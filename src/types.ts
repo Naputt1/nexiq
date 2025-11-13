@@ -1,0 +1,53 @@
+export type ComponentFileImport = {
+  localName: string;
+  importedName: string | null;
+  source: string;
+  type: "default" | "named" | "namespace" | "type";
+  importKind: "value" | "type";
+};
+
+export type ComponentFile = {
+  path: string;
+  import: Record<string, ComponentFileImport>;
+};
+
+export interface State {
+  value: string;
+  setter?: string;
+}
+
+export type HookInfo = {
+  id: string;
+  name: string;
+  file: string;
+  states: State[];
+  props: string[];
+};
+
+export interface ComponentInfo {
+  id: string;
+  name: string;
+  file: string;
+  type: "Function" | "Class";
+  states: State[];
+  hooks: string[];
+  props: string[];
+  contexts: string[];
+  renders: string[];
+}
+
+export type DataEdge = {
+  from: string;
+  to: string;
+  label: string;
+};
+
+export interface Data {
+  nodes: {
+    id: string;
+    label: string;
+    type: string;
+    file: string;
+  }[];
+  edges: DataEdge[];
+}

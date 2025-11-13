@@ -1,0 +1,48 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/dist/componentDB.js",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "sample",
+      "program": "${workspaceFolder}/dist/analyzer.js",
+      "args": [
+        "./sample-project",
+        "./out/graph.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "maemoo",
+      "program": "${workspaceFolder}/dist/analyzer.js",
+      "args": [
+        "../maemoo-minibus",
+        "./out/graph.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    }
+  ]
+}
