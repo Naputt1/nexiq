@@ -1,4 +1,6 @@
 packages:
-  - "visual/*"
-  - "sample-project/*"
-  - "ui"
+  - packages/*
+  - packages/sample-project/*
+
+ignoredBuiltDependencies:
+  - "@swc/core"

@@ -273,7 +273,7 @@ function analyzeFiles(files: string[]) {
 
 function main() {
   const files = getFiles(SRC_DIR);
-  fs.writeFileSync("./out/files.json", JSON.stringify(files));
+  // fs.writeFileSync("./out/files.json", JSON.stringify(files));
   console.log(`Analyzing ${files.length} files...`);
   const graph = analyzeFiles(files);
 

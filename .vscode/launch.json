@@ -19,11 +19,12 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "sample",
-      "program": "${workspaceFolder}/dist/analyzer.js",
+      "name": "simple",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [
-        "./sample-project",
-        "./out/graph.json"
+        "./packages/sample-project/simple",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -34,10 +35,11 @@
       "type": "node",
       "request": "launch",
       "name": "maemoo",
-      "program": "${workspaceFolder}/dist/analyzer.js",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [
         "../maemoo-minibus",
-        "./out/graph.json"
+        "./out/graph.json",
+         "./packages/ui/public/graph.json"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
