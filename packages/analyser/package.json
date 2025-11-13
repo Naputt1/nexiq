@@ -17,7 +17,8 @@
   "dependencies": {
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
-    "glob": "^11.0.3"
+    "glob": "^11.0.3",
+    "shared": "workspace:*"
   },
   "devDependencies": {
     "@types/babel__traverse": "^7.28.0",

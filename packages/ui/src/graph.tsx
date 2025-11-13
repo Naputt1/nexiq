@@ -1,16 +1,17 @@
 import { useEffect, useState, useRef } from "react";
-import { DataSet, Network } from "vis-network/standalone";
+import { DataSet, Network, type Edge } from "vis-network/standalone";
+import type { GraphData } from "shared";
 
 export default function GraphViewer() {
-  const containerRef = useRef(null);
-  const [error, setError] = useState(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async function loadGraph() {
       try {
         const res = await fetch("./graph.json");
         if (!res.ok) throw new Error("graph.json not found");
-        const graph = await res.json();
+        const graph: GraphData = await res.json();
 
         const nodes = new DataSet(
           Object.values(graph.nodes).map((n) => ({
@@ -21,7 +22,7 @@ export default function GraphViewer() {
           }))
         );
 
-        const edges = new DataSet(
+        const edges = new DataSet<Edge>(
           graph.edges.map((e) => ({
             from: e.from,
             to: e.to,
@@ -33,7 +34,7 @@ export default function GraphViewer() {
         );
 
         const network = new Network(
-          containerRef.current,
+          containerRef.current!,
           { nodes, edges },
           {
             nodes: { shape: "box" },
@@ -42,14 +43,9 @@ export default function GraphViewer() {
             physics: { stabilization: true },
           }
         );
-
-        // Optional: log for debugging
-        console.log("Graph loaded", graph);
       } catch (err) {
         console.error(err);
-        setError(
-          "graph.json not found. Run analyzer and place out/graph.json at project root."
-        );
+        setError("graph.json not found.");
       }
     })();
   }, []);

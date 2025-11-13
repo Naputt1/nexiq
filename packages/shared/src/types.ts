@@ -51,3 +51,11 @@ export interface Data {
   }[];
   edges: DataEdge[];
 }
+
+export type GraphData = {
+  nodes: Record<string, ComponentInfo>;
+  edges: DataEdge[];
+  files: Record<string, ComponentFile>;
+  ids: Record<string, string>;
+  keys: string[];
+};

@@ -5,7 +5,7 @@ import type {
   State,
   DataEdge,
   HookInfo,
-} from "../types.js";
+} from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
 
