@@ -4,16 +4,29 @@ import { glob } from "glob";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { File } from "@babel/types";
-import type { ComponentInfo, State, Data } from "./types.ts";
+import type { State } from "shared";
 import * as t from "@babel/types";
 import assert from "assert";
-import { getVariableComponentName, isCommented } from "./variable.js";
+import { getVariableComponentName } from "./variable.js";
 import { ComponentDB } from "./db/componentDB.js";
-import { isHook } from "./utils.js";
+import { containsJSX, isHook } from "./utils.js";
+import { getViteAliases } from "./vite.js";
+import { PackageJson } from "./db/packageJson.js";
 
 const SRC_DIR = process.argv[2] || "./sample-src";
 const OUT_FILE = process.argv[3] || "./out/graph.json";
 const PUBLIC_FILE = process.argv[4] || "./ui/public/graph.json";
+
+const VITE_CONFIG_FILE = "vite.config.ts";
+
+function getViteConfig(dir: string): string | null {
+  const configPath = path.join(dir, VITE_CONFIG_FILE);
+  if (fs.existsSync(configPath)) {
+    return configPath;
+  }
+
+  return null;
+}
 
 function getFiles(dir: string): string[] {
   return glob.sync("**/*.{js,jsx,ts,tsx}", {
@@ -26,6 +39,8 @@ function getFiles(dir: string): string[] {
       "**/.next/**",
       "**/out/**",
       "**/coverage/**",
+      "**/public/**",
+      "**/vite.config.ts",
     ],
   });
 }
@@ -37,12 +52,18 @@ function parseCode(code: string, filename: string): File {
   });
 }
 
-function analyzeFiles(files: string[]) {
-  const componentDB = new ComponentDB();
+function analyzeFiles(
+  viteConfigPath: string | null,
+  files: string[],
+  packageJson: PackageJson
+) {
+  const componentDB = new ComponentDB(packageJson);
+
+  const aliases = getViteAliases(viteConfigPath);
 
   for (const fileName of files) {
     componentDB.addFile(fileName);
-    console.log(fileName);
+    // console.log(fileName);
     const code = fs.readFileSync(fileName, "utf-8");
     let ast: File;
     try {
@@ -55,10 +76,57 @@ function analyzeFiles(files: string[]) {
     traverse.default(ast, {
       ImportDeclaration(nodePath) {
         let source = nodePath.node.source.value;
+        let temp = source;
         if (source.startsWith(".") || source.startsWith("..")) {
           const fileDir = path.dirname(fileName);
           source = path.join(fileDir, source);
           source = path.normalize(source);
+        } else if (!componentDB.isDependency(source)) {
+          let isAliase = false;
+          for (const alias in aliases) {
+            if (source.startsWith(alias)) {
+              source = path.join(
+                aliases[alias] ?? "",
+                `./${source.slice(alias.length)}`
+              );
+              isAliase = true;
+              break;
+            } else if (source.startsWith(alias + "/")) {
+              source = path.join(
+                aliases[alias] ?? "",
+                `./${source.slice(alias.length + 1)}`
+              );
+              isAliase = true;
+              break;
+            }
+          }
+
+          if (isAliase) {
+            source = path.join(SRC_DIR, source);
+            source = path.resolve(source);
+          }
+        }
+
+        if (source.startsWith("/")) {
+          if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
+            const indexExtension = ["tsx", "ts", "jsx", "js"];
+            for (const ext of indexExtension) {
+              const testFile = path.join(source, `index.${ext}`);
+              if (fs.existsSync(testFile)) {
+                source = testFile;
+                break;
+              }
+            }
+          } else {
+            const indexExtension = ["tsx", "ts", "jsx", "js"];
+            for (const ext of indexExtension) {
+              const testFile = `${source}.${ext}`;
+              if (fs.existsSync(testFile)) {
+                source = testFile;
+                break;
+              }
+            }
+          }
         }
 
         const importKind: "value" | "type" =
@@ -100,18 +168,30 @@ function analyzeFiles(files: string[]) {
         });
       },
 
+      ExportDefaultDeclaration(NodePath) {
+        const decl = NodePath.node.declaration;
+
+        if (t.isIdentifier(decl)) {
+          componentDB.fileSetDefaultExport(fileName, decl.name);
+          return;
+        }
+
+        if (
+          t.isArrowFunctionExpression(decl) ||
+          t.isFunctionExpression(decl) ||
+          t.isCallExpression(decl) ||
+          t.isFunctionDeclaration(decl)
+        ) {
+          componentDB.fileSetDefaultExport(fileName);
+          return;
+        }
+      },
+
       FunctionDeclaration(nodePath) {
         const name = nodePath.node.id?.name;
         if (!name) return;
 
-        let hasJSX = false;
-        nodePath.traverse({
-          JSXElement() {
-            hasJSX = true;
-          },
-        });
-
-        if (isHook(fileName)) {
+        if (isHook(name)) {
           const isExported =
             nodePath.parentPath.isExportNamedDeclaration() ||
             nodePath.parentPath.isExportDefaultDeclaration();
@@ -126,7 +206,7 @@ function analyzeFiles(files: string[]) {
           });
         }
 
-        if (hasJSX) {
+        if (containsJSX(nodePath)) {
           componentDB.addComponent({
             name,
             file: fileName,
@@ -184,14 +264,7 @@ function analyzeFiles(files: string[]) {
         )
           return;
 
-        let hasJSX = false;
-        nodePath.traverse({
-          JSXElement() {
-            hasJSX = true;
-          },
-        });
-
-        if (hasJSX) {
+        if (containsJSX(nodePath)) {
           componentDB.addComponent({
             name,
             file: fileName,
@@ -246,10 +319,24 @@ function analyzeFiles(files: string[]) {
 
         const fn = callee.name;
         const parentFunc = nodePath.getFunctionParent();
-        const compName =
-          parentFunc?.node.type === "FunctionDeclaration"
-            ? parentFunc.node.id?.name
-            : undefined;
+        let compName: string | undefined;
+        if (parentFunc?.node.type === "FunctionDeclaration") {
+          compName = parentFunc.node.id?.name;
+        } else if (
+          parentFunc?.node.type === "ArrowFunctionExpression" ||
+          parentFunc?.node.type === "FunctionExpression"
+        ) {
+          const bindingPath = parentFunc.parentPath;
+          if (bindingPath.isVariableDeclarator()) {
+            if (bindingPath.node.id.type === "Identifier") {
+              compName = bindingPath.node.id.name;
+            }
+          } else if (bindingPath.isAssignmentExpression()) {
+            if (bindingPath.node.left.type === "Identifier") {
+              compName = bindingPath.node.left.name;
+            }
+          }
+        }
 
         // if (!compName || !components[compName]) return;
 
@@ -261,21 +348,27 @@ function analyzeFiles(files: string[]) {
         //   components[compName].contexts.push(fn);
         // }
 
-        if (compName && /^use[A-Z0-9]/.test(fn)) {
+        if (compName && isHook(fn) && fn === "useWindowDimensions") {
           componentDB.comAddHook(compName, fileName, fn);
         }
       },
     });
   }
 
+  componentDB.resolve();
+
   return componentDB.getData();
 }
 
 function main() {
+  const packageJson = new PackageJson(SRC_DIR);
+
+  const viteConfigPath = getViteConfig(SRC_DIR);
+  console.log("viteConfigPath", viteConfigPath);
   const files = getFiles(SRC_DIR);
   // fs.writeFileSync("./out/files.json", JSON.stringify(files));
   console.log(`Analyzing ${files.length} files...`);
-  const graph = analyzeFiles(files);
+  const graph = analyzeFiles(viteConfigPath, files, packageJson);
 
   fs.mkdirSync(path.dirname(PUBLIC_FILE), { recursive: true });
   fs.writeFileSync(PUBLIC_FILE, JSON.stringify(graph, null, 2));

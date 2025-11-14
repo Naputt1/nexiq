@@ -1,5 +1,5 @@
 import assert from "assert";
-import type { ComponentFile, ComponentFileImport } from "../types.js";
+import type { ComponentFile, ComponentFileImport } from "shared";
 
 export class FileDB {
   private files: Map<string, ComponentFile>;
@@ -12,6 +12,7 @@ export class FileDB {
     this.files.set(filename, {
       path: filename,
       import: {},
+      defaultExport: null,
     });
   }
 
@@ -42,5 +43,16 @@ export class FileDB {
 
   public getData() {
     return Object.fromEntries(this.files);
+  }
+
+  public setDefaultExport(fileName: string, exportVal?: string | null) {
+    const file = this.get(fileName);
+
+    file.defaultExport = exportVal ?? "anonymous";
+  }
+
+  public getDefaultExport(fileName: string) {
+    const file = this.get(fileName);
+    return file.defaultExport;
   }
 }

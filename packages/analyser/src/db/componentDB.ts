@@ -8,6 +8,7 @@ import type {
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
+import type { PackageJson } from "./packageJson.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -37,7 +38,9 @@ export class ComponentDB {
 
   private isResolve = false;
 
-  constructor() {
+  private packageJson: PackageJson;
+
+  constructor(packageJson: PackageJson) {
     this.components = new Map();
     this.hooks = new Map();
     this.edges = [];
@@ -46,6 +49,8 @@ export class ComponentDB {
     this.files = new FileDB();
 
     this.resolveTasks = [];
+
+    this.packageJson = packageJson;
   }
 
   private getFuncKey(name: string, fileName: string): string {
@@ -59,7 +64,14 @@ export class ComponentDB {
       return;
     }
 
-    const id = crypto.randomUUID();
+    const comImport = this.files.getImport(component.file, component.name);
+
+    const id =
+      comImport?.type === "default"
+        ? this.ids.get(this.getFuncKey("default", component.file)) ??
+          crypto.randomUUID()
+        : crypto.randomUUID();
+
     this.ids.set(key, id);
 
     this.components.set(id, {
@@ -75,7 +87,14 @@ export class ComponentDB {
       return;
     }
 
-    const id = crypto.randomUUID();
+    const hookImport = this.files.getImport(hook.file, hook.name);
+
+    const id =
+      hookImport?.type === "default"
+        ? this.ids.get(this.getFuncKey("default", hook.file)) ??
+          crypto.randomUUID()
+        : crypto.randomUUID();
+
     this.ids.set(key, id);
 
     this.hooks.set(id, {
@@ -92,7 +111,7 @@ export class ComponentDB {
     }
     assert(id != null, "Component not found");
 
-    const component = isHook(fileName)
+    const component = isHook(name)
       ? this.hooks.get(id)
       : this.components.get(id);
     assert(component != null, "Component not found");
@@ -122,7 +141,9 @@ export class ComponentDB {
     const component = this.components.get(id);
     assert(component != null, "Component not found");
 
-    const srcId = this.ids.get(this.getFuncKey(hookImport.localName, fileName));
+    const srcId = this.ids.get(
+      this.getFuncKey(hookImport.localName, hookImport.source)
+    );
 
     if (srcId == null) {
       this.addResolveTask({
@@ -147,11 +168,15 @@ export class ComponentDB {
 
     // rendere component is imported
     const comImport = this.files.getImport(fileName, tag);
-    if (!comImport) {
+    if (!comImport || this.isDependency(comImport.source)) {
       return;
     }
 
-    const srcId = this.ids.get(this.getFuncKey(comImport.localName, fileName));
+    const srcKey = this.getFuncKey(
+      comImport.type == "default" ? "default" : comImport.localName,
+      comImport.source
+    );
+    const srcId = this.ids.get(srcKey);
 
     if (srcId == null) {
       this.addResolveTask({
@@ -165,8 +190,8 @@ export class ComponentDB {
 
     component.renders.push(srcId);
     this.edges.push({
-      from: id,
-      to: srcId,
+      from: srcId,
+      to: id,
       label: "renders",
     });
   }
@@ -177,6 +202,17 @@ export class ComponentDB {
 
   public fileAddImport(fileName: string, fileImport: ComponentFileImport) {
     this.files.addImport(fileName, fileImport);
+  }
+
+  public fileSetDefaultExport(fileName: string, exportVal?: string | null) {
+    if (exportVal) {
+      const key = this.getFuncKey(exportVal, fileName);
+      const id = this.ids.get(key) ?? crypto.randomUUID();
+
+      this.ids.set(this.getFuncKey("default", fileName), id);
+    }
+
+    this.files.setDefaultExport(fileName, exportVal);
   }
 
   public getData() {
@@ -202,8 +238,14 @@ export class ComponentDB {
     for (const resolve of this.resolveTasks) {
       if (resolve.type === "comAddRender") {
         this.comAddRender(resolve.name, resolve.fileName, resolve.tag);
+      } else if (resolve.type === "comAddHook") {
+        this.comAddHook(resolve.name, resolve.fileName, resolve.hook);
       }
     }
     this.isResolve = false;
+  }
+
+  public isDependency(name: string): boolean {
+    return this.packageJson.isDependency(name);
   }
 }

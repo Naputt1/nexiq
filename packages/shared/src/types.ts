@@ -9,6 +9,7 @@ export type ComponentFileImport = {
 export type ComponentFile = {
   path: string;
   import: Record<string, ComponentFileImport>;
+  defaultExport: string | null;
 };
 
 export interface State {
