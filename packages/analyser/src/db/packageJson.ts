@@ -9,8 +9,10 @@ type PackageJsonData = {
 
 export class PackageJson {
   private data: PackageJsonData;
+  private cache: Set<string>;
 
   constructor(dir: string) {
+    this.cache = new Set();
     const configPath = path.join(dir, "package.json");
     if (fs.existsSync(configPath)) {
       try {
@@ -30,12 +32,30 @@ export class PackageJson {
   }
 
   public isDependency(name: string): boolean {
-    if (Object.prototype.hasOwnProperty.call(this.data.dependencies, name)) {
+    if (this.cache.has(name)) {
       return true;
     }
-    return Object.prototype.hasOwnProperty.call(
-      this.data.devDependencies,
-      name
-    );
+
+    const nameParts = name.split("/");
+    if (nameParts.length === 1) {
+      return (
+        Object.prototype.hasOwnProperty.call(this.data.dependencies, name) ||
+        Object.prototype.hasOwnProperty.call(this.data.devDependencies, name)
+      );
+    }
+
+    for (let i = 0; i < nameParts.length; i++) {
+      const name = nameParts.slice(0, i + 1).join("/");
+
+      if (
+        Object.prototype.hasOwnProperty.call(this.data.dependencies, name) ||
+        Object.prototype.hasOwnProperty.call(this.data.devDependencies, name)
+      ) {
+        this.cache.add(name);
+        return true;
+      }
+    }
+
+    return false;
   }
 }

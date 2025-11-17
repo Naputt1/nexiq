@@ -57,7 +57,11 @@ function analyzeFiles(
   files: string[],
   packageJson: PackageJson
 ) {
-  const componentDB = new ComponentDB(packageJson);
+  const componentDB = new ComponentDB({
+    packageJson,
+    viteAliases: getViteAliases(viteConfigPath),
+    dir: SRC_DIR,
+  });
 
   const aliases = getViteAliases(viteConfigPath);
 
@@ -75,59 +79,10 @@ function analyzeFiles(
 
     traverse.default(ast, {
       ImportDeclaration(nodePath) {
-        let source = nodePath.node.source.value;
-        let temp = source;
-        if (source.startsWith(".") || source.startsWith("..")) {
-          const fileDir = path.dirname(fileName);
-          source = path.join(fileDir, source);
-          source = path.normalize(source);
-        } else if (!componentDB.isDependency(source)) {
-          let isAliase = false;
-          for (const alias in aliases) {
-            if (source.startsWith(alias)) {
-              source = path.join(
-                aliases[alias] ?? "",
-                `./${source.slice(alias.length)}`
-              );
-              isAliase = true;
-              break;
-            } else if (source.startsWith(alias + "/")) {
-              source = path.join(
-                aliases[alias] ?? "",
-                `./${source.slice(alias.length + 1)}`
-              );
-              isAliase = true;
-              break;
-            }
-          }
-
-          if (isAliase) {
-            source = path.join(SRC_DIR, source);
-            source = path.resolve(source);
-          }
-        }
-
-        if (source.startsWith("/")) {
-          if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
-            const indexExtension = ["tsx", "ts", "jsx", "js"];
-            for (const ext of indexExtension) {
-              const testFile = path.join(source, `index.${ext}`);
-              if (fs.existsSync(testFile)) {
-                source = testFile;
-                break;
-              }
-            }
-          } else {
-            const indexExtension = ["tsx", "ts", "jsx", "js"];
-            for (const ext of indexExtension) {
-              const testFile = `${source}.${ext}`;
-              if (fs.existsSync(testFile)) {
-                source = testFile;
-                break;
-              }
-            }
-          }
-        }
+        const source = componentDB.getImportFileName(
+          nodePath.node.source.value,
+          fileName
+        );
 
         const importKind: "value" | "type" =
           nodePath.node.importKind === "type" ? "type" : "value";
@@ -174,13 +129,13 @@ function analyzeFiles(
         if (t.isIdentifier(decl)) {
           componentDB.fileSetDefaultExport(fileName, decl.name);
           return;
-        }
-
-        if (
+        } else if (t.isFunctionDeclaration(decl)) {
+          componentDB.fileSetDefaultExport(fileName, decl.id?.name);
+          return;
+        } else if (
           t.isArrowFunctionExpression(decl) ||
           t.isFunctionExpression(decl) ||
-          t.isCallExpression(decl) ||
-          t.isFunctionDeclaration(decl)
+          t.isCallExpression(decl)
         ) {
           componentDB.fileSetDefaultExport(fileName);
           return;
@@ -283,12 +238,35 @@ function analyzeFiles(
         if (opening.type === "JSXIdentifier") {
           const tag = opening.name;
           const parentFunc = nodePath.getFunctionParent();
-          const compName =
-            parentFunc?.node.type === "FunctionDeclaration"
-              ? parentFunc.node.id?.name
-              : undefined;
+
+          let compName = null;
+
+          if (parentFunc?.node.type === "FunctionDeclaration") {
+            // function MyComponent() {}
+            compName = parentFunc.node.id?.name;
+          } else if (
+            parentFunc?.node.type === "ArrowFunctionExpression" ||
+            parentFunc?.node.type === "FunctionExpression"
+          ) {
+            // const MyComponent = () => {}
+            const parent = parentFunc.parentPath?.node;
+            if (parent?.type === "VariableDeclarator") {
+              const id = parent.id;
+
+              if (id.type === "Identifier") {
+                compName = id.name;
+              }
+            }
+          } else {
+            compName = parentFunc?.node.type;
+          }
 
           if (compName == null) {
+            return;
+          }
+
+          // TODO: handle ObjectMethod
+          if (compName == "ObjectMethod") {
             return;
           }
 

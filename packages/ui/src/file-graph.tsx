@@ -31,7 +31,7 @@ export default function FileGraphViewer() {
               .map((v) => `${v.value}`)
               .join(", ")}] `,
             shape: "box",
-          })),
+          }))
         );
 
         const edges = new DataSet<Edge>(
@@ -42,7 +42,7 @@ export default function FileGraphViewer() {
             arrows: "to",
             smooth: false,
             font: { align: "middle" },
-          })),
+          }))
         );
 
         networkData.current = { nodes, edges };
@@ -51,11 +51,22 @@ export default function FileGraphViewer() {
           containerRef.current!,
           { nodes, edges },
           {
+            layout: {
+              improvedLayout: true,
+            },
             nodes: { shape: "box" },
             edges: { arrows: "to", smooth: false, font: { align: "middle" } },
             interaction: { hover: true, multiselect: false },
-            physics: { stabilization: true },
-          },
+            physics: {
+              stabilization: true,
+              // forceAtlas2Based: {
+              //   springLength: 1200,
+              // },
+              repulsion: {
+                nodeDistance: 1200,
+              },
+            },
+          }
         );
       } catch (err) {
         console.error(err);

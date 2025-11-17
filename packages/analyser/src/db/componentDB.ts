@@ -9,6 +9,8 @@ import type {
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
 import type { PackageJson } from "./packageJson.js";
+import fs from "fs";
+import path from "path";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -26,6 +28,12 @@ type IResolveAddHook = {
 
 type ComponentDBResolve = IResolveAddRender | IResolveAddHook;
 
+export type ComponentDBOptions = {
+  packageJson: PackageJson;
+  viteAliases: Record<string, string>;
+  dir: string;
+};
+
 export class ComponentDB {
   private components: Map<string, ComponentInfo>;
   private hooks: Map<string, HookInfo>;
@@ -39,8 +47,11 @@ export class ComponentDB {
   private isResolve = false;
 
   private packageJson: PackageJson;
+  private viteAliases: Record<string, string>;
 
-  constructor(packageJson: PackageJson) {
+  private dir: string;
+
+  constructor(options: ComponentDBOptions) {
     this.components = new Map();
     this.hooks = new Map();
     this.edges = [];
@@ -50,7 +61,10 @@ export class ComponentDB {
 
     this.resolveTasks = [];
 
-    this.packageJson = packageJson;
+    this.packageJson = options.packageJson;
+    this.viteAliases = options.viteAliases;
+
+    this.dir = options.dir;
   }
 
   private getFuncKey(name: string, fileName: string): string {
@@ -161,6 +175,10 @@ export class ComponentDB {
   public comAddRender(name: string, fileName: string, tag: string) {
     const key = this.getFuncKey(name, fileName);
     const id = this.ids.get(key);
+    if (id == null) {
+      debugger;
+    }
+
     assert(id != null, "Component not found");
 
     const component = this.components.get(id);
@@ -176,9 +194,14 @@ export class ComponentDB {
       comImport.type == "default" ? "default" : comImport.localName,
       comImport.source
     );
+    component.renders.push(srcKey);
     const srcId = this.ids.get(srcKey);
 
     if (srcId == null) {
+      if (this.isResolve) {
+        debugger;
+      }
+
       this.addResolveTask({
         type: "comAddRender",
         name,
@@ -190,8 +213,8 @@ export class ComponentDB {
 
     component.renders.push(srcId);
     this.edges.push({
-      from: srcId,
-      to: id,
+      from: id,
+      to: srcId,
       label: "renders",
     });
   }
@@ -222,6 +245,7 @@ export class ComponentDB {
       files: this.files.getData(),
       ids: Object.fromEntries(this.ids),
       keys: Array.from(this.keys),
+      resolve: this.resolveTasks,
     };
   }
 
@@ -247,5 +271,60 @@ export class ComponentDB {
 
   public isDependency(name: string): boolean {
     return this.packageJson.isDependency(name);
+  }
+
+  public getImportFileName(name: string, fileName: string) {
+    let source = name;
+    if (source.startsWith(".") || source.startsWith("..")) {
+      const fileDir = path.dirname(fileName);
+      source = path.join(fileDir, source);
+      source = path.normalize(source);
+    } else if (!this.isDependency(source)) {
+      let isAliase = false;
+      for (const alias in this.viteAliases) {
+        if (source.startsWith(alias)) {
+          source = path.join(
+            this.viteAliases[alias] ?? "",
+            `./${source.slice(alias.length)}`
+          );
+          isAliase = true;
+          break;
+        } else if (source.startsWith(alias + "/")) {
+          source = path.join(
+            this.viteAliases[alias] ?? "",
+            `./${source.slice(alias.length + 1)}`
+          );
+          isAliase = true;
+          break;
+        }
+      }
+
+      if (isAliase) {
+        source = path.join(this.dir, source);
+        source = path.resolve(source);
+      }
+    }
+
+    if (source.startsWith("/")) {
+      if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
+        const indexExtension = ["tsx", "ts", "jsx", "js"];
+        for (const ext of indexExtension) {
+          const testFile = path.join(source, `index.${ext}`);
+          if (fs.existsSync(testFile)) {
+            return testFile;
+          }
+        }
+      }
+
+      const indexExtension = ["tsx", "ts", "jsx", "js"];
+      for (const ext of indexExtension) {
+        const testFile = `${source}.${ext}`;
+        if (fs.existsSync(testFile)) {
+          return testFile;
+        }
+      }
+    }
+
+    return source;
   }
 }

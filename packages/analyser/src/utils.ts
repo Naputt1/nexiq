@@ -55,3 +55,59 @@ export function containsJSX(nodePath: NodePath): boolean {
 
   return found;
 }
+
+export function getImportFileName(name: string, fileName: string) {
+  let source = name;
+  let temp = source;
+  if (source.startsWith(".") || source.startsWith("..")) {
+    const fileDir = path.dirname(fileName);
+    source = path.join(fileDir, source);
+    source = path.normalize(source);
+  } else if (!componentDB.isDependency(source)) {
+    let isAliase = false;
+    for (const alias in aliases) {
+      if (source.startsWith(alias)) {
+        source = path.join(
+          aliases[alias] ?? "",
+          `./${source.slice(alias.length)}`
+        );
+        isAliase = true;
+        break;
+      } else if (source.startsWith(alias + "/")) {
+        source = path.join(
+          aliases[alias] ?? "",
+          `./${source.slice(alias.length + 1)}`
+        );
+        isAliase = true;
+        break;
+      }
+    }
+
+    if (isAliase) {
+      source = path.join(SRC_DIR, source);
+      source = path.resolve(source);
+    }
+  }
+
+  if (source.startsWith("/")) {
+    if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
+      const indexExtension = ["tsx", "ts", "jsx", "js"];
+      for (const ext of indexExtension) {
+        const testFile = path.join(source, `index.${ext}`);
+        if (fs.existsSync(testFile)) {
+          source = testFile;
+          break;
+        }
+      }
+    } else {
+      const indexExtension = ["tsx", "ts", "jsx", "js"];
+      for (const ext of indexExtension) {
+        const testFile = `${source}.${ext}`;
+        if (fs.existsSync(testFile)) {
+          source = testFile;
+          break;
+        }
+      }
+    }
+  }
+}
