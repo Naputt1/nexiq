@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { DataSet, Network, type Edge } from "vis-network/standalone";
-import type { GraphData } from "shared";
+import type { JsonData } from "shared";
 
 export default function GraphViewer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -11,7 +11,7 @@ export default function GraphViewer() {
       try {
         const res = await fetch("./graph.json");
         if (!res.ok) throw new Error("graph.json not found");
-        const graph: GraphData = await res.json();
+        const graph: JsonData = await res.json();
         console.log(graph);
 
         const nodes = new DataSet(

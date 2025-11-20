@@ -6,7 +6,7 @@ import {
   type Edge,
   type Data as NetworkData,
 } from "vis-network/standalone";
-import type { GraphData } from "shared";
+import type { JsonData } from "shared";
 
 export default function FileGraphViewer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -21,7 +21,7 @@ export default function FileGraphViewer() {
       try {
         const res = await fetch("./graph.json");
         if (!res.ok) throw new Error("graph.json not found");
-        const graph: GraphData = await res.json();
+        const graph: JsonData = await res.json();
 
         const nodes = new DataSet(
           Object.values(graph.nodes).map((n) => ({

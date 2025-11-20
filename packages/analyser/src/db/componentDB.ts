@@ -5,6 +5,7 @@ import type {
   State,
   DataEdge,
   HookInfo,
+  ComponentFileExport,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
@@ -78,13 +79,7 @@ export class ComponentDB {
       return;
     }
 
-    const comImport = this.files.getImport(component.file, component.name);
-
-    const id =
-      comImport?.type === "default"
-        ? this.ids.get(this.getFuncKey("default", component.file)) ??
-          crypto.randomUUID()
-        : crypto.randomUUID();
+    const id = this.files.getComId(component.file, component.name);
 
     this.ids.set(key, id);
 
@@ -194,7 +189,6 @@ export class ComponentDB {
       comImport.type == "default" ? "default" : comImport.localName,
       comImport.source
     );
-    component.renders.push(srcKey);
     const srcId = this.ids.get(srcKey);
 
     if (srcId == null) {
@@ -211,6 +205,8 @@ export class ComponentDB {
       return;
     }
 
+    if (component.renders.includes(srcId)) return;
+
     component.renders.push(srcId);
     this.edges.push({
       from: id,
@@ -225,6 +221,20 @@ export class ComponentDB {
 
   public fileAddImport(fileName: string, fileImport: ComponentFileImport) {
     this.files.addImport(fileName, fileImport);
+  }
+
+  public fileAddExport(
+    fileName: string,
+    fileExport: Omit<ComponentFileExport, "id">
+  ) {
+    const key = this.getFuncKey(fileExport.name, fileName);
+    const id = this.ids.get(key) ?? crypto.randomUUID();
+
+    if (fileExport.type === "default") {
+      this.ids.set(this.getFuncKey("default", fileName), id);
+    }
+
+    this.files.addExport(fileName, { id, ...fileExport });
   }
 
   public fileSetDefaultExport(fileName: string, exportVal?: string | null) {

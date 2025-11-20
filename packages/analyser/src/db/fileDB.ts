@@ -1,5 +1,9 @@
 import assert from "assert";
-import type { ComponentFile, ComponentFileImport } from "shared";
+import type {
+  ComponentFile,
+  ComponentFileExport,
+  ComponentFileImport,
+} from "shared";
 
 export class FileDB {
   private files: Map<string, ComponentFile>;
@@ -12,6 +16,7 @@ export class FileDB {
     this.files.set(filename, {
       path: filename,
       import: {},
+      export: {},
       defaultExport: null,
     });
   }
@@ -41,8 +46,27 @@ export class FileDB {
     return file.import[localName];
   }
 
+  public getComId(fileName: string, localName: string) {
+    const file = this.get(fileName);
+
+    if (file.export.hasOwnProperty(localName)) {
+      return file.export[localName]?.id ?? crypto.randomUUID();
+    }
+
+    return crypto.randomUUID();
+  }
+
   public getData() {
     return Object.fromEntries(this.files);
+  }
+
+  public addExport(fileName: string, exportData: ComponentFileExport) {
+    const file = this.get(fileName);
+
+    file.export[exportData.name] = exportData;
+    if (exportData.type === "default") {
+      file.defaultExport = exportData.name;
+    }
   }
 
   public setDefaultExport(fileName: string, exportVal?: string | null) {

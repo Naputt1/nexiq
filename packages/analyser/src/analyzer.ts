@@ -4,7 +4,7 @@ import { glob } from "glob";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { File } from "@babel/types";
-import type { State } from "shared";
+import type { ComponentFileExport, State } from "shared";
 import * as t from "@babel/types";
 import assert from "assert";
 import { getVariableComponentName } from "./variable.js";
@@ -123,23 +123,123 @@ function analyzeFiles(
         });
       },
 
-      ExportDefaultDeclaration(NodePath) {
-        const decl = NodePath.node.declaration;
+      ExportNamedDeclaration(nodePath) {
+        const decl = nodePath.node.declaration;
+        if (!decl) return;
+
+        let name: string | undefined;
+
+        let exportType: ComponentFileExport["type"] = "named";
+        let exportKind: ComponentFileExport["exportKind"] = "value";
+        if (
+          decl.type === "TSTypeAliasDeclaration" ||
+          decl.type === "TSInterfaceDeclaration"
+        ) {
+          exportKind = "type";
+          exportType = "type";
+          name = decl.id.name;
+        } else if (decl.type === "ClassDeclaration") {
+          exportKind = "class";
+          name = decl.id?.name;
+        } else if (decl.type === "FunctionDeclaration") {
+          let isComponent = false;
+          nodePath.traverse({
+            JSXElement(innerPath) {
+              isComponent = true;
+              innerPath.stop();
+            },
+          });
+
+          exportKind = isComponent ? "component" : "function";
+          name = decl.id?.name;
+        } else if (decl.type === "VariableDeclaration") {
+          decl.declarations.forEach((declarator) => {
+            if (declarator.id.type === "Identifier") {
+              componentDB.fileAddExport(fileName, {
+                name: declarator.id.name,
+                type: "named",
+                exportKind: "value",
+              });
+            }
+          });
+          return;
+        }
+
+        componentDB.fileAddExport(fileName, {
+          name: name ?? "anonymous",
+          type: exportType,
+          exportKind,
+        });
+      },
+
+      // ExportAllDeclaration(nodePath) {
+      //   const source = componentDB.getImportFileName(
+      //     nodePath.node.source.value,
+      //     fileName
+      //   );
+      // },
+
+      ExportDefaultDeclaration(nodePath) {
+        const decl = nodePath.node.declaration;
+
+        let exportKind: ComponentFileExport["exportKind"] = "value";
+        let name: string | undefined;
 
         if (t.isIdentifier(decl)) {
-          componentDB.fileSetDefaultExport(fileName, decl.name);
-          return;
+          // export default Foo;
+          name = decl.name;
+          exportKind = "value";
         } else if (t.isFunctionDeclaration(decl)) {
-          componentDB.fileSetDefaultExport(fileName, decl.id?.name);
-          return;
+          // export default function Foo() {} or export default function() {}
+          name = decl.id?.name ?? "anonymous";
+
+          let isComponent = false;
+          nodePath.traverse({
+            JSXElement(innerPath) {
+              isComponent = true;
+              innerPath.stop();
+            },
+          });
+
+          exportKind = isComponent ? "component" : "function";
+        } else if (t.isClassDeclaration(decl)) {
+          // export default class Foo {} or export default class {}
+          name = decl.id?.name ?? "anonymous";
+          exportKind = "class";
         } else if (
           t.isArrowFunctionExpression(decl) ||
           t.isFunctionExpression(decl) ||
-          t.isCallExpression(decl)
+          t.isCallExpression(decl) ||
+          t.isClassExpression(decl)
         ) {
-          componentDB.fileSetDefaultExport(fileName);
-          return;
+          // export default () => {}, export default call(), export default class {}
+          name = "anonymous";
+
+          // If it's an arrow/function with JSX, treat as component
+          if (
+            t.isArrowFunctionExpression(decl) ||
+            t.isFunctionExpression(decl)
+          ) {
+            let isComponent = false;
+            nodePath.traverse({
+              JSXElement(innerPath) {
+                isComponent = true;
+                innerPath.stop();
+              },
+            });
+            exportKind = isComponent ? "component" : "function";
+          } else if (t.isCallExpression(decl)) {
+            exportKind = "value";
+          } else if (t.isClassExpression(decl)) {
+            exportKind = "class";
+          }
         }
+
+        componentDB.fileAddExport(fileName, {
+          name: name ?? "anonymous",
+          type: "default",
+          exportKind,
+        });
       },
 
       FunctionDeclaration(nodePath) {
@@ -179,30 +279,50 @@ function analyzeFiles(
         const id = nodePath.node.id;
         const init = nodePath.node.init;
 
-        if (
-          t.isCallExpression(init) &&
-          t.isIdentifier(init.callee) &&
-          init.callee.name === "useState"
-        ) {
-          const id = nodePath.node.id;
+        if (t.isCallExpression(init)) {
+          const firstArg = init.arguments[0];
+          const firstArgPath = nodePath.get("init").get("arguments")[0];
 
-          if (t.isArrayPattern(id)) {
-            const [stateVar, setterVar] = id.elements;
+          console.log(firstArg, fileName);
+          if (
+            (t.isArrowFunctionExpression(firstArgPath?.node) ||
+              t.isFunctionExpression(firstArgPath?.node)) &&
+            containsJSX(firstArgPath)
+          ) {
+            componentDB.addComponent({
+              name: id?.name,
+              file: fileName,
+              type: "Function",
+              states: [],
+              hooks: [],
+              props: [],
+              contexts: [],
+              renders: [],
+            });
+          } else if (
+            t.isIdentifier(init.callee) &&
+            init.callee.name === "useState"
+          ) {
+            const id = nodePath.node.id;
 
-            let state: State | null = null;
-            if (t.isIdentifier(stateVar)) {
-              state = { value: stateVar.name };
-            }
-            if (t.isIdentifier(setterVar)) {
-              assert(state != null, "useState have setter without value");
-              state!.setter = setterVar.name;
-            }
+            if (t.isArrayPattern(id)) {
+              const [stateVar, setterVar] = id.elements;
 
-            if (state != null) {
-              const name = getVariableComponentName(nodePath);
+              let state: State | null = null;
+              if (t.isIdentifier(stateVar)) {
+                state = { value: stateVar.name };
+              }
+              if (t.isIdentifier(setterVar)) {
+                assert(state != null, "useState have setter without value");
+                state!.setter = setterVar.name;
+              }
 
-              if (name) {
-                componentDB.comAddState(name, fileName, state);
+              if (state != null) {
+                const name = getVariableComponentName(nodePath);
+
+                if (name) {
+                  componentDB.comAddState(name, fileName, state);
+                }
               }
             }
           }

@@ -6,9 +6,17 @@ export type ComponentFileImport = {
   importKind: "value" | "type";
 };
 
+export type ComponentFileExport = {
+  id: string;
+  name: string;
+  type: "default" | "named" | "namespace" | "type";
+  exportKind: "value" | "type" | "component" | "function" | "class";
+};
+
 export type ComponentFile = {
   path: string;
   import: Record<string, ComponentFileImport>;
+  export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
 };
 
@@ -53,7 +61,7 @@ export interface Data {
   edges: DataEdge[];
 }
 
-export type GraphData = {
+export type JsonData = {
   nodes: Record<string, ComponentInfo>;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
