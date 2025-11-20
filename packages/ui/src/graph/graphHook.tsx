@@ -27,40 +27,23 @@ const MemoizedArrow = memo(Arrow);
 
 const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
   const getComboElement = useCallback(
-    (data: ComboGraphData) => {
-      return (
-        <MemoizedCombo
-          key={data.id}
-          id={data.id}
-          x={data.x}
-          y={data.y}
-          color={"blue"}
-          radius={data.radius}
-          collapsedRadius={data.collapsedRadius}
-          expandedRadius={data.expandedRadius}
-          collapsed={data.collapsed}
-          onCollapse={() => graph.comboCollapsed(data.id)}
-          onDragMove={(e) => graph.comboDragMove(data.id, e)}
-          onRadiusChange={(radius) => graph.comboRadiusChange(data.id, radius)}
-          label={data.label}
-        />
-      );
+    (combo: ComboGraphData) => {
+      return <MemoizedCombo key={combo.id} id={combo.id} graph={graph} />;
     },
     [graph]
   );
 
   const getEdgeElement = useCallback(
-    (data: EdgeGraphData) => {
+    (edge: EdgeGraphData) => {
       return (
         <MemoizedArrow
-          key={data.id}
-          id={data.id}
-          points={data.points}
+          key={edge.id}
+          id={edge.id}
+          points={edge.points}
           stroke={"white"}
-          strokeWidth={4}
+          strokeWidth={1}
           lineJoin="round"
           perfectDrawEnabled={false}
-          // draggable
         />
       );
     },
@@ -97,18 +80,18 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
             combos,
           };
         }
-        case "combo-collapsed": {
-          const newCombos: Record<string, JSX.Element> = { ...state.combos };
-          const combo = graph.getCombo(action.id);
-          if (combo != null) {
-            newCombos[action.id] = getComboElement(combo);
-          }
+        // case "combo-collapsed": {
+        //   const newCombos: Record<string, JSX.Element> = { ...state.combos };
+        //   const combo = graph.getCombo(action.id);
+        //   if (combo != null) {
+        //     newCombos[action.id] = getComboElement(combo);
+        //   }
 
-          return {
-            ...state,
-            combos: newCombos,
-          };
-        }
+        //   return {
+        //     ...state,
+        //     combos: newCombos,
+        //   };
+        // }
         case "combo-drag-move": {
           const edges = { ...state.edges };
           for (const id of action.edgeIds) {
@@ -121,7 +104,6 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
           return {
             ...state,
             edges,
-            // combos: newCombos,
           };
         }
         case "combo-radius-change": {
@@ -155,10 +137,6 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
   );
 
   useEffect(() => {
-    dispatch({ type: "new-nodes" });
-    dispatch({ type: "new-edges" });
-    dispatch({ type: "new-combos" });
-
     const id = graph.bind(dispatch);
 
     return () => {

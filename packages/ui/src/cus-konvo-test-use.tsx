@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { JsonData } from "shared";
-import useGraph, { type ComboData, type EdgeData } from "./graph/hook";
+import useGraph, {
+  type ComboData,
+  type EdgeData,
+  type NodeData,
+} from "./graph/hook";
 import GraphHook from "./graph/graphHook";
 
 const CusKonvoTestHook = () => {
@@ -11,6 +15,7 @@ const CusKonvoTestHook = () => {
 
   const [combos, setCombos] = useState<ComboData[]>([]);
   const [edges, setEdges] = useState<EdgeData[]>([]);
+  const [nodes, setNodes] = useState<NodeData[]>([]);
 
   const loadData = async () => {
     try {
@@ -25,6 +30,12 @@ const CusKonvoTestHook = () => {
           collapsed: true,
           label: { text: n.name, fill: "white" },
         });
+        combos.push({
+          id: `${n.id}-render`,
+          collapsed: true,
+          label: { text: "render", fill: "white" },
+          combo: n.id,
+        });
       }
 
       const edges: EdgeData[] = [];
@@ -36,6 +47,32 @@ const CusKonvoTestHook = () => {
         });
       }
 
+      const nodes: NodeData[] = [];
+      Object.values(graphData.nodes).map((n) => {
+        for (const state of n.states) {
+          nodes.push({
+            id: `${n.id}-state-${state.value}`,
+            label: {
+              text: state.value,
+            },
+            // title: `${n.file}\nstate: ${state.value}`,
+            combo: n.id,
+          });
+        }
+
+        for (const render of n.renders) {
+          nodes.push({
+            id: `${n.id}-render-${render}`,
+            label: {
+              text: render,
+            },
+            // title: `${n.file}\nstate: ${state.value}`,
+            combo: `${n.id}-render`,
+          });
+        }
+      });
+
+      setNodes(nodes);
       setEdges(edges);
       setCombos(combos);
     } catch (err) {
@@ -46,6 +83,7 @@ const CusKonvoTestHook = () => {
   const graph = useGraph({
     edges,
     combos,
+    nodes,
   });
 
   // keep stage size responsive

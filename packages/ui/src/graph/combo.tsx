@@ -2,40 +2,37 @@ import type Konva from "konva";
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Circle } from "react-konva";
-import Label, { type LabelData } from "./label";
+import Label from "./label";
+import type { GraphData } from "./hook";
+import Point from "./point";
 
 type ComboProps = {
   id: string;
-  collapsed?: boolean;
-  color?: string;
-  x?: number;
-  y?: number;
-  radius: number;
-  collapsedRadius: number;
-  expandedRadius: number;
-  onDragMove?: (evt: Konva.KonvaEventObject<DragEvent>) => void;
-  onCollapse?: () => void;
-  onRadiusChange?: (radius: number) => void;
-  label?: LabelData;
-  animation?: boolean;
+  onDragMove?: (id: string, evt: Konva.KonvaEventObject<DragEvent>) => void;
+  graph: GraphData;
 };
 
-const Combo: React.FC<ComboProps> = ({
-  collapsed,
-  id,
-  x,
-  y,
-  color = "black",
-  radius: _radius = 10,
-  collapsedRadius = 20,
-  expandedRadius = 40,
-  onDragMove,
-  onCollapse,
-  onRadiusChange,
-  label,
-  animation,
-}) => {
-  const [radius, setRadius] = useState<number>(_radius);
+const Combo: React.FC<ComboProps> = ({ id, graph, onDragMove }) => {
+  const {
+    radius: _radius = 20,
+    collapsed,
+    collapsedRadius = 20,
+    expandedRadius = 40,
+    animation,
+    x,
+    y,
+    label,
+    color,
+    nodes = {},
+    combos = [],
+    comboCollapsed,
+    comboDragMove,
+    comboRadiusChange,
+  } = graph.useCombo(id);
+
+  const [radius, setRadius] = useState<number>(
+    collapsed ? collapsedRadius : expandedRadius
+  );
 
   const radiusRef = useRef(radius);
 
@@ -59,7 +56,7 @@ const Combo: React.FC<ComboProps> = ({
       const eased = t * (2 - t);
 
       setRadius(start + delta * eased);
-      onRadiusChange?.(start + delta * eased);
+      comboRadiusChange?.(id, start + delta * eased);
 
       if (t < 1) {
         requestAnimationFrame(step);
@@ -67,7 +64,6 @@ const Combo: React.FC<ComboProps> = ({
       }
 
       expanding.current = false;
-      // onRadiusChange?.(radius);
     };
 
     expanding.current = true;
@@ -76,8 +72,10 @@ const Combo: React.FC<ComboProps> = ({
 
   useEffect(() => {
     const targetRadius = collapsed ? collapsedRadius : expandedRadius;
+    if (radius == targetRadius) return;
+
     if (animation == false) {
-      onRadiusChange?.(targetRadius);
+      comboRadiusChange?.(id, targetRadius);
       return;
     }
     animateRadius(targetRadius);
@@ -86,27 +84,67 @@ const Combo: React.FC<ComboProps> = ({
   const dblClickLock = useRef(false);
 
   return (
-    <Label x={x} y={y} offsetY={radius + 10} onDragMove={onDragMove} {...label}>
+    <Label
+      x={x}
+      y={y}
+      offsetY={radius + 10}
+      onDragMove={(e) => {
+        comboDragMove?.(id, e);
+        onDragMove?.(id, e);
+      }}
+      {...label}
+    >
       <Circle
         id={id}
         radius={radius}
         stroke={color}
-        shadowColor="transparent"
+        // shadowColor="transparent"
         strokeWidth={4}
         fill={collapsed ? color : "transparent"}
-        shadowBlur={10}
-        onDblClick={() => {
+        // shadowBlur={10}
+        onDblClick={(e) => {
+          e.cancelBubble = true;
           if (expanding.current) return;
           if (dblClickLock.current) return;
 
           dblClickLock.current = true;
           setTimeout(() => (dblClickLock.current = false), 200);
 
-          onCollapse?.();
+          comboCollapsed?.(id);
         }}
         perfectDrawEnabled={false}
       />
+      {!collapsed && (
+        <>
+          {...Object.values(nodes).map((node) => (
+            <Point
+              key={node.id}
+              id={node.id}
+              x={node.x}
+              y={node.y}
+              onDragMove={(e) => {
+                e.cancelBubble = true;
+              }}
+              radius={node.radius}
+              label={node.label}
+            />
+          ))}
+          {...combos?.map((id) => (
+            <Combo
+              key={id}
+              id={id}
+              graph={graph}
+              onDragMove={(_id, e) => {
+                e.cancelBubble = true;
+              }}
+            />
+          ))}
+
+          {/* TODO: add edges */}
+        </>
+      )}
     </Label>
   );
 };
+
 export default Combo;
