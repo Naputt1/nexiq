@@ -1,77 +1,153 @@
-import { Layer } from "react-konva";
+import { Arrow, Layer } from "react-konva";
 import Combo from "./combo";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import type { LabelData } from "./label";
+import { memo, useCallback, useEffect, useReducer, type JSX } from "react";
 import DragableStage from "./dragableGraph";
 import type {
-  ComboData,
   ComboGraphData,
-  EdgeData,
-  GraphItem,
-  NodeData,
+  EdgeGraphData,
+  GraphData,
+  GraphDataCallbackParams,
+  NodeGraphData,
 } from "./hook";
 
 type GraphProps = {
-  nodes?: NodeData[];
-  edges?: EdgeData[];
-  combos?: ComboData[];
+  graph: GraphData;
   width?: number;
   height?: number;
 };
 
-const MemoizedCombo = memo(Combo);
+type DataMap = {
+  nodes: Record<string, NodeGraphData>;
+  edges: Record<string, JSX.Element>;
+  combos: Record<string, JSX.Element>;
+};
 
-const Graph: React.FC<GraphProps> = ({
-  nodes,
-  edges,
-  combos: combosData = [],
-  width,
-  height,
-}) => {
-  const [combosMap, setCombosMap] = useState<Record<string, ComboGraphData>>(
-    {}
+const MemoizedCombo = memo(Combo);
+const MemoizedArrow = memo(Arrow);
+
+const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
+  const getComboElement = useCallback(
+    (combo: ComboGraphData) => {
+      return <MemoizedCombo key={combo.id} id={combo.id} graph={graph} />;
+    },
+    [graph]
   );
-  const combos = useMemo(() => Object.values(combosMap), [combosMap]);
+
+  const getEdgeElement = useCallback(
+    (edge: EdgeGraphData) => {
+      return (
+        <MemoizedArrow
+          key={edge.id}
+          id={edge.id}
+          points={edge.points}
+          stroke={"white"}
+          strokeWidth={1}
+          lineJoin="round"
+          perfectDrawEnabled={false}
+        />
+      );
+    },
+    [graph]
+  );
+
+  const [dataMap, dispatch] = useReducer(
+    (state, action: GraphDataCallbackParams) => {
+      switch (action.type) {
+        case "new-nodes":
+          return {
+            ...state,
+            nodes: graph.getNodes(),
+          };
+        case "new-edges": {
+          const edgesData = graph.getEdges();
+          const edges: Record<string, JSX.Element> = {};
+          for (const e of Object.values(edgesData)) {
+            edges[e.id] = getEdgeElement(e);
+          }
+          return {
+            ...state,
+            edges,
+          };
+        }
+        case "new-combos": {
+          const combosData = graph.getCombos();
+          const combos: Record<string, JSX.Element> = {};
+          for (const c of Object.values(combosData)) {
+            combos[c.id] = getComboElement(c);
+          }
+          return {
+            ...state,
+            combos,
+          };
+        }
+        // case "combo-collapsed": {
+        //   const newCombos: Record<string, JSX.Element> = { ...state.combos };
+        //   const combo = graph.getCombo(action.id);
+        //   if (combo != null) {
+        //     newCombos[action.id] = getComboElement(combo);
+        //   }
+
+        //   return {
+        //     ...state,
+        //     combos: newCombos,
+        //   };
+        // }
+        case "combo-drag-move": {
+          const edges = { ...state.edges };
+          for (const id of action.edgeIds) {
+            const edge = graph.getEdge(id);
+            if (edge != null) {
+              edges[id] = getEdgeElement(edge);
+            }
+          }
+
+          return {
+            ...state,
+            edges,
+          };
+        }
+        case "combo-radius-change": {
+          const combos = { ...state.combos };
+          const combo = graph.getCombo(action.id);
+          if (combo != null) {
+            combos[action.id] = getComboElement(combo);
+          }
+
+          const edges = { ...state.edges };
+          for (const id of action.edgeIds) {
+            const edge = graph.getEdge(id);
+            if (edge != null) {
+              edges[id] = getEdgeElement(edge);
+            }
+          }
+
+          return {
+            ...state,
+            edges,
+            combos,
+          };
+        }
+      }
+    },
+    {
+      nodes: {},
+      edges: {},
+      combos: {},
+    } as DataMap
+  );
 
   useEffect(() => {
-    const combos: Record<string, ComboGraphData> = {};
-    for (const c of combosData) {
-      combos[c.id] = {
-        ...c,
-        x: Math.random() * combosData.length * 20,
-        y: Math.random() * combosData.length * 20,
-      };
-    }
+    const id = graph.bind(dispatch);
 
-    setCombosMap(combos);
-  }, [combosData]);
-
-  const setCollapse = useCallback((id: string, collapsed: boolean) => {
-    setCombosMap((c) => {
-      const newCombo = { ...c };
-      newCombo[id].collapsed = collapsed;
-      return newCombo;
-    });
+    return () => {
+      graph.unbind(id);
+    };
   }, []);
 
   return (
     <DragableStage width={width} height={height}>
-      <Layer>
-        {combos.map((combo) => {
-          return (
-            <MemoizedCombo
-              key={combo.id}
-              x={combo.x}
-              y={combo.y}
-              color={"blue"}
-              radius={20}
-              collapsed={combo.collapsed}
-              onCollapse={() => setCollapse(combo.id, !combo.collapsed)}
-              label={combo.label}
-            />
-          );
-        })}
-      </Layer>
+      <Layer>{...Object.values(dataMap?.edges)}</Layer>
+      <Layer>{...Object.values(dataMap?.combos)}</Layer>
     </DragableStage>
   );
 };
