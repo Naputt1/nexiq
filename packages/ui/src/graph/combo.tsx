@@ -10,11 +10,14 @@ type ComboProps = {
   color?: string;
   x?: number;
   y?: number;
-  radius?: number;
+  radius: number;
+  collapsedRadius: number;
+  expandedRadius: number;
   onDragMove?: (evt: Konva.KonvaEventObject<DragEvent>) => void;
   onCollapse?: () => void;
   onRadiusChange?: (radius: number) => void;
   label?: LabelData;
+  animation?: boolean;
 };
 
 const Combo: React.FC<ComboProps> = ({
@@ -23,13 +26,16 @@ const Combo: React.FC<ComboProps> = ({
   x,
   y,
   color = "black",
-  radius: minRadius = 10,
+  radius: _radius = 10,
+  collapsedRadius = 20,
+  expandedRadius = 40,
   onDragMove,
   onCollapse,
   onRadiusChange,
   label,
+  animation,
 }) => {
-  const [radius, setRadius] = useState<number>(minRadius);
+  const [radius, setRadius] = useState<number>(_radius);
 
   const radiusRef = useRef(radius);
 
@@ -38,6 +44,10 @@ const Combo: React.FC<ComboProps> = ({
   useEffect(() => {
     radiusRef.current = radius;
   }, [radius]);
+
+  useEffect(() => {
+    setRadius(_radius);
+  }, [_radius]);
 
   const animateRadius = (target: number, duration = 1000) => {
     const start = radiusRef.current;
@@ -49,6 +59,7 @@ const Combo: React.FC<ComboProps> = ({
       const eased = t * (2 - t);
 
       setRadius(start + delta * eased);
+      onRadiusChange?.(start + delta * eased);
 
       if (t < 1) {
         requestAnimationFrame(step);
@@ -56,7 +67,7 @@ const Combo: React.FC<ComboProps> = ({
       }
 
       expanding.current = false;
-      onRadiusChange?.(radius);
+      // onRadiusChange?.(radius);
     };
 
     expanding.current = true;
@@ -64,9 +75,15 @@ const Combo: React.FC<ComboProps> = ({
   };
 
   useEffect(() => {
-    const targetRadius = collapsed ? minRadius : minRadius * 2;
+    const targetRadius = collapsed ? collapsedRadius : expandedRadius;
+    if (animation == false) {
+      onRadiusChange?.(targetRadius);
+      return;
+    }
     animateRadius(targetRadius);
-  }, [collapsed, minRadius]);
+  }, [collapsed, collapsedRadius]);
+
+  const dblClickLock = useRef(false);
 
   return (
     <Label x={x} y={y} offsetY={radius + 10} onDragMove={onDragMove} {...label}>
@@ -80,6 +97,10 @@ const Combo: React.FC<ComboProps> = ({
         shadowBlur={10}
         onDblClick={() => {
           if (expanding.current) return;
+          if (dblClickLock.current) return;
+
+          dblClickLock.current = true;
+          setTimeout(() => (dblClickLock.current = false), 200);
 
           onCollapse?.();
         }}

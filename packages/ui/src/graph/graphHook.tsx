@@ -23,6 +23,7 @@ type DataMap = {
 };
 
 const MemoizedCombo = memo(Combo);
+const MemoizedArrow = memo(Arrow);
 
 const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
   const getComboElement = useCallback(
@@ -35,6 +36,8 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
           y={data.y}
           color={"blue"}
           radius={data.radius}
+          collapsedRadius={data.collapsedRadius}
+          expandedRadius={data.expandedRadius}
           collapsed={data.collapsed}
           onCollapse={() => graph.comboCollapsed(data.id)}
           onDragMove={(e) => graph.comboDragMove(data.id, e)}
@@ -49,15 +52,14 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
   const getEdgeElement = useCallback(
     (data: EdgeGraphData) => {
       return (
-        <Arrow
+        <MemoizedArrow
           key={data.id}
           id={data.id}
           points={data.points}
           stroke={"white"}
           strokeWidth={4}
           lineJoin="round"
-          shadowColor="transparent"
-          shadowBlur={10}
+          perfectDrawEnabled={false}
           // draggable
         />
       );
@@ -123,7 +125,12 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
           };
         }
         case "combo-radius-change": {
-          console.log(action);
+          const combos = { ...state.combos };
+          const combo = graph.getCombo(action.id);
+          if (combo != null) {
+            combos[action.id] = getComboElement(combo);
+          }
+
           const edges = { ...state.edges };
           for (const id of action.edgeIds) {
             const edge = graph.getEdge(id);
@@ -135,6 +142,7 @@ const GraphHook: React.FC<GraphProps> = ({ graph, width, height }) => {
           return {
             ...state,
             edges,
+            combos,
           };
         }
       }

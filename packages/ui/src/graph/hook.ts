@@ -14,7 +14,7 @@ export type GraphDataCallbackParams =
   | { type: "new-combos" }
   | { type: "combo-collapsed"; id: string }
   | { type: "combo-drag-move"; id: string; edgeIds: string[] }
-  | { type: "combo-radius-change"; edgeIds: string[] };
+  | { type: "combo-radius-change"; id: string; edgeIds: string[] };
 
 export type GraphDataCallback = (params: GraphDataCallbackParams) => void;
 
@@ -42,6 +42,8 @@ export type EdgeData = {
 export interface ComboData extends PointData {
   id: string;
   collapsed?: boolean;
+  collapsedRadius: number;
+  expandedRadius: number;
 }
 
 export interface NodeGraphData extends NodeData {
@@ -193,10 +195,12 @@ export class GraphData {
       this.combos.set(c.id, {
         ...c,
         radius: c.radius ?? 20,
+        collapsedRadius: c.collapsedRadius ?? 20,
+        expandedRadius: c.expandedRadius ?? 40,
         // x: 0,
         // y: 0,
-        x: Math.random() * combos.length * 200,
-        y: Math.random() * combos.length * 200,
+        x: Math.random() * combos.length * 20,
+        y: Math.random() * combos.length * 20,
       });
     }
 
@@ -224,11 +228,11 @@ export class GraphData {
       return;
     }
 
-    // combo.radius = radius;
-    // const edgeIds = this.getComboEdges(id);
-    // this.updateEdgePos(edgeIds);
+    combo.radius = radius;
+    const edgeIds = this.getComboEdges(id);
+    this.updateEdgePos(edgeIds);
 
-    // this.trigger({ type: "combo-radius-change", edgeIds });
+    this.trigger({ type: "combo-radius-change", id, edgeIds });
   }
 
   private updateEdgePos(ids: string[]) {
