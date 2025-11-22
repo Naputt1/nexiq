@@ -674,6 +674,7 @@ export class GraphData {
         id: n.id,
         x: n.x,
         y: n.y,
+        radius: n.radius,
       });
     }
 
@@ -682,6 +683,7 @@ export class GraphData {
         id: c.id,
         x: c.x,
         y: c.y,
+        radius: c.radius,
       });
     }
 
@@ -701,13 +703,15 @@ export class GraphData {
       damping: 0.85,
       gravity: 0.05,
       timeStep: 0.02,
+      minNodeDistance: 300,
+      collisionStrength: 1,
     });
 
-    layout.onTick = (nodesPositions, step) => {
-      console.log("tick", step, nodesPositions);
-    };
+    // layout.onTick = (nodesPositions, step) => {
+    //   console.log("tick", step, nodesPositions);
+    // };
 
-    layout.runSteps(1000);
+    layout.runSteps(100000);
 
     for (const n of layout.nodes) {
       const node: PointData | undefined = this.getPointId(n.id);

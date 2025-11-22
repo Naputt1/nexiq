@@ -6,6 +6,7 @@ export type Node = {
   vx?: number;
   vy?: number;
   mass?: number;
+  radius?: number;
   // any additional data you want to carry
   [key: string]: any;
 };
@@ -23,6 +24,9 @@ export type ForceOptions = {
   attractionStrength?: number; // multiplier for springs (default 0.1)
   repulsionStrength?: number; // multiplier for node repulsion (default 300)
   linkDistance?: number; // default preferred distance (default 80)
+  minNodeDistance?: number; // minimum distance between nodes to avoid overlap (default 0 - disabled)
+  nodeRadius?: number; // default radius for nodes if not specified on node (default 0)
+  collisionStrength?: number; // multiplier for collision force (default 0.5)
   damping?: number; // velocity damping [0..1) (default 0.9)
   gravity?: number; // pulls nodes toward center (default 0.1)
   maxDisplacement?: number; // prevents exploding positions (default 100)
@@ -42,6 +46,7 @@ type InternalNode = Node & {
   fx: number;
   fy: number;
   mass: number;
+  radius: number;
 };
 
 export class ForceLayout {
@@ -62,6 +67,9 @@ export class ForceLayout {
       attractionStrength: 0.1,
       repulsionStrength: 300,
       linkDistance: 80,
+      minNodeDistance: 0,
+      nodeRadius: 0,
+      collisionStrength: 0.5,
       damping: 0.9,
       gravity: 0.1,
       maxDisplacement: 100,
@@ -81,6 +89,7 @@ export class ForceLayout {
       fx: 0,
       fy: 0,
       mass: n.mass ?? 1,
+      radius: n.radius ?? this.opts.nodeRadius,
     }));
 
     this.edges = edges.map((e) => ({
@@ -108,6 +117,9 @@ export class ForceLayout {
     // 1) repulsive forces (Coulomb-like) - O(n^2)
     // F_repulse = k * (q_i * q_j) / d^2, but we'll use a more stable formulation
     const repulseCoef = opts.repulsionStrength;
+    const minNodeDist = opts.minNodeDistance;
+    const collisionK = opts.collisionStrength;
+
     for (let i = 0; i < n; i++) {
       const ni = nodes[i];
       for (let j = i + 1; j < n; j++) {
@@ -122,8 +134,19 @@ export class ForceLayout {
         const uy = dy / dist;
 
         // magnitude (tamed to avoid extreme forces)
-        const force =
+        let force =
           (repulseCoef * (ni.mass * nj.mass)) / (dist * dist + 1e-6);
+
+        // Collision / Minimum distance force
+        // Effective minimum distance = global min distance + radius of both nodes
+        const effectiveMinDist = minNodeDist + ni.radius + nj.radius;
+        
+        if (effectiveMinDist > 0 && dist < effectiveMinDist) {
+           // Apply extra repulsive force if closer than effectiveMinDist
+           // A simple linear spring repulsion: k * (desired - current)
+           const overlap = effectiveMinDist - dist;
+           force += collisionK * overlap * 100; // *100 to make it significant
+        }
 
         const fx = ux * force;
         const fy = uy * force;
