@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { LabelData } from "./label";
 import type Konva from "konva";
+import { ForceLayout, type Node, type Edge } from "./layout";
 
 type useGraphProps = {
   nodes?: NodeData[];
@@ -514,8 +515,8 @@ export class GraphData {
           color: c.color ?? this.config.combo.color,
           collapsedRadius: c.collapsedRadius ?? this.config.combo.minRadius,
           expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
-          x: Math.random() * combos.length * 20,
-          y: Math.random() * combos.length * 20,
+          x: (Math.random() - 0.5) * combos.length * 20,
+          y: (Math.random() - 0.5) * combos.length * 20,
         });
         continue;
       }
@@ -662,6 +663,75 @@ export class GraphData {
 
   public getCombo(id: string) {
     return this.combos.get(id);
+  }
+
+  public layout() {
+    const nodes: Node[] = [];
+    const edges: Edge[] = [];
+
+    for (const n of this.nodes.values()) {
+      nodes.push({
+        id: n.id,
+        x: n.x,
+        y: n.y,
+      });
+    }
+
+    for (const c of this.combos.values()) {
+      nodes.push({
+        id: c.id,
+        x: c.x,
+        y: c.y,
+      });
+    }
+
+    for (const e of this.edges.values()) {
+      edges.push({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+      });
+    }
+
+    console.log(nodes, edges);
+
+    const layout = new ForceLayout(nodes, edges, {
+      repulsionStrength: 4000,
+      linkDistance: 300,
+      damping: 0.85,
+      gravity: 0.05,
+      timeStep: 0.02,
+    });
+
+    layout.onTick = (nodesPositions, step) => {
+      console.log("tick", step, nodesPositions);
+    };
+
+    layout.runSteps(1000);
+
+    for (const n of layout.nodes) {
+      const node: PointData | undefined = this.getPointId(n.id);
+      if (node == null) continue;
+
+      node.x = n.x;
+      node.y = n.y;
+    }
+
+    const edgeIds = new Set<string>();
+
+    for (const n of layout.nodes) {
+      const ids = this.getComboEdges(n.id);
+      for (const edgeId of ids) {
+        edgeIds.add(edgeId);
+      }
+    }
+
+    console.log("edgeIds", edgeIds);
+    this.updateEdgePos(Array.from(edgeIds));
+
+    this.trigger({ type: "new-combos" });
+    this.trigger({ type: "new-nodes" });
+    this.trigger({ type: "new-edges" });
   }
 }
 

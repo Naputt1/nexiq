@@ -6,6 +6,7 @@ import useGraph, {
   type NodeData,
 } from "./graph/hook";
 import Graph from "./graph/graph";
+import { ForceLayout, type Edge, type Node } from "./graph/layout";
 
 const CusKonvoTestHook = () => {
   const [size, setSize] = useState({
@@ -85,6 +86,44 @@ const CusKonvoTestHook = () => {
     combos,
     nodes,
   });
+
+  useEffect(() => {
+    if (edges.length == 0 || combos.length == 0 || nodes.length == 0) return;
+    graph.layout();
+  }, [edges, combos, nodes]);
+
+  useEffect(() => {
+    const nodes: Node[] = [
+      { id: "a", x: -100, y: 0 },
+      { id: "b", x: 100, y: 0 },
+      { id: "c", x: 0, y: 100 },
+      { id: "d", x: 0, y: -100 },
+    ];
+
+    const edges: Edge[] = [
+      { source: "a", target: "b", distance: 200, strength: 0.05 },
+      { source: "a", target: "c" },
+      { source: "b", target: "d" },
+    ];
+
+    const layout = new ForceLayout(nodes, edges, {
+      repulsionStrength: 400,
+      linkDistance: 120,
+      damping: 0.85,
+      gravity: 0.05,
+      timeStep: 0.02,
+    });
+
+    // layout.onTick = (nodesPositions, step) => {
+    //   // render your nodesPositions into canvas/SVG/DOM
+    //   console.log("tick", step, nodesPositions);
+    // };
+
+    // run synchronously 200 steps (for Node or to precompute)
+    layout.runSteps(200);
+
+    console.log("layout", layout);
+  }, []);
 
   // keep stage size responsive
   useEffect(() => {

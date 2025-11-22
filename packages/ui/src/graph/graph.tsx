@@ -138,6 +138,7 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
 
   useEffect(() => {
     const id = graph.bind(dispatch);
+    // graph.layout();
 
     return () => {
       graph.unbind(id);
