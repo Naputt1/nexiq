@@ -37,7 +37,6 @@ export type ComponentDBOptions = {
 };
 
 export class ComponentDB {
-  private components: Map<string, ComponentInfo>;
   private hooks: Map<string, HookInfo>;
   private edges: DataEdge[];
   private files: FileDB;
@@ -54,7 +53,6 @@ export class ComponentDB {
   private dir: string;
 
   constructor(options: ComponentDBOptions) {
-    this.components = new Map();
     this.hooks = new Map();
     this.edges = [];
     this.ids = new Map();
@@ -84,8 +82,9 @@ export class ComponentDB {
 
     this.ids.set(key, id);
 
-    this.components.set(id, {
+    this.files.addVariable(component.file, {
       id,
+      isComponent: true,
       ...component,
     });
   }
@@ -123,7 +122,7 @@ export class ComponentDB {
 
     const component = isHook(name)
       ? this.hooks.get(id)
-      : this.components.get(id);
+      : this.files.getComponent(fileName, id);
     assert(component != null, "Component not found");
 
     component.states.push(state);
@@ -148,7 +147,7 @@ export class ComponentDB {
     }
     assert(id != null, "Component not found");
 
-    const component = this.components.get(id);
+    const component = this.files.getComponent(fileName, id);
     assert(component != null, "Component not found");
 
     const srcId = this.ids.get(
@@ -177,7 +176,7 @@ export class ComponentDB {
 
     assert(id != null, "Component not found");
 
-    const component = this.components.get(id);
+    const component = this.files.getComponent(fileName, id);
     assert(component != null, "Component not found");
 
     // rendere component is imported
@@ -252,7 +251,6 @@ export class ComponentDB {
   public getData(): JsonData {
     return {
       src: path.resolve(this.dir),
-      nodes: Object.fromEntries(this.components),
       edges: this.edges,
       files: this.files.getData(),
       ids: Object.fromEntries(this.ids),

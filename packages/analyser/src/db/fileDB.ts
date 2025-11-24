@@ -3,6 +3,7 @@ import type {
   ComponentFile,
   ComponentFileExport,
   ComponentFileImport,
+  ComponentFileVar,
 } from "shared";
 
 export class FileDB {
@@ -18,6 +19,7 @@ export class FileDB {
       import: {},
       export: {},
       defaultExport: null,
+      var: {},
     });
   }
 
@@ -78,5 +80,16 @@ export class FileDB {
   public getDefaultExport(fileName: string) {
     const file = this.get(fileName);
     return file.defaultExport;
+  }
+
+  public addVariable(fileName: string, variable: ComponentFileVar) {
+    const file = this.get(fileName);
+
+    file.var[variable.id] = variable;
+  }
+
+  public getComponent(fileName: string, id: string) {
+    const file = this.get(fileName);
+    return file.var[id];
   }
 }

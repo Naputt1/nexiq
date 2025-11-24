@@ -13,11 +13,25 @@ export type ComponentFileExport = {
   exportKind: "value" | "type" | "component" | "function" | "class";
 };
 
+export type ComponentFileVar = {
+  id: string;
+  name: string;
+  file: string;
+  type: "Function" | "Class";
+  states: State[];
+  hooks: string[];
+  props: string[];
+  contexts: string[];
+  renders: string[];
+  isComponent: boolean;
+};
+
 export type ComponentFile = {
   path: string;
   import: Record<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
+  var: Record<string, ComponentFileVar>;
 };
 
 export interface State {
@@ -63,7 +77,6 @@ export interface Data {
 
 export type JsonData = {
   src: string;
-  nodes: Record<string, ComponentInfo>;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
   ids: Record<string, string>;

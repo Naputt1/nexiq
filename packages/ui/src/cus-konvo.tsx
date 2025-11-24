@@ -24,18 +24,43 @@ const CusKonvoTestHook = () => {
       const graphData: JsonData = await res.json();
 
       const combos: ComboData[] = [];
-      for (const n of Object.values(graphData.nodes)) {
-        combos.push({
-          id: n.id,
-          collapsed: true,
-          label: { text: n.name, fill: "white" },
-        });
-        combos.push({
-          id: `${n.id}-render`,
-          collapsed: true,
-          label: { text: "render", fill: "white" },
-          combo: n.id,
-        });
+      const nodes: NodeData[] = [];
+      for (const file of Object.values(graphData.files)) {
+        for (const n of Object.values(file.var)) {
+          combos.push({
+            id: n.id,
+            collapsed: true,
+            label: { text: n.name, fill: "white" },
+          });
+          combos.push({
+            id: `${n.id}-render`,
+            collapsed: true,
+            label: { text: "render", fill: "white" },
+            combo: n.id,
+          });
+
+          for (const state of n.states) {
+            nodes.push({
+              id: `${n.id}-state-${state.value}`,
+              label: {
+                text: state.value,
+              },
+              // title: `${n.file}\nstate: ${state.value}`,
+              combo: n.id,
+            });
+          }
+
+          for (const render of n.renders) {
+            nodes.push({
+              id: `${n.id}-render-${render}`,
+              label: {
+                text: render,
+              },
+              // title: `${n.file}\nstate: ${state.value}`,
+              combo: `${n.id}-render`,
+            });
+          }
+        }
       }
 
       const edges: EdgeData[] = [];
@@ -46,31 +71,6 @@ const CusKonvoTestHook = () => {
           target: e.to,
         });
       }
-
-      const nodes: NodeData[] = [];
-      Object.values(graphData.nodes).map((n) => {
-        for (const state of n.states) {
-          nodes.push({
-            id: `${n.id}-state-${state.value}`,
-            label: {
-              text: state.value,
-            },
-            // title: `${n.file}\nstate: ${state.value}`,
-            combo: n.id,
-          });
-        }
-
-        for (const render of n.renders) {
-          nodes.push({
-            id: `${n.id}-render-${render}`,
-            label: {
-              text: render,
-            },
-            // title: `${n.file}\nstate: ${state.value}`,
-            combo: `${n.id}-render`,
-          });
-        }
-      });
 
       setNodes(nodes);
       setEdges(edges);
