@@ -124,6 +124,7 @@ const Combo: React.FC<ComboProps> = ({ id, graph, onDragMove }) => {
               y={node.y}
               onDragMove={(e) => {
                 e.cancelBubble = true;
+                graph.comboChildNodeMove(id, node.id, e);
               }}
               radius={node.radius}
               label={node.label}

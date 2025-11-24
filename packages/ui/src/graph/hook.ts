@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { LabelData } from "./label";
 import type Konva from "konva";
 import { ForceLayout, type Node, type Edge } from "./layout";
@@ -24,6 +24,10 @@ export type GraphDataCallbackParams =
     };
 
 export type GraphDataCallback = (params: GraphDataCallbackParams) => void;
+
+type InnerCallBackParams = { type: "child-moved" };
+
+type InnerCallBack = (params: InnerCallBackParams) => void;
 
 export interface GraphItem {
   x?: number;
@@ -54,6 +58,7 @@ export interface ComboData extends PointData {
   collapsedRadius?: number;
   expandedRadius?: number;
   animation?: boolean;
+  padding?: number;
 }
 
 export interface NodeGraphData extends NodeData {
@@ -81,6 +86,7 @@ export interface ComboGraphData extends ComboData {
   child?: ComboGraphDataChild;
   collapsedRadius: number;
   expandedRadius: number;
+  padding: number;
 }
 
 export interface ComboGraphDataHookBase extends Omit<ComboGraphData, "child"> {
@@ -103,6 +109,7 @@ export interface GraphDataConfig {
     color: string;
     minRadius: number;
     maxRadius: number;
+    padding: number;
   };
 }
 
@@ -114,6 +121,7 @@ const defaultConfig: GraphDataConfig = {
     color: "blue",
     minRadius: 20,
     maxRadius: 40,
+    padding: 10,
   },
 };
 
@@ -132,6 +140,8 @@ export class GraphData {
   private edgeIds: Record<string, Set<string>> = {};
 
   private config: GraphDataConfig;
+
+  private innerCallback: Map<string, InnerCallBack> = new Map();
 
   constructor(
     nodes: NodeData[],
@@ -190,9 +200,31 @@ export class GraphData {
     const [state, setState] = useState<ComboGraphDataHook | null>(null);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
+    const callback = useCallback(
+      (param: InnerCallBackParams) => {
+        if (param.type === "child-moved") {
+          const combo = this.getComboHook(id);
+          if (combo == null) return;
+
+          setState((s) => {
+            if (s == null) return null;
+
+            return {
+              ...s,
+              ...combo,
+            };
+          });
+        }
+      },
+      [setState]
+    );
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const combo = this.getComboHook(id);
       if (combo == null) return;
+
+      this.innerCallback.set(id, callback);
 
       const newData: ComboGraphDataHook = {
         ...combo,
@@ -474,6 +506,7 @@ export class GraphData {
         expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
         x: Math.random() * size * 5,
         y: Math.random() * size * 5,
+        padding: c.padding ?? this.config.combo.padding,
       };
       this.comboChildMap.set(c.id, c.combo);
       return true;
@@ -517,6 +550,7 @@ export class GraphData {
           expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
           x: (Math.random() - 0.5) * combos.length * 20,
           y: (Math.random() - 0.5) * combos.length * 20,
+          padding: c.padding ?? this.config.combo.padding,
         });
         continue;
       }
@@ -617,6 +651,42 @@ export class GraphData {
     return edges;
   }
 
+  private updateComboRadius(id: string) {
+    const combo = this.getComboByID(id);
+    if (combo == null) {
+      console.error("updateComboRadius: combo not found");
+      return;
+    }
+    let maxRadius = 0;
+
+    for (const node of Object.values(combo.child?.nodes ?? {})) {
+      if (node.combo === id) {
+        const dist = Math.sqrt(node.x * node.x + node.y * node.y) + node.radius;
+        if (dist > maxRadius) maxRadius = dist;
+      }
+    }
+
+    for (const childCombo of Object.values(combo.child?.combos ?? {})) {
+      if (childCombo.combo === id) {
+        const dist =
+          Math.sqrt(childCombo.x * childCombo.x + childCombo.y * childCombo.y) +
+          childCombo.radius;
+        if (dist > maxRadius) maxRadius = dist;
+      }
+    }
+
+    combo.radius = maxRadius + combo.padding;
+    combo.expandedRadius = maxRadius + combo.padding;
+
+    const edgeIds = this.getComboEdges(id);
+    this.updateEdgePos(edgeIds);
+    this.trigger({
+      type: "combo-radius-change",
+      id: id,
+      edgeIds,
+    });
+  }
+
   public comboDragMove(id: string, e: Konva.KonvaEventObject<DragEvent>) {
     const combo = this.getComboByID(id);
     if (combo == null) {
@@ -630,14 +700,53 @@ export class GraphData {
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
 
-    const parentCombo = this.getTopParent(id);
-    if (parentCombo == null) return;
+    // const parentCombo = this.getTopParent(id);
+    // if (parentCombo == null) return;
 
-    this.trigger({
-      type: "combo-drag-move",
-      id: parentCombo.id,
-      edgeIds,
-      child: combo.id != id,
+    if (combo.combo == null) {
+      this.trigger({
+        type: "combo-drag-move",
+        id: combo.id,
+        edgeIds,
+      });
+      return;
+    }
+
+    this.updateComboRadius(combo.combo);
+    const cb = this.innerCallback.get(combo.combo);
+    if (cb == null) return;
+
+    cb({
+      type: "child-moved",
+    });
+  }
+
+  public comboChildNodeMove(
+    id: string,
+    nodeId: string,
+    e: Konva.KonvaEventObject<DragEvent>
+  ) {
+    const combo = this.getComboByID(id);
+    if (combo == null) {
+      console.error("comboChildNodeMove: combo not found");
+      return;
+    }
+
+    const node = combo.child?.nodes[nodeId];
+    if (node == null) {
+      console.error("comboChildNodeMove: node not found");
+      return;
+    }
+
+    node.x = e.target.x();
+    node.y = e.target.y();
+
+    this.updateComboRadius(combo.id);
+    const cb = this.innerCallback.get(combo.id);
+    if (cb == null) return;
+
+    cb({
+      type: "child-moved",
     });
   }
 
@@ -695,8 +804,6 @@ export class GraphData {
       });
     }
 
-    console.log(nodes, edges);
-
     const layout = new ForceLayout(nodes, edges, {
       repulsionStrength: 4000,
       linkDistance: 300,
@@ -711,7 +818,7 @@ export class GraphData {
     //   console.log("tick", step, nodesPositions);
     // };
 
-    layout.runSteps(100000);
+    layout.runSteps(2500);
 
     for (const n of layout.nodes) {
       const node: PointData | undefined = this.getPointId(n.id);
@@ -730,7 +837,6 @@ export class GraphData {
       }
     }
 
-    console.log("edgeIds", edgeIds);
     this.updateEdgePos(Array.from(edgeIds));
 
     this.trigger({ type: "new-combos" });

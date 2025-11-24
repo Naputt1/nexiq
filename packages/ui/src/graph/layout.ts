@@ -56,7 +56,7 @@ export class ForceLayout {
   opts: Required<ForceOptions>;
 
   // callback invoked after each step with current nodes positions
-  onTick?: (nodes: Node[], stepCount: number) => void;
+  onTick?: (nodes: Node[], stepCount: number) => Promise<void>;
 
   private stepCount = 0;
   private running = false;
@@ -103,7 +103,7 @@ export class ForceLayout {
   }
 
   // single simulation step (deterministic)
-  step(): void {
+  async step(): Promise<void> {
     const { nodes, edges, opts } = this;
     const n = nodes.length;
     this.stepCount++;
@@ -134,18 +134,17 @@ export class ForceLayout {
         const uy = dy / dist;
 
         // magnitude (tamed to avoid extreme forces)
-        let force =
-          (repulseCoef * (ni.mass * nj.mass)) / (dist * dist + 1e-6);
+        let force = (repulseCoef * (ni.mass * nj.mass)) / (dist * dist + 1e-6);
 
         // Collision / Minimum distance force
         // Effective minimum distance = global min distance + radius of both nodes
         const effectiveMinDist = minNodeDist + ni.radius + nj.radius;
-        
+
         if (effectiveMinDist > 0 && dist < effectiveMinDist) {
-           // Apply extra repulsive force if closer than effectiveMinDist
-           // A simple linear spring repulsion: k * (desired - current)
-           const overlap = effectiveMinDist - dist;
-           force += collisionK * overlap * 100; // *100 to make it significant
+          // Apply extra repulsive force if closer than effectiveMinDist
+          // A simple linear spring repulsion: k * (desired - current)
+          const overlap = effectiveMinDist - dist;
+          force += collisionK * overlap * 100; // *100 to make it significant
         }
 
         const fx = ux * force;
@@ -231,7 +230,7 @@ export class ForceLayout {
 
     // call tick callback with shallow-copied nodes (strip internals)
     if (this.onTick) {
-      this.onTick(
+      await this.onTick(
         nodes.map(({ id, x, y, ...rest }) => ({ id, x, y, ...rest })) as Node[],
         this.stepCount
       );
