@@ -1,5 +1,5 @@
 import type Konva from "konva";
-import React from "react";
+import React, { memo } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Circle } from "react-konva";
 import Label from "./label";
@@ -12,7 +12,7 @@ type ComboProps = {
   graph: GraphData;
 };
 
-const Combo: React.FC<ComboProps> = ({ id, graph, onDragMove }) => {
+const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
   const {
     radius: _radius = 20,
     collapsed,
@@ -146,6 +146,6 @@ const Combo: React.FC<ComboProps> = ({ id, graph, onDragMove }) => {
       )}
     </Label>
   );
-};
+});
 
 export default Combo;

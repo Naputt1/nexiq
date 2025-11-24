@@ -22,13 +22,12 @@ type DataMap = {
   combos: Record<string, JSX.Element>;
 };
 
-const MemoizedCombo = memo(Combo);
 const MemoizedArrow = memo(Arrow);
 
 const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
   const getComboElement = useCallback(
     (combo: ComboGraphData) => {
-      return <MemoizedCombo key={combo.id} id={combo.id} graph={graph} />;
+      return <Combo key={combo.id} id={combo.id} graph={graph} />;
     },
     [graph]
   );
