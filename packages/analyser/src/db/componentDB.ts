@@ -6,6 +6,7 @@ import type {
   DataEdge,
   HookInfo,
   ComponentFileExport,
+  JsonData,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
@@ -248,8 +249,9 @@ export class ComponentDB {
     this.files.setDefaultExport(fileName, exportVal);
   }
 
-  public getData() {
+  public getData(): JsonData {
     return {
+      src: path.resolve(this.dir),
       nodes: Object.fromEntries(this.components),
       edges: this.edges,
       files: this.files.getData(),
@@ -311,26 +313,27 @@ export class ComponentDB {
 
       if (isAliase) {
         source = path.join(this.dir, source);
-        source = path.resolve(source);
+        source = source.replace(this.dir, "");
       }
     }
 
     if (source.startsWith("/")) {
-      if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
+      const fullSource = path.join(this.dir, "." + source);
+      if (fs.existsSync(fullSource) && fs.statSync(fullSource).isDirectory()) {
         const indexExtension = ["tsx", "ts", "jsx", "js"];
         for (const ext of indexExtension) {
-          const testFile = path.join(source, `index.${ext}`);
+          const testFile = path.join(fullSource, `index.${ext}`);
           if (fs.existsSync(testFile)) {
-            return testFile;
+            return `${source}/index.${ext}`;
           }
         }
       }
 
       const indexExtension = ["tsx", "ts", "jsx", "js"];
       for (const ext of indexExtension) {
-        const testFile = `${source}.${ext}`;
+        const testFile = `${fullSource}.${ext}`;
         if (fs.existsSync(testFile)) {
-          return testFile;
+          return `${source}.${ext}`;
         }
       }
     }

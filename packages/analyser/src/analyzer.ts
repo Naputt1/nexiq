@@ -31,7 +31,7 @@ function getViteConfig(dir: string): string | null {
 function getFiles(dir: string): string[] {
   return glob.sync("**/*.{js,jsx,ts,tsx}", {
     cwd: dir,
-    absolute: true,
+    absolute: false,
     ignore: [
       "**/node_modules/**",
       "**/dist/**",
@@ -63,17 +63,17 @@ function analyzeFiles(
     dir: SRC_DIR,
   });
 
-  const aliases = getViteAliases(viteConfigPath);
+  for (const fullfileName of files) {
+    const fileName = "/" + fullfileName;
 
-  for (const fileName of files) {
     componentDB.addFile(fileName);
     // console.log(fileName);
-    const code = fs.readFileSync(fileName, "utf-8");
+    const code = fs.readFileSync(path.resolve(SRC_DIR, fullfileName), "utf-8");
     let ast: File;
     try {
-      ast = parseCode(code, fileName);
+      ast = parseCode(code, fullfileName);
     } catch (e) {
-      console.warn(`Skipping ${fileName}: ${(e as Error).message}`);
+      console.warn(`Skipping ${fullfileName}: ${(e as Error).message}`);
       continue;
     }
 
@@ -283,7 +283,7 @@ function analyzeFiles(
           const firstArg = init.arguments[0];
           const firstArgPath = nodePath.get("init").get("arguments")[0];
 
-          console.log(firstArg, fileName);
+          // console.log(firstArg, fileName);
           if (
             (t.isArrowFunctionExpression(firstArgPath?.node) ||
               t.isFunctionExpression(firstArgPath?.node)) &&

@@ -62,6 +62,7 @@ export interface Data {
 }
 
 export type JsonData = {
+  src: string;
   nodes: Record<string, ComponentInfo>;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
