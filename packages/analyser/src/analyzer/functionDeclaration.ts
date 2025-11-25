@@ -3,6 +3,33 @@ import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { containsJSX, isHook } from "../utils.js";
 
+function getParentPath(nodePath: traverse.NodePath<t.Node>) {
+  const parentPath: string[] = [];
+  let path: traverse.NodePath<t.Node> = nodePath;
+  while (true) {
+    if (path.scope.block.type === "Program") {
+      break;
+    }
+
+    if (path.scope.block.type === "FunctionDeclaration") {
+      if (path.scope.block.id?.type === "Identifier") {
+        parentPath.push(path.scope.block.id.name);
+      }
+    } else if (path.scope.block.type === "ArrowFunctionExpression") {
+      if (path.scope.parentBlock.type == "VariableDeclarator") {
+        if (path.scope.parentBlock.id.type === "Identifier") {
+          parentPath.push(path.scope.parentBlock.id.name);
+        }
+      }
+    }
+
+    path = path.scope.parent.path;
+  }
+
+  // debugger;
+
+  return parentPath;
+}
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
   fileName: string
@@ -36,8 +63,33 @@ export default function FunctionDeclaration(
         props: [],
         contexts: [],
         renders: [],
-        dependencies: [],
+        dependencies: {},
+        var: {},
       });
+    }
+
+    // if (name == "onFilter") {
+    //   debugger;
+    // }
+
+    if (nodePath.scope.block.type === "Program") {
+    } else {
+      if (
+        nodePath.scope.block.type === "FunctionDeclaration" &&
+        nodePath.scope.block.id?.type === "Identifier"
+      ) {
+        const parentPath = getParentPath(nodePath.scope.parent.path);
+
+        componentDB.addVariable(
+          fileName,
+          {
+            name,
+            dependencies: {},
+            type: "function",
+          },
+          parentPath
+        );
+      }
     }
   };
 }

@@ -1,12 +1,14 @@
 import assert from "assert";
 import type {
   ComponentFileImport,
-  ComponentInfo,
   State,
   DataEdge,
   HookInfo,
   ComponentFileExport,
   JsonData,
+  ComponentFileVarComponent,
+  ComponentFileVarDependency,
+  ComponentFileVarNormal,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
@@ -71,7 +73,9 @@ export class ComponentDB {
     return `${name}@${fileName}`;
   }
 
-  public addComponent(component: Omit<ComponentInfo, "id">) {
+  public addComponent(
+    component: Omit<ComponentFileVarComponent, "id" | "isComponent">
+  ) {
     const key = this.getFuncKey(component.name, component.file);
     if (this.keys.has(key)) {
       assert(false, "Component already exists");
@@ -86,6 +90,34 @@ export class ComponentDB {
       id,
       isComponent: true,
       ...component,
+    });
+  }
+
+  public addVariable(
+    filename: string,
+    variable: Omit<ComponentFileVarNormal, "id" | "isComponent" | "var">,
+    parentPath?: string[]
+  ) {
+    this.files.addVariable(
+      filename,
+      {
+        id: crypto.randomUUID(),
+        isComponent: false,
+        var: {},
+        ...variable,
+      },
+      parentPath
+    );
+  }
+
+  public addVariableDependency(
+    filename: string,
+    parent: string,
+    variable: Omit<ComponentFileVarDependency, "id">
+  ) {
+    this.files.addVariableDependency(filename, parent, {
+      id: crypto.randomUUID(),
+      ...variable,
     });
   }
 
@@ -235,17 +267,6 @@ export class ComponentDB {
     }
 
     this.files.addExport(fileName, { id, ...fileExport });
-  }
-
-  public fileSetDefaultExport(fileName: string, exportVal?: string | null) {
-    if (exportVal) {
-      const key = this.getFuncKey(exportVal, fileName);
-      const id = this.ids.get(key) ?? crypto.randomUUID();
-
-      this.ids.set(this.getFuncKey("default", fileName), id);
-    }
-
-    this.files.setDefaultExport(fileName, exportVal);
   }
 
   public getData(): JsonData {

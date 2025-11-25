@@ -13,9 +13,7 @@ export type ComponentFileExport = {
   exportKind: "value" | "type" | "component" | "function" | "class";
 };
 
-export type ComponentFileVar = {
-  id: string;
-  name: string;
+export interface ComponentInfo {
   file: string;
   type: "Function" | "Class";
   states: State[];
@@ -23,8 +21,35 @@ export type ComponentFileVar = {
   props: string[];
   contexts: string[];
   renders: string[];
+}
+
+export interface ComponentFileVarDependency {
+  id: string;
+  name: string;
+}
+
+interface ComponentFileVarBase {
+  id: string;
+  name: string;
   isComponent: boolean;
-};
+  dependencies: Record<string, ComponentFileVarDependency>;
+  var: Record<string, ComponentFileVar>;
+}
+
+export interface ComponentFileVarComponent
+  extends ComponentFileVarBase,
+    ComponentInfo {
+  isComponent: true;
+}
+
+export interface ComponentFileVarNormal extends ComponentFileVarBase {
+  isComponent: false;
+  type: "function" | "data";
+}
+
+export type ComponentFileVar =
+  | ComponentFileVarComponent
+  | ComponentFileVarNormal;
 
 export type ComponentFile = {
   path: string;
@@ -47,18 +72,6 @@ export type HookInfo = {
   props: string[];
 };
 
-export interface ComponentInfo {
-  id: string;
-  name: string;
-  file: string;
-  type: "Function" | "Class";
-  states: State[];
-  hooks: string[];
-  props: string[];
-  contexts: string[];
-  renders: string[];
-}
-
 export type DataEdge = {
   from: string;
   to: string;
@@ -77,6 +90,7 @@ export interface Data {
 
 export type JsonData = {
   src: string;
+  nodes: Record<string, ComponentInfo>;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
   ids: Record<string, string>;

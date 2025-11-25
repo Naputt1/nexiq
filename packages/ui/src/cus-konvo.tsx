@@ -27,6 +27,8 @@ const CusKonvoTestHook = () => {
       const nodes: NodeData[] = [];
       for (const file of Object.values(graphData.files)) {
         for (const n of Object.values(file.var)) {
+          if (!n.isComponent) continue;
+
           combos.push({
             id: n.id,
             collapsed: true,
