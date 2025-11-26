@@ -9,18 +9,22 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentFileVarNormal,
+  ComponentInfoRenderDependency,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
 import type { PackageJson } from "./packageJson.js";
 import fs from "fs";
 import path from "path";
+import { ComponentVariable } from "./variable/component.js";
+import { DataVariable } from "./variable/dataVariable.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
   name: string;
   fileName: string;
   tag: string;
+  dependencry: ComponentInfoRenderDependency[];
 };
 
 type IResolveAddHook = {
@@ -86,11 +90,13 @@ export class ComponentDB {
 
     this.ids.set(key, id);
 
-    this.files.addVariable(component.file, {
-      id,
-      isComponent: true,
-      ...component,
-    });
+    this.files.addVariable(
+      component.file,
+      new ComponentVariable({
+        id,
+        ...component,
+      })
+    );
   }
 
   public addVariable(
@@ -100,12 +106,10 @@ export class ComponentDB {
   ) {
     this.files.addVariable(
       filename,
-      {
+      new DataVariable({
         id: crypto.randomUUID(),
-        isComponent: false,
-        var: {},
         ...variable,
-      },
+      }),
       parentPath
     );
   }
@@ -199,29 +203,39 @@ export class ComponentDB {
     component.hooks.push(srcId);
   }
 
-  public comAddRender(name: string, fileName: string, tag: string) {
+  public comAddRender(
+    name: string,
+    fileName: string,
+    tag: string,
+    dependencry: ComponentInfoRenderDependency[]
+  ) {
     const key = this.getFuncKey(name, fileName);
     const id = this.ids.get(key);
     if (id == null) {
       debugger;
+      //TODO: handle function use/return jsx but not component
+      return;
     }
 
     assert(id != null, "Component not found");
 
-    const component = this.files.getComponent(fileName, id);
-    assert(component != null, "Component not found");
-
     // rendere component is imported
     const comImport = this.files.getImport(fileName, tag);
-    if (!comImport || this.isDependency(comImport.source)) {
+    const isDependency = !comImport || this.isDependency(comImport.source);
+    if (!comImport) {
       return;
     }
 
-    const srcKey = this.getFuncKey(
-      comImport.type == "default" ? "default" : comImport.localName,
-      comImport.source
-    );
-    const srcId = this.ids.get(srcKey);
+    let srcId: string | undefined;
+    if (isDependency) {
+      srcId = comImport.localName;
+    } else {
+      const srcKey = this.getFuncKey(
+        comImport.type == "default" ? "default" : comImport.localName,
+        comImport.source
+      );
+      srcId = this.ids.get(srcKey);
+    }
 
     if (srcId == null) {
       if (this.isResolve) {
@@ -233,18 +247,20 @@ export class ComponentDB {
         name,
         fileName,
         tag,
+        dependencry,
       });
       return;
     }
 
-    if (component.renders.includes(srcId)) return;
+    this.files.addRender(fileName, id, srcId, dependencry, isDependency);
 
-    component.renders.push(srcId);
-    this.edges.push({
-      from: id,
-      to: srcId,
-      label: "renders",
-    });
+    if (!isDependency) {
+      this.edges.push({
+        from: id,
+        to: srcId,
+        label: "renders",
+      });
+    }
   }
 
   public addFile(file: string) {
@@ -292,7 +308,12 @@ export class ComponentDB {
     this.isResolve = true;
     for (const resolve of this.resolveTasks) {
       if (resolve.type === "comAddRender") {
-        this.comAddRender(resolve.name, resolve.fileName, resolve.tag);
+        this.comAddRender(
+          resolve.name,
+          resolve.fileName,
+          resolve.tag,
+          resolve.dependencry
+        );
       } else if (resolve.type === "comAddHook") {
         this.comAddHook(resolve.name, resolve.fileName, resolve.hook);
       }

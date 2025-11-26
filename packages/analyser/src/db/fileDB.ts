@@ -5,8 +5,12 @@ import type {
   ComponentFileImport,
   ComponentFileVar,
   ComponentFileVarDependency,
+  ComponentInfoRenderDependency,
   JsonData,
 } from "shared";
+import type { Variable } from "./variable/variable.js";
+import type { ComponentVariable } from "./variable/component.js";
+import { isComponentVariable } from "./variable/type.js";
 
 interface FileIds {
   id: string;
@@ -18,7 +22,7 @@ export class File {
   import: Record<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
-  var: Map<string, ComponentFileVar>;
+  var: Map<string, Variable>;
 
   private dependencyMap = new Map<string, string>();
   private ids = new Map<string, FileIds>();
@@ -86,35 +90,44 @@ export class File {
       return undefined;
     }
 
-    let parent = this.var.get(ids[0]!);
-    for (let i = 1; i < ids.length; i++) {
+    let parent = undefined;
+    for (const id of ids) {
       if (parent == null) {
-        break;
+        parent = this.var.get(id);
+        continue;
       }
 
-      parent = parent.var[ids[i]!];
+      parent = parent.var.get(id);
       if (parent == null) {
         debugger;
         return undefined;
       }
     }
 
-    // while (ids.length > 0 && parent != null) {
-    //   const nextId = ids.pop()!;
-    //   parent = parent.var[nextId];
-    //   if (parent == null) {
-    //     debugger;
-    //     return undefined;
-    //   }
-    // }
-    // if (parent == null) {
-    //   debugger;
-    //   return undefined;
-    // }
     return parent;
   }
 
-  public addVariable(variable: ComponentFileVar, parentPath?: string[]) {
+  private getParentFromId(
+    id: string,
+    varables?: Map<string, Variable>
+  ): Variable | undefined {
+    const _variable = varables ?? this.var;
+
+    if (_variable.has(id)) {
+      return _variable.get(id);
+    }
+
+    for (const [key, value] of _variable) {
+      const parent = this.getParentFromId(id, value.var);
+      if (parent) {
+        return parent;
+      }
+    }
+
+    return undefined;
+  }
+
+  public addVariable(variable: Variable, parentPath?: string[]) {
     if (parentPath == null || parentPath.length == 0) {
       this.var.set(variable.id, variable);
       this.ids.set(variable.name, {
@@ -137,7 +150,8 @@ export class File {
         return;
       }
 
-      parent.var[variable.id] = variable;
+      parent.var.set(variable.id, variable);
+      variable.parent = parent;
       parentId.var.set(variable.name, {
         id: variable.id,
         var: new Map(),
@@ -145,7 +159,7 @@ export class File {
     }
   }
 
-  private getTopParent(id: string): ComponentFileVar | undefined {
+  private getTopParent(id: string): Variable | undefined {
     if (this.var.has(id)) {
       const parentCombo = this.var.get(id);
       if (parentCombo != null) {
@@ -190,7 +204,12 @@ export class File {
       import: this.import,
       export: this.export,
       defaultExport: this.defaultExport,
-      var: Object.fromEntries(this.var),
+      var: Object.fromEntries(
+        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
+          k,
+          value.getData(),
+        ])
+      ),
     };
   }
 
@@ -214,6 +233,85 @@ export class File {
     if (variable.isComponent) return;
 
     variable.dependencies[dependency.id] = dependency;
+  }
+
+  private _getDependenciesIds(
+    dependencies: ComponentInfoRenderDependency[],
+    depMap: Record<string, number>,
+    parent: Variable | undefined
+  ) {
+    if (parent == null) return;
+
+    for (const [key, com] of parent.var) {
+      if (Object.keys(depMap).includes(com.name)) {
+        const depI = depMap[com.name];
+        const dep = dependencies[depI!];
+
+        dep!.value = com.id;
+
+        delete depMap[com.name];
+        if (Object.keys(depMap).length === 0) {
+          return;
+        }
+      }
+    }
+
+    if (Object.keys(depMap).length > 0) {
+      if (parent.parent == null) {
+        for (const [key, com] of this.var) {
+          if (Object.keys(depMap).includes(com.name)) {
+            const depI = depMap[com.name];
+            const dep = dependencies[depI!];
+
+            dep!.value = com.id;
+
+            delete depMap[com.name];
+            if (Object.keys(depMap).length === 0) {
+              return;
+            }
+          }
+        }
+        return;
+      }
+      this._getDependenciesIds(dependencies, depMap, parent.parent);
+    }
+  }
+
+  private getDependenciesIds(
+    id: string,
+    dependencies: ComponentInfoRenderDependency[]
+  ) {
+    const depMap: Record<string, number> = {};
+    for (const [i, dep] of dependencies.entries()) {
+      depMap[dep.value] = i;
+    }
+
+    const parent = this.getParentFromId(id);
+
+    if (parent == null) {
+      this._getDependenciesIds(dependencies, depMap, this.var.get(id));
+    } else {
+      this._getDependenciesIds(dependencies, depMap, parent);
+    }
+  }
+
+  public addRender(
+    id: string,
+    srcId: string,
+    dependencies: ComponentInfoRenderDependency[],
+    isDependency: boolean
+  ) {
+    const variable = this.var.get(id);
+    if (variable == null) return;
+    if (!variable || !isComponentVariable(variable)) return;
+
+    this.getDependenciesIds(id, dependencies);
+
+    variable.renders[srcId] = {
+      id: srcId,
+      dependencies,
+      isDependency,
+    };
   }
 }
 
@@ -279,7 +377,7 @@ export class FileDB {
 
   public addVariable(
     fileName: string,
-    variable: ComponentFileVar,
+    variable: Variable,
     parentPath?: string[]
   ) {
     const file = this.get(fileName);
@@ -287,10 +385,13 @@ export class FileDB {
     file.addVariable(variable, parentPath);
   }
 
-  public getComponent(fileName: string, id: string) {
+  public getComponent(
+    fileName: string,
+    id: string
+  ): ComponentVariable | undefined {
     const file = this.get(fileName);
     const variable = file.var.get(id);
-    if (variable?.isComponent) {
+    if (variable && isComponentVariable(variable)) {
       return variable;
     }
     return undefined;
@@ -304,5 +405,17 @@ export class FileDB {
     const file = this.get(fileName);
 
     file.addVariableDependency(parent, dependency);
+  }
+
+  public addRender(
+    fileName: string,
+    id: string,
+    srcId: string,
+    dependencies: ComponentInfoRenderDependency[],
+    isDependency: boolean
+  ) {
+    const file = this.get(fileName);
+
+    file.addRender(id, srcId, dependencies, isDependency);
   }
 }

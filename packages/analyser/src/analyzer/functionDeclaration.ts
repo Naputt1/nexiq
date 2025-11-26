@@ -53,32 +53,45 @@ export default function FunctionDeclaration(
       });
     }
 
-    if (containsJSX(nodePath)) {
-      componentDB.addComponent({
+    if (nodePath.parentPath.scope.block.type === "Program") {
+      if (containsJSX(nodePath)) {
+        componentDB.addComponent({
+          name,
+          file: fileName,
+          type: "Function",
+          states: [],
+          hooks: [],
+          props: [],
+          contexts: [],
+          renders: {},
+          dependencies: {},
+          var: {},
+        });
+        return;
+      }
+
+      componentDB.addVariable(fileName, {
         name,
-        file: fileName,
-        type: "Function",
-        states: [],
-        hooks: [],
-        props: [],
-        contexts: [],
-        renders: [],
         dependencies: {},
-        var: {},
+        type: "function",
       });
-    }
-
-    // if (name == "onFilter") {
-    //   debugger;
-    // }
-
-    if (nodePath.scope.block.type === "Program") {
     } else {
+      // if (
+      //   nodePath.parent.type === "ExportDefaultDeclaration"
+      //   // || nodePath.parent.type === "ExportNamedDeclaration"
+      // ) {
+      //   return;
+      // }
+
       if (
         nodePath.scope.block.type === "FunctionDeclaration" &&
         nodePath.scope.block.id?.type === "Identifier"
       ) {
         const parentPath = getParentPath(nodePath.scope.parent.path);
+
+        if (name === "AppRouters") {
+          debugger;
+        }
 
         componentDB.addVariable(
           fileName,

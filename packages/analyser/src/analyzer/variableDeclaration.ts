@@ -52,7 +52,7 @@ export default function VariableDeclarator(
           t.isFunctionExpression(firstArgPath?.node)) &&
         containsJSX(firstArgPath)
       ) {
-        if (id.type == "Identifier")
+        if (id.type == "Identifier") {
           componentDB.addComponent({
             name: id.name,
             file: fileName,
@@ -61,10 +61,12 @@ export default function VariableDeclarator(
             hooks: [],
             props: [],
             contexts: [],
-            renders: [],
+            renders: {},
             dependencies: {},
             var: {},
           });
+          return;
+        }
       } else if (
         t.isIdentifier(init.callee) &&
         init.callee.name === "useState"
@@ -98,10 +100,6 @@ export default function VariableDeclarator(
 
     const name = id.name;
 
-    if (name === "handleCancel") {
-      debugger;
-    }
-
     // if (
     //   !(
     //     !init ||
@@ -131,7 +129,7 @@ export default function VariableDeclarator(
         hooks: [],
         props: [],
         contexts: [],
-        renders: [],
+        renders: {},
         dependencies: {},
         var: {},
       });
@@ -159,6 +157,10 @@ export default function VariableDeclarator(
           };
         }
 
+        if (name === "AppRouters") {
+          debugger;
+        }
+
         componentDB.addVariable(fileName, {
           name,
           dependencies,
@@ -170,6 +172,10 @@ export default function VariableDeclarator(
           nodePath.scope.block.id?.type === "Identifier"
         ) {
           const parentPath = getParentPath(nodePath);
+
+          if (name === "AppRouters") {
+            debugger;
+          }
 
           componentDB.addVariable(
             fileName,
@@ -189,6 +195,10 @@ export default function VariableDeclarator(
           //   }
           // );
         } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
+          if (name === "AppRouters") {
+            debugger;
+          }
+
           const parentPath = getParentPath(nodePath);
           componentDB.addVariable(
             fileName,

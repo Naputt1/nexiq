@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
+import type { ComponentInfoRenderDependency } from "shared";
 
 export default function JSXElement(
   componentDB: ComponentDB,
@@ -52,7 +53,28 @@ export default function JSXElement(
       // }
 
       if (/^[A-Z]/.test(tag)) {
-        componentDB.comAddRender(compName, fileName, tag);
+        const dependency: ComponentInfoRenderDependency[] = [];
+        for (const prop of nodePath.node.openingElement.attributes) {
+          if (
+            prop.type === "JSXAttribute" &&
+            prop.name.type === "JSXIdentifier"
+          ) {
+            let value = "";
+            if (
+              prop.value?.type === "JSXExpressionContainer" &&
+              prop.value.expression.type === "Identifier"
+            ) {
+              value = prop.value.expression.name;
+            }
+
+            dependency.push({
+              id: prop.name.name,
+              value: value,
+            });
+          }
+        }
+
+        componentDB.comAddRender(compName, fileName, tag, dependency);
         // components[id].renders.push(tag);
         // edges.push({
         //   from: id,

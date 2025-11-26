@@ -52,7 +52,7 @@ const CusKonvoTestHook = () => {
             });
           }
 
-          for (const render of n.renders) {
+          for (const render of Object.values(n.renders)) {
             nodes.push({
               id: `${n.id}-render-${render}`,
               label: {

@@ -13,6 +13,17 @@ export type ComponentFileExport = {
   exportKind: "value" | "type" | "component" | "function" | "class";
 };
 
+export type ComponentInfoRenderDependency = {
+  id: string;
+  value: string;
+};
+
+export type ComponentInfoRender = {
+  id: string;
+  dependencies: ComponentInfoRenderDependency[];
+  isDependency?: boolean;
+};
+
 export interface ComponentInfo {
   file: string;
   type: "Function" | "Class";
@@ -20,7 +31,7 @@ export interface ComponentInfo {
   hooks: string[];
   props: string[];
   contexts: string[];
-  renders: string[];
+  renders: Record<string, ComponentInfoRender>;
 }
 
 export interface ComponentFileVarDependency {
