@@ -1,4 +1,6 @@
 import type Konva from "konva";
+import type { ClipFuncOutput } from "konva/lib/Container";
+import type { SceneContext } from "konva/lib/Context";
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Group, Text } from "react-konva";
@@ -10,6 +12,7 @@ interface LabelProps extends React.ComponentProps<typeof Text> {
   offsetX?: number;
   offsetY?: number;
   text?: string;
+  clipFunc?: (ctx: SceneContext) => ClipFuncOutput;
   onDragMove?: (evt: Konva.KonvaEventObject<DragEvent>) => void;
 }
 
@@ -25,6 +28,7 @@ const Label: React.FC<LabelProps> = ({
   offsetX = 0,
   offsetY = 0,
   onDragMove,
+  clipFunc,
   ...props
 }) => {
   const textRef = useRef<Konva.Text>(null);
@@ -50,6 +54,7 @@ const Label: React.FC<LabelProps> = ({
       perfectDrawEnabled={false}
       x={x}
       y={y}
+      clipFunc={clipFunc}
     >
       {children}
       <Text

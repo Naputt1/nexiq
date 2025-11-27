@@ -1,7 +1,7 @@
 import type Konva from "konva";
 import React, { memo } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Circle } from "react-konva";
+import { Circle, Group } from "react-konva";
 import Label from "./label";
 import type { GraphData } from "./hook";
 import Point from "./point";
@@ -28,6 +28,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
     comboCollapsed,
     comboDragMove,
     comboRadiusChange,
+    comboHover,
   } = graph.useCombo(id);
 
   const [radius, setRadius] = useState<number>(
@@ -94,56 +95,66 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
       }}
       {...label}
     >
-      <Circle
-        id={id}
-        radius={radius}
-        stroke={color}
-        // shadowColor="transparent"
-        strokeWidth={4}
-        fill={collapsed ? color : "transparent"}
-        // shadowBlur={10}
-        onDblClick={(e) => {
-          e.cancelBubble = true;
-          if (expanding.current) return;
-          if (dblClickLock.current) return;
-
-          dblClickLock.current = true;
-          setTimeout(() => (dblClickLock.current = false), 200);
-
-          comboCollapsed?.(id);
+      <Group
+        clipFunc={(ctx) => {
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+          ctx.closePath();
         }}
         perfectDrawEnabled={false}
-      />
-      {!collapsed && (
-        <>
-          {...Object.values(nodes).map((node) => (
-            <Point
-              key={node.id}
-              id={node.id}
-              x={node.x}
-              y={node.y}
-              onDragMove={(e) => {
-                e.cancelBubble = true;
-                graph.comboChildNodeMove(id, node.id, e);
-              }}
-              radius={node.radius}
-              label={node.label}
-            />
-          ))}
-          {...combos?.map((id) => (
-            <Combo
-              key={id}
-              id={id}
-              graph={graph}
-              onDragMove={(_id, e) => {
-                e.cancelBubble = true;
-              }}
-            />
-          ))}
+      >
+        <Circle
+          id={id}
+          radius={radius}
+          stroke={color}
+          // shadowColor="transparent"
+          strokeWidth={4}
+          fill={collapsed ? color : "transparent"}
+          // shadowBlur={10}
+          onMouseEnter={comboHover}
+          onDblClick={(e) => {
+            e.cancelBubble = true;
+            if (expanding.current) return;
+            if (dblClickLock.current) return;
 
-          {/* TODO: add edges */}
-        </>
-      )}
+            dblClickLock.current = true;
+            setTimeout(() => (dblClickLock.current = false), 200);
+
+            comboCollapsed?.(id);
+          }}
+          perfectDrawEnabled={false}
+        />
+        {!collapsed && (
+          <>
+            {...Object.values(nodes).map((node) => (
+              <Point
+                key={node.id}
+                id={node.id}
+                x={node.x}
+                y={node.y}
+                onDragMove={(e) => {
+                  e.cancelBubble = true;
+                  graph.comboChildNodeMove(id, node.id, e);
+                }}
+                radius={node.radius}
+                label={node.label}
+              />
+            ))}
+            {...combos?.map((id) => (
+              <Combo
+                key={id}
+                id={id}
+                graph={graph}
+                onDragMove={(_id, e) => {
+                  e.cancelBubble = true;
+                }}
+              />
+            ))}
+
+            {/* TODO: add edges */}
+          </>
+        )}
+      </Group>
     </Label>
   );
 });

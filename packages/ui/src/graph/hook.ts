@@ -87,6 +87,7 @@ export interface ComboGraphData extends ComboData {
   collapsedRadius: number;
   expandedRadius: number;
   padding: number;
+  isLayoutCalculated: boolean;
 }
 
 export interface ComboGraphDataHookBase extends Omit<ComboGraphData, "child"> {
@@ -99,6 +100,7 @@ export interface ComboGraphDataHook extends ComboGraphDataHookBase {
   comboRadiusChange: (id: string, radius: number) => void;
   comboCollapsed: (id: string) => void;
   comboDragMove: (id: string, e: Konva.KonvaEventObject<DragEvent>) => void;
+  comboHover: () => void;
 }
 
 export interface GraphDataConfig {
@@ -269,6 +271,77 @@ export class GraphData {
               ...combo,
             };
           });
+        },
+        comboHover: () => {
+          const combo = this.getComboByID(id);
+          if (combo == null) return;
+
+          if (combo.isLayoutCalculated) return;
+
+          const nodes: Node[] = [];
+          const edges: Edge[] = [];
+
+          for (const n of Object.values(combo.child?.nodes ?? {})) {
+            nodes.push({
+              id: n.id,
+              x: (Math.random() - 0.5) * 20,
+              y: (Math.random() - 0.5) * 20,
+              radius: n.radius,
+            });
+          }
+
+          for (const c of Object.values(combo.child?.combos ?? {})) {
+            nodes.push({
+              id: c.id,
+              x: (Math.random() - 0.5) * 20,
+              y: (Math.random() - 0.5) * 20,
+              radius: c.radius,
+            });
+          }
+
+          for (const e of Object.values(combo.child?.edges ?? {})) {
+            edges.push({
+              id: e.id,
+              source: e.source,
+              target: e.target,
+            });
+          }
+
+          const layout = new ForceLayout(nodes, edges, {
+            repulsionStrength: 4000,
+            linkDistance: 300,
+            damping: 0.85,
+            gravity: 0.05,
+            timeStep: 0.02,
+            minNodeDistance: 10,
+            collisionStrength: 1,
+          });
+
+          layout.runSteps(2500);
+
+          for (const n of layout.nodes) {
+            const node: PointData | undefined =
+              combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
+            if (node == null) continue;
+
+            node.x = n.x;
+            node.y = n.y;
+          }
+
+          const edgeIds = new Set<string>();
+
+          for (const n of layout.nodes) {
+            const ids = this.getComboEdges(n.id);
+            for (const edgeId of ids) {
+              edgeIds.add(edgeId);
+            }
+          }
+
+          this.updateEdgePos(Array.from(edgeIds));
+
+          combo.expandedRadius = this.calculateComboRadius(combo);
+
+          combo.isLayoutCalculated = true;
         },
       };
 
@@ -507,6 +580,7 @@ export class GraphData {
         x: Math.random() * size * 5,
         y: Math.random() * size * 5,
         padding: c.padding ?? this.config.combo.padding,
+        isLayoutCalculated: false,
       };
       this.comboChildMap.set(c.id, c.combo);
       return true;
@@ -551,6 +625,7 @@ export class GraphData {
           x: (Math.random() - 0.5) * combos.length * 20,
           y: (Math.random() - 0.5) * combos.length * 20,
           padding: c.padding ?? this.config.combo.padding,
+          isLayoutCalculated: false,
         });
         continue;
       }
@@ -651,32 +726,35 @@ export class GraphData {
     return edges;
   }
 
+  private calculateComboRadius(combo: ComboGraphData): number {
+    let maxRadius = 0;
+
+    for (const node of Object.values(combo.child?.nodes ?? {})) {
+      const dist = Math.sqrt(node.x * node.x + node.y * node.y) + node.radius;
+      if (dist > maxRadius) maxRadius = dist;
+    }
+
+    for (const childCombo of Object.values(combo.child?.combos ?? {})) {
+      const dist =
+        Math.sqrt(childCombo.x * childCombo.x + childCombo.y * childCombo.y) +
+        childCombo.radius;
+      if (dist > maxRadius) maxRadius = dist;
+    }
+
+    return maxRadius + combo.padding;
+  }
+
   private updateComboRadius(id: string) {
     const combo = this.getComboByID(id);
     if (combo == null) {
       console.error("updateComboRadius: combo not found");
       return;
     }
-    let maxRadius = 0;
 
-    for (const node of Object.values(combo.child?.nodes ?? {})) {
-      if (node.combo === id) {
-        const dist = Math.sqrt(node.x * node.x + node.y * node.y) + node.radius;
-        if (dist > maxRadius) maxRadius = dist;
-      }
-    }
+    const radius = this.calculateComboRadius(combo);
 
-    for (const childCombo of Object.values(combo.child?.combos ?? {})) {
-      if (childCombo.combo === id) {
-        const dist =
-          Math.sqrt(childCombo.x * childCombo.x + childCombo.y * childCombo.y) +
-          childCombo.radius;
-        if (dist > maxRadius) maxRadius = dist;
-      }
-    }
-
-    combo.radius = maxRadius + combo.padding;
-    combo.expandedRadius = maxRadius + combo.padding;
+    combo.radius = radius;
+    combo.expandedRadius = radius;
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
