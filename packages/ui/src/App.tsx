@@ -5,10 +5,12 @@ import FileGraphViewerG6 from "./file-graph-g6";
 import GraphViewer from "./graph";
 import FileViewerG6 from "./file-g6";
 import CusKonvoTestHook from "./cus-konvo";
+import Dashboard from "./dashboard";
 
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Dashboard />} />
       <Route path="/view" element={<GraphViewer />} />
       <Route path="/cus-konvo" element={<CusKonvoTestHook />} />
       <Route path="/graph" element={<FileGraphViewer />} />

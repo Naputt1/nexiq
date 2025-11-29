@@ -231,8 +231,11 @@ export class GraphData {
       const newData: ComboGraphDataHook = {
         ...combo,
         comboCollapsed: (id: string) => {
+          const prevCOmbo = structuredClone(this.getComboByID(id));
           this.comboCollapsed(id);
           const combo = this.getComboHook(id);
+          const nowCOmbo = structuredClone(this.getComboByID(id));
+          console.log(prevCOmbo?.x, nowCOmbo?.x, prevCOmbo?.y, nowCOmbo?.y);
           if (combo == null) return;
 
           setState((s) => {
