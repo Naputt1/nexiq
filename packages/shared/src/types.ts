@@ -18,11 +18,11 @@ export type ComponentInfoRenderDependency = {
   value: string;
 };
 
-export type ComponentInfoRender = {
+export interface ComponentInfoRender extends ComponentLoc {
   id: string;
   dependencies: ComponentInfoRenderDependency[];
   isDependency?: boolean;
-};
+}
 
 export interface ComponentInfo {
   file: string;
@@ -39,7 +39,16 @@ export interface ComponentFileVarDependency {
   name: string;
 }
 
-interface ComponentFileVarBase {
+export interface VariableLoc {
+  line: number;
+  column: number;
+}
+
+export interface ComponentLoc {
+  loc: VariableLoc;
+}
+
+interface ComponentFileVarBase extends ComponentLoc {
   id: string;
   name: string;
   isComponent: boolean;
@@ -70,7 +79,7 @@ export type ComponentFile = {
   var: Record<string, ComponentFileVar>;
 };
 
-export interface State {
+export interface State extends ComponentLoc {
   value: string;
   setter?: string;
 }
@@ -101,7 +110,6 @@ export interface Data {
 
 export type JsonData = {
   src: string;
-  nodes: Record<string, ComponentInfo>;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
   ids: Record<string, string>;

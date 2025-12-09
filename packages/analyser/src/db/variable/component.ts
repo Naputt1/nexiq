@@ -18,9 +18,10 @@ export class ComponentVariable extends Variable {
     id,
     name,
     dependencies,
+    loc,
     ...options
   }: Omit<ComponentFileVarComponent, "isComponent">) {
-    super(id, name, dependencies, true);
+    super(id, name, dependencies, true, loc);
     this.file = options.file;
     this.type = options.type;
     this.states = options.states;
@@ -49,6 +50,7 @@ export class ComponentVariable extends Variable {
       props: this.props,
       contexts: this.contexts,
       renders: this.renders,
+      loc: this.loc,
     };
   }
 }

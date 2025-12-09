@@ -25,6 +25,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
     color,
     nodes = {},
     combos = [],
+    fileName,
     comboCollapsed,
     comboDragMove,
     comboRadiusChange,
@@ -93,14 +94,24 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
         comboDragMove?.(id, e);
         onDragMove?.(id, e);
       }}
+      onClick={(e) => {
+        if (e.evt.ctrlKey) {
+          e.cancelBubble = true;
+          window.ipcRenderer.invoke("run-cli", `code -g ${fileName}`);
+        }
+      }}
       {...label}
     >
       <Group
-        clipFunc={(ctx) => {
-          ctx.beginPath();
-          ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
-          ctx.closePath();
-        }}
+        clipFunc={
+          radius != expandedRadius
+            ? (ctx) => {
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+                ctx.closePath();
+              }
+            : undefined
+        }
         perfectDrawEnabled={false}
       >
         <Circle
@@ -135,6 +146,15 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
                 onDragMove={(e) => {
                   e.cancelBubble = true;
                   graph.comboChildNodeMove(id, node.id, e);
+                }}
+                onClick={(e) => {
+                  if (e.evt.ctrlKey) {
+                    e.cancelBubble = true;
+                    window.ipcRenderer.invoke(
+                      "run-cli",
+                      `code -g ${node.fileName}`
+                    );
+                  }
                 }}
                 radius={node.radius}
                 label={node.label}

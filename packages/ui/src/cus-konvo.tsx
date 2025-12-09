@@ -4,6 +4,7 @@ import useGraph, {
   type ComboData,
   type EdgeData,
   type NodeData,
+  type useGraphProps,
 } from "./graph/hook";
 import Graph from "./graph/graph";
 
@@ -13,9 +14,11 @@ const CusKonvoTestHook = () => {
     height: window.innerHeight,
   });
 
-  const [combos, setCombos] = useState<ComboData[]>([]);
-  const [edges, setEdges] = useState<EdgeData[]>([]);
-  const [nodes, setNodes] = useState<NodeData[]>([]);
+  const [graphData, setGraphData] = useState<useGraphProps>({
+    nodes: [],
+    edges: [],
+    combos: [],
+  });
 
   const loadData = async () => {
     try {
@@ -28,17 +31,20 @@ const CusKonvoTestHook = () => {
       for (const file of Object.values(graphData.files)) {
         for (const n of Object.values(file.var)) {
           if (!n.isComponent) continue;
+          const fileName = `${graphData.src}${file.path}`;
 
           combos.push({
             id: n.id,
             collapsed: true,
             label: { text: n.name, fill: "white" },
+            fileName: `${fileName}:${n.loc.line}:${n.loc.column}`,
           });
           combos.push({
             id: `${n.id}-render`,
             collapsed: true,
             label: { text: "render", fill: "white" },
             combo: n.id,
+            fileName: `${fileName}:${n.loc.line}:${n.loc.column}`,
           });
 
           for (const state of n.states) {
@@ -49,6 +55,7 @@ const CusKonvoTestHook = () => {
               },
               // title: `${n.file}\nstate: ${state.value}`,
               combo: n.id,
+              fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
             });
           }
 
@@ -56,10 +63,11 @@ const CusKonvoTestHook = () => {
             nodes.push({
               id: `${n.id}-render-${render}`,
               label: {
-                text: render,
+                text: render.id,
               },
               // title: `${n.file}\nstate: ${state.value}`,
               combo: `${n.id}-render`,
+              fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
             });
           }
         }
@@ -74,26 +82,29 @@ const CusKonvoTestHook = () => {
         });
       }
 
-      setNodes(nodes);
-      setEdges(edges);
-      setCombos(combos);
+      setGraphData({
+        nodes,
+        edges,
+        combos,
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
-  const graph = useGraph({
-    edges,
-    combos,
-    nodes,
-  });
+  const graph = useGraph(graphData);
 
   useEffect(() => {
-    if (edges.length == 0 || combos.length == 0 || nodes.length == 0) return;
+    if (
+      graphData.edges?.length == 0 ||
+      graphData.combos?.length == 0 ||
+      graphData.nodes?.length == 0
+    )
+      return;
     const time = performance.now();
-    graph.layout();
+    graph.render();
     console.log("layout", performance.now() - time);
-  }, [edges, combos, nodes]);
+  }, [graphData]);
 
   // keep stage size responsive
   useEffect(() => {

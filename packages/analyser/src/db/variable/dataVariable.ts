@@ -8,9 +8,10 @@ export class DataVariable extends Variable {
     id,
     name,
     dependencies,
+    loc,
     ...options
   }: Omit<ComponentFileVarNormal, "isComponent" | "var">) {
-    super(id, name, dependencies, false);
+    super(id, name, dependencies, false, loc);
     this.type = options.type;
   }
 
@@ -27,6 +28,7 @@ export class DataVariable extends Variable {
         ])
       ),
       type: this.type,
+      loc: this.loc,
     };
   }
 }

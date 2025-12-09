@@ -2,6 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentInfoRenderDependency } from "shared";
+import assert from "assert";
 
 export default function JSXElement(
   componentDB: ComponentDB,
@@ -14,6 +15,12 @@ export default function JSXElement(
       const parentFunc = nodePath.getFunctionParent();
 
       let compName = null;
+
+      assert(nodePath.node.loc?.start != null);
+      const loc = {
+        line: nodePath.node.loc.start.line,
+        column: nodePath.node.loc.start.column,
+      };
 
       if (parentFunc?.node.type === "FunctionDeclaration") {
         // function MyComponent() {}
@@ -74,13 +81,7 @@ export default function JSXElement(
           }
         }
 
-        componentDB.comAddRender(compName, fileName, tag, dependency);
-        // components[id].renders.push(tag);
-        // edges.push({
-        //   from: id,
-        //   to: tag,
-        //   label: "renders",
-        // });
+        componentDB.comAddRender(compName, fileName, tag, dependency, loc);
       }
     }
   };

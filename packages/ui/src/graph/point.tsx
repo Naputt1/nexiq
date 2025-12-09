@@ -10,6 +10,7 @@ type PointProps = {
   y?: number;
   radius: number;
   onDragMove?: (evt: Konva.KonvaEventObject<DragEvent>) => void;
+  onClick?: (evt: Konva.KonvaEventObject<MouseEvent>) => void;
   label?: LabelData;
 };
 
@@ -20,6 +21,7 @@ const Point: React.FC<PointProps> = ({
   color = "red",
   radius = 10,
   onDragMove,
+  onClick,
   label,
 }) => {
   return (
@@ -28,6 +30,7 @@ const Point: React.FC<PointProps> = ({
       y={y}
       offsetY={radius + 10}
       onDragMove={onDragMove}
+      onClick={onClick}
       fill="white"
       {...label}
     >

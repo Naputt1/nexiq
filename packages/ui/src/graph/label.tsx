@@ -29,6 +29,7 @@ const Label: React.FC<LabelProps> = ({
   offsetY = 0,
   onDragMove,
   clipFunc,
+  onClick,
   ...props
 }) => {
   const textRef = useRef<Konva.Text>(null);
@@ -55,6 +56,7 @@ const Label: React.FC<LabelProps> = ({
       x={x}
       y={y}
       clipFunc={clipFunc}
+      onClick={onClick}
     >
       {children}
       <Text

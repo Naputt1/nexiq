@@ -7,6 +7,7 @@ import type {
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
   JsonData,
+  VariableLoc,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import type { ComponentVariable } from "./variable/component.js";
@@ -299,7 +300,8 @@ export class File {
     id: string,
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
-    isDependency: boolean
+    isDependency: boolean,
+    loc: VariableLoc
   ) {
     const variable = this.var.get(id);
     if (variable == null) return;
@@ -311,6 +313,7 @@ export class File {
       id: srcId,
       dependencies,
       isDependency,
+      loc,
     };
   }
 }
@@ -412,10 +415,11 @@ export class FileDB {
     id: string,
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
-    isDependency: boolean
+    isDependency: boolean,
+    loc: VariableLoc
   ) {
     const file = this.get(fileName);
 
-    file.addRender(id, srcId, dependencies, isDependency);
+    file.addRender(id, srcId, dependencies, isDependency, loc);
   }
 }

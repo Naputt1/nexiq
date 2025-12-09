@@ -60,6 +60,21 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "preLaunchTask": "build"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mastodon",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "../mastodon",
+        "./out/graph.json",
+         "./packages/ui/public/graph.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
     }
   ]
 }

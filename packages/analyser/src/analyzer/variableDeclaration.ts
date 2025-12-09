@@ -41,12 +41,17 @@ export default function VariableDeclarator(
   return (nodePath) => {
     const id = nodePath.node.id;
     const init = nodePath.node.init;
+    assert(nodePath.node.id?.loc?.start != null);
+
+    const loc = {
+      line: nodePath.node.id.loc.start.line,
+      column: nodePath.node.id.loc.start.column,
+    };
 
     if (t.isCallExpression(init)) {
       const firstArg = init.arguments[0];
       const firstArgPath = nodePath.get("init").get("arguments")[0];
 
-      // console.log(firstArg, fileName);
       if (
         (t.isArrowFunctionExpression(firstArgPath?.node) ||
           t.isFunctionExpression(firstArgPath?.node)) &&
@@ -64,6 +69,7 @@ export default function VariableDeclarator(
             renders: {},
             dependencies: {},
             var: {},
+            loc,
           });
           return;
         }
@@ -75,14 +81,31 @@ export default function VariableDeclarator(
 
         if (t.isArrayPattern(id)) {
           const [stateVar, setterVar] = id.elements;
+          assert(id.loc?.start != null);
 
           let state: State | null = null;
           if (t.isIdentifier(stateVar)) {
-            state = { value: stateVar.name };
+            state = {
+              value: stateVar.name,
+              loc: {
+                line: id.loc.start.line,
+                column: id.loc.start.column,
+              },
+            };
           }
+          // TODO: handle ObjectPattern
+          // const [{ previous, current }, setMemory] = useState<{
+
           if (t.isIdentifier(setterVar)) {
-            assert(state != null, "useState have setter without value");
-            state!.setter = setterVar.name;
+            if (state == null) {
+              state = {
+                value: "ObjectPattern",
+                setter: setterVar.name,
+                loc,
+              };
+            } else {
+              state.setter = setterVar.name;
+            }
           }
 
           if (state != null) {
@@ -100,15 +123,6 @@ export default function VariableDeclarator(
 
     const name = id.name;
 
-    // if (
-    //   !(
-    //     !init ||
-    //     (init.type !== "ArrowFunctionExpression" &&
-    //       init.type !== "FunctionExpression")
-    //   )
-    // )
-    //   return;
-
     if (
       !(
         !init ||
@@ -117,10 +131,6 @@ export default function VariableDeclarator(
       ) &&
       containsJSX(nodePath)
     ) {
-      if (name === "queryClient") {
-        debugger;
-      }
-
       componentDB.addComponent({
         name,
         file: fileName,
@@ -132,13 +142,9 @@ export default function VariableDeclarator(
         renders: {},
         dependencies: {},
         var: {},
+        loc,
       });
     } else {
-      // if (name === "routers" || name === "queryClient") {
-      //   console.log(nodePath.scope.block);
-      //   debugger;
-      // }
-
       if (nodePath.scope.block.type === "Program") {
         const dependencies: Record<string, ComponentFileVarDependency> = {};
         if (init?.type === "NewExpression") {
@@ -165,6 +171,7 @@ export default function VariableDeclarator(
           name,
           dependencies,
           type: "data",
+          loc,
         });
       } else {
         if (
@@ -183,17 +190,10 @@ export default function VariableDeclarator(
               name,
               dependencies: {},
               type: "data",
+              loc,
             },
             parentPath
           );
-          // componentDB.addVariableDependency(
-          //   fileName,
-          //   nodePath.scope.block.id.name,
-          //   {
-          //     name,
-          //     // file: fileName,
-          //   }
-          // );
         } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
           if (name === "AppRouters") {
             debugger;
@@ -206,6 +206,7 @@ export default function VariableDeclarator(
               name,
               dependencies: {},
               type: "function",
+              loc,
             },
             parentPath
           );

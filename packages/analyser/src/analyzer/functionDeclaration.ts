@@ -2,6 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { containsJSX, isHook } from "../utils.js";
+import assert from "assert";
 
 function getParentPath(nodePath: traverse.NodePath<t.Node>) {
   const parentPath: string[] = [];
@@ -37,6 +38,12 @@ export default function FunctionDeclaration(
   return (nodePath) => {
     const name = nodePath.node.id?.name;
     if (!name) return;
+    assert(nodePath.node.id?.loc?.start != null);
+
+    const loc = {
+      line: nodePath.node.id.loc.start.line,
+      column: nodePath.node.id.loc.start.column,
+    };
 
     if (isHook(name)) {
       const isExported =
@@ -66,6 +73,7 @@ export default function FunctionDeclaration(
           renders: {},
           dependencies: {},
           var: {},
+          loc,
         });
         return;
       }
@@ -74,6 +82,7 @@ export default function FunctionDeclaration(
         name,
         dependencies: {},
         type: "function",
+        loc,
       });
     } else {
       // if (
@@ -99,6 +108,7 @@ export default function FunctionDeclaration(
             name,
             dependencies: {},
             type: "function",
+            loc,
           },
           parentPath
         );

@@ -10,6 +10,7 @@ import type {
   ComponentFileVarDependency,
   ComponentFileVarNormal,
   ComponentInfoRenderDependency,
+  VariableLoc,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
@@ -25,6 +26,7 @@ type IResolveAddRender = {
   fileName: string;
   tag: string;
   dependencry: ComponentInfoRenderDependency[];
+  loc: VariableLoc;
 };
 
 type IResolveAddHook = {
@@ -152,6 +154,7 @@ export class ComponentDB {
     const key = this.getFuncKey(name, fileName);
     const id = this.ids.get(key);
     if (id == null) {
+      return;
       debugger;
     }
     assert(id != null, "Component not found");
@@ -172,7 +175,7 @@ export class ComponentDB {
         return;
       }
     } else {
-      // ignore local hooks
+      // TODO: hadnle local hooks
       return;
     }
 
@@ -207,14 +210,15 @@ export class ComponentDB {
     name: string,
     fileName: string,
     tag: string,
-    dependencry: ComponentInfoRenderDependency[]
+    dependencry: ComponentInfoRenderDependency[],
+    loc: VariableLoc
   ) {
     const key = this.getFuncKey(name, fileName);
     const id = this.ids.get(key);
     if (id == null) {
       debugger;
-      //TODO: handle function use/return jsx but not component
       return;
+      //TODO: handle function use/return jsx but not component or class component
     }
 
     assert(id != null, "Component not found");
@@ -248,11 +252,12 @@ export class ComponentDB {
         fileName,
         tag,
         dependencry,
+        loc,
       });
       return;
     }
 
-    this.files.addRender(fileName, id, srcId, dependencry, isDependency);
+    this.files.addRender(fileName, id, srcId, dependencry, isDependency, loc);
 
     if (!isDependency) {
       this.edges.push({
@@ -312,7 +317,8 @@ export class ComponentDB {
           resolve.name,
           resolve.fileName,
           resolve.tag,
-          resolve.dependencry
+          resolve.dependencry,
+          resolve.loc
         );
       } else if (resolve.type === "comAddHook") {
         this.comAddHook(resolve.name, resolve.fileName, resolve.hook);

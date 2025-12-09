@@ -54,7 +54,7 @@ export default function FileGraphViewerG6() {
         console.log(graphData);
 
         const edges = new Set();
-        const nodes: NodeData[] = [];
+        const nodes: NodeData[] = [{ id: "0" }];
 
         // Object.values(graphData.nodes).map((n) => {
         //   for (const state of n.states) {
@@ -71,29 +71,53 @@ export default function FileGraphViewerG6() {
         // });
 
         const combos: ComboData[] = [];
-        for (const n of Object.values(graphData.nodes)) {
-          const x = Math.random() * 100;
-          const y = Math.random() * 100;
-          combos.push({
-            id: n.id,
-            data: { label: n.name, length: n.states.length },
-            style: {
-              // ...(n.states.length > 0 ? { collapsed: true } : {}),
-              x,
-              y,
-            },
-          });
-          // combos.push({
-          //   id: `${n.id}-render`,
-          //   data: { label: "render", length: n.states.length },
-          //   combo: n.id,
-          //   style: {
-          //     collapsed: true,
-          //     x,
-          //     y,
-          //   },
-          // });
+        const ids = new Set<string>();
+
+        for (const file of Object.values(graphData.files)) {
+          for (const n of Object.values(file.var)) {
+            if (!n.isComponent) continue;
+            const fileName = graphData.src + file.path;
+
+            ids.add(n.id);
+            combos.push({
+              id: n.id,
+              collapsed: true,
+              data: { label: n.name, fill: "white" },
+              fileName,
+            });
+            combos.push({
+              id: `${n.id}-render`,
+              collapsed: true,
+              data: { label: "render", fill: "white" },
+              combo: n.id,
+              fileName,
+            });
+          }
         }
+
+        // for (const n of Object.values(graphData.nodes)) {
+        //   const x = Math.random() * 100;
+        //   const y = Math.random() * 100;
+        //   combos.push({
+        //     id: n.id,
+        //     data: { label: n.name, length: n.states.length },
+        //     style: {
+        //       // ...(n.states.length > 0 ? { collapsed: true } : {}),
+        //       x,
+        //       y,
+        //     },
+        //   });
+        //   // combos.push({
+        //   //   id: `${n.id}-render`,
+        //   //   data: { label: "render", length: n.states.length },
+        //   //   combo: n.id,
+        //   //   style: {
+        //   //     collapsed: true,
+        //   //     x,
+        //   //     y,
+        //   //   },
+        //   // });
+        // }
 
         const data: GraphData = {
           nodes,
@@ -102,13 +126,11 @@ export default function FileGraphViewerG6() {
             .filter((e) => {
               if (edges.has(e.from + e.to)) return false;
 
-              const valid =
-                graphData.nodes.hasOwnProperty(e.from) &&
-                graphData.nodes.hasOwnProperty(e.to);
+              if (edges.has(e.from + e.to)) return false;
 
               edges.add(e.from + e.to);
 
-              return valid;
+              return ids.has(e.from) && ids.has(e.to);
             })
             .map((e) => ({
               source: String(e.from),
@@ -121,20 +143,20 @@ export default function FileGraphViewerG6() {
             })),
         };
 
-        data.combos.forEach((combo) => {
-          const children = data.nodes.filter((node) => node.combo === combo.id);
-          if (children.length === 0) {
-            data.nodes.push({
-              id: `${combo.id}-dummy`,
-              combo: combo.id,
-              label: "", // hide label
-              size: 0, // zero size
-              style: { opacity: 0 },
-              x: combo.x || 0,
-              y: combo.y || 0,
-            });
-          }
-        });
+        // data.combos.forEach((combo) => {
+        //   const children = data.nodes.filter((node) => node.combo === combo.id);
+        //   if (children.length === 0) {
+        //     data.nodes.push({
+        //       id: `${combo.id}-dummy`,
+        //       combo: combo.id,
+        //       label: "", // hide label
+        //       size: 0, // zero size
+        //       style: { opacity: 0 },
+        //       x: combo.x || 0,
+        //       y: combo.y || 0,
+        //     });
+        //   }
+        // });
 
         // data.combos.forEach((combo, index) => {
         //   const hasChildren = data.nodes.some(
@@ -341,55 +363,55 @@ export default function FileGraphViewerG6() {
         //   ]);
         // }
 
-        graph.getComboData().forEach((combo) => {
-          graph.addComboData([
-            {
-              id: `${combo.id}-render`,
-              data: { label: "render" },
-              combo: combo.id,
-              style: {
-                collapsed: true,
-                x: combo.style?.x,
-                y: combo.style?.y + 100,
-              },
-            },
-          ]);
-        });
+        // graph.getComboData().forEach((combo) => {
+        //   graph.addComboData([
+        //     {
+        //       id: `${combo.id}-render`,
+        //       data: { label: "render" },
+        //       combo: combo.id,
+        //       style: {
+        //         collapsed: true,
+        //         x: combo.style?.x,
+        //         y: combo.style?.y + 100,
+        //       },
+        //     },
+        //   ]);
+        // });
 
-        Object.values(graphData.nodes).map((n) => {
-          for (const state of n.states) {
-            graph.addNodeData([
-              {
-                id: `${n.id}-state-${state.value}`,
-                label: state.value,
-                title: `${n.file}\nstate: ${state.value}`,
-                combo: n.id,
-                style: {
-                  size: 10,
-                },
-              },
-            ]);
-            // nodes.push({
-            //   id: `${n.id}-state-${state.value}`,
-            //   label: state.value,
-            //   title: `${n.file}\nstate: ${state.value}`,
-            //   combo: n.id,
-            //   style: {
-            //     size: 10,
-            //   },
-            // });
-          }
-        });
+        // Object.values(graphData.nodes).map((n) => {
+        //   for (const state of n.states) {
+        //     graph.addNodeData([
+        //       {
+        //         id: `${n.id}-state-${state.value}`,
+        //         label: state.value,
+        //         title: `${n.file}\nstate: ${state.value}`,
+        //         combo: n.id,
+        //         style: {
+        //           size: 10,
+        //         },
+        //       },
+        //     ]);
+        //     // nodes.push({
+        //     //   id: `${n.id}-state-${state.value}`,
+        //     //   label: state.value,
+        //     //   title: `${n.file}\nstate: ${state.value}`,
+        //     //   combo: n.id,
+        //     //   style: {
+        //     //     size: 10,
+        //     //   },
+        //     // });
+        //   }
+        // });
 
         // await graph.layout();
 
-        graph
-          .getComboData()
-          ?.forEach((combo) => graph.collapseElement(combo?.id));
+        // graph
+        //   .getComboData()
+        //   ?.forEach((combo) => graph.collapseElement(combo?.id));
 
-        const removeNodes = data.nodes
-          .filter((node) => node.id.endsWith("-dummy"))
-          .map((node) => node.id);
+        // const removeNodes = data.nodes
+        //   .filter((node) => node.id.endsWith("-dummy"))
+        //   .map((node) => node.id);
         // console.log(removeNodes);
         // graph.removeNodeData(removeNodes);
 
@@ -408,7 +430,7 @@ export default function FileGraphViewerG6() {
         graphRef.current = graph;
       } catch (err) {
         console.error(err);
-        setError("graph.json not found");
+        setError(err.message);
       }
     })();
   }, []);

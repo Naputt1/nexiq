@@ -1,6 +1,13 @@
 import { Arrow, Layer } from "react-konva";
 import Combo from "./combo";
-import { memo, useCallback, useEffect, useReducer, type JSX } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState,
+  type JSX,
+} from "react";
 import DragableStage from "./dragableGraph";
 import type {
   ComboGraphData,
@@ -9,6 +16,7 @@ import type {
   GraphDataCallbackParams,
   NodeGraphData,
 } from "./hook";
+import type { Vector2d } from "konva/lib/types";
 
 type GraphProps = {
   graph: GraphData;
@@ -22,9 +30,24 @@ type DataMap = {
   combos: Record<string, JSX.Element>;
 };
 
+type GraphState = {
+  x: number;
+  y: number;
+  scale: Vector2d;
+};
+
 const MemoizedArrow = memo(Arrow);
 
 const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
+  const [state, setState] = useState<GraphState>({
+    x: 0,
+    y: 0,
+    scale: {
+      x: 1,
+      y: 1,
+    },
+  });
+
   const getComboElement = useCallback(
     (combo: ComboGraphData) => {
       return <Combo key={combo.id} id={combo.id} graph={graph} />;
@@ -55,10 +78,10 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
         case "new-nodes":
           return {
             ...state,
-            nodes: graph.getNodes(),
+            nodes: graph.getCurNodes(),
           };
         case "new-edges": {
-          const edgesData = graph.getEdges();
+          const edgesData = graph.getCurEdges();
           const edges: Record<string, JSX.Element> = {};
           for (const e of Object.values(edgesData)) {
             edges[e.id] = getEdgeElement(e);
@@ -69,7 +92,7 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
           };
         }
         case "new-combos": {
-          const combosData = graph.getCombos();
+          const combosData = graph.getCurCombos();
           const combos: Record<string, JSX.Element> = {};
           for (const c of Object.values(combosData)) {
             combos[c.id] = getComboElement(c);
@@ -145,7 +168,47 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
   }, []);
 
   return (
-    <DragableStage width={width} height={height}>
+    <DragableStage
+      width={width}
+      height={height}
+      // onDragMove={(e) => {
+      //   const stage = e.target;
+      //   graph.setPosition(stage.x(), stage.y());
+      //   setState((s) => {
+      //     return {
+      //       ...s,
+      //       x: stage.x(),
+      //       y: stage.y(),
+      //     };
+      //   });
+      // }}
+      // onWheel={(e) => {
+      //   const scaleBy = 1.05;
+      //   const stage = e.target;
+
+      //   const oldScale = stage.scaleX();
+      //   const newScale =
+      //     e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+
+      //   // const stage = e.target;
+      //   graph.setScale(stage.scale().x);
+      //   stage.getAbsoluteScale();
+
+      //   console.log(stage.scale(), stage.getAbsoluteScale());
+      //   setState((s) => {
+      //     return {
+      //       ...s,
+      //       scale: {
+      //         x: newScale,
+      //         y: newScale,
+      //       },
+      //     };
+      //   });
+      // }}
+      // x={state.x}
+      // y={state.y}
+      // scale={state.scale}
+    >
       <Layer>{...Object.values(dataMap?.edges)}</Layer>
       <Layer>{...Object.values(dataMap?.combos)}</Layer>
     </DragableStage>
