@@ -4,6 +4,102 @@ import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentInfoRenderDependency } from "shared";
 import assert from "assert";
 
+function getComponentLoc(
+  nodePath: traverse.NodePath<t.JSXElement>,
+  fileName: string
+) {
+  const parentFunc = nodePath.getFunctionParent();
+  const parentStatement = nodePath.getStatementParent();
+
+  let compLoc = null;
+  if (parentStatement?.node?.loc?.start.line != null) {
+    if (
+      parentStatement?.node.type == "VariableDeclaration" &&
+      parentStatement?.node.declarations.length != 0
+    ) {
+      return `${parentStatement?.node.declarations[0]?.id?.loc?.start.line}@${parentStatement?.node.declarations[0]?.id?.loc?.start.column}`;
+    } else if (parentStatement?.node.type == "ReturnStatement") {
+      if (parentStatement.parentPath.type === "BlockStatement") {
+        if (
+          parentStatement.parentPath.parent.type === "FunctionDeclaration" &&
+          parentStatement.parentPath.parent.id?.loc != null
+        ) {
+          return `${parentStatement.parentPath.parent.id.loc.start.line}@${parentStatement.parentPath.parent.id.loc.start.column}`;
+        } else if (
+          parentStatement.parentPath.parent.type == "ArrowFunctionExpression"
+        ) {
+          if (
+            parentStatement.parentPath.parentPath?.type ===
+            "ArrowFunctionExpression"
+          ) {
+            if (
+              parentStatement.parentPath.parentPath.parent.type ===
+              "VariableDeclarator"
+            ) {
+              return `${parentStatement.parentPath.parentPath.parent.id.loc?.start.line}@${parentStatement.parentPath.parentPath.parent.id.loc?.start.column}`;
+            } else if (
+              parentStatement.parentPath.parentPath.parentPath?.type ===
+              "CallExpression"
+            ) {
+              if (
+                parentStatement.parentPath.parentPath.parentPath.parent.type ===
+                "VariableDeclarator"
+              ) {
+                return `${parentStatement.parentPath.parentPath.parentPath.parent.id.loc?.start.line}@${parentStatement.parentPath.parentPath.parentPath.parent.id.loc?.start.column}`;
+              } else {
+                debugger;
+              }
+            } else if (
+              parentStatement.parentPath.parentPath.parentPath?.type ===
+              "JSXExpressionContainer"
+            ) {
+            } else {
+              debugger;
+            }
+          } else {
+            debugger;
+          }
+        } else {
+          debugger;
+        }
+      } else {
+        debugger;
+      }
+    } else if (parentStatement?.node.type == "ExpressionStatement") {
+      //TODO: handle expression statement like ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
+    } else {
+      debugger;
+    }
+  }
+
+  if (compLoc == null && parentFunc != null) {
+    if (parentFunc?.node.type === "ArrowFunctionExpression") {
+      if (
+        parentFunc?.parent.type === "VariableDeclarator" &&
+        parentFunc.parent.id.loc != null
+      ) {
+        compLoc = `${parentFunc.parent.id.loc.start.line}@${parentFunc.parent.id.loc.start.column}`;
+      } else if (
+        parentFunc?.parent.type === "CallExpression" &&
+        parentFunc.parentPath.parent.type === "VariableDeclarator"
+      ) {
+        compLoc = `${parentFunc.parentPath.parent.id.loc?.start.line}@${parentFunc.parentPath.parent.id.loc?.start.column}`;
+      } else {
+        debugger;
+      }
+    } else if (
+      parentFunc?.node.type === "FunctionDeclaration" &&
+      parentFunc.node.id?.loc != null
+    ) {
+      compLoc = `${parentFunc.node.id.loc.start.line}@${parentFunc.node.id.loc.start.column}`;
+    } else {
+      debugger;
+    }
+  }
+
+  return compLoc;
+}
+
 export default function JSXElement(
   componentDB: ComponentDB,
   fileName: string
@@ -14,7 +110,12 @@ export default function JSXElement(
       const tag = opening.name;
       const parentFunc = nodePath.getFunctionParent();
 
+      if (tag == "StatComponent") {
+        debugger;
+      }
+
       let compName = null;
+      const compLoc = getComponentLoc(nodePath, fileName);
 
       assert(nodePath.node.loc?.start != null);
       const loc = {
@@ -81,7 +182,9 @@ export default function JSXElement(
           }
         }
 
-        componentDB.comAddRender(compName, fileName, tag, dependency, loc);
+        if (compLoc != null) {
+          componentDB.comAddRender(compLoc, fileName, tag, dependency, loc);
+        }
       }
     }
   };

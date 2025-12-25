@@ -3,6 +3,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
+import os from "os";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -74,6 +75,27 @@ app.whenReady().then(createWindow);
 ipcMain.handle("run-cli", async (event, command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
+      if (error) reject(error.message);
+      else resolve(stdout || stderr);
+    });
+  });
+});
+
+let firstOpen = true;
+ipcMain.handle("open-vscode", async (event, path) => {
+  return new Promise((resolve, reject) => {
+    let cmd = `code -g ${path}`;
+
+    if (firstOpen) {
+      // handle for windows and linux
+      if (os.platform() === "darwin") {
+        // cmd = `open -a "Visual Studio Code" --args -g ${path}`;
+        cmd += `\nosascript -e 'tell application "Visual Studio Code" to activate'`;
+      }
+      firstOpen = false;
+    }
+
+    exec(cmd, (error, stdout, stderr) => {
       if (error) reject(error.message);
       else resolve(stdout || stderr);
     });

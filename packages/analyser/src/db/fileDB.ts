@@ -11,7 +11,7 @@ import type {
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import type { ComponentVariable } from "./variable/component.js";
-import { isComponentVariable } from "./variable/type.js";
+import { isComponentVariable, isDataVariable } from "./variable/type.js";
 
 interface FileIds {
   id: string;
@@ -24,6 +24,9 @@ export class File {
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
   var: Map<string, Variable>;
+
+  // key = loc.line + @ + loc.column val = variable
+  private locIdsMap = new Map<string, Variable>();
 
   private dependencyMap = new Map<string, string>();
   private ids = new Map<string, FileIds>();
@@ -129,6 +132,8 @@ export class File {
   }
 
   public addVariable(variable: Variable, parentPath?: string[]) {
+    this.locIdsMap.set(`${variable.loc.line}@${variable.loc.column}`, variable);
+
     if (parentPath == null || parentPath.length == 0) {
       this.var.set(variable.id, variable);
       this.ids.set(variable.name, {
@@ -296,25 +301,44 @@ export class File {
     }
   }
 
+  public getVariableID(name: string): string | null {
+    const id = this.ids.get(name);
+    if (id != null) {
+      return id.id;
+    }
+
+    return null;
+  }
+
   public addRender(
-    id: string,
+    comLoc: string,
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc
   ) {
-    const variable = this.var.get(id);
+    const variable = this.locIdsMap.get(comLoc);
     if (variable == null) return;
-    if (!variable || !isComponentVariable(variable)) return;
+    if (!variable) return;
+    this.getDependenciesIds(variable.id, dependencies);
 
-    this.getDependenciesIds(id, dependencies);
+    if (isComponentVariable(variable)) {
+      variable.renders[srcId] = {
+        id: srcId,
+        dependencies,
+        isDependency,
+        loc,
+      };
+    } else if (isDataVariable(variable)) {
+      variable.components.set(srcId, {
+        id: srcId,
+        dependencies,
+        isDependency,
+        loc,
+      });
+    }
 
-    variable.renders[srcId] = {
-      id: srcId,
-      dependencies,
-      isDependency,
-      loc,
-    };
+    return variable.id;
   }
 }
 
@@ -323,6 +347,10 @@ export class FileDB {
 
   constructor() {
     this.files = new Map();
+  }
+
+  public getFiles() {
+    return this.files.values();
   }
 
   public add(filename: string) {
@@ -412,7 +440,7 @@ export class FileDB {
 
   public addRender(
     fileName: string,
-    id: string,
+    comLoc: string,
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
@@ -420,6 +448,6 @@ export class FileDB {
   ) {
     const file = this.get(fileName);
 
-    file.addRender(id, srcId, dependencies, isDependency, loc);
+    return file.addRender(comLoc, srcId, dependencies, isDependency, loc);
   }
 }

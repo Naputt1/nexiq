@@ -1,8 +1,9 @@
-import type { ComponentFileVarNormal } from "shared";
+import type { ComponentFileVarNormal, ComponentInfoRender } from "shared";
 import { Variable } from "./variable.js";
 
 export class DataVariable extends Variable {
   type: "function" | "data";
+  components: Map<string, ComponentInfoRender>;
 
   constructor({
     id,
@@ -10,9 +11,10 @@ export class DataVariable extends Variable {
     dependencies,
     loc,
     ...options
-  }: Omit<ComponentFileVarNormal, "isComponent" | "var">) {
+  }: Omit<ComponentFileVarNormal, "isComponent" | "var" | "components">) {
     super(id, name, dependencies, false, loc);
     this.type = options.type;
+    this.components = new Map();
   }
 
   public getData(): ComponentFileVarNormal {
@@ -29,6 +31,7 @@ export class DataVariable extends Variable {
       ),
       type: this.type,
       loc: this.loc,
+      components: Object.fromEntries(this.components),
     };
   }
 }

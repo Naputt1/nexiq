@@ -65,6 +65,7 @@ export interface ComponentFileVarComponent
 export interface ComponentFileVarNormal extends ComponentFileVarBase {
   isComponent: false;
   type: "function" | "data";
+  components: Record<string, ComponentInfoRender>;
 }
 
 export type ComponentFileVar =

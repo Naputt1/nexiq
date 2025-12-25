@@ -19,6 +19,8 @@ import fs from "fs";
 import path from "path";
 import { ComponentVariable } from "./variable/component.js";
 import { DataVariable } from "./variable/dataVariable.js";
+import type { Variable } from "./variable/variable.js";
+import { isComponentVariable, isDataVariable } from "./variable/type.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -103,7 +105,10 @@ export class ComponentDB {
 
   public addVariable(
     filename: string,
-    variable: Omit<ComponentFileVarNormal, "id" | "isComponent" | "var">,
+    variable: Omit<
+      ComponentFileVarNormal,
+      "id" | "isComponent" | "var" | "components"
+    >,
     parentPath?: string[]
   ) {
     this.files.addVariable(
@@ -206,23 +211,28 @@ export class ComponentDB {
     component.hooks.push(srcId);
   }
 
+  private getVariableID(name: string, fileName: string): string | null {
+    const key = this.getFuncKey(name, fileName);
+    const id = this.ids.get(key);
+    if (id != null) {
+      return id;
+    }
+
+    const file = this.files.get(fileName);
+    if (file == null) {
+      return null;
+    }
+
+    return file.getVariableID(name);
+  }
+
   public comAddRender(
-    name: string,
+    comLoc: string,
     fileName: string,
     tag: string,
     dependencry: ComponentInfoRenderDependency[],
     loc: VariableLoc
   ) {
-    const key = this.getFuncKey(name, fileName);
-    const id = this.ids.get(key);
-    if (id == null) {
-      debugger;
-      return;
-      //TODO: handle function use/return jsx but not component or class component
-    }
-
-    assert(id != null, "Component not found");
-
     // rendere component is imported
     const comImport = this.files.getImport(fileName, tag);
     const isDependency = !comImport || this.isDependency(comImport.source);
@@ -248,7 +258,7 @@ export class ComponentDB {
 
       this.addResolveTask({
         type: "comAddRender",
-        name,
+        name: comLoc,
         fileName,
         tag,
         dependencry,
@@ -257,15 +267,18 @@ export class ComponentDB {
       return;
     }
 
-    this.files.addRender(fileName, id, srcId, dependencry, isDependency, loc);
-
-    if (!isDependency) {
-      this.edges.push({
-        from: id,
-        to: srcId,
-        label: "renders",
-      });
+    if (tag == "BuisnessCardPage") {
+      debugger;
     }
+
+    this.files.addRender(
+      fileName,
+      comLoc,
+      srcId,
+      dependencry,
+      isDependency,
+      loc
+    );
   }
 
   public addFile(file: string) {
@@ -290,14 +303,69 @@ export class ComponentDB {
     this.files.addExport(fileName, { id, ...fileExport });
   }
 
+  private _resolveDependency(variable: Variable, parent?: string) {
+    if (variable.name == "LeaveForm") {
+      debugger;
+    }
+
+    if (isComponentVariable(variable)) {
+      for (const render of Object.values(variable.renders)) {
+        if (render.isDependency) continue;
+
+        this.edges.push({
+          from: render.id,
+          to: variable.id,
+          label: "render",
+        });
+      }
+    } else if (isDataVariable(variable)) {
+      if (parent != null) {
+        // for (const render of Object.values(variable.components)) {
+        //   if (render.isDependency) continue;
+
+        //   this.edges.push({
+        //     from: parent,
+        //     to: variable.id,
+        //     label: "render",
+        //   });
+        // }
+
+        for (const innerCom of variable.components.values()) {
+          if (innerCom.isDependency) continue;
+
+          this.edges.push({
+            from: parent,
+            to: innerCom.id,
+            label: "render2",
+          });
+        }
+      }
+    }
+
+    for (const innerVar of variable.var.values()) {
+      this._resolveDependency(
+        innerVar,
+        variable.isComponent ? variable.id : parent
+      );
+    }
+  }
+
+  public resolveDependency() {
+    for (const file of this.files.getFiles()) {
+      for (const variable of file.var.values()) {
+        this._resolveDependency(variable);
+      }
+    }
+  }
+
   public getData(): JsonData {
     return {
       src: path.resolve(this.dir),
-      edges: this.edges,
       files: this.files.getData(),
+      edges: this.edges,
       ids: Object.fromEntries(this.ids),
       keys: Array.from(this.keys),
-      resolve: this.resolveTasks,
+      // resolve: this.resolveTasks,
     };
   }
 
@@ -313,6 +381,13 @@ export class ComponentDB {
     this.isResolve = true;
     for (const resolve of this.resolveTasks) {
       if (resolve.type === "comAddRender") {
+        // if (resolve.name === "RouterHr") {
+        //   debugger;
+        // }
+
+        if (resolve.tag == "StatComponent") {
+          debugger;
+        }
         this.comAddRender(
           resolve.name,
           resolve.fileName,

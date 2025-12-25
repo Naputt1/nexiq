@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentFileVarDependency, State } from "shared";
-import { containsJSX } from "../utils.js";
+import { containsJSX, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
 
@@ -34,6 +34,36 @@ function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   return parentPath;
 }
 
+function getVariableComponent(
+  nodes: Array<traverse.Node | null>,
+  _components?: Set<string>
+) {
+  const components = _components ?? new Set<string>();
+
+  for (const node of nodes) {
+    if (node == null) continue;
+
+    if (node.type === "ArrayExpression") {
+      getVariableComponent(node.elements, components);
+    } else if (node.type === "ObjectExpression") {
+      getVariableComponent(node.properties, components);
+    } else if (node.type === "ObjectProperty") {
+      if (node.value.type === "JSXElement") {
+        if (node.value.openingElement.name.type === "JSXIdentifier") {
+          components.add(node.value.openingElement.name.name);
+        }
+      }
+    }
+    if (node.type === "JSXElement") {
+      if (node.openingElement.name.type === "JSXIdentifier") {
+        components.add(node.openingElement.name.name);
+      }
+    }
+  }
+
+  return components;
+}
+
 export default function VariableDeclarator(
   componentDB: ComponentDB,
   fileName: string
@@ -55,7 +85,7 @@ export default function VariableDeclarator(
       if (
         (t.isArrowFunctionExpression(firstArgPath?.node) ||
           t.isFunctionExpression(firstArgPath?.node)) &&
-        containsJSX(firstArgPath)
+        returnJSX(firstArgPath.node)
       ) {
         if (id.type == "Identifier") {
           componentDB.addComponent({
@@ -129,7 +159,7 @@ export default function VariableDeclarator(
         (init.type !== "ArrowFunctionExpression" &&
           init.type !== "FunctionExpression")
       ) &&
-      containsJSX(nodePath)
+      returnJSX(init)
     ) {
       componentDB.addComponent({
         name,
@@ -179,10 +209,6 @@ export default function VariableDeclarator(
           nodePath.scope.block.id?.type === "Identifier"
         ) {
           const parentPath = getParentPath(nodePath);
-
-          if (name === "AppRouters") {
-            debugger;
-          }
 
           componentDB.addVariable(
             fileName,

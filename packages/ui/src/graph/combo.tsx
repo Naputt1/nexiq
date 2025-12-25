@@ -97,7 +97,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
       onClick={(e) => {
         if (e.evt.ctrlKey) {
           e.cancelBubble = true;
-          window.ipcRenderer.invoke("run-cli", `code -g ${fileName}`);
+          window.ipcRenderer.invoke("open-vscode", fileName);
         }
       }}
       {...label}
@@ -150,10 +150,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
                 onClick={(e) => {
                   if (e.evt.ctrlKey) {
                     e.cancelBubble = true;
-                    window.ipcRenderer.invoke(
-                      "run-cli",
-                      `code -g ${node.fileName}`
-                    );
+                    window.ipcRenderer.invoke("open-vscode", node.fileName);
                   }
                 }}
                 radius={node.radius}

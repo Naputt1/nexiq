@@ -60,6 +60,7 @@ function analyzeFiles(
   }
 
   componentDB.resolve();
+  componentDB.resolveDependency();
 
   return componentDB.getData();
 }

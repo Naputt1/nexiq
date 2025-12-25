@@ -521,8 +521,10 @@ export class GraphData {
   public addEdges(edges: EdgeData[]) {
     this.edges.clear();
     for (const e of edges) {
-      const srcNode = this.nodes.get(e.source) ?? this.combos.get(e.source);
-      const targetNode = this.nodes.get(e.target) ?? this.combos.get(e.target);
+      const srcNode = this.getPointId(e.source);
+      const targetNode = this.getPointId(e.target);
+
+      console.log(Object.fromEntries(this.combos), e.source, e.target);
 
       if (srcNode == null || targetNode == null) {
         this.edgeToCreate.push(e);
@@ -671,6 +673,7 @@ export class GraphData {
 
     this.createEdges();
 
+    console.log(this.combos, this.comboToCreate);
     this.trigger({ type: "new-combos" });
   }
 
@@ -1078,7 +1081,11 @@ export class GraphData {
         Object.keys(newCurRender.edges).length == this.edges.size &&
         Object.keys(newCurRender.combos).length == this.combos.size
       ) {
-        console.log("render done");
+        console.log(
+          "render done",
+          this,
+          this.combos.get("b4c6c2dc-9fdd-4ce4-b7f4-120354a08611")
+        );
         clearInterval(interval);
         this.rendering = false;
       } else {

@@ -1,8 +1,31 @@
-import type { NodePath } from "@babel/traverse";
+import type { NodePath, Node } from "@babel/traverse";
 import path from "path";
 
 export function isHook(filePath: string) {
   return path.basename(filePath).startsWith("use");
+}
+
+export function returnJSX(nodePath: Node): boolean {
+  if (
+    (nodePath.type != "FunctionDeclaration" &&
+      nodePath.type != "ArrowFunctionExpression") ||
+    nodePath.body.type != "BlockStatement"
+  ) {
+    return false;
+  }
+
+  for (const body of nodePath.body.body) {
+    if (body.type === "ReturnStatement") {
+      if (
+        body.argument?.type === "JSXElement" ||
+        body.argument?.type === "JSXFragment"
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 export function containsJSX(nodePath: NodePath): boolean {
