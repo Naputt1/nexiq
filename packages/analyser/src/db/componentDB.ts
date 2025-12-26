@@ -283,7 +283,7 @@ export class ComponentDB {
         srcId = file.getExport(comImport);
 
         if (srcId == null && this.isResolve) {
-          // Resolve failed
+          debugger;
         }
       }
     }

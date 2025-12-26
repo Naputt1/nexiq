@@ -719,13 +719,6 @@ export class GraphData {
 
     if (combo.parent != null) {
       this.updateComboRadius(combo.parent.id);
-
-      const parentCb = this.innerCallback.get(combo.parent.id);
-      if (parentCb == null) return;
-
-      parentCb({
-        type: "child-moved",
-      });
     }
   }
 
@@ -747,7 +740,7 @@ export class GraphData {
     }
   }
 
-  private getComboEdges(src: string) {
+  private getComboEdges(src: string): string[] {
     const targetIds = this.edgeIds[src];
     if (targetIds == null) return [];
 
@@ -783,7 +776,7 @@ export class GraphData {
       if (dist > maxRadius) maxRadius = dist;
     }
 
-    return maxRadius + combo.padding;
+    return Math.max(maxRadius + combo.padding, combo.collapsedRadius);
   }
 
   private updateComboRadius(id: string) {
@@ -795,8 +788,10 @@ export class GraphData {
 
     const radius = this.calculateComboRadius(combo);
 
-    combo.radius = radius;
     combo.expandedRadius = radius;
+    if (!combo.collapsed) {
+      combo.radius = radius;
+    }
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
@@ -805,6 +800,17 @@ export class GraphData {
       id: id,
       edgeIds,
     });
+
+    const cb = this.innerCallback.get(id);
+    if (cb != null) {
+      cb({
+        type: "child-moved",
+      });
+    }
+
+    if (combo.parent != null) {
+      this.updateComboRadius(combo.parent.id);
+    }
   }
 
   public comboDragMove(id: string, e: Konva.KonvaEventObject<DragEvent>) {
