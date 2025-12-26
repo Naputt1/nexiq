@@ -36,7 +36,13 @@ describe("analyser snapshots", () => {
       const snapshotData = JSON.parse(fs.readFileSync(snapshotPath, "utf-8"));
 
       // Compare the result with the stored snapshot
-      expect(JSON.parse(JSON.stringify(graph))).toEqual(snapshotData);
+      // We strip the absolute 'src' path as it changes between environments
+      const result = JSON.parse(JSON.stringify(graph));
+      delete result.src;
+      const expected = snapshotData;
+      delete expected.src;
+
+      expect(result).toEqual(expected);
     });
   });
 });
