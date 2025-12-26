@@ -1,14 +1,17 @@
 import { Arrow, Layer } from "react-konva";
 import Combo from "./combo";
 import {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useReducer,
+  useRef,
   useState,
   type JSX,
 } from "react";
-import DragableStage from "./dragableGraph";
+import DragableStage, { type DragableStageRef } from "./dragableGraph";
 import type {
   ComboGraphData,
   EdgeGraphData,
@@ -17,6 +20,10 @@ import type {
   NodeGraphData,
 } from "./hook";
 import type { Vector2d } from "konva/lib/types";
+
+export interface GraphRef {
+  focusItem: (id: string, scale?: number) => void;
+}
 
 type GraphProps = {
   graph: GraphData;
@@ -38,7 +45,8 @@ type GraphState = {
 
 const MemoizedArrow = memo(Arrow);
 
-const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
+const Graph = forwardRef<GraphRef, GraphProps>(({ graph, width, height }, ref) => {
+  const stageRef = useRef<DragableStageRef>(null);
   const [state, setState] = useState<GraphState>({
     x: 0,
     y: 0,
@@ -47,6 +55,15 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
       y: 1,
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    focusItem: (id: string, scale?: number) => {
+      const pos = graph.getAbsolutePosition(id);
+      if (pos) {
+        stageRef.current?.focusOn(pos.x, pos.y, scale);
+      }
+    },
+  }));
 
   const getComboElement = useCallback(
     (combo: ComboGraphData) => {
@@ -103,18 +120,6 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
             combos,
           };
         }
-        // case "combo-collapsed": {
-        //   const newCombos: Record<string, JSX.Element> = { ...state.combos };
-        //   const combo = graph.getCombo(action.id);
-        //   if (combo != null) {
-        //     newCombos[action.id] = getComboElement(combo);
-        //   }
-
-        //   return {
-        //     ...state,
-        //     combos: newCombos,
-        //   };
-        // }
         case "combo-drag-move": {
           const edges = { ...state.edges };
           for (const id of action.edgeIds) {
@@ -161,7 +166,6 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
 
   useEffect(() => {
     const id = graph.bind(dispatch);
-    // graph.layout();
 
     return () => {
       graph.unbind(id);
@@ -170,50 +174,16 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
 
   return (
     <DragableStage
+      ref={stageRef}
       width={width}
       height={height}
-      // onDragMove={(e) => {
-      //   const stage = e.target;
-      //   graph.setPosition(stage.x(), stage.y());
-      //   setState((s) => {
-      //     return {
-      //       ...s,
-      //       x: stage.x(),
-      //       y: stage.y(),
-      //     };
-      //   });
-      // }}
-      // onWheel={(e) => {
-      //   const scaleBy = 1.05;
-      //   const stage = e.target;
-
-      //   const oldScale = stage.scaleX();
-      //   const newScale =
-      //     e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-
-      //   // const stage = e.target;
-      //   graph.setScale(stage.scale().x);
-      //   stage.getAbsoluteScale();
-
-      //   console.log(stage.scale(), stage.getAbsoluteScale());
-      //   setState((s) => {
-      //     return {
-      //       ...s,
-      //       scale: {
-      //         x: newScale,
-      //         y: newScale,
-      //       },
-      //     };
-      //   });
-      // }}
-      // x={state.x}
-      // y={state.y}
-      // scale={state.scale}
     >
       <Layer>{...Object.values(dataMap?.edges)}</Layer>
       <Layer>{...Object.values(dataMap?.combos)}</Layer>
     </DragableStage>
   );
-};
+});
+
+Graph.displayName = "Graph";
 
 export default Graph;

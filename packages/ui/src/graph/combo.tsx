@@ -153,6 +153,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
                     window.ipcRenderer.invoke("open-vscode", node.fileName);
                   }
                 }}
+                color={node.color}
                 radius={node.radius}
                 label={node.label}
               />

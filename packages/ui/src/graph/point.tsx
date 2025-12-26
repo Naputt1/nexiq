@@ -18,7 +18,7 @@ const Point: React.FC<PointProps> = ({
   id,
   x,
   y,
-  color = "red",
+  color = "blue",
   radius = 10,
   onDragMove,
   onClick,

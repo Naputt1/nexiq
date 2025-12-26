@@ -299,75 +299,7 @@ export class GraphData {
           });
         },
         comboHover: () => {
-          const combo = this.getComboByID(id);
-          if (combo == null) return;
-
-          if (combo.isLayoutCalculated) return;
-
-          const nodes: Node[] = [];
-          const edges: Edge[] = [];
-
-          for (const n of Object.values(combo.child?.nodes ?? {})) {
-            nodes.push({
-              id: n.id,
-              x: (Math.random() - 0.5) * 20,
-              y: (Math.random() - 0.5) * 20,
-              radius: n.radius,
-            });
-          }
-
-          for (const c of Object.values(combo.child?.combos ?? {})) {
-            nodes.push({
-              id: c.id,
-              x: (Math.random() - 0.5) * 20,
-              y: (Math.random() - 0.5) * 20,
-              radius: c.radius,
-            });
-          }
-
-          for (const e of Object.values(combo.child?.edges ?? {})) {
-            edges.push({
-              id: e.id,
-              source: e.source,
-              target: e.target,
-            });
-          }
-
-          const layout = new ForceLayout(nodes, edges, {
-            repulsionStrength: 4000,
-            linkDistance: 300,
-            damping: 0.85,
-            gravity: 0.05,
-            timeStep: 0.02,
-            minNodeDistance: 10,
-            collisionStrength: 1,
-          });
-
-          layout.runSteps(2500);
-
-          for (const n of layout.nodes) {
-            const node: PointData | undefined =
-              combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
-            if (node == null) continue;
-
-            node.x = n.x;
-            node.y = n.y;
-          }
-
-          const edgeIds = new Set<string>();
-
-          for (const n of layout.nodes) {
-            const ids = this.getComboEdges(n.id);
-            for (const edgeId of ids) {
-              edgeIds.add(edgeId);
-            }
-          }
-
-          this.updateEdgePos(Array.from(edgeIds));
-
-          combo.expandedRadius = this.calculateComboRadius(combo);
-
-          combo.isLayoutCalculated = true;
+          this.calculateComboChildrenLayout(id);
         },
       };
 
@@ -375,6 +307,76 @@ export class GraphData {
     }, [id]);
 
     return { ...state };
+  }
+
+  private calculateComboChildrenLayout(id: string) {
+    const combo = this.getComboByID(id);
+    if (combo == null) return;
+    if (combo.isLayoutCalculated) return;
+
+    const nodes: Node[] = [];
+    const edges: Edge[] = [];
+
+    for (const n of Object.values(combo.child?.nodes ?? {})) {
+      nodes.push({
+        id: n.id,
+        x: (Math.random() - 0.5) * 20,
+        y: (Math.random() - 0.5) * 20,
+        radius: n.radius,
+      });
+    }
+
+    for (const c of Object.values(combo.child?.combos ?? {})) {
+      nodes.push({
+        id: c.id,
+        x: (Math.random() - 0.5) * 20,
+        y: (Math.random() - 0.5) * 20,
+        radius: c.radius,
+      });
+    }
+
+    for (const e of Object.values(combo.child?.edges ?? {})) {
+      edges.push({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+      });
+    }
+
+    const layout = new ForceLayout(nodes, edges, {
+      repulsionStrength: 4000,
+      linkDistance: 300,
+      damping: 0.85,
+      gravity: 0.05,
+      timeStep: 0.02,
+      minNodeDistance: 10,
+      collisionStrength: 1,
+    });
+
+    layout.runSteps(2500);
+
+    for (const n of layout.nodes) {
+      const node: PointData | undefined =
+        combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
+      if (node == null) continue;
+
+      node.x = n.x;
+      node.y = n.y;
+    }
+
+    const edgeIds = new Set<string>();
+
+    for (const n of layout.nodes) {
+      const ids = this.getComboEdges(n.id);
+      for (const edgeId of ids) {
+        edgeIds.add(edgeId);
+      }
+    }
+
+    this.updateEdgePos(Array.from(edgeIds));
+
+    combo.expandedRadius = this.calculateComboRadius(combo);
+    combo.isLayoutCalculated = true;
   }
 
   private getConnectorPoints = (
@@ -898,6 +900,41 @@ export class GraphData {
     }
   }
 
+  public getAbsolutePosition(id: string): { x: number; y: number } | undefined {
+    let item: NodeGraphData | ComboGraphData | undefined =
+      this.nodes.get(id) ?? this.combos.get(id);
+
+    if (!item) {
+      const parentId = this.comboChildMap.get(id);
+      if (parentId) {
+        const parent = this.getComboByID(parentId);
+        if (parent && parent.child) {
+          item = parent.child.nodes[id] ?? parent.child.combos[id];
+        }
+      }
+    }
+
+    if (!item) return undefined;
+
+    let x = item.x;
+    let y = item.y;
+    let currentId = id;
+
+    while (this.comboChildMap.has(currentId)) {
+      const parentId = this.comboChildMap.get(currentId)!;
+      const parent = this.getComboByID(parentId);
+      if (parent) {
+        x += parent.x;
+        y += parent.y;
+        currentId = parentId;
+      } else {
+        break;
+      }
+    }
+
+    return { x, y };
+  }
+
   public getNodes() {
     return Object.fromEntries(this.nodes);
   }
@@ -911,7 +948,12 @@ export class GraphData {
   }
 
   public updateCombo(combo: ComboGraphData) {
-    this.combos.set(combo.id, combo);
+    const target = this.getComboByID(combo.id);
+    if (target) {
+      Object.assign(target, combo);
+    } else {
+      this.combos.set(combo.id, combo);
+    }
 
     const cb = this.innerCallback.get(combo.id);
     if (cb == null) return;
@@ -919,6 +961,67 @@ export class GraphData {
     cb({
       type: "child-moved",
     });
+  }
+
+  public updateNode(node: NodeGraphData) {
+    const target = this.getPointId(node.id);
+    if (target) {
+      Object.assign(target, node);
+    } else {
+      this.nodes.set(node.id, node);
+    }
+    this.trigger({ type: "new-nodes" });
+  }
+
+  public getAllNodes(): NodeGraphData[] {
+    const all: NodeGraphData[] = [];
+    const collect = (nodes: Record<string, NodeGraphData>, combos: Record<string, ComboGraphData>) => {
+      for (const n of Object.values(nodes)) {
+        all.push(n);
+      }
+      for (const c of Object.values(combos)) {
+        if (c.child) {
+          collect(c.child.nodes, c.child.combos);
+        }
+      }
+    };
+    collect(Object.fromEntries(this.nodes), Object.fromEntries(this.combos));
+    return all;
+  }
+
+  public getAllCombos(): ComboGraphData[] {
+    const all: ComboGraphData[] = [];
+    const collect = (combos: Record<string, ComboGraphData>) => {
+      for (const c of Object.values(combos)) {
+        all.push(c);
+        if (c.child) {
+          collect(c.child.combos);
+        }
+      }
+    };
+    collect(Object.fromEntries(this.combos));
+    return all;
+  }
+
+  public expandAncestors(id: string) {
+    const parentId = this.comboChildMap.get(id);
+    if (!parentId) return;
+
+    const parent = this.getComboByID(parentId);
+    if (parent) {
+      if (parent.collapsed) {
+        parent.collapsed = false;
+        // Ensure child layout is calculated if it hasn't been before
+        this.calculateComboChildrenLayout(parentId);
+        
+        // Trigger update for the parent combo
+        const cb = this.innerCallback.get(parentId);
+        if (cb) {
+          cb({ type: "child-moved" }); // Triggers re-render of the combo
+        }
+      }
+      this.expandAncestors(parentId);
+    }
   }
 
   public getNode(id: string) {
