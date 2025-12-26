@@ -61,6 +61,15 @@ importers:
         specifier: ^4.0.16
         version: 4.0.16(@types/node@24.10.1)(@vitest/ui@4.0.16)(esbuild@0.25.12)(jiti@2.6.1)(terser@5.44.1)(tsx@4.20.6)
 
+  packages/sample-project/complex:
+    dependencies:
+      react:
+        specifier: ^19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.0(react@19.2.0)
+
   packages/sample-project/simple:
     dependencies:
       react:
