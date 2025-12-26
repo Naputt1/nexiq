@@ -26,7 +26,7 @@ export interface ComponentInfoRender extends ComponentLoc {
 
 export interface ComponentInfo {
   file: string;
-  type: "Function" | "Class";
+  componentType: "Function" | "Class";
   states: State[];
   hooks: string[];
   props: string[];
@@ -48,25 +48,49 @@ export interface ComponentLoc {
   loc: VariableLoc;
 }
 
-interface ComponentFileVarBase extends ComponentLoc {
-  id: string;
-  name: string;
-  isComponent: boolean;
-  dependencies: Record<string, ComponentFileVarDependency>;
-  var: Record<string, ComponentFileVar>;
+export interface VariableScope {
+  start: VariableLoc;
+  end: VariableLoc;
 }
 
-export interface ComponentFileVarComponent
-  extends ComponentFileVarBase,
-    ComponentInfo {
-  isComponent: true;
+interface ComponentFileVarBaseType {
+  type: "function" | "data";
+  scope?: VariableScope;
 }
 
-export interface ComponentFileVarNormal extends ComponentFileVarBase {
+export interface ComponentFileVarBaseTypeFunction
+  extends ComponentFileVarBaseType {
+  type: "function";
+  scope: VariableScope;
+}
+
+export interface ComponentFileVarBaseTypeData extends ComponentFileVarBaseType {
+  type: "data";
+}
+
+export type ComponentFileVarDependencyType =
+  | ComponentFileVarBaseTypeFunction
+  | ComponentFileVarBaseTypeData;
+
+export type ComponentFileVarBase = ComponentLoc &
+  ComponentFileVarDependencyType & {
+    id: string;
+    name: string;
+    isComponent: boolean;
+    dependencies: Record<string, ComponentFileVarDependency>;
+    var: Record<string, ComponentFileVar>;
+  };
+
+export type ComponentFileVarComponent = ComponentFileVarBase &
+  ComponentInfo & {
+    isComponent: true;
+  };
+
+export type ComponentFileVarNormal = ComponentFileVarBase & {
   isComponent: false;
   type: "function" | "data";
   components: Record<string, ComponentInfoRender>;
-}
+};
 
 export type ComponentFileVar =
   | ComponentFileVarComponent

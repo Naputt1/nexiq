@@ -3,6 +3,7 @@ import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentInfoRenderDependency } from "shared";
 import assert from "assert";
+import { fullDebug } from "../utils/debug.js";
 
 function getComponentLoc(
   nodePath: traverse.NodePath<t.JSXElement>,
@@ -47,28 +48,28 @@ function getComponentLoc(
               ) {
                 return `${parentStatement.parentPath.parentPath.parentPath.parent.id.loc?.start.line}@${parentStatement.parentPath.parentPath.parentPath.parent.id.loc?.start.column}`;
               } else {
-                debugger;
+                fullDebug();
               }
             } else if (
               parentStatement.parentPath.parentPath.parentPath?.type ===
               "JSXExpressionContainer"
             ) {
             } else {
-              debugger;
+              fullDebug();
             }
           } else {
-            debugger;
+            fullDebug();
           }
         } else {
-          debugger;
+          fullDebug();
         }
       } else {
-        debugger;
+        fullDebug();
       }
     } else if (parentStatement?.node.type == "ExpressionStatement") {
       //TODO: handle expression statement like ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
     } else {
-      debugger;
+      fullDebug();
     }
   }
 
@@ -85,7 +86,9 @@ function getComponentLoc(
       ) {
         compLoc = `${parentFunc.parentPath.parent.id.loc?.start.line}@${parentFunc.parentPath.parent.id.loc?.start.column}`;
       } else {
-        debugger;
+        if (process.env.ANALYSER_DEBUG) {
+          fullDebug();
+        }
       }
     } else if (
       parentFunc?.node.type === "FunctionDeclaration" &&
@@ -93,7 +96,7 @@ function getComponentLoc(
     ) {
       compLoc = `${parentFunc.node.id.loc.start.line}@${parentFunc.node.id.loc.start.column}`;
     } else {
-      debugger;
+      fullDebug();
     }
   }
 
@@ -109,10 +112,6 @@ export default function JSXElement(
     if (opening.type === "JSXIdentifier") {
       const tag = opening.name;
       const parentFunc = nodePath.getFunctionParent();
-
-      if (tag == "StatComponent") {
-        debugger;
-      }
 
       let compName = null;
       const compLoc = getComponentLoc(nodePath, fileName);

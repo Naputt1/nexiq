@@ -1,13 +1,14 @@
 import type {
   ComponentFileVarComponent,
   ComponentInfoRender,
+  VariableScope,
   State,
 } from "shared";
 import { Variable } from "./variable.js";
 
 export class ComponentVariable extends Variable {
   file: string;
-  type: "Function" | "Class";
+  componentType: ComponentFileVarComponent["componentType"];
   states: State[];
   hooks: string[];
   props: string[];
@@ -21,9 +22,10 @@ export class ComponentVariable extends Variable {
     loc,
     ...options
   }: Omit<ComponentFileVarComponent, "isComponent">) {
-    super(id, name, dependencies, true, loc);
+    const scope = options.type === "function" ? options.scope : undefined;
+    super(id, name, options.type, dependencies, true, loc, scope);
     this.file = options.file;
-    this.type = options.type;
+    this.componentType = options.componentType;
     this.states = options.states;
     this.hooks = options.hooks;
     this.props = options.props;
@@ -33,24 +35,15 @@ export class ComponentVariable extends Variable {
 
   public getData(): ComponentFileVarComponent {
     return {
-      id: this.id,
-      name: this.name,
+      ...super.getBaseData(),
       isComponent: true,
-      dependencies: this.dependencies,
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ])
-      ),
       file: this.file,
-      type: this.type,
+      componentType: this.componentType,
       states: this.states,
       hooks: this.hooks,
       props: this.props,
       contexts: this.contexts,
       renders: this.renders,
-      loc: this.loc,
     };
   }
 }

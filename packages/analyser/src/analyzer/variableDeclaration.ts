@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentFileVarDependency, State } from "shared";
-import { containsJSX, returnJSX } from "../utils.js";
+import { returnJSX } from "../utils.js";
 import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
 
@@ -28,8 +28,6 @@ function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
 
     path = path.scope.parent.path;
   }
-
-  // debugger;
 
   return parentPath;
 }
@@ -78,6 +76,17 @@ export default function VariableDeclarator(
       column: nodePath.node.id.loc.start.column,
     };
 
+    const scope = {
+      start: {
+        line: nodePath.node.id.loc.start.line,
+        column: nodePath.node.id.loc.start.column,
+      },
+      end: {
+        line: nodePath.node.id.loc.end.line,
+        column: nodePath.node.id.loc.end.column,
+      },
+    };
+
     if (t.isCallExpression(init)) {
       const firstArg = init.arguments[0];
       const firstArgPath = nodePath.get("init").get("arguments")[0];
@@ -88,19 +97,25 @@ export default function VariableDeclarator(
         returnJSX(firstArgPath.node)
       ) {
         if (id.type == "Identifier") {
-          componentDB.addComponent({
-            name: id.name,
-            file: fileName,
-            type: "Function",
-            states: [],
-            hooks: [],
-            props: [],
-            contexts: [],
-            renders: {},
-            dependencies: {},
-            var: {},
-            loc,
-          });
+          const parentPath = getParentPath(nodePath);
+          componentDB.addComponent(
+            {
+              name: id.name,
+              file: fileName,
+              type: "function",
+              componentType: "Function",
+              states: [],
+              hooks: [],
+              props: [],
+              contexts: [],
+              renders: {},
+              dependencies: {},
+              var: {},
+              loc,
+              scope,
+            },
+            parentPath
+          );
           return;
         }
       } else if (
@@ -153,27 +168,36 @@ export default function VariableDeclarator(
 
     const name = id.name;
 
+    if (name === "uploadButton") debugger;
+
     if (
-      !(
-        !init ||
-        (init.type !== "ArrowFunctionExpression" &&
-          init.type !== "FunctionExpression")
-      ) &&
-      returnJSX(init)
+      init &&
+      (init.type === "JSXElement" ||
+        (!(
+          init.type !== "ArrowFunctionExpression" &&
+          init.type !== "FunctionExpression"
+        ) &&
+          returnJSX(init)))
     ) {
-      componentDB.addComponent({
-        name,
-        file: fileName,
-        type: "Function",
-        states: [],
-        hooks: [],
-        props: [],
-        contexts: [],
-        renders: {},
-        dependencies: {},
-        var: {},
-        loc,
-      });
+      const parentPath = getParentPath(nodePath);
+      componentDB.addComponent(
+        {
+          name,
+          file: fileName,
+          type: "function",
+          componentType: "Function",
+          states: [],
+          hooks: [],
+          props: [],
+          contexts: [],
+          renders: {},
+          dependencies: {},
+          var: {},
+          loc,
+          scope,
+        },
+        parentPath
+      );
     } else {
       if (nodePath.scope.block.type === "Program") {
         const dependencies: Record<string, ComponentFileVarDependency> = {};
@@ -193,17 +217,13 @@ export default function VariableDeclarator(
           };
         }
 
-        if (name === "AppRouters") {
-          debugger;
-        }
-
         componentDB.addVariable(fileName, {
           name,
-          dependencies,
           type: "data",
+          dependencies,
           loc,
         });
-      } else {
+      } else if (init?.type === "ArrowFunctionExpression") {
         if (
           nodePath.scope.block.type === "FunctionDeclaration" &&
           nodePath.scope.block.id?.type === "Identifier"
@@ -221,10 +241,6 @@ export default function VariableDeclarator(
             parentPath
           );
         } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
-          if (name === "AppRouters") {
-            debugger;
-          }
-
           const parentPath = getParentPath(nodePath);
           componentDB.addVariable(
             fileName,
@@ -233,6 +249,7 @@ export default function VariableDeclarator(
               dependencies: {},
               type: "function",
               loc,
+              scope,
             },
             parentPath
           );

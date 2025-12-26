@@ -27,8 +27,6 @@ function getParentPath(nodePath: traverse.NodePath<t.Node>) {
     path = path.scope.parent.path;
   }
 
-  // debugger;
-
   return parentPath;
 }
 export default function FunctionDeclaration(
@@ -40,13 +38,20 @@ export default function FunctionDeclaration(
     if (!name) return;
     assert(nodePath.node.id?.loc?.start != null);
 
-    if (name === "App") {
-      debugger;
-    }
-
     const loc = {
       line: nodePath.node.id.loc.start.line,
       column: nodePath.node.id.loc.start.column,
+    };
+
+    const scope = {
+      start: {
+        line: nodePath.node.id.loc.start.line,
+        column: nodePath.node.id.loc.start.column,
+      },
+      end: {
+        line: nodePath.node.id.loc.end.line,
+        column: nodePath.node.id.loc.end.column,
+      },
     };
 
     if (isHook(name)) {
@@ -69,7 +74,8 @@ export default function FunctionDeclaration(
         componentDB.addComponent({
           name,
           file: fileName,
-          type: "Function",
+          type: "function",
+          componentType: "Function",
           states: [],
           hooks: [],
           props: [],
@@ -78,6 +84,7 @@ export default function FunctionDeclaration(
           dependencies: {},
           var: {},
           loc,
+          scope,
         });
         return;
       }
@@ -87,6 +94,7 @@ export default function FunctionDeclaration(
         dependencies: {},
         type: "function",
         loc,
+        scope,
       });
     } else {
       // if (
@@ -102,10 +110,6 @@ export default function FunctionDeclaration(
       ) {
         const parentPath = getParentPath(nodePath.scope.parent.path);
 
-        if (name === "AppRouters") {
-          debugger;
-        }
-
         componentDB.addVariable(
           fileName,
           {
@@ -113,6 +117,7 @@ export default function FunctionDeclaration(
             dependencies: {},
             type: "function",
             loc,
+            scope,
           },
           parentPath
         );

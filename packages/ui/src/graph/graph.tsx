@@ -63,7 +63,7 @@ const Graph: React.FC<GraphProps> = ({ graph, width, height }) => {
           id={edge.id}
           points={edge.points}
           stroke={"white"}
-          strokeWidth={1}
+          strokeWidth={0.5}
           lineJoin="round"
           perfectDrawEnabled={false}
         />

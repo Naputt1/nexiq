@@ -12,24 +12,16 @@ export class DataVariable extends Variable {
     loc,
     ...options
   }: Omit<ComponentFileVarNormal, "isComponent" | "var" | "components">) {
-    super(id, name, dependencies, false, loc);
+    const scope = options.type === "function" ? options.scope : undefined;
+    super(id, name, options.type, dependencies, false, loc, scope);
     this.type = options.type;
     this.components = new Map();
   }
 
   public getData(): ComponentFileVarNormal {
     return {
-      id: this.id,
-      name: this.name,
+      ...super.getBaseData(),
       isComponent: false,
-      dependencies: this.dependencies,
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ])
-      ),
-      type: this.type,
       loc: this.loc,
       components: Object.fromEntries(this.components),
     };

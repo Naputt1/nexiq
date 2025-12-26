@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { JsonData } from "shared";
+import type { ComponentFile, ComponentFileVar, JsonData } from "shared";
 import useGraph, {
   type ComboData,
   type EdgeData,
@@ -20,6 +20,8 @@ const CusKonvoTestHook = () => {
     combos: [],
   });
 
+  const [search, setSearch] = useState<string>("");
+
   const loadData = async () => {
     try {
       const res = await fetch("/public/graph.json");
@@ -28,48 +30,65 @@ const CusKonvoTestHook = () => {
 
       const combos: ComboData[] = [];
       const nodes: NodeData[] = [];
+
+      const addCombo = (
+        variable: ComponentFileVar,
+        file: ComponentFile,
+        parentID?: string
+      ) => {
+        if (!variable.isComponent) return;
+        const fileName = `${graphData.src}${file.path}`;
+
+        combos.push({
+          id: variable.id,
+          collapsed: true,
+          label: { text: variable.name, fill: "white" },
+          combo: parentID,
+          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+        });
+        combos.push({
+          id: `${variable.id}-render`,
+          collapsed: true,
+          label: { text: "render", fill: "white" },
+          combo: variable.id,
+          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+        });
+
+        for (const state of variable.states) {
+          nodes.push({
+            id: `${variable.id}-state-${state.value}`,
+            label: {
+              text: state.value,
+            },
+            // title: `${n.file}\nstate: ${state.value}`,
+            combo: variable.id,
+            fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
+          });
+        }
+
+        for (const render of Object.values(variable.renders)) {
+          if (variable.name == "uploadButton") {
+            console.log("render", render, `${variable.id}-render-${render.id}`);
+          }
+          nodes.push({
+            id: `${variable.id}-render-${render.id}`,
+            label: {
+              text: render.id,
+            },
+            // title: `${n.file}\nstate: ${state.value}`,
+            combo: `${variable.id}-render`,
+            fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+          });
+        }
+
+        for (const v of Object.values(variable.var)) {
+          addCombo(v, file, variable.id);
+        }
+      };
+
       for (const file of Object.values(graphData.files)) {
-        for (const n of Object.values(file.var)) {
-          if (!n.isComponent) continue;
-          const fileName = `${graphData.src}${file.path}`;
-
-          combos.push({
-            id: n.id,
-            collapsed: true,
-            label: { text: n.name, fill: "white" },
-            fileName: `${fileName}:${n.loc.line}:${n.loc.column}`,
-          });
-          combos.push({
-            id: `${n.id}-render`,
-            collapsed: true,
-            label: { text: "render", fill: "white" },
-            combo: n.id,
-            fileName: `${fileName}:${n.loc.line}:${n.loc.column}`,
-          });
-
-          for (const state of n.states) {
-            nodes.push({
-              id: `${n.id}-state-${state.value}`,
-              label: {
-                text: state.value,
-              },
-              // title: `${n.file}\nstate: ${state.value}`,
-              combo: n.id,
-              fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
-            });
-          }
-
-          for (const render of Object.values(n.renders)) {
-            nodes.push({
-              id: `${n.id}-render-${render}`,
-              label: {
-                text: render.id,
-              },
-              // title: `${n.file}\nstate: ${state.value}`,
-              combo: `${n.id}-render`,
-              fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
-            });
-          }
+        for (const variable of Object.values(file.var)) {
+          addCombo(variable, file);
         }
       }
 
@@ -115,8 +134,27 @@ const CusKonvoTestHook = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+
+    const combos = graph.getCombos();
+    for (const combo of Object.values(combos)) {
+      if (
+        e.target.value != "" &&
+        combo.label?.text.toLowerCase().includes(e.target.value)
+      ) {
+        combo.color = "red";
+        graph.updateCombo(combo);
+      } else if (combo.color == "red") {
+        combo.color = "blue";
+        graph.updateCombo(combo);
+      }
+    }
+  };
+
   return (
     <div className="w-full h-full" style={{ width: "100vw", height: "100vh" }}>
+      <input type="text" value={search} onChange={onSearch} />
       <Graph width={size.width} height={size.height} graph={graph} />
     </div>
   );

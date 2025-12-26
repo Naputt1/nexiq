@@ -429,8 +429,10 @@ export class GraphData {
     if (count != null && count == this.nodeToCreate.length) {
       console.error(
         "_addNodes failed to create",
+        count,
         this.nodeToCreate,
-        Object.fromEntries(this.combos)
+        Object.fromEntries(this.combos),
+        this.comboChildMap.get("44d171ea-4fbf-4cc4-ae67-218df1a1caf2-render")
       );
       return;
     }
@@ -524,8 +526,6 @@ export class GraphData {
       const srcNode = this.getPointId(e.source);
       const targetNode = this.getPointId(e.target);
 
-      console.log(Object.fromEntries(this.combos), e.source, e.target);
-
       if (srcNode == null || targetNode == null) {
         this.edgeToCreate.push(e);
         continue;
@@ -573,7 +573,7 @@ export class GraphData {
     if (this.comboChildMap.has(id)) {
       const parentId = this.comboChildMap.get(id);
       if (parentId != null) {
-        const parent = this.getTopParent(parentId);
+        const parent = this.getComboByID(parentId);
         if (parent != null) {
           return parent.child?.combos[id];
         }
@@ -673,7 +673,6 @@ export class GraphData {
 
     this.createEdges();
 
-    console.log(this.combos, this.comboToCreate);
     this.trigger({ type: "new-combos" });
   }
 
@@ -903,6 +902,17 @@ export class GraphData {
 
   public getCombos() {
     return Object.fromEntries(this.combos);
+  }
+
+  public updateCombo(combo: ComboGraphData) {
+    this.combos.set(combo.id, combo);
+
+    const cb = this.innerCallback.get(combo.id);
+    if (cb == null) return;
+
+    cb({
+      type: "child-moved",
+    });
   }
 
   public getNode(id: string) {

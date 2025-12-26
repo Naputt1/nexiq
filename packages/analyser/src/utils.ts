@@ -7,10 +7,17 @@ export function isHook(filePath: string) {
 
 export function returnJSX(nodePath: Node): boolean {
   if (
-    (nodePath.type != "FunctionDeclaration" &&
-      nodePath.type != "ArrowFunctionExpression") ||
-    nodePath.body.type != "BlockStatement"
+    nodePath.type != "FunctionDeclaration" &&
+    nodePath.type != "ArrowFunctionExpression"
   ) {
+    return false;
+  }
+
+  if (nodePath.body.type === "JSXElement") {
+    return true;
+  }
+
+  if (nodePath.body.type !== "BlockStatement") {
     return false;
   }
 

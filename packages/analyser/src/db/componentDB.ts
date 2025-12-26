@@ -82,7 +82,8 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<ComponentFileVarComponent, "id" | "isComponent">
+    component: Omit<ComponentFileVarComponent, "id" | "isComponent">,
+    parentPath?: string[]
   ) {
     const key = this.getFuncKey(component.name, component.file);
     if (this.keys.has(key)) {
@@ -99,7 +100,8 @@ export class ComponentDB {
       new ComponentVariable({
         id,
         ...component,
-      })
+      }),
+      parentPath
     );
   }
 
@@ -267,10 +269,6 @@ export class ComponentDB {
       return;
     }
 
-    if (tag == "BuisnessCardPage") {
-      debugger;
-    }
-
     this.files.addRender(
       fileName,
       comLoc,
@@ -304,10 +302,6 @@ export class ComponentDB {
   }
 
   private _resolveDependency(variable: Variable, parent?: string) {
-    if (variable.name == "LeaveForm") {
-      debugger;
-    }
-
     if (isComponentVariable(variable)) {
       for (const render of Object.values(variable.renders)) {
         if (render.isDependency) continue;
@@ -381,13 +375,6 @@ export class ComponentDB {
     this.isResolve = true;
     for (const resolve of this.resolveTasks) {
       if (resolve.type === "comAddRender") {
-        // if (resolve.name === "RouterHr") {
-        //   debugger;
-        // }
-
-        if (resolve.tag == "StatComponent") {
-          debugger;
-        }
         this.comAddRender(
           resolve.name,
           resolve.fileName,

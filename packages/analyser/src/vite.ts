@@ -78,6 +78,5 @@ export function getViteAliases(
     },
   });
 
-  console.log("Aliases:", aliases);
   return aliases;
 }

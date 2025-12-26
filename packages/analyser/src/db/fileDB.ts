@@ -8,6 +8,7 @@ import type {
   ComponentInfoRenderDependency,
   JsonData,
   VariableLoc,
+  VariableScope,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import type { ComponentVariable } from "./variable/component.js";
@@ -24,6 +25,8 @@ export class File {
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
   var: Map<string, Variable>;
+
+  scopes = new Set<Variable>();
 
   // key = loc.line + @ + loc.column val = variable
   private locIdsMap = new Map<string, Variable>();
@@ -133,6 +136,10 @@ export class File {
 
   public addVariable(variable: Variable, parentPath?: string[]) {
     this.locIdsMap.set(`${variable.loc.line}@${variable.loc.column}`, variable);
+
+    if (variable.type === "function") {
+      this.scopes.add(variable);
+    }
 
     if (parentPath == null || parentPath.length == 0) {
       this.var.set(variable.id, variable);
@@ -305,6 +312,23 @@ export class File {
     const id = this.ids.get(name);
     if (id != null) {
       return id.id;
+    }
+
+    return null;
+  }
+
+  public getScope(scope: VariableScope) {
+    for (const s of this.scopes) {
+      assert(s.type === "function", "Scope variable must be a function");
+
+      if (
+        s.scope?.start.line == scope.start.line &&
+        s.scope?.start.column == scope.start.column &&
+        s.scope?.end.line == scope.end.line &&
+        s.scope?.end.column == scope.end.column
+      ) {
+        return s;
+      }
     }
 
     return null;
