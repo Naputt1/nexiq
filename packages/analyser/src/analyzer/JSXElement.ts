@@ -155,7 +155,7 @@ export default function JSXElement(
       // let id = componentIds.get(key);
 
       // if (id == null) {
-      //   id = crypto.randomUUID();
+      //   id = newUUID();
       //   componentIds.set(key, id);
       // }
 

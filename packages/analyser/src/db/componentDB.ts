@@ -21,6 +21,7 @@ import { ComponentVariable } from "./variable/component.js";
 import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
 import { isComponentVariable, isDataVariable } from "./variable/type.js";
+import { newUUID } from "../utils/uuid.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -36,6 +37,7 @@ type IResolveAddHook = {
   name: string;
   fileName: string;
   hook: string;
+  loc: VariableLoc;
 };
 
 type ComponentDBResolve = IResolveAddRender | IResolveAddHook;
@@ -82,7 +84,10 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<ComponentFileVarComponent, "id" | "isComponent">,
+    component: Omit<
+      ComponentFileVarComponent,
+      "id" | "isComponent" | "isHook"
+    > & { isHook?: boolean },
     parentPath?: string[]
   ) {
     const key = this.getFuncKey(component.name, component.file);
@@ -91,14 +96,14 @@ export class ComponentDB {
       return;
     }
 
-    const id = this.files.getComId(component.file, component.name);
+    // const id = this.files.getComId(component.file, component.name);
 
-    this.ids.set(key, id);
+    // this.ids.set(key, id);
 
     this.files.addVariable(
       component.file,
       new ComponentVariable({
-        id,
+        id: newUUID(),
         ...component,
       }),
       parentPath
@@ -116,7 +121,7 @@ export class ComponentDB {
     this.files.addVariable(
       filename,
       new DataVariable({
-        id: crypto.randomUUID(),
+        id: newUUID(),
         ...variable,
       }),
       parentPath
@@ -129,7 +134,7 @@ export class ComponentDB {
     variable: Omit<ComponentFileVarDependency, "id">
   ) {
     this.files.addVariableDependency(filename, parent, {
-      id: crypto.randomUUID(),
+      id: newUUID(),
       ...variable,
     });
   }
@@ -145,9 +150,8 @@ export class ComponentDB {
 
     const id =
       hookImport?.type === "default"
-        ? this.ids.get(this.getFuncKey("default", hook.file)) ??
-          crypto.randomUUID()
-        : crypto.randomUUID();
+        ? this.ids.get(this.getFuncKey("default", hook.file)) ?? newUUID()
+        : newUUID();
 
     this.ids.set(key, id);
 
@@ -157,24 +161,38 @@ export class ComponentDB {
     });
   }
 
-  public comAddState(name: string, fileName: string, state: State) {
-    const key = this.getFuncKey(name, fileName);
-    const id = this.ids.get(key);
-    if (id == null) {
-      return;
-      debugger;
-    }
-    assert(id != null, "Component not found");
+  public comAddState(
+    name: string,
+    loc: VariableLoc,
+    fileName: string,
+    state: State
+  ) {
+    let component: HookInfo | undefined;
+    if (isHook(name)) {
+      const key = this.getFuncKey(name, fileName);
+      const id = this.ids.get(key);
+      if (id == null) {
+        debugger;
+        return;
+      }
+      assert(id != null, "Component not found");
 
-    const component = isHook(name)
-      ? this.hooks.get(id)
-      : this.files.getComponent(fileName, id);
+      component = this.hooks.get(id);
+    } else {
+      component = this.files.getComponentFromLoc(fileName, loc);
+    }
+
     assert(component != null, "Component not found");
 
     component.states.push(state);
   }
 
-  public comAddHook(name: string, fileName: string, hook: string) {
+  public comAddHook(
+    name: string,
+    loc: VariableLoc,
+    fileName: string,
+    hook: string
+  ) {
     // ignore build-in hooks
     const hookImport = this.files.getImport(fileName, hook);
     if (hookImport) {
@@ -186,26 +204,38 @@ export class ComponentDB {
       return;
     }
 
-    const key = this.getFuncKey(name, fileName);
-    const id = this.ids.get(key);
-    if (id == null) {
-      debugger;
-    }
-    assert(id != null, "Component not found");
+    const component = this.files.getComponentFromLoc(fileName, loc);
 
-    const component = this.files.getComponent(fileName, id);
+    if (component == null) debugger;
     assert(component != null, "Component not found");
 
-    const srcId = this.ids.get(
-      this.getFuncKey(hookImport.localName, hookImport.source)
-    );
+    let srcId: string | undefined;
+    if (this.isDependency(hookImport.source)) {
+      srcId = hookImport.localName;
+    } else {
+      if (this.files.has(hookImport.source)) {
+        const file = this.files.get(hookImport.source);
+        assert(file != null, "File not found");
+
+        srcId = file.getExport(hookImport);
+
+        if (this.isResolve && srcId == null) {
+          debugger;
+        }
+      }
+    }
 
     if (srcId == null) {
+      if (this.isResolve) {
+        debugger;
+      }
+
       this.addResolveTask({
         type: "comAddHook",
         name,
         fileName,
         hook,
+        loc,
       });
       return;
     }
@@ -246,11 +276,16 @@ export class ComponentDB {
     if (isDependency) {
       srcId = comImport.localName;
     } else {
-      const srcKey = this.getFuncKey(
-        comImport.type == "default" ? "default" : comImport.localName,
-        comImport.source
-      );
-      srcId = this.ids.get(srcKey);
+      if (this.files.has(comImport.source)) {
+        const file = this.files.get(comImport.source);
+        assert(file != null, "File not found");
+
+        srcId = file.getExport(comImport);
+
+        if (srcId == null && this.isResolve) {
+          debugger;
+        }
+      }
     }
 
     if (srcId == null) {
@@ -291,14 +326,14 @@ export class ComponentDB {
     fileName: string,
     fileExport: Omit<ComponentFileExport, "id">
   ) {
+    const id = this.files.addExport(fileName, fileExport);
+
     const key = this.getFuncKey(fileExport.name, fileName);
-    const id = this.ids.get(key) ?? crypto.randomUUID();
+    this.ids.set(key, id);
 
     if (fileExport.type === "default") {
       this.ids.set(this.getFuncKey("default", fileName), id);
     }
-
-    this.files.addExport(fileName, { id, ...fileExport });
   }
 
   private _resolveDependency(variable: Variable, parent?: string) {
@@ -383,7 +418,12 @@ export class ComponentDB {
           resolve.loc
         );
       } else if (resolve.type === "comAddHook") {
-        this.comAddHook(resolve.name, resolve.fileName, resolve.hook);
+        this.comAddHook(
+          resolve.name,
+          resolve.loc,
+          resolve.fileName,
+          resolve.hook
+        );
       }
     }
     this.isResolve = false;

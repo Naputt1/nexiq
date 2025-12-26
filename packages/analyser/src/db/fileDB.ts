@@ -13,6 +13,7 @@ import type {
 import type { Variable } from "./variable/variable.js";
 import type { ComponentVariable } from "./variable/component.js";
 import { isComponentVariable, isDataVariable } from "./variable/type.js";
+import { newUUID } from "../utils/uuid.js";
 
 interface FileIds {
   id: string;
@@ -52,11 +53,25 @@ export class File {
     };
   }
 
-  public addExport(exportData: ComponentFileExport) {
-    this.export[exportData.name] = exportData;
+  private getVarID(name: string): string | null {
+    for (const [id, variable] of this.var) {
+      if (variable.name === name) {
+        return id;
+      }
+    }
+
+    return null;
+  }
+
+  public addExport(exportData: Omit<ComponentFileExport, "id">) {
+    const id = this.getVarID(exportData.name) ?? newUUID();
+
+    this.export[exportData.name] = { ...exportData, id };
     if (exportData.type === "default") {
       this.defaultExport = exportData.name;
     }
+
+    return id;
   }
 
   private getParentId(parentPath: string[]): FileIds | undefined {
@@ -134,7 +149,33 @@ export class File {
     return undefined;
   }
 
-  public addVariable(variable: Variable, parentPath?: string[]) {
+  public getExport(varImport: ComponentFileImport): string | undefined {
+    if (varImport.type === "default") {
+      if (this.defaultExport != null) {
+        return this.export[this.defaultExport]?.id;
+      }
+    }
+
+    for (const ex of Object.values(this.export)) {
+      if (ex.name === varImport.localName) {
+        return ex.id;
+      }
+    }
+
+    return undefined;
+  }
+
+  private getNewVarID(name: string): string {
+    for (const ex of Object.values(this.export)) {
+      if (ex.name === name) {
+        return ex.id;
+      }
+    }
+
+    return newUUID();
+  }
+
+  public addVariable(variable: Variable, parentPath?: string[]): string {
     this.locIdsMap.set(`${variable.loc.line}@${variable.loc.column}`, variable);
 
     if (variable.type === "function") {
@@ -142,25 +183,30 @@ export class File {
     }
 
     if (parentPath == null || parentPath.length == 0) {
-      this.var.set(variable.id, variable);
+      const id = this.getNewVarID(variable.name);
+      variable.id = id;
+
+      this.var.set(id, variable);
       this.ids.set(variable.name, {
-        id: variable.id,
+        id: id,
         var: new Map(),
       });
+
+      return id;
     } else {
       const parentId = this.getParentId(parentPath);
       // const parentId = this.ids.get(parentPath);
       if (parentId == null) {
         debugger;
         //TODO: handle parent not found
-        return;
+        return "no parent";
       }
 
       const parent = this.getParent(parentPath);
       if (parent == null) {
         debugger;
         //TODO: handle parent not found
-        return;
+        return "no parent";
       }
 
       parent.var.set(variable.id, variable);
@@ -169,7 +215,13 @@ export class File {
         id: variable.id,
         var: new Map(),
       });
+
+      return variable.id;
     }
+  }
+
+  public getVariable(loc: VariableLoc): Variable | undefined {
+    return this.locIdsMap.get(`${loc.line}@${loc.column}`);
   }
 
   private getTopParent(id: string): Variable | undefined {
@@ -389,6 +441,10 @@ export class FileDB {
     file.addImport(fileImport);
   }
 
+  public has(fileName: string) {
+    return this.files.has(fileName);
+  }
+
   public get(fileName: string) {
     const file = this.files.get(fileName);
     assert(file != null, "File not found");
@@ -404,10 +460,10 @@ export class FileDB {
     const file = this.get(fileName);
 
     if (file.export.hasOwnProperty(localName)) {
-      return file.export[localName]?.id ?? crypto.randomUUID();
+      return file.export[localName]?.id ?? newUUID();
     }
 
-    return crypto.randomUUID();
+    return newUUID();
   }
 
   public getData(): JsonData["files"] {
@@ -419,10 +475,13 @@ export class FileDB {
     );
   }
 
-  public addExport(fileName: string, exportData: ComponentFileExport) {
+  public addExport(
+    fileName: string,
+    exportData: Omit<ComponentFileExport, "id">
+  ) {
     const file = this.get(fileName);
 
-    file.addExport(exportData);
+    return file.addExport(exportData);
   }
 
   public getDefaultExport(fileName: string) {
@@ -437,7 +496,7 @@ export class FileDB {
   ) {
     const file = this.get(fileName);
 
-    file.addVariable(variable, parentPath);
+    return file.addVariable(variable, parentPath);
   }
 
   public getComponent(
@@ -449,6 +508,19 @@ export class FileDB {
     if (variable && isComponentVariable(variable)) {
       return variable;
     }
+    return undefined;
+  }
+
+  public getComponentFromLoc(
+    fileName: string,
+    loc: VariableLoc
+  ): ComponentVariable | undefined {
+    const file = this.get(fileName);
+    const variable = file.getVariable(loc);
+    if (variable && isComponentVariable(variable)) {
+      return variable;
+    }
+
     return undefined;
   }
 

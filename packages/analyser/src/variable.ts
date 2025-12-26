@@ -1,9 +1,16 @@
 import type { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
+import { assert } from "console";
+import type { VariableLoc } from "shared";
+
+interface VariableComponentName {
+  name: string;
+  loc: VariableLoc;
+}
 
 export function getVariableComponentName(
   path: NodePath<t.VariableDeclarator>
-): string | null {
+): VariableComponentName | null {
   const compPath = path.findParent(
     (p) =>
       p.isFunctionDeclaration() ||
@@ -15,12 +22,38 @@ export function getVariableComponentName(
 
   if (compPath) {
     if (compPath.isFunctionDeclaration() && compPath.node.id) {
-      return compPath.node.id.name;
+      const start = compPath.node.id.loc?.start;
+
+      if (start == null) {
+        return null;
+      }
+      assert(start != null);
+
+      return {
+        name: compPath.node.id.name,
+        loc: {
+          line: start.line,
+          column: start.column,
+        },
+      };
     } else if (
       compPath.isVariableDeclarator() &&
       t.isIdentifier(compPath.node.id)
     ) {
-      return compPath.node.id.name;
+      const start = compPath.node.id.loc?.start;
+
+      if (start == null) {
+        return null;
+      }
+      assert(start != null);
+
+      return {
+        name: compPath.node.id.name,
+        loc: {
+          line: start.line,
+          column: start.column,
+        },
+      };
     }
   }
 

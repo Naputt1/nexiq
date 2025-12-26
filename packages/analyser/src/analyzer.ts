@@ -3,10 +3,18 @@ import path from "path";
 import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
+import minimist from "minimist";
+import { setRandomSeed } from "./utils/uuid.js";
 
-const SRC_DIR = process.argv[2] || "./sample-src";
-const OUT_FILE = process.argv[3] || "./out/graph.json";
-const PUBLIC_FILE = process.argv[4] || "./ui/public/graph.json";
+const args = minimist(process.argv.slice(2));
+
+const SRC_DIR = args._[0] || "./sample-src";
+const OUT_FILE = args._[1] || "./out/graph.json";
+const PUBLIC_FILE = args._[2] || "./ui/public/graph.json";
+
+if (args.seed) {
+  setRandomSeed(args.seed);
+}
 
 function main() {
   const packageJson = new PackageJson(SRC_DIR);

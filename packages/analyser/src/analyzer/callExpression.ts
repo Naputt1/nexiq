@@ -2,6 +2,8 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { isHook } from "../utils.js";
+import type { VariableLoc } from "shared";
+import assert from "assert";
 
 export default function CallExpression(
   componentDB: ComponentDB,
@@ -14,8 +16,16 @@ export default function CallExpression(
     const fn = callee.name;
     const parentFunc = nodePath.getFunctionParent();
     let compName: string | undefined;
+    let loc: VariableLoc | undefined;
     if (parentFunc?.node.type === "FunctionDeclaration") {
+      const start = parentFunc.node.id?.loc?.start;
+      assert(start != null);
+
       compName = parentFunc.node.id?.name;
+      loc = {
+        line: start.line,
+        column: start.column,
+      };
     } else if (
       parentFunc?.node.type === "ArrowFunctionExpression" ||
       parentFunc?.node.type === "FunctionExpression"
@@ -23,10 +33,20 @@ export default function CallExpression(
       const bindingPath = parentFunc.parentPath;
       if (bindingPath.isVariableDeclarator()) {
         if (bindingPath.node.id.type === "Identifier") {
+          const start = bindingPath.node.id?.loc?.start;
+          assert(start != null);
+
           compName = bindingPath.node.id.name;
+          loc = {
+            line: start.line,
+            column: start.column,
+          };
         }
       } else if (bindingPath.isAssignmentExpression()) {
         if (bindingPath.node.left.type === "Identifier") {
+          // const start = bindingPath.node.left.name?.loc?.start;
+          // assert(start != null);
+
           compName = bindingPath.node.left.name;
         }
       }
@@ -42,8 +62,12 @@ export default function CallExpression(
     //   components[compName].contexts.push(fn);
     // }
 
-    if (compName && isHook(fn) && fn === "useWindowDimensions") {
-      componentDB.comAddHook(compName, fileName, fn);
+    // if (fn === "useEffect" || fn === "useLayoutEffect") {
+    //   debugger;
+    // }
+
+    if (compName && loc && isHook(fn)) {
+      componentDB.comAddHook(compName, loc, fileName, fn);
     }
   };
 }

@@ -84,6 +84,7 @@ export type ComponentFileVarBase = ComponentLoc &
 export type ComponentFileVarComponent = ComponentFileVarBase &
   ComponentInfo & {
     isComponent: true;
+    isHook: boolean;
   };
 
 export type ComponentFileVarNormal = ComponentFileVarBase & {

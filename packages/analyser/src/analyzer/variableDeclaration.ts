@@ -2,9 +2,10 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentFileVarDependency, State } from "shared";
-import { returnJSX } from "../utils.js";
+import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
+import { newUUID } from "../utils/uuid.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -157,7 +158,7 @@ export default function VariableDeclarator(
             const name = getVariableComponentName(nodePath);
 
             if (name) {
-              componentDB.comAddState(name, fileName, state);
+              componentDB.comAddState(name.name, name.loc, fileName, state);
             }
           }
         }
@@ -167,8 +168,6 @@ export default function VariableDeclarator(
     if (id.type !== "Identifier") return;
 
     const name = id.name;
-
-    if (name === "uploadButton") debugger;
 
     if (
       init &&
@@ -200,17 +199,60 @@ export default function VariableDeclarator(
       );
     } else {
       if (nodePath.scope.block.type === "Program") {
+        if (init?.type === "ArrowFunctionExpression") {
+          assert(init.body.loc != null, "Function body loc not found");
+
+          const scope = {
+            start: {
+              line: init.body.loc.start.line,
+              column: init.body.loc.start.column,
+            },
+            end: {
+              line: init.body.loc.end.line,
+              column: init.body.loc.end.column,
+            },
+          };
+
+          if (isHook(name)) {
+            componentDB.addComponent({
+              name,
+              file: fileName,
+              type: "function",
+              dependencies: {},
+              isHook: true,
+              loc,
+              scope,
+              var: {},
+              componentType: "Function",
+              hooks: [],
+              states: [],
+              props: [],
+              contexts: [],
+              renders: {},
+            });
+          } else {
+            componentDB.addVariable(fileName, {
+              name,
+              type: "function",
+              dependencies: {},
+              loc,
+              scope,
+            });
+          }
+          return;
+        }
+
         const dependencies: Record<string, ComponentFileVarDependency> = {};
         if (init?.type === "NewExpression") {
           if (init.callee.type === "Identifier") {
-            const id = crypto.randomUUID();
+            const id = newUUID();
             dependencies[id] = {
               id,
               name: init.callee.name,
             };
           }
         } else if (init?.type === "Identifier") {
-          const id = crypto.randomUUID();
+          const id = newUUID();
           dependencies[id] = {
             id,
             name: init.name,

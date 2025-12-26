@@ -24,7 +24,9 @@
       "args": [
         "./packages/sample-project/simple",
         "./out/graph.json",
-        "./packages/ui/public/graph.json"
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "test"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -39,7 +41,9 @@
       "args": [
         "../maemoo-minibus",
         "./out/graph.json",
-         "./packages/ui/public/graph.json"
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "test"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -54,7 +58,9 @@
       "args": [
         "../sysits-hr-2024/web",
         "./out/graph.json",
-         "./packages/ui/public/graph.json"
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "test"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -69,7 +75,9 @@
       "args": [
         "../mastodon",
         "./out/graph.json",
-         "./packages/ui/public/graph.json"
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "test"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
