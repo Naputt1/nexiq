@@ -67,18 +67,21 @@ const CusKonvoTestHook = () => {
         }
 
         for (const render of Object.values(variable.renders)) {
-          if (variable.name == "uploadButton") {
-            console.log("render", render, `${variable.id}-render-${render.id}`);
+          for (const file of Object.values(graphData.files)) {
+            if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
+              const v = file.var[render.id];
+              nodes.push({
+                id: `${variable.id}-render-${render.id}`,
+                label: {
+                  text: v.name,
+                },
+                // title: `${n.file}\nstate: ${state.value}`,
+                combo: `${variable.id}-render`,
+                fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+              });
+              break;
+            }
           }
-          nodes.push({
-            id: `${variable.id}-render-${render.id}`,
-            label: {
-              text: render.id,
-            },
-            // title: `${n.file}\nstate: ${state.value}`,
-            combo: `${variable.id}-render`,
-            fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
-          });
         }
 
         for (const v of Object.values(variable.var)) {

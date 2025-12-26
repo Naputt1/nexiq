@@ -57,10 +57,26 @@ export default function ExportNamedDeclaration(
       return;
     }
 
+    const source = nodePath.node.source?.value;
     for (const spec of nodePath.node.specifiers) {
       assert(spec.exported.type === "Identifier");
 
-      //TODO: handle export kind component
+      if (source) {
+        // It's a re-export
+        const importedName =
+          spec.type === "ExportSpecifier" && spec.local.type === "Identifier"
+            ? spec.local.name
+            : spec.exported.name;
+
+        componentDB.fileAddImport(fileName, {
+          localName: spec.exported.name,
+          importedName: importedName,
+          source: componentDB.getImportFileName(source, fileName),
+          type: "named",
+          importKind: "value",
+        });
+      }
+
       componentDB.fileAddExport(fileName, {
         name: spec.exported.name,
         type: "named",

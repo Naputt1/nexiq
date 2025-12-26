@@ -283,7 +283,7 @@ export class ComponentDB {
         srcId = file.getExport(comImport);
 
         if (srcId == null && this.isResolve) {
-          debugger;
+          // Resolve failed
         }
       }
     }
@@ -399,16 +399,20 @@ export class ComponentDB {
   }
 
   private addResolveTask(resolve: ComponentDBResolve) {
-    if (this.isResolve) {
-      debugger;
-      assert(!this.isResolve, "Resolve failed: comAddRender");
-    }
     this.resolveTasks.push(resolve);
   }
 
   public resolve() {
     this.isResolve = true;
-    for (const resolve of this.resolveTasks) {
+    let i = 0;
+    const maxRetries = this.resolveTasks.length * 2 + 10; // Basic heuristic
+    let retries = 0;
+
+    while (i < this.resolveTasks.length && retries < 1000) {
+      const resolve = this.resolveTasks[i]!;
+      i++;
+      const currentTaskCount = this.resolveTasks.length;
+      
       if (resolve.type === "comAddRender") {
         this.comAddRender(
           resolve.name,
@@ -425,7 +429,17 @@ export class ComponentDB {
           resolve.hook
         );
       }
+
+      if (this.resolveTasks.length > currentTaskCount) {
+        retries++;
+      }
     }
+
+    if (retries >= 1000) {
+      console.warn("Resolution interrupted: suspected infinite loop in ComponentDB.resolve");
+    }
+
+    this.resolveTasks = [];
     this.isResolve = false;
   }
 

@@ -26,7 +26,24 @@
         "./out/graph.json",
         "./packages/ui/public/graph.json",
         "--seed",
-        "test"
+        "analyser-test-seed"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "complex",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/complex",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "analyser-test-seed"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -43,7 +60,7 @@
         "./out/graph.json",
         "./packages/ui/public/graph.json",
         "--seed",
-        "test"
+        "analyser-test-seed"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -60,7 +77,7 @@
         "./out/graph.json",
         "./packages/ui/public/graph.json",
         "--seed",
-        "test"
+        "analyser-test-seed"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -77,7 +94,7 @@
         "./out/graph.json",
         "./packages/ui/public/graph.json",
         "--seed",
-        "test"
+        "analyser-test-seed"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

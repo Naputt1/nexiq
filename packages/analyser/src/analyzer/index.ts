@@ -9,6 +9,7 @@ import type { File } from "@babel/types";
 import ImportDeclaration from "./importDeclaration.js";
 import ExportNamedDeclaration from "./exportNamedDeclaration.js";
 import ExportDefaultDeclaration from "./exportDefaultDeclaration.js";
+import ExportAllDeclaration from "./exportAllDeclaration.js";
 import FunctionDeclaration from "./functionDeclaration.js";
 import VariableDeclarator from "./variableDeclaration.js";
 import JSXElement from "./JSXElement.js";
@@ -40,16 +41,13 @@ function analyzeFiles(
       continue;
     }
 
-    traverse.default(ast, {
+    const traverseFn: typeof traverse.default =
+      (traverse as any).default || traverse;
+    traverseFn(ast, {
       ImportDeclaration: ImportDeclaration(componentDB, fileName),
       ExportNamedDeclaration: ExportNamedDeclaration(componentDB, fileName),
 
-      // ExportAllDeclaration(nodePath) {
-      //   const source = componentDB.getImportFileName(
-      //     nodePath.node.source.value,
-      //     fileName
-      //   );
-      // },
+      ExportAllDeclaration: ExportAllDeclaration(componentDB, fileName),
 
       ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
       FunctionDeclaration: FunctionDeclaration(componentDB, fileName),

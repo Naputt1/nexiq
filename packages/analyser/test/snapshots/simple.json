@@ -1,0 +1,455 @@
+{
+  "src": "/Users/naputt/git/react-map/packages/sample-project/simple",
+  "files": {
+    "/eslint.config.js": {
+      "path": "/eslint.config.js",
+      "import": {
+        "js": {
+          "localName": "js",
+          "importedName": null,
+          "source": "@eslint/js",
+          "type": "default",
+          "importKind": "value"
+        },
+        "globals": {
+          "localName": "globals",
+          "importedName": null,
+          "source": "globals",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactHooks": {
+          "localName": "reactHooks",
+          "importedName": null,
+          "source": "eslint-plugin-react-hooks",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactRefresh": {
+          "localName": "reactRefresh",
+          "importedName": null,
+          "source": "eslint-plugin-react-refresh",
+          "type": "default",
+          "importKind": "value"
+        },
+        "tseslint": {
+          "localName": "tseslint",
+          "importedName": null,
+          "source": "typescript-eslint",
+          "type": "default",
+          "importKind": "value"
+        },
+        "defineConfig": {
+          "localName": "defineConfig",
+          "importedName": "defineConfig",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        },
+        "globalIgnores": {
+          "localName": "globalIgnores",
+          "importedName": "globalIgnores",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "value",
+          "id": "d7da7947-3db3-4ae0-835b-dac20d5ab23e"
+        }
+      },
+      "defaultExport": "anonymous",
+      "var": {}
+    },
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "App": {
+          "localName": "App",
+          "importedName": null,
+          "source": "/src/App.tsx",
+          "type": "default",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "defaultExport": null,
+      "var": {}
+    },
+    "/src/Child.tsx": {
+      "path": "/src/Child.tsx",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "Child": {
+          "name": "Child",
+          "type": "named",
+          "exportKind": "component",
+          "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d"
+        }
+      },
+      "defaultExport": null,
+      "var": {
+        "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
+          "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+          "name": "Child",
+          "isComponent": true,
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 3,
+            "column": 16
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 16
+            },
+            "end": {
+              "line": 3,
+              "column": 21
+            }
+          },
+          "file": "/src/Child.tsx",
+          "componentType": "Function",
+          "states": [],
+          "hooks": [],
+          "props": [],
+          "contexts": [],
+          "renders": {},
+          "isHook": false
+        }
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "import": {
+        "createContext": {
+          "localName": "createContext",
+          "importedName": "createContext",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "reactLogo": {
+          "localName": "reactLogo",
+          "importedName": null,
+          "source": "/src/assets/react.svg",
+          "type": "default",
+          "importKind": "value"
+        },
+        "viteLogo": {
+          "localName": "viteLogo",
+          "importedName": null,
+          "source": "/vite.svg",
+          "type": "default",
+          "importKind": "value"
+        },
+        "Child": {
+          "localName": "Child",
+          "importedName": "Child",
+          "source": "/src/Child.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "UserContext": {
+          "name": "UserContext",
+          "type": "named",
+          "exportKind": "value",
+          "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89"
+        },
+        "App": {
+          "name": "App",
+          "type": "default",
+          "exportKind": "value",
+          "id": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87"
+        }
+      },
+      "defaultExport": "App",
+      "var": {
+        "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
+          "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+          "name": "UserContext",
+          "isComponent": false,
+          "dependencies": {},
+          "var": {},
+          "type": "data",
+          "loc": {
+            "line": 7,
+            "column": 13
+          },
+          "components": {}
+        },
+        "71a5333c-fbc1-4ea1-9519-dce12e5b4a87": {
+          "id": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+          "name": "App",
+          "isComponent": true,
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 9,
+            "column": 9
+          },
+          "scope": {
+            "start": {
+              "line": 9,
+              "column": 9
+            },
+            "end": {
+              "line": 9,
+              "column": 12
+            }
+          },
+          "file": "/src/App.tsx",
+          "componentType": "Function",
+          "states": [
+            {
+              "value": "count",
+              "loc": {
+                "line": 10,
+                "column": 8
+              },
+              "setter": "setCount"
+            },
+            {
+              "value": "user",
+              "loc": {
+                "line": 11,
+                "column": 8
+              }
+            }
+          ],
+          "hooks": [],
+          "props": [],
+          "contexts": [],
+          "renders": {
+            "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
+              "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+              "dependencies": [
+                {
+                  "id": "user",
+                  "value": "user"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 36,
+                "column": 8
+              }
+            }
+          },
+          "isHook": false
+        }
+      }
+    },
+    "/src/export/var.tsx": {
+      "path": "/src/export/var.tsx",
+      "import": {},
+      "export": {
+        "Test": {
+          "name": "Test",
+          "type": "default",
+          "exportKind": "value",
+          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
+        }
+      },
+      "defaultExport": "Test",
+      "var": {
+        "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
+          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+          "name": "Test",
+          "isComponent": true,
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 1,
+            "column": 6
+          },
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 6
+            },
+            "end": {
+              "line": 1,
+              "column": 10
+            }
+          },
+          "file": "/src/export/var.tsx",
+          "componentType": "Function",
+          "states": [],
+          "hooks": [],
+          "props": [],
+          "contexts": [],
+          "renders": {},
+          "isHook": false
+        }
+      }
+    },
+    "/src/export/func.tsx": {
+      "path": "/src/export/func.tsx",
+      "import": {},
+      "export": {
+        "Test": {
+          "name": "Test",
+          "type": "default",
+          "exportKind": "component",
+          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+        }
+      },
+      "defaultExport": "Test",
+      "var": {
+        "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
+          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+          "name": "Test",
+          "isComponent": true,
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 1,
+            "column": 24
+          },
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 24
+            },
+            "end": {
+              "line": 1,
+              "column": 28
+            }
+          },
+          "file": "/src/export/func.tsx",
+          "componentType": "Function",
+          "states": [],
+          "hooks": [],
+          "props": [],
+          "contexts": [],
+          "renders": {},
+          "isHook": false
+        }
+      }
+    },
+    "/src/export/express.tsx": {
+      "path": "/src/export/express.tsx",
+      "import": {},
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "value",
+          "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83"
+        }
+      },
+      "defaultExport": "anonymous",
+      "var": {
+        "4b97fa8f-c781-4270-98cf-364a2c015862": {
+          "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+          "name": "Test",
+          "isComponent": false,
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 1,
+            "column": 9
+          },
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 9
+            },
+            "end": {
+              "line": 1,
+              "column": 13
+            }
+          },
+          "components": {}
+        }
+      }
+    },
+    "/src/export/arrow.tsx": {
+      "path": "/src/export/arrow.tsx",
+      "import": {},
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "component",
+          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
+        }
+      },
+      "defaultExport": "anonymous",
+      "var": {}
+    }
+  },
+  "edges": [
+    {
+      "from": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+      "to": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+      "label": "render"
+    }
+  ],
+  "ids": {
+    "anonymous@/eslint.config.js": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
+    "default@/eslint.config.js": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
+    "Child@/src/Child.tsx": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+    "UserContext@/src/App.tsx": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+    "App@/src/App.tsx": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+    "default@/src/App.tsx": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+    "Test@/src/export/var.tsx": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+    "default@/src/export/var.tsx": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+    "Test@/src/export/func.tsx": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+    "default@/src/export/func.tsx": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+    "anonymous@/src/export/express.tsx": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+    "default@/src/export/express.tsx": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+    "anonymous@/src/export/arrow.tsx": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
+    "default@/src/export/arrow.tsx": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
+  },
+  "keys": []
+}

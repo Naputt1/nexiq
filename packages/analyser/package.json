@@ -8,7 +8,7 @@
     "build": "tsc",
     "dev": "tsc || true && node dist/analyzer.js ./sample-project ./out/graph.json",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +27,9 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.10.1",
     "@types/seedrandom": "^3.0.8",
+    "@vitest/ui": "^4.0.16",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }

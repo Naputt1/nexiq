@@ -32,8 +32,6 @@ export default function ImportDeclaration(
           importedName = spec.imported.value;
         }
 
-        if (spec.local.name != importedName) debugger;
-
         componentDB.fileAddImport(fileName, {
           localName: spec.local.name,
           importedName,

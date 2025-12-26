@@ -39,8 +39,10 @@ export class PackageJson {
     const nameParts = name.split("/");
     if (nameParts.length === 1) {
       return (
-        Object.prototype.hasOwnProperty.call(this.data.dependencies, name) ||
-        Object.prototype.hasOwnProperty.call(this.data.devDependencies, name)
+        (this.data.dependencies &&
+          Object.prototype.hasOwnProperty.call(this.data.dependencies, name)) ||
+        (this.data.devDependencies &&
+          Object.prototype.hasOwnProperty.call(this.data.devDependencies, name))
       );
     }
 
@@ -48,8 +50,10 @@ export class PackageJson {
       const name = nameParts.slice(0, i + 1).join("/");
 
       if (
-        Object.prototype.hasOwnProperty.call(this.data.dependencies, name) ||
-        Object.prototype.hasOwnProperty.call(this.data.devDependencies, name)
+        (this.data.dependencies &&
+          Object.prototype.hasOwnProperty.call(this.data.dependencies, name)) ||
+        (this.data.devDependencies &&
+          Object.prototype.hasOwnProperty.call(this.data.devDependencies, name))
       ) {
         this.cache.add(name);
         return true;

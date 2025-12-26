@@ -157,7 +157,7 @@ export class File {
     }
 
     for (const ex of Object.values(this.export)) {
-      if (ex.name === varImport.localName) {
+      if (ex.name === varImport.importedName) {
         return ex.id;
       }
     }
