@@ -23,6 +23,9 @@ importers:
       '@babel/traverse':
         specifier: ^7.28.5
         version: 7.28.5
+      '@babel/types':
+        specifier: ^7.28.5
+        version: 7.28.5
       glob:
         specifier: ^11.0.3
         version: 11.0.3
