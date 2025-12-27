@@ -144,6 +144,4 @@ export type JsonData = {
   src: string;
   edges: DataEdge[];
   files: Record<string, ComponentFile>;
-  ids: Record<string, string>;
-  keys: string[];
 };

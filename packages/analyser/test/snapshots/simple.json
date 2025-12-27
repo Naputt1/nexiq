@@ -430,22 +430,5 @@
       "to": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
       "label": "render"
     }
-  ],
-  "ids": {
-    "anonymous@/eslint.config.js": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
-    "default@/eslint.config.js": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
-    "Child@/src/Child.tsx": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
-    "UserContext@/src/App.tsx": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
-    "App@/src/App.tsx": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
-    "default@/src/App.tsx": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
-    "Test@/src/export/var.tsx": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
-    "default@/src/export/var.tsx": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
-    "Test@/src/export/func.tsx": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
-    "default@/src/export/func.tsx": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
-    "anonymous@/src/export/express.tsx": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
-    "default@/src/export/express.tsx": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
-    "anonymous@/src/export/arrow.tsx": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
-    "default@/src/export/arrow.tsx": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
-  },
-  "keys": []
+  ]
 }

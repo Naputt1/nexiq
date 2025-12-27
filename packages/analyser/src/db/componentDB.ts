@@ -53,8 +53,6 @@ export type ComponentDBOptions = {
 export class ComponentDB {
   private edges: DataEdge[];
   private files: FileDB;
-  private ids: Map<string, string>;
-  private keys: Set<string>;
 
   private resolveTasks: ComponentDBResolve[];
 
@@ -67,8 +65,6 @@ export class ComponentDB {
 
   constructor(options: ComponentDBOptions) {
     this.edges = [];
-    this.ids = new Map();
-    this.keys = new Set();
     this.files = new FileDB();
 
     this.resolveTasks = [];
@@ -79,24 +75,10 @@ export class ComponentDB {
     this.dir = options.dir;
   }
 
-  private getFuncKey(name: string, fileName: string): string {
-    return `${name}@${fileName}`;
-  }
-
   public addComponent(
     component: Omit<ComponentFileVarComponent, "id" | "variableType">,
     parentPath?: string[]
   ) {
-    const key = this.getFuncKey(component.name, component.file);
-    if (this.keys.has(key)) {
-      assert(false, "Component already exists");
-      return;
-    }
-
-    // const id = this.files.getComId(component.file, component.name);
-
-    // this.ids.set(key, id);
-
     this.files.addVariable(
       component.file,
       new ComponentVariable({
@@ -161,15 +143,6 @@ export class ComponentDB {
   ) {
     let component: HookInfo | undefined;
     if (isHook(name)) {
-      // const key = this.getFuncKey(name, fileName);
-      // const t = this.files.getComponentFromLoc(fileName, loc);
-      // const id = this.ids.get(key);
-      // if (id == null) {
-      //   debugger;
-      //   return;
-      // }
-      // assert(id != null, "Component not found");
-
       component = this.files.getHookFromLoc(fileName, loc);
     } else {
       component = this.files.getComponentFromLoc(fileName, loc);
@@ -238,12 +211,6 @@ export class ComponentDB {
   }
 
   private getVariableID(name: string, fileName: string): string | null {
-    const key = this.getFuncKey(name, fileName);
-    const id = this.ids.get(key);
-    if (id != null) {
-      return id;
-    }
-
     const file = this.files.get(fileName);
     if (file == null) {
       return null;
@@ -320,14 +287,7 @@ export class ComponentDB {
     fileName: string,
     fileExport: Omit<ComponentFileExport, "id">
   ) {
-    const id = this.files.addExport(fileName, fileExport);
-
-    const key = this.getFuncKey(fileExport.name, fileName);
-    this.ids.set(key, id);
-
-    if (fileExport.type === "default") {
-      this.ids.set(this.getFuncKey("default", fileName), id);
-    }
+    this.files.addExport(fileName, fileExport);
   }
 
   private _resolveDependency(variable: Variable, parent?: string) {
@@ -386,8 +346,6 @@ export class ComponentDB {
       src: path.resolve(this.dir),
       files: this.files.getData(),
       edges: this.edges,
-      ids: Object.fromEntries(this.ids),
-      keys: Array.from(this.keys),
       // resolve: this.resolveTasks,
     };
   }
