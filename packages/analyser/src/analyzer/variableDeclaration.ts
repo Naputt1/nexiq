@@ -214,21 +214,15 @@ export default function VariableDeclarator(
           };
 
           if (isHook(name)) {
-            componentDB.addComponent({
-              name,
+            componentDB.addHook({
               file: fileName,
+              name,
               type: "function",
               dependencies: {},
-              isHook: true,
               loc,
               scope,
-              var: {},
-              componentType: "Function",
-              hooks: [],
               states: [],
               props: [],
-              contexts: [],
-              renders: {},
             });
           } else {
             componentDB.addVariable(fileName, {

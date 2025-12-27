@@ -12,8 +12,13 @@ import type {
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import type { ComponentVariable } from "./variable/component.js";
-import { isComponentVariable, isDataVariable } from "./variable/type.js";
+import {
+  isHookVariable,
+  isComponentVariable,
+  isDataVariable,
+} from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
+import type { HookVariable } from "./variable/hook.js";
 
 interface FileIds {
   id: string;
@@ -526,6 +531,19 @@ export class FileDB {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
     if (variable && isComponentVariable(variable)) {
+      return variable;
+    }
+
+    return undefined;
+  }
+
+  public getHookFromLoc(
+    fileName: string,
+    loc: VariableLoc
+  ): HookVariable | undefined {
+    const file = this.get(fileName);
+    const variable = file.getVariable(loc);
+    if (variable && isHookVariable(variable)) {
       return variable;
     }
 

@@ -13,18 +13,14 @@ export class ComponentVariable extends Variable {
   props: string[];
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
-  isHook: boolean = false;
 
   constructor({
     id,
     name,
     dependencies,
     loc,
-    isHook = false,
     ...options
-  }: Omit<ComponentFileVarComponent, "variableType" | "isHook"> & {
-    isHook?: boolean;
-  }) {
+  }: Omit<ComponentFileVarComponent, "variableType">) {
     const scope = options.type === "function" ? options.scope : undefined;
     super(id, name, options.type, dependencies, "component", loc, scope);
     this.file = options.file;
@@ -34,7 +30,6 @@ export class ComponentVariable extends Variable {
     this.props = options.props;
     this.contexts = options.contexts;
     this.renders = options.renders;
-    this.isHook = isHook;
   }
 
   public getData(): ComponentFileVarComponent {
@@ -48,7 +43,6 @@ export class ComponentVariable extends Variable {
       props: this.props,
       contexts: this.contexts,
       renders: this.renders,
-      isHook: this.isHook,
     };
   }
 }

@@ -149,8 +149,7 @@
           "hooks": [],
           "props": [],
           "contexts": [],
-          "renders": {},
-          "isHook": false
+          "renders": {}
         }
       }
     },
@@ -280,8 +279,7 @@
                 "column": 8
               }
             }
-          },
-          "isHook": false
+          }
         }
       }
     },
@@ -325,8 +323,7 @@
           "hooks": [],
           "props": [],
           "contexts": [],
-          "renders": {},
-          "isHook": false
+          "renders": {}
         }
       }
     },
@@ -370,8 +367,7 @@
           "hooks": [],
           "props": [],
           "contexts": [],
-          "renders": {},
-          "isHook": false
+          "renders": {}
         }
       }
     },

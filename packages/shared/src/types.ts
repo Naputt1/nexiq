@@ -24,6 +24,14 @@ export interface ComponentInfoRender extends ComponentLoc {
   isDependency?: boolean;
 }
 
+export type HookInfo = {
+  id: string;
+  name: string;
+  file: string;
+  states: State[];
+  props: string[];
+};
+
 export interface ComponentInfo {
   file: string;
   componentType: "Function" | "Class";
@@ -76,15 +84,20 @@ export type ComponentFileVarBase = ComponentLoc &
   ComponentFileVarDependencyType & {
     id: string;
     name: string;
-    variableType: "component" | "normal";
+    variableType: "component" | "normal" | "hook";
     dependencies: Record<string, ComponentFileVarDependency>;
     var: Record<string, ComponentFileVar>;
   };
 
 export type ComponentFileVarComponent = ComponentFileVarBase &
-  ComponentInfo & {
-    isHook: boolean;
+  ComponentInfo &
+  HookInfo & {
     variableType: "component";
+  };
+
+export type ComponentFileVarHook = ComponentFileVarBase &
+  HookInfo & {
+    variableType: "hook";
   };
 
 export type ComponentFileVarNormal = ComponentFileVarBase & {
@@ -95,7 +108,8 @@ export type ComponentFileVarNormal = ComponentFileVarBase & {
 
 export type ComponentFileVar =
   | ComponentFileVarComponent
-  | ComponentFileVarNormal;
+  | ComponentFileVarNormal
+  | ComponentFileVarHook;
 
 export type ComponentFile = {
   path: string;
@@ -109,14 +123,6 @@ export interface State extends ComponentLoc {
   value: string;
   setter?: string;
 }
-
-export type HookInfo = {
-  id: string;
-  name: string;
-  file: string;
-  states: State[];
-  props: string[];
-};
 
 export type DataEdge = {
   from: string;

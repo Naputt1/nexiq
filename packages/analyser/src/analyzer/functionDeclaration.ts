@@ -54,21 +54,6 @@ export default function FunctionDeclaration(
       },
     };
 
-    if (isHook(name)) {
-      const isExported =
-        nodePath.parentPath.isExportNamedDeclaration() ||
-        nodePath.parentPath.isExportDefaultDeclaration();
-
-      if (!isExported) return;
-
-      componentDB.addHook({
-        name,
-        file: fileName,
-        states: [],
-        props: [],
-      });
-    }
-
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
         componentDB.addComponent({
@@ -90,21 +75,15 @@ export default function FunctionDeclaration(
       }
 
       if (isHook(name)) {
-        componentDB.addComponent({
-          name,
+        componentDB.addHook({
           file: fileName,
+          name,
           dependencies: {},
           type: "function",
           loc,
           scope,
           states: [],
-          hooks: [],
           props: [],
-          contexts: [],
-          renders: {},
-          isHook: true,
-          componentType: "Function",
-          var: {},
         });
         return;
       }

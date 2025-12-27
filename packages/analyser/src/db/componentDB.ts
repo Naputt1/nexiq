@@ -11,6 +11,7 @@ import type {
   ComponentFileVarNormal,
   ComponentInfoRenderDependency,
   VariableLoc,
+  ComponentFileVarHook,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import { isHook } from "../utils.js";
@@ -22,6 +23,7 @@ import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
 import { isComponentVariable, isDataVariable } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
+import { HookVariable } from "./variable/hook.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -49,7 +51,6 @@ export type ComponentDBOptions = {
 };
 
 export class ComponentDB {
-  private hooks: Map<string, HookInfo>;
   private edges: DataEdge[];
   private files: FileDB;
   private ids: Map<string, string>;
@@ -65,7 +66,6 @@ export class ComponentDB {
   private dir: string;
 
   constructor(options: ComponentDBOptions) {
-    this.hooks = new Map();
     this.edges = [];
     this.ids = new Map();
     this.keys = new Set();
@@ -84,10 +84,7 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<
-      ComponentFileVarComponent,
-      "id" | "variableType" | "isHook"
-    > & { isHook?: boolean },
+    component: Omit<ComponentFileVarComponent, "id" | "variableType">,
     parentPath?: string[]
   ) {
     const key = this.getFuncKey(component.name, component.file);
@@ -105,6 +102,23 @@ export class ComponentDB {
       new ComponentVariable({
         id: newUUID(),
         ...component,
+      }),
+      parentPath
+    );
+  }
+
+  public addHook(
+    variable: Omit<
+      ComponentFileVarHook,
+      "id" | "variableType" | "var" | "components"
+    >,
+    parentPath?: string[]
+  ) {
+    this.files.addVariable(
+      variable.file,
+      new HookVariable({
+        id: newUUID(),
+        ...variable,
       }),
       parentPath
     );
@@ -139,28 +153,6 @@ export class ComponentDB {
     });
   }
 
-  public addHook(hook: Omit<HookInfo, "id">) {
-    const key = this.getFuncKey(hook.name, hook.file);
-    if (this.keys.has(key)) {
-      assert(false, "hook already exists");
-      return;
-    }
-
-    const hookImport = this.files.getImport(hook.file, hook.name);
-
-    const id =
-      hookImport?.type === "default"
-        ? this.ids.get(this.getFuncKey("default", hook.file)) ?? newUUID()
-        : newUUID();
-
-    this.ids.set(key, id);
-
-    this.hooks.set(id, {
-      id,
-      ...hook,
-    });
-  }
-
   public comAddState(
     name: string,
     loc: VariableLoc,
@@ -178,12 +170,12 @@ export class ComponentDB {
       // }
       // assert(id != null, "Component not found");
 
-      // component = this.hooks.get(id);
-      component = this.files.getComponentFromLoc(fileName, loc);
+      component = this.files.getHookFromLoc(fileName, loc);
     } else {
       component = this.files.getComponentFromLoc(fileName, loc);
     }
 
+    if (component == null) debugger;
     assert(component != null, "Component not found");
 
     component.states.push(state);
