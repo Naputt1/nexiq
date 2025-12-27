@@ -148,6 +148,7 @@
           "states": [],
           "hooks": [],
           "props": [],
+          "effects": {},
           "contexts": [],
           "renders": {}
         }
@@ -263,6 +264,7 @@
           ],
           "hooks": [],
           "props": [],
+          "effects": {},
           "contexts": [],
           "renders": {
             "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
@@ -322,6 +324,7 @@
           "states": [],
           "hooks": [],
           "props": [],
+          "effects": {},
           "contexts": [],
           "renders": {}
         }
@@ -366,6 +369,7 @@
           "states": [],
           "hooks": [],
           "props": [],
+          "effects": {},
           "contexts": [],
           "renders": {}
         }

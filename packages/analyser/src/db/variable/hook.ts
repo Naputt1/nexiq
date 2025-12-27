@@ -1,10 +1,18 @@
-import type { ComponentFileVarHook, ComponentInfoRender, State } from "shared";
+import type {
+  ComponentFileVarHook,
+  ComponentInfoRender,
+  DataEdge,
+  EffectInfo,
+  State,
+} from "shared";
 import { Variable } from "./variable.js";
 
 export class HookVariable extends Variable {
   file: string;
   states: State[];
   props: string[];
+  hooks: string[];
+  effects: Record<string, EffectInfo>;
 
   constructor({
     id,
@@ -18,6 +26,8 @@ export class HookVariable extends Variable {
     this.file = options.file;
     this.states = options.states;
     this.props = options.props;
+    this.effects = options.effects;
+    this.hooks = options.hooks;
   }
 
   public getData(): ComponentFileVarHook {
@@ -28,6 +38,8 @@ export class HookVariable extends Variable {
       loc: this.loc,
       states: this.states,
       props: this.props,
+      effects: this.effects,
+      hooks: this.hooks,
     };
   }
 }

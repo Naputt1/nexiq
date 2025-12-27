@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { isHook } from "../utils.js";
-import type { VariableLoc } from "shared";
+import type { VariableLoc, VariableScope } from "shared";
 import assert from "assert";
 
 export default function CallExpression(
@@ -62,9 +62,61 @@ export default function CallExpression(
     //   components[compName].contexts.push(fn);
     // }
 
-    // if (fn === "useEffect" || fn === "useLayoutEffect") {
-    //   debugger;
-    // }
+    if (fn === "useEffect") {
+      const effect = nodePath.node.arguments[0];
+      const dependencies = nodePath.node.arguments[1];
+
+      let scope: VariableScope | undefined;
+
+      assert(nodePath.node.loc?.start != null, "Function loc not found");
+
+      const effectLoc = {
+        line: nodePath.node.loc.start.line,
+        column: nodePath.node.loc.start.column,
+      };
+
+      if (effect && effect.type == "ArrowFunctionExpression") {
+        if (effect.body.type == "BlockStatement") {
+          assert(effect.body.loc != null, "Function body loc not found");
+
+          scope = {
+            start: {
+              line: effect.body.loc.start.line,
+              column: effect.body.loc.start.column,
+            },
+            end: {
+              line: effect.body.loc.end.line,
+              column: effect.body.loc.end.column,
+            },
+          };
+        }
+      } else {
+        debugger;
+      }
+
+      const dependency: string[] = [];
+      if (dependencies && dependencies.type == "ArrayExpression") {
+        for (const element of dependencies.elements) {
+          if (element == null) continue;
+
+          if (element.type == "Identifier") {
+            dependency.push(element.name);
+          } else {
+            debugger;
+          }
+        }
+      } else {
+        debugger;
+      }
+
+      if (loc && scope) {
+        componentDB.comAddEffect(fileName, loc, {
+          scope,
+          loc: effectLoc,
+          dependencies: dependency,
+        });
+      }
+    }
 
     if (compName && loc && isHook(fn)) {
       componentDB.comAddHook(compName, loc, fileName, fn);

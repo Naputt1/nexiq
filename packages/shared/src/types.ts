@@ -24,12 +24,20 @@ export interface ComponentInfoRender extends ComponentLoc {
   isDependency?: boolean;
 }
 
+export interface EffectInfo extends ComponentLoc {
+  id: string;
+  scope?: VariableScope;
+  dependencies: string[];
+}
+
 export type HookInfo = {
   id: string;
   name: string;
   file: string;
   states: State[];
   props: string[];
+  hooks: string[];
+  effects: Record<string, EffectInfo>;
 };
 
 export interface ComponentInfo {

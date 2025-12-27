@@ -6,6 +6,8 @@ import type {
   ComponentFileVar,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
+  EffectInfo,
+  HookInfo,
   JsonData,
   VariableLoc,
   VariableScope,
@@ -421,6 +423,29 @@ export class File {
 
     return variable.id;
   }
+
+  public addEffect(loc: VariableLoc, effect: EffectInfo) {
+    const variable = this.getVariable(loc);
+
+    assert(variable != null, "Variable not found");
+
+    assert(
+      isHookVariable(variable) || isComponentVariable(variable),
+      "can't add hook to non-hook"
+    );
+
+    const newDependencies: string[] = [];
+    for (const dep of effect.dependencies) {
+      for (const state of variable.states) {
+        if (state.value === dep) {
+          newDependencies.push(dep);
+        }
+      }
+    }
+
+    effect.dependencies = newDependencies;
+    variable.effects[effect.id] = effect;
+  }
 }
 
 export class FileDB {
@@ -522,6 +547,22 @@ export class FileDB {
   ): Variable | undefined {
     const file = this.get(fileName);
     return file.getVariable(loc);
+  }
+
+  public getHookInfoFromLoc(
+    fileName: string,
+    loc: VariableLoc
+  ): HookInfo | undefined {
+    const file = this.get(fileName);
+    const variable = file.getVariable(loc);
+    if (
+      variable &&
+      (isHookVariable(variable) || isComponentVariable(variable))
+    ) {
+      return variable;
+    }
+
+    return undefined;
   }
 
   public getComponentFromLoc(

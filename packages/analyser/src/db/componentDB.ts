@@ -12,9 +12,9 @@ import type {
   ComponentInfoRenderDependency,
   VariableLoc,
   ComponentFileVarHook,
+  EffectInfo,
 } from "shared";
 import { FileDB } from "./fileDB.js";
-import { isHook } from "../utils.js";
 import type { PackageJson } from "./packageJson.js";
 import fs from "fs";
 import path from "path";
@@ -141,12 +141,7 @@ export class ComponentDB {
     fileName: string,
     state: State
   ) {
-    let component: HookInfo | undefined;
-    if (isHook(name)) {
-      component = this.files.getHookFromLoc(fileName, loc);
-    } else {
-      component = this.files.getComponentFromLoc(fileName, loc);
-    }
+    const component = this.files.getHookInfoFromLoc(fileName, loc);
 
     if (component == null) debugger;
     assert(component != null, "Component not found");
@@ -171,7 +166,7 @@ export class ComponentDB {
       return;
     }
 
-    const component = this.files.getComponentFromLoc(fileName, loc);
+    const component = this.files.getHookInfoFromLoc(fileName, loc);
 
     if (component == null) debugger;
     assert(component != null, "Component not found");
@@ -208,6 +203,19 @@ export class ComponentDB {
     }
 
     component.hooks.push(srcId);
+  }
+
+  public comAddEffect(
+    fileName: string,
+    loc: VariableLoc,
+    effect: Omit<EffectInfo, "id">
+  ) {
+    const file = this.files.get(fileName);
+
+    file.addEffect(loc, {
+      id: newUUID(),
+      ...effect,
+    });
   }
 
   private getVariableID(name: string, fileName: string): string | null {

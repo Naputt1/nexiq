@@ -975,7 +975,10 @@ export class GraphData {
 
   public getAllNodes(): NodeGraphData[] {
     const all: NodeGraphData[] = [];
-    const collect = (nodes: Record<string, NodeGraphData>, combos: Record<string, ComboGraphData>) => {
+    const collect = (
+      nodes: Record<string, NodeGraphData>,
+      combos: Record<string, ComboGraphData>
+    ) => {
       for (const n of Object.values(nodes)) {
         all.push(n);
       }
@@ -1013,7 +1016,7 @@ export class GraphData {
         parent.collapsed = false;
         // Ensure child layout is calculated if it hasn't been before
         this.calculateComboChildrenLayout(parentId);
-        
+
         // Trigger update for the parent combo
         const cb = this.innerCallback.get(parentId);
         if (cb) {

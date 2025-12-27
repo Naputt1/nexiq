@@ -112,6 +112,7 @@ export default function VariableDeclarator(
               renders: {},
               dependencies: {},
               var: {},
+              effects: {},
               loc,
               scope,
             },
@@ -192,6 +193,7 @@ export default function VariableDeclarator(
           renders: {},
           dependencies: {},
           var: {},
+          effects: {},
           loc,
           scope,
         },
@@ -223,6 +225,8 @@ export default function VariableDeclarator(
               scope,
               states: [],
               props: [],
+              effects: {},
+              hooks: [],
             });
           } else {
             componentDB.addVariable(fileName, {

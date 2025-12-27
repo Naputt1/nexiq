@@ -1,6 +1,8 @@
 import type {
   ComponentFileVarComponent,
   ComponentInfoRender,
+  DataEdge,
+  EffectInfo,
   State,
 } from "shared";
 import { Variable } from "./variable.js";
@@ -11,6 +13,7 @@ export class ComponentVariable extends Variable {
   states: State[];
   hooks: string[];
   props: string[];
+  effects: Record<string, EffectInfo>;
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
 
@@ -28,6 +31,7 @@ export class ComponentVariable extends Variable {
     this.states = options.states;
     this.hooks = options.hooks;
     this.props = options.props;
+    this.effects = options.effects;
     this.contexts = options.contexts;
     this.renders = options.renders;
   }
@@ -41,6 +45,7 @@ export class ComponentVariable extends Variable {
       states: this.states,
       hooks: this.hooks,
       props: this.props,
+      effects: this.effects,
       contexts: this.contexts,
       renders: this.renders,
     };

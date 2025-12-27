@@ -70,6 +70,7 @@ export default function FunctionDeclaration(
           var: {},
           loc,
           scope,
+          effects: {},
         });
         return;
       }
@@ -84,6 +85,8 @@ export default function FunctionDeclaration(
           scope,
           states: [],
           props: [],
+          effects: {},
+          hooks: [],
         });
         return;
       }

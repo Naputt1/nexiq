@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useCustomHook(initialValue: number) {
   const [value, setValue] = useState(initialValue);
-  
+
   useEffect(() => {
-    console.log('Value changed:', value);
+    console.log("Value changed:", value);
   }, [value]);
 
   return [value, setValue] as const;
