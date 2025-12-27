@@ -89,6 +89,26 @@ export default function FunctionDeclaration(
         return;
       }
 
+      if (isHook(name)) {
+        componentDB.addComponent({
+          name,
+          file: fileName,
+          dependencies: {},
+          type: "function",
+          loc,
+          scope,
+          states: [],
+          hooks: [],
+          props: [],
+          contexts: [],
+          renders: {},
+          isHook: true,
+          componentType: "Function",
+          var: {},
+        });
+        return;
+      }
+
       componentDB.addVariable(fileName, {
         name,
         dependencies: {},

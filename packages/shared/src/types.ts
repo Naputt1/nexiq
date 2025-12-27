@@ -76,21 +76,21 @@ export type ComponentFileVarBase = ComponentLoc &
   ComponentFileVarDependencyType & {
     id: string;
     name: string;
-    isComponent: boolean;
+    variableType: "component" | "normal";
     dependencies: Record<string, ComponentFileVarDependency>;
     var: Record<string, ComponentFileVar>;
   };
 
 export type ComponentFileVarComponent = ComponentFileVarBase &
   ComponentInfo & {
-    isComponent: true;
     isHook: boolean;
+    variableType: "component";
   };
 
 export type ComponentFileVarNormal = ComponentFileVarBase & {
-  isComponent: false;
   type: "function" | "data";
   components: Record<string, ComponentInfoRender>;
+  variableType: "normal";
 };
 
 export type ComponentFileVar =

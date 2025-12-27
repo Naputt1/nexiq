@@ -11,7 +11,7 @@ export abstract class Variable {
   id: string;
   name: string;
   type: ComponentFileVar["type"];
-  isComponent: boolean;
+  variableType: ComponentFileVarBase["variableType"];
   dependencies: Record<string, ComponentFileVarDependency>;
   var: Map<string, Variable>;
   parent?: Variable;
@@ -23,14 +23,14 @@ export abstract class Variable {
     name: string,
     type: ComponentFileVar["type"],
     dependecies: Record<string, ComponentFileVarDependency>,
-    isComponent: boolean,
+    variableType: ComponentFileVarBase["variableType"],
     loc: VariableLoc,
     scope?: VariableScope
   ) {
     this.id = id;
     this.name = name;
     this.type = type;
-    this.isComponent = isComponent;
+    this.variableType = variableType;
     this.dependencies = dependecies;
     this.var = new Map();
     this.loc = loc;
@@ -47,7 +47,7 @@ export abstract class Variable {
       return {
         id: this.id,
         name: this.name,
-        isComponent: this.isComponent,
+        variableType: this.variableType,
         dependencies: this.dependencies,
         var: Object.fromEntries(
           Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
@@ -64,7 +64,7 @@ export abstract class Variable {
     return {
       id: this.id,
       name: this.name,
-      isComponent: this.isComponent,
+      variableType: this.variableType,
       dependencies: this.dependencies,
       var: Object.fromEntries(
         Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [

@@ -86,7 +86,7 @@ export class ComponentDB {
   public addComponent(
     component: Omit<
       ComponentFileVarComponent,
-      "id" | "isComponent" | "isHook"
+      "id" | "variableType" | "isHook"
     > & { isHook?: boolean },
     parentPath?: string[]
   ) {
@@ -114,7 +114,7 @@ export class ComponentDB {
     filename: string,
     variable: Omit<
       ComponentFileVarNormal,
-      "id" | "isComponent" | "var" | "components"
+      "id" | "variableType" | "var" | "components"
     >,
     parentPath?: string[]
   ) {
@@ -169,15 +169,17 @@ export class ComponentDB {
   ) {
     let component: HookInfo | undefined;
     if (isHook(name)) {
-      const key = this.getFuncKey(name, fileName);
-      const id = this.ids.get(key);
-      if (id == null) {
-        debugger;
-        return;
-      }
-      assert(id != null, "Component not found");
+      // const key = this.getFuncKey(name, fileName);
+      // const t = this.files.getComponentFromLoc(fileName, loc);
+      // const id = this.ids.get(key);
+      // if (id == null) {
+      //   debugger;
+      //   return;
+      // }
+      // assert(id != null, "Component not found");
 
-      component = this.hooks.get(id);
+      // component = this.hooks.get(id);
+      component = this.files.getComponentFromLoc(fileName, loc);
     } else {
       component = this.files.getComponentFromLoc(fileName, loc);
     }
@@ -374,7 +376,7 @@ export class ComponentDB {
     for (const innerVar of variable.var.values()) {
       this._resolveDependency(
         innerVar,
-        variable.isComponent ? variable.id : parent
+        variable.variableType == "component" ? variable.id : parent
       );
     }
   }
@@ -412,7 +414,7 @@ export class ComponentDB {
       const resolve = this.resolveTasks[i]!;
       i++;
       const currentTaskCount = this.resolveTasks.length;
-      
+
       if (resolve.type === "comAddRender") {
         this.comAddRender(
           resolve.name,
@@ -436,7 +438,9 @@ export class ComponentDB {
     }
 
     if (retries >= 1000) {
-      console.warn("Resolution interrupted: suspected infinite loop in ComponentDB.resolve");
+      console.warn(
+        "Resolution interrupted: suspected infinite loop in ComponentDB.resolve"
+      );
     }
 
     this.resolveTasks = [];

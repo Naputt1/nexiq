@@ -22,11 +22,11 @@ export class ComponentVariable extends Variable {
     loc,
     isHook = false,
     ...options
-  }: Omit<ComponentFileVarComponent, "isComponent" | "isHook"> & {
+  }: Omit<ComponentFileVarComponent, "variableType" | "isHook"> & {
     isHook?: boolean;
   }) {
     const scope = options.type === "function" ? options.scope : undefined;
-    super(id, name, options.type, dependencies, true, loc, scope);
+    super(id, name, options.type, dependencies, "component", loc, scope);
     this.file = options.file;
     this.componentType = options.componentType;
     this.states = options.states;
@@ -40,7 +40,7 @@ export class ComponentVariable extends Variable {
   public getData(): ComponentFileVarComponent {
     return {
       ...super.getBaseData(),
-      isComponent: true,
+      variableType: "component",
       file: this.file,
       componentType: this.componentType,
       states: this.states,

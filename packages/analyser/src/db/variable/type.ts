@@ -3,9 +3,9 @@ import type { Variable } from "./variable.js";
 import type { DataVariable } from "./dataVariable.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.isComponent === true;
+  return v.variableType === "component";
 }
 
 export function isDataVariable(v: Variable): v is DataVariable {
-  return v.isComponent === false;
+  return v.variableType === "normal";
 }

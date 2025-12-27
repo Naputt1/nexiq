@@ -40,7 +40,7 @@ const CusKonvoTestHook = () => {
         file: ComponentFile,
         parentID?: string
       ) => {
-        if (!variable.isComponent) return;
+        if (variable.variableType != "component") return;
         const fileName = `${graphData.src}${file.path}`;
 
         combos.push({
@@ -65,6 +65,7 @@ const CusKonvoTestHook = () => {
               text: state.value,
             },
             // title: `${n.file}\nstate: ${state.value}`,
+            color: "red",
             combo: variable.id,
             fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
           });

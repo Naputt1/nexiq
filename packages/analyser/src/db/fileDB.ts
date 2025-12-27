@@ -295,7 +295,7 @@ export class File {
     }
     assert(variable != null, "Parent variable not found");
     if (variable == null) return;
-    if (variable.isComponent) return;
+    if (variable.variableType == "component") return;
 
     variable.dependencies[dependency.id] = dependency;
   }
@@ -509,6 +509,14 @@ export class FileDB {
       return variable;
     }
     return undefined;
+  }
+
+  public getVariableFromLoc(
+    fileName: string,
+    loc: VariableLoc
+  ): Variable | undefined {
+    const file = this.get(fileName);
+    return file.getVariable(loc);
   }
 
   public getComponentFromLoc(
