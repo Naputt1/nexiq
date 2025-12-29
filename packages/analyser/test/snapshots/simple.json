@@ -145,7 +145,7 @@
           },
           "file": "/src/Child.tsx",
           "componentType": "Function",
-          "states": [],
+          "states": {},
           "hooks": [],
           "props": [],
           "effects": {},
@@ -245,8 +245,9 @@
           },
           "file": "/src/App.tsx",
           "componentType": "Function",
-          "states": [
-            {
+          "states": {
+            "23adce01-2717-489c-9a42-e6485e2f01aa": {
+              "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
               "value": "count",
               "loc": {
                 "line": 10,
@@ -254,14 +255,15 @@
               },
               "setter": "setCount"
             },
-            {
+            "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
+              "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
               "value": "user",
               "loc": {
                 "line": 11,
                 "column": 8
               }
             }
-          ],
+          },
           "hooks": [],
           "props": [],
           "effects": {},
@@ -293,13 +295,13 @@
           "name": "Test",
           "type": "default",
           "exportKind": "value",
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
+          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d"
         }
       },
       "defaultExport": "Test",
       "var": {
-        "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+        "3551d3f2-2e56-49f1-8c18-04bed72b9c0d": {
+          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
           "name": "Test",
           "variableType": "component",
           "dependencies": {},
@@ -321,7 +323,7 @@
           },
           "file": "/src/export/var.tsx",
           "componentType": "Function",
-          "states": [],
+          "states": {},
           "hooks": [],
           "props": [],
           "effects": {},
@@ -338,13 +340,13 @@
           "name": "Test",
           "type": "default",
           "exportKind": "component",
-          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+          "id": "c625ffdc-46d9-471d-9145-289a0901db9a"
         }
       },
       "defaultExport": "Test",
       "var": {
-        "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
-          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+        "c625ffdc-46d9-471d-9145-289a0901db9a": {
+          "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
           "name": "Test",
           "variableType": "component",
           "dependencies": {},
@@ -366,7 +368,7 @@
           },
           "file": "/src/export/func.tsx",
           "componentType": "Function",
-          "states": [],
+          "states": {},
           "hooks": [],
           "props": [],
           "effects": {},
@@ -383,13 +385,13 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "value",
-          "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83"
+          "id": "5909b328-1690-4605-9200-a15584ba44b1"
         }
       },
       "defaultExport": "anonymous",
       "var": {
-        "4b97fa8f-c781-4270-98cf-364a2c015862": {
-          "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+        "d1b317ec-f1dc-4dec-baee-7696d1e8bea5": {
+          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
           "name": "Test",
           "variableType": "normal",
           "dependencies": {},
@@ -421,7 +423,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "component",
-          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
+          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0"
         }
       },
       "defaultExport": "anonymous",

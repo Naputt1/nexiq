@@ -9,7 +9,7 @@ import { Variable } from "./variable.js";
 
 export class HookVariable extends Variable {
   file: string;
-  states: State[];
+  states: Record<string, State>;
   props: string[];
   hooks: string[];
   effects: Record<string, EffectInfo>;

@@ -34,7 +34,7 @@ export type HookInfo = {
   id: string;
   name: string;
   file: string;
-  states: State[];
+  states: Record<string, State>;
   props: string[];
   hooks: string[];
   effects: Record<string, EffectInfo>;
@@ -43,7 +43,7 @@ export type HookInfo = {
 export interface ComponentInfo {
   file: string;
   componentType: "Function" | "Class";
-  states: State[];
+  states: Record<string, State>;
   hooks: string[];
   props: string[];
   contexts: string[];
@@ -128,6 +128,7 @@ export type ComponentFile = {
 };
 
 export interface State extends ComponentLoc {
+  id: string;
   value: string;
   setter?: string;
 }

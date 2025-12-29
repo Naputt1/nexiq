@@ -58,7 +58,7 @@ const CusKonvoTestHook = () => {
           fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
         });
 
-        for (const state of variable.states) {
+        for (const state of Object.values(variable.states)) {
           nodes.push({
             id: `${variable.id}-state-${state.value}`,
             label: {

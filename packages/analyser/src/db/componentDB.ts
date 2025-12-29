@@ -139,14 +139,18 @@ export class ComponentDB {
     name: string,
     loc: VariableLoc,
     fileName: string,
-    state: State
+    state: Omit<State, "id">
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
     if (component == null) debugger;
     assert(component != null, "Component not found");
 
-    component.states.push(state);
+    const id = newUUID();
+    component.states[id] = {
+      id,
+      ...state,
+    };
   }
 
   public comAddHook(

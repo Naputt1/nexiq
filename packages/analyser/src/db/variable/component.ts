@@ -10,7 +10,7 @@ import { Variable } from "./variable.js";
 export class ComponentVariable extends Variable {
   file: string;
   componentType: ComponentFileVarComponent["componentType"];
-  states: State[];
+  states: Record<string, State>;
   hooks: string[];
   props: string[];
   effects: Record<string, EffectInfo>;

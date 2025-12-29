@@ -105,7 +105,7 @@ export default function VariableDeclarator(
               file: fileName,
               type: "function",
               componentType: "Function",
-              states: [],
+              states: {},
               hooks: [],
               props: [],
               contexts: [],
@@ -130,7 +130,7 @@ export default function VariableDeclarator(
           const [stateVar, setterVar] = id.elements;
           assert(id.loc?.start != null);
 
-          let state: State | null = null;
+          let state: Omit<State, "id"> | null = null;
           if (t.isIdentifier(stateVar)) {
             state = {
               value: stateVar.name,
@@ -186,7 +186,7 @@ export default function VariableDeclarator(
           file: fileName,
           type: "function",
           componentType: "Function",
-          states: [],
+          states: {},
           hooks: [],
           props: [],
           contexts: [],
@@ -223,7 +223,7 @@ export default function VariableDeclarator(
               dependencies: {},
               loc,
               scope,
-              states: [],
+              states: {},
               props: [],
               effects: {},
               hooks: [],
