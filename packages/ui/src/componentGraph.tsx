@@ -8,7 +8,7 @@ import useGraph, {
 } from "./graph/hook";
 import Graph, { type GraphRef } from "./graph/graph";
 
-const CusKonvoTestHook = () => {
+const ComponentGraph = () => {
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -338,4 +338,4 @@ const CusKonvoTestHook = () => {
   );
 };
 
-export default CusKonvoTestHook;
+export default ComponentGraph;
