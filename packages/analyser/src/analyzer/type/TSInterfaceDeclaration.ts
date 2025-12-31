@@ -22,7 +22,13 @@ export default function TSInterfaceDeclaration(
     const bodies: TypeDataLiteralBody[] = [];
 
     for (const b of nodePath.node.body.body) {
+      //TODO: handle other type
       if (b.type === "TSPropertySignature") {
+        if (
+          b.key.type != "Identifier" ||
+          b.typeAnnotation?.type != "TSTypeAnnotation"
+        )
+          continue;
         assert(b.key.type == "Identifier");
         assert(b.typeAnnotation?.type == "TSTypeAnnotation");
 
@@ -69,6 +75,8 @@ export default function TSInterfaceDeclaration(
     if (nodePath.node.extends) {
       typeData.extends = [];
       for (const ex of nodePath.node.extends) {
+        //TODO: handle other type
+        if (ex.expression.type != "Identifier") continue;
         assert(ex.expression.type == "Identifier");
 
         typeData.extends.push(ex.expression.name);

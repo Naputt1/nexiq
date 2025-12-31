@@ -503,7 +503,7 @@ export class FileDB {
 
   public get(fileName: string) {
     const file = this.files.get(fileName);
-    assert(file != null, "File not found");
+    assert(file != null, `File not found: ${fileName}`);
     return file;
   }
 
@@ -639,8 +639,10 @@ export class FileDB {
     if (file.import?.has(name)) {
       const importData = file.import.get(name);
       if (importData) {
-        const file = this.get(importData.source);
-        return file.getExport(importData);
+        if (this.has(importData.source)) {
+          const file = this.get(importData.source);
+          return file.getExport(importData);
+        }
       }
     }
   }

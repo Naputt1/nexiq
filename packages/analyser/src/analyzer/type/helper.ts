@@ -215,6 +215,12 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
 
       for (const member of tsType.members) {
         if (member.type === "TSPropertySignature") {
+          // TODO: handle other type
+          if (
+            member.key.type != "Identifier" ||
+            member.typeAnnotation?.type != "TSTypeAnnotation"
+          )
+            continue;
           assert(member.key.type == "Identifier");
           assert(member.typeAnnotation?.type == "TSTypeAnnotation");
 
