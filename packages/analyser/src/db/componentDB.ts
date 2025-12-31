@@ -3,7 +3,6 @@ import type {
   ComponentFileImport,
   State,
   DataEdge,
-  HookInfo,
   ComponentFileExport,
   JsonData,
   ComponentFileVarComponent,
@@ -13,6 +12,7 @@ import type {
   VariableLoc,
   ComponentFileVarHook,
   EffectInfo,
+  TypeDataDeclare,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -302,6 +302,10 @@ export class ComponentDB {
     this.files.addExport(fileName, fileExport);
   }
 
+  public fileAddTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
+    this.files.addTsTypes(fileName, type);
+  }
+
   private _resolveDependency(variable: Variable, parent?: string) {
     if (isComponentVariable(variable)) {
       for (const render of Object.values(variable.renders)) {
@@ -369,10 +373,10 @@ export class ComponentDB {
   public resolve() {
     this.isResolve = true;
     let i = 0;
-    const maxRetries = this.resolveTasks.length * 2 + 10; // Basic heuristic
+    const maxRetries = this.resolveTasks.length * 2 + 10;
     let retries = 0;
 
-    while (i < this.resolveTasks.length && retries < 1000) {
+    while (i < this.resolveTasks.length && retries < maxRetries) {
       const resolve = this.resolveTasks[i]!;
       i++;
       const currentTaskCount = this.resolveTasks.length;
@@ -404,6 +408,8 @@ export class ComponentDB {
         "Resolution interrupted: suspected infinite loop in ComponentDB.resolve"
       );
     }
+
+    this.files.resolve();
 
     this.resolveTasks = [];
     this.isResolve = false;

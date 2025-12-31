@@ -1,10 +1,10 @@
-import type Konva from "konva";
-import React, { memo } from "react";
-import { useEffect, useRef, useState } from "react";
-import { Circle, Group } from "react-konva";
+import React from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { Circle, Group, Text } from "react-konva";
 import Label from "./label";
 import type { GraphData } from "./hook";
 import Point from "./point";
+import type Konva from "konva";
 
 type ComboProps = {
   id: string;
@@ -30,6 +30,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
     comboDragMove,
     comboRadiusChange,
     comboHover,
+    props,
   } = graph.useCombo(id);
 
   const [radius, setRadius] = useState<number>(
@@ -137,6 +138,19 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
         />
         {!collapsed && (
           <>
+            {props?.map((p, i) => (
+              <Text
+                key={i}
+                x={0}
+                y={radius + 20 + i * 12}
+                text={`${p.name}: ${p.type}`}
+                fill="white"
+                fontSize={10}
+                align="center"
+                offsetX={50} // Approximate centering
+                width={100}
+              />
+            ))}
             {...Object.values(nodes).map((node) => (
               <Point
                 key={node.id}

@@ -63,6 +63,7 @@
         }
       },
       "defaultExport": "anonymous",
+      "tsTypes": {},
       "var": {}
     },
     "/src/main.tsx": {
@@ -92,6 +93,7 @@
       },
       "export": {},
       "defaultExport": null,
+      "tsTypes": {},
       "var": {}
     },
     "/src/Child.tsx": {
@@ -121,6 +123,7 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
           "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
@@ -147,7 +150,12 @@
           "componentType": "Function",
           "states": {},
           "hooks": [],
-          "props": [],
+          "props": [
+            {
+              "name": "user",
+              "type": "{\n  name: string;\n}"
+            }
+          ],
           "effects": {},
           "contexts": [],
           "renders": {}
@@ -208,6 +216,7 @@
         }
       },
       "defaultExport": "App",
+      "tsTypes": {},
       "var": {
         "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
           "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
@@ -299,6 +308,7 @@
         }
       },
       "defaultExport": "Test",
+      "tsTypes": {},
       "var": {
         "3551d3f2-2e56-49f1-8c18-04bed72b9c0d": {
           "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
@@ -344,6 +354,7 @@
         }
       },
       "defaultExport": "Test",
+      "tsTypes": {},
       "var": {
         "c625ffdc-46d9-471d-9145-289a0901db9a": {
           "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
@@ -389,6 +400,7 @@
         }
       },
       "defaultExport": "anonymous",
+      "tsTypes": {},
       "var": {
         "d1b317ec-f1dc-4dec-baee-7696d1e8bea5": {
           "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
@@ -427,6 +439,7 @@
         }
       },
       "defaultExport": "anonymous",
+      "tsTypes": {},
       "var": {}
     }
   },

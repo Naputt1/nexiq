@@ -1,0 +1,1158 @@
+{
+  "src": "/Users/naputt/git/react-map/packages/sample-project/props",
+  "files": {
+    "/src/type2.tsx": {
+      "path": "/src/type2.tsx",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "Test2": {
+          "name": "Test2",
+          "type": "type",
+          "exportKind": "type",
+          "id": "d7da7947-3db3-4ae0-835b-dac20d5ab23e"
+        },
+        "Test3": {
+          "name": "Test3",
+          "type": "type",
+          "exportKind": "type",
+          "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137"
+        },
+        "Child4": {
+          "name": "Child4",
+          "type": "type",
+          "exportKind": "type",
+          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {
+        "d7da7947-3db3-4ae0-835b-dac20d5ab23e": {
+          "id": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
+          "type": "type",
+          "name": "Test2",
+          "body": {
+            "type": "parenthesis",
+            "members": {
+              "type": "string"
+            }
+          },
+          "loc": {
+            "line": 3,
+            "column": 12
+          }
+        },
+        "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
+          "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+          "type": "type",
+          "name": "Test3",
+          "body": {
+            "type": "union",
+            "members": [
+              {
+                "type": "parenthesis",
+                "members": {
+                  "type": "intersection",
+                  "members": [
+                    {
+                      "type": "type-literal",
+                      "members": [
+                        {
+                          "signatureType": "property",
+                          "name": "title",
+                          "type": {
+                            "type": "string"
+                          },
+                          "optional": true
+                        },
+                        {
+                          "signatureType": "property",
+                          "name": "items",
+                          "type": {
+                            "type": "array",
+                            "element": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "type-literal",
+                      "members": [
+                        {
+                          "signatureType": "property",
+                          "name": "title",
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "type-literal",
+                "members": [
+                  {
+                    "signatureType": "property",
+                    "name": "title",
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "loc": {
+            "line": 5,
+            "column": 12
+          }
+        },
+        "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
+          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+          "type": "interface",
+          "name": "Child4",
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "title",
+              "type": {
+                "type": "string"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "items",
+              "type": {
+                "type": "array",
+                "element": {
+                  "type": "string"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "loc": {
+            "line": 16,
+            "column": 17
+          }
+        }
+      },
+      "var": {}
+    },
+    "/src/type.tsx": {
+      "path": "/src/type.tsx",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "Child4": {
+          "localName": "Child4",
+          "importedName": "Child4",
+          "source": "/src/type2.tsx",
+          "type": "named",
+          "importKind": "value"
+        },
+        "Test3": {
+          "localName": "Test3",
+          "importedName": "Test3",
+          "source": "/src/type2.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "TypePropsVar": {
+          "name": "TypePropsVar",
+          "type": "named",
+          "exportKind": "value",
+          "id": "ad530bbc-a6d3-4231-998b-15368908343c"
+        },
+        "TypePropsVarFunction": {
+          "name": "TypePropsVarFunction",
+          "type": "named",
+          "exportKind": "value",
+          "id": "349d4ecc-273a-4e15-b915-cd9598704c57"
+        },
+        "TypePropsVarInline": {
+          "name": "TypePropsVarInline",
+          "type": "named",
+          "exportKind": "value",
+          "id": "aa090036-355a-4b94-a325-4b02393cd1de"
+        },
+        "TypePropsVarInlineFunction": {
+          "name": "TypePropsVarInlineFunction",
+          "type": "named",
+          "exportKind": "value",
+          "id": "42d3fabc-a292-4505-a161-79335af5dd21"
+        },
+        "TypePropsFunction": {
+          "name": "TypePropsFunction",
+          "type": "named",
+          "exportKind": "component",
+          "id": "9b232c45-1446-4f50-819f-a63eadb5f464"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {
+        "23adce01-2717-489c-9a42-e6485e2f01aa": {
+          "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
+          "type": "type",
+          "name": "stringAlias",
+          "body": {
+            "type": "string"
+          },
+          "loc": {
+            "line": 4,
+            "column": 5
+          }
+        },
+        "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
+          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+          "type": "type",
+          "name": "Test",
+          "body": {
+            "type": "union",
+            "members": [
+              {
+                "type": "parenthesis",
+                "members": {
+                  "type": "intersection",
+                  "members": [
+                    {
+                      "type": "type-literal",
+                      "members": [
+                        {
+                          "signatureType": "property",
+                          "name": "title",
+                          "type": {
+                            "type": "string"
+                          },
+                          "optional": true
+                        },
+                        {
+                          "signatureType": "property",
+                          "name": "items",
+                          "type": {
+                            "type": "array",
+                            "element": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "type-literal",
+                      "members": [
+                        {
+                          "signatureType": "property",
+                          "name": "title",
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "type-literal",
+                "members": [
+                  {
+                    "signatureType": "property",
+                    "name": "title",
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "ref",
+                "refType": "named",
+                "name": "f24b8c56-3fac-469d-b2f3-efc6e3575137"
+              },
+              {
+                "type": "ref",
+                "refType": "named",
+                "name": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
+              }
+            ]
+          },
+          "loc": {
+            "line": 6,
+            "column": 5
+          }
+        },
+        "c625ffdc-46d9-471d-9145-289a0901db9a": {
+          "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
+          "type": "type",
+          "name": "Props",
+          "body": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "title",
+                "type": {
+                  "type": "string"
+                }
+              },
+              {
+                "signatureType": "property",
+                "name": "items",
+                "type": {
+                  "type": "array",
+                  "element": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "signatureType": "property",
+                "name": "test",
+                "type": {
+                  "type": "ref",
+                  "refType": "named",
+                  "name": "T"
+                }
+              }
+            ]
+          },
+          "loc": {
+            "line": 19,
+            "column": 5
+          }
+        },
+        "f32b5a8c-0aa5-4307-9def-75171a5fff83": {
+          "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+          "type": "interface",
+          "name": "Child",
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "title",
+              "type": {
+                "type": "string"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "items",
+              "type": {
+                "type": "array",
+                "element": {
+                  "type": "string"
+                }
+              },
+              "optional": true
+            }
+          ],
+          "loc": {
+            "line": 25,
+            "column": 10
+          }
+        },
+        "3b8a1b0c-e673-490f-b319-49dfc33ecbbf": {
+          "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf",
+          "type": "interface",
+          "name": "Parent",
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "title",
+              "type": {
+                "type": "string"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "i",
+              "type": {
+                "type": "number"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "items",
+              "type": {
+                "type": "array",
+                "element": {
+                  "type": "string"
+                }
+              },
+              "optional": true
+            },
+            {
+              "signatureType": "property",
+              "name": "items2",
+              "type": {
+                "type": "array",
+                "element": {
+                  "type": "ref",
+                  "refType": "named",
+                  "name": "Record",
+                  "params": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "optional": true
+            },
+            {
+              "signatureType": "property",
+              "name": "test",
+              "type": {
+                "type": "type-literal",
+                "members": [
+                  {
+                    "signatureType": "index",
+                    "type": {
+                      "type": "string"
+                    },
+                    "parameter": {
+                      "name": "key",
+                      "type": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "test2",
+              "type": {
+                "type": "ref",
+                "refType": "named",
+                "name": "Record",
+                "params": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "test3",
+              "type": {
+                "type": "ref",
+                "refType": "named",
+                "name": "T"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "test4",
+              "type": {
+                "type": "type-literal",
+                "members": [
+                  {
+                    "signatureType": "property",
+                    "name": "test5",
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "t",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "boolean",
+                  "value": true
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "f",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "boolean",
+                  "value": false
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "te",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "test"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "union",
+              "type": {
+                "type": "union",
+                "members": [
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "test"
+                    }
+                  },
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "test2"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "intersection",
+              "type": {
+                "type": "intersection",
+                "members": [
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "test"
+                    }
+                  },
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "test2"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "bigint",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "bigint",
+                  "value": "10"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "template",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "template",
+                  "expression": [
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "quasis": ["foo-", ""]
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "template2",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "template",
+                  "expression": [
+                    {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "TStr"
+                    }
+                  ],
+                  "quasis": ["foo-", ""]
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "unary",
+              "type": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "unary",
+                  "operator": "-",
+                  "prefix": true,
+                  "argument": {
+                    "type": "number",
+                    "value": 1
+                  }
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "unary2",
+              "type": {
+                "type": "union",
+                "members": [
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "unary",
+                      "operator": "-",
+                      "prefix": true,
+                      "argument": {
+                        "type": "number",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "unary",
+                      "operator": "-",
+                      "prefix": true,
+                      "argument": {
+                        "type": "number",
+                        "value": 2
+                      }
+                    }
+                  },
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "unary",
+                      "operator": "-",
+                      "prefix": true,
+                      "argument": {
+                        "type": "number",
+                        "value": 10
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "object",
+              "type": {
+                "type": "ref",
+                "refType": "named",
+                "name": "Object"
+              }
+            }
+          ],
+          "loc": {
+            "line": 34,
+            "column": 10
+          },
+          "extends": ["f32b5a8c-0aa5-4307-9def-75171a5fff83"],
+          "params": {
+            "T": {
+              "name": "T",
+              "constraint": {
+                "type": "ref",
+                "refType": "named",
+                "name": "f32b5a8c-0aa5-4307-9def-75171a5fff83"
+              },
+              "default": {
+                "type": "any"
+              }
+            },
+            "TStr": {
+              "name": "TStr",
+              "constraint": {
+                "type": "string"
+              },
+              "default": {
+                "type": "any"
+              }
+            }
+          }
+        }
+      },
+      "var": {
+        "5909b328-1690-4605-9200-a15584ba44b1": {
+          "id": "5909b328-1690-4605-9200-a15584ba44b1",
+          "name": "Test65",
+          "variableType": "normal",
+          "dependencies": {},
+          "var": {},
+          "type": "data",
+          "loc": {
+            "line": 30,
+            "column": 6
+          },
+          "components": {}
+        },
+        "ad530bbc-a6d3-4231-998b-15368908343c": {
+          "id": "ad530bbc-a6d3-4231-998b-15368908343c",
+          "name": "TypePropsVar",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 59,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 59,
+              "column": 13
+            },
+            "end": {
+              "line": 59,
+              "column": 42
+            }
+          },
+          "file": "/src/type.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "any"
+            },
+            {
+              "name": "items",
+              "type": "any"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "ref",
+            "refType": "named",
+            "name": "Props"
+          }
+        },
+        "349d4ecc-273a-4e15-b915-cd9598704c57": {
+          "id": "349d4ecc-273a-4e15-b915-cd9598704c57",
+          "name": "TypePropsVarFunction",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 72,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 72,
+              "column": 13
+            },
+            "end": {
+              "line": 72,
+              "column": 50
+            }
+          },
+          "file": "/src/type.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "any"
+            },
+            {
+              "name": "items",
+              "type": "any"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "ref",
+            "refType": "named",
+            "name": "Props"
+          }
+        },
+        "aa090036-355a-4b94-a325-4b02393cd1de": {
+          "id": "aa090036-355a-4b94-a325-4b02393cd1de",
+          "name": "TypePropsVarInline",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 88,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 88,
+              "column": 13
+            },
+            "end": {
+              "line": 88,
+              "column": 31
+            }
+          },
+          "file": "/src/type.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "any"
+            },
+            {
+              "name": "items",
+              "type": "any"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "ref",
+            "refType": "named",
+            "name": "Props"
+          }
+        },
+        "42d3fabc-a292-4505-a161-79335af5dd21": {
+          "id": "42d3fabc-a292-4505-a161-79335af5dd21",
+          "name": "TypePropsVarInlineFunction",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 101,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 101,
+              "column": 13
+            },
+            "end": {
+              "line": 101,
+              "column": 39
+            }
+          },
+          "file": "/src/type.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "any"
+            },
+            {
+              "name": "items",
+              "type": "any"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "ref",
+            "refType": "named",
+            "name": "Props"
+          }
+        },
+        "9b232c45-1446-4f50-819f-a63eadb5f464": {
+          "id": "9b232c45-1446-4f50-819f-a63eadb5f464",
+          "name": "TypePropsFunction",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 114,
+            "column": 16
+          },
+          "scope": {
+            "start": {
+              "line": 114,
+              "column": 16
+            },
+            "end": {
+              "line": 114,
+              "column": 33
+            }
+          },
+          "file": "/src/type.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "any"
+            },
+            {
+              "name": "items",
+              "type": "any"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {}
+        }
+      }
+    },
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "App": {
+          "localName": "App",
+          "importedName": "App",
+          "source": "/src/App.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {}
+    },
+    "/src/Destructuring.tsx": {
+      "path": "/src/Destructuring.tsx",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "DestructuringProps": {
+          "name": "DestructuringProps",
+          "type": "named",
+          "exportKind": "value",
+          "id": "381f2a42-8538-4743-8bfb-e7a60146ca32"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "381f2a42-8538-4743-8bfb-e7a60146ca32": {
+          "id": "381f2a42-8538-4743-8bfb-e7a60146ca32",
+          "name": "DestructuringProps",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 3,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 13
+            },
+            "end": {
+              "line": 3,
+              "column": 31
+            }
+          },
+          "file": "/src/Destructuring.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "items",
+              "type": "string[]"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "title",
+                "type": {
+                  "type": "string"
+                }
+              },
+              {
+                "signatureType": "property",
+                "name": "items",
+                "type": {
+                  "type": "array",
+                  "element": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "import": {
+        "DestructuringProps": {
+          "localName": "DestructuringProps",
+          "importedName": "DestructuringProps",
+          "source": "/src/Destructuring.tsx",
+          "type": "named",
+          "importKind": "value"
+        },
+        "TypePropsFunction": {
+          "localName": "TypePropsFunction",
+          "importedName": "TypePropsFunction",
+          "source": "/src/type.tsx",
+          "type": "named",
+          "importKind": "value"
+        },
+        "TypePropsVar": {
+          "localName": "TypePropsVar",
+          "importedName": "TypePropsVar",
+          "source": "/src/type.tsx",
+          "type": "named",
+          "importKind": "value"
+        },
+        "TypePropsVarInline": {
+          "localName": "TypePropsVarInline",
+          "importedName": "TypePropsVarInline",
+          "source": "/src/type.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "component",
+          "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "40bad021-0b4b-4cac-9d26-eaf02e63efdf": {
+          "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
+          "name": "App",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 16
+            },
+            "end": {
+              "line": 4,
+              "column": 19
+            }
+          },
+          "file": "/src/App.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [],
+          "effects": {},
+          "contexts": [],
+          "renders": {
+            "381f2a42-8538-4743-8bfb-e7a60146ca32": {
+              "id": "381f2a42-8538-4743-8bfb-e7a60146ca32",
+              "dependencies": [
+                {
+                  "id": "title",
+                  "value": ""
+                },
+                {
+                  "id": "items",
+                  "value": ""
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 7,
+                "column": 6
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "381f2a42-8538-4743-8bfb-e7a60146ca32",
+      "to": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
+      "label": "render"
+    }
+  ]
+}

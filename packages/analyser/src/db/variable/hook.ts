@@ -1,16 +1,10 @@
-import type {
-  ComponentFileVarHook,
-  ComponentInfoRender,
-  DataEdge,
-  EffectInfo,
-  State,
-} from "shared";
+import type { ComponentFileVarHook, EffectInfo, PropData, State } from "shared";
 import { Variable } from "./variable.js";
 
 export class HookVariable extends Variable {
   file: string;
   states: Record<string, State>;
-  props: string[];
+  props: PropData[];
   hooks: string[];
   effects: Record<string, EffectInfo>;
 

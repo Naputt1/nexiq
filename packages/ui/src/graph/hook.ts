@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LabelData } from "./label";
+import type { PropData } from "shared";
 import type Konva from "konva";
 import { ForceLayout, type Node, type Edge } from "./layout";
 
@@ -45,6 +46,7 @@ export interface NodeData extends PointData {
   id: string;
   radius?: number;
   fileName: string;
+  props?: PropData[];
 }
 
 export type EdgeData = {
@@ -61,6 +63,7 @@ export interface ComboData extends PointData {
   animation?: boolean;
   padding?: number;
   fileName: string;
+  props?: PropData[];
 }
 
 export interface NodeGraphData extends NodeData {

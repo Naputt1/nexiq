@@ -34,6 +34,7 @@
         }
       },
       "defaultExport": "MainNested",
+      "tsTypes": {},
       "var": {}
     },
     "/src/Nested.tsx": {
@@ -68,6 +69,7 @@
         }
       },
       "defaultExport": "MainNested",
+      "tsTypes": {},
       "var": {
         "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
           "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
@@ -224,6 +226,7 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "3551d3f2-2e56-49f1-8c18-04bed72b9c0d": {
           "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
@@ -356,19 +359,42 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "39e733ca-65d4-4612-ba06-dcf283e974a0": {
           "id": "39e733ca-65d4-4612-ba06-dcf283e974a0",
           "name": "MemoizedComponent",
-          "variableType": "normal",
+          "variableType": "component",
           "dependencies": {},
           "var": {},
-          "type": "data",
+          "type": "function",
           "loc": {
             "line": 3,
             "column": 13
           },
-          "components": {}
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 13
+            },
+            "end": {
+              "line": 3,
+              "column": 30
+            }
+          },
+          "file": "/src/HocForwardRef.tsx",
+          "componentType": "Function",
+          "states": {},
+          "hooks": [],
+          "props": [
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "effects": {},
+          "contexts": [],
+          "renders": {}
         },
         "ad530bbc-a6d3-4231-998b-15368908343c": {
           "id": "ad530bbc-a6d3-4231-998b-15368908343c",
@@ -482,6 +508,7 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "42d3fabc-a292-4505-a161-79335af5dd21": {
           "id": "42d3fabc-a292-4505-a161-79335af5dd21",
@@ -508,7 +535,16 @@
           "componentType": "Function",
           "states": {},
           "hooks": [],
-          "props": [],
+          "props": [
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "items",
+              "type": "string[]"
+            }
+          ],
           "effects": {},
           "contexts": [],
           "renders": {
@@ -521,6 +557,28 @@
                 "column": 6
               }
             }
+          },
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "title",
+                "type": {
+                  "type": "string"
+                }
+              },
+              {
+                "signatureType": "property",
+                "name": "items",
+                "type": {
+                  "type": "array",
+                  "element": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
           }
         }
       }
@@ -571,6 +629,7 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "9b232c45-1446-4f50-819f-a63eadb5f464": {
           "id": "9b232c45-1446-4f50-819f-a63eadb5f464",
@@ -610,10 +669,29 @@
           "componentType": "Function",
           "states": {},
           "hooks": [],
-          "props": [],
+          "props": [
+            {
+              "name": "children",
+              "type": "React.ReactNode"
+            }
+          ],
           "effects": {},
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "children",
+                "type": {
+                  "type": "ref",
+                  "refType": "qualified",
+                  "names": ["React", "ReactNode"]
+                }
+              }
+            ]
+          }
         },
         "40bad021-0b4b-4cac-9d26-eaf02e63efdf": {
           "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
@@ -730,6 +808,7 @@
         }
       },
       "defaultExport": null,
+      "tsTypes": {},
       "var": {
         "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd": {
           "id": "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd",

@@ -9,6 +9,7 @@ import type {
   EffectInfo,
   HookInfo,
   JsonData,
+  TypeDataDeclare,
   VariableLoc,
   VariableScope,
 } from "shared";
@@ -21,6 +22,11 @@ import {
 } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import type { HookVariable } from "./variable/hook.js";
+import type {
+  TypeData,
+  TypeDataLiteralTypeLiteral,
+  TypeDataRef,
+} from "shared/src/types/primitive.js";
 
 interface FileIds {
   id: string;
@@ -29,9 +35,10 @@ interface FileIds {
 
 export class File {
   path: string;
-  import: Record<string, ComponentFileImport>;
+  import: Map<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
+  tsTypes: Map<string, TypeDataDeclare>;
   var: Map<string, Variable>;
 
   scopes = new Set<Variable>();
@@ -39,25 +46,28 @@ export class File {
   // key = loc.line + @ + loc.column val = variable
   private locIdsMap = new Map<string, Variable>();
 
+  private tsTypesID = new Map<string, TypeDataDeclare>();
+
   private dependencyMap = new Map<string, string>();
   private ids = new Map<string, FileIds>();
 
   constructor(filename: string) {
     this.path = filename;
-    this.import = {};
+    this.import = new Map();
     this.export = {};
     this.defaultExport = null;
+    this.tsTypes = new Map();
     this.var = new Map();
   }
 
   public addImport(fileImport: ComponentFileImport) {
-    this.import[fileImport.localName] = {
+    this.import.set(fileImport.localName, {
       localName: fileImport.localName,
       importedName: fileImport.importedName,
       source: fileImport.source,
       type: fileImport.type,
       importKind: fileImport.importKind,
-    };
+    });
   }
 
   private getVarID(name: string): string | null {
@@ -146,7 +156,7 @@ export class File {
       return _variable.get(id);
     }
 
-    for (const [key, value] of _variable) {
+    for (const [_key, value] of _variable) {
       const parent = this.getParentFromId(id, value.var);
       if (parent) {
         return parent;
@@ -249,33 +259,15 @@ export class File {
     return undefined;
   }
 
-  private getComboByID(id: string) {
-    if (this.var.has(id)) {
-      const parentCombo = this.var.get(id);
-      if (parentCombo != null) {
-        return parentCombo;
-      }
-    }
-
-    if (this.dependencyMap.has(id)) {
-      const parentId = this.dependencyMap.get(id);
-      if (parentId != null) {
-        const parent = this.getTopParent(parentId);
-        if (parent != null) {
-          return parent.dependencies[id];
-        }
-      }
-    }
-
-    return undefined;
-  }
-
   public getData(): ComponentFile {
     return {
       path: this.path,
-      import: this.import,
+      import: Object.fromEntries(this.import),
       export: this.export,
       defaultExport: this.defaultExport,
+      tsTypes: Object.fromEntries(
+        Object.entries(Object.fromEntries(this.tsTypes))
+      ),
       var: Object.fromEntries(
         Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
           k,
@@ -314,7 +306,7 @@ export class File {
   ) {
     if (parent == null) return;
 
-    for (const [key, com] of parent.var) {
+    for (const [_key, com] of parent.var) {
       if (Object.keys(depMap).includes(com.name)) {
         const depI = depMap[com.name];
         const dep = dependencies[depI!];
@@ -330,7 +322,7 @@ export class File {
 
     if (Object.keys(depMap).length > 0) {
       if (parent.parent == null) {
-        for (const [key, com] of this.var) {
+        for (const [_key, com] of this.var) {
           if (Object.keys(depMap).includes(com.name)) {
             const depI = depMap[com.name];
             const dep = dependencies[depI!];
@@ -391,6 +383,37 @@ export class File {
     }
 
     return null;
+  }
+
+  public getScopeFromLoc(loc: VariableLoc) {
+    for (const s of this.scopes) {
+      assert(s.type === "function", "Scope variable must be a function");
+
+      if (
+        s.scope?.start.line == loc.line &&
+        s.scope?.start.column == loc.column &&
+        s.scope?.end.line == loc.line &&
+        s.scope?.end.column == loc.column
+      ) {
+        return s;
+      }
+    }
+
+    return null;
+  }
+
+  public getTypeFromName(name: string) {
+    return this.tsTypesID.get(name);
+  }
+
+  public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
+    // const scope = this.getScopeFromLoc(loc);
+
+    const id = this.getNewVarID(type.name);
+    type.id = id;
+
+    this.tsTypes.set(type.id, type);
+    this.tsTypesID.set(type.name, type);
   }
 
   public addRender(
@@ -466,7 +489,10 @@ export class FileDB {
   public addImport(fileName: string, fileImport: ComponentFileImport) {
     const file = this.files.get(fileName);
     assert(file != null, "File not found");
-    assert(file.import[fileImport.localName] == null, "Import already exists");
+    assert(
+      file.import.get(fileImport.localName) == null,
+      "Import already exists"
+    );
 
     file.addImport(fileImport);
   }
@@ -483,13 +509,13 @@ export class FileDB {
 
   public getImport(fileName: string, localName: string) {
     const file = this.get(fileName);
-    return file.import[localName];
+    return file.import.get(localName);
   }
 
   public getComId(fileName: string, localName: string) {
     const file = this.get(fileName);
 
-    if (file.export.hasOwnProperty(localName)) {
+    if (Object.hasOwn(file.export, localName)) {
       return file.export[localName]?.id ?? newUUID();
     }
 
@@ -524,6 +550,7 @@ export class FileDB {
     variable: Variable,
     parentPath?: string[]
   ) {
+    // resolve propType
     const file = this.get(fileName);
 
     return file.addVariable(variable, parentPath);
@@ -601,6 +628,177 @@ export class FileDB {
     file.addVariableDependency(parent, dependency);
   }
 
+  private typeToResolve: Set<string> = new Set();
+
+  private getRefTypeId(name: string, file: File) {
+    if (file.var.has(name)) return name;
+
+    const type = file.getTypeFromName(name);
+    if (type) return type.id;
+
+    if (file.import?.has(name)) {
+      const importData = file.import.get(name);
+      if (importData) {
+        const file = this.get(importData.source);
+        return file.getExport(importData);
+      }
+    }
+  }
+
+  private updateTypeDataLiteral(
+    typeData: TypeDataLiteralTypeLiteral,
+    file: File,
+    params: Set<string>
+  ): boolean {
+    if (typeData.type === "template") {
+      for (const expr of typeData.expression) {
+        return this.updateTypeDataID(expr, file, params);
+      }
+    } else if (typeData.type === "unary") {
+      return this.updateTypeDataLiteral(typeData.argument, file, params);
+    }
+
+    return true;
+  }
+
+  private getTypeDataRefName(typeData: TypeDataRef): string {
+    if (typeData.refType === "named") {
+      return typeData.name;
+    } else {
+      assert(typeData.names?.length > 0);
+      return typeData.names[0]!;
+    }
+  }
+
+  private updateTypeDataID(
+    typeData: TypeData,
+    file: File,
+    params: Set<string>
+  ): boolean {
+    if (typeData.type === "ref") {
+      const name = this.getTypeDataRefName(typeData);
+      if (params.has(name)) return true;
+
+      const id = this.getRefTypeId(name, file);
+      if (id != null) {
+        if (typeData.refType === "named") {
+          typeData.name = id;
+        } else {
+          assert(typeData.names?.length > 0);
+          typeData.names[0] = id;
+        }
+      } else {
+        return false;
+      }
+
+      if (typeData.params) {
+        for (const param of typeData.params) {
+          const status = this.updateTypeDataID(param, file, params);
+          if (!status) return false;
+        }
+      }
+    } else if (typeData.type === "union" || typeData.type === "intersection") {
+      for (const member of typeData.members) {
+        const status = this.updateTypeDataID(member, file, params);
+        if (!status) return false;
+      }
+    } else if (typeData.type === "array") {
+      return this.updateTypeDataID(typeData.element, file, params);
+    } else if (typeData.type === "parenthesis") {
+      return this.updateTypeDataID(typeData.members, file, params);
+    } else if (typeData.type === "type-literal") {
+      for (const member of typeData.members) {
+        const status = this.updateTypeDataID(member.type, file, params);
+        if (!status) return false;
+      }
+    } else if (typeData.type === "literal-type") {
+      return this.updateTypeDataLiteral(typeData.literal, file, params);
+    }
+
+    return true;
+  }
+
+  private resolveTsTypeID(typeDeclare: TypeDataDeclare, file: File) {
+    const params = new Set<string>();
+    if (typeDeclare.params) {
+      for (const param of Object.values(typeDeclare.params)) {
+        params.add(param.name);
+
+        if (param.constraint) {
+          if (param.constraint.type === "ref") {
+            const name = this.getTypeDataRefName(param.constraint);
+            const id = this.getRefTypeId(name, file);
+            if (id != null) {
+              if (param.constraint.refType === "named") {
+                param.constraint.name = id;
+              } else {
+                assert(param.constraint.names?.length > 0);
+                param.constraint.names[0] = id;
+              }
+              continue;
+            }
+          }
+        }
+
+        if (param.default) {
+          if (param.default.type === "ref") {
+            const name = this.getTypeDataRefName(param.default);
+            const id = this.getRefTypeId(name, file);
+            if (id != null) {
+              if (param.default.refType === "named") {
+                param.default.name = id;
+              } else {
+                assert(param.default.names?.length > 0);
+                param.default.names[0] = id;
+              }
+            }
+          }
+        }
+
+        this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+      }
+    }
+
+    if (typeDeclare.type === "interface") {
+      if (typeDeclare.extends) {
+        for (const [i, ex] of typeDeclare.extends.entries()) {
+          const id = this.getRefTypeId(ex, file);
+          if (id != null) {
+            typeDeclare.extends[i] = id;
+            continue;
+          }
+
+          this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+        }
+      }
+
+      for (const body of typeDeclare.body) {
+        const status = this.updateTypeDataID(body.type, file, params);
+        if (!status) {
+          this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+        }
+      }
+    } else if (typeDeclare.type === "type") {
+      const status = this.updateTypeDataID(typeDeclare.body, file, params);
+      if (!status) {
+        this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+      }
+    }
+  }
+
+  public addTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
+    const file = this.get(fileName);
+
+    const typeDeclare = {
+      id: newUUID(),
+      ...type,
+    } as TypeDataDeclare;
+
+    this.resolveTsTypeID(typeDeclare, file);
+
+    file.addTsTypes(type.loc, typeDeclare);
+  }
+
   public addRender(
     fileName: string,
     comLoc: string,
@@ -612,5 +810,42 @@ export class FileDB {
     const file = this.get(fileName);
 
     return file.addRender(comLoc, srcId, dependencies, isDependency, loc);
+  }
+
+  private _resolveType(typeToResolve: Set<string>) {
+    for (const type of typeToResolve) {
+      const typeSplit = type.split(":");
+      assert(typeSplit.length == 2);
+
+      const [fileName, id] = typeSplit;
+      const file = this.get(fileName!);
+      if (file == null) continue;
+
+      const typeData = file.getTypeFromName(id!);
+      if (typeData == null) continue;
+
+      this.resolveTsTypeID(typeData, file);
+    }
+  }
+
+  private resolveType(): boolean {
+    const typeToResolve = this.typeToResolve;
+    this.typeToResolve = new Set();
+
+    while (this.typeToResolve.size > 0) {
+      this._resolveType(typeToResolve);
+
+      if (typeToResolve.size == this.typeToResolve.size) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public resolve(): boolean {
+    if (!this.resolveType()) return false;
+
+    return true;
   }
 }

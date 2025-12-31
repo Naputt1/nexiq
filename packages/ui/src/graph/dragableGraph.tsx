@@ -41,8 +41,10 @@ const DragableStage = forwardRef<DragableStageRef, DragableStageProps>(
 
     const setStageCursor = (cursor: string) => {
       const container = stageRef.current && stageRef.current.container();
+      // eslint-disable-next-line react-hooks/immutability
       if (container) container.style.cursor = cursor;
     };
+
     const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
       e.evt.preventDefault();
 

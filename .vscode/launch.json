@@ -50,6 +50,23 @@
       "internalConsoleOptions": "neverOpen",
       "preLaunchTask": "build"
     },
+        {
+      "type": "node",
+      "request": "launch",
+      "name": "props",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/props",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "analyser-test-seed"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    },
     {
       "type": "node",
       "request": "launch",

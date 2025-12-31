@@ -49,6 +49,7 @@ const CusKonvoTestHook = () => {
           label: { text: variable.name, fill: "white" },
           combo: parentID,
           fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+          props: "props" in variable ? variable.props : undefined,
         });
         combos.push({
           id: `${variable.id}-render`,

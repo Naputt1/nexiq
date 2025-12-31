@@ -1,11 +1,17 @@
 import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentFileVarDependency, State } from "shared";
+import type {
+  ComponentFileVarComponent,
+  ComponentFileVarDependency,
+  State,
+} from "shared";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
 import { newUUID } from "../utils/uuid.js";
+import { getProps } from "./propExtractor.js";
+import { getType } from "./type/helper.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -31,36 +37,6 @@ function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   }
 
   return parentPath;
-}
-
-function getVariableComponent(
-  nodes: Array<traverse.Node | null>,
-  _components?: Set<string>
-) {
-  const components = _components ?? new Set<string>();
-
-  for (const node of nodes) {
-    if (node == null) continue;
-
-    if (node.type === "ArrayExpression") {
-      getVariableComponent(node.elements, components);
-    } else if (node.type === "ObjectExpression") {
-      getVariableComponent(node.properties, components);
-    } else if (node.type === "ObjectProperty") {
-      if (node.value.type === "JSXElement") {
-        if (node.value.openingElement.name.type === "JSXIdentifier") {
-          components.add(node.value.openingElement.name.name);
-        }
-      }
-    }
-    if (node.type === "JSXElement") {
-      if (node.openingElement.name.type === "JSXIdentifier") {
-        components.add(node.openingElement.name.name);
-      }
-    }
-  }
-
-  return components;
 }
 
 export default function VariableDeclarator(
@@ -89,7 +65,6 @@ export default function VariableDeclarator(
     };
 
     if (t.isCallExpression(init)) {
-      const firstArg = init.arguments[0];
       const firstArgPath = nodePath.get("init").get("arguments")[0];
 
       if (
@@ -99,25 +74,51 @@ export default function VariableDeclarator(
       ) {
         if (id.type == "Identifier") {
           const parentPath = getParentPath(nodePath);
-          componentDB.addComponent(
-            {
-              name: id.name,
-              file: fileName,
-              type: "function",
-              componentType: "Function",
-              states: {},
-              hooks: [],
-              props: [],
-              contexts: [],
-              renders: {},
-              dependencies: {},
-              var: {},
-              effects: {},
-              loc,
-              scope,
-            },
-            parentPath
-          );
+          const component: Omit<
+            ComponentFileVarComponent,
+            "id" | "variableType"
+          > = {
+            name: id.name,
+            file: fileName,
+            type: "function",
+            componentType: "Function",
+            states: {},
+            hooks: [],
+            props: getProps(
+              firstArgPath as traverse.NodePath<
+                t.ArrowFunctionExpression | t.FunctionExpression
+              >,
+              nodePath.node.id as t.Identifier
+            ),
+            contexts: [],
+            renders: {},
+            dependencies: {},
+            var: {},
+            effects: {},
+            loc,
+            scope,
+          };
+
+          if (nodePath.node.id.type === "Identifier") {
+            if (nodePath.node.id.typeAnnotation?.type === "TSTypeAnnotation") {
+              const propType = getType(
+                nodePath.node.id.typeAnnotation.typeAnnotation
+              );
+
+              if (
+                propType.type === "ref" &&
+                propType.refType === "qualified" &&
+                propType.names?.length == 2 &&
+                propType.names[0] == "React" &&
+                propType.names[1] == "FC" &&
+                propType.params?.length == 1
+              ) {
+                component.propType = propType.params[0]!;
+              }
+            }
+          }
+
+          componentDB.addComponent(component, parentPath);
           return;
         }
       } else if (
@@ -180,7 +181,7 @@ export default function VariableDeclarator(
           returnJSX(init)))
     ) {
       const parentPath = getParentPath(nodePath);
-      componentDB.addComponent(
+      const component: Omit<ComponentFileVarComponent, "id" | "variableType"> =
         {
           name,
           file: fileName,
@@ -188,7 +189,15 @@ export default function VariableDeclarator(
           componentType: "Function",
           states: {},
           hooks: [],
-          props: [],
+          props:
+            t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)
+              ? getProps(
+                  nodePath.get("init") as traverse.NodePath<
+                    t.ArrowFunctionExpression | t.FunctionExpression
+                  >,
+                  nodePath.node.id as t.Identifier
+                )
+              : [],
           contexts: [],
           renders: {},
           dependencies: {},
@@ -196,12 +205,59 @@ export default function VariableDeclarator(
           effects: {},
           loc,
           scope,
-        },
-        parentPath
-      );
+        };
+
+      if (nodePath.node.id.type === "Identifier") {
+        if (nodePath.node.id.typeAnnotation?.type === "TSTypeAnnotation") {
+          const propType = getType(
+            nodePath.node.id.typeAnnotation.typeAnnotation
+          );
+
+          if (
+            propType.type === "ref" &&
+            propType.refType === "qualified" &&
+            propType.names?.length == 2 &&
+            propType.names[0] == "React" &&
+            propType.names[1] == "FC" &&
+            propType.params?.length == 1
+          ) {
+            component.propType = propType.params[0]!;
+          }
+        }
+      }
+
+      if (component.propType == null) {
+        if (
+          nodePath.node.init?.type === "ArrowFunctionExpression" ||
+          nodePath.node.init?.type === "FunctionExpression"
+        ) {
+          if (
+            (nodePath.node.init?.type === "ArrowFunctionExpression" ||
+              nodePath.node.init?.type === "FunctionExpression") &&
+            nodePath.node.init.params.length > 0 &&
+            nodePath.node.init.params[0]!.type === "ObjectPattern" &&
+            nodePath.node.init.params[0]!.typeAnnotation
+          ) {
+            assert(
+              nodePath.node.init.params[0]!.typeAnnotation.type ===
+                "TSTypeAnnotation"
+            );
+            component.propType = getType(
+              nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation
+            );
+          }
+        } else {
+          debugger;
+        }
+      }
+
+      componentDB.addComponent(component, parentPath);
     } else {
       if (nodePath.scope.block.type === "Program") {
-        if (init?.type === "ArrowFunctionExpression") {
+        if (
+          init?.type === "ArrowFunctionExpression" ||
+          init?.type === "FunctionExpression"
+        ) {
           assert(init.body.loc != null, "Function body loc not found");
 
           const scope = {
@@ -224,7 +280,12 @@ export default function VariableDeclarator(
               loc,
               scope,
               states: {},
-              props: [],
+              props: getProps(
+                nodePath.get("init") as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >,
+                nodePath.node.id as t.Identifier
+              ),
               effects: {},
               hooks: [],
             });

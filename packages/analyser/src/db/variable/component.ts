@@ -1,18 +1,20 @@
 import type {
   ComponentFileVarComponent,
   ComponentInfoRender,
-  DataEdge,
   EffectInfo,
+  PropData,
   State,
 } from "shared";
 import { Variable } from "./variable.js";
+import type { TypeData } from "shared/src/types/primitive.js";
 
 export class ComponentVariable extends Variable {
   file: string;
   componentType: ComponentFileVarComponent["componentType"];
   states: Record<string, State>;
   hooks: string[];
-  props: string[];
+  props: PropData[];
+  propType: TypeData | undefined;
   effects: Record<string, EffectInfo>;
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
@@ -31,13 +33,14 @@ export class ComponentVariable extends Variable {
     this.states = options.states;
     this.hooks = options.hooks;
     this.props = options.props;
+    this.propType = options.propType;
     this.effects = options.effects;
     this.contexts = options.contexts;
     this.renders = options.renders;
   }
 
   public getData(): ComponentFileVarComponent {
-    return {
+    const data: ComponentFileVarComponent = {
       ...super.getBaseData(),
       variableType: "component",
       file: this.file,
@@ -49,5 +52,11 @@ export class ComponentVariable extends Variable {
       contexts: this.contexts,
       renders: this.renders,
     };
+
+    if (this.propType) {
+      data.propType = this.propType;
+    }
+
+    return data;
   }
 }

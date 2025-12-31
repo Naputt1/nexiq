@@ -8,7 +8,8 @@ export function isHook(filePath: string) {
 export function returnJSX(nodePath: Node): boolean {
   if (
     nodePath.type != "FunctionDeclaration" &&
-    nodePath.type != "ArrowFunctionExpression"
+    nodePath.type != "ArrowFunctionExpression" &&
+    nodePath.type != "FunctionExpression"
   ) {
     return false;
   }
@@ -43,8 +44,7 @@ export function containsJSX(nodePath: NodePath): boolean {
 
   const startPaths: NodePath[] = [];
   if (initPath && initPath.node) {
-    // @ts-ignore
-    startPaths.push(initPath);
+    startPaths.push(initPath as NodePath);
   } else {
     startPaths.push(nodePath);
   }
@@ -79,7 +79,9 @@ export function containsJSX(nodePath: NodePath): boolean {
           path.stop();
         },
       });
-    } catch (e) {}
+    } catch (_e) {
+      /* empty */
+    }
     if (found) break;
   }
 

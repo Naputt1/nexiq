@@ -8,7 +8,8 @@
     "build": "tsc",
     "dev": "tsc || true && node dist/analyzer.js ./sample-project ./out/graph.json",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -24,13 +25,18 @@
     "shared": "workspace:*"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.10.1",
     "@types/seedrandom": "^3.0.8",
     "@vitest/ui": "^4.0.16",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
     "vitest": "^4.0.16"
   }
 }

@@ -1,3 +1,6 @@
+import type { TypeDataDeclare } from "./types/index.js";
+import type { TypeData } from "./types/primitive.js";
+
 export type ComponentFileImport = {
   localName: string;
   importedName: string | null;
@@ -12,6 +15,12 @@ export type ComponentFileExport = {
   type: "default" | "named" | "namespace" | "type";
   exportKind: "value" | "type" | "component" | "function" | "class";
 };
+
+export interface State extends ComponentLoc {
+  id: string;
+  value: string;
+  setter?: string;
+}
 
 export type ComponentInfoRenderDependency = {
   id: string;
@@ -30,12 +39,17 @@ export interface EffectInfo extends ComponentLoc {
   dependencies: string[];
 }
 
+export interface PropData {
+  name: string;
+  type: string;
+}
+
 export type HookInfo = {
   id: string;
   name: string;
   file: string;
   states: Record<string, State>;
-  props: string[];
+  props: PropData[];
   hooks: string[];
   effects: Record<string, EffectInfo>;
 };
@@ -45,7 +59,8 @@ export interface ComponentInfo {
   componentType: "Function" | "Class";
   states: Record<string, State>;
   hooks: string[];
-  props: string[];
+  props: PropData[];
+  propType?: TypeData;
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
 }
@@ -124,33 +139,6 @@ export type ComponentFile = {
   import: Record<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
+  tsTypes: Record<string, TypeDataDeclare>;
   var: Record<string, ComponentFileVar>;
-};
-
-export interface State extends ComponentLoc {
-  id: string;
-  value: string;
-  setter?: string;
-}
-
-export type DataEdge = {
-  from: string;
-  to: string;
-  label: string;
-};
-
-export interface Data {
-  nodes: {
-    id: string;
-    label: string;
-    type: string;
-    file: string;
-  }[];
-  edges: DataEdge[];
-}
-
-export type JsonData = {
-  src: string;
-  edges: DataEdge[];
-  files: Record<string, ComponentFile>;
 };

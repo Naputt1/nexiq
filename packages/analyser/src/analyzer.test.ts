@@ -9,7 +9,7 @@ import fs from "fs";
 const SEED = "analyser-test-seed";
 
 describe("analyser snapshots", () => {
-  const projects = ["simple", "complex"];
+  const projects = ["simple", "complex", "props"];
 
   projects.forEach((projectName) => {
     it(`should match snapshot for ${projectName}`, () => {

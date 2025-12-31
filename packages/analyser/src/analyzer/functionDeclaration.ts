@@ -3,6 +3,7 @@ import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
+import { getProps } from "./propExtractor.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.Node>) {
   const parentPath: string[] = [];
@@ -29,6 +30,7 @@ function getParentPath(nodePath: traverse.NodePath<t.Node>) {
 
   return parentPath;
 }
+
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
   fileName: string
@@ -63,7 +65,7 @@ export default function FunctionDeclaration(
           componentType: "Function",
           states: {},
           hooks: [],
-          props: [],
+          props: getProps(nodePath),
           contexts: [],
           renders: {},
           dependencies: {},
@@ -84,7 +86,7 @@ export default function FunctionDeclaration(
           loc,
           scope,
           states: {},
-          props: [],
+          props: getProps(nodePath),
           effects: {},
           hooks: [],
         });
@@ -99,13 +101,6 @@ export default function FunctionDeclaration(
         scope,
       });
     } else {
-      // if (
-      //   nodePath.parent.type === "ExportDefaultDeclaration"
-      //   // || nodePath.parent.type === "ExportNamedDeclaration"
-      // ) {
-      //   return;
-      // }
-
       if (
         nodePath.scope.block.type === "FunctionDeclaration" &&
         nodePath.scope.block.id?.type === "Identifier"

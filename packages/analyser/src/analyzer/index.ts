@@ -14,6 +14,8 @@ import FunctionDeclaration from "./functionDeclaration.js";
 import VariableDeclarator from "./variableDeclaration.js";
 import JSXElement from "./JSXElement.js";
 import CallExpression from "./callExpression.js";
+import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
+import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 
 function analyzeFiles(
   SRC_DIR: string,
@@ -41,8 +43,7 @@ function analyzeFiles(
       continue;
     }
 
-    const traverseFn: typeof traverse.default =
-      (traverse as any).default || traverse;
+    const traverseFn: typeof traverse.default = traverse.default || traverse;
     traverseFn(ast, {
       ImportDeclaration: ImportDeclaration(componentDB, fileName),
       ExportNamedDeclaration: ExportNamedDeclaration(componentDB, fileName),
@@ -54,6 +55,9 @@ function analyzeFiles(
       VariableDeclarator: VariableDeclarator(componentDB, fileName),
       JSXElement: JSXElement(componentDB, fileName),
       CallExpression: CallExpression(componentDB, fileName),
+
+      TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
+      TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
     });
   }
 
