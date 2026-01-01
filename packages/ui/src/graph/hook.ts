@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LabelData } from "./label";
-import type { PropData } from "shared";
+import type { PropData, TypeData, TypeDataParam } from "shared";
 import type Konva from "konva";
 import { ForceLayout, type Node, type Edge } from "./layout";
 
@@ -42,11 +42,18 @@ export interface PointData extends GraphItem {
   combo?: string;
 }
 
-export interface NodeData extends PointData {
+export interface DetailItemData {
   id: string;
-  radius?: number;
   fileName: string;
   props?: PropData[];
+  propType?: TypeData;
+  type?: "component" | "type" | "interface" | "state" | "render";
+  typeParams?: TypeDataParam[];
+  extends?: string[];
+}
+
+export interface NodeData extends PointData, DetailItemData {
+  radius?: number;
 }
 
 export type EdgeData = {
@@ -55,15 +62,12 @@ export type EdgeData = {
   target: string;
 };
 
-export interface ComboData extends PointData {
-  id: string;
+export interface ComboData extends PointData, DetailItemData {
   collapsed?: boolean;
   collapsedRadius?: number;
   expandedRadius?: number;
   animation?: boolean;
   padding?: number;
-  fileName: string;
-  props?: PropData[];
 }
 
 export interface NodeGraphData extends NodeData {
@@ -157,10 +161,6 @@ export class GraphData {
   private config: GraphDataConfig;
 
   private innerCallback: Map<string, InnerCallBack> = new Map();
-
-  private x: number = 0;
-  private y: number = 0;
-  private scale: number = 1;
 
   constructor(
     nodes: NodeData[],
@@ -356,7 +356,7 @@ export class GraphData {
       collisionStrength: 1,
     });
 
-    layout.runSteps(2500);
+    layout.runSteps(500);
 
     for (const n of layout.nodes) {
       const node: PointData | undefined =
@@ -1086,7 +1086,7 @@ export class GraphData {
     //   console.log("tick", step, nodesPositions);
     // };
 
-    layout.runSteps(2500);
+    layout.runSteps(500);
 
     for (const n of layout.nodes) {
       const node: PointData | undefined = this.getPointId(n.id);
@@ -1118,18 +1118,6 @@ export class GraphData {
     console.log(this);
   }
 
-  public setScale(scale: number) {
-    this.scale = scale;
-  }
-
-  public setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
-  private rendering = false;
-  private prevRender: (() => void) | null = null;
-
   private curRender: CurRender = {
     nodes: {},
     edges: {},
@@ -1149,82 +1137,23 @@ export class GraphData {
   }
 
   public render() {
-    if (this.rendering) {
-      this.prevRender?.();
-    }
-
+    // Run the layout algorithm once
     this.layout();
 
-    let x = this.x;
-    let y = this.y;
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
-    const interval = setInterval(() => {
-      const view = {
-        x: x / this.scale,
-        y: y / this.scale,
-        width: width / this.scale,
-        height: height / this.scale,
-      };
-
-      const newCurRender: CurRender = {
-        nodes: {},
-        edges: {},
-        combos: {},
-      };
-
-      for (const node of this.nodes.values()) {
-        if (node.x < view.x || node.x > view.x + view.width) continue;
-        if (node.y < view.y || node.y > view.y + view.height) continue;
-        newCurRender.nodes[node.id] = node;
-      }
-
-      for (const combo of this.combos.values()) {
-        if (combo.x < view.x || combo.x > view.width) continue;
-        if (combo.y < view.y || combo.y > view.height) continue;
-        newCurRender.combos[combo.id] = combo;
-      }
-
-      for (const edge of this.edges.values()) {
-        if (
-          edge.source in newCurRender.combos &&
-          edge.target in newCurRender.combos
-        ) {
-          newCurRender.edges[edge.id] = edge;
-        }
-      }
-
-      this.curRender = newCurRender;
-
-      this.trigger({ type: "new-combos" });
-      this.trigger({ type: "new-nodes" });
-      this.trigger({ type: "new-edges" });
-
-      if (
-        Object.keys(newCurRender.nodes).length == this.nodes.size &&
-        Object.keys(newCurRender.edges).length == this.edges.size &&
-        Object.keys(newCurRender.combos).length == this.combos.size
-      ) {
-        console.log(
-          "render done",
-          this,
-          this.combos.get("b4c6c2dc-9fdd-4ce4-b7f4-120354a08611")
-        );
-        clearInterval(interval);
-        this.rendering = false;
-      } else {
-        width += window.innerWidth / 2;
-        height += window.innerHeight / 2;
-        x -= window.innerWidth / 2;
-        y -= window.innerHeight / 2;
-      }
-    }, 10);
-
-    this.prevRender = () => {
-      console.log("render done");
-      clearInterval(interval);
+    // Show all nodes/combos/edges initially (no viewport culling on initial render)
+    // Viewport culling can be handled by the rendering layer if needed
+    this.curRender = {
+      nodes: Object.fromEntries(this.nodes),
+      edges: Object.fromEntries(this.edges),
+      combos: Object.fromEntries(this.combos),
     };
+
+    // Trigger final updates to render everything
+    this.trigger({ type: "new-combos" });
+    this.trigger({ type: "new-nodes" });
+    this.trigger({ type: "new-edges" });
+
+    console.log("render done", this);
   }
 }
 

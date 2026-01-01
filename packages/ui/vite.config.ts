@@ -32,4 +32,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ["tslib", "@antv/g6"],
   },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });

@@ -19,9 +19,7 @@ export function getViteAliases(
 
   const aliases: Record<string, string> = {};
 
-  traverse.default;
-  const traverseFn: typeof traverse.default =
-    (traverse as any).default || traverse;
+  const traverseFn: typeof traverse.default = traverse.default || traverse;
   traverseFn(ast, {
     ObjectProperty(path: traverse.NodePath<ObjectProperty>) {
       const key = path.node.key;

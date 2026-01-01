@@ -10,9 +10,10 @@ type ComboProps = {
   id: string;
   onDragMove?: (id: string, evt: Konva.KonvaEventObject<DragEvent>) => void;
   graph: GraphData;
+  onSelect?: (id: string) => void;
 };
 
-const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
+const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove, onSelect }) => {
   const {
     radius: _radius = 20,
     collapsed,
@@ -99,6 +100,10 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
         if (e.evt.ctrlKey) {
           e.cancelBubble = true;
           window.ipcRenderer.invoke("open-vscode", fileName);
+        } else {
+            // Select combo
+            e.cancelBubble = true; // prevent selecting parent combo
+            onSelect?.(id);
         }
       }}
       {...label}
@@ -165,6 +170,9 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
                   if (e.evt.ctrlKey) {
                     e.cancelBubble = true;
                     window.ipcRenderer.invoke("open-vscode", node.fileName);
+                  } else {
+                     e.cancelBubble = true;
+                     onSelect?.(node.id);
                   }
                 }}
                 color={node.color}
@@ -177,6 +185,7 @@ const Combo: React.FC<ComboProps> = memo(({ id, graph, onDragMove }) => {
                 key={id}
                 id={id}
                 graph={graph}
+                onSelect={onSelect}
                 onDragMove={(_id, e) => {
                   e.cancelBubble = true;
                 }}

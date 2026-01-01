@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentFile, ComponentFileVar, JsonData } from "shared";
 import useGraph, {
   type ComboData,
@@ -7,6 +7,7 @@ import useGraph, {
   type useGraphProps,
 } from "./graph/hook";
 import Graph, { type GraphRef } from "./graph/graph";
+import { NodeDetails } from "./components/node-details";
 
 const ComponentGraph = () => {
   const [size, setSize] = useState({
@@ -49,7 +50,14 @@ const ComponentGraph = () => {
           label: { text: variable.name, fill: "white" },
           combo: parentID,
           fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-          props: "props" in variable ? variable.props : undefined,
+          props: variable.props,
+          propType: variable.propType,
+          type: "component",
+          // Note: HookInfo or other parts might not have typeParams if it wasn't added to shared yet,
+          // but assuming it's available or we handle it if it's strictly NodeData/ComboData.
+          // For now, removing 'as any' and letting TS help.
+          // If typeParams is not on shared types, we might need to add it there too,
+          // but if we are just fixing 'any' in UI, let's see.
         });
         combos.push({
           id: `${variable.id}-render`,
@@ -98,6 +106,44 @@ const ComponentGraph = () => {
       for (const file of Object.values(graphData.files)) {
         for (const variable of Object.values(file.var)) {
           addCombo(variable, file);
+        }
+
+        if (file.tsTypes) {
+          for (const typeDeclare of Object.values(file.tsTypes)) {
+            const fileName = `${graphData.src}${file.path}`;
+            // Use a simpler ID for matching references by name if possible,
+            // but for uniqueness across files we need something robust.
+            // Ideally references should be resolved to this ID.
+            // For now, let's use a consistent ID format.
+            const id = `${typeDeclare.id}`;
+
+            nodes.push({
+              id: id,
+              label: {
+                text: typeDeclare.name,
+              },
+              color: "#4ade80", // Green color as requested
+              fileName: `${fileName}:${typeDeclare.loc.line}:${typeDeclare.loc.column}`,
+              type: typeDeclare.type, // "type" or "interface"
+              propType:
+                typeDeclare.type === "type"
+                  ? typeDeclare.body
+                  : {
+                      type: "type-literal",
+                      members: typeDeclare.body,
+                    },
+              typeParams: typeDeclare.params
+                ? Array.isArray(typeDeclare.params)
+                  ? typeDeclare.params
+                  : Object.values(typeDeclare.params)
+                : undefined,
+              combo: undefined, // Root level or we could check if file should be a combo
+              extends:
+                typeDeclare.type === "interface"
+                  ? typeDeclare.extends
+                  : undefined,
+            });
+          }
         }
       }
 
@@ -253,11 +299,44 @@ const ComponentGraph = () => {
     graphRef.current?.focusItem(matches[prevIndex], 1.5);
   };
 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const onSelect = (id: string) => {
+    setSelectedId(id);
+    // Auto-focus on selection if needed, or just highlight
+    // graphRef.current?.focusItem(id, 1.5);
+  };
+
+  // Fetch fresh node/combo data whenever selectedId changes
+  // Note: We can't memoize based on [graph] because graph instance is stable
+  // but its internal data changes (e.g., color updates during search)
+  const nodesMap = useMemo(() => {
+    if (!selectedId) return {};
+    const nodes = graph.getAllNodes();
+    return Object.fromEntries(nodes.map((n) => [n.id, n]));
+  }, [selectedId, graph]);
+
+  const combosMap = useMemo(() => {
+    if (!selectedId) return {};
+    const combos = graph.getAllCombos();
+    return Object.fromEntries(combos.map((c) => [c.id, c]));
+  }, [selectedId, graph]);
+
+  const handleClose = useCallback(() => {
+    setSelectedId(null);
+  }, []);
+
   return (
     <div
       className="w-full h-full relative bg-[#1e1e1e] overflow-hidden"
       style={{ width: "100vw", height: "100vh" }}
     >
+      <NodeDetails
+        selectedId={selectedId}
+        nodes={nodesMap}
+        combos={combosMap}
+        onClose={handleClose}
+      />
       {isSearchOpen && (
         <div className="absolute top-4 right-4 z-50 flex items-center bg-[#2d2d2d] border border-[#454545] rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-1">
@@ -333,6 +412,7 @@ const ComponentGraph = () => {
         width={size.width}
         height={size.height}
         graph={graph}
+        onSelect={onSelect}
       />
     </div>
   );

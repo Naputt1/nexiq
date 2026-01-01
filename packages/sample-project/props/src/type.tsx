@@ -56,46 +56,19 @@ interface Parent<T extends Child = any, TStr extends string = any>
   object: Object;
 }
 
-export const TypePropsVar: React.FC<Props> = ({ title, items }) => {
-  return (
-    <div>
-      <h1>{title}</h1>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
+export const TypePropsVar: React.FC<Test> = ({ title }) => {
+  return <div></div>;
 };
 
-export const TypePropsVarFunction: React.FC<Props> = function ({
+export const TypePropsVarFunction: React.FC<Parent> = function ({
   title,
   items,
 }) {
-  return (
-    <div>
-      <h1>{title}</h1>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <div></div>;
 };
 
-export const TypePropsVarInline = ({ title, items }: Props) => {
-  return (
-    <div>
-      <h1>{title}</h1>
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
+export const TypePropsVarInline = ({ title, items }: Child) => {
+  return <div></div>;
 };
 
 export const TypePropsVarInlineFunction = function ({ title, items }: Props) {

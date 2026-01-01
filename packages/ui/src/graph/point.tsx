@@ -1,5 +1,5 @@
 import type Konva from "konva";
-import React from "react";
+import React, { memo } from "react";
 import { Circle } from "react-konva";
 import Label, { type LabelData } from "./label";
 
@@ -14,35 +14,29 @@ type PointProps = {
   label?: LabelData;
 };
 
-const Point: React.FC<PointProps> = ({
-  id,
-  x,
-  y,
-  color = "blue",
-  radius = 10,
-  onDragMove,
-  onClick,
-  label,
-}) => {
-  return (
-    <Label
-      x={x}
-      y={y}
-      offsetY={radius + 10}
-      onDragMove={onDragMove}
-      onClick={onClick}
-      fill="white"
-      {...label}
-    >
-      <Circle
-        id={id}
-        radius={radius}
-        stroke={color}
-        strokeWidth={4}
-        fill={color}
-        perfectDrawEnabled={false}
-      />
-    </Label>
-  );
-};
+const Point: React.FC<PointProps> = memo(
+  ({ id, x, y, color = "blue", radius = 10, onDragMove, onClick, label }) => {
+    return (
+      <Label
+        x={x}
+        y={y}
+        offsetY={radius + 10}
+        onDragMove={onDragMove}
+        onClick={onClick}
+        fill="white"
+        {...label}
+      >
+        <Circle
+          id={id}
+          radius={radius}
+          stroke={color}
+          strokeWidth={4}
+          fill={color}
+          perfectDrawEnabled={false}
+        />
+      </Label>
+    );
+  }
+);
+
 export default Point;
