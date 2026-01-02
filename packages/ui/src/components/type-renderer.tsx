@@ -1,5 +1,5 @@
 import React, { type JSX } from "react";
-import type { TypeData } from "shared";
+import type { FuncParam, TypeData } from "shared";
 import { TypeColors } from "./type-colors";
 import { cn } from "@/lib/utils";
 import type { NodeData, ComboData } from "../graph/hook";
@@ -11,6 +11,92 @@ interface TypeRendererProps {
   combos: Record<string, ComboData> | undefined;
   depth?: number;
 }
+
+const FuncParamRenderer: React.FC<{
+  param: FuncParam;
+  nodes: Record<string, NodeData> | undefined;
+  combos: Record<string, ComboData> | undefined;
+  depth: number;
+}> = ({ param, nodes, combos, depth }) => {
+  // We need to import FuncParam or just use it. It's from shared.
+  const p = param;
+
+  switch (p.type) {
+    case "named":
+      return <span className={TypeColors.component}>{p.name}</span>;
+    case "rest-element":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>...</span>
+          <span className={TypeColors.component}>{p.name}</span>
+        </span>
+      );
+    case "object-pattern":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>{"{"}</span>
+          {p.property.map((prop, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              {prop.type === "object-property" ? (
+                <span>
+                  <span className={TypeColors.component}>{prop.key}</span>
+                  {!prop.shorthand && (
+                    <>
+                      <span className={TypeColors.punctuation}>: </span>
+                      <FuncParamRenderer
+                        param={prop.value}
+                        nodes={nodes}
+                        combos={combos}
+                        depth={depth}
+                      />
+                    </>
+                  )}
+                </span>
+              ) : (
+                <FuncParamRenderer
+                  param={prop}
+                  nodes={nodes}
+                  combos={combos}
+                  depth={depth}
+                />
+              )}
+            </React.Fragment>
+          ))}
+          <span className={TypeColors.punctuation}>{"}"}</span>
+        </span>
+      );
+    case "array-pattern":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>{"["}</span>
+          <span
+            className={cn(
+              "pl-4",
+              p.elements.length >= 3 ? "flex flex-col" : ""
+            )}
+          >
+            {p.elements.map((el, i) => (
+              <span key={i}>
+                <FuncParamRenderer
+                  param={el}
+                  nodes={nodes}
+                  combos={combos}
+                  depth={depth}
+                />
+                {i < p.elements.length - 1 && (
+                  <span className={TypeColors.punctuation}>, </span>
+                )}
+              </span>
+            ))}
+          </span>
+          <span className={TypeColors.punctuation}>{"]"}</span>
+        </span>
+      );
+    default:
+      return null;
+  }
+};
 
 export const TypeRenderer: React.FC<TypeRendererProps> = ({
   type,
@@ -227,6 +313,116 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
             depth={depth}
           />
           <span className={TypeColors.punctuation}>)</span>
+        </span>
+      );
+
+    case "tuple":
+      return (
+        <span className={TypeColors.punctuation}>
+          <span className={TypeColors.punctuation}>[</span>
+          {type.elements.map((element, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              {element.type == "named" && (
+                <>
+                  <span className={TypeColors.component}>{element.name}</span>
+                  <span>{`${element.optional ? "?" : ""}: `}</span>
+                </>
+              )}
+              <TypeRenderer
+                type={element.typeData}
+                nodes={nodes}
+                combos={combos}
+                depth={depth}
+              />
+            </React.Fragment>
+          ))}
+          <span className={TypeColors.punctuation}>]</span>
+        </span>
+      );
+    case "function":
+      return (
+        <span>
+          {type.params && type.params.length > 0 && (
+            <span className={TypeColors.punctuation}>
+              {"<"}
+              {type.params.map((p, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+                  <span className={TypeColors.component}>{p.name}</span>
+                  {p.constraint && (
+                    <>
+                      <span className={cn(TypeColors.punctuation, " mx-1")}>
+                        extends
+                      </span>
+                      <TypeRenderer
+                        type={p.constraint}
+                        nodes={nodes}
+                        combos={combos}
+                        depth={depth + 1}
+                      />
+                    </>
+                  )}
+                  {p.default && (
+                    <>
+                      <span className={cn(TypeColors.punctuation, " mx-1")}>
+                        =
+                      </span>
+                      <TypeRenderer
+                        type={p.default}
+                        nodes={nodes}
+                        combos={combos}
+                        depth={depth + 1}
+                      />
+                    </>
+                  )}
+                </React.Fragment>
+              ))}
+              {">"}
+            </span>
+          )}
+          <span className={TypeColors.punctuation}>(</span>
+          <span
+            className={cn(
+              type.parameters.length >= 3 ? "pl-4 flex flex-col" : ""
+            )}
+          >
+            {type.parameters.map((param, i) => (
+              <span key={i}>
+                <FuncParamRenderer
+                  param={param.param}
+                  nodes={nodes}
+                  combos={combos}
+                  depth={depth}
+                />
+                {param.optional ? (
+                  <span className={TypeColors.punctuation}>?</span>
+                ) : undefined}
+                {param.typeData && (
+                  <>
+                    <span className={TypeColors.punctuation}>: </span>
+                    <TypeRenderer
+                      type={param.typeData}
+                      nodes={nodes}
+                      combos={combos}
+                      depth={depth}
+                    />
+                  </>
+                )}
+                {i < type.parameters.length - 1 && (
+                  <span className={TypeColors.punctuation}>, </span>
+                )}
+              </span>
+            ))}
+          </span>
+          <span className={TypeColors.punctuation}>)</span>
+          <span className={TypeColors.punctuation}>{" => "}</span>
+          <TypeRenderer
+            type={type.return}
+            nodes={nodes}
+            combos={combos}
+            depth={depth}
+          />
         </span>
       );
 

@@ -54,6 +54,23 @@ interface Parent<T extends Child = any, TStr extends string = any>
   unary: -1;
   unary2: -1 | -2 | -10;
   object: Object;
+  c: (
+    x: number,
+    {
+      a,
+      b,
+      c: {
+        d: { e },
+      },
+      ...res
+    }: { a: string; b: boolean; c: { d: { e: number } }; f: number },
+    [y, z, { t }, ...arrRest]: [number, o: number, { t: number }, number],
+    ...rest: unknown[]
+  ) => void;
+  cb: () => void;
+  cb2: (a: string, b: number) => void;
+  cb3: (a: string, b: number) => number;
+  cb4: <T extends Child = any>(a: T, b?: number) => number;
 }
 
 export const TypePropsVar: React.FC<Test> = ({ title }) => {

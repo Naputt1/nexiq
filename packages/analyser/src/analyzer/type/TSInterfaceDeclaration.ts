@@ -76,7 +76,9 @@ export default function TSInterfaceDeclaration(
       typeData.extends = [];
       for (const ex of nodePath.node.extends) {
         //TODO: handle other type
-        if (ex.expression.type != "Identifier") continue;
+        if (ex.expression.type != "Identifier") {
+          continue;
+        }
         assert(ex.expression.type == "Identifier");
 
         typeData.extends.push(ex.expression.name);
