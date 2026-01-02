@@ -1,11 +1,18 @@
 import type { ComponentLoc } from "../component.js";
 import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
 export * from "./primitive.js";
+export * from "./object.js";
 
 export interface TypeDataParam {
   name: string;
   default?: TypeData;
   constraint?: TypeData;
+}
+
+export interface TypeDataParamFunction extends TypeDataParam {
+  const?: boolean;
+  in?: boolean;
+  out?: boolean;
 }
 
 export interface TypeDataDeclareBase {

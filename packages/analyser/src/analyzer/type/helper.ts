@@ -1,11 +1,116 @@
 import type {
   TypeData,
+  TypeDataFunction,
+  TypeDataFunctionParameter,
   TypeDataLiteralBody,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
+  TypeDataTuple,
 } from "shared/src/types/primitive.js";
 import * as t from "@babel/types";
 import assert from "assert";
+import type { FuncParam, TypeDataParamFunction } from "shared";
+
+function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
+  const data: TypeDataParamFunction = {
+    name: tsType.name,
+  };
+
+  if (tsType.constraint) {
+    data.constraint = getType(tsType.constraint);
+  }
+
+  if (tsType.default) {
+    data.default = getType(tsType.default);
+  }
+
+  if (tsType.in) {
+    data.in = true;
+  }
+
+  if (tsType.out) {
+    data.out = true;
+  }
+
+  return data;
+}
+
+function getFuncParam(
+  param: t.TSFunctionType["parameters"][number]
+): FuncParam {
+  switch (param.type) {
+    case "Identifier":
+      return {
+        type: "named",
+        name: param.name,
+      };
+    case "ObjectPattern": {
+      const funcParam: FuncParam = {
+        type: "object-pattern",
+        property: [],
+      };
+
+      for (const property of param.properties) {
+        if (property.type === "ObjectProperty") {
+          assert(property.key.type == "Identifier");
+
+          assert(
+            property.value.type == "Identifier" ||
+              property.value.type == "ObjectPattern" ||
+              property.value.type == "ArrayPattern" ||
+              property.value.type == "RestElement"
+          );
+
+          funcParam.property.push({
+            type: "object-property",
+            shorthand: property.shorthand,
+            key: property.key.name,
+            value: getFuncParam(property.value),
+          });
+        } else if (property.type == "RestElement") {
+          assert(property.argument.type == "Identifier");
+
+          funcParam.property.push({
+            type: "rest-element",
+            name: property.argument.name,
+          });
+        } else {
+          debugger;
+        }
+      }
+
+      return funcParam;
+    }
+    case "ArrayPattern": {
+      const funcParam: FuncParam = {
+        type: "array-pattern",
+        elements: [],
+      };
+
+      for (const element of param.elements) {
+        assert(element != null);
+
+        assert(
+          element.type == "Identifier" ||
+            element.type == "ObjectPattern" ||
+            element.type == "ArrayPattern" ||
+            element.type == "RestElement"
+        );
+
+        funcParam.elements.push(getFuncParam(element));
+      }
+
+      return funcParam;
+    }
+    case "RestElement":
+      assert(param.argument.type == "Identifier");
+
+      return {
+        type: "rest-element",
+        name: param.argument.name,
+      };
+  }
+}
 
 function getLiteralType(literal: t.TSLiteralType): TypeDataLiteralTypeLiteral {
   switch (literal.literal.type) {
@@ -268,6 +373,71 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
         type: "parenthesis",
         members: getType(tsType.typeAnnotation),
       };
+    }
+    case "TSFunctionType": {
+      assert(tsType.typeAnnotation != null);
+
+      const typeData: TypeDataFunction = {
+        type: "function",
+        params: [],
+        parameters: [],
+        return: getType(tsType.typeAnnotation),
+      };
+
+      // TODO: resolve ref type
+      if (tsType.typeParameters) {
+        typeData.params = [];
+        for (const param of tsType.typeParameters.params) {
+          typeData.params.push(getTypeParameter(param));
+        }
+      }
+
+      if (tsType.parameters) {
+        typeData.parameters = [];
+        for (const param of tsType.parameters) {
+          const parameter: TypeDataFunctionParameter = {
+            param: getFuncParam(param),
+          };
+
+          if (param.typeAnnotation) {
+            assert(t.isTSTypeAnnotation(param.typeAnnotation));
+
+            parameter.typeData = getType(param.typeAnnotation);
+          }
+
+          if ("optional" in param && param.optional) {
+            parameter.optional = true;
+          }
+
+          typeData.parameters.push(parameter);
+        }
+      }
+
+      return typeData;
+    }
+    case "TSTupleType": {
+      const typeData: TypeDataTuple = {
+        type: "tuple",
+        elements: [],
+      };
+
+      for (const element of tsType.elementTypes) {
+        if (element.type === "TSNamedTupleMember") {
+          typeData.elements.push({
+            type: "named",
+            name: element.label.name,
+            optional: element.optional,
+            typeData: getType(element.elementType),
+          });
+        } else {
+          typeData.elements.push({
+            type: "unnamed",
+            typeData: getType(element),
+          });
+        }
+      }
+
+      return typeData;
     }
     default: {
       debugger;

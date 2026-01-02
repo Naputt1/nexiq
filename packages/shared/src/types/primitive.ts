@@ -1,3 +1,5 @@
+import type { FuncParam, TypeDataParamFunction } from "./index.js";
+
 export interface TypeDataString {
   type: "string";
 }
@@ -99,6 +101,21 @@ export type TypeDataRef = {
     }
 );
 
+export type TypeDataFunctionParameter = {
+  param: FuncParam;
+  typeData?: TypeData;
+  optional?: boolean;
+};
+
+export type TypeDataFunction = {
+  type: "function";
+  // generic
+  params: TypeDataParamFunction[];
+  // function parameters
+  parameters: TypeDataFunctionParameter[];
+  return: TypeData;
+};
+
 export type TypeDataPrimitive =
   | TypeDataString
   | TypeDataNumber
@@ -111,11 +128,35 @@ export type TypeDataPrimitive =
   | TypeDataUnknown
   | TypeDataNever
   | TypeDataRef
-  | TypeDataLiteralType;
+  | TypeDataLiteralType
+  | TypeDataFunction;
 
 export interface TypeDataArray {
   type: "array";
   element: TypeData;
+}
+export interface TypeDataTupleElementBase {
+  type: "named" | "unnamed";
+  typeData: TypeData;
+}
+
+export interface TypeDataTupleElementNamed extends TypeDataTupleElementBase {
+  type: "named";
+  name: string;
+  optional: boolean;
+}
+
+export interface TypeDataTupleElementUnNamed extends TypeDataTupleElementBase {
+  type: "unnamed";
+}
+
+export type TypeDataTupleElement =
+  | TypeDataTupleElementNamed
+  | TypeDataTupleElementUnNamed;
+
+export interface TypeDataTuple {
+  type: "tuple";
+  elements: TypeDataTupleElement[];
 }
 
 export interface TypeDataLiteralBodyBase {
@@ -168,6 +209,7 @@ export interface TypeDataTypeBodyIntersection {
 export type TypeData =
   | TypeDataPrimitive
   | TypeDataArray
+  | TypeDataTuple
   | TypeDataTypeBodyLiteral
   | TypeDataTypeBodyUnion
   | TypeDataTypeBodyIntersection

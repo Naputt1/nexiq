@@ -676,6 +676,342 @@
                 "refType": "named",
                 "name": "Object"
               }
+            },
+            {
+              "signatureType": "property",
+              "name": "c",
+              "type": {
+                "type": "function",
+                "params": [],
+                "parameters": [
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "x"
+                    },
+                    "typeData": {
+                      "type": "number"
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "object-pattern",
+                      "property": [
+                        {
+                          "type": "object-property",
+                          "shorthand": true,
+                          "key": "a",
+                          "value": {
+                            "type": "named",
+                            "name": "a"
+                          }
+                        },
+                        {
+                          "type": "object-property",
+                          "shorthand": true,
+                          "key": "b",
+                          "value": {
+                            "type": "named",
+                            "name": "b"
+                          }
+                        },
+                        {
+                          "type": "object-property",
+                          "shorthand": false,
+                          "key": "c",
+                          "value": {
+                            "type": "object-pattern",
+                            "property": [
+                              {
+                                "type": "object-property",
+                                "shorthand": false,
+                                "key": "d",
+                                "value": {
+                                  "type": "object-pattern",
+                                  "property": [
+                                    {
+                                      "type": "object-property",
+                                      "shorthand": true,
+                                      "key": "e",
+                                      "value": {
+                                        "type": "named",
+                                        "name": "e"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "rest-element",
+                          "name": "res"
+                        }
+                      ]
+                    },
+                    "typeData": {
+                      "type": "type-literal",
+                      "members": [
+                        {
+                          "signatureType": "property",
+                          "name": "a",
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        {
+                          "signatureType": "property",
+                          "name": "b",
+                          "type": {
+                            "type": "boolean"
+                          }
+                        },
+                        {
+                          "signatureType": "property",
+                          "name": "c",
+                          "type": {
+                            "type": "type-literal",
+                            "members": [
+                              {
+                                "signatureType": "property",
+                                "name": "d",
+                                "type": {
+                                  "type": "type-literal",
+                                  "members": [
+                                    {
+                                      "signatureType": "property",
+                                      "name": "e",
+                                      "type": {
+                                        "type": "number"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "signatureType": "property",
+                          "name": "f",
+                          "type": {
+                            "type": "number"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "array-pattern",
+                      "elements": [
+                        {
+                          "type": "named",
+                          "name": "y"
+                        },
+                        {
+                          "type": "named",
+                          "name": "z"
+                        },
+                        {
+                          "type": "object-pattern",
+                          "property": [
+                            {
+                              "type": "object-property",
+                              "shorthand": true,
+                              "key": "t",
+                              "value": {
+                                "type": "named",
+                                "name": "t"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rest-element",
+                          "name": "arrRest"
+                        }
+                      ]
+                    },
+                    "typeData": {
+                      "type": "tuple",
+                      "elements": [
+                        {
+                          "type": "unnamed",
+                          "typeData": {
+                            "type": "number"
+                          }
+                        },
+                        {
+                          "type": "named",
+                          "name": "o",
+                          "optional": false,
+                          "typeData": {
+                            "type": "number"
+                          }
+                        },
+                        {
+                          "type": "unnamed",
+                          "typeData": {
+                            "type": "type-literal",
+                            "members": [
+                              {
+                                "signatureType": "property",
+                                "name": "t",
+                                "type": {
+                                  "type": "number"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "unnamed",
+                          "typeData": {
+                            "type": "number"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "rest-element",
+                      "name": "rest"
+                    },
+                    "typeData": {
+                      "type": "array",
+                      "element": {
+                        "type": "unknown"
+                      }
+                    }
+                  }
+                ],
+                "return": {
+                  "type": "void"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "cb",
+              "type": {
+                "type": "function",
+                "params": [],
+                "parameters": [],
+                "return": {
+                  "type": "void"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "cb2",
+              "type": {
+                "type": "function",
+                "params": [],
+                "parameters": [
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "a"
+                    },
+                    "typeData": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "b"
+                    },
+                    "typeData": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "return": {
+                  "type": "void"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "cb3",
+              "type": {
+                "type": "function",
+                "params": [],
+                "parameters": [
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "a"
+                    },
+                    "typeData": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "b"
+                    },
+                    "typeData": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "return": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "cb4",
+              "type": {
+                "type": "function",
+                "params": [
+                  {
+                    "name": "T",
+                    "constraint": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "Child"
+                    },
+                    "default": {
+                      "type": "any"
+                    }
+                  }
+                ],
+                "parameters": [
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "a"
+                    },
+                    "typeData": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "T"
+                    }
+                  },
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "b"
+                    },
+                    "typeData": {
+                      "type": "number"
+                    },
+                    "optional": true
+                  }
+                ],
+                "return": {
+                  "type": "number"
+                }
+              }
             }
           ],
           "loc": {
@@ -729,17 +1065,17 @@
           "var": {},
           "type": "function",
           "loc": {
-            "line": 59,
+            "line": 76,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 59,
+              "line": 76,
               "column": 13
             },
             "end": {
-              "line": 59,
-              "column": 42
+              "line": 76,
+              "column": 41
             }
           },
           "file": "/src/type.tsx",
@@ -750,10 +1086,6 @@
             {
               "name": "title",
               "type": "any"
-            },
-            {
-              "name": "items",
-              "type": "any"
             }
           ],
           "effects": {},
@@ -762,7 +1094,7 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "Props"
+            "name": "Test"
           }
         },
         "349d4ecc-273a-4e15-b915-cd9598704c57": {
@@ -773,17 +1105,17 @@
           "var": {},
           "type": "function",
           "loc": {
-            "line": 72,
+            "line": 80,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 72,
+              "line": 80,
               "column": 13
             },
             "end": {
-              "line": 72,
-              "column": 50
+              "line": 80,
+              "column": 51
             }
           },
           "file": "/src/type.tsx",
@@ -806,7 +1138,7 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "Props"
+            "name": "Parent"
           }
         },
         "aa090036-355a-4b94-a325-4b02393cd1de": {
@@ -817,16 +1149,16 @@
           "var": {},
           "type": "function",
           "loc": {
-            "line": 88,
+            "line": 87,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 88,
+              "line": 87,
               "column": 13
             },
             "end": {
-              "line": 88,
+              "line": 87,
               "column": 31
             }
           },
@@ -850,7 +1182,7 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "Props"
+            "name": "Child"
           }
         },
         "42d3fabc-a292-4505-a161-79335af5dd21": {
@@ -861,16 +1193,16 @@
           "var": {},
           "type": "function",
           "loc": {
-            "line": 101,
+            "line": 91,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 101,
+              "line": 91,
               "column": 13
             },
             "end": {
-              "line": 101,
+              "line": 91,
               "column": 39
             }
           },
@@ -905,16 +1237,16 @@
           "var": {},
           "type": "function",
           "loc": {
-            "line": 114,
+            "line": 104,
             "column": 16
           },
           "scope": {
             "start": {
-              "line": 114,
+              "line": 104,
               "column": 16
             },
             "end": {
-              "line": 114,
+              "line": 104,
               "column": 33
             }
           },
