@@ -159,6 +159,12 @@ export interface TypeDataTuple {
   elements: TypeDataTupleElement[];
 }
 
+export interface TypeDataIndexAccess {
+  type: "index-access";
+  indexType: TypeData;
+  objectType: TypeData;
+}
+
 export interface TypeDataLiteralBodyBase {
   signatureType: "property" | "index";
   type: TypeData;
@@ -210,6 +216,7 @@ export type TypeData =
   | TypeDataPrimitive
   | TypeDataArray
   | TypeDataTuple
+  | TypeDataIndexAccess
   | TypeDataTypeBodyLiteral
   | TypeDataTypeBodyUnion
   | TypeDataTypeBodyIntersection
