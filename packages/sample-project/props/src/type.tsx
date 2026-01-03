@@ -73,6 +73,9 @@ interface Parent<T extends Child = any, TStr extends string = any>
   cb4: <T extends Child = any>(a: T, b?: number) => number;
 }
 
+type func = (a: string, b: number) => number;
+type funcP1 = Parameters<func>[0];
+
 export const TypePropsVar: React.FC<Test> = ({ title }) => {
   return <div></div>;
 };

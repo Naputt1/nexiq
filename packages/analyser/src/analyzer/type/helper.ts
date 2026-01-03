@@ -439,6 +439,13 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
 
       return typeData;
     }
+    case "TSIndexedAccessType":
+      // TODO: resolve ref types
+      return {
+        type: "index-access",
+        indexType: getType(tsType.indexType),
+        objectType: getType(tsType.objectType),
+      };
     default: {
       debugger;
     }

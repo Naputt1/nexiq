@@ -425,7 +425,25 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           />
         </span>
       );
-
+    case "index-access":
+      return (
+        <span>
+          <TypeRenderer
+            type={type.objectType}
+            nodes={nodes}
+            combos={combos}
+            depth={depth}
+          />
+          <span className={TypeColors.punctuation}>{"["}</span>
+          <TypeRenderer
+            type={type.indexType}
+            nodes={nodes}
+            combos={combos}
+            depth={depth}
+          />
+          <span className={TypeColors.punctuation}>{"]"}</span>
+        </span>
+      );
     default:
       return (
         <span className={TypeColors.default}>
