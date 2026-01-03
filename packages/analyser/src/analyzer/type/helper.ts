@@ -203,6 +203,52 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
   return id;
 }
 
+export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
+  if (member.type === "TSPropertySignature") {
+    if (
+      member.key.type !== "Identifier" ||
+      member.typeAnnotation?.type !== "TSTypeAnnotation"
+    ) {
+      return null;
+    }
+
+    const body: TypeDataLiteralBody = {
+      signatureType: "property",
+      name: member.key.name,
+      type: getType(member.typeAnnotation.typeAnnotation),
+    };
+
+    if (member.optional) {
+      body.optional = true;
+    }
+
+    if (member.computed) {
+      body.computed = true;
+    }
+
+    return body;
+  } else if (member.type === "TSIndexSignature") {
+    if (
+      member.typeAnnotation?.type !== "TSTypeAnnotation" ||
+      member.parameters.length !== 1 ||
+      member.parameters[0]!.typeAnnotation?.type !== "TSTypeAnnotation"
+    ) {
+      return null;
+    }
+
+    return {
+      signatureType: "index",
+      type: getType(member.typeAnnotation.typeAnnotation),
+      parameter: {
+        name: member.parameters[0]!.name,
+        type: getType(member.parameters[0]!.typeAnnotation.typeAnnotation),
+      },
+    };
+  }
+
+  return null;
+}
+
 export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
   if (tsType.type === "TSTypeAnnotation") {
     return getType(tsType.typeAnnotation);
