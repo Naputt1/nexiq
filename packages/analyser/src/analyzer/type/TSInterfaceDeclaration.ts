@@ -4,7 +4,7 @@ import type { TypeDataDeclareInterface, TypeDataParam } from "shared";
 import assert from "assert";
 import type { ComponentDB } from "../../db/componentDB.js";
 import type { TypeDataLiteralBody } from "shared/src/types/primitive.js";
-import { getType } from "./helper.js";
+import { getType, getMember } from "./helper.js";
 
 export default function TSInterfaceDeclaration(
   componentDB: ComponentDB,
@@ -22,46 +22,9 @@ export default function TSInterfaceDeclaration(
     const bodies: TypeDataLiteralBody[] = [];
 
     for (const b of nodePath.node.body.body) {
-      //TODO: handle other type
-      if (b.type === "TSPropertySignature") {
-        if (
-          b.key.type != "Identifier" ||
-          b.typeAnnotation?.type != "TSTypeAnnotation"
-        )
-          continue;
-        assert(b.key.type == "Identifier");
-        assert(b.typeAnnotation?.type == "TSTypeAnnotation");
-
-        const body: TypeDataLiteralBody = {
-          signatureType: "property",
-          name: b.key.name,
-          type: getType(b.typeAnnotation.typeAnnotation),
-        };
-
-        if (b.optional) {
-          body.optional = true;
-        }
-
-        if (b.computed) {
-          body.computed = true;
-        }
-
-        bodies.push(body);
-      } else if (b.type === "TSIndexSignature") {
-        assert(b.typeAnnotation?.type == "TSTypeAnnotation");
-        assert(b.parameters.length == 1);
-        assert(b.parameters[0]!.typeAnnotation?.type == "TSTypeAnnotation");
-
-        bodies.push({
-          signatureType: "index",
-          type: getType(b.typeAnnotation.typeAnnotation),
-          parameter: {
-            name: b.parameters[0]!.name,
-            type: getType(b.parameters[0]!.typeAnnotation.typeAnnotation),
-          },
-        });
-      } else {
-        debugger;
+      const result = getMember(b);
+      if (result) {
+        bodies.push(result);
       }
     }
 
