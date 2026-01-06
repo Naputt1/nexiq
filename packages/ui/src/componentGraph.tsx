@@ -22,10 +22,14 @@ const ComponentGraph = () => {
   });
 
   const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [matches, setMatches] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   const graphRef = useRef<GraphRef>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = async () => {
     try {
@@ -198,7 +202,11 @@ const ComponentGraph = () => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "f") {
         e.preventDefault();
-        setIsSearchOpen((prev) => !prev);
+        if (isSearchOpen) {
+          searchInputRef.current?.select();
+        } else {
+          setIsSearchOpen(true);
+        }
       }
       if (e.key === "Escape") {
         setIsSearchOpen(false);
@@ -219,51 +227,86 @@ const ComponentGraph = () => {
     };
   }, [isSearchOpen, matches, currentMatchIndex]);
 
+  // Focus and select search input when opened
+  useEffect(() => {
+    if (isSearchOpen) {
+      // Small delay to ensure the input is rendered and focused
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }, 10);
+    }
+  }, [isSearchOpen]);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 200);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  // Trigger search when debounced value changes
+  useEffect(() => {
+    performSearch(debouncedSearch);
+  }, [debouncedSearch]);
+
+  const performSearch = (value: string) => {
+    graph.batch(() => {
+      if (value === "") {
+        setMatches([]);
+        setCurrentMatchIndex(-1);
+        resetHighlights();
+        return;
+      }
+
+      const lowerValue = value.toLowerCase();
+      const newMatches: string[] = [];
+
+      const combos = graph.getAllCombos();
+      for (const combo of combos) {
+        const isMatch = combo.label?.text.toLowerCase().includes(lowerValue);
+        if (isMatch) {
+          if (combo.color !== "red") {
+            combo.color = "red";
+            graph.updateCombo(combo);
+          }
+          newMatches.push(combo.id);
+        } else if (combo.color === "red") {
+          combo.color = "blue";
+          graph.updateCombo(combo);
+        }
+      }
+
+      const nodes = graph.getAllNodes();
+      for (const node of nodes) {
+        const isMatch = node.label?.text.toLowerCase().includes(lowerValue);
+        if (isMatch) {
+          if (node.color !== "red") {
+            node.color = "red";
+            graph.updateNode(node);
+          }
+          newMatches.push(node.id);
+        } else if (node.color === "red") {
+          node.color = "blue";
+          graph.updateNode(node);
+        }
+      }
+
+      setMatches(newMatches);
+      if (newMatches.length > 0) {
+        setCurrentMatchIndex(0);
+        graph.expandAncestors(newMatches[0]);
+        graphRef.current?.focusItem(newMatches[0], 1.5);
+        setSelectedId(newMatches[0]);
+      } else {
+        setCurrentMatchIndex(-1);
+      }
+    });
+  };
+
   const onSearch = (value: string) => {
     setSearch(value);
-
-    if (value === "") {
-      setMatches([]);
-      setCurrentMatchIndex(-1);
-      resetHighlights();
-      return;
-    }
-
-    const lowerValue = value.toLowerCase();
-    const newMatches: string[] = [];
-
-    const combos = graph.getAllCombos();
-    for (const combo of Object.values(combos)) {
-      if (combo.label?.text.toLowerCase().includes(lowerValue)) {
-        combo.color = "red";
-        graph.updateCombo(combo);
-        newMatches.push(combo.id);
-      } else if (combo.color == "red") {
-        combo.color = "blue";
-        graph.updateCombo(combo);
-      }
-    }
-
-    const nodes = graph.getAllNodes();
-    for (const node of Object.values(nodes)) {
-      if (node.label?.text.toLowerCase().includes(lowerValue)) {
-        node.color = "red";
-        graph.updateNode(node);
-        newMatches.push(node.id);
-      } else if (node.color == "red") {
-        node.color = "blue";
-        graph.updateNode(node);
-      }
-    }
-
-    setMatches(newMatches);
-    if (newMatches.length > 0) {
-      setCurrentMatchIndex(0);
-      graph.expandAncestors(newMatches[0]);
-      graphRef.current?.focusItem(newMatches[0], 1.5); // Zoom in on first match
-    } else {
-      setCurrentMatchIndex(-1);
-    }
   };
 
   const resetHighlights = () => {
@@ -289,6 +332,7 @@ const ComponentGraph = () => {
     setCurrentMatchIndex(nextIndex);
     graph.expandAncestors(matches[nextIndex]);
     graphRef.current?.focusItem(matches[nextIndex], 1.5);
+    setSelectedId(matches[nextIndex]);
   };
 
   const goToPrevMatch = () => {
@@ -297,9 +341,8 @@ const ComponentGraph = () => {
     setCurrentMatchIndex(prevIndex);
     graph.expandAncestors(matches[prevIndex]);
     graphRef.current?.focusItem(matches[prevIndex], 1.5);
+    setSelectedId(matches[prevIndex]);
   };
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const onSelect = (id: string) => {
     setSelectedId(id);
@@ -342,6 +385,7 @@ const ComponentGraph = () => {
           <div className="flex items-center gap-1">
             <div className="relative flex items-center">
               <input
+                ref={searchInputRef}
                 autoFocus
                 type="text"
                 value={search}
