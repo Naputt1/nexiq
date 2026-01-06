@@ -162,6 +162,8 @@ export class GraphData {
 
   private innerCallback: Map<string, InnerCallBack> = new Map();
 
+  private isBatching = false;
+
   constructor(
     nodes: NodeData[],
     edges: EdgeData[],
@@ -197,8 +199,32 @@ export class GraphData {
   }
 
   private trigger(data: GraphDataCallbackParams) {
+    if (this.isBatching) return;
     for (const cb of Object.values(this.callback)) {
       cb(data);
+    }
+  }
+
+  public batch(fn: () => void) {
+    const prevBatching = this.isBatching;
+    this.isBatching = true;
+    try {
+      fn();
+    } finally {
+      this.isBatching = prevBatching;
+      if (!this.isBatching) {
+        // this.refresh();
+      }
+    }
+  }
+
+  public refresh() {
+    this.trigger({ type: "new-nodes" });
+    this.trigger({ type: "new-combos" });
+    this.trigger({ type: "new-edges" });
+
+    for (const c of this.combos.values()) {
+      this.innerCallback.get(c.id)?.({ type: "layout-change" });
     }
   }
 
