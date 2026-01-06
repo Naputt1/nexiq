@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ComponentFile, ComponentFileVar, JsonData } from "shared";
+import type {
+  ComponentFile,
+  ComponentFileVar,
+  JsonData,
+  TypeDataDeclare,
+} from "shared";
 import useGraph, {
   type ComboData,
   type EdgeData,
@@ -28,6 +33,10 @@ const ComponentGraph = () => {
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const [typeData, settypeData] = useState<{ [key: string]: TypeDataDeclare }>(
+    {}
+  );
+
   const graphRef = useRef<GraphRef>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +48,7 @@ const ComponentGraph = () => {
 
       const combos: ComboData[] = [];
       const nodes: NodeData[] = [];
+      const edges: EdgeData[] = [];
 
       const addCombo = (
         variable: ComponentFileVar,
@@ -73,15 +83,34 @@ const ComponentGraph = () => {
 
         for (const state of Object.values(variable.states)) {
           nodes.push({
-            id: `${variable.id}-state-${state.value}`,
+            id: state.id,
             label: {
               text: state.value,
             },
-            // title: `${n.file}\nstate: ${state.value}`,
+            type: "state",
             color: "red",
             combo: variable.id,
             fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
           });
+        }
+
+        for (const effect of Object.values(variable.effects)) {
+          nodes.push({
+            id: effect.id,
+            type: "effect",
+            color: "yellow",
+            combo: variable.id,
+            fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+          });
+
+          for (const dep of effect.dependencies) {
+            edges.push({
+              id: `${dep}-${effect.id}`,
+              source: dep,
+              target: effect.id,
+              combo: variable.id,
+            });
+          }
         }
 
         for (const render of Object.values(variable.renders)) {
@@ -93,7 +122,6 @@ const ComponentGraph = () => {
                 label: {
                   text: v.name,
                 },
-                // title: `${n.file}\nstate: ${state.value}`,
                 combo: `${variable.id}-render`,
                 fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
               });
@@ -107,6 +135,7 @@ const ComponentGraph = () => {
         }
       };
 
+      const newTypeData: { [key: string]: TypeDataDeclare } = {};
       for (const file of Object.values(graphData.files)) {
         for (const variable of Object.values(file.var)) {
           addCombo(variable, file);
@@ -114,44 +143,13 @@ const ComponentGraph = () => {
 
         if (file.tsTypes) {
           for (const typeDeclare of Object.values(file.tsTypes)) {
-            const fileName = `${graphData.src}${file.path}`;
-            // Use a simpler ID for matching references by name if possible,
-            // but for uniqueness across files we need something robust.
-            // Ideally references should be resolved to this ID.
-            // For now, let's use a consistent ID format.
-            const id = `${typeDeclare.id}`;
-
-            nodes.push({
-              id: id,
-              label: {
-                text: typeDeclare.name,
-              },
-              color: "#4ade80", // Green color as requested
-              fileName: `${fileName}:${typeDeclare.loc.line}:${typeDeclare.loc.column}`,
-              type: typeDeclare.type, // "type" or "interface"
-              propType:
-                typeDeclare.type === "type"
-                  ? typeDeclare.body
-                  : {
-                      type: "type-literal",
-                      members: typeDeclare.body,
-                    },
-              typeParams: typeDeclare.params
-                ? Array.isArray(typeDeclare.params)
-                  ? typeDeclare.params
-                  : Object.values(typeDeclare.params)
-                : undefined,
-              combo: undefined, // Root level or we could check if file should be a combo
-              extends:
-                typeDeclare.type === "interface"
-                  ? typeDeclare.extends
-                  : undefined,
-            });
+            newTypeData[typeDeclare.id] = typeDeclare;
           }
         }
       }
 
-      const edges: EdgeData[] = [];
+      settypeData(newTypeData);
+
       for (const e of Object.values(graphData.edges)) {
         edges.push({
           id: `${e.from}-${e.to}`,
@@ -378,6 +376,7 @@ const ComponentGraph = () => {
         selectedId={selectedId}
         nodes={nodesMap}
         combos={combosMap}
+        typeData={typeData}
         onClose={handleClose}
       />
       {isSearchOpen && (

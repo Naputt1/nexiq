@@ -482,12 +482,22 @@ export class File {
     );
 
     const newDependencies: string[] = [];
-    for (const dep of effect.dependencies) {
+    outer: for (const dep of effect.dependencies) {
       for (const state of Object.values(variable.states)) {
         if (state.value === dep) {
           newDependencies.push(state.id);
+          continue outer;
         }
       }
+
+      for (const prop of variable.props) {
+        if (prop.name == dep) {
+          newDependencies.push(dep);
+          continue outer;
+        }
+      }
+
+      debugger;
     }
 
     effect.dependencies = newDependencies;

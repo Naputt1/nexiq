@@ -173,6 +173,13 @@
           "source": "/src/type2.tsx",
           "type": "named",
           "importKind": "value"
+        },
+        "des": {
+          "localName": "des",
+          "importedName": "*",
+          "source": "/src/Destructuring.tsx",
+          "type": "namespace",
+          "importKind": "value"
         }
       },
       "export": {
@@ -180,31 +187,31 @@
           "name": "TypePropsVar",
           "type": "named",
           "exportKind": "value",
-          "id": "4b97fa8f-c781-4270-98cf-364a2c015862"
+          "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf"
         },
         "TypePropsVarFunction": {
           "name": "TypePropsVarFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
+          "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe"
         },
         "TypePropsVarInline": {
           "name": "TypePropsVarInline",
           "type": "named",
           "exportKind": "value",
-          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0"
+          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4"
         },
         "TypePropsVarInlineFunction": {
           "name": "TypePropsVarInlineFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "ad530bbc-a6d3-4231-998b-15368908343c"
+          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b"
         },
         "TypePropsFunction": {
           "name": "TypePropsFunction",
           "type": "named",
           "exportKind": "component",
-          "id": "349d4ecc-273a-4e15-b915-cd9598704c57"
+          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c"
         }
       },
       "defaultExport": null,
@@ -217,7 +224,7 @@
             "type": "string"
           },
           "loc": {
-            "line": 4,
+            "line": 5,
             "column": 5
           }
         },
@@ -296,7 +303,7 @@
             ]
           },
           "loc": {
-            "line": 6,
+            "line": 7,
             "column": 5
           }
         },
@@ -336,7 +343,7 @@
             ]
           },
           "loc": {
-            "line": 19,
+            "line": 20,
             "column": 5
           }
         },
@@ -365,7 +372,7 @@
             }
           ],
           "loc": {
-            "line": 25,
+            "line": 26,
             "column": 10
           }
         },
@@ -1015,7 +1022,7 @@
             }
           ],
           "loc": {
-            "line": 34,
+            "line": 35,
             "column": 10
           },
           "extends": ["71a5333c-fbc1-4ea1-9519-dce12e5b4a87"],
@@ -1074,7 +1081,7 @@
             }
           },
           "loc": {
-            "line": 76,
+            "line": 77,
             "column": 5
           }
         },
@@ -1105,7 +1112,98 @@
             }
           },
           "loc": {
-            "line": 77,
+            "line": 78,
+            "column": 5
+          }
+        },
+        "4b97fa8f-c781-4270-98cf-364a2c015862": {
+          "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+          "type": "type",
+          "name": "y2",
+          "body": {
+            "type": "query",
+            "expr": {
+              "type": "ref",
+              "refType": "named",
+              "name": "Test65"
+            }
+          },
+          "loc": {
+            "line": 80,
+            "column": 5
+          }
+        },
+        "f32b5a8c-0aa5-4307-9def-75171a5fff83": {
+          "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+          "type": "type",
+          "name": "y3",
+          "body": {
+            "type": "query",
+            "expr": {
+              "type": "ref",
+              "refType": "qualified",
+              "names": ["des", "DestructuringProps"]
+            }
+          },
+          "loc": {
+            "line": 81,
+            "column": 5
+          }
+        },
+        "d1b317ec-f1dc-4dec-baee-7696d1e8bea5": {
+          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
+          "type": "type",
+          "name": "y4",
+          "body": {
+            "type": "query",
+            "expr": {
+              "type": "import",
+              "name": "./Destructuring.tsx"
+            }
+          },
+          "loc": {
+            "line": 82,
+            "column": 5
+          }
+        },
+        "5909b328-1690-4605-9200-a15584ba44b1": {
+          "id": "5909b328-1690-4605-9200-a15584ba44b1",
+          "type": "type",
+          "name": "y5",
+          "body": {
+            "type": "query",
+            "expr": {
+              "type": "import",
+              "name": "./Destructuring.tsx",
+              "qualifier": "DestructuringProps"
+            }
+          },
+          "loc": {
+            "line": 83,
+            "column": 5
+          }
+        },
+        "39e733ca-65d4-4612-ba06-dcf283e974a0": {
+          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0",
+          "type": "type",
+          "name": "x",
+          "body": {
+            "type": "ref",
+            "refType": "named",
+            "name": "ReturnType",
+            "params": [
+              {
+                "type": "query",
+                "expr": {
+                  "type": "ref",
+                  "refType": "named",
+                  "name": "create"
+                }
+              }
+            ]
+          },
+          "loc": {
+            "line": 86,
             "column": 5
           }
         }
@@ -1119,29 +1217,29 @@
           "var": {},
           "type": "data",
           "loc": {
-            "line": 30,
+            "line": 31,
             "column": 6
           },
           "components": {}
         },
-        "4b97fa8f-c781-4270-98cf-364a2c015862": {
-          "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+        "3b8a1b0c-e673-490f-b319-49dfc33ecbbf": {
+          "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf",
           "name": "TypePropsVar",
           "variableType": "component",
           "dependencies": {},
           "var": {},
           "type": "function",
           "loc": {
-            "line": 79,
+            "line": 88,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 79,
+              "line": 88,
               "column": 13
             },
             "end": {
-              "line": 79,
+              "line": 88,
               "column": 41
             }
           },
@@ -1164,24 +1262,24 @@
             "name": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
           }
         },
-        "d1b317ec-f1dc-4dec-baee-7696d1e8bea5": {
-          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
+        "6c8881e7-248b-47fc-a2b9-c334971eb9fe": {
+          "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe",
           "name": "TypePropsVarFunction",
           "variableType": "component",
           "dependencies": {},
           "var": {},
           "type": "function",
           "loc": {
-            "line": 83,
+            "line": 92,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 83,
+              "line": 92,
               "column": 13
             },
             "end": {
-              "line": 83,
+              "line": 92,
               "column": 51
             }
           },
@@ -1208,24 +1306,24 @@
             "name": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
           }
         },
-        "39e733ca-65d4-4612-ba06-dcf283e974a0": {
-          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0",
+        "186e1276-819b-4e0b-bd90-165ae049a9f4": {
+          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4",
           "name": "TypePropsVarInline",
           "variableType": "component",
           "dependencies": {},
           "var": {},
           "type": "function",
           "loc": {
-            "line": 90,
+            "line": 99,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 90,
+              "line": 99,
               "column": 13
             },
             "end": {
-              "line": 90,
+              "line": 99,
               "column": 31
             }
           },
@@ -1252,24 +1350,24 @@
             "name": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87"
           }
         },
-        "ad530bbc-a6d3-4231-998b-15368908343c": {
-          "id": "ad530bbc-a6d3-4231-998b-15368908343c",
+        "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
+          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
           "name": "TypePropsVarInlineFunction",
           "variableType": "component",
           "dependencies": {},
           "var": {},
           "type": "function",
           "loc": {
-            "line": 94,
+            "line": 103,
             "column": 13
           },
           "scope": {
             "start": {
-              "line": 94,
+              "line": 103,
               "column": 13
             },
             "end": {
-              "line": 94,
+              "line": 103,
               "column": 39
             }
           },
@@ -1296,24 +1394,24 @@
             "name": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159"
           }
         },
-        "349d4ecc-273a-4e15-b915-cd9598704c57": {
-          "id": "349d4ecc-273a-4e15-b915-cd9598704c57",
+        "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c": {
+          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
           "name": "TypePropsFunction",
           "variableType": "component",
           "dependencies": {},
           "var": {},
           "type": "function",
           "loc": {
-            "line": 107,
+            "line": 116,
             "column": 16
           },
           "scope": {
             "start": {
-              "line": 107,
+              "line": 116,
               "column": 16
             },
             "end": {
-              "line": 107,
+              "line": 116,
               "column": 33
             }
           },
@@ -1383,14 +1481,14 @@
           "name": "DestructuringProps",
           "type": "named",
           "exportKind": "value",
-          "id": "aa090036-355a-4b94-a325-4b02393cd1de"
+          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "aa090036-355a-4b94-a325-4b02393cd1de": {
-          "id": "aa090036-355a-4b94-a325-4b02393cd1de",
+        "160568c3-c878-41fa-a2d7-8a528b4fc107": {
+          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
           "name": "DestructuringProps",
           "variableType": "component",
           "dependencies": {},
@@ -1489,14 +1587,14 @@
           "name": "App",
           "type": "named",
           "exportKind": "component",
-          "id": "42d3fabc-a292-4505-a161-79335af5dd21"
+          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "42d3fabc-a292-4505-a161-79335af5dd21": {
-          "id": "42d3fabc-a292-4505-a161-79335af5dd21",
+        "fc9d69c7-9955-435e-a79e-5e7607fa910b": {
+          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
           "name": "App",
           "variableType": "component",
           "dependencies": {},
@@ -1524,8 +1622,8 @@
           "effects": {},
           "contexts": [],
           "renders": {
-            "aa090036-355a-4b94-a325-4b02393cd1de": {
-              "id": "aa090036-355a-4b94-a325-4b02393cd1de",
+            "160568c3-c878-41fa-a2d7-8a528b4fc107": {
+              "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
               "dependencies": [
                 {
                   "id": "title",
@@ -1549,8 +1647,8 @@
   },
   "edges": [
     {
-      "from": "aa090036-355a-4b94-a325-4b02393cd1de",
-      "to": "42d3fabc-a292-4505-a161-79335af5dd21",
+      "from": "160568c3-c878-41fa-a2d7-8a528b4fc107",
+      "to": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
       "label": "render"
     }
   ]
