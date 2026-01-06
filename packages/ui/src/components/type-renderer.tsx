@@ -444,6 +444,31 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           <span className={TypeColors.punctuation}>{"]"}</span>
         </span>
       );
+    case "query":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>{"typeof "}</span>
+          <TypeRenderer
+            type={type.expr}
+            nodes={nodes}
+            combos={combos}
+            depth={depth}
+          />
+        </span>
+      );
+    case "import":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>{"import("}</span>
+          <span className={TypeColors.component}>"{type.name}"</span>
+          <span className={TypeColors.punctuation}>{")"}</span>
+          {type.qualifier && (
+            <span className={TypeColors.punctuation}>
+              {`.${type.qualifier}`}
+            </span>
+          )}
+        </span>
+      );
     default:
       return (
         <span className={TypeColors.default}>
