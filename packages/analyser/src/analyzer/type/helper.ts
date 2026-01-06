@@ -2,8 +2,10 @@ import type {
   TypeData,
   TypeDataFunction,
   TypeDataFunctionParameter,
+  TypeDataImport,
   TypeDataLiteralBody,
   TypeDataLiteralTypeLiteral,
+  TypeDataQuery,
   TypeDataRef,
   TypeDataTuple,
 } from "shared/src/types/primitive.js";
@@ -492,6 +494,46 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
         indexType: getType(tsType.indexType),
         objectType: getType(tsType.objectType),
       };
+    case "TSTypeQuery":
+      if (tsType.exprName.type == "Identifier") {
+        return {
+          type: "query",
+          expr: {
+            type: "ref",
+            refType: "named",
+            name: tsType.exprName.name,
+          },
+        };
+      } else if (tsType.exprName.type == "TSQualifiedName") {
+        return {
+          type: "query",
+          expr: {
+            type: "ref",
+            refType: "qualified",
+            names: getQualifiedName(tsType.exprName),
+          },
+        };
+      } else if (tsType.exprName.type == "TSImportType") {
+        const expr: TypeDataImport = {
+          type: "import",
+          name: tsType.exprName.argument.value,
+        };
+
+        if (tsType.exprName.qualifier) {
+          assert(tsType.exprName.qualifier.type == "Identifier");
+
+          expr.qualifier = tsType.exprName.qualifier.name;
+        }
+
+        return {
+          type: "query",
+          expr,
+        };
+      } else {
+        debugger;
+      }
+
+      break;
     default: {
       debugger;
     }
