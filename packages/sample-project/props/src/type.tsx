@@ -1,5 +1,6 @@
 import React from "react";
 import { Child4, Test3 } from "./type2";
+import * as des from "./Destructuring.tsx";
 
 type stringAlias = string;
 
@@ -75,6 +76,14 @@ interface Parent<T extends Child = any, TStr extends string = any>
 
 type func = (a: string, b: number) => number;
 type funcP1 = Parameters<func>[0];
+
+type y2 = typeof Test65;
+type y3 = typeof des.DestructuringProps;
+type y4 = typeof import("./Destructuring.tsx");
+type y5 = typeof import("./Destructuring.tsx").DestructuringProps;
+
+declare function create<T>(): T;
+type x = ReturnType<typeof create<string>>;
 
 export const TypePropsVar: React.FC<Test> = ({ title }) => {
   return <div></div>;

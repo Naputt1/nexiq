@@ -26,12 +26,40 @@ import type {
   TypeData,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
+  TypeDataArray,
+  TypeDataTypeBodyUnion,
+  TypeDataTypeBodyIntersection,
+  TypeDataTypeBodyParathesis,
+  TypeDataTypeBodyLiteral,
+  TypeDataFunction,
+  TypeDataTuple,
+  TypeDataIndexAccess,
 } from "shared/src/types/primitive.js";
 
 interface FileIds {
   id: string;
   var: Map<string, FileIds>;
 }
+
+type TypeDataHandlerMap = {
+  ref: TypeDataRef;
+  union: TypeDataTypeBodyUnion;
+  intersection: TypeDataTypeBodyIntersection;
+  array: TypeDataArray;
+  parenthesis: TypeDataTypeBodyParathesis;
+  "type-literal": TypeDataTypeBodyLiteral;
+  "literal-type": { literal: TypeDataLiteralTypeLiteral };
+  function: TypeDataFunction;
+  tuple: TypeDataTuple;
+  "index-access": TypeDataIndexAccess;
+};
+
+type TypeDataHandler<T> = (
+  db: FileDB,
+  td: T,
+  file: File,
+  params: Set<string>
+) => boolean;
 
 export class File {
   path: string;
@@ -70,18 +98,8 @@ export class File {
     });
   }
 
-  private getVarID(name: string): string | null {
-    for (const [id, variable] of this.var) {
-      if (variable.name === name) {
-        return id;
-      }
-    }
-
-    return null;
-  }
-
   public addExport(exportData: Omit<ComponentFileExport, "id">) {
-    const id = this.getVarID(exportData.name) ?? newUUID();
+    const id = this.getVariableID(exportData.name) ?? newUUID();
 
     this.export[exportData.name] = { ...exportData, id };
     if (exportData.type === "default") {
@@ -182,7 +200,7 @@ export class File {
     return undefined;
   }
 
-  private getNewVarID(name: string): string {
+  public getNewVarID(name: string): string {
     for (const ex of Object.values(this.export)) {
       if (ex.name === name) {
         return ex.id;
@@ -406,11 +424,17 @@ export class File {
     return this.tsTypesID.get(name);
   }
 
-  public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
-    // const scope = this.getScopeFromLoc(loc);
+  public getTypeByID(id: string) {
+    return this.tsTypes.get(id);
+  }
 
-    const id = this.getNewVarID(type.name);
-    type.id = id;
+  public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
+    if (!type.id) {
+      const id = this.getNewVarID(type.name);
+      type.id = id;
+    }
+
+    this.ids.set(type.name, { id: type.id, var: new Map() });
 
     this.tsTypes.set(type.id, type);
     this.tsTypesID.set(type.name, type);
@@ -628,13 +652,14 @@ export class FileDB {
     file.addVariableDependency(parent, dependency);
   }
 
-  private typeToResolve: Set<string> = new Set();
-
-  private getRefTypeId(name: string, file: File) {
-    if (file.var.has(name)) return name;
+  public getRefTypeId(name: string, file: File) {
+    const varId = file.getVariableID(name);
+    if (varId) return varId;
 
     const type = file.getTypeFromName(name);
     if (type) return type.id;
+
+    if (file.getTypeByID(name)) return name;
 
     if (file.import?.has(name)) {
       const importData = file.import.get(name);
@@ -672,92 +697,137 @@ export class FileDB {
     }
   }
 
-  private updateTypeDataID(
-    typeData: TypeData,
+  private _resolveTypeRef(
+    typeData: TypeDataRef,
     file: File,
     params: Set<string>
   ): boolean {
-    if (typeData.type === "ref") {
-      const name = this.getTypeDataRefName(typeData);
-      if (params.has(name)) return true;
+    const name = this.getTypeDataRefName(typeData);
+    if (params.has(name)) return true;
 
-      const id = this.getRefTypeId(name, file);
-      if (id != null) {
-        if (typeData.refType === "named") {
-          typeData.name = id;
-        } else {
-          assert(typeData.names?.length > 0);
-          typeData.names[0] = id;
-        }
+    const id = this.getRefTypeId(name, file);
+    if (id != null) {
+      if (typeData.refType === "named") {
+        typeData.name = id;
       } else {
-        return false;
+        assert(typeData.names?.length > 0);
+        typeData.names[0] = id;
       }
+    } else {
+      return false;
+    }
 
-      if (typeData.params) {
-        for (const param of typeData.params) {
-          const status = this.updateTypeDataID(param, file, params);
-          if (!status) return false;
-        }
+    if (typeData.params) {
+      for (const param of typeData.params) {
+        if (!this.updateTypeDataID(param, file, params)) return false;
       }
-    } else if (typeData.type === "union" || typeData.type === "intersection") {
-      for (const member of typeData.members) {
-        const status = this.updateTypeDataID(member, file, params);
-        if (!status) return false;
-      }
-    } else if (typeData.type === "array") {
-      return this.updateTypeDataID(typeData.element, file, params);
-    } else if (typeData.type === "parenthesis") {
-      return this.updateTypeDataID(typeData.members, file, params);
-    } else if (typeData.type === "type-literal") {
-      for (const member of typeData.members) {
-        const status = this.updateTypeDataID(member.type, file, params);
-        if (!status) return false;
-      }
-    } else if (typeData.type === "literal-type") {
-      return this.updateTypeDataLiteral(typeData.literal, file, params);
     }
 
     return true;
   }
 
-  private resolveTsTypeID(typeDeclare: TypeDataDeclare, file: File) {
+  private static TYPE_DATA_HANDLERS: {
+    [K in keyof TypeDataHandlerMap]: TypeDataHandler<TypeDataHandlerMap[K]>;
+  } = {
+    ref: (db, td: TypeDataRef, file, params) =>
+      db._resolveTypeRef(td, file, params),
+    union: (db, td: TypeDataTypeBodyUnion, file, params) =>
+      td.members.every((m) => db.updateTypeDataID(m, file, params)),
+    intersection: (db, td: TypeDataTypeBodyIntersection, file, params) =>
+      td.members.every((m) => db.updateTypeDataID(m, file, params)),
+    array: (db, td: TypeDataArray, file, params) =>
+      db.updateTypeDataID(td.element, file, params),
+    parenthesis: (db, td: TypeDataTypeBodyParathesis, file, params) =>
+      db.updateTypeDataID(td.members, file, params),
+    "type-literal": (db, td: TypeDataTypeBodyLiteral, file, params) =>
+      td.members.every((m) => db.updateTypeDataID(m.type, file, params)),
+    "literal-type": (
+      db,
+      td: { literal: TypeDataLiteralTypeLiteral },
+      file,
+      params
+    ) => db.updateTypeDataLiteral(td.literal, file, params),
+    function: (db, td: TypeDataFunction, file, params) => {
+      for (const p of td.parameters) {
+        if (p.typeData && !db.updateTypeDataID(p.typeData, file, params))
+          return false;
+      }
+
+      for (const param of td.params) {
+        if (
+          param.constraint &&
+          !db.updateTypeDataID(param.constraint, file, params)
+        )
+          return false;
+        if (param.default && !db.updateTypeDataID(param.default, file, params))
+          return false;
+      }
+
+      return db.updateTypeDataID(td.return, file, params);
+    },
+    tuple: (db, td: TypeDataTuple, file, params) =>
+      td.elements.every((e) => db.updateTypeDataID(e.typeData, file, params)),
+    "index-access": (db, td: TypeDataIndexAccess, file, params) =>
+      db.updateTypeDataID(td.indexType, file, params) &&
+      db.updateTypeDataID(td.objectType, file, params),
+  };
+
+  private hasTypeDataHandler(
+    kind: string
+  ): kind is keyof typeof FileDB.TYPE_DATA_HANDLERS {
+    return kind in FileDB.TYPE_DATA_HANDLERS;
+  }
+
+  public updateTypeDataID(
+    typeData: TypeData,
+    file: File,
+    params: Set<string>
+  ): boolean {
+    if (!this.hasTypeDataHandler(typeData.type)) return true;
+
+    return FileDB.TYPE_DATA_HANDLERS[typeData.type](
+      this,
+      typeData as never,
+      file,
+      params
+    );
+  }
+
+  public resolveComPropsTsTypeID(id: string, fileName: string): boolean {
+    const file = this.get(fileName);
+
+    const com = file.var.get(id);
+    if (com == null) return false;
+
+    if (!isComponentVariable(com)) return true;
+    if (com.propType == null) return true;
+
+    if (!this.updateTypeDataID(com.propType, file, new Set<string>())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public resolveTsTypeID(typeDeclare: TypeDataDeclare, file: File): boolean {
     const params = new Set<string>();
+    let allResolved = true;
+
     if (typeDeclare.params) {
       for (const param of Object.values(typeDeclare.params)) {
         params.add(param.name);
 
-        if (param.constraint) {
-          if (param.constraint.type === "ref") {
-            const name = this.getTypeDataRefName(param.constraint);
-            const id = this.getRefTypeId(name, file);
-            if (id != null) {
-              if (param.constraint.refType === "named") {
-                param.constraint.name = id;
-              } else {
-                assert(param.constraint.names?.length > 0);
-                param.constraint.names[0] = id;
-              }
-              continue;
-            }
+        if (param.constraint && param.constraint.type === "ref") {
+          if (!this._resolveTypeRef(param.constraint, file, params)) {
+            allResolved = false;
           }
         }
 
-        if (param.default) {
-          if (param.default.type === "ref") {
-            const name = this.getTypeDataRefName(param.default);
-            const id = this.getRefTypeId(name, file);
-            if (id != null) {
-              if (param.default.refType === "named") {
-                param.default.name = id;
-              } else {
-                assert(param.default.names?.length > 0);
-                param.default.names[0] = id;
-              }
-            }
+        if (param.default && param.default.type === "ref") {
+          if (!this._resolveTypeRef(param.default, file, params)) {
+            allResolved = false;
           }
         }
-
-        this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
       }
     }
 
@@ -767,38 +837,39 @@ export class FileDB {
           const id = this.getRefTypeId(ex, file);
           if (id != null) {
             typeDeclare.extends[i] = id;
-            continue;
+          } else {
+            allResolved = false;
           }
-
-          this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
         }
       }
 
       for (const body of typeDeclare.body) {
-        const status = this.updateTypeDataID(body.type, file, params);
-        if (!status) {
-          this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+        if (!this.updateTypeDataID(body.type, file, params)) {
+          allResolved = false;
         }
       }
     } else if (typeDeclare.type === "type") {
-      const status = this.updateTypeDataID(typeDeclare.body, file, params);
-      if (!status) {
-        this.typeToResolve.add(`${file.path}:${typeDeclare.id}`);
+      if (!this.updateTypeDataID(typeDeclare.body, file, params)) {
+        allResolved = false;
       }
     }
+
+    return allResolved;
   }
 
   public addTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
     const file = this.get(fileName);
 
     const typeDeclare = {
-      id: newUUID(),
+      id: file.getNewVarID(type.name),
       ...type,
     } as TypeDataDeclare;
 
     this.resolveTsTypeID(typeDeclare, file);
 
     file.addTsTypes(type.loc, typeDeclare);
+
+    return typeDeclare;
   }
 
   public addRender(
@@ -812,42 +883,5 @@ export class FileDB {
     const file = this.get(fileName);
 
     return file.addRender(comLoc, srcId, dependencies, isDependency, loc);
-  }
-
-  private _resolveType(typeToResolve: Set<string>) {
-    for (const type of typeToResolve) {
-      const typeSplit = type.split(":");
-      assert(typeSplit.length == 2);
-
-      const [fileName, id] = typeSplit;
-      const file = this.get(fileName!);
-      if (file == null) continue;
-
-      const typeData = file.getTypeFromName(id!);
-      if (typeData == null) continue;
-
-      this.resolveTsTypeID(typeData, file);
-    }
-  }
-
-  private resolveType(): boolean {
-    const typeToResolve = this.typeToResolve;
-    this.typeToResolve = new Set();
-
-    while (this.typeToResolve.size > 0) {
-      this._resolveType(typeToResolve);
-
-      if (typeToResolve.size == this.typeToResolve.size) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  public resolve(): boolean {
-    if (!this.resolveType()) return false;
-
-    return true;
   }
 }

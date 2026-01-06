@@ -21,7 +21,11 @@ import path from "path";
 import { ComponentVariable } from "./variable/component.js";
 import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
-import { isComponentVariable, isDataVariable } from "./variable/type.js";
+import {
+  isComponentVariable,
+  isDataVariable,
+  isHookVariable,
+} from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
 
@@ -42,7 +46,23 @@ type IResolveAddHook = {
   loc: VariableLoc;
 };
 
-type ComponentDBResolve = IResolveAddRender | IResolveAddHook;
+type IResolveTsType = {
+  type: "tsType";
+  fileName: string;
+  id: string;
+};
+
+type IResolveComPropsTsType = {
+  type: "comPropsTsType";
+  fileName: string;
+  id: string;
+};
+
+type ComponentDBResolve =
+  | IResolveAddRender
+  | IResolveAddHook
+  | IResolveTsType
+  | IResolveComPropsTsType;
 
 export type ComponentDBOptions = {
   packageJson: PackageJson;
@@ -55,6 +75,7 @@ export class ComponentDB {
   private files: FileDB;
 
   private resolveTasks: ComponentDBResolve[];
+  private typesToResolve: Set<string>;
 
   private isResolve = false;
 
@@ -68,6 +89,7 @@ export class ComponentDB {
     this.files = new FileDB();
 
     this.resolveTasks = [];
+    this.typesToResolve = new Set();
 
     this.packageJson = options.packageJson;
     this.viteAliases = options.viteAliases;
@@ -79,7 +101,7 @@ export class ComponentDB {
     component: Omit<ComponentFileVarComponent, "id" | "variableType">,
     parentPath?: string[]
   ) {
-    this.files.addVariable(
+    const id = this.files.addVariable(
       component.file,
       new ComponentVariable({
         id: newUUID(),
@@ -87,6 +109,14 @@ export class ComponentDB {
       }),
       parentPath
     );
+
+    if (this.files.resolveComPropsTsTypeID(id, component.file)) {
+      this.resolveTasks.push({
+        type: "comPropsTsType",
+        fileName: component.file,
+        id,
+      });
+    }
   }
 
   public addHook(
@@ -107,7 +137,7 @@ export class ComponentDB {
   }
 
   public addVariable(
-    filename: string,
+    fileName: string,
     variable: Omit<
       ComponentFileVarNormal,
       "id" | "variableType" | "var" | "components"
@@ -115,7 +145,7 @@ export class ComponentDB {
     parentPath?: string[]
   ) {
     this.files.addVariable(
-      filename,
+      fileName,
       new DataVariable({
         id: newUUID(),
         ...variable,
@@ -124,15 +154,23 @@ export class ComponentDB {
     );
   }
 
+  public addState(fileName: string, loc: VariableLoc, state: State) {
+    const file = this.files.get(fileName);
+    const variable = file.getVariable(loc);
+
+    assert(variable != null, "Variable not found");
+
+    if (isComponentVariable(variable) || isHookVariable(variable)) {
+      variable.states[state.id] = state;
+    }
+  }
+
   public addVariableDependency(
-    filename: string,
+    fileName: string,
     parent: string,
-    variable: Omit<ComponentFileVarDependency, "id">
+    dependency: ComponentFileVarDependency
   ) {
-    this.files.addVariableDependency(filename, parent, {
-      id: newUUID(),
-      ...variable,
-    });
+    this.files.addVariableDependency(fileName, parent, dependency);
   }
 
   public comAddState(
@@ -153,48 +191,42 @@ export class ComponentDB {
     };
   }
 
+  private _getExportId(
+    fileName: string,
+    name: string
+  ): { id: string; isDependency: boolean } | null {
+    const comImport = this.files.getImport(fileName, name);
+    if (!comImport) return null;
+
+    const isDependency = this.isDependency(comImport.source);
+    if (isDependency) {
+      return { id: comImport.localName, isDependency: true };
+    }
+
+    if (this.files.has(comImport.source)) {
+      const file = this.files.get(comImport.source);
+      const id = file.getExport(comImport);
+      if (id) {
+        return { id, isDependency: false };
+      }
+    }
+
+    return null;
+  }
+
   public comAddHook(
     name: string,
     loc: VariableLoc,
     fileName: string,
     hook: string
   ) {
-    // ignore build-in hooks
-    const hookImport = this.files.getImport(fileName, hook);
-    if (hookImport) {
-      if (hookImport.source === "react") {
-        return;
-      }
-    } else {
-      // TODO: hadnle local hooks
-      return;
-    }
+    const comImport = this.files.getImport(fileName, hook);
+    if (comImport?.source === "react") return;
 
-    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    const exportInfo = this._getExportId(fileName, hook);
 
-    if (component == null) debugger;
-    assert(component != null, "Component not found");
-
-    let srcId: string | undefined;
-    if (this.isDependency(hookImport.source)) {
-      srcId = hookImport.localName;
-    } else {
-      if (this.files.has(hookImport.source)) {
-        const file = this.files.get(hookImport.source);
-        assert(file != null, "File not found");
-
-        srcId = file.getExport(hookImport);
-
-        if (this.isResolve && srcId == null) {
-          debugger;
-        }
-      }
-    }
-
-    if (srcId == null) {
-      if (this.isResolve) {
-        debugger;
-      }
+    if (exportInfo == null) {
+      if (this.isResolve) return;
 
       this.addResolveTask({
         type: "comAddHook",
@@ -206,7 +238,10 @@ export class ComponentDB {
       return;
     }
 
-    component.hooks.push(srcId);
+    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    assert(component != null, "Component not found");
+
+    component.hooks.push(exportInfo.id);
   }
 
   public comAddEffect(
@@ -238,33 +273,10 @@ export class ComponentDB {
     dependencry: ComponentInfoRenderDependency[],
     loc: VariableLoc
   ) {
-    // rendere component is imported
-    const comImport = this.files.getImport(fileName, tag);
-    const isDependency = !comImport || this.isDependency(comImport.source);
-    if (!comImport) {
-      return;
-    }
+    const exportInfo = this._getExportId(fileName, tag);
 
-    let srcId: string | undefined;
-    if (isDependency) {
-      srcId = comImport.localName;
-    } else {
-      if (this.files.has(comImport.source)) {
-        const file = this.files.get(comImport.source);
-        assert(file != null, "File not found");
-
-        srcId = file.getExport(comImport);
-
-        if (srcId == null && this.isResolve) {
-          debugger;
-        }
-      }
-    }
-
-    if (srcId == null) {
-      if (this.isResolve) {
-        debugger;
-      }
+    if (exportInfo == null) {
+      if (this.isResolve) return;
 
       this.addResolveTask({
         type: "comAddRender",
@@ -280,9 +292,9 @@ export class ComponentDB {
     this.files.addRender(
       fileName,
       comLoc,
-      srcId,
+      exportInfo.id,
       dependencry,
-      isDependency,
+      exportInfo.isDependency,
       loc
     );
   }
@@ -303,11 +315,23 @@ export class ComponentDB {
   }
 
   public fileAddTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
-    this.files.addTsTypes(fileName, type);
+    const typeDeclare = this.files.addTsTypes(fileName, type);
+
+    const file = this.files.get(fileName);
+    if (!this.files.resolveTsTypeID(typeDeclare, file)) {
+      this.addResolveTask({
+        type: "tsType",
+        fileName,
+        id: typeDeclare.id,
+      });
+    }
   }
 
   private _resolveDependency(variable: Variable, parent?: string) {
-    if (isComponentVariable(variable)) {
+    if (
+      variable.variableType === "component" &&
+      isComponentVariable(variable)
+    ) {
       for (const render of Object.values(variable.renders)) {
         if (render.isDependency) continue;
 
@@ -317,18 +341,8 @@ export class ComponentDB {
           label: "render",
         });
       }
-    } else if (isDataVariable(variable)) {
+    } else if (variable.variableType === "normal" && isDataVariable(variable)) {
       if (parent != null) {
-        // for (const render of Object.values(variable.components)) {
-        //   if (render.isDependency) continue;
-
-        //   this.edges.push({
-        //     from: parent,
-        //     to: variable.id,
-        //     label: "render",
-        //   });
-        // }
-
         for (const innerCom of variable.components.values()) {
           if (innerCom.isDependency) continue;
 
@@ -370,46 +384,70 @@ export class ComponentDB {
     this.resolveTasks.push(resolve);
   }
 
+  private static RESOLVE_HANDLERS: {
+    [K in ComponentDBResolve["type"]]: (
+      db: ComponentDB,
+      task: Extract<ComponentDBResolve, { type: K }>
+    ) => void | boolean;
+  } = {
+    comAddRender: (db, task) => {
+      db.comAddRender(
+        task.name,
+        task.fileName,
+        task.tag,
+        task.dependencry,
+        task.loc
+      );
+    },
+    comAddHook: (db, task) => {
+      db.comAddHook(task.name, task.loc, task.fileName, task.hook);
+    },
+    tsType: (db, task) => {
+      const file = db.files.get(task.fileName);
+      const typeDeclare = file.getTypeFromName(task.id);
+      if (typeDeclare) {
+        if (!db.files.resolveTsTypeID(typeDeclare, file)) {
+          return false;
+        }
+      }
+      return true;
+    },
+    comPropsTsType: (db, task) => {
+      return db.files.resolveComPropsTsTypeID(task.id, task.fileName);
+    },
+  };
+
   public resolve() {
     this.isResolve = true;
-    let i = 0;
-    const maxRetries = this.resolveTasks.length * 2 + 10;
+
+    const maxRetries = 100;
     let retries = 0;
 
-    while (i < this.resolveTasks.length && retries < maxRetries) {
-      const resolve = this.resolveTasks[i]!;
-      i++;
-      const currentTaskCount = this.resolveTasks.length;
+    while (this.resolveTasks.length > 0 && retries < maxRetries) {
+      const currentTasks = [...this.resolveTasks];
+      this.resolveTasks = [];
 
-      if (resolve.type === "comAddRender") {
-        this.comAddRender(
-          resolve.name,
-          resolve.fileName,
-          resolve.tag,
-          resolve.dependencry,
-          resolve.loc
-        );
-      } else if (resolve.type === "comAddHook") {
-        this.comAddHook(
-          resolve.name,
-          resolve.loc,
-          resolve.fileName,
-          resolve.hook
-        );
+      for (const task of currentTasks) {
+        const handler = ComponentDB.RESOLVE_HANDLERS[task.type] as (
+          db: ComponentDB,
+          task: ComponentDBResolve
+        ) => void | boolean;
+        if (handler) {
+          const result = handler(this, task);
+          if (result === false) {
+            this.addResolveTask(task);
+          }
+        }
       }
 
-      if (this.resolveTasks.length > currentTaskCount) {
-        retries++;
-      }
+      retries++;
     }
 
-    if (retries >= 1000) {
+    if (retries >= maxRetries && this.resolveTasks.length > 0) {
       console.warn(
-        "Resolution interrupted: suspected infinite loop in ComponentDB.resolve"
+        "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve"
       );
     }
-
-    this.files.resolve();
 
     this.resolveTasks = [];
     this.isResolve = false;

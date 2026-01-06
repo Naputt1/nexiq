@@ -165,6 +165,17 @@ export interface TypeDataIndexAccess {
   objectType: TypeData;
 }
 
+export interface TypeDataQuery {
+  type: "query";
+  expr: TypeData;
+}
+
+export interface TypeDataImport {
+  type: "import";
+  name: string;
+  qualifier?: string;
+}
+
 export interface TypeDataLiteralBodyBase {
   signatureType: "property" | "index";
   type: TypeData;
@@ -217,6 +228,8 @@ export type TypeData =
   | TypeDataArray
   | TypeDataTuple
   | TypeDataIndexAccess
+  | TypeDataQuery
+  | TypeDataImport
   | TypeDataTypeBodyLiteral
   | TypeDataTypeBodyUnion
   | TypeDataTypeBodyIntersection
