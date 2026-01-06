@@ -1,0 +1,209 @@
+{
+  "src": "/Users/naputt/git/react-map/packages/sample-project/hook",
+  "files": {
+    "/src/effectt.tsx": {
+      "path": "/src/effectt.tsx",
+      "import": {
+        "useEffect": {
+          "localName": "useEffect",
+          "importedName": "useEffect",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
+          "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+          "name": "Effect",
+          "variableType": "component",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 3,
+            "column": 6
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 6
+            },
+            "end": {
+              "line": 3,
+              "column": 12
+            }
+          },
+          "file": "/src/effectt.tsx",
+          "componentType": "Function",
+          "states": {
+            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
+              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+              "value": "state",
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "setter": "setState"
+            }
+          },
+          "hooks": [],
+          "props": [],
+          "effects": {
+            "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
+              "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+              "scope": {
+                "start": {
+                  "line": 6,
+                  "column": 18
+                },
+                "end": {
+                  "line": 8,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 6,
+                "column": 2
+              },
+              "dependencies": ["f24b8c56-3fac-469d-b2f3-efc6e3575137"]
+            }
+          },
+          "contexts": [],
+          "renders": {}
+        }
+      }
+    },
+    "/src/Hooks.ts": {
+      "path": "/src/Hooks.ts",
+      "import": {
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useEffect": {
+          "localName": "useEffect",
+          "importedName": "useEffect",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "useCustomHook": {
+          "name": "useCustomHook",
+          "type": "named",
+          "exportKind": "function",
+          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
+        },
+        "useOtherHook": {
+          "name": "useOtherHook",
+          "type": "named",
+          "exportKind": "value",
+          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
+          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+          "name": "useCustomHook",
+          "variableType": "hook",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 3,
+            "column": 16
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 16
+            },
+            "end": {
+              "line": 3,
+              "column": 29
+            }
+          },
+          "file": "/src/Hooks.ts",
+          "states": {
+            "71a5333c-fbc1-4ea1-9519-dce12e5b4a87": {
+              "id": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+              "value": "value",
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "setter": "setValue"
+            }
+          },
+          "props": [],
+          "effects": {
+            "23adce01-2717-489c-9a42-e6485e2f01aa": {
+              "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
+              "scope": {
+                "start": {
+                  "line": 6,
+                  "column": 18
+                },
+                "end": {
+                  "line": 8,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 6,
+                "column": 2
+              },
+              "dependencies": ["71a5333c-fbc1-4ea1-9519-dce12e5b4a87"]
+            }
+          },
+          "hooks": []
+        },
+        "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
+          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+          "name": "useOtherHook",
+          "variableType": "hook",
+          "dependencies": {},
+          "var": {},
+          "type": "function",
+          "loc": {
+            "line": 13,
+            "column": 13
+          },
+          "scope": {
+            "start": {
+              "line": 13,
+              "column": 34
+            },
+            "end": {
+              "line": 15,
+              "column": 1
+            }
+          },
+          "file": "/src/Hooks.ts",
+          "states": {},
+          "props": [],
+          "effects": {},
+          "hooks": []
+        }
+      }
+    }
+  },
+  "edges": []
+}

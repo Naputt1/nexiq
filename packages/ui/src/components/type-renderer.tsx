@@ -1,24 +1,20 @@
 import React, { type JSX } from "react";
-import type { FuncParam, TypeData } from "shared";
+import type { FuncParam, TypeData, TypeDataDeclare } from "shared";
 import { TypeColors } from "./type-colors";
 import { cn } from "@/lib/utils";
-import type { NodeData, ComboData } from "../graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 
 interface TypeRendererProps {
   type: TypeData | undefined;
-  nodes: Record<string, NodeData> | undefined;
-  combos: Record<string, ComboData> | undefined;
+  typeData: Record<string, TypeDataDeclare>;
   depth?: number;
 }
 
 const FuncParamRenderer: React.FC<{
   param: FuncParam;
-  nodes: Record<string, NodeData> | undefined;
-  combos: Record<string, ComboData> | undefined;
+  typeData: Record<string, TypeDataDeclare>;
   depth: number;
-}> = ({ param, nodes, combos, depth }) => {
-  // We need to import FuncParam or just use it. It's from shared.
+}> = ({ param, typeData, depth }) => {
   const p = param;
 
   switch (p.type) {
@@ -46,8 +42,7 @@ const FuncParamRenderer: React.FC<{
                       <span className={TypeColors.punctuation}>: </span>
                       <FuncParamRenderer
                         param={prop.value}
-                        nodes={nodes}
-                        combos={combos}
+                        typeData={typeData}
                         depth={depth}
                       />
                     </>
@@ -56,8 +51,7 @@ const FuncParamRenderer: React.FC<{
               ) : (
                 <FuncParamRenderer
                   param={prop}
-                  nodes={nodes}
-                  combos={combos}
+                  typeData={typeData}
                   depth={depth}
                 />
               )}
@@ -80,8 +74,7 @@ const FuncParamRenderer: React.FC<{
               <span key={i}>
                 <FuncParamRenderer
                   param={el}
-                  nodes={nodes}
-                  combos={combos}
+                  typeData={typeData}
                   depth={depth}
                 />
                 {i < p.elements.length - 1 && (
@@ -100,8 +93,7 @@ const FuncParamRenderer: React.FC<{
 
 export const TypeRenderer: React.FC<TypeRendererProps> = ({
   type,
-  nodes,
-  combos,
+  typeData,
   depth = 0,
 }) => {
   if (!type) return <span className={TypeColors.default}>any</span>;
@@ -154,8 +146,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                 {"${"}
                 <TypeRenderer
                   type={literal.expression[i]}
-                  nodes={nodes}
-                  combos={combos}
+                  typeData={typeData}
                   depth={depth + 1}
                 />
                 {"}"}
@@ -193,12 +184,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
     case "array":
       return (
         <span>
-          <TypeRenderer
-            type={type.element}
-            nodes={nodes}
-            combos={combos}
-            depth={depth}
-          />
+          <TypeRenderer type={type.element} typeData={typeData} depth={depth} />
           <span className={TypeColors.punctuation}>[]</span>
         </span>
       );
@@ -211,12 +197,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               {i > 0 && (
                 <span className={cn(TypeColors.punctuation, "mx-1")}>|</span>
               )}
-              <TypeRenderer
-                type={member}
-                nodes={nodes}
-                combos={combos}
-                depth={depth}
-              />
+              <TypeRenderer type={member} typeData={typeData} depth={depth} />
             </React.Fragment>
           ))}
         </span>
@@ -230,12 +211,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               {i > 0 && (
                 <span className={cn(TypeColors.punctuation, "mx-1")}>&</span>
               )}
-              <TypeRenderer
-                type={member}
-                nodes={nodes}
-                combos={combos}
-                depth={depth}
-              />
+              <TypeRenderer type={member} typeData={typeData} depth={depth} />
             </React.Fragment>
           ))}
         </span>
@@ -257,8 +233,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                     <span className={TypeColors.punctuation}>: </span>
                     <TypeRenderer
                       type={member.type}
-                      nodes={nodes}
-                      combos={combos}
+                      typeData={typeData}
                       depth={depth + 1}
                     />
                     <span className={TypeColors.punctuation}>;</span>
@@ -275,15 +250,13 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                     <span className={TypeColors.punctuation}>: </span>
                     <TypeRenderer
                       type={member.parameter.type}
-                      nodes={nodes}
-                      combos={combos}
+                      typeData={typeData}
                       depth={depth + 1}
                     />
                     <span className={TypeColors.punctuation}>]: </span>
                     <TypeRenderer
                       type={member.type}
-                      nodes={nodes}
-                      combos={combos}
+                      typeData={typeData}
                       depth={depth + 1}
                     />
                     <span className={TypeColors.punctuation}>;</span>
@@ -298,7 +271,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
       );
 
     case "ref": {
-      return <TypeRefRenderer type={type} nodes={nodes} combos={combos} />;
+      return <TypeRefRenderer type={type} typeData={typeData} />;
     }
 
     // Add other cases like 'parenthesis' as needed
@@ -306,12 +279,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
       return (
         <span>
           <span className={TypeColors.punctuation}>(</span>
-          <TypeRenderer
-            type={type.members}
-            nodes={nodes}
-            combos={combos}
-            depth={depth}
-          />
+          <TypeRenderer type={type.members} typeData={typeData} depth={depth} />
           <span className={TypeColors.punctuation}>)</span>
         </span>
       );
@@ -331,8 +299,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               )}
               <TypeRenderer
                 type={element.typeData}
-                nodes={nodes}
-                combos={combos}
+                typeData={typeData}
                 depth={depth}
               />
             </React.Fragment>
@@ -357,8 +324,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                       </span>
                       <TypeRenderer
                         type={p.constraint}
-                        nodes={nodes}
-                        combos={combos}
+                        typeData={typeData}
                         depth={depth + 1}
                       />
                     </>
@@ -370,8 +336,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                       </span>
                       <TypeRenderer
                         type={p.default}
-                        nodes={nodes}
-                        combos={combos}
+                        typeData={typeData}
                         depth={depth + 1}
                       />
                     </>
@@ -391,8 +356,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               <span key={i}>
                 <FuncParamRenderer
                   param={param.param}
-                  nodes={nodes}
-                  combos={combos}
+                  typeData={typeData}
                   depth={depth}
                 />
                 {param.optional ? (
@@ -403,8 +367,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                     <span className={TypeColors.punctuation}>: </span>
                     <TypeRenderer
                       type={param.typeData}
-                      nodes={nodes}
-                      combos={combos}
+                      typeData={typeData}
                       depth={depth}
                     />
                   </>
@@ -417,12 +380,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           </span>
           <span className={TypeColors.punctuation}>)</span>
           <span className={TypeColors.punctuation}>{" => "}</span>
-          <TypeRenderer
-            type={type.return}
-            nodes={nodes}
-            combos={combos}
-            depth={depth}
-          />
+          <TypeRenderer type={type.return} typeData={typeData} depth={depth} />
         </span>
       );
     case "index-access":
@@ -430,15 +388,13 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
         <span>
           <TypeRenderer
             type={type.objectType}
-            nodes={nodes}
-            combos={combos}
+            typeData={typeData}
             depth={depth}
           />
           <span className={TypeColors.punctuation}>{"["}</span>
           <TypeRenderer
             type={type.indexType}
-            nodes={nodes}
-            combos={combos}
+            typeData={typeData}
             depth={depth}
           />
           <span className={TypeColors.punctuation}>{"]"}</span>
@@ -448,12 +404,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
       return (
         <span>
           <span className={TypeColors.punctuation}>{"typeof "}</span>
-          <TypeRenderer
-            type={type.expr}
-            nodes={nodes}
-            combos={combos}
-            depth={depth}
-          />
+          <TypeRenderer type={type.expr} typeData={typeData} depth={depth} />
         </span>
       );
     case "import":

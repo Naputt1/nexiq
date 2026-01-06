@@ -8,7 +8,7 @@ import {
   useImperativeHandle,
   useReducer,
   useRef,
-  useState,
+  // useState,
   type JSX,
 } from "react";
 import DragableStage, { type DragableStageRef } from "./dragableGraph";
@@ -19,7 +19,7 @@ import type {
   GraphDataCallbackParams,
   NodeGraphData,
 } from "./hook";
-import type { Vector2d } from "konva/lib/types";
+// import type { Vector2d } from "konva/lib/types";
 import Point from "./point";
 
 export interface GraphRef {
@@ -39,25 +39,25 @@ type DataMap = {
   combos: Record<string, JSX.Element>;
 };
 
-type GraphState = {
-  x: number;
-  y: number;
-  scale: Vector2d;
-};
+// type GraphState = {
+//   x: number;
+//   y: number;
+//   scale: Vector2d;
+// };
 
 const MemoizedArrow = memo(Arrow);
 
 const Graph = forwardRef<GraphRef, GraphProps>(
   ({ graph, width, height, onSelect }, ref) => {
     const stageRef = useRef<DragableStageRef>(null);
-    const [state, setState] = useState<GraphState>({
-      x: 0,
-      y: 0,
-      scale: {
-        x: 1,
-        y: 1,
-      },
-    });
+    // const [state, setState] = useState<GraphState>({
+    //   x: 0,
+    //   y: 0,
+    //   scale: {
+    //     x: 1,
+    //     y: 1,
+    //   },
+    // });
 
     useImperativeHandle(ref, () => ({
       focusItem: (id: string, scale?: number) => {

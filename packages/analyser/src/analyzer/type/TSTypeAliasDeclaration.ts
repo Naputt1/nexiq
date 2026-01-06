@@ -13,8 +13,6 @@ export default function TSTypeAliasDeclaration(
     const name = nodePath.node.id.name;
     assert(nodePath.node.id.loc != null);
 
-    if (name === "FormWrapperProp") debugger;
-
     const loc = {
       line: nodePath.node.id.loc.start.line,
       column: nodePath.node.id.loc.start.column,

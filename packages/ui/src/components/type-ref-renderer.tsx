@@ -1,21 +1,18 @@
-import type { ComboData, NodeData } from "@/graph/hook";
 import { useState } from "react";
-import type { TypeDataRef } from "shared";
+import type { TypeData, TypeDataDeclare, TypeDataRef } from "shared";
 import { TypeRenderer } from "./type-renderer";
 import React from "react";
 import { TypeColors } from "./type-colors";
 
 interface TypeRendererProps {
   type: TypeDataRef;
-  nodes: Record<string, NodeData> | undefined;
-  combos: Record<string, ComboData> | undefined;
+  typeData: Record<string, TypeDataDeclare>;
   depth?: number;
 }
 
 export const TypeRefRenderer: React.FC<TypeRendererProps> = ({
   type,
-  nodes,
-  combos,
+  typeData,
   depth = 0,
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -31,54 +28,55 @@ export const TypeRefRenderer: React.FC<TypeRendererProps> = ({
   // But the Ref doesn't give us the file path directly unless imports are resolved.
   // Quick heuristic: Check if any node in `nodes` has `label.text === name` and `type === 'type' || 'interface'`
 
-  let targetNode: NodeData | undefined = undefined;
-  if (nodes) {
-    targetNode = Object.values(nodes).find(
-      (n) => (n.type === "interface" || n.type === "type") && n.id === name
-    );
-  }
+  const targetNode: TypeDataDeclare | undefined = Object.values(typeData).find(
+    (n) => (n.type === "interface" || n.type === "type") && n.id === name
+  );
 
-  if (targetNode && targetNode.propType) {
-    return (
-      <span>
-        <span
-          className={TypeColors.reference}
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpanded(!expanded);
-          }}
-        >
-          {targetNode.label?.text ?? name}
-        </span>
-        {type.params && type.params.length > 0 && (
-          <span>
-            <span className={TypeColors.punctuation}>{"<"}</span>
-            {type.params.map((p, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && <span className={TypeColors.punctuation}>, </span>}
-                <TypeRenderer
-                  type={p}
-                  nodes={nodes}
-                  combos={combos}
-                  depth={depth}
-                />
-              </React.Fragment>
-            ))}
-            <span className={TypeColors.punctuation}>{">"}</span>
+  if (targetNode) {
+    const propType: TypeData | undefined =
+      targetNode.type === "type"
+        ? targetNode.body
+        : {
+            type: "type-literal",
+            members: targetNode.body,
+          };
+
+    if (propType) {
+      return (
+        <span>
+          <span
+            className={TypeColors.reference}
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+          >
+            {targetNode.name}
           </span>
-        )}
-        {expanded && (
-          <div className="mt-1 ml-2 border-l-2 border-slate-600 pl-2">
-            <TypeRenderer
-              type={targetNode.propType}
-              nodes={nodes}
-              combos={combos}
-              depth={depth + 1}
-            />
-          </div>
-        )}
-      </span>
-    );
+          {type.params && type.params.length > 0 && (
+            <span>
+              <span className={TypeColors.punctuation}>{"<"}</span>
+              {type.params.map((p, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+                  <TypeRenderer type={p} typeData={typeData} depth={depth} />
+                </React.Fragment>
+              ))}
+              <span className={TypeColors.punctuation}>{">"}</span>
+            </span>
+          )}
+          {expanded && (
+            <div className="mt-1 ml-2 border-l-2 border-slate-600 pl-2">
+              <TypeRenderer
+                type={propType}
+                typeData={typeData}
+                depth={depth + 1}
+              />
+            </div>
+          )}
+        </span>
+      );
+    }
   }
 
   return (
@@ -90,12 +88,7 @@ export const TypeRefRenderer: React.FC<TypeRendererProps> = ({
           {type.params.map((p, i) => (
             <React.Fragment key={i}>
               {i > 0 && <span className={TypeColors.punctuation}>, </span>}
-              <TypeRenderer
-                type={p}
-                nodes={nodes}
-                combos={combos}
-                depth={depth}
-              />
+              <TypeRenderer type={p} typeData={typeData} depth={depth} />
             </React.Fragment>
           ))}
           <span className={TypeColors.punctuation}>{">"}</span>

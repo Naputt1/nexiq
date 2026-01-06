@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { TypeRenderer } from "./type-renderer";
-import type { PropData, TypeDataParam } from "shared";
+import type { PropData, TypeDataDeclare, TypeDataParam } from "shared";
 import type { ComboData, NodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 import React from "react";
@@ -12,6 +12,7 @@ interface NodeDetailsProps {
   selectedId: string | null;
   nodes: Record<string, NodeData>;
   combos: Record<string, ComboData>;
+  typeData: Record<string, TypeDataDeclare>;
   onClose: () => void;
 }
 
@@ -19,6 +20,7 @@ export function NodeDetails({
   selectedId,
   nodes,
   combos,
+  typeData,
   onClose,
 }: NodeDetailsProps) {
   if (!selectedId) return null;
@@ -42,17 +44,13 @@ export function NodeDetails({
             {p.constraint && (
               <>
                 <span className="text-purple-400"> extends </span>
-                <TypeRenderer
-                  type={p.constraint}
-                  nodes={nodes}
-                  combos={combos}
-                />
+                <TypeRenderer type={p.constraint} typeData={typeData} />
               </>
             )}
             {p.default && (
               <>
                 <span className="text-purple-400"> = </span>
-                <TypeRenderer type={p.default} nodes={nodes} combos={combos} />
+                <TypeRenderer type={p.default} typeData={typeData} />
               </>
             )}
           </span>
@@ -64,7 +62,7 @@ export function NodeDetails({
 
   return (
     <Card className="absolute top-4 left-4 w-96 shadow-lg z-50 bg-[#2d2d2d] border-[#454545] text-white overflow-hidden flex flex-col max-h-[90vh]">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2 shrink-0">
+      <CardHeader className="flex flex-row justify-between space-y-0 p-4 pb-2 shrink-0">
         <div className="flex flex-col gap-1 overflow-hidden">
           <CardTitle className="text-xs font-medium text-gray-400 uppercase tracking-wider text-start">
             {item.type || type}
@@ -123,8 +121,7 @@ export function NodeDetails({
                             refType: "named",
                             name: param,
                           }}
-                          nodes={nodes}
-                          combos={combos}
+                          typeData={typeData}
                         />
                         {item.extends!.length - 1 > i && (
                           <span className="text-gray-400">,</span>
@@ -135,11 +132,7 @@ export function NodeDetails({
                 </span>
               )}
               {item.propType ? (
-                <TypeRenderer
-                  type={item.propType}
-                  nodes={nodes}
-                  combos={combos}
-                />
+                <TypeRenderer type={item.propType} typeData={typeData} />
               ) : (
                 item.props?.map((p: PropData, i: number) => (
                   <div
