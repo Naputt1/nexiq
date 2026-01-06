@@ -47,7 +47,14 @@ export interface DetailItemData {
   fileName: string;
   props?: PropData[];
   propType?: TypeData;
-  type?: "component" | "type" | "interface" | "state" | "render";
+  type?:
+    | "component"
+    | "type"
+    | "interface"
+    | "state"
+    | "render"
+    | "effect"
+    | "state";
   typeParams?: TypeDataParam[];
   extends?: string[];
 }
@@ -60,6 +67,7 @@ export type EdgeData = {
   id: string;
   source: string;
   target: string;
+  combo?: string;
 };
 
 export interface ComboData extends PointData, DetailItemData {
@@ -394,15 +402,14 @@ export class GraphData {
     }
 
     const edgeIds = new Set<string>();
-
     for (const n of layout.nodes) {
-      const ids = this.getComboEdges(n.id);
+      const ids = this.getComboEdges(n.id, combo);
       for (const edgeId of ids) {
         edgeIds.add(edgeId);
       }
     }
 
-    this.updateEdgePos(Array.from(edgeIds));
+    this.updateEdgePos(Array.from(edgeIds), combo);
 
     combo.expandedRadius = this.calculateComboRadius(combo);
     combo.isLayoutCalculated = true;
@@ -423,6 +430,43 @@ export class GraphData {
       to.y + to.radius * Math.sin(angle),
     ];
   };
+
+  private _addChildEdge(e: EdgeData): boolean {
+    if (e.combo == null) {
+      console.error("_addChildEdge parent is null", e);
+      return false;
+    }
+
+    const parentCombo = this.getComboByID(e.combo);
+    if (parentCombo != null) {
+      if (parentCombo.child == null) {
+        parentCombo.child = {
+          nodes: {},
+          combos: {},
+          edges: {},
+        };
+        return false;
+      }
+
+      const srcNode =
+        parentCombo.child.nodes[e.source] ?? parentCombo.child.combos[e.source];
+      const targetNode =
+        parentCombo.child.nodes[e.target] ?? parentCombo.child.combos[e.target];
+
+      if (srcNode == null || targetNode == null) {
+        return false;
+      }
+
+      const points = this.getConnectorPoints(srcNode, targetNode);
+      parentCombo.child.edges[e.id] = {
+        ...e,
+        points,
+      };
+      return true;
+    }
+
+    return false;
+  }
 
   private _addChildNode(c: NodeData): boolean {
     if (c.combo == null) {
@@ -527,25 +571,34 @@ export class GraphData {
     return this.nodes.get(id) ?? this.combos.get(id);
   }
 
+  private getChildPointId(id: string, parent: ComboGraphData) {
+    return parent.child?.nodes[id] ?? parent.child?.combos[id];
+  }
+
   private createEdges() {
     const newEdgesToCreate: EdgeData[] = [];
     for (const e of this.edgeToCreate) {
-      const srcNode = this.getPointId(e.source);
-      const targetNode = this.getPointId(e.target);
+      if (e.combo == null) {
+        const srcNode = this.getPointId(e.source);
+        const targetNode = this.getPointId(e.target);
 
-      if (srcNode == null || targetNode == null) {
-        newEdgesToCreate.push(e);
+        if (srcNode == null || targetNode == null) {
+          newEdgesToCreate.push(e);
+          continue;
+        }
+
+        const points = this.getConnectorPoints(srcNode, targetNode);
+
+        this.edges.set(e.id, {
+          ...e,
+          points,
+        });
         continue;
       }
 
-      this.addEdgeId(e.source, e.target);
-
-      const points = this.getConnectorPoints(srcNode, targetNode);
-
-      this.edges.set(e.id, {
-        ...e,
-        points,
-      });
+      if (!this._addChildEdge(e)) {
+        newEdgesToCreate.push(e);
+      }
     }
 
     this.edgeToCreate = newEdgesToCreate;
@@ -554,22 +607,30 @@ export class GraphData {
   public addEdges(edges: EdgeData[]) {
     this.edges.clear();
     for (const e of edges) {
-      const srcNode = this.getPointId(e.source);
-      const targetNode = this.getPointId(e.target);
+      this.addEdgeId(e.source, e.target);
 
-      if (srcNode == null || targetNode == null) {
-        this.edgeToCreate.push(e);
+      if (e.combo == null) {
+        const srcNode = this.getPointId(e.source);
+        const targetNode = this.getPointId(e.target);
+
+        if (srcNode == null || targetNode == null) {
+          this.edgeToCreate.push(e);
+          continue;
+        }
+
+        const points = this.getConnectorPoints(srcNode, targetNode);
+
+        this.edges.set(e.id, {
+          ...e,
+          points,
+        });
+      }
+
+      if (this._addChildEdge(e)) {
         continue;
       }
 
-      this.addEdgeId(e.source, e.target);
-
-      const points = this.getConnectorPoints(srcNode, targetNode);
-
-      this.edges.set(e.id, {
-        ...e,
-        points,
-      });
+      this.edgeToCreate.push(e);
     }
 
     this.trigger({ type: "new-edges" });
@@ -753,13 +814,20 @@ export class GraphData {
     }
   }
 
-  private updateEdgePos(ids: string[]) {
+  private updateEdgePos(ids: string[], parent?: ComboGraphData) {
     for (const id of ids) {
-      const edge = this.edges.get(id);
+      const edge =
+        parent == null ? this.edges.get(id) : parent.child?.edges[id];
       if (edge == null) continue;
 
-      const srcNode = this.getPointId(edge.source);
-      const targetNode = this.getPointId(edge.target);
+      const srcNode =
+        parent == null
+          ? this.getPointId(edge.source)
+          : this.getChildPointId(edge.source, parent);
+      const targetNode =
+        parent == null
+          ? this.getPointId(edge.target)
+          : this.getChildPointId(edge.target, parent);
 
       if (srcNode == null || targetNode == null) {
         this.edgeToCreate.push(edge);
@@ -771,20 +839,28 @@ export class GraphData {
     }
   }
 
-  private getComboEdges(src: string): string[] {
+  private getComboEdges(src: string, parent?: ComboGraphData): string[] {
     const targetIds = this.edgeIds[src];
     if (targetIds == null) return [];
 
     const edges: string[] = [];
     for (const targetId of targetIds) {
       let id = `${src}-${targetId}`;
-      if (this.edges.has(id)) {
+      if (
+        parent
+          ? Object.hasOwn(parent.child?.edges ?? {}, id)
+          : this.edges.has(id)
+      ) {
         edges.push(id);
         continue;
       }
 
       id = `${targetId}-${src}`;
-      if (this.edges.has(id)) {
+      if (
+        parent
+          ? Object.hasOwn(parent.child?.edges ?? {}, id)
+          : this.edges.has(id)
+      ) {
         edges.push(id);
       }
     }
@@ -908,6 +984,15 @@ export class GraphData {
 
     node.x = e.target.x();
     node.y = e.target.y();
+
+    const edgeIds = new Set<string>();
+
+    const ids = this.getComboEdges(node.id, combo);
+    for (const edgeId of ids) {
+      edgeIds.add(edgeId);
+    }
+
+    this.updateEdgePos(Array.from(edgeIds), combo);
 
     this.updateComboRadius(combo.id);
     const cb = this.innerCallback.get(combo.id);
