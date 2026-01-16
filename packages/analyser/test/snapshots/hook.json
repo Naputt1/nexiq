@@ -1,8 +1,8 @@
 {
-  "src": "/Users/naputt/git/react-map/packages/sample-project/hook",
   "files": {
     "/src/effectt.tsx": {
       "path": "/src/effectt.tsx",
+      "hash": "bf73885303949326",
       "import": {
         "useEffect": {
           "localName": "useEffect",
@@ -45,7 +45,6 @@
             }
           },
           "file": "/src/effectt.tsx",
-          "componentType": "Function",
           "states": {
             "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
               "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
@@ -57,10 +56,10 @@
               "setter": "setState"
             }
           },
-          "hooks": [],
           "props": [],
+          "hooks": [],
           "effects": {
-            "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
+            "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
               "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
               "scope": {
                 "start": {
@@ -76,9 +75,12 @@
                 "line": 6,
                 "column": 2
               },
-              "dependencies": ["f24b8c56-3fac-469d-b2f3-efc6e3575137"]
+              "dependencies": [
+                "f24b8c56-3fac-469d-b2f3-efc6e3575137"
+              ]
             }
           },
+          "componentType": "Function",
           "contexts": [],
           "renders": {}
         }
@@ -86,6 +88,7 @@
     },
     "/src/Hooks.ts": {
       "path": "/src/Hooks.ts",
+      "hash": "348770204f33f87b",
       "import": {
         "useState": {
           "localName": "useState",
@@ -107,20 +110,20 @@
           "name": "useCustomHook",
           "type": "named",
           "exportKind": "function",
-          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
+          "id": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159"
         },
         "useOtherHook": {
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
+          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
-          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+        "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159": {
+          "id": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159",
           "name": "useCustomHook",
           "variableType": "hook",
           "dependencies": {},
@@ -142,8 +145,8 @@
           },
           "file": "/src/Hooks.ts",
           "states": {
-            "71a5333c-fbc1-4ea1-9519-dce12e5b4a87": {
-              "id": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87",
+            "23adce01-2717-489c-9a42-e6485e2f01aa": {
+              "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
               "value": "value",
               "loc": {
                 "line": 4,
@@ -153,9 +156,10 @@
             }
           },
           "props": [],
+          "hooks": [],
           "effects": {
-            "23adce01-2717-489c-9a42-e6485e2f01aa": {
-              "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
+            "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
+              "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
               "scope": {
                 "start": {
                   "line": 6,
@@ -170,13 +174,14 @@
                 "line": 6,
                 "column": 2
               },
-              "dependencies": ["71a5333c-fbc1-4ea1-9519-dce12e5b4a87"]
+              "dependencies": [
+                "23adce01-2717-489c-9a42-e6485e2f01aa"
+              ]
             }
-          },
-          "hooks": []
+          }
         },
-        "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+        "3551d3f2-2e56-49f1-8c18-04bed72b9c0d": {
+          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
           "name": "useOtherHook",
           "variableType": "hook",
           "dependencies": {},
@@ -199,8 +204,8 @@
           "file": "/src/Hooks.ts",
           "states": {},
           "props": [],
-          "effects": {},
-          "hooks": []
+          "hooks": [],
+          "effects": {}
         }
       }
     }

@@ -112,19 +112,18 @@ export type ComponentFileVarBase = ComponentLoc &
     var: Record<string, ComponentFileVar>;
   };
 
-export type ComponentFileVarComponent = ComponentFileVarBase &
-  ComponentInfo &
-  HookInfo & {
+export type ComponentFileVarReact = ComponentFileVarBase & HookInfo;
+
+export type ComponentFileVarComponent = ComponentFileVarReact &
+  ComponentInfo & {
     variableType: "component";
   };
 
-export type ComponentFileVarHook = ComponentFileVarBase &
-  HookInfo & {
-    variableType: "hook";
-  };
+export type ComponentFileVarHook = ComponentFileVarReact & {
+  variableType: "hook";
+};
 
 export type ComponentFileVarNormal = ComponentFileVarBase & {
-  type: "function" | "data";
   components: Record<string, ComponentInfoRender>;
   variableType: "normal";
 };
@@ -136,6 +135,8 @@ export type ComponentFileVar =
 
 export type ComponentFile = {
   path: string;
+  fingerPrint: string;
+  hash: string;
   import: Record<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
