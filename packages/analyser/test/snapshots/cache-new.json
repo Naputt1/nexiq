@@ -2,7 +2,7 @@
   "files": {
     "/eslint.config.js": {
       "path": "/eslint.config.js",
-      "hash": "3c31918f0aa69c",
+      "hash": "3c1694874b5d85f",
       "import": {
         "js": {
           "localName": "js",
@@ -157,8 +157,8 @@
           },
           "file": "/src/Child.tsx",
           "states": {
-            "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
-              "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
+              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
               "value": "count",
               "loc": {
                 "line": 4,
@@ -175,8 +175,8 @@
           ],
           "hooks": [],
           "effects": {
-            "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
-              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+            "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
+              "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
               "scope": {
                 "start": {
                   "line": 6,
@@ -192,7 +192,7 @@
                 "column": 2
               },
               "dependencies": [
-                "adaf1dbd-98e0-440a-8e91-0565ceff7b6d"
+                "f24b8c56-3fac-469d-b2f3-efc6e3575137"
               ]
             }
           },
@@ -279,8 +279,8 @@
             "column": 5
           }
         },
-        "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
-          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+        "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159": {
+          "id": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159",
           "type": "type",
           "name": "User",
           "body": {
@@ -523,7 +523,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "component",
-          "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf"
+          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
         }
       },
       "defaultExport": "anonymous",
