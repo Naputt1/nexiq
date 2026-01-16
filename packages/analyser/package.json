@@ -5,9 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc || true && node dist/analyzer.js ./sample-project ./out/graph.json",
+    "build": "tsup",
+    "dev": "tsup --watch --onSuccess \"node dist/analyzer.js ./sample-project ./out/graph.json\"",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
+    "snapshot": "tsx src/snapshot.ts",
     "test": "vitest run",
     "lint": "eslint ."
   },
@@ -20,6 +21,7 @@
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
     "@babel/types": "^7.28.5",
+    "@node-rs/xxhash": "^1.7.6",
     "glob": "^11.0.3",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5",
@@ -36,6 +38,8 @@
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
     "vitest": "^4.0.16"

@@ -18,6 +18,14 @@ export class DataVariable extends Variable {
     this.components = new Map();
   }
 
+  public load(data: DataVariable) {
+    super.load(data);
+
+    this.type = data.type;
+    // TODO: handle merge
+    this.components = new Map(Object.entries(data.components));
+  }
+
   public getData(): ComponentFileVarNormal {
     return {
       ...super.getBaseData(),

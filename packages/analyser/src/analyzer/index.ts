@@ -16,12 +16,14 @@ import JSXElement from "./JSXElement.js";
 import CallExpression from "./callExpression.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
+import type { JsonData } from "shared";
 
 function analyzeFiles(
   SRC_DIR: string,
   viteConfigPath: string | null,
   files: string[],
-  packageJson: PackageJson
+  packageJson: PackageJson,
+  cacheData?: JsonData
 ) {
   const componentDB = new ComponentDB({
     packageJson,
@@ -32,8 +34,11 @@ function analyzeFiles(
   for (const fullfileName of files) {
     const fileName = "/" + fullfileName;
 
-    componentDB.addFile(fileName);
-    // console.log(fileName);
+    const fileCache = cacheData?.files?.[fileName];
+    if (!componentDB.addFile(fullfileName, fileCache)) {
+      continue;
+    }
+
     const code = fs.readFileSync(path.resolve(SRC_DIR, fullfileName), "utf-8");
     let ast: File;
     try {

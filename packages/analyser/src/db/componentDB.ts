@@ -13,6 +13,7 @@ import type {
   ComponentFileVarHook,
   EffectInfo,
   TypeDataDeclare,
+  ComponentFile,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -21,11 +22,7 @@ import path from "path";
 import { ComponentVariable } from "./variable/component.js";
 import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
-import {
-  isComponentVariable,
-  isDataVariable,
-  isHookVariable,
-} from "./variable/type.js";
+import { isComponentVariable, isDataVariable } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
 
@@ -86,7 +83,7 @@ export class ComponentDB {
 
   constructor(options: ComponentDBOptions) {
     this.edges = [];
-    this.files = new FileDB();
+    this.files = new FileDB(options.dir);
 
     this.resolveTasks = [];
     this.typesToResolve = new Set();
@@ -154,17 +151,6 @@ export class ComponentDB {
     );
   }
 
-  public addState(fileName: string, loc: VariableLoc, state: State) {
-    const file = this.files.get(fileName);
-    const variable = file.getVariable(loc);
-
-    assert(variable != null, "Variable not found");
-
-    if (isComponentVariable(variable) || isHookVariable(variable)) {
-      variable.states[state.id] = state;
-    }
-  }
-
   public addVariableDependency(
     fileName: string,
     parent: string,
@@ -184,11 +170,7 @@ export class ComponentDB {
     if (component == null) debugger;
     assert(component != null, "Component not found");
 
-    const id = newUUID();
-    component.states[id] = {
-      id,
-      ...state,
-    };
+    component.addState(state);
   }
 
   private _getExportId(
@@ -241,7 +223,7 @@ export class ComponentDB {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
     assert(component != null, "Component not found");
 
-    component.hooks.push(exportInfo.id);
+    component.addHook(exportInfo.id);
   }
 
   public comAddEffect(
@@ -299,8 +281,8 @@ export class ComponentDB {
     );
   }
 
-  public addFile(file: string) {
-    this.files.add(file);
+  public addFile(file: string, cache?: ComponentFile) {
+    return this.files.add(file, cache);
   }
 
   public fileAddImport(fileName: string, fileImport: ComponentFileImport) {
@@ -327,6 +309,16 @@ export class ComponentDB {
     }
   }
 
+  private _getValues<T>(collection: Map<string, T> | Record<string, T>) {
+    if (collection instanceof Map) {
+      return collection.values();
+    }
+    if (collection && typeof collection === "object") {
+      return Object.values(collection);
+    }
+    return [];
+  }
+
   private _resolveDependency(variable: Variable, parent?: string) {
     if (
       variable.variableType === "component" &&
@@ -343,19 +335,23 @@ export class ComponentDB {
       }
     } else if (variable.variableType === "normal" && isDataVariable(variable)) {
       if (parent != null) {
-        for (const innerCom of variable.components.values()) {
+        // Handle components iteration (Map or Record)
+        const components = this._getValues(variable.components);
+        for (const innerCom of components) {
           if (innerCom.isDependency) continue;
 
           this.edges.push({
             from: parent,
             to: innerCom.id,
-            label: "render2",
+            label: "render",
           });
         }
       }
     }
 
-    for (const innerVar of variable.var.values()) {
+    // Handle nested var iteration (Map or Record)
+    const vars = this._getValues(variable.var);
+    for (const innerVar of vars) {
       this._resolveDependency(
         innerVar,
         variable.variableType == "component" ? variable.id : parent
@@ -365,17 +361,27 @@ export class ComponentDB {
 
   public resolveDependency() {
     for (const file of this.files.getFiles()) {
-      for (const variable of file.var.values()) {
+      for (const variable of file.getVariables()) {
         this._resolveDependency(variable);
       }
     }
+  }
+
+  private getEdges(): DataEdge[] {
+    const edges: DataEdge[] = [];
+
+    for (const file of this.files.getFiles()) {
+      edges.push(...file.getEdges());
+    }
+
+    return edges;
   }
 
   public getData(): JsonData {
     return {
       src: path.resolve(this.dir),
       files: this.files.getData(),
-      edges: this.edges,
+      edges: this.getEdges(),
       // resolve: this.resolveTasks,
     };
   }

@@ -37,6 +37,16 @@ export abstract class Variable {
     if (scope) this.scope = scope;
   }
 
+  public load(data: Variable) {
+    this.type = data.type;
+
+    // TODO: handle merge
+    this.dependencies = data.dependencies;
+
+    this.loc = data.loc;
+    if (data.scope) this.scope = data.scope;
+  }
+
   protected getBaseData(): ComponentFileVarBase {
     if (this.type === "function") {
       if (this.scope == null) {
