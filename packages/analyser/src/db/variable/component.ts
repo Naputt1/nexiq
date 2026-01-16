@@ -1,54 +1,41 @@
-import type {
-  ComponentFileVarComponent,
-  ComponentInfoRender,
-  EffectInfo,
-  PropData,
-  State,
-} from "shared";
-import { Variable } from "./variable.js";
+import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
 import type { TypeData } from "shared/src/types/primitive.js";
+import { ReactVariable } from "./reactVariable.js";
 
-export class ComponentVariable extends Variable {
-  file: string;
+export class ComponentVariable extends ReactVariable {
   componentType: ComponentFileVarComponent["componentType"];
-  states: Record<string, State>;
-  hooks: string[];
-  props: PropData[];
   propType: TypeData | undefined;
-  effects: Record<string, EffectInfo>;
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
 
-  constructor({
-    id,
-    name,
-    dependencies,
-    loc,
-    ...options
-  }: Omit<ComponentFileVarComponent, "variableType">) {
-    const scope = options.type === "function" ? options.scope : undefined;
-    super(id, name, options.type, dependencies, "component", loc, scope);
-    this.file = options.file;
+  constructor(options: Omit<ComponentFileVarComponent, "variableType">) {
+    super({
+      variableType: "component",
+      ...options,
+    } as ComponentFileVarComponent);
     this.componentType = options.componentType;
-    this.states = options.states;
-    this.hooks = options.hooks;
-    this.props = options.props;
     this.propType = options.propType;
-    this.effects = options.effects;
     this.contexts = options.contexts;
     this.renders = options.renders;
   }
 
+  public load(data: ComponentVariable) {
+    super.load(data);
+
+    this.variableType = "component";
+    this.componentType = data.componentType;
+    this.propType = data.propType;
+
+    // TODO: handle merge
+    this.contexts = data.contexts;
+    this.renders = data.renders;
+  }
+
   public getData(): ComponentFileVarComponent {
     const data: ComponentFileVarComponent = {
-      ...super.getBaseData(),
+      ...this.getReactVariable(),
       variableType: "component",
-      file: this.file,
       componentType: this.componentType,
-      states: this.states,
-      hooks: this.hooks,
-      props: this.props,
-      effects: this.effects,
       contexts: this.contexts,
       renders: this.renders,
     };

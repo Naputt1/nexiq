@@ -5,6 +5,7 @@ import { PackageJson } from "./db/packageJson.js";
 import { setRandomSeed } from "./utils/uuid.js";
 import path from "path";
 import fs from "fs";
+import type { SnapshotData } from "./types/test.js";
 
 const SEED = "analyser-test-seed";
 
@@ -33,16 +34,21 @@ describe("analyser snapshots", () => {
         process.cwd(),
         `test/snapshots/${projectName}.json`
       );
-      const snapshotData = JSON.parse(fs.readFileSync(snapshotPath, "utf-8"));
+      const snapshotData: SnapshotData = JSON.parse(
+        fs.readFileSync(snapshotPath, "utf-8")
+      );
 
       // Compare the result with the stored snapshot
       // We strip the absolute 'src' path as it changes between environments
-      const result = JSON.parse(JSON.stringify(graph));
+      const result: SnapshotData = JSON.parse(JSON.stringify(graph));
       delete result.src;
-      const expected = snapshotData;
-      delete expected.src;
 
-      expect(result).toEqual(expected);
+      // Strip fingerPrint as it contains timestamps
+      for (const file of Object.values(result.files)) {
+        delete file.fingerPrint;
+      }
+
+      expect(result).toEqual(snapshotData);
     });
   });
 });

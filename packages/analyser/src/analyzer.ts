@@ -16,6 +16,8 @@ if (args.seed) {
   setRandomSeed(args.seed);
 }
 
+const CACHE_FILE = args.cache || OUT_FILE;
+
 function main() {
   const packageJson = new PackageJson(SRC_DIR);
 
@@ -24,7 +26,23 @@ function main() {
   const files = getFiles(SRC_DIR);
   // fs.writeFileSync("./out/files.json", JSON.stringify(files));
   console.log(`Analyzing ${files.length} files...`);
-  const graph = analyzeFiles(SRC_DIR, viteConfigPath, files, packageJson);
+
+  let cacheData = undefined;
+  if (fs.existsSync(CACHE_FILE)) {
+    try {
+      cacheData = JSON.parse(fs.readFileSync(CACHE_FILE, "utf-8"));
+    } catch (e) {
+      console.warn("Failed to load cache", e);
+    }
+  }
+
+  const graph = analyzeFiles(
+    SRC_DIR,
+    viteConfigPath,
+    files,
+    packageJson,
+    cacheData
+  );
 
   fs.mkdirSync(path.dirname(PUBLIC_FILE), { recursive: true });
   fs.writeFileSync(PUBLIC_FILE, JSON.stringify(graph, null, 2));

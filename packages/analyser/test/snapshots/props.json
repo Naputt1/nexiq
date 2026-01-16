@@ -1,8 +1,8 @@
 {
-  "src": "/Users/naputt/git/react-map/packages/sample-project/props",
   "files": {
     "/src/type2.tsx": {
       "path": "/src/type2.tsx",
+      "hash": "2bad4400688d020b",
       "import": {
         "React": {
           "localName": "React",
@@ -152,6 +152,7 @@
     },
     "/src/type.tsx": {
       "path": "/src/type.tsx",
+      "hash": "5c2841b6cb214c31",
       "import": {
         "React": {
           "localName": "React",
@@ -592,7 +593,10 @@
                       "type": "string"
                     }
                   ],
-                  "quasis": ["foo-", ""]
+                  "quasis": [
+                    "foo-",
+                    ""
+                  ]
                 }
               }
             },
@@ -610,7 +614,10 @@
                       "name": "TStr"
                     }
                   ],
-                  "quasis": ["foo-", ""]
+                  "quasis": [
+                    "foo-",
+                    ""
+                  ]
                 }
               }
             },
@@ -1025,7 +1032,9 @@
             "line": 35,
             "column": 10
           },
-          "extends": ["71a5333c-fbc1-4ea1-9519-dce12e5b4a87"],
+          "extends": [
+            "71a5333c-fbc1-4ea1-9519-dce12e5b4a87"
+          ],
           "params": {
             "T": {
               "name": "T",
@@ -1142,7 +1151,10 @@
             "expr": {
               "type": "ref",
               "refType": "qualified",
-              "names": ["des", "DestructuringProps"]
+              "names": [
+                "des",
+                "DestructuringProps"
+              ]
             }
           },
           "loc": {
@@ -1244,16 +1256,16 @@
             }
           },
           "file": "/src/type.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
               "type": "any"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {},
           "propType": {
@@ -1284,9 +1296,7 @@
             }
           },
           "file": "/src/type.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
@@ -1297,7 +1307,9 @@
               "type": "any"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {},
           "propType": {
@@ -1328,9 +1340,7 @@
             }
           },
           "file": "/src/type.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
@@ -1341,7 +1351,9 @@
               "type": "any"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {},
           "propType": {
@@ -1372,9 +1384,7 @@
             }
           },
           "file": "/src/type.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
@@ -1385,7 +1395,9 @@
               "type": "any"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {},
           "propType": {
@@ -1416,9 +1428,7 @@
             }
           },
           "file": "/src/type.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
@@ -1429,7 +1439,9 @@
               "type": "any"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {}
         }
@@ -1437,6 +1449,7 @@
     },
     "/src/main.tsx": {
       "path": "/src/main.tsx",
+      "hash": "6dd60477ed194af5",
       "import": {
         "StrictMode": {
           "localName": "StrictMode",
@@ -1467,6 +1480,7 @@
     },
     "/src/Destructuring.tsx": {
       "path": "/src/Destructuring.tsx",
+      "hash": "67f6742985a966b",
       "import": {
         "React": {
           "localName": "React",
@@ -1509,9 +1523,7 @@
             }
           },
           "file": "/src/Destructuring.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [
             {
               "name": "title",
@@ -1522,7 +1534,9 @@
               "type": "string[]"
             }
           ],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {},
           "propType": {
@@ -1552,6 +1566,7 @@
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
+      "hash": "f32487801e84c7ec",
       "import": {
         "DestructuringProps": {
           "localName": "DestructuringProps",
@@ -1615,11 +1630,11 @@
             }
           },
           "file": "/src/App.tsx",
-          "componentType": "Function",
           "states": {},
-          "hooks": [],
           "props": [],
+          "hooks": [],
           "effects": {},
+          "componentType": "Function",
           "contexts": [],
           "renders": {
             "160568c3-c878-41fa-a2d7-8a528b4fc107": {

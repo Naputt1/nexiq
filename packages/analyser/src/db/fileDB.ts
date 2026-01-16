@@ -4,24 +4,25 @@ import type {
   ComponentFileExport,
   ComponentFileImport,
   ComponentFileVar,
+  ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
+  DataEdge,
   EffectInfo,
-  HookInfo,
   JsonData,
   TypeDataDeclare,
   VariableLoc,
   VariableScope,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
-import type { ComponentVariable } from "./variable/component.js";
+import { ComponentVariable } from "./variable/component.js";
 import {
   isHookVariable,
   isComponentVariable,
   isDataVariable,
 } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
-import type { HookVariable } from "./variable/hook.js";
+import { HookVariable } from "./variable/hook.js";
 import type {
   TypeData,
   TypeDataLiteralTypeLiteral,
@@ -35,6 +36,11 @@ import type {
   TypeDataTuple,
   TypeDataIndexAccess,
 } from "shared/src/types/primitive.js";
+import fs from "fs";
+import path from "path";
+import { xxh3 } from "@node-rs/xxhash";
+import { DataVariable } from "./variable/dataVariable.js";
+import type { ReactVariable } from "./variable/reactVariable.js";
 
 interface FileIds {
   id: string;
@@ -63,6 +69,8 @@ type TypeDataHandler<T> = (
 
 export class File {
   path: string;
+  fingerPrint: string;
+  hash: string;
   import: Map<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
@@ -71,16 +79,22 @@ export class File {
 
   scopes = new Set<Variable>();
 
+  private init: boolean = true;
+
   // key = loc.line + @ + loc.column val = variable
   private locIdsMap = new Map<string, Variable>();
 
+  // key = name val = typeData
   private tsTypesID = new Map<string, TypeDataDeclare>();
 
-  private dependencyMap = new Map<string, string>();
   private ids = new Map<string, FileIds>();
 
-  constructor(filename: string) {
-    this.path = filename;
+  private prevIds = new Map<string, string>();
+
+  constructor() {
+    this.path = "";
+    this.fingerPrint = "";
+    this.hash = "";
     this.import = new Map();
     this.export = {};
     this.defaultExport = null;
@@ -88,7 +102,105 @@ export class File {
     this.var = new Map();
   }
 
+  // Helper to extract IDs recursively
+  public extractIds = (
+    vars: Record<string, ComponentFileVar>,
+    prevIds: Map<string, string>
+  ) => {
+    for (const key in vars) {
+      const v = vars[key];
+      if (v && v.name && v.id) {
+        prevIds.set(v.name, v.id);
+      }
+      if (v && v.var) {
+        this.extractIds(v.var, prevIds);
+      }
+    }
+  };
+
+  private loadVariable(variable: ComponentFileVar) {
+    let v: Variable;
+    if (variable.variableType === "component") {
+      v = new ComponentVariable(variable);
+    } else if (variable.variableType === "hook") {
+      v = new HookVariable(variable);
+    } else {
+      v = new DataVariable(variable);
+    }
+
+    this.var.set(v.id, v);
+    if (v.type === "function") {
+      this.scopes.add(v);
+    }
+
+    this.locIdsMap.set(this.getLocalId(v), v);
+
+    this.ids.set(v.name, v);
+
+    for (const childVar of Object.values(variable.var)) {
+      const child = this.loadVariable(childVar);
+      v.var.set(child.id, child);
+    }
+
+    return v;
+  }
+
+  private rawData: ComponentFile | null = null;
+  public load(data: ComponentFile, changed: boolean) {
+    this.init = changed;
+    this.path = data.path;
+    this.fingerPrint = data.fingerPrint;
+    this.hash = data.hash;
+    this.rawData = data;
+
+    if (changed) {
+      for (const variable of Object.values(data.var)) {
+        this.loadVariable(variable);
+      }
+
+      for (const importData of Object.values(data.import)) {
+        this.import.set(importData.localName, {
+          localName: importData.localName,
+          importedName: importData.importedName,
+          source: importData.source,
+          type: importData.type,
+          importKind: importData.importKind,
+        });
+      }
+
+      for (const exportData of Object.values(data.export)) {
+        this.export[exportData.name] = {
+          id: exportData.id,
+          name: exportData.name,
+          type: exportData.type,
+          exportKind: exportData.exportKind,
+        };
+
+        if (exportData.type === "default") {
+          this.defaultExport = exportData.name;
+        }
+      }
+
+      for (const typeData of Object.values(data.tsTypes)) {
+        this.tsTypes.set(typeData.id, typeData);
+        this.tsTypesID.set(typeData.name, typeData);
+      }
+
+      if (data.var) {
+        this.extractIds(data.var, this.prevIds);
+      }
+    }
+  }
+
   public addImport(fileImport: ComponentFileImport) {
+    // if (this.import.get(fileImport.localName) != null) {
+    //   if (!this.init) {
+    //     return;
+    //   }
+
+    //   assert(false, "Import already exists");
+    // }
+
     this.import.set(fileImport.localName, {
       localName: fileImport.localName,
       importedName: fileImport.importedName,
@@ -207,20 +319,38 @@ export class File {
       }
     }
 
+    if (this.prevIds.has(name)) {
+      return this.prevIds.get(name)!;
+    }
+
     return newUUID();
   }
 
+  public getLocalId(variable: Variable): string {
+    return `${variable.loc.line}@${variable.loc.column}`;
+  }
+
   public addVariable(variable: Variable, parentPath?: string[]): string {
-    this.locIdsMap.set(`${variable.loc.line}@${variable.loc.column}`, variable);
+    const id = this.getNewVarID(variable.name);
+    variable.id = id;
+
+    if (this.prevIds.has(variable.name)) {
+      const oldVar = this.var.get(id);
+      assert(oldVar != null, "Variable not found");
+
+      if (oldVar.variableType === variable.variableType) {
+        oldVar.load(variable);
+        variable = oldVar;
+      }
+    }
+
+    this.locIdsMap.set(this.getLocalId(variable), variable);
 
     if (variable.type === "function") {
       this.scopes.add(variable);
     }
 
     if (parentPath == null || parentPath.length == 0) {
-      const id = this.getNewVarID(variable.name);
-      variable.id = id;
-
       this.var.set(id, variable);
       this.ids.set(variable.name, {
         id: id,
@@ -255,31 +385,83 @@ export class File {
     }
   }
 
+  private __getEdgesRaw(variable: ComponentFileVarComponent): DataEdge[] {
+    const edges: DataEdge[] = [];
+
+    for (const render of Object.values(variable.renders)) {
+      edges.push({
+        from: render.id,
+        to: variable.id,
+        label: "render",
+      });
+    }
+
+    for (const v of Object.values(variable.var)) {
+      if (v.variableType != "component") continue;
+
+      edges.push(...this.__getEdgesRaw(v));
+    }
+
+    return edges;
+  }
+
+  private __getEdges(variable: ComponentVariable): DataEdge[] {
+    const edges: DataEdge[] = [];
+
+    for (const render of Object.values(variable.renders)) {
+      edges.push({
+        from: render.id,
+        to: variable.id,
+        label: "render",
+      });
+    }
+
+    for (const v of variable.var.values()) {
+      if (!isComponentVariable(v)) continue;
+
+      edges.push(...this.__getEdges(v));
+    }
+
+    return edges;
+  }
+
+  public getEdges(): DataEdge[] {
+    const edges: DataEdge[] = [];
+    if (!this.init && this.rawData) {
+      for (const variable of Object.values(this.rawData.var)) {
+        if (variable.variableType != "component") continue;
+
+        edges.push(...this.__getEdgesRaw(variable));
+      }
+    } else {
+      for (const variable of this.var.values()) {
+        if (!isComponentVariable(variable)) continue;
+
+        edges.push(...this.__getEdges(variable));
+      }
+    }
+
+    return edges;
+  }
+
+  public getVariables() {
+    // if (!this.init && this.rawData) {
+    //   return Object.values(this.rawData.var);
+    // }
+    return this.var.values();
+  }
+
   public getVariable(loc: VariableLoc): Variable | undefined {
     return this.locIdsMap.get(`${loc.line}@${loc.column}`);
   }
 
-  private getTopParent(id: string): Variable | undefined {
-    if (this.var.has(id)) {
-      const parentCombo = this.var.get(id);
-      if (parentCombo != null) {
-        return parentCombo;
-      }
-    }
-
-    if (this.dependencyMap.has(id)) {
-      const parentId = this.dependencyMap.get(id);
-      if (parentId != null) {
-        return this.getTopParent(parentId);
-      }
-    }
-
-    return undefined;
-  }
-
   public getData(): ComponentFile {
+    if (!this.init && this.rawData) return this.rawData;
+
     return {
       path: this.path,
+      fingerPrint: this.fingerPrint,
+      hash: this.hash,
       import: Object.fromEntries(this.import),
       export: this.export,
       defaultExport: this.defaultExport,
@@ -481,52 +663,77 @@ export class File {
       "can't add hook to non-hook"
     );
 
-    const newDependencies: string[] = [];
-    outer: for (const dep of effect.dependencies) {
-      for (const state of Object.values(variable.states)) {
-        if (state.value === dep) {
-          newDependencies.push(state.id);
-          continue outer;
-        }
-      }
-
-      for (const prop of variable.props) {
-        if (prop.name == dep) {
-          newDependencies.push(dep);
-          continue outer;
-        }
-      }
-
-      debugger;
-    }
-
-    effect.dependencies = newDependencies;
-    variable.effects[effect.id] = effect;
+    variable.addEffect(effect);
   }
 }
 
 export class FileDB {
+  src_dir: string;
+
   private files: Map<string, File>;
 
-  constructor() {
+  constructor(src_dir: string) {
     this.files = new Map();
+    this.src_dir = src_dir;
   }
 
   public getFiles() {
     return this.files.values();
   }
 
-  public add(filename: string) {
-    this.files.set(filename, new File(filename));
+  private isFileChanged(filename: string, file: File, cache?: ComponentFile) {
+    try {
+      // console.log(this.src_dir, filename, path.resolve(this.src_dir, filename));
+      const stat = fs.statSync(path.resolve(this.src_dir, filename));
+      file.fingerPrint = `${stat.size}:${stat.mtimeMs}`;
+
+      if (cache) {
+        if (cache.fingerPrint == file.fingerPrint) {
+          file.hash = cache.hash;
+          return false;
+        }
+      }
+
+      const hasher = xxh3.Xxh3.withSeed();
+      hasher.update(fs.readFileSync(path.resolve(this.src_dir, filename)));
+
+      file.hash = hasher.digest().toString(16);
+
+      if (cache) {
+        return file.hash !== cache.hash;
+      }
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      assert(false, "file read failed");
+    }
+  }
+
+  public add(filename: string, cache?: ComponentFile) {
+    const file = new File();
+    file.path = "/" + filename;
+
+    const changed = this.isFileChanged(filename, file, cache);
+    if (!changed) {
+      assert(cache != null, "Cache must be defined");
+
+      file.load(cache, changed);
+      this.files.set("/" + filename, file);
+      return false; // Unchanged
+    }
+
+    if (cache) {
+      file.load(cache, changed);
+    }
+
+    this.files.set("/" + filename, file);
+    return true; // Changed
   }
 
   public addImport(fileName: string, fileImport: ComponentFileImport) {
     const file = this.files.get(fileName);
     assert(file != null, "File not found");
-    assert(
-      file.import.get(fileImport.localName) == null,
-      "Import already exists"
-    );
 
     file.addImport(fileImport);
   }
@@ -613,7 +820,7 @@ export class FileDB {
   public getHookInfoFromLoc(
     fileName: string,
     loc: VariableLoc
-  ): HookInfo | undefined {
+  ): ReactVariable | undefined {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
     if (

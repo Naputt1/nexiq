@@ -1,0 +1,100 @@
+import { describe, it, expect } from "vitest";
+import analyzeFiles from "./analyzer/index.js";
+import { getFiles, getViteConfig } from "./analyzer/utils.js";
+import { PackageJson } from "./db/packageJson.js";
+import { setRandomSeed } from "./utils/uuid.js";
+import path from "path";
+import fs from "fs";
+import type { SnapshotData } from "./types/test.js";
+
+const SEED = "analyser-test-seed";
+
+describe("analyser cache snapshots", () => {
+  const projectName = "cache";
+  it(`should match snapshot for ${projectName}`, () => {
+    setRandomSeed(SEED);
+    const projectPath = path.resolve(
+      process.cwd(),
+      `../sample-project/${projectName}`
+    );
+    const packageJson = new PackageJson(projectPath);
+    const viteConfigPath = getViteConfig(projectPath);
+    const files = getFiles(projectPath);
+
+    const graph = analyzeFiles(projectPath, viteConfigPath, files, packageJson);
+
+    const snapshotPath = path.resolve(
+      process.cwd(),
+      `test/snapshots/${projectName}.json`
+    );
+    const snapshotData: SnapshotData = JSON.parse(
+      fs.readFileSync(snapshotPath, "utf-8")
+    );
+
+    // Compare the result with the stored snapshot
+    // We strip the absolute 'src' path as it changes between environments
+    const result: SnapshotData = JSON.parse(JSON.stringify(graph));
+    delete result.src;
+
+    // Strip fingerPrint as it contains timestamps
+    for (const file of Object.values(result.files)) {
+      delete file.fingerPrint;
+    }
+
+    expect(result).toEqual(snapshotData);
+  });
+
+  const projectNameNew = "cache-new";
+  it(`should match snapshot for ${projectNameNew}`, () => {
+    setRandomSeed(SEED);
+    const projectPath = path.resolve(
+      process.cwd(),
+      `../sample-project/${projectNameNew}`
+    );
+    const packageJson = new PackageJson(projectPath);
+    const viteConfigPath = getViteConfig(projectPath);
+    const files = getFiles(projectPath);
+
+    const cachePath = path.resolve(
+      process.cwd(),
+      `test/snapshots/${projectName}.json`
+    );
+
+    let cacheData = undefined;
+    if (fs.existsSync(cachePath)) {
+      try {
+        cacheData = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+      } catch (e) {
+        console.warn("Failed to load cache", e);
+      }
+    }
+
+    const graph = analyzeFiles(
+      projectPath,
+      viteConfigPath,
+      files,
+      packageJson,
+      cacheData
+    );
+
+    const snapshotPath = path.resolve(
+      process.cwd(),
+      `test/snapshots/${projectNameNew}.json`
+    );
+    const snapshotData: SnapshotData = JSON.parse(
+      fs.readFileSync(snapshotPath, "utf-8")
+    );
+
+    // Compare the result with the stored snapshot
+    // We strip the absolute 'src' path as it changes between environments
+    const result: SnapshotData = JSON.parse(JSON.stringify(graph));
+    delete result.src;
+
+    // Strip fingerPrint as it contains timestamps
+    for (const file of Object.values(result.files)) {
+      delete file.fingerPrint;
+    }
+
+    expect(result).toEqual(snapshotData);
+  });
+});

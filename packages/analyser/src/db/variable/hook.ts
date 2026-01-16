@@ -1,39 +1,23 @@
-import type { ComponentFileVarHook, EffectInfo, PropData, State } from "shared";
-import { Variable } from "./variable.js";
+import type { ComponentFileVarHook } from "shared";
+import { ReactVariable } from "./reactVariable.js";
 
-export class HookVariable extends Variable {
-  file: string;
-  states: Record<string, State>;
-  props: PropData[];
-  hooks: string[];
-  effects: Record<string, EffectInfo>;
+export class HookVariable extends ReactVariable {
+  constructor(
+    options: Omit<ComponentFileVarHook, "variableType" | "var" | "components">
+  ) {
+    super({ ...options, variableType: "hook" } as ComponentFileVarHook);
+  }
 
-  constructor({
-    id,
-    name,
-    dependencies,
-    loc,
-    ...options
-  }: Omit<ComponentFileVarHook, "variableType" | "var" | "components">) {
-    const scope = options.type === "function" ? options.scope : undefined;
-    super(id, name, options.type, dependencies, "hook", loc, scope);
-    this.file = options.file;
-    this.states = options.states;
-    this.props = options.props;
-    this.effects = options.effects;
-    this.hooks = options.hooks;
+  public load(data: HookVariable) {
+    super.load(data);
+
+    this.variableType = "hook";
   }
 
   public getData(): ComponentFileVarHook {
     return {
-      ...super.getBaseData(),
-      file: this.file,
+      ...super.getReactVariable(),
       variableType: "hook",
-      loc: this.loc,
-      states: this.states,
-      props: this.props,
-      effects: this.effects,
-      hooks: this.hooks,
     };
   }
 }
