@@ -141,3 +141,5 @@ vite.config.ts.timestamp-*
 .vite/
 
 graph.json
+.react-map/
+react.map.config.json
