@@ -13,8 +13,19 @@ import useGraph, {
 } from "./graph/hook";
 import Graph, { type GraphRef } from "./graph/graph";
 import { NodeDetails } from "./components/node-details";
+import { ProjectSidebar } from "./components/Sidebar";
+import { cn } from "@/lib/utils";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
-const ComponentGraph = () => {
+interface ComponentGraphProps {
+  projectPath: string;
+}
+
+const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -32,9 +43,12 @@ const ComponentGraph = () => {
   const [matches, setMatches] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [currentAnalysisPath, setCurrentAnalysisPath] = useState(projectPath);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [typeData, settypeData] = useState<{ [key: string]: TypeDataDeclare }>(
-    {}
+    {},
   );
 
   const graphRef = useRef<GraphRef>(null);
@@ -42,9 +56,12 @@ const ComponentGraph = () => {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/public/graph.json");
-      if (!res.ok) throw new Error("graph.json not found");
-      const graphData: JsonData = await res.json();
+      // Use configRoot (projectPath) to read data because that's where .react-map is
+      const graphData: JsonData = await window.ipcRenderer.invoke(
+        "read-graph-data",
+        projectPath,
+      );
+      if (!graphData) throw new Error("Graph data not found");
 
       const combos: ComboData[] = [];
       const nodes: NodeData[] = [];
@@ -53,7 +70,7 @@ const ComponentGraph = () => {
       const addCombo = (
         variable: ComponentFileVar,
         file: ComponentFile,
-        parentID?: string
+        parentID?: string,
       ) => {
         if (variable.variableType != "component") return;
         const fileName = `${graphData.src}${file.path}`;
@@ -61,7 +78,7 @@ const ComponentGraph = () => {
         combos.push({
           id: variable.id,
           collapsed: true,
-          label: { text: variable.name, fill: "white" },
+          label: { text: variable.name, fill: "black" },
           combo: parentID,
           fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
           props: variable.props,
@@ -76,11 +93,10 @@ const ComponentGraph = () => {
         combos.push({
           id: `${variable.id}-render`,
           collapsed: true,
-          label: { text: "render", fill: "white" },
+          label: { text: "render", fill: "black" },
           combo: variable.id,
           fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
         });
-
         for (const state of Object.values(variable.states)) {
           nodes.push({
             id: state.id,
@@ -187,13 +203,27 @@ const ComponentGraph = () => {
     loadData();
   }, []);
 
-  // keep stage size responsive
+  // Resize observer for container
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const onResize = () =>
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    if (!containerRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setSize({ width, height });
+      }
+    });
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
   }, []);
+
+  // Force re-calculation of size when sidebar toggles
+  useEffect(() => {
+    if (containerRef.current) {
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      setSize({ width, height });
+    }
+  }, [isSidebarOpen]);
 
   // handle global shortcuts
   useEffect(() => {
@@ -367,96 +397,136 @@ const ComponentGraph = () => {
     setSelectedId(null);
   }, []);
 
+  const handleProjectSwitch = async (path: string) => {
+    if (path === currentAnalysisPath) return; // No change
+
+    setIsAnalyzing(true);
+    setCurrentAnalysisPath(path);
+    try {
+      // Trigger analysis on new path, storing config in projectRoot
+      await window.ipcRenderer.invoke("analyze-project", path, projectPath);
+
+      // Reload data
+      await loadData();
+    } catch (e) {
+      console.error("Failed to switch project", e);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
-    <div
-      className="w-full h-full relative bg-[#1e1e1e] overflow-hidden"
-      style={{ width: "100vw", height: "100vh" }}
-    >
-      <NodeDetails
-        selectedId={selectedId}
-        nodes={nodesMap}
-        combos={combosMap}
-        typeData={typeData}
-        onClose={handleClose}
-      />
-      {isSearchOpen && (
-        <div className="absolute top-4 right-4 z-50 flex items-center bg-[#2d2d2d] border border-[#454545] rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center gap-1">
-            <div className="relative flex items-center">
-              <input
-                ref={searchInputRef}
-                autoFocus
-                type="text"
-                value={search}
-                placeholder="Find"
-                onChange={(e) => onSearch(e.target.value)}
-                className="bg-[#3c3c3c] text-white pl-2 pr-16 py-1 outline-none text-sm w-64 border border-transparent focus:border-[#007acc] rounded-sm"
-              />
-              <div className="absolute right-2 text-[11px] text-[#aaaaaa] pointer-events-none">
-                {matches.length > 0 ? (
-                  <span>
-                    {currentMatchIndex + 1} of {matches.length}
-                  </span>
-                ) : search !== "" ? (
-                  <span className="text-[#f48771]">No results</span>
-                ) : null}
+    <div className="w-screen h-screen relative bg-background overflow-hidden">
+      <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <ProjectSidebar
+          currentPath={currentAnalysisPath}
+          projectRoot={projectPath}
+          onSelectProject={handleProjectSwitch}
+          isLoading={isAnalyzing}
+        />
+        <SidebarInset className="min-w-0">
+          <SidebarTrigger
+            className={cn(
+              "absolute top-4 left-4 z-50",
+              // isSidebarOpen && "hidden",
+            )}
+          />
+          <NodeDetails
+            selectedId={selectedId}
+            nodes={nodesMap}
+            combos={combosMap}
+            typeData={typeData}
+            onClose={handleClose}
+          />
+          {isSearchOpen && (
+            <div className="absolute top-4 right-4 z-50 flex items-center bg-popover border border-border rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-1">
+                <div className="relative flex items-center">
+                  <input
+                    ref={searchInputRef}
+                    autoFocus
+                    type="text"
+                    value={search}
+                    placeholder="Find"
+                    onChange={(e) => onSearch(e.target.value)}
+                    className="bg-muted text-foreground pl-2 pr-16 py-1 outline-none text-sm w-64 border border-transparent focus:border-primary rounded-sm placeholder:text-muted-foreground"
+                  />
+                  <div className="absolute right-2 text-[11px] text-muted-foreground pointer-events-none">
+                    {matches.length > 0 ? (
+                      <span className="text-foreground">
+                        {currentMatchIndex + 1} of {matches.length}
+                      </span>
+                    ) : search !== "" ? (
+                      <span className="text-destructive">No results</span>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="flex items-center border-l border-border pl-1 gap-1">
+                  <button
+                    onClick={goToPrevMatch}
+                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
+                    title="Previous Match (Shift+Enter)"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                    >
+                      <path d="M7.707 5.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L8 7.414l-3.707 3.707a1 1 0 0 1-1.414-1.414l4-4z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={goToNextMatch}
+                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
+                    title="Next Match (Enter)"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                    >
+                      <path d="M7.707 10.707a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L8 8.586l-3.707-3.707a1 1 0 0 0-1.414 1.414l4 4z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setIsSearchOpen(false)}
+                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors ml-1"
+                    title="Close (Esc)"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                    >
+                      <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center border-l border-[#454545] pl-1 gap-1">
-              <button
-                onClick={goToPrevMatch}
-                className="p-1 hover:bg-[#454545] rounded-sm text-[#cccccc] hover:text-white transition-colors"
-                title="Previous Match (Shift+Enter)"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M7.707 5.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L8 7.414l-3.707 3.707a1 1 0 0 1-1.414-1.414l4-4z" />
-                </svg>
-              </button>
-              <button
-                onClick={goToNextMatch}
-                className="hover:bg-[#454545] rounded-sm text-[#cccccc] hover:text-white transition-colors"
-                title="Next Match (Enter)"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M7.707 10.707a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L8 8.586l-3.707-3.707a1 1 0 0 0-1.414 1.414l4 4z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setIsSearchOpen(false)}
-                className="p-1 hover:bg-[#454545] rounded-sm text-[#cccccc] hover:text-white transition-colors ml-1"
-                title="Close (Esc)"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
-                </svg>
-              </button>
+          )}
+          <div
+            ref={containerRef}
+            className="flex flex-1 flex-col h-full overflow-hidden relative min-w-0"
+          >
+            <div className="absolute inset-0">
+              {size.width > 0 && size.height > 0 && (
+                <Graph
+                  ref={graphRef}
+                  width={size.width}
+                  height={size.height}
+                  graph={graph}
+                  onSelect={onSelect}
+                />
+              )}
             </div>
           </div>
-        </div>
-      )}
-      <Graph
-        ref={graphRef}
-        width={size.width}
-        height={size.height}
-        graph={graph}
-        onSelect={onSelect}
-      />
+        </SidebarInset>
+      </SidebarProvider>
     </div>
   );
 };

@@ -35,7 +35,7 @@ export function NodeDetails({
   const renderGenerics = (params?: TypeDataParam[]) => {
     if (!params || params.length === 0) return null;
     return (
-      <span className="text-gray-400 pr-1">
+      <span className="text-muted-foreground pr-1">
         {"<"}
         {params.map((p, i) => (
           <span key={i}>
@@ -61,21 +61,21 @@ export function NodeDetails({
   };
 
   return (
-    <Card className="absolute top-4 left-4 w-96 shadow-lg z-50 bg-[#2d2d2d] border-[#454545] text-white overflow-hidden flex flex-col max-h-[90vh]">
+    <Card className="absolute top-4 left-16 w-96 shadow-lg z-50 bg-popover border-border text-foreground overflow-hidden flex flex-col max-h-[90vh]">
       <CardHeader className="flex flex-row justify-between space-y-0 p-4 pb-2 shrink-0">
         <div className="flex flex-col gap-1 overflow-hidden">
-          <CardTitle className="text-xs font-medium text-gray-400 uppercase tracking-wider text-start">
+          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-start">
             {item.type || type}
           </CardTitle>
           <div className="text-lg font-bold flex items-center gap-1 truncate">
-            <span className="text-blue-300">{item.label?.text}</span>
+            <span className="text-primary">{item.label?.text}</span>
           </div>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="h-8 w-8 text-gray-400 hover:text-white shrink-0"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
         >
           <X className="h-5 w-5" />
         </Button>
@@ -83,30 +83,30 @@ export function NodeDetails({
       <CardContent className="p-4 pt-2 text-sm space-y-3 overflow-y-auto">
         <div className="space-y-1">
           <div className="flex gap-2 text-xs">
-            <span className="font-semibold text-gray-500 min-w-12">ID:</span>
-            <span className="truncate text-gray-400" title={item.id}>
+            <span className="font-semibold text-muted-foreground/80 min-w-12">ID:</span>
+            <span className="truncate text-muted-foreground" title={item.id}>
               {item.id}
             </span>
           </div>
 
           {item.fileName && (
             <div className="flex gap-2 text-xs">
-              <span className="font-semibold text-gray-500 min-w-12">
+              <span className="font-semibold text-muted-foreground/80 min-w-12">
                 File:
               </span>
-              <span className="text-gray-400 break-all">{item.fileName}</span>
+              <span className="text-muted-foreground break-all">{item.fileName}</span>
             </div>
           )}
         </div>
 
         {(item.propType || (item.props && item.props.length > 0)) && (
-          <div className="mt-4 pt-4 border-t border-[#454545]">
+          <div className="mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-semibold text-gray-400">
+              <span className="font-semibold text-muted-foreground">
                 {type === "Node" ? "Definition" : "Properties"}
               </span>
             </div>
-            <div className="text-xs font-mono bg-[#1e1e1e] p-3 rounded-md border border-[#333] max-w-full overflow-x-auto text-start leading-relaxed shadow-inner">
+            <div className="text-xs font-mono bg-muted/50 p-3 rounded-md border border-border max-w-full overflow-x-auto text-start leading-relaxed shadow-inner">
               {renderGenerics(item.typeParams)}
               {item.extends && (
                 <span className="text-purple-400">
@@ -137,10 +137,10 @@ export function NodeDetails({
                 item.props?.map((p: PropData, i: number) => (
                   <div
                     key={i}
-                    className="flex justify-between py-0.5 border-b border-[#2a2a2a] last:border-0"
+                    className="flex justify-between py-0.5 border-b border-border/50 last:border-0"
                   >
-                    <span className="text-blue-300">{p.name}</span>
-                    <span className="text-gray-500 italic">{p.type}</span>
+                    <span className="text-primary">{p.name}</span>
+                    <span className="text-muted-foreground italic">{p.type}</span>
                   </div>
                 ))
               )}

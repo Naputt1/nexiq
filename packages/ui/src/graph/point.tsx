@@ -23,7 +23,7 @@ const Point: React.FC<PointProps> = memo(
         offsetY={radius + 10}
         onDragMove={onDragMove}
         onClick={onClick}
-        fill="white"
+        fill="black"
         {...label}
       >
         <Circle
@@ -36,7 +36,7 @@ const Point: React.FC<PointProps> = memo(
         />
       </Label>
     );
-  }
+  },
 );
 
 export default Point;
