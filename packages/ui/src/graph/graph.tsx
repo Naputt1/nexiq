@@ -79,7 +79,7 @@ const Graph = forwardRef<GraphRef, GraphProps>(
           />
         );
       },
-      [graph, onSelect]
+      [graph, onSelect],
     );
 
     const getEdgeElement = useCallback(
@@ -97,7 +97,7 @@ const Graph = forwardRef<GraphRef, GraphProps>(
           />
         );
       },
-      [graph]
+      [graph],
     );
 
     const getNodeElement = useCallback((node: NodeGraphData) => {
@@ -203,7 +203,7 @@ const Graph = forwardRef<GraphRef, GraphProps>(
         nodes: {},
         edges: {},
         combos: {},
-      } as DataMap
+      } as DataMap,
     );
 
     useEffect(() => {
@@ -221,7 +221,7 @@ const Graph = forwardRef<GraphRef, GraphProps>(
         <Layer>{...Object.values(dataMap?.nodes)}</Layer>
       </DragableStage>
     );
-  }
+  },
 );
 
 Graph.displayName = "Graph";

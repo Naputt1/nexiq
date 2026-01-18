@@ -39,7 +39,7 @@ const Combo: React.FC<ComboProps> = memo(
     } = graph.useCombo(id);
 
     const [radius, setRadius] = useState<number>(
-      collapsed ? collapsedRadius : expandedRadius
+      collapsed ? collapsedRadius : expandedRadius,
     );
 
     const radiusRef = useRef(radius);
@@ -153,7 +153,7 @@ const Combo: React.FC<ComboProps> = memo(
                   x={0}
                   y={radius + 20 + i * 12}
                   text={`${p.name}: ${p.type}`}
-                  fill="white"
+                  fill="black"
                   fontSize={10}
                   align="center"
                   offsetX={50} // Approximate centering
@@ -212,7 +212,7 @@ const Combo: React.FC<ComboProps> = memo(
         </Group>
       </Label>
     );
-  }
+  },
 );
 
 export default Combo;
