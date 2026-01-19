@@ -42,7 +42,7 @@ function analyzeFiles(
     const code = fs.readFileSync(path.resolve(SRC_DIR, fullfileName), "utf-8");
     let ast: File;
     try {
-      ast = parseCode(code, fullfileName);
+      ast = parseCode(code);
     } catch (e) {
       console.warn(`Skipping ${fullfileName}: ${(e as Error).message}`);
       continue;

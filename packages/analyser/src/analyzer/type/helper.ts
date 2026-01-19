@@ -5,7 +5,6 @@ import type {
   TypeDataImport,
   TypeDataLiteralBody,
   TypeDataLiteralTypeLiteral,
-  TypeDataQuery,
   TypeDataRef,
   TypeDataTuple,
 } from "shared/src/types/primitive.js";

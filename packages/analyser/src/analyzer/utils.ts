@@ -32,7 +32,7 @@ export function getFiles(dir: string): string[] {
   });
 }
 
-export function parseCode(code: string, filename: string): File {
+export function parseCode(code: string): File {
   return parser.parse(code, {
     sourceType: "module",
     plugins: ["jsx", "typescript", "classProperties"],

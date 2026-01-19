@@ -18,6 +18,8 @@ if (args.seed) {
 
 const CACHE_FILE = args.cache || OUT_FILE;
 
+const CACHE = args.cache ?? true;
+
 function main() {
   const packageJson = new PackageJson(SRC_DIR);
 
@@ -28,7 +30,7 @@ function main() {
   console.log(`Analyzing ${files.length} files...`);
 
   let cacheData = undefined;
-  if (fs.existsSync(CACHE_FILE)) {
+  if (CACHE && fs.existsSync(CACHE_FILE)) {
     try {
       cacheData = JSON.parse(fs.readFileSync(CACHE_FILE, "utf-8"));
     } catch (e) {
