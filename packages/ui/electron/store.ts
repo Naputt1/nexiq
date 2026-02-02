@@ -6,6 +6,7 @@ const DATA_FILE = "recent-projects.json";
 
 interface StoreData {
   recentProjects: string[];
+  lastProjectRoot: string | null;
 }
 
 export class Store {
@@ -19,9 +20,13 @@ export class Store {
 
   private parseDataFile(filePath: string): StoreData {
     try {
-      return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    } catch (error) {
-      return { recentProjects: [] };
+      const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      return {
+        recentProjects: parsed.recentProjects || [],
+        lastProjectRoot: parsed.lastProjectRoot || null,
+      };
+    } catch {
+      return { recentProjects: [], lastProjectRoot: null };
     }
   }
 
@@ -37,10 +42,19 @@ export class Store {
     return this.data.recentProjects;
   }
 
+  getLastProject(): string | null {
+    return this.data.lastProjectRoot;
+  }
+
+  setLastProject(projectPath: string | null) {
+    this.data.lastProjectRoot = projectPath;
+    this.save();
+  }
+
   addRecentProject(projectPath: string) {
     // Remove if exists (to move to top)
     this.data.recentProjects = this.data.recentProjects.filter(
-      (p) => p !== projectPath
+      (p) => p !== projectPath,
     );
     // Add to top
     this.data.recentProjects.unshift(projectPath);
@@ -51,7 +65,7 @@ export class Store {
 
   removeRecentProject(projectPath: string) {
     this.data.recentProjects = this.data.recentProjects.filter(
-      (p) => p !== projectPath
+      (p) => p !== projectPath,
     );
     this.save();
   }

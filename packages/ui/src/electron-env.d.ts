@@ -1,7 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /// <reference types="vite-plugin-electron/electron-env" />
 
-import { ProjectStatus, ReactMapConfig } from "../electron/types";
+import { JsonData } from "shared";
+import {
+  AppStateData,
+  IpcEvents,
+  ProjectStatus,
+  ReactMapConfig,
+} from "../electron/types";
 
 declare global {
   namespace NodeJS {
@@ -32,16 +37,24 @@ declare global {
         analysisPath: string,
         projectPath: string,
       ): Promise<string>;
-      invoke(channel: "read-graph-data", projectPath?: string): Promise<any>;
-      on(
-        channel: string,
-        listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void,
-      ): void;
-      off(
-        channel: string,
-        listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void,
-      ): void;
-      send(channel: string, ...args: any[]): void;
+      invoke(
+        channel: "read-graph-data",
+        projectRoot: string,
+        analysisPath?: string,
+      ): Promise<JsonData | null>;
+      invoke(channel: "read-state", projectRoot: string): Promise<AppStateData | null>;
+      invoke(
+        channel: "save-state",
+        projectRoot: string,
+        state: AppStateData,
+      ): Promise<boolean>;
+      on<K extends keyof IpcEvents>(
+        channel: K,
+        listener: (payload: IpcEvents[K]) => void,
+      ): () => void;
+      send(channel: string, ...args: unknown[]): void;
+      invoke(channel: "get-last-project"): Promise<string | null>;
+      invoke(channel: "set-last-project", path: string | null): Promise<void>;
     };
   }
 }

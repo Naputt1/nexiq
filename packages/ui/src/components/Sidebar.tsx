@@ -13,6 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "./ui/button";
+import { LogOut } from "lucide-react";
+import { useProjectStore } from "@/hooks/use-project-store";
 
 interface SidebarProps {
   currentPath: string;
@@ -33,6 +36,12 @@ export function ProjectSidebar({
   isLoading,
 }: SidebarProps) {
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
+  const reset = useProjectStore((state) => state.reset);
+
+  const handleReset = () => {
+    reset();
+    window.ipcRenderer.invoke("set-last-project", null);
+  };
 
   useEffect(() => {
     const fetchSubProjects = async () => {
@@ -55,7 +64,7 @@ export function ProjectSidebar({
     <ShadcnSidebar collapsible="offcanvas">
       <SidebarHeader>
         <SidebarGroup className="px-0">
-          <SidebarGroupContent>
+          <SidebarGroupContent className="flex items-center gap-2 p-2">
             <Select
               value={currentPath}
               onValueChange={(val) => onSelectProject(val)}
@@ -77,6 +86,15 @@ export function ProjectSidebar({
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReset}
+              title="Close Project"
+              className="h-9 w-9 shrink-0"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarHeader>

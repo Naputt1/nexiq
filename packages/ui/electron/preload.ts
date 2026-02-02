@@ -1,17 +1,22 @@
-import { ipcRenderer, contextBridge } from "electron";
+import { ipcRenderer, contextBridge, type IpcRendererEvent } from "electron";
+import type { IpcEvents } from "./types";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args;
-    return ipcRenderer.on(channel, (event, ...args) =>
-      listener(event, ...args)
-    );
+  on<K extends keyof IpcEvents>(
+    channel: K,
+    listener: (payload: IpcEvents[K]) => void,
+  ) {
+    const wrappedListener = (
+      _event: IpcRendererEvent,
+      payload: IpcEvents[K],
+    ) => listener(payload);
+    ipcRenderer.on(channel, wrappedListener);
+    return () => {
+      ipcRenderer.removeListener(channel, wrappedListener);
+    };
   },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args;
-    return ipcRenderer.off(channel, ...omit);
-  },
+
   send(...args: Parameters<typeof ipcRenderer.send>) {
     const [channel, ...omit] = args;
     return ipcRenderer.send(channel, ...omit);

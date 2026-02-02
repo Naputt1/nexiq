@@ -138,10 +138,15 @@ export type ComponentFileVarNormal =
   | ComponentFileVarNormalFunction
   | ComponentFileVarNormalData;
 
+export type ComponentFileVarFunction = ComponentFileVarBaseTypeFunction & {
+  variableType: "normal";
+};
+
 export type ComponentFileVar =
   | ComponentFileVarComponent
   | ComponentFileVarNormal
-  | ComponentFileVarHook;
+  | ComponentFileVarHook
+  | ComponentFileVarFunction;
 
 export type ComponentFile = {
   path: string;

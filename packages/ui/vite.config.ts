@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import electron from "vite-plugin-electron/simple";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
+import { builtinModules } from "node:module";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,7 +17,28 @@ export default defineConfig({
         vite: {
           build: {
             rollupOptions: {
-              external: ["fast-glob", "js-yaml"],
+              external: [
+                "electron",
+                "@node-rs/xxhash",
+                "analyser",
+                "fast-glob",
+                "js-yaml",
+                "tty",
+                "os",
+                "util",
+                "fs",
+                "path",
+                "child_process",
+                "module",
+                "node:tty",
+                "node:os",
+                "node:util",
+                "node:fs",
+                "node:path",
+                "node:child_process",
+                "node:module",
+                ...builtinModules,
+              ],
             },
           },
         },
@@ -37,7 +59,8 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    include: ["tslib", "@antv/g6"],
+    include: ["tslib"],
+    exclude: ["@node-rs/xxhash"],
   },
   resolve: {
     alias: {

@@ -436,12 +436,22 @@
           "name": "withLogging",
           "variableType": "normal",
           "dependencies": {},
-          "type": "data",
+          "type": "function",
           "loc": {
             "line": 11,
             "column": 6
           },
-          "components": {}
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 11,
+              "column": 59
+            },
+            "end": {
+              "line": 16,
+              "column": 1
+            }
+          }
         },
         "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
           "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
