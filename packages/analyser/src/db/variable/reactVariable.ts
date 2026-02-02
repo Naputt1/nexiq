@@ -5,15 +5,15 @@ import type {
   PropData,
   State,
 } from "shared";
-import { Variable } from "./variable.js";
 import { newUUID } from "../../utils/uuid.js";
+import { FunctionVariable } from "./functionVariable.js";
+import type { File } from "../fileDB.js";
 
 type InnerType = {
   found: boolean;
 };
 
-export abstract class ReactVariable extends Variable {
-  file: string;
+export abstract class ReactVariable extends FunctionVariable {
   states: Record<string, State & InnerType> = {};
   props: PropData[];
   hooks: string[];
@@ -21,17 +21,11 @@ export abstract class ReactVariable extends Variable {
 
   private stateCache: Record<string, State & InnerType> = {};
 
-  constructor({
-    id,
-    name,
-    dependencies,
-    loc,
-    variableType,
-    ...options
-  }: ComponentFileVarReact) {
-    const scope = options.type === "function" ? options.scope : undefined;
-    super(id, name, options.type, dependencies, variableType, loc, scope);
-    this.file = options.file;
+  constructor(
+    options: Omit<ComponentFileVarReact, "var" | "components" | "type">,
+    file: File,
+  ) {
+    super(options, file);
 
     for (const state of Object.values(options.states)) {
       this.states[state.id] = {
@@ -100,14 +94,14 @@ export abstract class ReactVariable extends Variable {
     this.file = data.file;
   }
 
-  protected getReactVariable(): ComponentFileVarReact {
+  protected getBaseData(): ComponentFileVarReact {
     return {
       ...super.getBaseData(),
-      file: this.file,
+      file: this.file.path,
       states: Object.fromEntries(
         Object.entries(this.states)
           .filter(([, state]) => state.found)
-          .map(([key, { found: _, ...rest }]) => [key, rest])
+          .map(([key, { found: _, ...rest }]) => [key, rest]),
       ),
       props: this.props,
       hooks: this.hooks,

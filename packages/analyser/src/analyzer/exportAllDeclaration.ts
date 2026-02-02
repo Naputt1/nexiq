@@ -4,14 +4,14 @@ import type { ComponentDB } from "../db/componentDB.js";
 
 export default function ExportAllDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ExportAllDeclaration> {
   return (nodePath) => {
     const source = componentDB.getImportFileName(
       nodePath.node.source.value,
-      fileName
+      fileName,
     );
-    
+
     // We don't know the names being exported here without analyzing the source file,
     // but the analyzer should probably handle this by tagging the file as having a star export.
     // For now, these are harder to resolve statically without multi-pass or recursive file analysis.
