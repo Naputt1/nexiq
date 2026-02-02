@@ -15,7 +15,7 @@ export type GraphDataCallbackParams =
   | { type: "new-nodes" }
   | { type: "new-edges" }
   | { type: "new-combos" }
-  // | { type: "combo-collapsed"; id: string; child?: boolean }
+  | { type: "combo-collapsed"; id: string }
   | { type: "combo-drag-move"; id: string; edgeIds: string[]; child?: boolean }
   | {
       type: "combo-radius-change";
@@ -366,7 +366,7 @@ export class GraphData {
     return { ...state };
   }
 
-  private calculateComboChildrenLayout(id: string) {
+  public calculateComboChildrenLayout(id: string) {
     const combo = this.getComboByID(id);
     if (combo == null) return;
     if (combo.isLayoutCalculated) return;
@@ -799,11 +799,10 @@ export class GraphData {
     // const parentCombo = this.getTopParent(id);
     // if (parentCombo == null) return;
 
-    // this.trigger({
-    //   type: "combo-collapsed",
-    //   id: parentCombo.id,
-    //   child: combo.id != id,
-    // });
+    this.trigger({
+      type: "combo-collapsed",
+      id: combo.id,
+    });
   }
 
   // trigger by self on collpase/expand
