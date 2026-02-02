@@ -1,9 +1,9 @@
 import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
 import type { TypeData } from "shared";
-import { ReactVariable } from "./reactVariable.js";
 import type { File } from "../fileDB.js";
+import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
-export class ComponentVariable extends ReactVariable<"component"> {
+export class ComponentVariable extends ReactFunctionVariable<"component"> {
   componentType: ComponentFileVarComponent["componentType"];
   propType: TypeData | undefined;
   contexts: string[];
@@ -44,7 +44,6 @@ export class ComponentVariable extends ReactVariable<"component"> {
   public getData(): ComponentFileVarComponent {
     const data: ComponentFileVarComponent = {
       ...this.getBaseData(),
-      kind: "component",
       componentType: this.componentType,
       contexts: this.contexts,
       renders: this.renders,

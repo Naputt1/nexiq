@@ -44,23 +44,24 @@ export interface PropData {
   type: string;
 }
 
-export type HookInfo = {
-  id: string;
-  name: string;
-  file: string;
-  states: Record<string, State>;
-  props: PropData[];
-  hooks: string[];
-  effects: Record<string, EffectInfo>;
-};
-
-export interface ComponentInfo {
-  file: string;
-  componentType: "Function" | "Class";
+export interface ReactFunctionInfoBase {
   states: Record<string, State>;
   hooks: string[];
   props: PropData[];
   propType?: TypeData;
+  effects: Record<string, EffectInfo>;
+}
+
+export interface ReactFunctionInfo extends ReactFunctionInfoBase {
+  id: string;
+  name: string;
+  file: string;
+}
+
+export interface HookInfo extends ReactFunctionInfoBase {}
+
+export interface ComponentInfo extends ReactFunctionInfoBase {
+  componentType: "Function" | "Class";
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
 }
@@ -85,12 +86,21 @@ export interface VariableScope {
 }
 
 export type VarType = "function" | "data" | "jsx";
-export type VarKind = "component" | "normal" | "hook" | "memo";
+
+export type ReactFunctionVar = "component" | "hook";
+export type ReactStateVar = "state";
+export type ReactWithCallbackVar = "memo" | "callback";
+export type ReactVarKind =
+  | ReactFunctionVar
+  | ReactStateVar
+  | ReactWithCallbackVar;
+export type VarKind = "normal" | ReactVarKind;
 
 interface ComponentFileVarBaseType<TType extends VarType> {
   id: string;
   name: string;
   type: TType;
+  file: string;
   dependencies: Record<string, ComponentFileVarDependency>;
 }
 
@@ -120,26 +130,52 @@ export type ComponentFileVarDependencyType<TKind extends VarKind> =
   | ComponentFileVarBaseTypeFunction<TKind>
   | ComponentFileVarBaseTypeData<TKind>;
 
-export type ComponentFileVarReact<TKind extends VarKind> = ComponentFileVarBase<
-  "function",
-  TKind
-> &
-  ComponentFileVarBaseTypeFunction<TKind> &
-  HookInfo;
+export type ComponentFileVarReact<
+  TType extends VarType,
+  TKind extends ReactVarKind,
+> = ComponentFileVarBase<TType, TKind>;
 
-export type ComponentFileVarComponent = ComponentFileVarReact<"component"> &
-  ComponentInfo & {
-    kind: "component";
+export type ComponentFileVarReact2<TKind extends ReactVarKind> =
+  ComponentFileVarBase<"function", TKind> &
+    ComponentFileVarBaseTypeFunction<TKind> &
+    HookInfo;
+
+export type ComponentFileVarReactFunction<TKind extends ReactVarKind> =
+  ComponentFileVarBaseTypeFunction<TKind> & ReactFunctionInfoBase;
+
+export type ReactDependency = {
+  id: string;
+  name: string;
+};
+
+export type ReactDependencies = {
+  reactDeps: ReactDependency[];
+};
+
+export type ComponentFileVarReactWithCallback<TKind extends ReactVarKind> =
+  ComponentFileVarBaseTypeFunction<TKind> & ReactDependencies;
+
+export type ComponentFileVarComponent =
+  ComponentFileVarReactFunction<"component"> &
+    ComponentInfo & {
+      kind: "component";
+    };
+
+export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
+  value: string;
+  setter?: string;
+};
+
+export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook"> &
+  HookInfo & {
+    kind: "hook";
   };
 
-export type ComponentFileVarHook = ComponentFileVarReact<"hook"> & {
-  kind: "hook";
-};
+export type ComponentFileVarCallback =
+  ComponentFileVarReactWithCallback<"callback"> & ReactDependencies;
 
-export type MemoFileVarHook = ComponentFileVarReact<"memo"> & {
-  kind: "memo";
-  memoDependencies: string[];
-};
+export type MemoFileVarHook = ComponentFileVarReactWithCallback<"memo"> &
+  ReactDependencies;
 
 export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
   ComponentFileVarBase<TType, "normal"> & {
@@ -164,8 +200,10 @@ export type ComponentFileVarFunction =
 
 export type ComponentFileVar =
   | ComponentFileVarComponent
+  | ComponentFileVarState
   | ComponentFileVarNormal
   | ComponentFileVarHook
+  | ComponentFileVarCallback
   | MemoFileVarHook
   | ComponentFileVarFunction;
 

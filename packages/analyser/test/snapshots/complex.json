@@ -76,8 +76,9 @@
           "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
           "name": "SubComponentA",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Nested.tsx",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 13
@@ -93,7 +94,6 @@
               "column": 26
             }
           },
-          "file": "/src/Nested.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -106,8 +106,9 @@
           "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
           "name": "SubComponentB",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Nested.tsx",
+          "dependencies": {},
           "loc": {
             "line": 5,
             "column": 16
@@ -123,7 +124,6 @@
               "column": 29
             }
           },
-          "file": "/src/Nested.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -136,8 +136,9 @@
           "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
           "name": "InternalComponent",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Nested.tsx",
+          "dependencies": {},
           "loc": {
             "line": 14,
             "column": 6
@@ -153,7 +154,6 @@
               "column": 23
             }
           },
-          "file": "/src/Nested.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -166,8 +166,9 @@
           "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
           "name": "MainNested",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Nested.tsx",
+          "dependencies": {},
           "loc": {
             "line": 16,
             "column": 24
@@ -183,7 +184,6 @@
               "column": 34
             }
           },
-          "file": "/src/Nested.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -234,8 +234,9 @@
           "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
           "name": "useCustomHook",
           "kind": "hook",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Hooks.ts",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
@@ -251,7 +252,6 @@
               "column": 29
             }
           },
-          "file": "/src/Hooks.ts",
           "states": {
             "4b97fa8f-c781-4270-98cf-364a2c015862": {
               "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
@@ -292,8 +292,9 @@
           "id": "5909b328-1690-4605-9200-a15584ba44b1",
           "name": "useOtherHook",
           "kind": "hook",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Hooks.ts",
+          "dependencies": {},
           "loc": {
             "line": 13,
             "column": 13
@@ -309,7 +310,6 @@
               "column": 1
             }
           },
-          "file": "/src/Hooks.ts",
           "states": {},
           "props": [],
           "hooks": [],
@@ -370,8 +370,9 @@
           "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf",
           "name": "MemoizedComponent",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 13
@@ -387,7 +388,6 @@
               "column": 30
             }
           },
-          "file": "/src/HocForwardRef.tsx",
           "states": {},
           "props": [
             {
@@ -405,8 +405,9 @@
           "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe",
           "name": "ForwardRefComponent",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "dependencies": {},
           "loc": {
             "line": 7,
             "column": 13
@@ -422,7 +423,6 @@
               "column": 32
             }
           },
-          "file": "/src/HocForwardRef.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -435,8 +435,9 @@
           "id": "aa090036-355a-4b94-a325-4b02393cd1de",
           "name": "withLogging",
           "kind": "normal",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "dependencies": {},
           "loc": {
             "line": 11,
             "column": 6
@@ -457,8 +458,9 @@
           "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
           "name": "WrappedComponent",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "dependencies": {},
           "loc": {
             "line": 18,
             "column": 13
@@ -474,7 +476,6 @@
               "column": 29
             }
           },
-          "file": "/src/HocForwardRef.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -519,8 +520,9 @@
           "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
           "name": "DestructuringProps",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Destructuring.tsx",
+          "dependencies": {},
           "loc": {
             "line": 4,
             "column": 13
@@ -536,7 +538,6 @@
               "column": 31
             }
           },
-          "file": "/src/Destructuring.tsx",
           "states": {},
           "props": [
             {
@@ -641,8 +642,9 @@
           "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
           "name": "MyContext",
           "kind": "normal",
-          "dependencies": {},
           "type": "data",
+          "file": "/src/Context.tsx",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 13
@@ -653,8 +655,9 @@
           "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
           "name": "MyProvider",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Context.tsx",
+          "dependencies": {},
           "loc": {
             "line": 5,
             "column": 13
@@ -670,7 +673,6 @@
               "column": 23
             }
           },
-          "file": "/src/Context.tsx",
           "states": {},
           "props": [
             {
@@ -705,8 +707,9 @@
           "id": "409b99d0-111e-46ff-8890-7c62623fd2c0",
           "name": "MyConsumer",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Context.tsx",
+          "dependencies": {},
           "loc": {
             "line": 13,
             "column": 13
@@ -722,7 +725,6 @@
               "column": 23
             }
           },
-          "file": "/src/Context.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -823,8 +825,9 @@
           "id": "3787c95a-3d25-44df-8a51-7185a1a363ed",
           "name": "ComplexApp",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/ComplexApp.tsx",
+          "dependencies": {},
           "loc": {
             "line": 8,
             "column": 16
@@ -840,7 +843,6 @@
               "column": 26
             }
           },
-          "file": "/src/ComplexApp.tsx",
           "states": {},
           "props": [],
           "hooks": [
