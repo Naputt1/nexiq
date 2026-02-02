@@ -17,6 +17,7 @@ export type GraphDataCallbackParams =
   | { type: "new-combos" }
   | { type: "combo-collapsed"; id: string }
   | { type: "combo-drag-move"; id: string; edgeIds: string[]; child?: boolean }
+  | { type: "node-drag-move"; id: string; edgeIds: string[] }
   | {
       type: "combo-radius-change";
       id: string;
@@ -158,6 +159,7 @@ export class GraphData {
   private combos: Map<string, ComboGraphData> = new Map();
 
   private comboChildMap: Map<string, string> = new Map();
+  private edgeParentMap: Map<string, string> = new Map();
 
   private callback: Record<string, GraphDataCallback> = {};
 
@@ -423,13 +425,13 @@ export class GraphData {
 
     const edgeIds = new Set<string>();
     for (const n of layout.nodes) {
-      const ids = this.getComboEdges(n.id, combo);
+      const ids = this.getComboEdges(n.id);
       for (const edgeId of ids) {
         edgeIds.add(edgeId);
       }
     }
 
-    this.updateEdgePos(Array.from(edgeIds), combo);
+    this.updateEdgePos(Array.from(edgeIds));
 
     combo.expandedRadius = this.calculateComboRadius(combo);
     combo.isLayoutCalculated = true;
@@ -481,6 +483,7 @@ export class GraphData {
         ...e,
         points,
       };
+      this.edgeParentMap.set(e.id, parentCombo.id);
       return true;
     }
 
@@ -587,12 +590,26 @@ export class GraphData {
   }
 
   private getPointId(id: string) {
-    return this.nodes.get(id) ?? this.combos.get(id);
+    return this.getPointByID(id);
   }
 
-  private getChildPointId(id: string, parent: ComboGraphData) {
-    return parent.child?.nodes[id] ?? parent.child?.combos[id];
+  public getPointByID(id: string): NodeGraphData | ComboGraphData | undefined {
+    let item: NodeGraphData | ComboGraphData | undefined =
+      this.nodes.get(id) ?? this.combos.get(id);
+
+    if (!item) {
+      const parentId = this.comboChildMap.get(id);
+      if (parentId) {
+        const parent = this.getComboByID(parentId);
+        if (parent && parent.child) {
+          item = parent.child.nodes[id] ?? parent.child.combos[id];
+        }
+      }
+    }
+
+    return item;
   }
+
 
   private createEdges() {
     const newEdgesToCreate: EdgeData[] = [];
@@ -625,6 +642,7 @@ export class GraphData {
 
   public addEdges(edges: EdgeData[]) {
     this.edges.clear();
+    this.edgeParentMap.clear();
     for (const e of edges) {
       this.addEdgeId(e.source, e.target);
 
@@ -643,6 +661,7 @@ export class GraphData {
           ...e,
           points,
         });
+        this.edgeParentMap.delete(e.id);
       }
 
       if (this._addChildEdge(e)) {
@@ -832,53 +851,48 @@ export class GraphData {
     }
   }
 
-  private updateEdgePos(ids: string[], parent?: ComboGraphData) {
+  private updateEdgePos(ids: string[]) {
     for (const id of ids) {
-      const edge =
-        parent == null ? this.edges.get(id) : parent.child?.edges[id];
+      const edge = this.getEdge(id);
       if (edge == null) continue;
 
-      const srcNode =
-        parent == null
-          ? this.getPointId(edge.source)
-          : this.getChildPointId(edge.source, parent);
-      const targetNode =
-        parent == null
-          ? this.getPointId(edge.target)
-          : this.getChildPointId(edge.target, parent);
+      const srcNode = this.getPointId(edge.source);
+      const targetNode = this.getPointId(edge.target);
 
-      if (srcNode == null || targetNode == null) {
-        this.edgeToCreate.push(edge);
-        this.edges.delete(id);
-        continue;
+      if (srcNode == null || targetNode == null) continue;
+
+      const parentId = this.edgeParentMap.get(id);
+      if (parentId == null) {
+        // Top-level edge or absolute coordinate space required
+        const srcPos = this.getAbsolutePosition(edge.source);
+        const targetPos = this.getAbsolutePosition(edge.target);
+        if (srcPos && targetPos) {
+          edge.points = this.getConnectorPoints(
+            { ...srcNode, ...srcPos },
+            { ...targetNode, ...targetPos },
+          );
+        }
+      } else {
+        // Nested edge: use local positions (siblings)
+        edge.points = this.getConnectorPoints(srcNode, targetNode);
       }
-
-      edge.points = this.getConnectorPoints(srcNode, targetNode);
     }
   }
 
-  private getComboEdges(src: string, parent?: ComboGraphData): string[] {
+  private getComboEdges(src: string): string[] {
     const targetIds = this.edgeIds[src];
     if (targetIds == null) return [];
 
     const edges: string[] = [];
     for (const targetId of targetIds) {
       let id = `${src}-${targetId}`;
-      if (
-        parent
-          ? Object.hasOwn(parent.child?.edges ?? {}, id)
-          : this.edges.has(id)
-      ) {
+      if (this.getEdge(id)) {
         edges.push(id);
         continue;
       }
 
       id = `${targetId}-${src}`;
-      if (
-        parent
-          ? Object.hasOwn(parent.child?.edges ?? {}, id)
-          : this.edges.has(id)
-      ) {
+      if (this.getEdge(id)) {
         edges.push(id);
       }
     }
@@ -1005,12 +1019,18 @@ export class GraphData {
 
     const edgeIds = new Set<string>();
 
-    const ids = this.getComboEdges(node.id, combo);
+    const ids = this.getComboEdges(node.id);
     for (const edgeId of ids) {
       edgeIds.add(edgeId);
     }
 
-    this.updateEdgePos(Array.from(edgeIds), combo);
+    this.updateEdgePos(Array.from(edgeIds));
+
+    this.trigger({
+      type: "node-drag-move",
+      id: nodeId,
+      edgeIds: Array.from(edgeIds),
+    });
 
     this.updateComboRadius(combo.id);
     const cb = this.innerCallback.get(combo.id);
@@ -1164,11 +1184,42 @@ export class GraphData {
   }
 
   public getEdge(id: string) {
-    return this.edges.get(id);
+    if (this.edges.has(id)) return this.edges.get(id);
+    const parentId = this.edgeParentMap.get(id);
+    if (parentId) {
+      const parent = this.getComboByID(parentId);
+      if (parent && parent.child) {
+        return parent.child.edges[id];
+      }
+    }
+    return this.curRender.edges[id];
+  }
+
+  public nodeDragMove(nodeId: string, e: Konva.KonvaEventObject<DragEvent>) {
+    const node = this.nodes.get(nodeId);
+    if (!node) return;
+
+    node.x = e.target.x();
+    node.y = e.target.y();
+
+    const edgeIds = new Set<string>();
+    const ids = this.getComboEdges(nodeId);
+    for (const edgeId of ids) {
+      edgeIds.add(edgeId);
+    }
+
+    this.updateEdgePos(Array.from(edgeIds));
+
+    this.trigger({
+      type: "node-drag-move",
+      id: nodeId,
+      edgeIds: Array.from(edgeIds),
+    });
   }
 
   public getCombo(id: string) {
-    return this.combos.get(id);
+    if (this.combos.has(id)) return this.combos.get(id);
+    return this.curRender.combos[id];
   }
 
   public layout() {
