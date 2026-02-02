@@ -86,6 +86,14 @@ declare function create<T>(): T;
 type x = ReturnType<typeof create<string>>;
 
 export const TypePropsVar: React.FC<Test> = ({ title }) => {
+  type InnerType = {
+    title: string;
+  };
+
+  interface InnerType2 {
+    title: string;
+  }
+
   return <div></div>;
 };
 

@@ -19,7 +19,8 @@ import { ComponentVariable } from "./variable/component.js";
 import {
   isHookVariable,
   isComponentVariable,
-  isDataVariable,
+  isNormalVariable,
+  isFunctionVariable,
 } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
@@ -64,7 +65,7 @@ type TypeDataHandler<T> = (
   db: FileDB,
   td: T,
   file: File,
-  params: Set<string>
+  params: Set<string>,
 ) => boolean;
 
 export class File {
@@ -105,14 +106,14 @@ export class File {
   // Helper to extract IDs recursively
   public extractIds = (
     vars: Record<string, ComponentFileVar>,
-    prevIds: Map<string, string>
+    prevIds: Map<string, string>,
   ) => {
     for (const key in vars) {
       const v = vars[key];
       if (v && v.name && v.id) {
         prevIds.set(v.name, v.id);
       }
-      if (v && v.var) {
+      if (v && v.type === "function" && v.var) {
         this.extractIds(v.var, prevIds);
       }
     }
@@ -121,11 +122,11 @@ export class File {
   private loadVariable(variable: ComponentFileVar) {
     let v: Variable;
     if (variable.variableType === "component") {
-      v = new ComponentVariable(variable);
+      v = new ComponentVariable(variable, this);
     } else if (variable.variableType === "hook") {
-      v = new HookVariable(variable);
+      v = new HookVariable(variable, this);
     } else {
-      v = new DataVariable(variable);
+      v = new DataVariable(variable, this);
     }
 
     this.var.set(v.id, v);
@@ -135,11 +136,16 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(v), v);
 
-    this.ids.set(v.name, v);
+    this.ids.set(v.name, {
+      id: v.id,
+      var: new Map(),
+    });
 
-    for (const childVar of Object.values(variable.var)) {
-      const child = this.loadVariable(childVar);
-      v.var.set(child.id, child);
+    if (variable.type === "function" && isFunctionVariable(v)) {
+      for (const childVar of Object.values(variable.var)) {
+        const child = this.loadVariable(childVar);
+        v.var.set(child.id, child);
+      }
     }
 
     return v;
@@ -266,10 +272,12 @@ export class File {
         continue;
       }
 
-      parent = parent.var.get(id);
-      if (parent == null) {
-        debugger;
-        return undefined;
+      if (isFunctionVariable(parent)) {
+        parent = parent.var.get(id);
+        if (parent == null) {
+          debugger;
+          return undefined;
+        }
       }
     }
 
@@ -278,7 +286,7 @@ export class File {
 
   private getParentFromId(
     id: string,
-    varables?: Map<string, Variable>
+    varables?: Map<string, Variable>,
   ): Variable | undefined {
     const _variable = varables ?? this.var;
 
@@ -287,9 +295,11 @@ export class File {
     }
 
     for (const [_key, value] of _variable) {
-      const parent = this.getParentFromId(id, value.var);
-      if (parent) {
-        return parent;
+      if (isFunctionVariable(value)) {
+        const parent = this.getParentFromId(id, value.var);
+        if (parent) {
+          return parent;
+        }
       }
     }
 
@@ -374,7 +384,9 @@ export class File {
         return "no parent";
       }
 
-      parent.var.set(variable.id, variable);
+      if (isFunctionVariable(parent)) {
+        parent.var.set(variable.id, variable);
+      }
       variable.parent = parent;
       parentId.var.set(variable.name, {
         id: variable.id,
@@ -466,20 +478,20 @@ export class File {
       export: this.export,
       defaultExport: this.defaultExport,
       tsTypes: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.tsTypes))
+        Object.entries(Object.fromEntries(this.tsTypes)),
       ),
       var: Object.fromEntries(
         Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
           k,
           value.getData(),
-        ])
+        ]),
       ),
     };
   }
 
   public addVariableDependency(
     parent: string,
-    dependency: ComponentFileVarDependency
+    dependency: ComponentFileVarDependency,
   ) {
     let variable: ComponentFileVar | null = null;
     for (const v of Object.values(this.var)) {
@@ -502,20 +514,22 @@ export class File {
   private _getDependenciesIds(
     dependencies: ComponentInfoRenderDependency[],
     depMap: Record<string, number>,
-    parent: Variable | undefined
+    parent: Variable | undefined,
   ) {
     if (parent == null) return;
 
-    for (const [_key, com] of parent.var) {
-      if (Object.keys(depMap).includes(com.name)) {
-        const depI = depMap[com.name];
-        const dep = dependencies[depI!];
+    if (isFunctionVariable(parent)) {
+      for (const [_key, com] of parent.var) {
+        if (Object.keys(depMap).includes(com.name)) {
+          const depI = depMap[com.name];
+          const dep = dependencies[depI!];
 
-        dep!.value = com.id;
+          dep!.value = com.id;
 
-        delete depMap[com.name];
-        if (Object.keys(depMap).length === 0) {
-          return;
+          delete depMap[com.name];
+          if (Object.keys(depMap).length === 0) {
+            return;
+          }
         }
       }
     }
@@ -543,7 +557,7 @@ export class File {
 
   private getDependenciesIds(
     id: string,
-    dependencies: ComponentInfoRenderDependency[]
+    dependencies: ComponentInfoRenderDependency[],
   ) {
     const depMap: Record<string, number> = {};
     for (const [i, dep] of dependencies.entries()) {
@@ -570,7 +584,7 @@ export class File {
 
   public getScope(scope: VariableScope) {
     for (const s of this.scopes) {
-      assert(s.type === "function", "Scope variable must be a function");
+      assert(isFunctionVariable(s), "Scope variable must be a function");
 
       if (
         s.scope?.start.line == scope.start.line &&
@@ -587,7 +601,7 @@ export class File {
 
   public getScopeFromLoc(loc: VariableLoc) {
     for (const s of this.scopes) {
-      assert(s.type === "function", "Scope variable must be a function");
+      assert(isFunctionVariable(s), "Scope variable must be a function");
 
       if (
         s.scope?.start.line == loc.line &&
@@ -627,7 +641,7 @@ export class File {
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
-    loc: VariableLoc
+    loc: VariableLoc,
   ) {
     const variable = this.locIdsMap.get(comLoc);
     if (variable == null) return;
@@ -641,7 +655,7 @@ export class File {
         isDependency,
         loc,
       };
-    } else if (isDataVariable(variable)) {
+    } else if (isNormalVariable(variable)) {
       variable.components.set(srcId, {
         id: srcId,
         dependencies,
@@ -660,7 +674,7 @@ export class File {
 
     assert(
       isHookVariable(variable) || isComponentVariable(variable),
-      "can't add hook to non-hook"
+      "can't add hook to non-hook",
     );
 
     variable.addEffect(effect);
@@ -768,13 +782,13 @@ export class FileDB {
       Object.entries(Object.fromEntries(this.files)).map(([k, value]) => [
         k,
         value.getData(),
-      ])
+      ]),
     );
   }
 
   public addExport(
     fileName: string,
-    exportData: Omit<ComponentFileExport, "id">
+    exportData: Omit<ComponentFileExport, "id">,
   ) {
     const file = this.get(fileName);
 
@@ -789,7 +803,7 @@ export class FileDB {
   public addVariable(
     fileName: string,
     variable: Variable,
-    parentPath?: string[]
+    parentPath?: string[],
   ) {
     // resolve propType
     const file = this.get(fileName);
@@ -799,7 +813,7 @@ export class FileDB {
 
   public getComponent(
     fileName: string,
-    id: string
+    id: string,
   ): ComponentVariable | undefined {
     const file = this.get(fileName);
     const variable = file.var.get(id);
@@ -811,7 +825,7 @@ export class FileDB {
 
   public getVariableFromLoc(
     fileName: string,
-    loc: VariableLoc
+    loc: VariableLoc,
   ): Variable | undefined {
     const file = this.get(fileName);
     return file.getVariable(loc);
@@ -819,7 +833,7 @@ export class FileDB {
 
   public getHookInfoFromLoc(
     fileName: string,
-    loc: VariableLoc
+    loc: VariableLoc,
   ): ReactVariable | undefined {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
@@ -835,7 +849,7 @@ export class FileDB {
 
   public getComponentFromLoc(
     fileName: string,
-    loc: VariableLoc
+    loc: VariableLoc,
   ): ComponentVariable | undefined {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
@@ -848,7 +862,7 @@ export class FileDB {
 
   public getHookFromLoc(
     fileName: string,
-    loc: VariableLoc
+    loc: VariableLoc,
   ): HookVariable | undefined {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
@@ -862,7 +876,7 @@ export class FileDB {
   public addVariableDependency(
     fileName: string,
     parent: string,
-    dependency: ComponentFileVarDependency
+    dependency: ComponentFileVarDependency,
   ) {
     const file = this.get(fileName);
 
@@ -892,7 +906,7 @@ export class FileDB {
   private updateTypeDataLiteral(
     typeData: TypeDataLiteralTypeLiteral,
     file: File,
-    params: Set<string>
+    params: Set<string>,
   ): boolean {
     if (typeData.type === "template") {
       for (const expr of typeData.expression) {
@@ -917,7 +931,7 @@ export class FileDB {
   private _resolveTypeRef(
     typeData: TypeDataRef,
     file: File,
-    params: Set<string>
+    params: Set<string>,
   ): boolean {
     const name = this.getTypeDataRefName(typeData);
     if (params.has(name)) return true;
@@ -962,7 +976,7 @@ export class FileDB {
       db,
       td: { literal: TypeDataLiteralTypeLiteral },
       file,
-      params
+      params,
     ) => db.updateTypeDataLiteral(td.literal, file, params),
     function: (db, td: TypeDataFunction, file, params) => {
       for (const p of td.parameters) {
@@ -990,7 +1004,7 @@ export class FileDB {
   };
 
   private hasTypeDataHandler(
-    kind: string
+    kind: string,
   ): kind is keyof typeof FileDB.TYPE_DATA_HANDLERS {
     return kind in FileDB.TYPE_DATA_HANDLERS;
   }
@@ -998,7 +1012,7 @@ export class FileDB {
   public updateTypeDataID(
     typeData: TypeData,
     file: File,
-    params: Set<string>
+    params: Set<string>,
   ): boolean {
     if (!this.hasTypeDataHandler(typeData.type)) return true;
 
@@ -1006,7 +1020,7 @@ export class FileDB {
       this,
       typeData as never,
       file,
-      params
+      params,
     );
   }
 
@@ -1095,7 +1109,7 @@ export class FileDB {
     srcId: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
-    loc: VariableLoc
+    loc: VariableLoc,
   ) {
     const file = this.get(fileName);
 

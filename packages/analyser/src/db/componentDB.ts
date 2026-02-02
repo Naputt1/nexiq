@@ -7,13 +7,14 @@ import type {
   JsonData,
   ComponentFileVarComponent,
   ComponentFileVarDependency,
-  ComponentFileVarNormal,
   ComponentInfoRenderDependency,
   VariableLoc,
   ComponentFileVarHook,
   EffectInfo,
   TypeDataDeclare,
   ComponentFile,
+  ComponentFileVarNormalFunction,
+  ComponentFileVarNormalData,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -22,7 +23,11 @@ import path from "path";
 import { ComponentVariable } from "./variable/component.js";
 import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
-import { isComponentVariable, isDataVariable } from "./variable/type.js";
+import {
+  isComponentVariable,
+  isFunctionVariable,
+  isNormalVariable,
+} from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
 
@@ -96,15 +101,20 @@ export class ComponentDB {
 
   public addComponent(
     component: Omit<ComponentFileVarComponent, "id" | "variableType">,
-    parentPath?: string[]
+    parentPath?: string[],
   ) {
+    const file = this.files.get(component.file);
+
     const id = this.files.addVariable(
       component.file,
-      new ComponentVariable({
-        id: newUUID(),
-        ...component,
-      }),
-      parentPath
+      new ComponentVariable(
+        {
+          id: newUUID(),
+          ...component,
+        },
+        file,
+      ),
+      parentPath,
     );
 
     if (this.files.resolveComPropsTsTypeID(id, component.file)) {
@@ -121,40 +131,55 @@ export class ComponentDB {
       ComponentFileVarHook,
       "id" | "variableType" | "var" | "components"
     >,
-    parentPath?: string[]
+    parentPath?: string[],
   ) {
+    const file = this.files.get(variable.file);
+
     this.files.addVariable(
       variable.file,
-      new HookVariable({
-        id: newUUID(),
-        ...variable,
-      }),
-      parentPath
+      new HookVariable(
+        {
+          id: newUUID(),
+          ...variable,
+        },
+        file,
+      ),
+      parentPath,
     );
   }
 
   public addVariable(
     fileName: string,
-    variable: Omit<
-      ComponentFileVarNormal,
-      "id" | "variableType" | "var" | "components"
-    >,
-    parentPath?: string[]
+    variable:
+      | Omit<
+          ComponentFileVarNormalFunction,
+          "id" | "variableType" | "var" | "components"
+        >
+      | Omit<
+          ComponentFileVarNormalData,
+          "id" | "variableType" | "var" | "components"
+        >,
+    parentPath?: string[],
   ) {
+    const file = this.files.get(fileName);
+
     this.files.addVariable(
       fileName,
-      new DataVariable({
-        id: newUUID(),
-        ...variable,
-      }),
-      parentPath
+      new DataVariable(
+        {
+          id: newUUID(),
+          ...variable,
+        },
+        file,
+      ),
+      parentPath,
     );
   }
 
   public addVariableDependency(
     fileName: string,
     parent: string,
-    dependency: ComponentFileVarDependency
+    dependency: ComponentFileVarDependency,
   ) {
     this.files.addVariableDependency(fileName, parent, dependency);
   }
@@ -163,7 +188,7 @@ export class ComponentDB {
     name: string,
     loc: VariableLoc,
     fileName: string,
-    state: Omit<State, "id">
+    state: Omit<State, "id">,
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
@@ -175,7 +200,7 @@ export class ComponentDB {
 
   private _getExportId(
     fileName: string,
-    name: string
+    name: string,
   ): { id: string; isDependency: boolean } | null {
     const comImport = this.files.getImport(fileName, name);
     if (!comImport) return null;
@@ -200,7 +225,7 @@ export class ComponentDB {
     name: string,
     loc: VariableLoc,
     fileName: string,
-    hook: string
+    hook: string,
   ) {
     const comImport = this.files.getImport(fileName, hook);
     if (comImport?.source === "react") return;
@@ -229,7 +254,7 @@ export class ComponentDB {
   public comAddEffect(
     fileName: string,
     loc: VariableLoc,
-    effect: Omit<EffectInfo, "id">
+    effect: Omit<EffectInfo, "id">,
   ) {
     const file = this.files.get(fileName);
 
@@ -253,7 +278,7 @@ export class ComponentDB {
     fileName: string,
     tag: string,
     dependencry: ComponentInfoRenderDependency[],
-    loc: VariableLoc
+    loc: VariableLoc,
   ) {
     const exportInfo = this._getExportId(fileName, tag);
 
@@ -277,7 +302,7 @@ export class ComponentDB {
       exportInfo.id,
       dependencry,
       exportInfo.isDependency,
-      loc
+      loc,
     );
   }
 
@@ -291,7 +316,7 @@ export class ComponentDB {
 
   public fileAddExport(
     fileName: string,
-    fileExport: Omit<ComponentFileExport, "id">
+    fileExport: Omit<ComponentFileExport, "id">,
   ) {
     this.files.addExport(fileName, fileExport);
   }
@@ -333,7 +358,10 @@ export class ComponentDB {
           label: "render",
         });
       }
-    } else if (variable.variableType === "normal" && isDataVariable(variable)) {
+    } else if (
+      variable.variableType === "normal" &&
+      isNormalVariable(variable)
+    ) {
       if (parent != null) {
         // Handle components iteration (Map or Record)
         const components = this._getValues(variable.components);
@@ -350,12 +378,14 @@ export class ComponentDB {
     }
 
     // Handle nested var iteration (Map or Record)
-    const vars = this._getValues(variable.var);
-    for (const innerVar of vars) {
-      this._resolveDependency(
-        innerVar,
-        variable.variableType == "component" ? variable.id : parent
-      );
+    if (isFunctionVariable(variable)) {
+      const vars = this._getValues(variable.var);
+      for (const innerVar of vars) {
+        this._resolveDependency(
+          innerVar,
+          variable.variableType == "component" ? variable.id : parent,
+        );
+      }
     }
   }
 
@@ -393,7 +423,7 @@ export class ComponentDB {
   private static RESOLVE_HANDLERS: {
     [K in ComponentDBResolve["type"]]: (
       db: ComponentDB,
-      task: Extract<ComponentDBResolve, { type: K }>
+      task: Extract<ComponentDBResolve, { type: K }>,
     ) => void | boolean;
   } = {
     comAddRender: (db, task) => {
@@ -402,7 +432,7 @@ export class ComponentDB {
         task.fileName,
         task.tag,
         task.dependencry,
-        task.loc
+        task.loc,
       );
     },
     comAddHook: (db, task) => {
@@ -436,7 +466,7 @@ export class ComponentDB {
       for (const task of currentTasks) {
         const handler = ComponentDB.RESOLVE_HANDLERS[task.type] as (
           db: ComponentDB,
-          task: ComponentDBResolve
+          task: ComponentDBResolve,
         ) => void | boolean;
         if (handler) {
           const result = handler(this, task);
@@ -451,7 +481,7 @@ export class ComponentDB {
 
     if (retries >= maxRetries && this.resolveTasks.length > 0) {
       console.warn(
-        "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve"
+        "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
       );
     }
 
@@ -475,14 +505,14 @@ export class ComponentDB {
         if (source.startsWith(alias)) {
           source = path.join(
             this.viteAliases[alias] ?? "",
-            `./${source.slice(alias.length)}`
+            `./${source.slice(alias.length)}`,
           );
           isAliase = true;
           break;
         } else if (source.startsWith(alias + "/")) {
           source = path.join(
             this.viteAliases[alias] ?? "",
-            `./${source.slice(alias.length + 1)}`
+            `./${source.slice(alias.length + 1)}`,
           );
           isAliase = true;
           break;

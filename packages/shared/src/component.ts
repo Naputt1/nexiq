@@ -85,17 +85,24 @@ export interface VariableScope {
 }
 
 interface ComponentFileVarBaseType {
-  type: "function" | "data";
-  scope?: VariableScope;
+  id: string;
+  name: string;
+  type: "function" | "data" | "jsx";
+  dependencies: Record<string, ComponentFileVarDependency>;
 }
 
-export interface ComponentFileVarBaseTypeFunction
-  extends ComponentFileVarBaseType {
+export type ComponentFileVarBase = ComponentLoc &
+  ComponentFileVarBaseType & {
+    variableType: "component" | "normal" | "hook";
+  };
+
+export interface ComponentFileVarBaseTypeFunction extends ComponentFileVarBase {
   type: "function";
   scope: VariableScope;
+  var: Record<string, ComponentFileVar>;
 }
 
-export interface ComponentFileVarBaseTypeData extends ComponentFileVarBaseType {
+export interface ComponentFileVarBaseTypeData extends ComponentFileVarBase {
   type: "data";
 }
 
@@ -103,16 +110,9 @@ export type ComponentFileVarDependencyType =
   | ComponentFileVarBaseTypeFunction
   | ComponentFileVarBaseTypeData;
 
-export type ComponentFileVarBase = ComponentLoc &
-  ComponentFileVarDependencyType & {
-    id: string;
-    name: string;
-    variableType: "component" | "normal" | "hook";
-    dependencies: Record<string, ComponentFileVarDependency>;
-    var: Record<string, ComponentFileVar>;
-  };
-
-export type ComponentFileVarReact = ComponentFileVarBase & HookInfo;
+export type ComponentFileVarReact = ComponentFileVarBase &
+  ComponentFileVarBaseTypeFunction &
+  HookInfo;
 
 export type ComponentFileVarComponent = ComponentFileVarReact &
   ComponentInfo & {
@@ -123,10 +123,20 @@ export type ComponentFileVarHook = ComponentFileVarReact & {
   variableType: "hook";
 };
 
-export type ComponentFileVarNormal = ComponentFileVarBase & {
-  components: Record<string, ComponentInfoRender>;
-  variableType: "normal";
-};
+export type ComponentFileVarNormalBase = ComponentLoc &
+  ComponentFileVarBase & {
+    components: Record<string, ComponentInfoRender>;
+    variableType: "normal";
+  };
+
+export type ComponentFileVarNormalFunction = ComponentFileVarNormalBase &
+  ComponentFileVarBaseTypeFunction;
+export type ComponentFileVarNormalData = ComponentFileVarNormalBase &
+  ComponentFileVarBaseTypeData;
+
+export type ComponentFileVarNormal =
+  | ComponentFileVarNormalFunction
+  | ComponentFileVarNormalData;
 
 export type ComponentFileVar =
   | ComponentFileVarComponent

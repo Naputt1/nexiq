@@ -1,19 +1,19 @@
 import type { ComponentFileVarNormal, ComponentInfoRender } from "shared";
 import { Variable } from "./variable.js";
+import type { File } from "../fileDB.js";
 
 export class DataVariable extends Variable {
   type: "function" | "data";
   components: Map<string, ComponentInfoRender>;
 
-  constructor({
-    id,
-    name,
-    dependencies,
-    loc,
-    ...options
-  }: Omit<ComponentFileVarNormal, "variableType" | "var" | "components">) {
-    const scope = options.type === "function" ? options.scope : undefined;
-    super(id, name, options.type, dependencies, "normal", loc, scope);
+  constructor(
+    options: Omit<
+      ComponentFileVarNormal,
+      "variableType" | "var" | "components"
+    >,
+    file: File,
+  ) {
+    super({ ...options, variableType: "normal" }, file);
     this.type = options.type;
     this.components = new Map();
   }
@@ -29,6 +29,7 @@ export class DataVariable extends Variable {
   public getData(): ComponentFileVarNormal {
     return {
       ...super.getBaseData(),
+      type: "data",
       variableType: "normal",
       loc: this.loc,
       components: Object.fromEntries(this.components),

@@ -1,6 +1,7 @@
 import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
 import type { TypeData } from "shared/src/types/primitive.js";
 import { ReactVariable } from "./reactVariable.js";
+import type { File } from "../fileDB.js";
 
 export class ComponentVariable extends ReactVariable {
   componentType: ComponentFileVarComponent["componentType"];
@@ -8,11 +9,20 @@ export class ComponentVariable extends ReactVariable {
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
 
-  constructor(options: Omit<ComponentFileVarComponent, "variableType">) {
-    super({
-      variableType: "component",
-      ...options,
-    } as ComponentFileVarComponent);
+  constructor(
+    options: Omit<
+      ComponentFileVarComponent,
+      "variableType" | "var" | "components" | "type"
+    >,
+    file: File,
+  ) {
+    super(
+      {
+        ...options,
+        variableType: "component",
+      },
+      file,
+    );
     this.componentType = options.componentType;
     this.propType = options.propType;
     this.contexts = options.contexts;
@@ -33,7 +43,7 @@ export class ComponentVariable extends ReactVariable {
 
   public getData(): ComponentFileVarComponent {
     const data: ComponentFileVarComponent = {
-      ...this.getReactVariable(),
+      ...this.getBaseData(),
       variableType: "component",
       componentType: this.componentType,
       contexts: this.contexts,

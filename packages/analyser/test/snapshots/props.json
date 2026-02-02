@@ -152,7 +152,7 @@
     },
     "/src/type.tsx": {
       "path": "/src/type.tsx",
-      "hash": "5c2841b6cb214c31",
+      "hash": "7c15a64cb8e87591",
       "import": {
         "React": {
           "localName": "React",
@@ -194,25 +194,25 @@
           "name": "TypePropsVarFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe"
+          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4"
         },
         "TypePropsVarInline": {
           "name": "TypePropsVarInline",
           "type": "named",
           "exportKind": "value",
-          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4"
+          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b"
         },
         "TypePropsVarInlineFunction": {
           "name": "TypePropsVarInlineFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b"
+          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c"
         },
         "TypePropsFunction": {
           "name": "TypePropsFunction",
           "type": "named",
           "exportKind": "component",
-          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c"
+          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107"
         }
       },
       "defaultExport": null,
@@ -1218,6 +1218,45 @@
             "line": 86,
             "column": 5
           }
+        },
+        "6c8881e7-248b-47fc-a2b9-c334971eb9fe": {
+          "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe",
+          "type": "type",
+          "name": "InnerType",
+          "body": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "title",
+                "type": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "loc": {
+            "line": 89,
+            "column": 7
+          }
+        },
+        "349d4ecc-273a-4e15-b915-cd9598704c57": {
+          "id": "349d4ecc-273a-4e15-b915-cd9598704c57",
+          "type": "interface",
+          "name": "InnerType2",
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "title",
+              "type": {
+                "type": "string"
+              }
+            }
+          ],
+          "loc": {
+            "line": 93,
+            "column": 12
+          }
         }
       },
       "var": {
@@ -1226,7 +1265,6 @@
           "name": "Test65",
           "variableType": "normal",
           "dependencies": {},
-          "var": {},
           "type": "data",
           "loc": {
             "line": 31,
@@ -1239,12 +1277,12 @@
           "name": "TypePropsVar",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
             "line": 88,
             "column": 13
           },
+          "var": {},
           "scope": {
             "start": {
               "line": 88,
@@ -1274,24 +1312,24 @@
             "name": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
           }
         },
-        "6c8881e7-248b-47fc-a2b9-c334971eb9fe": {
-          "id": "6c8881e7-248b-47fc-a2b9-c334971eb9fe",
+        "186e1276-819b-4e0b-bd90-165ae049a9f4": {
+          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4",
           "name": "TypePropsVarFunction",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
-            "line": 92,
+            "line": 100,
             "column": 13
           },
+          "var": {},
           "scope": {
             "start": {
-              "line": 92,
+              "line": 100,
               "column": 13
             },
             "end": {
-              "line": 92,
+              "line": 100,
               "column": 51
             }
           },
@@ -1318,24 +1356,24 @@
             "name": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
           }
         },
-        "186e1276-819b-4e0b-bd90-165ae049a9f4": {
-          "id": "186e1276-819b-4e0b-bd90-165ae049a9f4",
+        "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
+          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
           "name": "TypePropsVarInline",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
-            "line": 99,
+            "line": 107,
             "column": 13
           },
+          "var": {},
           "scope": {
             "start": {
-              "line": 99,
+              "line": 107,
               "column": 13
             },
             "end": {
-              "line": 99,
+              "line": 107,
               "column": 31
             }
           },
@@ -1362,24 +1400,24 @@
             "name": "71a5333c-fbc1-4ea1-9519-dce12e5b4a87"
           }
         },
-        "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
-          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
+        "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c": {
+          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
           "name": "TypePropsVarInlineFunction",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
-            "line": 103,
+            "line": 111,
             "column": 13
           },
+          "var": {},
           "scope": {
             "start": {
-              "line": 103,
+              "line": 111,
               "column": 13
             },
             "end": {
-              "line": 103,
+              "line": 111,
               "column": 39
             }
           },
@@ -1406,24 +1444,24 @@
             "name": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159"
           }
         },
-        "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c": {
-          "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
+        "160568c3-c878-41fa-a2d7-8a528b4fc107": {
+          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
           "name": "TypePropsFunction",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
-            "line": 116,
+            "line": 124,
             "column": 16
           },
+          "var": {},
           "scope": {
             "start": {
-              "line": 116,
+              "line": 124,
               "column": 16
             },
             "end": {
-              "line": 116,
+              "line": 124,
               "column": 33
             }
           },
@@ -1495,23 +1533,23 @@
           "name": "DestructuringProps",
           "type": "named",
           "exportKind": "value",
-          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107"
+          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "160568c3-c878-41fa-a2d7-8a528b4fc107": {
-          "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
+        "fc9d69c7-9955-435e-a79e-5e7607fa910b": {
+          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
           "name": "DestructuringProps",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
             "line": 3,
             "column": 13
           },
+          "var": {},
           "scope": {
             "start": {
               "line": 3,
@@ -1602,23 +1640,23 @@
           "name": "App",
           "type": "named",
           "exportKind": "component",
-          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b"
+          "id": "409b99d0-111e-46ff-8890-7c62623fd2c0"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "fc9d69c7-9955-435e-a79e-5e7607fa910b": {
-          "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
+        "409b99d0-111e-46ff-8890-7c62623fd2c0": {
+          "id": "409b99d0-111e-46ff-8890-7c62623fd2c0",
           "name": "App",
           "variableType": "component",
           "dependencies": {},
-          "var": {},
           "type": "function",
           "loc": {
             "line": 4,
             "column": 16
           },
+          "var": {},
           "scope": {
             "start": {
               "line": 4,
@@ -1637,8 +1675,8 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "160568c3-c878-41fa-a2d7-8a528b4fc107": {
-              "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
+            "fc9d69c7-9955-435e-a79e-5e7607fa910b": {
+              "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
               "dependencies": [
                 {
                   "id": "title",
@@ -1662,8 +1700,8 @@
   },
   "edges": [
     {
-      "from": "160568c3-c878-41fa-a2d7-8a528b4fc107",
-      "to": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
+      "from": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
+      "to": "409b99d0-111e-46ff-8890-7c62623fd2c0",
       "label": "render"
     }
   ]
