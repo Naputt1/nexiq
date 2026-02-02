@@ -45,7 +45,7 @@ export interface PropData {
 }
 
 export interface ReactFunctionInfoBase {
-  states: Record<string, State>;
+  states: string[];
   hooks: string[];
   props: PropData[];
   propType?: TypeData;

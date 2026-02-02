@@ -41,7 +41,22 @@
             "line": 4,
             "column": 6
           },
-          "var": {},
+          "var": {
+            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
+              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+              "name": "state",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/effectt.tsx",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 8
+              },
+              "value": "state",
+              "setter": "setState"
+            }
+          },
           "scope": {
             "start": {
               "line": 4,
@@ -52,17 +67,9 @@
               "column": 12
             }
           },
-          "states": {
-            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
-              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
-              "value": "state",
-              "loc": {
-                "line": 5,
-                "column": 8
-              },
-              "setter": "setState"
-            }
-          },
+          "states": [
+            "f24b8c56-3fac-469d-b2f3-efc6e3575137"
+          ],
           "props": [],
           "hooks": [
             "23adce01-2717-489c-9a42-e6485e2f01aa"
@@ -160,7 +167,22 @@
             "line": 3,
             "column": 16
           },
-          "var": {},
+          "var": {
+            "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
+              "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+              "name": "value",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/Hooks.ts",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "value": "value",
+              "setter": "setValue"
+            }
+          },
           "scope": {
             "start": {
               "line": 3,
@@ -171,17 +193,9 @@
               "column": 29
             }
           },
-          "states": {
-            "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
-              "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
-              "value": "value",
-              "loc": {
-                "line": 4,
-                "column": 8
-              },
-              "setter": "setValue"
-            }
-          },
+          "states": [
+            "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+          ],
           "props": [],
           "hooks": [],
           "effects": {
@@ -229,7 +243,7 @@
               "column": 1
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {}

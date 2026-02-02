@@ -104,7 +104,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
           });
-          for (const state of Object.values(variable.states)) {
+
+          for (const stateID of variable.states) {
+            const state = variable.var[stateID];
+            if (state == null || state.kind !== "state") continue;
+
             nodes.push({
               id: state.id,
               label: {

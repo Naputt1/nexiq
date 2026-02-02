@@ -101,7 +101,7 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<ComponentFileVarComponent, "id" | "kind">,
+    component: Omit<ComponentFileVarComponent, "id" | "kind" | "states">,
     parentPath?: string[],
   ) {
     const file = this.files.get(component.file);
@@ -128,7 +128,10 @@ export class ComponentDB {
   }
 
   public addHook(
-    variable: Omit<ComponentFileVarHook, "id" | "kind" | "var" | "components">,
+    variable: Omit<
+      ComponentFileVarHook,
+      "id" | "kind" | "var" | "components" | "states"
+    >,
     parentPath?: string[],
   ) {
     const file = this.files.get(variable.file);

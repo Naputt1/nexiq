@@ -74,12 +74,14 @@ export default function VariableDeclarator(
       ) {
         if (id.type == "Identifier") {
           const parentPath = getParentPath(nodePath);
-          const component: Omit<ComponentFileVarComponent, "id" | "kind"> = {
+          const component: Omit<
+            ComponentFileVarComponent,
+            "id" | "kind" | "states"
+          > = {
             name: id.name,
             file: fileName,
             type: "function",
             componentType: "Function",
-            states: {},
             hooks: [],
             props: getProps(
               firstArgPath as traverse.NodePath<
@@ -178,12 +180,14 @@ export default function VariableDeclarator(
           returnJSX(init)))
     ) {
       const parentPath = getParentPath(nodePath);
-      const component: Omit<ComponentFileVarComponent, "id" | "kind"> = {
+      const component: Omit<
+        ComponentFileVarComponent,
+        "id" | "kind" | "states"
+      > = {
         name,
         file: fileName,
         type: "function",
         componentType: "Function",
-        states: {},
         hooks: [],
         props:
           t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)
@@ -275,7 +279,6 @@ export default function VariableDeclarator(
               dependencies: {},
               loc,
               scope,
-              states: {},
               props: getProps(
                 nodePath.get("init") as traverse.NodePath<
                   t.ArrowFunctionExpression | t.FunctionExpression
