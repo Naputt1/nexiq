@@ -36,6 +36,6 @@
   },
   "include": [
     "src",
-    "electron/electron-env.d.ts"
+    "src/electron-env.d.ts"
   ]
 }
