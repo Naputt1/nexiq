@@ -84,68 +84,89 @@ export interface VariableScope {
   end: VariableLoc;
 }
 
-interface ComponentFileVarBaseType {
+export type VarType = "function" | "data" | "jsx";
+export type VarKind = "component" | "normal" | "hook" | "memo";
+
+interface ComponentFileVarBaseType<TType extends VarType> {
   id: string;
   name: string;
-  type: "function" | "data" | "jsx";
+  type: TType;
   dependencies: Record<string, ComponentFileVarDependency>;
 }
 
-export type ComponentFileVarBase = ComponentLoc &
-  ComponentFileVarBaseType & {
-    variableType: "component" | "normal" | "hook";
+export type ComponentFileVarBase<
+  TType extends VarType,
+  TKind extends VarKind,
+> = ComponentLoc &
+  ComponentFileVarBaseType<TType> & {
+    kind: TKind;
   };
 
-export interface ComponentFileVarBaseTypeFunction extends ComponentFileVarBase {
+export interface ComponentFileVarBaseTypeFunction<
+  TKind extends VarKind,
+> extends ComponentFileVarBase<"function", TKind> {
   type: "function";
   scope: VariableScope;
   var: Record<string, ComponentFileVar>;
 }
 
-export interface ComponentFileVarBaseTypeData extends ComponentFileVarBase {
+export interface ComponentFileVarBaseTypeData<
+  TKind extends VarKind,
+> extends ComponentFileVarBase<"data", TKind> {
   type: "data";
 }
 
-export type ComponentFileVarDependencyType =
-  | ComponentFileVarBaseTypeFunction
-  | ComponentFileVarBaseTypeData;
+export type ComponentFileVarDependencyType<TKind extends VarKind> =
+  | ComponentFileVarBaseTypeFunction<TKind>
+  | ComponentFileVarBaseTypeData<TKind>;
 
-export type ComponentFileVarReact = ComponentFileVarBase &
-  ComponentFileVarBaseTypeFunction &
+export type ComponentFileVarReact<TKind extends VarKind> = ComponentFileVarBase<
+  "function",
+  TKind
+> &
+  ComponentFileVarBaseTypeFunction<TKind> &
   HookInfo;
 
-export type ComponentFileVarComponent = ComponentFileVarReact &
+export type ComponentFileVarComponent = ComponentFileVarReact<"component"> &
   ComponentInfo & {
-    variableType: "component";
+    kind: "component";
   };
 
-export type ComponentFileVarHook = ComponentFileVarReact & {
-  variableType: "hook";
+export type ComponentFileVarHook = ComponentFileVarReact<"hook"> & {
+  kind: "hook";
 };
 
-export type ComponentFileVarNormalBase = ComponentLoc &
-  ComponentFileVarBase & {
+export type MemoFileVarHook = ComponentFileVarReact<"memo"> & {
+  kind: "memo";
+  memoDependencies: string[];
+};
+
+export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
+  ComponentFileVarBase<TType, "normal"> & {
     components: Record<string, ComponentInfoRender>;
-    variableType: "normal";
+    kind: "normal";
   };
 
-export type ComponentFileVarNormalFunction = ComponentFileVarNormalBase &
-  ComponentFileVarBaseTypeFunction;
-export type ComponentFileVarNormalData = ComponentFileVarNormalBase &
-  ComponentFileVarBaseTypeData;
+export type ComponentFileVarNormalFunction =
+  ComponentFileVarNormalBase<"function"> &
+    ComponentFileVarBaseTypeFunction<"normal">;
+export type ComponentFileVarNormalData = ComponentFileVarNormalBase<"data"> &
+  ComponentFileVarBaseTypeData<"normal">;
 
 export type ComponentFileVarNormal =
   | ComponentFileVarNormalFunction
   | ComponentFileVarNormalData;
 
-export type ComponentFileVarFunction = ComponentFileVarBaseTypeFunction & {
-  variableType: "normal";
-};
+export type ComponentFileVarFunction =
+  ComponentFileVarBaseTypeFunction<"normal"> & {
+    kind: "normal";
+  };
 
 export type ComponentFileVar =
   | ComponentFileVarComponent
   | ComponentFileVarNormal
   | ComponentFileVarHook
+  | MemoFileVarHook
   | ComponentFileVarFunction;
 
 export type ComponentFile = {

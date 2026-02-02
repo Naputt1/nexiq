@@ -2,24 +2,24 @@ import type { ComponentFileVarHook } from "shared";
 import { ReactVariable } from "./reactVariable.js";
 import type { File } from "../fileDB.js";
 
-export class HookVariable extends ReactVariable {
+export class HookVariable extends ReactVariable<"hook"> {
   constructor(
-    options: Omit<ComponentFileVarHook, "variableType" | "var" | "components">,
+    options: Omit<ComponentFileVarHook, "kind" | "var" | "components">,
     file: File,
   ) {
-    super({ ...options, variableType: "hook" }, file);
+    super({ ...options, kind: "hook" }, file);
   }
 
   public load(data: HookVariable) {
     super.load(data);
 
-    this.variableType = "hook";
+    this.kind = "hook";
   }
 
   public getData(): ComponentFileVarHook {
     return {
       ...super.getBaseData(),
-      variableType: "hook",
+      kind: "hook",
     };
   }
 }

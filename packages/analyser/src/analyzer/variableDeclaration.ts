@@ -41,7 +41,7 @@ function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
 
 export default function VariableDeclarator(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.VariableDeclarator> {
   return (nodePath) => {
     const id = nodePath.node.id;
@@ -74,10 +74,7 @@ export default function VariableDeclarator(
       ) {
         if (id.type == "Identifier") {
           const parentPath = getParentPath(nodePath);
-          const component: Omit<
-            ComponentFileVarComponent,
-            "id" | "variableType"
-          > = {
+          const component: Omit<ComponentFileVarComponent, "id" | "kind"> = {
             name: id.name,
             file: fileName,
             type: "function",
@@ -88,7 +85,7 @@ export default function VariableDeclarator(
               firstArgPath as traverse.NodePath<
                 t.ArrowFunctionExpression | t.FunctionExpression
               >,
-              nodePath.node.id as t.Identifier
+              nodePath.node.id as t.Identifier,
             ),
             contexts: [],
             renders: {},
@@ -102,7 +99,7 @@ export default function VariableDeclarator(
           if (nodePath.node.id.type === "Identifier") {
             if (nodePath.node.id.typeAnnotation?.type === "TSTypeAnnotation") {
               const propType = getType(
-                nodePath.node.id.typeAnnotation.typeAnnotation
+                nodePath.node.id.typeAnnotation.typeAnnotation,
               );
 
               if (
@@ -181,36 +178,35 @@ export default function VariableDeclarator(
           returnJSX(init)))
     ) {
       const parentPath = getParentPath(nodePath);
-      const component: Omit<ComponentFileVarComponent, "id" | "variableType"> =
-        {
-          name,
-          file: fileName,
-          type: "function",
-          componentType: "Function",
-          states: {},
-          hooks: [],
-          props:
-            t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)
-              ? getProps(
-                  nodePath.get("init") as traverse.NodePath<
-                    t.ArrowFunctionExpression | t.FunctionExpression
-                  >,
-                  nodePath.node.id as t.Identifier
-                )
-              : [],
-          contexts: [],
-          renders: {},
-          dependencies: {},
-          var: {},
-          effects: {},
-          loc,
-          scope,
-        };
+      const component: Omit<ComponentFileVarComponent, "id" | "kind"> = {
+        name,
+        file: fileName,
+        type: "function",
+        componentType: "Function",
+        states: {},
+        hooks: [],
+        props:
+          t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)
+            ? getProps(
+                nodePath.get("init") as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >,
+                nodePath.node.id as t.Identifier,
+              )
+            : [],
+        contexts: [],
+        renders: {},
+        dependencies: {},
+        var: {},
+        effects: {},
+        loc,
+        scope,
+      };
 
       if (nodePath.node.id.type === "Identifier") {
         if (nodePath.node.id.typeAnnotation?.type === "TSTypeAnnotation") {
           const propType = getType(
-            nodePath.node.id.typeAnnotation.typeAnnotation
+            nodePath.node.id.typeAnnotation.typeAnnotation,
           );
 
           if (
@@ -240,10 +236,10 @@ export default function VariableDeclarator(
           ) {
             assert(
               nodePath.node.init.params[0]!.typeAnnotation.type ===
-                "TSTypeAnnotation"
+                "TSTypeAnnotation",
             );
             component.propType = getType(
-              nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation
+              nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation,
             );
           }
         } else {
@@ -284,7 +280,7 @@ export default function VariableDeclarator(
                 nodePath.get("init") as traverse.NodePath<
                   t.ArrowFunctionExpression | t.FunctionExpression
                 >,
-                nodePath.node.id as t.Identifier
+                nodePath.node.id as t.Identifier,
               ),
               effects: {},
               hooks: [],
@@ -339,7 +335,7 @@ export default function VariableDeclarator(
               type: "data",
               loc,
             },
-            parentPath
+            parentPath,
           );
         } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
           const parentPath = getParentPath(nodePath);
@@ -352,7 +348,7 @@ export default function VariableDeclarator(
               loc,
               scope,
             },
-            parentPath
+            parentPath,
           );
         }
       }

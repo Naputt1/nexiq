@@ -3,20 +3,23 @@ import type { Variable } from "./variable.js";
 import type { DataVariable } from "./dataVariable.js";
 import type { HookVariable } from "./hook.js";
 import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
+import type { VarKind, VarType } from "shared";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.variableType === "component";
+  return v.kind === "component";
 }
 
 export function isHookVariable(v: Variable): v is HookVariable {
-  return v.variableType === "hook";
+  return v.kind === "hook";
 }
 
 export function isNormalVariable(v: Variable): v is DataVariable {
-  return v.variableType === "normal";
+  return v.kind === "normal";
 }
 
-export function isBaseFunctionVariable(v: Variable): v is BaseFunctionVariable {
+export function isBaseFunctionVariable<TKind extends VarKind>(
+  v: Variable<VarType, TKind>,
+): v is BaseFunctionVariable<TKind> {
   return v.type === "function";
 }
 
