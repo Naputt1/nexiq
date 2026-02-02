@@ -25,11 +25,12 @@ import { DataVariable } from "./variable/dataVariable.js";
 import type { Variable } from "./variable/variable.js";
 import {
   isComponentVariable,
-  isFunctionVariable,
+  isBaseFunctionVariable,
   isNormalVariable,
 } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
+import { FunctionVariable } from "./variable/functionVariable.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -163,17 +164,28 @@ export class ComponentDB {
   ) {
     const file = this.files.get(fileName);
 
-    this.files.addVariable(
-      fileName,
-      new DataVariable(
+    let v: Variable | undefined;
+    if (variable.type === "function") {
+      v = new FunctionVariable(
         {
           id: newUUID(),
           ...variable,
         },
         file,
-      ),
-      parentPath,
-    );
+      );
+    } else if (variable.type === "data") {
+      v = new DataVariable(
+        {
+          id: newUUID(),
+          ...variable,
+        },
+        file,
+      );
+    }
+
+    assert(v != null, "Variable not found");
+
+    this.files.addVariable(fileName, v, parentPath);
   }
 
   public addVariableDependency(
@@ -378,7 +390,7 @@ export class ComponentDB {
     }
 
     // Handle nested var iteration (Map or Record)
-    if (isFunctionVariable(variable)) {
+    if (isBaseFunctionVariable(variable)) {
       const vars = this._getValues(variable.var);
       for (const innerVar of vars) {
         this._resolveDependency(

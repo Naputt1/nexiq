@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type {
-  ComponentFile,
-  ComponentFileVar,
-  JsonData,
-  TypeDataDeclare,
-} from "shared";
+import type { ComponentFile, ComponentFileVar, TypeDataDeclare } from "shared";
 import useGraph, {
   type ComboData,
   type EdgeData,
@@ -21,11 +16,26 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
+import { useAppStateStore } from "./hooks/use-app-state-store";
+
 interface ComponentGraphProps {
   projectPath: string;
 }
 
 const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
+  const {
+    selectedSubProject,
+    setSelectedSubProject,
+    selectedId,
+    setSelectedId,
+    centeredItemId,
+    setCenteredItemId,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    loadState,
+    saveState,
+  } = useAppStateStore();
+
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -42,10 +52,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [matches, setMatches] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [currentAnalysisPath, setCurrentAnalysisPath] = useState(projectPath);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [typeData, settypeData] = useState<{ [key: string]: TypeDataDeclare }>(
     {},
@@ -54,135 +61,137 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const graphRef = useRef<GraphRef>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const loadData = async () => {
-    try {
-      // Use configRoot (projectPath) to read data because that's where .react-map is
-      const graphData: JsonData = await window.ipcRenderer.invoke(
-        "read-graph-data",
-        projectPath,
-      );
-      if (!graphData) throw new Error("Graph data not found");
+  const loadData = useCallback(
+    async (analysisPath?: string) => {
+      const targetPath = analysisPath || selectedSubProject || projectPath;
+      if (!targetPath) return;
 
-      const combos: ComboData[] = [];
-      const nodes: NodeData[] = [];
-      const edges: EdgeData[] = [];
+      try {
+        // Use configRoot (projectPath) to read data because that's where .react-map is
+        const graphData = await window.ipcRenderer.invoke(
+          "read-graph-data",
+          projectPath,
+          targetPath,
+        );
+        if (!graphData) throw new Error("Graph data not found");
 
-      const addCombo = (
-        variable: ComponentFileVar,
-        file: ComponentFile,
-        parentID?: string,
-      ) => {
-        if (variable.variableType != "component") return;
-        const fileName = `${graphData.src}${file.path}`;
+        const combos: ComboData[] = [];
+        const nodes: NodeData[] = [];
+        const edges: EdgeData[] = [];
 
-        combos.push({
-          id: variable.id,
-          collapsed: true,
-          label: { text: variable.name, fill: "black" },
-          combo: parentID,
-          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-          props: variable.props,
-          propType: variable.propType,
-          type: "component",
-          // Note: HookInfo or other parts might not have typeParams if it wasn't added to shared yet,
-          // but assuming it's available or we handle it if it's strictly NodeData/ComboData.
-          // For now, removing 'as any' and letting TS help.
-          // If typeParams is not on shared types, we might need to add it there too,
-          // but if we are just fixing 'any' in UI, let's see.
-        });
-        combos.push({
-          id: `${variable.id}-render`,
-          collapsed: true,
-          label: { text: "render", fill: "black" },
-          combo: variable.id,
-          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-        });
-        for (const state of Object.values(variable.states)) {
-          nodes.push({
-            id: state.id,
-            label: {
-              text: state.value,
-            },
-            type: "state",
-            color: "red",
-            combo: variable.id,
-            fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
+        const addCombo = (
+          variable: ComponentFileVar,
+          file: ComponentFile,
+          parentID?: string,
+        ) => {
+          if (variable.variableType != "component") return;
+          const fileName = `${graphData.src}${file.path}`;
+
+          combos.push({
+            id: variable.id,
+            collapsed: true,
+            label: { text: variable.name, fill: "black" },
+            combo: parentID,
+            fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+            props: variable.props,
+            propType: variable.propType,
+            type: "component",
           });
-        }
-
-        for (const effect of Object.values(variable.effects)) {
-          nodes.push({
-            id: effect.id,
-            type: "effect",
-            color: "yellow",
+          combos.push({
+            id: `${variable.id}-render`,
+            collapsed: true,
+            label: { text: "render", fill: "black" },
             combo: variable.id,
-            fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+            fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
           });
-
-          for (const dep of effect.dependencies) {
-            edges.push({
-              id: `${dep}-${effect.id}`,
-              source: dep,
-              target: effect.id,
+          for (const state of Object.values(variable.states)) {
+            nodes.push({
+              id: state.id,
+              label: {
+                text: state.value,
+              },
+              type: "state",
+              color: "red",
               combo: variable.id,
+              fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
             });
           }
-        }
 
-        for (const render of Object.values(variable.renders)) {
-          for (const file of Object.values(graphData.files)) {
-            if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
-              const v = file.var[render.id];
-              nodes.push({
-                id: `${variable.id}-render-${render.id}`,
-                label: {
-                  text: v.name,
-                },
-                combo: `${variable.id}-render`,
-                fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+          for (const effect of Object.values(variable.effects)) {
+            nodes.push({
+              id: effect.id,
+              type: "effect",
+              color: "yellow",
+              combo: variable.id,
+              fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+            });
+
+            for (const dep of effect.dependencies) {
+              edges.push({
+                id: `${dep}-${effect.id}`,
+                source: dep,
+                target: effect.id,
+                combo: variable.id,
               });
-              break;
+            }
+          }
+
+          for (const render of Object.values(variable.renders)) {
+            for (const file of Object.values(graphData.files)) {
+              if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
+                const v = file.var[render.id];
+                nodes.push({
+                  id: `${variable.id}-render-${render.id}`,
+                  label: {
+                    text: v.name,
+                  },
+                  combo: `${variable.id}-render`,
+                  fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+                });
+                break;
+              }
+            }
+          }
+
+          for (const v of Object.values(variable.var)) {
+            addCombo(v, file, variable.id);
+          }
+        };
+
+        const newTypeData: { [key: string]: TypeDataDeclare } = {};
+        for (const file of Object.values(graphData.files)) {
+          for (const variable of Object.values(file.var)) {
+            addCombo(variable, file);
+          }
+
+          if (file.tsTypes) {
+            for (const typeDeclare of Object.values(file.tsTypes)) {
+              newTypeData[typeDeclare.id] = typeDeclare;
             }
           }
         }
 
-        for (const v of Object.values(variable.var)) {
-          addCombo(v, file, variable.id);
+        settypeData(newTypeData);
+
+        for (const e of Object.values(graphData.edges)) {
+          edges.push({
+            id: `${e.from}-${e.to}`,
+            source: e.from,
+            target: e.to,
+          });
         }
-      };
 
-      const newTypeData: { [key: string]: TypeDataDeclare } = {};
-      for (const file of Object.values(graphData.files)) {
-        for (const variable of Object.values(file.var)) {
-          addCombo(variable, file);
-        }
-
-        if (file.tsTypes) {
-          for (const typeDeclare of Object.values(file.tsTypes)) {
-            newTypeData[typeDeclare.id] = typeDeclare;
-          }
-        }
-      }
-
-      settypeData(newTypeData);
-
-      for (const e of Object.values(graphData.edges)) {
-        edges.push({
-          id: `${e.from}-${e.to}`,
-          source: e.from,
-          target: e.to,
+        setGraphData({
+          nodes,
+          edges,
+          combos,
         });
+      } catch (err) {
+        console.error(err);
       }
-
-      setGraphData({
-        nodes,
-        edges,
-        combos,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    },
+    [projectPath, selectedSubProject],
+  );
 
   const graph = useGraph(graphData);
 
@@ -196,12 +205,39 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const time = performance.now();
     graph.render();
     console.log("layout", performance.now() - time);
+
+    // After render, center on saved item if it exists
+    if (centeredItemId) {
+      setTimeout(() => {
+        graph.expandAncestors(centeredItemId);
+        graphRef.current?.focusItem(centeredItemId, 1.5);
+      }, 100);
+    }
   }, [graphData]);
 
-  // initial load
+  // Initial load state
   useEffect(() => {
-    loadData();
-  }, []);
+    loadState(projectPath);
+  }, [projectPath, loadState]);
+
+  // Auto-save state
+  useEffect(() => {
+    saveState(projectPath);
+  }, [
+    projectPath,
+    selectedSubProject,
+    centeredItemId,
+    selectedId,
+    isSidebarOpen,
+    saveState,
+  ]);
+
+  // load data whenever sub-project selection changes
+  useEffect(() => {
+    if (selectedSubProject) {
+      loadData();
+    }
+  }, [selectedSubProject, loadData]);
 
   // Resize observer for container
   const containerRef = useRef<HTMLDivElement>(null);
@@ -372,8 +408,37 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     setSelectedId(matches[prevIndex]);
   };
 
+  const handleReloadProject = useCallback(async () => {
+    const targetPath = selectedSubProject || projectPath;
+    if (!targetPath) return;
+
+    setIsAnalyzing(true);
+    try {
+      await window.ipcRenderer.invoke(
+        "analyze-project",
+        targetPath,
+        projectPath,
+      );
+      await loadData();
+    } catch (e) {
+      console.error("Failed to reload project", e);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [selectedSubProject, projectPath, loadData]);
+
+  useEffect(() => {
+    const unsubscribe = window.ipcRenderer.on("reload-project", () => {
+      handleReloadProject();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [handleReloadProject]);
+
   const onSelect = (id: string) => {
     setSelectedId(id);
+    setCenteredItemId(id);
     // Auto-focus on selection if needed, or just highlight
     // graphRef.current?.focusItem(id, 1.5);
   };
@@ -395,19 +460,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   const handleClose = useCallback(() => {
     setSelectedId(null);
-  }, []);
+  }, [setSelectedId]);
 
   const handleProjectSwitch = async (path: string) => {
-    if (path === currentAnalysisPath) return; // No change
+    if (path === selectedSubProject) return; // No change
 
     setIsAnalyzing(true);
-    setCurrentAnalysisPath(path);
+    setSelectedSubProject(path);
     try {
       // Trigger analysis on new path, storing config in projectRoot
       await window.ipcRenderer.invoke("analyze-project", path, projectPath);
 
-      // Reload data
-      await loadData();
+      // Data will be reloaded by the useEffect watching loadData/selectedSubProject
     } catch (e) {
       console.error("Failed to switch project", e);
     } finally {
@@ -419,7 +483,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     <div className="w-screen h-screen relative bg-background overflow-hidden">
       <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <ProjectSidebar
-          currentPath={currentAnalysisPath}
+          currentPath={selectedSubProject || projectPath}
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
           isLoading={isAnalyzing}

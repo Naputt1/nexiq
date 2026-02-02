@@ -10,7 +10,18 @@ import type {
   DataEdge,
   EffectInfo,
   JsonData,
+  TypeData,
+  TypeDataArray,
   TypeDataDeclare,
+  TypeDataFunction,
+  TypeDataIndexAccess,
+  TypeDataLiteralTypeLiteral,
+  TypeDataRef,
+  TypeDataTuple,
+  TypeDataTypeBodyIntersection,
+  TypeDataTypeBodyLiteral,
+  TypeDataTypeBodyParathesis,
+  TypeDataTypeBodyUnion,
   VariableLoc,
   VariableScope,
 } from "shared";
@@ -20,28 +31,17 @@ import {
   isHookVariable,
   isComponentVariable,
   isNormalVariable,
-  isFunctionVariable,
+  isBaseFunctionVariable,
+  isDataVariable,
 } from "./variable/type.js";
 import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
-import type {
-  TypeData,
-  TypeDataLiteralTypeLiteral,
-  TypeDataRef,
-  TypeDataArray,
-  TypeDataTypeBodyUnion,
-  TypeDataTypeBodyIntersection,
-  TypeDataTypeBodyParathesis,
-  TypeDataTypeBodyLiteral,
-  TypeDataFunction,
-  TypeDataTuple,
-  TypeDataIndexAccess,
-} from "shared/src/types/primitive.js";
 import fs from "fs";
 import path from "path";
 import { xxh3 } from "@node-rs/xxhash";
 import { DataVariable } from "./variable/dataVariable.js";
 import type { ReactVariable } from "./variable/reactVariable.js";
+import { FunctionVariable } from "./variable/functionVariable.js";
 
 interface FileIds {
   id: string;
@@ -120,14 +120,20 @@ export class File {
   };
 
   private loadVariable(variable: ComponentFileVar) {
-    let v: Variable;
-    if (variable.variableType === "component") {
+    let v: Variable | undefined;
+    if (variable.variableType === "normal") {
+      if (variable.type === "function") {
+        v = new FunctionVariable(variable, this);
+      } else {
+        v = new DataVariable(variable, this);
+      }
+    } else if (variable.variableType === "component") {
       v = new ComponentVariable(variable, this);
     } else if (variable.variableType === "hook") {
       v = new HookVariable(variable, this);
-    } else {
-      v = new DataVariable(variable, this);
     }
+
+    assert(v != null, "Variable not found");
 
     this.var.set(v.id, v);
     if (v.type === "function") {
@@ -141,9 +147,10 @@ export class File {
       var: new Map(),
     });
 
-    if (variable.type === "function" && isFunctionVariable(v)) {
+    if (variable.type === "function" && isBaseFunctionVariable(v)) {
       for (const childVar of Object.values(variable.var)) {
         const child = this.loadVariable(childVar);
+        console.log(v.var);
         v.var.set(child.id, child);
       }
     }
@@ -272,7 +279,7 @@ export class File {
         continue;
       }
 
-      if (isFunctionVariable(parent)) {
+      if (isBaseFunctionVariable(parent)) {
         parent = parent.var.get(id);
         if (parent == null) {
           debugger;
@@ -295,7 +302,7 @@ export class File {
     }
 
     for (const [_key, value] of _variable) {
-      if (isFunctionVariable(value)) {
+      if (isBaseFunctionVariable(value)) {
         const parent = this.getParentFromId(id, value.var);
         if (parent) {
           return parent;
@@ -384,7 +391,7 @@ export class File {
         return "no parent";
       }
 
-      if (isFunctionVariable(parent)) {
+      if (isBaseFunctionVariable(parent)) {
         parent.var.set(variable.id, variable);
       }
       variable.parent = parent;
@@ -518,7 +525,7 @@ export class File {
   ) {
     if (parent == null) return;
 
-    if (isFunctionVariable(parent)) {
+    if (isBaseFunctionVariable(parent)) {
       for (const [_key, com] of parent.var) {
         if (Object.keys(depMap).includes(com.name)) {
           const depI = depMap[com.name];
@@ -584,7 +591,7 @@ export class File {
 
   public getScope(scope: VariableScope) {
     for (const s of this.scopes) {
-      assert(isFunctionVariable(s), "Scope variable must be a function");
+      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
 
       if (
         s.scope?.start.line == scope.start.line &&
@@ -601,7 +608,7 @@ export class File {
 
   public getScopeFromLoc(loc: VariableLoc) {
     for (const s of this.scopes) {
-      assert(isFunctionVariable(s), "Scope variable must be a function");
+      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
 
       if (
         s.scope?.start.line == loc.line &&
@@ -655,7 +662,7 @@ export class File {
         isDependency,
         loc,
       };
-    } else if (isNormalVariable(variable)) {
+    } else if (isNormalVariable(variable) && isDataVariable(variable)) {
       variable.components.set(srcId, {
         id: srcId,
         dependencies,

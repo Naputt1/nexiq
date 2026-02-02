@@ -1,32 +1,44 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import ComponentGraph from "./componentGraph";
-import { useEffect, useState } from "react";
 import { SetupFlow } from "./components/setup-flow/SetupFlow";
+import { useProjectStore } from "./hooks/use-project-store";
+import { useEffect } from "react";
 
 function App() {
-  const [currentProject, setCurrentProject] = useState<string | null>(() => {
-    return sessionStorage.getItem("currentProject");
-  });
+  const { projectRoot, setProjectRoot, _hasHydrated } = useProjectStore();
 
   useEffect(() => {
-    if (currentProject) {
-      sessionStorage.setItem("currentProject", currentProject);
-    } else {
-      sessionStorage.removeItem("currentProject");
+    if (_hasHydrated && !projectRoot) {
+      // Try to recover from Electron store if local storage is empty
+      window.ipcRenderer.invoke("get-last-project").then((lastRoot) => {
+        if (lastRoot) {
+          setProjectRoot(lastRoot);
+        }
+      });
     }
-  }, [currentProject]);
+  }, [_hasHydrated, projectRoot, setProjectRoot]);
 
-  if (!currentProject) {
-    return <SetupFlow onComplete={(path) => setCurrentProject(path)} />;
+  const handleProjectComplete = (path: string) => {
+    setProjectRoot(path);
+    window.ipcRenderer.invoke("set-last-project", path);
+  };
+
+  if (!_hasHydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-white">
+        <div className="animate-spin text-blue-500 text-3xl">●</div>
+      </div>
+    );
+  }
+
+  if (!projectRoot) {
+    return <SetupFlow onComplete={handleProjectComplete} />;
   }
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<ComponentGraph projectPath={currentProject} />}
-      />
+      <Route path="/" element={<ComponentGraph projectPath={projectRoot} />} />
     </Routes>
   );
 }

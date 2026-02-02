@@ -1,5 +1,5 @@
 import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
-import type { TypeData } from "shared/src/types/primitive.js";
+import type { TypeData } from "shared";
 import { ReactVariable } from "./reactVariable.js";
 import type { File } from "../fileDB.js";
 

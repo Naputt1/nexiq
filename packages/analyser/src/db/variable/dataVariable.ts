@@ -3,7 +3,6 @@ import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
 export class DataVariable extends Variable {
-  type: "function" | "data";
   components: Map<string, ComponentInfoRender>;
 
   constructor(
@@ -13,8 +12,7 @@ export class DataVariable extends Variable {
     >,
     file: File,
   ) {
-    super({ ...options, variableType: "normal" }, file);
-    this.type = options.type;
+    super({ ...options, variableType: "normal", type: "data" }, file);
     this.components = new Map();
   }
 

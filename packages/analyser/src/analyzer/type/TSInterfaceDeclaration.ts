@@ -3,12 +3,12 @@ import traverse from "@babel/traverse";
 import type { TypeDataDeclareInterface, TypeDataParam } from "shared";
 import assert from "assert";
 import type { ComponentDB } from "../../db/componentDB.js";
-import type { TypeDataLiteralBody } from "shared/src/types/primitive.js";
+import type { TypeDataLiteralBody } from "shared";
 import { getType, getMember } from "./helper.js";
 
 export default function TSInterfaceDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.TSInterfaceDeclaration> {
   return (nodePath) => {
     const name = nodePath.node.id.name;

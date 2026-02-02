@@ -1,19 +1,18 @@
 import type {
-  ComponentFileVar,
   ComponentFileVarReact,
   EffectInfo,
   PropData,
   State,
 } from "shared";
 import { newUUID } from "../../utils/uuid.js";
-import { FunctionVariable } from "./functionVariable.js";
+import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 
 type InnerType = {
   found: boolean;
 };
 
-export abstract class ReactVariable extends FunctionVariable {
+export abstract class ReactVariable extends BaseFunctionVariable {
   states: Record<string, State & InnerType> = {};
   props: PropData[];
   hooks: string[];
@@ -108,6 +107,4 @@ export abstract class ReactVariable extends FunctionVariable {
       effects: this.effects,
     };
   }
-
-  public abstract getData(): ComponentFileVar;
 }

@@ -1,23 +1,28 @@
-import type {
-  ComponentFileVarBaseTypeFunction,
-  ComponentFileVarFunction,
-} from "shared";
+import type { VariableScope, ComponentFileVarBaseTypeFunction } from "shared";
+import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 
-export class FunctionVariable extends BaseFunctionVariable {
+export abstract class BaseFunctionVariable extends Variable {
+  var: Map<string, Variable>;
+  scope: VariableScope;
+
   constructor(
     options: Omit<
       ComponentFileVarBaseTypeFunction,
-      "var" | "components" | "type" | "variableType"
+      "var" | "components" | "type"
     >,
     file: File,
   ) {
-    super({ ...options, variableType: "normal" }, file);
+    super({ ...options, type: "function" }, file);
+    this.var = new Map();
+    this.scope = options.scope;
   }
 
-  public load(data: FunctionVariable) {
+  public load(data: BaseFunctionVariable) {
     super.load(data);
+
+    this.type = data.type;
+    this.scope = data.scope;
   }
 
   protected getBaseData(): ComponentFileVarBaseTypeFunction {
@@ -31,13 +36,6 @@ export class FunctionVariable extends BaseFunctionVariable {
       ),
       type: "function",
       scope: this.scope,
-    };
-  }
-
-  public getData(): ComponentFileVarFunction {
-    return {
-      ...super.getBaseData(),
-      variableType: "normal",
     };
   }
 }

@@ -7,7 +7,7 @@ import type {
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
-} from "shared/src/types/primitive.js";
+} from "shared";
 import * as t from "@babel/types";
 import assert from "assert";
 import type { FuncParam, TypeDataParamFunction } from "shared";
@@ -37,7 +37,7 @@ function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
 }
 
 function getFuncParam(
-  param: t.TSFunctionType["parameters"][number]
+  param: t.TSFunctionType["parameters"][number],
 ): FuncParam {
   switch (param.type) {
     case "Identifier":
@@ -59,7 +59,7 @@ function getFuncParam(
             property.value.type == "Identifier" ||
               property.value.type == "ObjectPattern" ||
               property.value.type == "ArrayPattern" ||
-              property.value.type == "RestElement"
+              property.value.type == "RestElement",
           );
 
           funcParam.property.push({
@@ -95,7 +95,7 @@ function getFuncParam(
           element.type == "Identifier" ||
             element.type == "ObjectPattern" ||
             element.type == "ArrayPattern" ||
-            element.type == "RestElement"
+            element.type == "RestElement",
         );
 
         funcParam.elements.push(getFuncParam(element));
@@ -395,7 +395,7 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           assert(member.typeAnnotation?.type == "TSTypeAnnotation");
           assert(member.parameters.length == 1);
           assert(
-            member.parameters[0]!.typeAnnotation?.type == "TSTypeAnnotation"
+            member.parameters[0]!.typeAnnotation?.type == "TSTypeAnnotation",
           );
 
           typeData.members.push({
@@ -404,7 +404,7 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
             parameter: {
               name: member.parameters[0]!.name,
               type: getType(
-                member.parameters[0]!.typeAnnotation.typeAnnotation
+                member.parameters[0]!.typeAnnotation.typeAnnotation,
               ),
             },
           });
