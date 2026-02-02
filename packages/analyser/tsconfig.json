@@ -2,7 +2,7 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -43,7 +43,8 @@
     // "emitDecoratorMetadata": true,
   },
   "include": [
-    "src"
+    "src",
+    "*.config.ts",
   ],
   "ts-node": {
     "esm": true

@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/analyzer.ts"],
+  entry: ["src/analyzer.ts", "src/index.ts"],
   format: ["esm"],
   target: "node18",
   clean: true,

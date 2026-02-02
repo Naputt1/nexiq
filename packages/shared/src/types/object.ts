@@ -1,4 +1,3 @@
-import type { TypeData } from "./primitive.js";
 
 export interface FuncParamName {
   type: "named";

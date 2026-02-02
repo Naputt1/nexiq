@@ -13,7 +13,7 @@ export function WelcomeStep({ onSelectProject }: WelcomeStepProps) {
 
   useEffect(() => {
     // Load recent projects
-    window.ipcRenderer.invoke("get-recent-projects").then((projects: any) => {
+    window.ipcRenderer.invoke("get-recent-projects").then((projects) => {
       if (Array.isArray(projects)) {
         setRecents(projects);
       }
