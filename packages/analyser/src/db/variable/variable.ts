@@ -3,34 +3,46 @@ import type {
   ComponentFileVarBase,
   ComponentFileVarDependency,
   VariableLoc,
+  VarKind,
+  VarType,
 } from "shared";
 import type { File } from "../fileDB.js";
 
-export abstract class Variable {
+export abstract class Variable<
+  TType extends VarType = VarType,
+  TKind extends VarKind = VarKind,
+> {
   id: string;
   name: string;
   file: File;
-  type: ComponentFileVarBase["type"];
-  variableType: ComponentFileVarBase["variableType"];
+  type: TType;
+  kind: ComponentFileVarBase<TType, TKind>["kind"];
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Variable;
+  parent?: Variable<"function">;
   loc: VariableLoc;
 
   constructor(
-    { id, name, type, dependencies, variableType, loc }: ComponentFileVarBase,
-    file: File
+    {
+      id,
+      name,
+      type,
+      dependencies,
+      kind,
+      loc,
+    }: ComponentFileVarBase<TType, TKind>,
+    file: File,
   ) {
     this.id = id;
     this.name = name;
     this.type = type;
-    this.variableType = variableType;
+    this.kind = kind;
     this.dependencies = dependencies;
     this.loc = loc;
 
     this.file = file;
   }
 
-  public load(data: Variable) {
+  public load(data: Variable<TType>) {
     this.type = data.type;
 
     // TODO: handle merge
@@ -39,13 +51,13 @@ export abstract class Variable {
     this.loc = data.loc;
   }
 
-  protected getBaseData(): ComponentFileVarBase {
+  protected getBaseData(): ComponentFileVarBase<TType, TKind> {
     return {
       id: this.id,
       name: this.name,
-      variableType: this.variableType,
+      kind: this.kind,
       dependencies: this.dependencies,
-      type: "data",
+      type: this.type,
       loc: this.loc,
     };
   }

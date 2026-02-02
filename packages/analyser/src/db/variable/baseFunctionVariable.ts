@@ -1,14 +1,20 @@
-import type { VariableScope, ComponentFileVarBaseTypeFunction } from "shared";
+import type {
+  VariableScope,
+  ComponentFileVarBaseTypeFunction,
+  VarKind,
+} from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
-export abstract class BaseFunctionVariable extends Variable {
+export abstract class BaseFunctionVariable<
+  TKind extends VarKind,
+> extends Variable<"function", TKind> {
   var: Map<string, Variable>;
   scope: VariableScope;
 
   constructor(
     options: Omit<
-      ComponentFileVarBaseTypeFunction,
+      ComponentFileVarBaseTypeFunction<TKind>,
       "var" | "components" | "type"
     >,
     file: File,
@@ -18,14 +24,14 @@ export abstract class BaseFunctionVariable extends Variable {
     this.scope = options.scope;
   }
 
-  public load(data: BaseFunctionVariable) {
+  public load(data: BaseFunctionVariable<TKind>) {
     super.load(data);
 
     this.type = data.type;
     this.scope = data.scope;
   }
 
-  protected getBaseData(): ComponentFileVarBaseTypeFunction {
+  protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind> {
     return {
       ...super.getBaseData(),
       var: Object.fromEntries(

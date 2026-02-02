@@ -3,7 +3,7 @@ import type { TypeData } from "shared";
 import { ReactVariable } from "./reactVariable.js";
 import type { File } from "../fileDB.js";
 
-export class ComponentVariable extends ReactVariable {
+export class ComponentVariable extends ReactVariable<"component"> {
   componentType: ComponentFileVarComponent["componentType"];
   propType: TypeData | undefined;
   contexts: string[];
@@ -12,14 +12,14 @@ export class ComponentVariable extends ReactVariable {
   constructor(
     options: Omit<
       ComponentFileVarComponent,
-      "variableType" | "var" | "components" | "type"
+      "kind" | "var" | "components" | "type"
     >,
     file: File,
   ) {
     super(
       {
         ...options,
-        variableType: "component",
+        kind: "component",
       },
       file,
     );
@@ -32,7 +32,7 @@ export class ComponentVariable extends ReactVariable {
   public load(data: ComponentVariable) {
     super.load(data);
 
-    this.variableType = "component";
+    this.kind = "component";
     this.componentType = data.componentType;
     this.propType = data.propType;
 
@@ -44,7 +44,7 @@ export class ComponentVariable extends ReactVariable {
   public getData(): ComponentFileVarComponent {
     const data: ComponentFileVarComponent = {
       ...this.getBaseData(),
-      variableType: "component",
+      kind: "component",
       componentType: this.componentType,
       contexts: this.contexts,
       renders: this.renders,

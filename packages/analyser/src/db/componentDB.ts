@@ -101,7 +101,7 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<ComponentFileVarComponent, "id" | "variableType">,
+    component: Omit<ComponentFileVarComponent, "id" | "kind">,
     parentPath?: string[],
   ) {
     const file = this.files.get(component.file);
@@ -128,10 +128,7 @@ export class ComponentDB {
   }
 
   public addHook(
-    variable: Omit<
-      ComponentFileVarHook,
-      "id" | "variableType" | "var" | "components"
-    >,
+    variable: Omit<ComponentFileVarHook, "id" | "kind" | "var" | "components">,
     parentPath?: string[],
   ) {
     const file = this.files.get(variable.file);
@@ -154,12 +151,9 @@ export class ComponentDB {
     variable:
       | Omit<
           ComponentFileVarNormalFunction,
-          "id" | "variableType" | "var" | "components"
+          "id" | "kind" | "var" | "components"
         >
-      | Omit<
-          ComponentFileVarNormalData,
-          "id" | "variableType" | "var" | "components"
-        >,
+      | Omit<ComponentFileVarNormalData, "id" | "kind" | "var" | "components">,
     parentPath?: string[],
   ) {
     const file = this.files.get(fileName);
@@ -357,10 +351,7 @@ export class ComponentDB {
   }
 
   private _resolveDependency(variable: Variable, parent?: string) {
-    if (
-      variable.variableType === "component" &&
-      isComponentVariable(variable)
-    ) {
+    if (variable.kind === "component" && isComponentVariable(variable)) {
       for (const render of Object.values(variable.renders)) {
         if (render.isDependency) continue;
 
@@ -370,10 +361,7 @@ export class ComponentDB {
           label: "render",
         });
       }
-    } else if (
-      variable.variableType === "normal" &&
-      isNormalVariable(variable)
-    ) {
+    } else if (variable.kind === "normal" && isNormalVariable(variable)) {
       if (parent != null) {
         // Handle components iteration (Map or Record)
         const components = this._getValues(variable.components);
@@ -395,7 +383,7 @@ export class ComponentDB {
       for (const innerVar of vars) {
         this._resolveDependency(
           innerVar,
-          variable.variableType == "component" ? variable.id : parent,
+          variable.kind == "component" ? variable.id : parent,
         );
       }
     }
