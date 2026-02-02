@@ -151,9 +151,12 @@ export class ComponentDB {
     variable:
       | Omit<
           ComponentFileVarNormalFunction,
-          "id" | "kind" | "var" | "components"
+          "id" | "kind" | "var" | "components" | "file"
         >
-      | Omit<ComponentFileVarNormalData, "id" | "kind" | "var" | "components">,
+      | Omit<
+          ComponentFileVarNormalData,
+          "id" | "kind" | "var" | "components" | "file"
+        >,
     parentPath?: string[],
   ) {
     const file = this.files.get(fileName);

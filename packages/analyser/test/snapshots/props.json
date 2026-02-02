@@ -1264,8 +1264,9 @@
           "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
           "name": "Test65",
           "kind": "normal",
-          "dependencies": {},
           "type": "data",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 31,
             "column": 6
@@ -1276,8 +1277,9 @@
           "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf",
           "name": "TypePropsVar",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 88,
             "column": 13
@@ -1293,7 +1295,6 @@
               "column": 41
             }
           },
-          "file": "/src/type.tsx",
           "states": {},
           "props": [
             {
@@ -1316,8 +1317,9 @@
           "id": "186e1276-819b-4e0b-bd90-165ae049a9f4",
           "name": "TypePropsVarFunction",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 100,
             "column": 13
@@ -1333,7 +1335,6 @@
               "column": 51
             }
           },
-          "file": "/src/type.tsx",
           "states": {},
           "props": [
             {
@@ -1360,8 +1361,9 @@
           "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
           "name": "TypePropsVarInline",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 107,
             "column": 13
@@ -1377,7 +1379,6 @@
               "column": 31
             }
           },
-          "file": "/src/type.tsx",
           "states": {},
           "props": [
             {
@@ -1404,8 +1405,9 @@
           "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
           "name": "TypePropsVarInlineFunction",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 111,
             "column": 13
@@ -1421,7 +1423,6 @@
               "column": 39
             }
           },
-          "file": "/src/type.tsx",
           "states": {},
           "props": [
             {
@@ -1448,8 +1449,9 @@
           "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
           "name": "TypePropsFunction",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/type.tsx",
+          "dependencies": {},
           "loc": {
             "line": 124,
             "column": 16
@@ -1465,7 +1467,6 @@
               "column": 33
             }
           },
-          "file": "/src/type.tsx",
           "states": {},
           "props": [
             {
@@ -1543,8 +1544,9 @@
           "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
           "name": "DestructuringProps",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Destructuring.tsx",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 13
@@ -1560,7 +1562,6 @@
               "column": 31
             }
           },
-          "file": "/src/Destructuring.tsx",
           "states": {},
           "props": [
             {
@@ -1650,8 +1651,9 @@
           "id": "409b99d0-111e-46ff-8890-7c62623fd2c0",
           "name": "App",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/App.tsx",
+          "dependencies": {},
           "loc": {
             "line": 4,
             "column": 16
@@ -1667,7 +1669,6 @@
               "column": 19
             }
           },
-          "file": "/src/App.tsx",
           "states": {},
           "props": [],
           "hooks": [],

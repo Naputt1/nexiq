@@ -34,8 +34,9 @@
           "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
           "name": "Effect",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/effectt.tsx",
+          "dependencies": {},
           "loc": {
             "line": 4,
             "column": 6
@@ -51,7 +52,6 @@
               "column": 12
             }
           },
-          "file": "/src/effectt.tsx",
           "states": {
             "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
               "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
@@ -153,8 +153,9 @@
           "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
           "name": "useCustomHook",
           "kind": "hook",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Hooks.ts",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
@@ -170,7 +171,6 @@
               "column": 29
             }
           },
-          "file": "/src/Hooks.ts",
           "states": {
             "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
               "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
@@ -211,8 +211,9 @@
           "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
           "name": "useOtherHook",
           "kind": "hook",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Hooks.ts",
+          "dependencies": {},
           "loc": {
             "line": 13,
             "column": 13
@@ -228,7 +229,6 @@
               "column": 1
             }
           },
-          "file": "/src/Hooks.ts",
           "states": {},
           "props": [],
           "hooks": [],

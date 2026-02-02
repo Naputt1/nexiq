@@ -29,7 +29,7 @@ export abstract class Variable<
       dependencies,
       kind,
       loc,
-    }: ComponentFileVarBase<TType, TKind>,
+    }: Omit<ComponentFileVarBase<TType, TKind>, "file">,
     file: File,
   ) {
     this.id = id;
@@ -56,8 +56,9 @@ export abstract class Variable<
       id: this.id,
       name: this.name,
       kind: this.kind,
-      dependencies: this.dependencies,
       type: this.type,
+      file: this.file.path,
+      dependencies: this.dependencies,
       loc: this.loc,
     };
   }

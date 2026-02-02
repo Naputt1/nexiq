@@ -131,8 +131,9 @@
           "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
           "name": "Child",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/Child.tsx",
+          "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
@@ -148,7 +149,6 @@
               "column": 21
             }
           },
-          "file": "/src/Child.tsx",
           "states": {},
           "props": [
             {
@@ -247,8 +247,9 @@
           "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
           "name": "UserContext",
           "kind": "normal",
-          "dependencies": {},
           "type": "data",
+          "file": "/src/App.tsx",
+          "dependencies": {},
           "loc": {
             "line": 10,
             "column": 13
@@ -259,8 +260,9 @@
           "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
           "name": "App",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/App.tsx",
+          "dependencies": {},
           "loc": {
             "line": 12,
             "column": 9
@@ -276,7 +278,6 @@
               "column": 12
             }
           },
-          "file": "/src/App.tsx",
           "states": {
             "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
               "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
@@ -339,8 +340,9 @@
           "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
           "name": "Test",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/export/var.tsx",
+          "dependencies": {},
           "loc": {
             "line": 1,
             "column": 6
@@ -356,7 +358,6 @@
               "column": 10
             }
           },
-          "file": "/src/export/var.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -386,8 +387,9 @@
           "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
           "name": "Test",
           "kind": "component",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/export/func.tsx",
+          "dependencies": {},
           "loc": {
             "line": 1,
             "column": 24
@@ -403,7 +405,6 @@
               "column": 28
             }
           },
-          "file": "/src/export/func.tsx",
           "states": {},
           "props": [],
           "hooks": [],
@@ -433,8 +434,9 @@
           "id": "5909b328-1690-4605-9200-a15584ba44b1",
           "name": "Test",
           "kind": "normal",
-          "dependencies": {},
           "type": "function",
+          "file": "/src/export/express.tsx",
+          "dependencies": {},
           "loc": {
             "line": 1,
             "column": 9

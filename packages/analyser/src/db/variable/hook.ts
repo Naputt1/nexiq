@@ -1,8 +1,8 @@
 import type { ComponentFileVarHook } from "shared";
-import { ReactVariable } from "./reactVariable.js";
 import type { File } from "../fileDB.js";
+import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
-export class HookVariable extends ReactVariable<"hook"> {
+export class HookVariable extends ReactFunctionVariable<"hook"> {
   constructor(
     options: Omit<ComponentFileVarHook, "kind" | "var" | "components">,
     file: File,
@@ -19,7 +19,6 @@ export class HookVariable extends ReactVariable<"hook"> {
   public getData(): ComponentFileVarHook {
     return {
       ...super.getBaseData(),
-      kind: "hook",
     };
   }
 }

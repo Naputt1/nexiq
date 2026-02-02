@@ -2,7 +2,7 @@ import type { MemoFileVarHook } from "shared";
 import type { File } from "../fileDB.js";
 import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 
-export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
+export class CallbackVariable extends ReactWithCallbackVariable<"memo"> {
   constructor(
     options: Omit<MemoFileVarHook, "kind" | "var" | "components" | "type">,
     file: File,
@@ -16,7 +16,7 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
     );
   }
 
-  public load(data: MemoVariable) {
+  public load(data: CallbackVariable) {
     super.load(data);
 
     // TODO: handle merge

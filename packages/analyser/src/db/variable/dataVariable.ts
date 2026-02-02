@@ -6,7 +6,10 @@ export class DataVariable extends Variable<"data"> {
   components: Map<string, ComponentInfoRender>;
 
   constructor(
-    options: Omit<ComponentFileVarNormal, "kind" | "var" | "components">,
+    options: Omit<
+      ComponentFileVarNormal,
+      "kind" | "var" | "components" | "file"
+    >,
     file: File,
   ) {
     super({ ...options, kind: "normal", type: "data" }, file);
