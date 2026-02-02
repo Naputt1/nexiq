@@ -6,7 +6,7 @@ import useGraph, {
   type NodeData,
   type useGraphProps,
 } from "./graph/hook";
-import Graph, { type GraphRef } from "./graph/graph";
+import { GraphRenderer } from "./graph/renderer";
 import { NodeDetails } from "./components/node-details";
 import { ProjectSidebar } from "./components/Sidebar";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     {},
   );
 
-  const graphRef = useRef<GraphRef>(null);
+  const rendererRef = useRef<GraphRenderer | null>(null);
+  const graphContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = useCallback(
@@ -199,6 +200,38 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   const graph = useGraph(graphData);
 
+  const onSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    setCenteredItemId(id);
+  }, [setSelectedId, setCenteredItemId]);
+
+  // Initialize/Update Renderer
+  useEffect(() => {
+    if (!graphContainerRef.current) return;
+    if (size.width === 0 || size.height === 0) return;
+
+    if (!rendererRef.current) {
+      rendererRef.current = new GraphRenderer(
+        graphContainerRef.current,
+        graph,
+        size.width,
+        size.height,
+        onSelect
+      );
+    } else {
+       rendererRef.current.resize(size.width, size.height);
+       rendererRef.current.onSelect = onSelect;
+    }
+  }, [graph, size.width, size.height, onSelect]);
+  
+  // Clean up
+  useEffect(() => {
+      return () => {
+          rendererRef.current?.destroy();
+          rendererRef.current = null;
+      }
+  }, []);
+
   useEffect(() => {
     if (
       graphData.edges?.length == 0 ||
@@ -214,7 +247,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     if (centeredItemId) {
       setTimeout(() => {
         graph.expandAncestors(centeredItemId);
-        graphRef.current?.focusItem(centeredItemId, 1.5);
+        rendererRef.current?.focusItem(centeredItemId, 1.5);
       }, 100);
     }
   }, [graphData]);
@@ -365,7 +398,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       if (newMatches.length > 0) {
         setCurrentMatchIndex(0);
         graph.expandAncestors(newMatches[0]);
-        graphRef.current?.focusItem(newMatches[0], 1.5);
+        rendererRef.current?.focusItem(newMatches[0], 1.5);
         setSelectedId(newMatches[0]);
       } else {
         setCurrentMatchIndex(-1);
@@ -399,7 +432,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const nextIndex = (currentMatchIndex + 1) % matches.length;
     setCurrentMatchIndex(nextIndex);
     graph.expandAncestors(matches[nextIndex]);
-    graphRef.current?.focusItem(matches[nextIndex], 1.5);
+    rendererRef.current?.focusItem(matches[nextIndex], 1.5);
     setSelectedId(matches[nextIndex]);
   };
 
@@ -408,7 +441,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const prevIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
     setCurrentMatchIndex(prevIndex);
     graph.expandAncestors(matches[prevIndex]);
-    graphRef.current?.focusItem(matches[prevIndex], 1.5);
+    rendererRef.current?.focusItem(matches[prevIndex], 1.5);
     setSelectedId(matches[prevIndex]);
   };
 
@@ -440,16 +473,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     };
   }, [handleReloadProject]);
 
-  const onSelect = (id: string) => {
-    setSelectedId(id);
-    setCenteredItemId(id);
-    // Auto-focus on selection if needed, or just highlight
-    // graphRef.current?.focusItem(id, 1.5);
-  };
-
-  // Fetch fresh node/combo data whenever selectedId changes
-  // Note: We can't memoize based on [graph] because graph instance is stable
-  // but its internal data changes (e.g., color updates during search)
   const nodesMap = useMemo(() => {
     if (!selectedId) return {};
     const nodes = graph.getAllNodes();
@@ -581,17 +604,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             ref={containerRef}
             className="flex flex-1 flex-col h-full overflow-hidden relative min-w-0"
           >
-            <div className="absolute inset-0">
-              {size.width > 0 && size.height > 0 && (
-                <Graph
-                  ref={graphRef}
-                  width={size.width}
-                  height={size.height}
-                  graph={graph}
-                  onSelect={onSelect}
-                />
-              )}
-            </div>
+            <div className="absolute inset-0" ref={graphContainerRef} />
           </div>
         </SidebarInset>
       </SidebarProvider>
