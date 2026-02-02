@@ -7,10 +7,13 @@ export class StateVariable extends Variable<"data", "state"> {
   setter: string | undefined;
 
   constructor(
-    options: Omit<ComponentFileVarState, "kind" | "var" | "components">,
+    options: Omit<
+      ComponentFileVarState,
+      "kind" | "var" | "components" | "file" | "type"
+    >,
     file: File,
   ) {
-    super({ ...options, kind: "state" }, file);
+    super({ ...options, kind: "state", type: "data" }, file);
 
     this.value = options.value;
     this.setter = options.setter;
