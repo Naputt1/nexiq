@@ -176,7 +176,7 @@ export class GraphData {
     nodes: NodeData[],
     edges: EdgeData[],
     combos: ComboData[],
-    config?: GraphDataConfig
+    config?: GraphDataConfig,
   ) {
     this.config = {
       ...defaultConfig,
@@ -236,6 +236,26 @@ export class GraphData {
     }
   }
 
+  public clear() {
+    this.nodes.clear();
+    this.edges.clear();
+    this.combos.clear();
+    this.comboChildMap.clear();
+    this.comboToCreate = [];
+    this.nodeToCreate = [];
+    this.edgeToCreate = [];
+    this.edgeIds = {};
+  }
+
+  public setData(nodes: NodeData[], edges: EdgeData[], combos: ComboData[]) {
+    this.batch(() => {
+      this.clear();
+      this.addCombos(combos);
+      this.addNodes(nodes);
+      this.addEdges(edges);
+    });
+  }
+
   private getComboHook(id: string): ComboGraphDataHookBase | undefined {
     const combo = this.getComboByID(id);
     if (combo == null) return;
@@ -281,7 +301,7 @@ export class GraphData {
           });
         }
       },
-      [setState]
+      [setState],
     );
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -417,7 +437,7 @@ export class GraphData {
 
   private getConnectorPoints = (
     from: NodeGraphData | ComboGraphData,
-    to: NodeGraphData | ComboGraphData
+    to: NodeGraphData | ComboGraphData,
   ) => {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
@@ -433,7 +453,6 @@ export class GraphData {
 
   private _addChildEdge(e: EdgeData): boolean {
     if (e.combo == null) {
-      console.error("_addChildEdge parent is null", e);
       return false;
     }
 
@@ -507,7 +526,7 @@ export class GraphData {
         count,
         this.nodeToCreate,
         Object.fromEntries(this.combos),
-        this.comboChildMap.get("44d171ea-4fbf-4cc4-ae67-218df1a1caf2-render")
+        this.comboChildMap.get("44d171ea-4fbf-4cc4-ae67-218df1a1caf2-render"),
       );
       return;
     }
@@ -968,7 +987,7 @@ export class GraphData {
   public comboChildNodeMove(
     id: string,
     nodeId: string,
-    e: Konva.KonvaEventObject<DragEvent>
+    e: Konva.KonvaEventObject<DragEvent>,
   ) {
     const combo = this.getComboByID(id);
     if (combo == null) {
@@ -1091,7 +1110,7 @@ export class GraphData {
     const all: NodeGraphData[] = [];
     const collect = (
       nodes: Record<string, NodeGraphData>,
-      combos: Record<string, ComboGraphData>
+      combos: Record<string, ComboGraphData>,
     ) => {
       for (const n of Object.values(nodes)) {
         all.push(n);
@@ -1277,16 +1296,8 @@ const useGraph: (option: useGraphProps) => GraphData = ({
   const [data] = useState(() => new GraphData(nodes, edges, combos, config));
 
   useEffect(() => {
-    data.addNodes(nodes);
-  }, [nodes]);
-
-  useEffect(() => {
-    data.addEdges(edges);
-  }, [edges]);
-
-  useEffect(() => {
-    data.addCombos(combos);
-  }, [combos]);
+    data.setData(nodes, edges, combos);
+  }, [nodes, edges, combos]);
 
   return data;
 };
