@@ -8,6 +8,12 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
 import os from "os";
+import type {
+  PackageJson,
+  PnpmWorkspace,
+  ProjectStatus,
+  ReactMapConfig,
+} from "./types";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -102,7 +108,7 @@ app.on("activate", () => {
 
 app.whenReady().then(createWindow);
 
-ipcMain.handle("run-cli", async (event, command) => {
+ipcMain.handle("run-cli", async (_, command: string) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) reject(error.message);
@@ -112,7 +118,7 @@ ipcMain.handle("run-cli", async (event, command) => {
 });
 
 let firstOpen = true;
-ipcMain.handle("open-vscode", async (event, path) => {
+ipcMain.handle("open-vscode", async (_, path: string) => {
   return new Promise((resolve, reject) => {
     let cmd = `code -g ${path}`;
 
@@ -146,13 +152,13 @@ ipcMain.handle("get-recent-projects", () => {
   return store.getRecentProjects();
 });
 
-ipcMain.handle("check-project-status", async (event, directoryPath) => {
-  const status = {
+ipcMain.handle("check-project-status", async (_, directoryPath: string) => {
+  const status: ProjectStatus = {
     hasConfig: false,
     isMonorepo: false,
     projectType: "unknown",
     config: null,
-    subProjects: [] as { name: string; path: string }[],
+    subProjects: [],
   };
 
   try {
@@ -160,7 +166,9 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
     if (fs.existsSync(configPath)) {
       status.hasConfig = true;
       try {
-        status.config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        status.config = JSON.parse(
+          fs.readFileSync(configPath, "utf-8"),
+        ) as ReactMapConfig;
       } catch (e) {
         console.error("Error reading config", e);
       }
@@ -175,7 +183,9 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
     if (fs.existsSync(pnpmWorkspace)) {
       status.isMonorepo = true;
       try {
-        const doc = yaml.load(fs.readFileSync(pnpmWorkspace, "utf-8")) as any;
+        const doc = yaml.load(
+          fs.readFileSync(pnpmWorkspace, "utf-8"),
+        ) as PnpmWorkspace;
         if (doc && doc.packages && Array.isArray(doc.packages)) {
           workspacePatterns = doc.packages;
         }
@@ -184,7 +194,9 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
       }
     } else if (fs.existsSync(packageJsonPath)) {
       try {
-        const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+        const pkg = JSON.parse(
+          fs.readFileSync(packageJsonPath, "utf-8"),
+        ) as PackageJson;
         if (pkg.workspaces) {
           status.isMonorepo = true;
           if (Array.isArray(pkg.workspaces)) {
@@ -196,7 +208,7 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
             workspacePatterns = pkg.workspaces.packages;
           }
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -217,14 +229,16 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
 
         for (const entry of entries) {
           try {
-            const pkg = JSON.parse(fs.readFileSync(entry, "utf-8"));
+            const pkg = JSON.parse(
+              fs.readFileSync(entry, "utf-8"),
+            ) as PackageJson;
             // We only care about packages that look like apps (vite/next) or have main/module?
             // For now, list all.
             status.subProjects.push({
               name: pkg.name || path.basename(path.dirname(entry)),
               path: path.dirname(entry),
             });
-          } catch (e) {
+          } catch {
             // ignore
           }
         }
@@ -250,7 +264,10 @@ ipcMain.handle("check-project-status", async (event, directoryPath) => {
 
 ipcMain.handle(
   "save-project-config",
-  async (event, { config, directoryPath }) => {
+  async (
+    _,
+    { config, directoryPath }: { config: ReactMapConfig; directoryPath: string },
+  ) => {
     try {
       const configPath = path.join(directoryPath, "react.map.config.json");
       const dotDir = path.join(directoryPath, ".react-map");
@@ -271,7 +288,7 @@ ipcMain.handle(
 
 let currentProject: string | null = null;
 
-ipcMain.handle("set-project", (event, path) => {
+ipcMain.handle("set-project", (_, path: string) => {
   currentProject = path;
 });
 
@@ -279,22 +296,13 @@ ipcMain.handle("get-project", () => {
   return currentProject;
 });
 
-ipcMain.handle("analyze-project", async (event, analysisPath, projectPath) => {
-  return new Promise((resolve, reject) => {
-    // analysisPath: where to scan (defaults to projectPath if not provided, but frontend sends it)
-    // projectPath: where .react-map is stored (the "Root")
+import { analyzeProject } from "analyser";
 
+ipcMain.handle(
+  "analyze-project",
+  async (_, analysisPath: string, projectPath: string) => {
     const targetPath = analysisPath;
     const configRoot = projectPath || analysisPath;
-
-    // Note: process.env.APP_ROOT is packages/ui
-    const analyzerPath = path.resolve(
-      process.env.APP_ROOT,
-      "..",
-      "analyser",
-      "dist",
-      "analyzer.js",
-    );
     const outputPath = path.join(configRoot, ".react-map", "graph.json");
 
     // Ensure output dir exists
@@ -303,30 +311,21 @@ ipcMain.handle("analyze-project", async (event, analysisPath, projectPath) => {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    if (!fs.existsSync(analyzerPath)) {
-      console.error("Analyzer not found at", analyzerPath);
-      reject(
-        "Analyzer script not found. Make sure packages/analyser is built.",
-      );
-      return;
+    console.log("Running analysis on:", targetPath);
+
+    try {
+      const graph = analyzeProject(targetPath, outputPath);
+      fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
+      console.log("Analysis success, written to:", outputPath);
+      return outputPath;
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      throw error;
     }
+  },
+);
 
-    const command = `node "${analyzerPath}" "${targetPath}" "${outputPath}"`;
-    console.log("Running analysis:", command);
-
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error("Analysis failed:", stderr);
-        reject(stderr || error.message);
-      } else {
-        console.log("Analysis success:", stdout);
-        resolve(outputPath);
-      }
-    });
-  });
-});
-
-ipcMain.handle("read-graph-data", async (event, projectPath) => {
+ipcMain.handle("read-graph-data", async (_, projectPath?: string) => {
   const targetPath = projectPath || currentProject;
   if (!targetPath) return null;
 

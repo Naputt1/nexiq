@@ -1,6 +1,6 @@
 import React from "react";
 import { memo, useEffect, useRef, useState } from "react";
-import { Arrow, Circle, Group, Text } from "react-konva";
+import { Arrow, Circle, Group } from "react-konva";
 import Label from "./label";
 import type { GraphData } from "./hook";
 import Point from "./point";
@@ -35,7 +35,6 @@ const Combo: React.FC<ComboProps> = memo(
       comboDragMove,
       comboRadiusChange,
       comboHover,
-      props,
     } = graph.useCombo(id);
 
     const [radius, setRadius] = useState<number>(
@@ -103,7 +102,7 @@ const Combo: React.FC<ComboProps> = memo(
         onClick={(e) => {
           if (e.evt.ctrlKey) {
             e.cancelBubble = true;
-            window.ipcRenderer.invoke("open-vscode", fileName);
+            window.ipcRenderer.invoke("open-vscode", fileName as string);
           } else {
             // Select combo
             e.cancelBubble = true; // prevent selecting parent combo
@@ -172,7 +171,7 @@ const Combo: React.FC<ComboProps> = memo(
                   onClick={(e) => {
                     if (e.evt.ctrlKey) {
                       e.cancelBubble = true;
-                      window.ipcRenderer.invoke("open-vscode", node.fileName);
+                      window.ipcRenderer.invoke("open-vscode", node.fileName as string);
                     } else {
                       e.cancelBubble = true;
                       onSelect?.(node.id);

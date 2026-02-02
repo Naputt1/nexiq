@@ -112,7 +112,7 @@ const Graph = forwardRef<GraphRef, GraphProps>(
           onClick={(e) => {
             if (e.evt.ctrlKey) {
               e.cancelBubble = true;
-              window.ipcRenderer.invoke("open-vscode", node.fileName);
+              window.ipcRenderer.invoke("open-vscode", node.fileName as string);
             } else {
               e.cancelBubble = true;
               onSelect?.(node.id);
