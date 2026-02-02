@@ -1,40 +1,33 @@
-import assert from "assert";
 import type {
   ComponentFileVar,
   ComponentFileVarBase,
   ComponentFileVarDependency,
-  VariableScope,
   VariableLoc,
 } from "shared";
+import type { File } from "../fileDB.js";
 
 export abstract class Variable {
   id: string;
   name: string;
-  type: ComponentFileVar["type"];
+  file: File;
+  type: ComponentFileVarBase["type"];
   variableType: ComponentFileVarBase["variableType"];
   dependencies: Record<string, ComponentFileVarDependency>;
-  var: Map<string, Variable>;
   parent?: Variable;
   loc: VariableLoc;
-  scope?: VariableScope;
 
   constructor(
-    id: string,
-    name: string,
-    type: ComponentFileVar["type"],
-    dependecies: Record<string, ComponentFileVarDependency>,
-    variableType: ComponentFileVarBase["variableType"],
-    loc: VariableLoc,
-    scope?: VariableScope
+    { id, name, type, dependencies, variableType, loc }: ComponentFileVarBase,
+    file: File
   ) {
     this.id = id;
     this.name = name;
     this.type = type;
     this.variableType = variableType;
-    this.dependencies = dependecies;
-    this.var = new Map();
+    this.dependencies = dependencies;
     this.loc = loc;
-    if (scope) this.scope = scope;
+
+    this.file = file;
   }
 
   public load(data: Variable) {
@@ -44,44 +37,14 @@ export abstract class Variable {
     this.dependencies = data.dependencies;
 
     this.loc = data.loc;
-    if (data.scope) this.scope = data.scope;
   }
 
   protected getBaseData(): ComponentFileVarBase {
-    if (this.type === "function") {
-      if (this.scope == null) {
-        debugger;
-      }
-      assert(this.scope, "Function variable must have scope defined");
-
-      return {
-        id: this.id,
-        name: this.name,
-        variableType: this.variableType,
-        dependencies: this.dependencies,
-        var: Object.fromEntries(
-          Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-            k,
-            value.getData(),
-          ])
-        ),
-        type: this.type,
-        loc: this.loc,
-        scope: this.scope,
-      };
-    }
-
     return {
       id: this.id,
       name: this.name,
       variableType: this.variableType,
       dependencies: this.dependencies,
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ])
-      ),
       type: "data",
       loc: this.loc,
     };

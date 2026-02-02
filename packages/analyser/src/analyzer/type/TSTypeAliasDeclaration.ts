@@ -7,11 +7,13 @@ import { getType } from "./helper.js";
 
 export default function TSTypeAliasDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.TSTypeAliasDeclaration> {
   return (nodePath) => {
     const name = nodePath.node.id.name;
     assert(nodePath.node.id.loc != null);
+
+    if (name === "InnerType") debugger;
 
     const loc = {
       line: nodePath.node.id.loc.start.line,

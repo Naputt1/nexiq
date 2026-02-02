@@ -14,6 +14,8 @@ export default function TSInterfaceDeclaration(
     const name = nodePath.node.id.name;
     assert(nodePath.node.id.loc != null);
 
+    if (name === "InnerType") debugger;
+
     const loc = {
       line: nodePath.node.id.loc.start.line,
       column: nodePath.node.id.loc.start.column,
