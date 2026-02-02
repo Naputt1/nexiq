@@ -9,6 +9,7 @@ import path from "node:path";
 import { exec } from "node:child_process";
 import os from "os";
 import type {
+  AppStateData,
   PackageJson,
   PnpmWorkspace,
   ProjectStatus,
@@ -59,24 +60,19 @@ function createWindow() {
     const ctrlOrCmd = input.control || input.meta;
     const shift = input.shift;
 
-    // Ctrl + Shift + R → hard reload
+    // Ctrl + Shift + R → reload the whole app
     if (ctrlOrCmd && shift && key === "r") {
       event.preventDefault();
-
-      console.log("Hard reload");
-      win!.webContents.executeJavaScript("sessionStorage.clear()").then(() => {
-        win!.webContents.reloadIgnoringCache();
-      });
-
+      console.log("Reloading the whole app");
+      win!.webContents.reload();
       return;
     }
 
-    // Ctrl + R → soft reload
+    // Ctrl + R → reload the current project
     if (ctrlOrCmd && !shift && key === "r") {
       event.preventDefault();
-
-      console.log("Soft reload");
-      win!.webContents.reload();
+      console.log("Reloading current project");
+      win?.webContents.send("reload-project");
     }
   });
 
@@ -150,6 +146,14 @@ ipcMain.handle("select-directory", async () => {
 
 ipcMain.handle("get-recent-projects", () => {
   return store.getRecentProjects();
+});
+
+ipcMain.handle("get-last-project", () => {
+  return store.getLastProject();
+});
+
+ipcMain.handle("set-last-project", (_, path: string | null) => {
+  store.setLastProject(path);
 });
 
 ipcMain.handle("check-project-status", async (_, directoryPath: string) => {
@@ -303,7 +307,8 @@ ipcMain.handle(
   async (_, analysisPath: string, projectPath: string) => {
     const targetPath = analysisPath;
     const configRoot = projectPath || analysisPath;
-    const outputPath = path.join(configRoot, ".react-map", "graph.json");
+    const name = path.basename(targetPath);
+    const outputPath = path.join(configRoot, ".react-map", `${name}.json`);
 
     // Ensure output dir exists
     const outputDir = path.dirname(outputPath);
@@ -311,13 +316,13 @@ ipcMain.handle(
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    console.log("Running analysis on:", targetPath);
+    console.log("Running analysis on:", targetPath, "into:", outputPath);
 
     try {
       const graph = analyzeProject(targetPath, outputPath);
       fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
       console.log("Analysis success, written to:", outputPath);
-      return outputPath;
+      return name;
     } catch (error) {
       console.error("Analysis failed:", error);
       throw error;
@@ -325,13 +330,48 @@ ipcMain.handle(
   },
 );
 
-ipcMain.handle("read-graph-data", async (_, projectPath?: string) => {
-  const targetPath = projectPath || currentProject;
-  if (!targetPath) return null;
+ipcMain.handle(
+  "read-graph-data",
+  async (_, projectRoot: string, analysisPath?: string) => {
+    const targetPath = analysisPath || currentProject || projectRoot;
+    if (!targetPath) return null;
 
-  const graphPath = path.join(targetPath, ".react-map", "graph.json");
-  if (fs.existsSync(graphPath)) {
-    return JSON.parse(fs.readFileSync(graphPath, "utf-8"));
+    const name = path.basename(targetPath);
+    const graphPath = path.join(projectRoot, ".react-map", `${name}.json`);
+
+    console.log("Reading graph data from:", graphPath);
+
+    if (fs.existsSync(graphPath)) {
+      return JSON.parse(fs.readFileSync(graphPath, "utf-8"));
+    }
+    return null;
+  },
+);
+
+ipcMain.handle("read-state", async (_, projectRoot: string) => {
+  const statePath = path.join(projectRoot, ".react-map", "state.json");
+  if (fs.existsSync(statePath)) {
+    try {
+      return JSON.parse(fs.readFileSync(statePath, "utf-8"));
+    } catch (e) {
+      console.error("Error reading state.json", e);
+    }
   }
   return null;
 });
+
+ipcMain.handle("save-state", async (_, projectRoot: string, state: AppStateData) => {
+  try {
+    const dotDir = path.join(projectRoot, ".react-map");
+    if (!fs.existsSync(dotDir)) {
+      fs.mkdirSync(dotDir, { recursive: true });
+    }
+    const statePath = path.join(dotDir, "state.json");
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    return true;
+  } catch (error) {
+    console.error("Error saving state.json", error);
+    return false;
+  }
+});
+

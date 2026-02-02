@@ -27,3 +27,15 @@ export interface ProjectStatus {
   config: ReactMapConfig | null;
   subProjects: SubProject[];
 }
+
+export interface IpcEvents {
+  "main-process-message": string;
+  "reload-project": void;
+}
+
+export interface AppStateData {
+  selectedSubProject: string | null;
+  centeredItemId: string | null;
+  selectedId: string | null;
+  isSidebarOpen: boolean;
+}

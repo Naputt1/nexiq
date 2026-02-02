@@ -8,7 +8,7 @@ export type Node = {
   mass?: number;
   radius?: number;
   // any additional data you want to carry
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type Edge = {
@@ -16,7 +16,7 @@ export type Edge = {
   target: string; // node id
   distance?: number; // preferred length
   strength?: number; // spring stiffness
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type ForceOptions = {
