@@ -121,15 +121,15 @@ export class File {
 
   private loadVariable(variable: ComponentFileVar) {
     let v: Variable | undefined;
-    if (variable.variableType === "normal") {
+    if (variable.kind === "normal") {
       if (variable.type === "function") {
         v = new FunctionVariable(variable, this);
       } else {
         v = new DataVariable(variable, this);
       }
-    } else if (variable.variableType === "component") {
+    } else if (variable.kind === "component") {
       v = new ComponentVariable(variable, this);
-    } else if (variable.variableType === "hook") {
+    } else if (variable.kind === "hook") {
       v = new HookVariable(variable, this);
     }
 
@@ -355,7 +355,7 @@ export class File {
       const oldVar = this.var.get(id);
       assert(oldVar != null, "Variable not found");
 
-      if (oldVar.variableType === variable.variableType) {
+      if (oldVar.kind === variable.kind) {
         oldVar.load(variable);
         variable = oldVar;
       }
@@ -393,8 +393,8 @@ export class File {
 
       if (isBaseFunctionVariable(parent)) {
         parent.var.set(variable.id, variable);
+        variable.parent = parent;
       }
-      variable.parent = parent;
       parentId.var.set(variable.name, {
         id: variable.id,
         var: new Map(),
@@ -416,7 +416,7 @@ export class File {
     }
 
     for (const v of Object.values(variable.var)) {
-      if (v.variableType != "component") continue;
+      if (v.kind != "component") continue;
 
       edges.push(...this.__getEdgesRaw(v));
     }
@@ -448,7 +448,7 @@ export class File {
     const edges: DataEdge[] = [];
     if (!this.init && this.rawData) {
       for (const variable of Object.values(this.rawData.var)) {
-        if (variable.variableType != "component") continue;
+        if (variable.kind != "component") continue;
 
         edges.push(...this.__getEdgesRaw(variable));
       }
@@ -513,7 +513,7 @@ export class File {
     }
     assert(variable != null, "Parent variable not found");
     if (variable == null) return;
-    if (variable.variableType == "component") return;
+    if (variable.kind == "component") return;
 
     variable.dependencies[dependency.id] = dependency;
   }

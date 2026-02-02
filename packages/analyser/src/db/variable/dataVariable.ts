@@ -2,17 +2,14 @@ import type { ComponentFileVarNormal, ComponentInfoRender } from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
-export class DataVariable extends Variable {
+export class DataVariable extends Variable<"data"> {
   components: Map<string, ComponentInfoRender>;
 
   constructor(
-    options: Omit<
-      ComponentFileVarNormal,
-      "variableType" | "var" | "components"
-    >,
+    options: Omit<ComponentFileVarNormal, "kind" | "var" | "components">,
     file: File,
   ) {
-    super({ ...options, variableType: "normal", type: "data" }, file);
+    super({ ...options, kind: "normal", type: "data" }, file);
     this.components = new Map();
   }
 
@@ -28,7 +25,7 @@ export class DataVariable extends Variable {
     return {
       ...super.getBaseData(),
       type: "data",
-      variableType: "normal",
+      kind: "normal",
       loc: this.loc,
       components: Object.fromEntries(this.components),
     };

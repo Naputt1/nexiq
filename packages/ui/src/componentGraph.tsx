@@ -84,7 +84,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           file: ComponentFile,
           parentID?: string,
         ) => {
-          if (variable.variableType != "component") return;
+          if (variable.kind != "component") return;
           const fileName = `${graphData.src}${file.path}`;
 
           combos.push({

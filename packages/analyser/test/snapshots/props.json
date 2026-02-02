@@ -1263,7 +1263,7 @@
         "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
           "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
           "name": "Test65",
-          "variableType": "normal",
+          "kind": "normal",
           "dependencies": {},
           "type": "data",
           "loc": {
@@ -1275,7 +1275,7 @@
         "3b8a1b0c-e673-490f-b319-49dfc33ecbbf": {
           "id": "3b8a1b0c-e673-490f-b319-49dfc33ecbbf",
           "name": "TypePropsVar",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1315,7 +1315,7 @@
         "186e1276-819b-4e0b-bd90-165ae049a9f4": {
           "id": "186e1276-819b-4e0b-bd90-165ae049a9f4",
           "name": "TypePropsVarFunction",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1359,7 +1359,7 @@
         "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
           "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
           "name": "TypePropsVarInline",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1403,7 +1403,7 @@
         "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c": {
           "id": "2bcf5831-41f3-4aeb-ac86-5c10d9555f1c",
           "name": "TypePropsVarInlineFunction",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1447,7 +1447,7 @@
         "160568c3-c878-41fa-a2d7-8a528b4fc107": {
           "id": "160568c3-c878-41fa-a2d7-8a528b4fc107",
           "name": "TypePropsFunction",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1542,7 +1542,7 @@
         "fc9d69c7-9955-435e-a79e-5e7607fa910b": {
           "id": "fc9d69c7-9955-435e-a79e-5e7607fa910b",
           "name": "DestructuringProps",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -1649,7 +1649,7 @@
         "409b99d0-111e-46ff-8890-7c62623fd2c0": {
           "id": "409b99d0-111e-46ff-8890-7c62623fd2c0",
           "name": "App",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {

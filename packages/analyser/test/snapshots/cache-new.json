@@ -137,7 +137,7 @@
         "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
           "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
           "name": "Child",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -305,7 +305,7 @@
         "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
           "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
           "name": "UserContext",
-          "variableType": "normal",
+          "kind": "normal",
           "dependencies": {},
           "type": "data",
           "loc": {
@@ -317,7 +317,7 @@
         "23adce01-2717-489c-9a42-e6485e2f01aa": {
           "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
           "name": "App",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -397,7 +397,7 @@
         "c625ffdc-46d9-471d-9145-289a0901db9a": {
           "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
           "name": "Test",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -444,7 +444,7 @@
         "4b97fa8f-c781-4270-98cf-364a2c015862": {
           "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
           "name": "Test",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -491,7 +491,7 @@
         "5909b328-1690-4605-9200-a15584ba44b1": {
           "id": "5909b328-1690-4605-9200-a15584ba44b1",
           "name": "Test",
-          "variableType": "normal",
+          "kind": "normal",
           "dependencies": {},
           "type": "function",
           "loc": {

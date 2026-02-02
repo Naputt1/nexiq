@@ -5,22 +5,22 @@ import type {
 import type { File } from "../fileDB.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 
-export class FunctionVariable extends BaseFunctionVariable {
+export class FunctionVariable extends BaseFunctionVariable<"normal"> {
   constructor(
     options: Omit<
-      ComponentFileVarBaseTypeFunction,
-      "var" | "components" | "type" | "variableType"
+      ComponentFileVarBaseTypeFunction<"normal">,
+      "var" | "components" | "type" | "kind"
     >,
     file: File,
   ) {
-    super({ ...options, variableType: "normal" }, file);
+    super({ ...options, kind: "normal" }, file);
   }
 
   public load(data: FunctionVariable) {
     super.load(data);
   }
 
-  protected getBaseData(): ComponentFileVarBaseTypeFunction {
+  protected getBaseData(): ComponentFileVarBaseTypeFunction<"normal"> {
     return {
       ...super.getBaseData(),
       var: Object.fromEntries(
@@ -37,7 +37,7 @@ export class FunctionVariable extends BaseFunctionVariable {
   public getData(): ComponentFileVarFunction {
     return {
       ...super.getBaseData(),
-      variableType: "normal",
+      kind: "normal",
     };
   }
 }

@@ -33,7 +33,7 @@
         "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
           "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
           "name": "Effect",
-          "variableType": "component",
+          "kind": "component",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -152,7 +152,7 @@
         "23adce01-2717-489c-9a42-e6485e2f01aa": {
           "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
           "name": "useCustomHook",
-          "variableType": "hook",
+          "kind": "hook",
           "dependencies": {},
           "type": "function",
           "loc": {
@@ -210,7 +210,7 @@
         "4b97fa8f-c781-4270-98cf-364a2c015862": {
           "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
           "name": "useOtherHook",
-          "variableType": "hook",
+          "kind": "hook",
           "dependencies": {},
           "type": "function",
           "loc": {

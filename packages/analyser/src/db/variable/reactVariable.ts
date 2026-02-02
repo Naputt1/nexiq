@@ -3,6 +3,7 @@ import type {
   EffectInfo,
   PropData,
   State,
+  VarKind,
 } from "shared";
 import { newUUID } from "../../utils/uuid.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
@@ -12,7 +13,9 @@ type InnerType = {
   found: boolean;
 };
 
-export abstract class ReactVariable extends BaseFunctionVariable {
+export abstract class ReactVariable<
+  TKind extends VarKind = VarKind,
+> extends BaseFunctionVariable<TKind> {
   states: Record<string, State & InnerType> = {};
   props: PropData[];
   hooks: string[];
@@ -21,7 +24,7 @@ export abstract class ReactVariable extends BaseFunctionVariable {
   private stateCache: Record<string, State & InnerType> = {};
 
   constructor(
-    options: Omit<ComponentFileVarReact, "var" | "components" | "type">,
+    options: Omit<ComponentFileVarReact<TKind>, "var" | "components" | "type">,
     file: File,
   ) {
     super(options, file);
@@ -87,13 +90,13 @@ export abstract class ReactVariable extends BaseFunctionVariable {
     };
   }
 
-  public load(data: ReactVariable) {
+  public load(data: ReactVariable<TKind>) {
     super.load(data);
 
     this.file = data.file;
   }
 
-  protected getBaseData(): ComponentFileVarReact {
+  protected getBaseData(): ComponentFileVarReact<TKind> {
     return {
       ...super.getBaseData(),
       file: this.file.path,
