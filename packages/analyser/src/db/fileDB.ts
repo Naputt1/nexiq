@@ -40,8 +40,8 @@ import fs from "fs";
 import path from "path";
 import { xxh3 } from "@node-rs/xxhash";
 import { DataVariable } from "./variable/dataVariable.js";
-import type { ReactVariable } from "./variable/reactVariable.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
+import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
 
 interface FileIds {
   id: string;
@@ -841,7 +841,7 @@ export class FileDB {
   public getHookInfoFromLoc(
     fileName: string,
     loc: VariableLoc,
-  ): ReactVariable | undefined {
+  ): ReactFunctionVariable | undefined {
     const file = this.get(fileName);
     const variable = file.getVariable(loc);
     if (

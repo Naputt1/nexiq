@@ -1,113 +1,22 @@
-import type {
-  ComponentFileVarReact,
-  EffectInfo,
-  PropData,
-  State,
-  VarKind,
-} from "shared";
-import { newUUID } from "../../utils/uuid.js";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
+import type { ComponentFileVarReact, ReactVarKind, VarType } from "shared";
 import type { File } from "../fileDB.js";
-
-type InnerType = {
-  found: boolean;
-};
+import { Variable } from "./variable.js";
 
 export abstract class ReactVariable<
-  TKind extends VarKind = VarKind,
-> extends BaseFunctionVariable<TKind> {
-  states: Record<string, State & InnerType> = {};
-  props: PropData[];
-  hooks: string[];
-  effects: Record<string, EffectInfo>;
-
-  private stateCache: Record<string, State & InnerType> = {};
-
-  constructor(
-    options: Omit<ComponentFileVarReact<TKind>, "var" | "components" | "type">,
-    file: File,
-  ) {
+  TType extends VarType = VarType,
+  TKind extends ReactVarKind = ReactVarKind,
+> extends Variable<TType, TKind> {
+  constructor(options: ComponentFileVarReact<TType, TKind>, file: File) {
     super(options, file);
-
-    for (const state of Object.values(options.states)) {
-      this.states[state.id] = {
-        ...state,
-        found: false,
-      };
-      this.stateCache[state.value] = this.states[state.id]!;
-    }
-
-    this.props = options.props;
-    this.effects = options.effects;
-    this.hooks = options.hooks;
   }
 
-  public addState(state: Omit<State, "id">) {
-    let id: string;
-    if (state.value in this.stateCache) {
-      id = this.stateCache[state.value]!.id;
-      delete this.stateCache[state.value];
-    } else {
-      id = newUUID();
-    }
-
-    this.states[id] = {
-      id,
-      ...state,
-      found: true,
-    };
-  }
-
-  public addHook(hook: string) {
-    this.hooks.push(hook);
-  }
-
-  public addEffect(effect: Omit<EffectInfo, "id">) {
-    const newDependencies: string[] = [];
-    outer: for (const dep of effect.dependencies) {
-      for (const state of Object.values(this.states)) {
-        if (state.value === dep) {
-          newDependencies.push(state.id);
-          continue outer;
-        }
-      }
-
-      for (const prop of this.props) {
-        if (prop.name == dep) {
-          newDependencies.push(dep);
-          continue outer;
-        }
-      }
-
-      debugger;
-    }
-
-    const id = newUUID();
-    this.effects[id] = {
-      id,
-      ...effect,
-      dependencies: newDependencies,
-    };
-  }
-
-  public load(data: ReactVariable<TKind>) {
+  public load(data: ReactVariable<TType, TKind>) {
     super.load(data);
-
-    this.file = data.file;
   }
 
-  protected getBaseData(): ComponentFileVarReact<TKind> {
+  protected getBaseData(): ComponentFileVarReact<TType, TKind> {
     return {
       ...super.getBaseData(),
-      file: this.file.path,
-      states: Object.fromEntries(
-        Object.entries(this.states)
-          .filter(([, state]) => state.found)
-          .map(([key, { found: _, ...rest }]) => [key, rest]),
-      ),
-      props: this.props,
-      hooks: this.hooks,
-      effects: this.effects,
     };
   }
 }

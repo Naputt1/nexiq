@@ -15,7 +15,7 @@ export abstract class BaseFunctionVariable<
   constructor(
     options: Omit<
       ComponentFileVarBaseTypeFunction<TKind>,
-      "var" | "components" | "type"
+      "var" | "components" | "type" | "file"
     >,
     file: File,
   ) {
@@ -40,7 +40,6 @@ export abstract class BaseFunctionVariable<
           value.getData(),
         ]),
       ),
-      type: "function",
       scope: this.scope,
     };
   }
