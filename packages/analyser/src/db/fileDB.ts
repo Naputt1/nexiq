@@ -42,6 +42,7 @@ import { xxh3 } from "@node-rs/xxhash";
 import { DataVariable } from "./variable/dataVariable.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
+import { StateVariable } from "./variable/state.js";
 
 interface FileIds {
   id: string;
@@ -131,6 +132,10 @@ export class File {
       v = new ComponentVariable(variable, this);
     } else if (variable.kind === "hook") {
       v = new HookVariable(variable, this);
+    } else if (variable.kind === "state") {
+      v = new StateVariable(variable, this);
+    } else {
+      debugger;
     }
 
     assert(v != null, "Variable not found");
@@ -150,7 +155,6 @@ export class File {
     if (variable.type === "function" && isBaseFunctionVariable(v)) {
       for (const childVar of Object.values(variable.var)) {
         const child = this.loadVariable(childVar);
-        console.log(v.var);
         v.var.set(child.id, child);
       }
     }

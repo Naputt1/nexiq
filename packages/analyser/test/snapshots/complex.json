@@ -94,7 +94,7 @@
               "column": 26
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -124,7 +124,7 @@
               "column": 29
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -154,7 +154,7 @@
               "column": 23
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -184,7 +184,7 @@
               "column": 34
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -241,7 +241,22 @@
             "line": 3,
             "column": 16
           },
-          "var": {},
+          "var": {
+            "4b97fa8f-c781-4270-98cf-364a2c015862": {
+              "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+              "name": "value",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/Hooks.ts",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "value": "value",
+              "setter": "setValue"
+            }
+          },
           "scope": {
             "start": {
               "line": 3,
@@ -252,17 +267,9 @@
               "column": 29
             }
           },
-          "states": {
-            "4b97fa8f-c781-4270-98cf-364a2c015862": {
-              "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
-              "value": "value",
-              "loc": {
-                "line": 4,
-                "column": 8
-              },
-              "setter": "setValue"
-            }
-          },
+          "states": [
+            "4b97fa8f-c781-4270-98cf-364a2c015862"
+          ],
           "props": [],
           "hooks": [],
           "effects": {
@@ -310,7 +317,7 @@
               "column": 1
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {}
@@ -388,7 +395,7 @@
               "column": 30
             }
           },
-          "states": {},
+          "states": [],
           "props": [
             {
               "name": "name",
@@ -423,7 +430,7 @@
               "column": 32
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -476,7 +483,7 @@
               "column": 29
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -538,7 +545,7 @@
               "column": 31
             }
           },
-          "states": {},
+          "states": [],
           "props": [
             {
               "name": "title",
@@ -673,7 +680,7 @@
               "column": 23
             }
           },
-          "states": {},
+          "states": [],
           "props": [
             {
               "name": "children",
@@ -725,7 +732,7 @@
               "column": 23
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -843,7 +850,7 @@
               "column": 26
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [
             "3551d3f2-2e56-49f1-8c18-04bed72b9c0d"

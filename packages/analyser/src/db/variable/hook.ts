@@ -4,7 +4,10 @@ import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
 export class HookVariable extends ReactFunctionVariable<"hook"> {
   constructor(
-    options: Omit<ComponentFileVarHook, "kind" | "var" | "components">,
+    options: Omit<
+      ComponentFileVarHook,
+      "kind" | "var" | "components" | "states"
+    >,
     file: File,
   ) {
     super({ ...options, kind: "hook" }, file);

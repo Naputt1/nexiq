@@ -149,7 +149,7 @@
               "column": 21
             }
           },
-          "states": {},
+          "states": [],
           "props": [
             {
               "name": "user",
@@ -267,7 +267,35 @@
             "line": 12,
             "column": 9
           },
-          "var": {},
+          "var": {
+            "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
+              "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+              "name": "count",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "dependencies": {},
+              "loc": {
+                "line": 13,
+                "column": 8
+              },
+              "value": "count",
+              "setter": "setCount"
+            },
+            "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
+              "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+              "name": "user",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 8
+              },
+              "value": "user"
+            }
+          },
           "scope": {
             "start": {
               "line": 12,
@@ -278,25 +306,10 @@
               "column": 12
             }
           },
-          "states": {
-            "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
-              "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
-              "value": "count",
-              "loc": {
-                "line": 13,
-                "column": 8
-              },
-              "setter": "setCount"
-            },
-            "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
-              "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
-              "value": "user",
-              "loc": {
-                "line": 14,
-                "column": 8
-              }
-            }
-          },
+          "states": [
+            "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+            "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+          ],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -308,7 +321,7 @@
               "dependencies": [
                 {
                   "id": "user",
-                  "value": "user"
+                  "value": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
                 }
               ],
               "isDependency": false,
@@ -358,7 +371,7 @@
               "column": 10
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -405,7 +418,7 @@
               "column": 28
             }
           },
-          "states": {},
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},

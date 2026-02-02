@@ -33,7 +33,7 @@ function getParentPath(nodePath: traverse.NodePath<t.Node>) {
 
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.FunctionDeclaration> {
   return (nodePath) => {
     const name = nodePath.node.id?.name;
@@ -63,7 +63,6 @@ export default function FunctionDeclaration(
           file: fileName,
           type: "function",
           componentType: "Function",
-          states: {},
           hooks: [],
           props: getProps(nodePath),
           contexts: [],
@@ -85,7 +84,6 @@ export default function FunctionDeclaration(
           type: "function",
           loc,
           scope,
-          states: {},
           props: getProps(nodePath),
           effects: {},
           hooks: [],
@@ -116,7 +114,7 @@ export default function FunctionDeclaration(
             loc,
             scope,
           },
-          parentPath
+          parentPath,
         );
       }
     }
