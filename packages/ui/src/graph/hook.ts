@@ -41,6 +41,7 @@ export interface PointData extends GraphItem {
   radius?: number;
   label?: LabelData;
   combo?: string;
+  highlighted?: boolean;
 }
 
 export interface DetailItemData {
@@ -223,7 +224,7 @@ export class GraphData {
     } finally {
       this.isBatching = prevBatching;
       if (!this.isBatching) {
-        // this.refresh();
+        this.refresh();
       }
     }
   }
@@ -1107,6 +1108,8 @@ export class GraphData {
       this.combos.set(combo.id, combo);
     }
 
+    this.trigger({ type: "new-combos" });
+
     const cb = this.innerCallback.get(combo.id);
     if (cb == null) return;
 
@@ -1169,7 +1172,13 @@ export class GraphData {
         // Ensure child layout is calculated if it hasn't been before
         this.calculateComboChildrenLayout(parentId);
 
-        // Trigger update for the parent combo
+        // Trigger update for the parent combo to start expansion animation
+        this.trigger({
+          type: "combo-collapsed",
+          id: parentId,
+        });
+
+        // Trigger update for the parent combo (internal)
         const cb = this.innerCallback.get(parentId);
         if (cb) {
           cb({ type: "child-moved" }); // Triggers re-render of the combo
@@ -1180,7 +1189,11 @@ export class GraphData {
   }
 
   public getNode(id: string) {
-    return this.nodes.get(id);
+    const point = this.getPointByID(id);
+    if (point && !("collapsedRadius" in point)) {
+      return point as NodeGraphData;
+    }
+    return undefined;
   }
 
   public getEdge(id: string) {
@@ -1218,8 +1231,7 @@ export class GraphData {
   }
 
   public getCombo(id: string) {
-    if (this.combos.has(id)) return this.combos.get(id);
-    return this.curRender.combos[id];
+    return this.getComboByID(id);
   }
 
   public layout() {

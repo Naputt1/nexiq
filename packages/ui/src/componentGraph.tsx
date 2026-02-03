@@ -353,6 +353,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   }, [debouncedSearch]);
 
   const performSearch = (value: string) => {
+    let firstMatchId: string | null = null;
+    const newMatches: string[] = [];
+
     graph.batch(() => {
       if (value === "") {
         setMatches([]);
@@ -362,19 +365,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       }
 
       const lowerValue = value.toLowerCase();
-      const newMatches: string[] = [];
 
       const combos = graph.getAllCombos();
       for (const combo of combos) {
         const isMatch = combo.label?.text.toLowerCase().includes(lowerValue);
         if (isMatch) {
-          if (combo.color !== "red") {
-            combo.color = "red";
+          if (!combo.highlighted) {
+            combo.highlighted = true;
             graph.updateCombo(combo);
           }
           newMatches.push(combo.id);
-        } else if (combo.color === "red") {
-          combo.color = "blue";
+        } else if (combo.highlighted) {
+          combo.highlighted = false;
           graph.updateCombo(combo);
         }
       }
@@ -383,27 +385,36 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       for (const node of nodes) {
         const isMatch = node.label?.text.toLowerCase().includes(lowerValue);
         if (isMatch) {
-          if (node.color !== "red") {
-            node.color = "red";
+          if (!node.highlighted) {
+            node.highlighted = true;
             graph.updateNode(node);
           }
           newMatches.push(node.id);
-        } else if (node.color === "red") {
-          node.color = "blue";
+        } else if (node.highlighted) {
+          node.highlighted = false;
           graph.updateNode(node);
         }
       }
 
-      setMatches(newMatches);
       if (newMatches.length > 0) {
-        setCurrentMatchIndex(0);
-        graph.expandAncestors(newMatches[0]);
-        rendererRef.current?.focusItem(newMatches[0], 1.5);
-        setSelectedId(newMatches[0]);
-      } else {
-        setCurrentMatchIndex(-1);
+        firstMatchId = newMatches[0];
       }
     });
+
+    setMatches(newMatches);
+    if (newMatches.length > 0) {
+      setCurrentMatchIndex(0);
+      setSelectedId(firstMatchId);
+      // Small timeout to allow the batch render to complete before starting expansion animations
+      setTimeout(() => {
+        if (firstMatchId) {
+          graph.expandAncestors(firstMatchId);
+          rendererRef.current?.focusItem(firstMatchId, 1.5);
+        }
+      }, 50);
+    } else {
+      setCurrentMatchIndex(-1);
+    }
   };
 
   const onSearch = (value: string) => {
@@ -413,15 +424,15 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const resetHighlights = () => {
     const combos = graph.getAllCombos();
     for (const combo of Object.values(combos)) {
-      if (combo.color === "red") {
-        combo.color = "blue";
+      if (combo.highlighted) {
+        combo.highlighted = false;
         graph.updateCombo(combo);
       }
     }
     const nodes = graph.getAllNodes();
     for (const node of Object.values(nodes)) {
-      if (node.color === "red") {
-        node.color = "blue";
+      if (node.highlighted) {
+        node.highlighted = false;
         graph.updateNode(node);
       }
     }

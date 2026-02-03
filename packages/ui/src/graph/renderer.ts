@@ -374,10 +374,15 @@ export class GraphRenderer {
     const bg = new Konva.Circle({
       id: `bg-${combo.id}`,
       radius: radius,
-      stroke: combo.color,
-      strokeWidth: 4,
+      stroke: combo.highlighted ? "#007AFF" : combo.color,
+      strokeWidth: combo.highlighted ? 4 : 2,
       fill: combo.collapsed ? combo.color : "transparent",
       perfectDrawEnabled: false,
+      shadowColor: "#007AFF",
+      shadowBlur: 40,
+      shadowOpacity: 1,
+      shadowOffset: { x: 0, y: 0 },
+      shadowEnabled: !!combo.highlighted,
     });
 
     bg.on("mouseenter", () => {
@@ -486,7 +491,14 @@ export class GraphRenderer {
     const circle = new Konva.Circle({
       radius: node.radius,
       fill: node.color,
+      stroke: node.highlighted ? "#007AFF" : undefined,
+      strokeWidth: node.highlighted ? 2 : 0,
       perfectDrawEnabled: false,
+      shadowColor: "#007AFF",
+      shadowBlur: 20,
+      shadowOpacity: 1,
+      shadowOffset: { x: 0, y: 0 },
+      shadowEnabled: !!node.highlighted,
     });
 
     group.add(circle);
