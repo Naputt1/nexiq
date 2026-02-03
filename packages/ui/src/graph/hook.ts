@@ -2,13 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import type { LabelData } from "./label";
 import type { PropData, TypeData, TypeDataParam } from "shared";
 import type Konva from "konva";
-import { ForceLayout, type Node, type Edge } from "./layout";
+import { type Node, type Edge } from "./layout";
 
 export type useGraphProps = {
   nodes?: NodeData[];
   edges?: EdgeData[];
   combos?: ComboData[];
   config?: GraphDataConfig;
+  projectPath?: string;
+  targetPath?: string;
 };
 
 export type GraphDataCallbackParams =
@@ -23,7 +25,9 @@ export type GraphDataCallbackParams =
       id: string;
       edgeIds: string[];
       child?: boolean;
-    };
+    }
+  | { type: "layout-change" }
+  | { type: "child-moved" };
 
 export type GraphDataCallback = (params: GraphDataCallbackParams) => void;
 
@@ -59,6 +63,12 @@ export interface DetailItemData {
     | "state";
   typeParams?: TypeDataParam[];
   extends?: string[];
+  ui?: {
+    renders?: Record<string, { x: number; y: number }>;
+    isLayoutCalculated?: boolean;
+    x?: number;
+    y?: number;
+  };
 }
 
 export interface NodeData extends PointData, DetailItemData {
@@ -85,6 +95,7 @@ export interface NodeGraphData extends NodeData {
   y: number;
   radius: number;
   color: string;
+  isLayoutCalculated: boolean;
   parent?: ComboGraphData;
 }
 
@@ -142,6 +153,9 @@ export interface GraphDataConfig {
   };
 }
 
+import LayoutWorker from "./layout.worker?worker";
+import type { LayoutRequest, LayoutResponse } from "./layout.worker";
+
 const defaultConfig: GraphDataConfig = {
   node: {
     color: "blue",
@@ -175,12 +189,93 @@ export class GraphData {
 
   private isBatching = false;
 
+  private worker: Worker;
+
+  private projectPath?: string;
+  private targetPath?: string;
+
   constructor(
     nodes: NodeData[],
     edges: EdgeData[],
     combos: ComboData[],
     config?: GraphDataConfig,
+    projectPath?: string,
+    targetPath?: string,
   ) {
+    this.projectPath = projectPath;
+    this.targetPath = targetPath;
+    this.worker = new LayoutWorker();
+    this.worker.onmessage = (e: MessageEvent<LayoutResponse>) => {
+      const { type, id, nodes } = e.data;
+      if (type === "layout-result") {
+        this.batch(() => {
+          if (id === "root") {
+            for (const n of nodes) {
+              const node: PointData | undefined = this.getPointId(n.id);
+              if (node) {
+                node.x = n.x;
+                node.y = n.y;
+              }
+            }
+
+            const edgeIds = new Set<string>();
+            for (const n of nodes) {
+              const ids = this.getComboEdges(n.id);
+              for (const edgeId of ids) {
+                edgeIds.add(edgeId);
+              }
+            }
+
+            this.updateEdgePos(Array.from(edgeIds));
+
+            this.trigger({ type: "new-combos" });
+            this.trigger({ type: "new-nodes" });
+            this.trigger({ type: "new-edges" });
+
+            for (const c of this.combos.values()) {
+              this.innerCallback.get(c.id)?.({ type: "layout-change" });
+            }
+          } else {
+            const combo = this.getComboByID(id);
+            if (combo) {
+              for (const n of nodes) {
+                const node =
+                  combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
+                if (node) {
+                  node.x = n.x;
+                  node.y = n.y;
+                }
+              }
+
+              const edgeIds = new Set<string>();
+              for (const n of nodes) {
+                const ids = this.getComboEdges(n.id);
+                for (const edgeId of ids) {
+                  edgeIds.add(edgeId);
+                }
+              }
+
+              this.updateEdgePos(Array.from(edgeIds));
+
+              combo.expandedRadius = this.calculateComboRadius(combo);
+              combo.isLayoutCalculated = true;
+              this.innerCallback.get(id)?.({ type: "layout-change" });
+
+              this.trigger({
+                type: "combo-radius-change",
+                id: combo.id,
+                edgeIds: [],
+                child: true,
+              });
+            }
+          }
+
+          // Trigger IPC update
+          this.savePositions(nodes);
+        });
+      }
+    };
+
     this.config = {
       ...defaultConfig,
       ...config,
@@ -213,6 +308,21 @@ export class GraphData {
     if (this.isBatching) return;
     for (const cb of Object.values(this.callback)) {
       cb(data);
+    }
+  }
+
+  private savePositions(nodes: { id: string; x: number; y: number }[]) {
+    if (this.projectPath && this.targetPath) {
+      const positions: Record<string, { x: number; y: number }> = {};
+      for (const n of nodes) {
+        positions[n.id] = { x: n.x, y: n.y };
+      }
+      window.ipcRenderer.invoke(
+        "update-graph-position",
+        this.projectPath,
+        this.targetPath,
+        positions,
+      );
     }
   }
 
@@ -250,7 +360,16 @@ export class GraphData {
     this.edgeIds = {};
   }
 
-  public setData(nodes: NodeData[], edges: EdgeData[], combos: ComboData[]) {
+  public setData(
+    nodes: NodeData[],
+    edges: EdgeData[],
+    combos: ComboData[],
+    projectPath?: string,
+    targetPath?: string,
+  ) {
+    if (projectPath) this.projectPath = projectPath;
+    if (targetPath) this.targetPath = targetPath;
+
     this.batch(() => {
       this.clear();
       this.addCombos(combos);
@@ -374,14 +493,45 @@ export class GraphData {
     if (combo == null) return;
     if (combo.isLayoutCalculated) return;
 
+    // Check if all children already have positions from UI or parent renders
+    const children = [
+      ...Object.values(combo.child?.nodes ?? {}),
+      ...Object.values(combo.child?.combos ?? {}),
+    ];
+
+    if (children.length > 0) {
+      const allHavePos = children.every(
+        (c) =>
+          (c.ui && (c.ui.x !== 0 || c.ui.y !== 0)) || c.x !== 0 || c.y !== 0,
+      );
+
+      if (allHavePos) {
+        combo.isLayoutCalculated = true;
+        // Need to update edge positions since they might not be calculated
+        const edgeIds = new Set<string>();
+        for (const child of children) {
+          const ids = this.getComboEdges(child.id);
+          for (const eid of ids) edgeIds.add(eid);
+        }
+        this.updateEdgePos(Array.from(edgeIds));
+        this.trigger({ type: "layout-change" });
+        return;
+      }
+    }
+
+    // Check if we already have positions (from persistence)
+    // If all children have x,y != 0 (or some check), maybe skips?
+    // But persistence layer should set isLayoutCalculated = true if loaded.
+
+    // If not calculated, send to worker
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
     for (const n of Object.values(combo.child?.nodes ?? {})) {
       nodes.push({
         id: n.id,
-        x: (Math.random() - 0.5) * 20,
-        y: (Math.random() - 0.5) * 20,
+        x: n.x, // Pass existing X if available (from persistence)
+        y: n.y,
         radius: n.radius,
       });
     }
@@ -389,8 +539,8 @@ export class GraphData {
     for (const c of Object.values(combo.child?.combos ?? {})) {
       nodes.push({
         id: c.id,
-        x: (Math.random() - 0.5) * 20,
-        y: (Math.random() - 0.5) * 20,
+        x: c.x,
+        y: c.y,
         radius: c.radius,
       });
     }
@@ -403,39 +553,22 @@ export class GraphData {
       });
     }
 
-    const layout = new ForceLayout(nodes, edges, {
-      repulsionStrength: 4000,
-      linkDistance: 300,
-      damping: 0.85,
-      gravity: 0.05,
-      timeStep: 0.02,
-      minNodeDistance: 10,
-      collisionStrength: 1,
-    });
-
-    layout.runSteps(500);
-
-    for (const n of layout.nodes) {
-      const node: PointData | undefined =
-        combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
-      if (node == null) continue;
-
-      node.x = n.x;
-      node.y = n.y;
-    }
-
-    const edgeIds = new Set<string>();
-    for (const n of layout.nodes) {
-      const ids = this.getComboEdges(n.id);
-      for (const edgeId of ids) {
-        edgeIds.add(edgeId);
-      }
-    }
-
-    this.updateEdgePos(Array.from(edgeIds));
-
-    combo.expandedRadius = this.calculateComboRadius(combo);
-    combo.isLayoutCalculated = true;
+    this.worker.postMessage({
+      type: "layout",
+      id: combo.id,
+      nodes,
+      edges,
+      options: {
+        repulsionStrength: 4000,
+        linkDistance: 300,
+        damping: 0.85,
+        gravity: 0.05,
+        timeStep: 0.02,
+        minNodeDistance: 10,
+        collisionStrength: 1,
+      },
+      iterations: 500,
+    } as LayoutRequest);
   }
 
   private getConnectorPoints = (
@@ -508,12 +641,25 @@ export class GraphData {
       }
 
       const size = Object.keys(parentCombo.child.combos).length;
+
+      let x = c.x;
+      let y = c.y;
+
+      if (c.ui) {
+        x = c.ui.x;
+        y = c.ui.y;
+      } else if (parentCombo.ui?.renders?.[c.id]) {
+        x = parentCombo.ui.renders[c.id].x;
+        y = parentCombo.ui.renders[c.id].y;
+      }
+
       parentCombo.child.nodes[c.id] = {
         ...c,
         radius: c.radius ?? this.config.combo.minRadius,
         color: c.color ?? this.config.node.color,
-        x: Math.random() * size * 5,
-        y: Math.random() * size * 5,
+        isLayoutCalculated: !!(c.ui?.isLayoutCalculated || (x && y)),
+        x: x ?? Math.random() * size * 5,
+        y: y ?? Math.random() * size * 5,
         parent: parentCombo,
       };
       this.comboChildMap.set(c.id, c.combo);
@@ -560,8 +706,9 @@ export class GraphData {
           ...n,
           radius: n.radius ?? 20,
           color: n.color ?? this.config.node.color,
-          x: Math.random() * 100,
-          y: Math.random() * 100,
+          isLayoutCalculated: !!(n.ui?.isLayoutCalculated || (n.x && n.y)),
+          x: n.ui?.x ?? n.x ?? Math.random() * 100, // Use UI position if available
+          y: n.ui?.y ?? n.y ?? Math.random() * 100,
         });
         continue;
       }
@@ -610,7 +757,6 @@ export class GraphData {
 
     return item;
   }
-
 
   private createEdges() {
     const newEdgesToCreate: EdgeData[] = [];
@@ -737,10 +883,10 @@ export class GraphData {
         color: c.color ?? this.config.combo.color,
         collapsedRadius: c.collapsedRadius ?? this.config.combo.minRadius,
         expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
-        x: Math.random() * size * 5,
-        y: Math.random() * size * 5,
+        x: c.ui?.x ?? c.x ?? Math.random() * size * 5,
+        y: c.ui?.y ?? c.y ?? Math.random() * size * 5,
         padding: c.padding ?? this.config.combo.padding,
-        isLayoutCalculated: false,
+        isLayoutCalculated: !!(c.ui?.isLayoutCalculated || (c.x && c.y)),
         parent: parentCombo,
       };
       this.comboChildMap.set(c.id, c.combo);
@@ -783,10 +929,10 @@ export class GraphData {
           color: c.color ?? this.config.combo.color,
           collapsedRadius: c.collapsedRadius ?? this.config.combo.minRadius,
           expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
-          x: (Math.random() - 0.5) * combos.length * 20,
-          y: (Math.random() - 0.5) * combos.length * 20,
+          x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * combos.length * 20,
+          y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 20,
           padding: c.padding ?? this.config.combo.padding,
-          isLayoutCalculated: false,
+          isLayoutCalculated: !!(c.ui?.isLayoutCalculated || (c.x && c.y)),
         });
         continue;
       }
@@ -1235,6 +1381,17 @@ export class GraphData {
   }
 
   public layout() {
+    const allItems = [...this.nodes.values(), ...this.combos.values()];
+    const allHavePos = allItems.every(
+      (c) =>
+        (c.ui && (c.ui.x !== 0 || c.ui.y !== 0)) || c.x !== 0 || c.y !== 0,
+    );
+
+    if (allItems.length > 0 && allHavePos) {
+      this.trigger({ type: "layout-change" });
+      return;
+    }
+
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
@@ -1264,50 +1421,19 @@ export class GraphData {
       });
     }
 
-    const layout = new ForceLayout(nodes, edges, {
-      repulsionStrength: 4000,
-      linkDistance: 300,
-      damping: 0.85,
-      gravity: 0.05,
-      timeStep: 0.02,
-      minNodeDistance: 300,
-      collisionStrength: 1,
+    this.worker.postMessage({
+      type: "layout",
+      id: "root",
+      nodes,
+      edges,
+      iterations: 500,
+      options: {
+        minNodeDistance: 300,
+      },
     });
 
-    // layout.onTick = (nodesPositions, step) => {
-    //   console.log("tick", step, nodesPositions);
-    // };
-
-    layout.runSteps(500);
-
-    for (const n of layout.nodes) {
-      const node: PointData | undefined = this.getPointId(n.id);
-      if (node == null) continue;
-
-      node.x = n.x;
-      node.y = n.y;
-    }
-
-    const edgeIds = new Set<string>();
-
-    for (const n of layout.nodes) {
-      const ids = this.getComboEdges(n.id);
-      for (const edgeId of ids) {
-        edgeIds.add(edgeId);
-      }
-    }
-
-    this.updateEdgePos(Array.from(edgeIds));
-
-    this.trigger({ type: "new-combos" });
-    this.trigger({ type: "new-nodes" });
-    this.trigger({ type: "new-edges" });
-
-    for (const c of this.combos.values()) {
-      this.innerCallback.get(c.id)?.({ type: "layout-change" });
-    }
-
-    console.log(this);
+    // Populate curRender immediately with current positions (even if not laid out yet)
+    // or we might wait? But render() initializes curRender.
   }
 
   private curRender: CurRender = {
@@ -1354,12 +1480,16 @@ const useGraph: (option: useGraphProps) => GraphData = ({
   edges = [],
   combos = [],
   config,
+  projectPath,
+  targetPath,
 }) => {
-  const [data] = useState(() => new GraphData(nodes, edges, combos, config));
+  const [data] = useState(
+    () => new GraphData(nodes, edges, combos, config, projectPath, targetPath),
+  );
 
   useEffect(() => {
-    data.setData(nodes, edges, combos);
-  }, [nodes, edges, combos]);
+    data.setData(nodes, edges, combos, projectPath, targetPath);
+  }, [nodes, edges, combos, projectPath, targetPath]);
 
   return data;
 };

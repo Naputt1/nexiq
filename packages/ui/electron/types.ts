@@ -38,4 +38,5 @@ export interface AppStateData {
   centeredItemId: string | null;
   selectedId: string | null;
   isSidebarOpen: boolean;
+  viewport?: { x: number; y: number; zoom: number } | null;
 }

@@ -55,6 +55,12 @@ declare global {
       send(channel: string, ...args: unknown[]): void;
       invoke(channel: "get-last-project"): Promise<string | null>;
       invoke(channel: "set-last-project", path: string | null): Promise<void>;
+      invoke(
+        channel: "update-graph-position",
+        projectRoot: string,
+        analysisPath: string,
+        positions: Record<string, { x: number; y: number }>,
+      ): Promise<boolean>;
     };
   }
 }

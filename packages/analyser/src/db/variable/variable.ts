@@ -20,24 +20,24 @@ export abstract class Variable<
   dependencies: Record<string, ComponentFileVarDependency>;
   parent?: Variable<"function">;
   loc: VariableLoc;
+  ui?: {
+    x: number;
+    y: number;
+    renders?: Record<string, { x: number; y: number }>;
+    isLayoutCalculated?: boolean | undefined;
+  } | undefined;
 
   constructor(
-    {
-      id,
-      name,
-      type,
-      dependencies,
-      kind,
-      loc,
-    }: Omit<ComponentFileVarBase<TType, TKind>, "file">,
+    data: Omit<ComponentFileVarBase<TType, TKind>, "file">,
     file: File,
   ) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    this.kind = kind;
-    this.dependencies = dependencies;
-    this.loc = loc;
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+    this.kind = data.kind;
+    this.dependencies = data.dependencies;
+    this.loc = data.loc;
+    this.ui = data.ui;
 
     this.file = file;
   }
@@ -49,6 +49,9 @@ export abstract class Variable<
     this.dependencies = data.dependencies;
 
     this.loc = data.loc;
+    if (data.ui) {
+      this.ui = data.ui;
+    }
   }
 
   protected getBaseData(): ComponentFileVarBase<TType, TKind> {
@@ -60,6 +63,7 @@ export abstract class Variable<
       file: this.file.path,
       dependencies: this.dependencies,
       loc: this.loc,
+      ui: this.ui,
     };
   }
 

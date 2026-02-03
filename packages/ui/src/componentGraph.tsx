@@ -9,7 +9,7 @@ import useGraph, {
 import { GraphRenderer } from "./graph/renderer";
 import { NodeDetails } from "./components/node-details";
 import { ProjectSidebar } from "./components/Sidebar";
-import { cn } from "@/lib/utils";
+import { cn, debounce } from "@/lib/utils";
 import {
   SidebarProvider,
   SidebarInset,
@@ -32,8 +32,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     setCenteredItemId,
     isSidebarOpen,
     setIsSidebarOpen,
+    viewport,
+    setViewport,
     loadState,
     saveState,
+    isLoaded,
   } = useAppStateStore();
 
   const [size, setSize] = useState({
@@ -61,6 +64,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const rendererRef = useRef<GraphRenderer | null>(null);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const hasRestoredViewport = useRef(false);
 
   const loadData = useCallback(
     async (analysisPath?: string) => {
@@ -97,6 +101,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             props: variable.props,
             propType: variable.propType,
             type: "component",
+            ui: variable.ui,
           });
           combos.push({
             id: `${variable.id}-render`,
@@ -104,6 +109,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             label: { text: "render", fill: "black" },
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+            ui: variable.ui?.renders?.[`${variable.id}-render`],
           });
 
           for (const stateID of variable.states) {
@@ -119,6 +125,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               color: "red",
               combo: variable.id,
               fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
+              ui: state.ui,
             });
           }
 
@@ -152,6 +159,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   },
                   combo: `${variable.id}-render`,
                   fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+                  ui: variable.ui?.renders?.[render.id],
                 });
                 break;
               }
@@ -198,12 +206,62 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     [projectPath, selectedSubProject],
   );
 
-  const graph = useGraph(graphData);
+  const graph = useGraph({
+    ...graphData,
+    projectPath,
+    targetPath: selectedSubProject || projectPath,
+  });
 
-  const onSelect = useCallback((id: string) => {
-    setSelectedId(id);
-    setCenteredItemId(id);
-  }, [setSelectedId, setCenteredItemId]);
+  const onSelect = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      setCenteredItemId(id);
+    },
+    [setSelectedId, setCenteredItemId],
+  );
+
+  useEffect(() => {
+    const savePositions = debounce(() => {
+      const allNodes = graph.getAllNodes();
+      const allCombos = graph.getAllCombos();
+      const positions: Record<string, { x: number; y: number }> = {};
+
+      allNodes.forEach((n) => {
+        if (n.x !== undefined && n.y !== undefined) {
+          positions[n.id] = { x: n.x, y: n.y };
+        }
+      });
+      allCombos.forEach((c) => {
+        if (c.x !== undefined && c.y !== undefined) {
+          positions[c.id] = { x: c.x, y: c.y };
+        }
+      });
+
+      const targetPath = selectedSubProject || projectPath;
+      if (Object.keys(positions).length > 0) {
+        window.ipcRenderer.invoke(
+          "update-graph-position",
+          projectPath,
+          targetPath,
+          positions,
+        );
+      }
+    }, 1000);
+
+    const unbind = graph.bind((data) => {
+      if (
+        data.type === "combo-drag-move" ||
+        data.type === "layout-change" ||
+        data.type === "child-moved"
+      ) {
+        savePositions();
+      }
+    });
+
+    return () => {
+      graph.unbind(unbind);
+    };
+  }, [graph, projectPath, selectedSubProject]);
 
   // Initialize/Update Renderer
   useEffect(() => {
@@ -216,20 +274,33 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         graph,
         size.width,
         size.height,
-        onSelect
+        onSelect,
+        (vp) => {
+          setViewport(vp);
+        },
       );
     } else {
-       rendererRef.current.resize(size.width, size.height);
-       rendererRef.current.onSelect = onSelect;
+      rendererRef.current.resize(size.width, size.height);
+      rendererRef.current.onSelect = onSelect;
     }
-  }, [graph, size.width, size.height, onSelect]);
-  
+
+    if (
+      rendererRef.current &&
+      viewport &&
+      !hasRestoredViewport.current &&
+      isLoaded
+    ) {
+      rendererRef.current.setViewport(viewport.x, viewport.y, viewport.zoom);
+      hasRestoredViewport.current = true;
+    }
+  }, [graph, size.width, size.height, onSelect, viewport, isLoaded]);
+
   // Clean up
   useEffect(() => {
-      return () => {
-          rendererRef.current?.destroy();
-          rendererRef.current = null;
-      }
+    return () => {
+      rendererRef.current?.destroy();
+      rendererRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -243,30 +314,37 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     graph.render();
     console.log("layout", performance.now() - time);
 
-    // After render, center on saved item if it exists
-    if (centeredItemId) {
+    // After render, center on saved item if it exists AND we haven't restored a viewport
+    if (centeredItemId && !hasRestoredViewport.current) {
       setTimeout(() => {
         graph.expandAncestors(centeredItemId);
         rendererRef.current?.focusItem(centeredItemId, 1.5);
+        hasRestoredViewport.current = true; // Mark as done so we don't jump again
       }, 100);
     }
   }, [graphData]);
 
   // Initial load state
   useEffect(() => {
+    hasRestoredViewport.current = false; // Reset flag when project changes
     loadState(projectPath);
-  }, [projectPath, loadState]);
+  }, [projectPath, selectedSubProject, loadState]);
 
   // Auto-save state
+  const debouncedSaveState = useMemo(
+    () => debounce((path: string) => saveState(path), 1000),
+    [saveState],
+  );
+
   useEffect(() => {
-    saveState(projectPath);
+    debouncedSaveState(projectPath);
   }, [
     projectPath,
     selectedSubProject,
     centeredItemId,
-    selectedId,
     isSidebarOpen,
-    saveState,
+    viewport,
+    debouncedSaveState,
   ]);
 
   // load data whenever sub-project selection changes

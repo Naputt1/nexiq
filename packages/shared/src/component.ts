@@ -102,6 +102,12 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   type: TType;
   file: string;
   dependencies: Record<string, ComponentFileVarDependency>;
+  ui?: {
+    x: number;
+    y: number;
+    renders?: Record<string, { x: number; y: number }>;
+    isLayoutCalculated?: boolean | undefined;
+  } | undefined;
 }
 
 export type ComponentFileVarBase<
