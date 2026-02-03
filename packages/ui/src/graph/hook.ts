@@ -60,7 +60,7 @@ export interface DetailItemData {
     | "state"
     | "render"
     | "effect"
-    | "state";
+    | "memo";
   typeParams?: TypeDataParam[];
   extends?: string[];
   ui?: {
@@ -1383,8 +1383,7 @@ export class GraphData {
   public layout() {
     const allItems = [...this.nodes.values(), ...this.combos.values()];
     const allHavePos = allItems.every(
-      (c) =>
-        (c.ui && (c.ui.x !== 0 || c.ui.y !== 0)) || c.x !== 0 || c.y !== 0,
+      (c) => (c.ui && (c.ui.x !== 0 || c.ui.y !== 0)) || c.x !== 0 || c.y !== 0,
     );
 
     if (allItems.length > 0 && allHavePos) {

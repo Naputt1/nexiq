@@ -5,6 +5,7 @@ import type { HookVariable } from "./hook.js";
 import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { VarKind, VarType } from "shared";
 import type { StateVariable } from "./state.js";
+import type { MemoVariable } from "./memo.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
   return v.kind === "component";
@@ -30,4 +31,8 @@ export function isDataVariable(v: Variable): v is DataVariable {
 
 export function isStateVariable(v: Variable): v is StateVariable {
   return v.type === "data" && v.kind === "state";
+}
+
+export function isMemoVariable(v: Variable): v is MemoVariable {
+  return v.type === "function" && v.kind === "memo";
 }

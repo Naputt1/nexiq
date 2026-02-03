@@ -15,6 +15,7 @@ import type {
   ComponentFile,
   ComponentFileVarNormalFunction,
   ComponentFileVarNormalData,
+  Memo,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -208,6 +209,14 @@ export class ComponentDB {
     assert(component != null, "Component not found");
 
     component.addState(state);
+  }
+
+  public comAddMemo(
+    loc: VariableLoc,
+    fileName: string,
+    memo: Omit<Memo, "id">,
+  ) {
+    this.files.addMemo(fileName, loc, memo);
   }
 
   private _getExportId(

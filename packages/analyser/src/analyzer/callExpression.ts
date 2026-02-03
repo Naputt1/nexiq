@@ -2,12 +2,12 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { isHook } from "../utils.js";
-import type { VariableLoc, VariableScope } from "shared";
+import type { ReactDependency, VariableLoc, VariableScope } from "shared";
 import assert from "assert";
 
 export default function CallExpression(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.CallExpression> {
   return (nodePath) => {
     const callee = nodePath.node.callee;
@@ -94,13 +94,13 @@ export default function CallExpression(
         debugger;
       }
 
-      const dependency: string[] = [];
+      const reactDeps: ReactDependency[] = [];
       if (dependencies && dependencies.type == "ArrayExpression") {
         for (const element of dependencies.elements) {
           if (element == null) continue;
 
           if (element.type == "Identifier") {
-            dependency.push(element.name);
+            reactDeps.push({ id: "", name: element.name });
           } else {
             debugger;
           }
@@ -113,7 +113,7 @@ export default function CallExpression(
         componentDB.comAddEffect(fileName, loc, {
           scope,
           loc: effectLoc,
-          dependencies: dependency,
+          reactDeps,
         });
       }
     }
