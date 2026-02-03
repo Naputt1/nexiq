@@ -4,7 +4,10 @@ import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 
 export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
   constructor(
-    options: Omit<MemoFileVarHook, "kind" | "var" | "components" | "type">,
+    options: Omit<
+      MemoFileVarHook,
+      "kind" | "var" | "components" | "type" | "file"
+    >,
     file: File,
   ) {
     super(

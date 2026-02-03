@@ -14,7 +14,7 @@ export abstract class ReactWithCallbackVariable<
   constructor(
     options: Omit<
       ComponentFileVarReactWithCallback<TKind>,
-      "var" | "components" | "type"
+      "var" | "components" | "type" | "file"
     >,
     file: File,
   ) {

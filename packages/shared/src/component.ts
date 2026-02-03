@@ -22,6 +22,12 @@ export interface State extends ComponentLoc {
   setter?: string;
 }
 
+export interface Memo extends ComponentLoc, ReactDependencies {
+  id: string;
+  value: string;
+  scope: VariableScope;
+}
+
 export type ComponentInfoRenderDependency = {
   id: string;
   value: string;
@@ -33,10 +39,9 @@ export interface ComponentInfoRender extends ComponentLoc {
   isDependency?: boolean;
 }
 
-export interface EffectInfo extends ComponentLoc {
+export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
   scope?: VariableScope;
-  dependencies: string[];
 }
 
 export interface PropData {
@@ -102,12 +107,14 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   type: TType;
   file: string;
   dependencies: Record<string, ComponentFileVarDependency>;
-  ui?: {
-    x: number;
-    y: number;
-    renders?: Record<string, { x: number; y: number }>;
-    isLayoutCalculated?: boolean | undefined;
-  } | undefined;
+  ui?:
+    | {
+        x: number;
+        y: number;
+        renders?: Record<string, { x: number; y: number }>;
+        isLayoutCalculated?: boolean | undefined;
+      }
+    | undefined;
 }
 
 export type ComponentFileVarBase<

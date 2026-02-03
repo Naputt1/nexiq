@@ -4,7 +4,10 @@ import type { ComponentDB } from "../db/componentDB.js";
 import type {
   ComponentFileVarComponent,
   ComponentFileVarDependency,
+  Memo,
+  ReactDependency,
   State,
+  VariableScope,
 } from "shared";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
@@ -120,46 +123,104 @@ export default function VariableDeclarator(
           componentDB.addComponent(component, parentPath);
           return;
         }
-      } else if (
-        t.isIdentifier(init.callee) &&
-        init.callee.name === "useState"
-      ) {
-        const id = nodePath.node.id;
+      } else if (t.isIdentifier(init.callee)) {
+        if (init.callee.name === "useState") {
+          const id = nodePath.node.id;
 
-        if (t.isArrayPattern(id)) {
-          const [stateVar, setterVar] = id.elements;
-          assert(id.loc?.start != null);
+          if (t.isArrayPattern(id)) {
+            const [stateVar, setterVar] = id.elements;
+            assert(id.loc?.start != null);
 
-          let state: Omit<State, "id"> | null = null;
-          if (t.isIdentifier(stateVar)) {
-            state = {
-              value: stateVar.name,
-              loc: {
-                line: id.loc.start.line,
-                column: id.loc.start.column,
-              },
-            };
-          }
-          // TODO: handle ObjectPattern
-          // const [{ previous, current }, setMemory] = useState<{
-
-          if (t.isIdentifier(setterVar)) {
-            if (state == null) {
+            let state: Omit<State, "id"> | null = null;
+            if (t.isIdentifier(stateVar)) {
               state = {
-                value: "ObjectPattern",
-                setter: setterVar.name,
-                loc,
+                value: stateVar.name,
+                loc: {
+                  line: id.loc.start.line,
+                  column: id.loc.start.column,
+                },
               };
-            } else {
-              state.setter = setterVar.name;
+            }
+            // TODO: handle ObjectPattern
+            // const [{ previous, current }, setMemory] = useState<{
+
+            if (t.isIdentifier(setterVar)) {
+              if (state == null) {
+                state = {
+                  value: "ObjectPattern",
+                  setter: setterVar.name,
+                  loc,
+                };
+              } else {
+                state.setter = setterVar.name;
+              }
+            }
+
+            if (state != null) {
+              const name = getVariableComponentName(nodePath);
+
+              if (name) {
+                componentDB.comAddState(name.name, name.loc, fileName, state);
+              }
             }
           }
+        } else if (init.callee.name === "useMemo") {
+          const id = nodePath.node.id;
 
-          if (state != null) {
-            const name = getVariableComponentName(nodePath);
+          if (t.isIdentifier(id)) {
+            const name = id.name;
 
-            if (name) {
-              componentDB.comAddState(name.name, name.loc, fileName, state);
+            let scope: VariableScope | undefined;
+            const reactDeps: ReactDependency[] = [];
+            if (init.arguments.length > 0) {
+              if (t.isArrowFunctionExpression(init.arguments[0])) {
+                assert(init.arguments[0].loc != null, "Function loc not found");
+
+                scope = {
+                  start: {
+                    line: init.arguments[0].loc.start.line,
+                    column: init.arguments[0].loc.start.column,
+                  },
+                  end: {
+                    line: init.arguments[0].loc.end.line,
+                    column: init.arguments[0].loc.end.column,
+                  },
+                };
+              } else {
+                debugger;
+              }
+            }
+
+            if (init.arguments.length > 1) {
+              if (t.isArrayExpression(init.arguments[1])) {
+                for (const element of init.arguments[1].elements) {
+                  if (t.isIdentifier(element)) {
+                    reactDeps.push({
+                      id: "",
+                      name: element.name,
+                    });
+                  } else {
+                    debugger;
+                  }
+                }
+              } else {
+                debugger;
+              }
+            } else {
+              debugger;
+            }
+
+            assert(scope != null, "Scope not found");
+            const memo: Omit<Memo, "id"> = {
+              value: name,
+              loc,
+              scope,
+              reactDeps,
+            };
+
+            const parent = getVariableComponentName(nodePath);
+            if (parent != null) {
+              componentDB.comAddMemo(parent.loc, fileName, memo);
             }
           }
         }
