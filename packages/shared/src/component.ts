@@ -111,7 +111,8 @@ interface ComponentFileVarBaseType<TType extends VarType> {
     | {
         x: number;
         y: number;
-        renders?: Record<string, { x: number; y: number }>;
+        radius?: number;
+        renders?: Record<string, { x: number; y: number; radius?: number }>;
         isLayoutCalculated?: boolean | undefined;
       }
     | undefined;

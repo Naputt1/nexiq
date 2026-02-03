@@ -19,7 +19,9 @@ export type GraphDataCallbackParams =
   | { type: "new-combos" }
   | { type: "combo-collapsed"; id: string }
   | { type: "combo-drag-move"; id: string; edgeIds: string[]; child?: boolean }
+  | { type: "combo-drag-end"; id: string }
   | { type: "node-drag-move"; id: string; edgeIds: string[] }
+  | { type: "node-drag-end"; id: string }
   | {
       type: "combo-radius-change";
       id: string;
@@ -68,6 +70,7 @@ export interface DetailItemData {
     isLayoutCalculated?: boolean;
     x?: number;
     y?: number;
+    radius?: number;
   };
 }
 
@@ -132,6 +135,7 @@ export interface ComboGraphDataHook extends ComboGraphDataHookBase {
   comboRadiusChange: (id: string, radius: number) => void;
   comboCollapsed: (id: string) => void;
   comboDragMove: (id: string, e: Konva.KonvaEventObject<DragEvent>) => void;
+  comboDragEnd: (id: string, e: Konva.KonvaEventObject<DragEvent>) => void;
   comboHover: () => void;
 }
 
@@ -463,6 +467,9 @@ export class GraphData {
             };
           });
         },
+        comboDragEnd: (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
+          this.comboDragEnd(id, e);
+        },
         comboRadiusChange: (id: string, radius: number) => {
           this.comboRadiusChange(id, radius);
           const combo = this.getComboHook(id);
@@ -600,7 +607,6 @@ export class GraphData {
           combos: {},
           edges: {},
         };
-        return false;
       }
 
       const srcNode =
@@ -612,12 +618,12 @@ export class GraphData {
         return false;
       }
 
-      const points = this.getConnectorPoints(srcNode, targetNode);
       parentCombo.child.edges[e.id] = {
         ...e,
-        points,
+        points: [],
       };
       this.edgeParentMap.set(e.id, parentCombo.id);
+      this.updateEdgePos([e.id]);
       return true;
     }
 
@@ -655,7 +661,7 @@ export class GraphData {
 
       parentCombo.child.nodes[c.id] = {
         ...c,
-        radius: c.radius ?? this.config.combo.minRadius,
+        radius: c.ui?.radius ?? c.radius ?? this.config.combo.minRadius,
         color: c.color ?? this.config.node.color,
         isLayoutCalculated: !!(c.ui?.isLayoutCalculated || (x && y)),
         x: x ?? Math.random() * size * 5,
@@ -704,7 +710,7 @@ export class GraphData {
       if (n.combo == null) {
         this.nodes.set(n.id, {
           ...n,
-          radius: n.radius ?? 20,
+          radius: n.ui?.radius ?? n.radius ?? 20,
           color: n.color ?? this.config.node.color,
           isLayoutCalculated: !!(n.ui?.isLayoutCalculated || (n.x && n.y)),
           x: n.ui?.x ?? n.x ?? Math.random() * 100, // Use UI position if available
@@ -718,6 +724,13 @@ export class GraphData {
       }
 
       this.nodeToCreate.push(n);
+    }
+
+    // Update radii for combos that have children nodes added
+    for (const c of this.getAllCombos()) {
+      if (c.isLayoutCalculated) {
+        this.updateComboRadius(c.id);
+      }
     }
 
     this.createEdges();
@@ -770,12 +783,11 @@ export class GraphData {
           continue;
         }
 
-        const points = this.getConnectorPoints(srcNode, targetNode);
-
         this.edges.set(e.id, {
           ...e,
-          points,
+          points: [],
         });
+        this.updateEdgePos([e.id]);
         continue;
       }
 
@@ -802,12 +814,11 @@ export class GraphData {
           continue;
         }
 
-        const points = this.getConnectorPoints(srcNode, targetNode);
-
         this.edges.set(e.id, {
           ...e,
-          points,
+          points: [],
         });
+        this.updateEdgePos([e.id]);
         this.edgeParentMap.delete(e.id);
       }
 
@@ -877,12 +888,16 @@ export class GraphData {
       }
 
       const size = Object.keys(parentCombo.child.combos).length;
+      const collapsedRadius = c.collapsedRadius ?? this.config.combo.minRadius;
+      const expandedRadius =
+        c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
+
       parentCombo.child.combos[c.id] = {
         ...c,
-        radius: c.radius ?? this.config.combo.minRadius,
+        radius: c.collapsed ? collapsedRadius : expandedRadius,
         color: c.color ?? this.config.combo.color,
-        collapsedRadius: c.collapsedRadius ?? this.config.combo.minRadius,
-        expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
+        collapsedRadius,
+        expandedRadius,
         x: c.ui?.x ?? c.x ?? Math.random() * size * 5,
         y: c.ui?.y ?? c.y ?? Math.random() * size * 5,
         padding: c.padding ?? this.config.combo.padding,
@@ -923,12 +938,17 @@ export class GraphData {
     this.combos.clear();
     for (const c of combos) {
       if (c.combo == null) {
+        const collapsedRadius =
+          c.collapsedRadius ?? this.config.combo.minRadius;
+        const expandedRadius =
+          c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
+
         this.combos.set(c.id, {
           ...c,
-          radius: c.radius ?? this.config.combo.minRadius,
+          radius: c.collapsed ? collapsedRadius : expandedRadius,
           color: c.color ?? this.config.combo.color,
-          collapsedRadius: c.collapsedRadius ?? this.config.combo.minRadius,
-          expandedRadius: c.expandedRadius ?? this.config.combo.maxRadius,
+          collapsedRadius,
+          expandedRadius,
           x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * combos.length * 20,
           y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 20,
           padding: c.padding ?? this.config.combo.padding,
@@ -1144,6 +1164,13 @@ export class GraphData {
     }
   }
 
+  public comboDragEnd(id: string, _e: Konva.KonvaEventObject<DragEvent>) {
+    this.trigger({
+      type: "combo-drag-end",
+      id: id,
+    });
+  }
+
   public comboChildNodeMove(
     id: string,
     nodeId: string,
@@ -1197,6 +1224,13 @@ export class GraphData {
         type: "child-moved",
       });
     }
+  }
+
+  public comboChildNodeEnd(_id: string, nodeId: string) {
+    this.trigger({
+      type: "node-drag-end",
+      id: nodeId,
+    });
   }
 
   public getAbsolutePosition(id: string): { x: number; y: number } | undefined {
@@ -1373,6 +1407,13 @@ export class GraphData {
       type: "node-drag-move",
       id: nodeId,
       edgeIds: Array.from(edgeIds),
+    });
+  }
+
+  public nodeDragEnd(nodeId: string, _e: Konva.KonvaEventObject<DragEvent>) {
+    this.trigger({
+      type: "node-drag-end",
+      id: nodeId,
     });
   }
 
