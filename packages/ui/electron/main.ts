@@ -467,7 +467,7 @@ ipcMain.handle(
     _,
     projectRoot: string,
     analysisPath: string,
-    positions: Record<string, { x: number; y: number }>,
+    positions: Record<string, { x: number; y: number; radius?: number }>,
   ) => {
     const targetPath = analysisPath;
     const configRoot = projectRoot || analysisPath;
@@ -485,17 +485,52 @@ ipcMain.handle(
           if (!item.ui) item.ui = { x: 0, y: 0 };
           item.ui.x = positions[item.id].x;
           item.ui.y = positions[item.id].y;
+          if (positions[item.id].radius !== undefined) {
+            item.ui.radius = positions[item.id].radius;
+          }
         }
 
         // Update renders positions on the parent component/hook
         if ("renders" in item && item.renders) {
           for (const render of Object.values(item.renders)) {
-            if (positions[render.id]) {
+            // Check both original ID and the composite ID used in the UI
+            const compositeId = `${item.id}-render-${render.id}`;
+            const pos = positions[render.id] || positions[compositeId];
+
+            if (pos) {
               if (!item.ui) item.ui = { x: 0, y: 0 };
               if (!item.ui.renders) item.ui.renders = {};
               item.ui.renders[render.id] = {
-                x: positions[render.id].x,
-                y: positions[render.id].y,
+                x: pos.x,
+                y: pos.y,
+                radius: pos.radius,
+              };
+            }
+          }
+
+          // Handle the render combo itself
+          const renderComboId = `${item.id}-render`;
+          if (positions[renderComboId]) {
+            if (!item.ui) item.ui = { x: 0, y: 0 };
+            if (!item.ui.renders) item.ui.renders = {};
+            item.ui.renders[renderComboId] = {
+              x: positions[renderComboId].x,
+              y: positions[renderComboId].y,
+              radius: positions[renderComboId].radius,
+            };
+          }
+        }
+
+        // Handle effect nodes (stored in parent's ui.renders for now as effects don't have their own ui property)
+        if ("effects" in item && item.effects) {
+          for (const effect of Object.values(item.effects)) {
+            if (positions[effect.id]) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[effect.id] = {
+                x: positions[effect.id].x,
+                y: positions[effect.id].y,
+                radius: positions[effect.id].radius,
               };
             }
           }

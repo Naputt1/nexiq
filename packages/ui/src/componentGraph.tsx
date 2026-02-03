@@ -173,6 +173,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               color: "yellow",
               combo: variable.id,
               fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+              ui: variable.ui?.renders?.[effect.id],
             });
 
             for (const dep of effect.reactDeps) {
@@ -263,7 +264,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const savePositions = debounce(() => {
       const allNodes = graph.getAllNodes();
       const allCombos = graph.getAllCombos();
-      const positions: Record<string, { x: number; y: number }> = {};
+      const positions: Record<string, { x: number; y: number; radius?: number }> = {};
 
       allNodes.forEach((n) => {
         if (n.x !== undefined && n.y !== undefined) {
@@ -272,7 +273,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       });
       allCombos.forEach((c) => {
         if (c.x !== undefined && c.y !== undefined) {
-          positions[c.id] = { x: c.x, y: c.y };
+          positions[c.id] = {
+            x: c.x,
+            y: c.y,
+            radius: c.expandedRadius || c.radius,
+          };
         }
       });
 
@@ -290,6 +295,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const unbind = graph.bind((data) => {
       if (
         data.type === "combo-drag-move" ||
+        data.type === "node-drag-move" ||
+        data.type === "combo-drag-end" ||
+        data.type === "node-drag-end" ||
         data.type === "layout-change" ||
         data.type === "child-moved"
       ) {
@@ -485,6 +493,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
       const combos = graph.getAllCombos();
       for (const combo of combos) {
+        if (combo.id.endsWith("-render")) continue;
+
         const isMatch = combo.label?.text.toLowerCase().includes(lowerValue);
         if (isMatch) {
           if (!combo.highlighted) {

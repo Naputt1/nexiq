@@ -171,6 +171,12 @@ export class GraphRenderer {
       case "combo-radius-change":
         this.handleComboRadiusChange(params.id, params.edgeIds);
         break;
+      case "combo-drag-end":
+      case "node-drag-end":
+      case "layout-change":
+      case "child-moved":
+        // These events are handled elsewhere or don't require immediate visual updates in the renderer
+        break;
     }
   }
 
@@ -390,6 +396,11 @@ export class GraphRenderer {
       this.graph.comboDragMove(combo.id, e);
     });
 
+    group.on("dragend", (e) => {
+      e.cancelBubble = true;
+      this.graph.comboDragEnd(combo.id, e);
+    });
+
     // Background Circle
     const radius = combo.collapsed
       ? combo.collapsedRadius
@@ -498,6 +509,15 @@ export class GraphRenderer {
         this.graph.comboChildNodeMove(node.combo, node.id, e);
       } else {
         this.graph.nodeDragMove(node.id, e);
+      }
+    });
+
+    group.on("dragend", (e) => {
+      e.cancelBubble = true;
+      if (node.combo) {
+        this.graph.comboChildNodeEnd(node.combo, node.id);
+      } else {
+        this.graph.nodeDragEnd(node.id, e);
       }
     });
 
