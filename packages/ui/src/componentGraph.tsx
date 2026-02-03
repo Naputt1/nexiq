@@ -112,21 +112,58 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             ui: variable.ui?.renders?.[`${variable.id}-render`],
           });
 
-          for (const stateID of variable.states) {
-            const state = variable.var[stateID];
-            if (state == null || state.kind !== "state") continue;
+          // for (const stateID of variable.states) {
+          //   const state = variable.var[stateID];
+          //   if (state == null || state.kind !== "state") continue;
 
-            nodes.push({
-              id: state.id,
-              label: {
-                text: state.value,
-              },
-              type: "state",
-              color: "red",
-              combo: variable.id,
-              fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
-              ui: state.ui,
-            });
+          //   nodes.push({
+          //     id: state.id,
+          //     label: {
+          //       text: state.value,
+          //     },
+          //     type: "state",
+          //     color: "red",
+          //     combo: variable.id,
+          //     fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
+          //     ui: state.ui,
+          //   });
+          // }
+
+          for (const v of Object.values(variable.var)) {
+            if (v.kind == "state") {
+              nodes.push({
+                id: v.id,
+                label: {
+                  text: v.value,
+                },
+                type: "state",
+                color: "red",
+                combo: variable.id,
+                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                ui: v.ui,
+              });
+            } else if (v.kind == "memo") {
+              nodes.push({
+                id: v.id,
+                label: {
+                  text: v.name,
+                },
+                type: "memo",
+                color: "red",
+                combo: variable.id,
+                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                ui: v.ui,
+              });
+
+              for (const dep of v.reactDeps) {
+                edges.push({
+                  id: `${dep.id}-${v.id}`,
+                  source: dep.id,
+                  target: v.id,
+                  combo: variable.id,
+                });
+              }
+            }
           }
 
           for (const effect of Object.values(variable.effects)) {
@@ -138,10 +175,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
             });
 
-            for (const dep of effect.dependencies) {
+            for (const dep of effect.reactDeps) {
+              if (dep.id == "") continue;
+
               edges.push({
-                id: `${dep}-${effect.id}`,
-                source: dep,
+                id: `${dep.id}-${effect.id}`,
+                source: dep.id,
                 target: effect.id,
                 combo: variable.id,
               });
@@ -328,7 +367,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   useEffect(() => {
     hasRestoredViewport.current = false; // Reset flag when project changes
     loadState(projectPath);
-  }, [projectPath, selectedSubProject, loadState]);
+  }, [projectPath, loadState]);
 
   // Auto-save state
   const debouncedSaveState = useMemo(

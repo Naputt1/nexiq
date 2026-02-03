@@ -2,7 +2,9 @@ import type {
   ComponentFileVarReact2,
   ComponentFileVarReactFunction,
   EffectInfo,
+  Memo,
   PropData,
+  ReactDependency,
   ReactFunctionVar,
   State,
 } from "shared";
@@ -10,12 +12,14 @@ import { newUUID } from "../../utils/uuid.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 import { StateVariable } from "./state.js";
-import { isStateVariable } from "./type.js";
+import { isMemoVariable, isStateVariable } from "./type.js";
+import { MemoVariable } from "./memo.js";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
 > extends BaseFunctionVariable<TKind> {
   states: Set<string> = new Set();
+  memos: Set<string> = new Set();
   props: PropData[];
   hooks: string[];
   effects: Record<string, EffectInfo>;
@@ -61,38 +65,72 @@ export abstract class ReactFunctionVariable<
     this.states.add(id);
   }
 
+  public addMemo(memo: Omit<Memo, "id">): MemoVariable {
+    const id = newUUID();
+
+    this.resolveReactDependencies(memo.reactDeps);
+
+    const memoVariablle = new MemoVariable(
+      {
+        id: id,
+        name: memo.value,
+        dependencies: {},
+        ...memo,
+      },
+      this.file,
+    );
+
+    this.var.set(id, memoVariablle);
+    this.memos.add(id);
+
+    return memoVariablle;
+  }
+
   public addHook(hook: string) {
     this.hooks.push(hook);
   }
 
-  public addEffect(effect: Omit<EffectInfo, "id">) {
-    const newDependencies: string[] = [];
-    outer: for (const dep of effect.dependencies) {
+  public resolveReactDependencies(reactDeps: ReactDependency[]) {
+    outer: for (const dep of reactDeps) {
       for (const stateID of this.states) {
         const state = this.var.get(stateID);
         if (state == null || !isStateVariable(state)) continue;
 
-        if (state.value === dep) {
-          newDependencies.push(state.id);
+        if (state.value === dep.name || state.setter === dep.name) {
+          dep.id = state.id;
+          continue outer;
+        }
+      }
+
+      for (const memoID of this.memos) {
+        const memo = this.var.get(memoID);
+        if (memo == null || !isMemoVariable(memo)) continue;
+
+        if (memo.name === dep.name) {
+          dep.id = memo.id;
           continue outer;
         }
       }
 
       for (const prop of this.props) {
-        if (prop.name == dep) {
-          newDependencies.push(dep);
+        if (prop.name == dep.name) {
+          // TODO: add id to props
+          // dep.id = prop.id;
           continue outer;
         }
       }
 
       debugger;
     }
+  }
+
+  public addEffect(effect: Omit<EffectInfo, "id">) {
+    this.resolveReactDependencies(effect.reactDeps);
 
     const id = newUUID();
     this.effects[id] = {
       id,
       ...effect,
-      dependencies: newDependencies,
     };
   }
 

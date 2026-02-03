@@ -10,6 +10,7 @@ import type {
   DataEdge,
   EffectInfo,
   JsonData,
+  Memo,
   TypeData,
   TypeDataArray,
   TypeDataDeclare,
@@ -79,7 +80,7 @@ export class File {
   tsTypes: Map<string, TypeDataDeclare>;
   var: Map<string, Variable>;
 
-  scopes = new Set<Variable>();
+  scopes = new Set<Variable<"function">>();
 
   private init: boolean = true;
 
@@ -141,7 +142,7 @@ export class File {
     assert(v != null, "Variable not found");
 
     this.var.set(v.id, v);
-    if (v.type === "function") {
+    if (isBaseFunctionVariable(v)) {
       this.scopes.add(v);
     }
 
@@ -367,7 +368,7 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
-    if (variable.type === "function") {
+    if (isBaseFunctionVariable(variable)) {
       this.scopes.add(variable);
     }
 
@@ -406,6 +407,15 @@ export class File {
 
       return variable.id;
     }
+  }
+
+  public addMemo(loc: VariableLoc, memo: Omit<Memo, "id">) {
+    const component = this.getHookInfoFromLoc(loc);
+    assert(component != null, "Component not found");
+
+    const variable = component.addMemo(memo);
+    this.scopes.add(variable);
+    this.locIdsMap.set(this.getLocalId(variable), variable);
   }
 
   private __getEdgesRaw(variable: ComponentFileVarComponent): DataEdge[] {
@@ -476,6 +486,20 @@ export class File {
 
   public getVariable(loc: VariableLoc): Variable | undefined {
     return this.locIdsMap.get(`${loc.line}@${loc.column}`);
+  }
+
+  public getHookInfoFromLoc(
+    loc: VariableLoc,
+  ): ReactFunctionVariable | undefined {
+    const variable = this.getVariable(loc);
+    if (
+      variable &&
+      (isHookVariable(variable) || isComponentVariable(variable))
+    ) {
+      return variable;
+    }
+
+    return undefined;
   }
 
   public getData(): ComponentFile {
@@ -822,6 +846,14 @@ export class FileDB {
     return file.addVariable(variable, parentPath);
   }
 
+  public addMemo(fileName: string, loc: VariableLoc, memo: Omit<Memo, "id">) {
+    const file = this.get(fileName);
+
+    return file.addMemo(loc, {
+      ...memo,
+    });
+  }
+
   public getComponent(
     fileName: string,
     id: string,
@@ -847,15 +879,7 @@ export class FileDB {
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
     const file = this.get(fileName);
-    const variable = file.getVariable(loc);
-    if (
-      variable &&
-      (isHookVariable(variable) || isComponentVariable(variable))
-    ) {
-      return variable;
-    }
-
-    return undefined;
+    return file.getHookInfoFromLoc(loc);
   }
 
   public getComponentFromLoc(
