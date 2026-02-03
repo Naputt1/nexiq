@@ -6,11 +6,13 @@ interface AppState {
   selectedId: string | null;
   isSidebarOpen: boolean;
   isLoaded: boolean;
+  viewport: { x: number; y: number; zoom: number } | null;
   
   setSelectedSubProject: (path: string | null) => void;
   setCenteredItemId: (id: string | null) => void;
   setSelectedId: (id: string | null) => void;
   setIsSidebarOpen: (open: boolean) => void;
+  setViewport: (viewport: { x: number; y: number; zoom: number } | null) => void;
   
   // Persistence helpers
   loadState: (projectRoot: string) => Promise<void>;
@@ -23,11 +25,13 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   selectedId: null,
   isSidebarOpen: false,
   isLoaded: false,
+  viewport: null,
 
   setSelectedSubProject: (path) => set({ selectedSubProject: path }),
   setCenteredItemId: (id) => set({ centeredItemId: id }),
   setSelectedId: (id) => set({ selectedId: id }),
   setIsSidebarOpen: (open) => set({ isSidebarOpen: open }),
+  setViewport: (viewport) => set({ viewport }),
 
   loadState: async (projectRoot: string) => {
     set({ isLoaded: false });
@@ -38,6 +42,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         centeredItemId: state.centeredItemId || null,
         selectedId: state.selectedId || null,
         isSidebarOpen: state.isSidebarOpen ?? false,
+        viewport: state.viewport || null,
         isLoaded: true,
       });
     } else {
@@ -47,13 +52,14 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         centeredItemId: null,
         selectedId: null,
         isSidebarOpen: false,
+        viewport: null,
         isLoaded: true,
       });
     }
   },
 
   saveState: async (projectRoot: string) => {
-    const { selectedSubProject, centeredItemId, selectedId, isSidebarOpen, isLoaded } = get();
+    const { selectedSubProject, centeredItemId, selectedId, isSidebarOpen, viewport, isLoaded } = get();
     if (!isLoaded) return; // Don't save until we've loaded
 
     await window.ipcRenderer.invoke("save-state", projectRoot, {
@@ -61,6 +67,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       centeredItemId,
       selectedId,
       isSidebarOpen,
+      viewport,
     });
   },
 }));

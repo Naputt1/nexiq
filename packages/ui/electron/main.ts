@@ -15,6 +15,7 @@ import type {
   ProjectStatus,
   ReactMapConfig,
 } from "./types";
+import { type JsonData, type ComponentFileVar } from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -270,7 +271,10 @@ ipcMain.handle(
   "save-project-config",
   async (
     _,
-    { config, directoryPath }: { config: ReactMapConfig; directoryPath: string },
+    {
+      config,
+      directoryPath,
+    }: { config: ReactMapConfig; directoryPath: string },
   ) => {
     try {
       const configPath = path.join(directoryPath, "react.map.config.json");
@@ -320,6 +324,85 @@ ipcMain.handle(
 
     try {
       const graph = analyzeProject(targetPath, outputPath);
+
+      // Merge with existing position data if available
+      if (fs.existsSync(outputPath)) {
+        try {
+          const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
+
+          // Helper to recurse and map positions
+          const positionMap = new Map<string, { x: number; y: number }>();
+
+          // Wait, the output of analyzeProject is 'graph', but here we read the JSON.
+          // The JSON structure depends on what analyzeProject returns.
+          // Based on hook.ts, we have graphData.nodes, graphData.combos in the flattened structure usually?
+          // But analyzeProject returns a structure that hook.ts parses into flat arrays or nested?
+          // hook.ts: loadData parses it.
+          // line 167: for (const file of Object.values(graphData.files))
+          // line 168:   for (const variable of Object.values(file.var))
+          // It seems the stored JSON has `files` and nested `var`.
+
+          // Let's traverse the new graph and apply positions from existingData.
+
+          // We need to traverse efficiently.
+          // Let's build a map of IDs to positions from existingData first.
+
+          // traverse existingData
+          const traverse = (container: JsonData | null) => {
+            if (!container) return;
+            const files = container.files || {};
+            for (const file of Object.values(files)) {
+              for (const variable of Object.values(file.var || {})) {
+                collectPos(variable);
+              }
+            }
+          };
+
+          const collectPos = (item: ComponentFileVar) => {
+            if (item.ui?.x !== undefined && item.ui?.y !== undefined) {
+              positionMap.set(item.id, { x: item.ui.x, y: item.ui.y });
+            }
+            if ("var" in item && item.var) {
+              for (const v of Object.values(item.var)) {
+                collectPos(v);
+              }
+            }
+          };
+
+          traverse(existingData);
+
+          // Now apply to new graph
+          const applyPos = (item: ComponentFileVar) => {
+            const pos = positionMap.get(item.id);
+            if (pos) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              item.ui.x = pos.x;
+              item.ui.y = pos.y;
+              item.ui.isLayoutCalculated = true; // Mark as calculated
+            }
+            if ("var" in item && item.var) {
+              for (const v of Object.values(item.var)) {
+                applyPos(v);
+              }
+            }
+          };
+
+          const traverseApply = (container: JsonData | null) => {
+            if (!container) return;
+            const files = container.files || {};
+            for (const file of Object.values(files)) {
+              for (const variable of Object.values(file.var || {})) {
+                applyPos(variable);
+              }
+            }
+          };
+
+          traverseApply(graph as unknown as JsonData);
+        } catch (e) {
+          console.error("Failed to merge positions", e);
+        }
+      }
+
       fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
       console.log("Analysis success, written to:", outputPath);
       return name;
@@ -360,18 +443,82 @@ ipcMain.handle("read-state", async (_, projectRoot: string) => {
   return null;
 });
 
-ipcMain.handle("save-state", async (_, projectRoot: string, state: AppStateData) => {
-  try {
-    const dotDir = path.join(projectRoot, ".react-map");
-    if (!fs.existsSync(dotDir)) {
-      fs.mkdirSync(dotDir, { recursive: true });
+ipcMain.handle(
+  "save-state",
+  async (_, projectRoot: string, state: AppStateData) => {
+    try {
+      const dotDir = path.join(projectRoot, ".react-map");
+      if (!fs.existsSync(dotDir)) {
+        fs.mkdirSync(dotDir, { recursive: true });
+      }
+      const statePath = path.join(dotDir, "state.json");
+      fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+      return true;
+    } catch (error) {
+      console.error("Error saving state.json", error);
+      return false;
     }
-    const statePath = path.join(dotDir, "state.json");
-    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
-    return true;
-  } catch (error) {
-    console.error("Error saving state.json", error);
-    return false;
-  }
-});
+  },
+);
 
+ipcMain.handle(
+  "update-graph-position",
+  async (
+    _,
+    projectRoot: string,
+    analysisPath: string,
+    positions: Record<string, { x: number; y: number }>,
+  ) => {
+    const targetPath = analysisPath;
+    const configRoot = projectRoot || analysisPath;
+    const name = path.basename(targetPath);
+    const graphPath = path.join(configRoot, ".react-map", `${name}.json`);
+
+    if (!fs.existsSync(graphPath)) return false;
+
+    try {
+      const graphData = JSON.parse(fs.readFileSync(graphPath, "utf-8")) as JsonData;
+
+      // Helper to update position recursively
+      const updatePos = (item: ComponentFileVar) => {
+        if (positions[item.id]) {
+          if (!item.ui) item.ui = { x: 0, y: 0 };
+          item.ui.x = positions[item.id].x;
+          item.ui.y = positions[item.id].y;
+        }
+
+        // Update renders positions on the parent component/hook
+        if ("renders" in item && item.renders) {
+          for (const render of Object.values(item.renders)) {
+            if (positions[render.id]) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[render.id] = {
+                x: positions[render.id].x,
+                y: positions[render.id].y,
+              };
+            }
+          }
+        }
+
+        if ("var" in item && item.var) {
+          for (const v of Object.values(item.var)) {
+            updatePos(v);
+          }
+        }
+      };
+
+      for (const file of Object.values(graphData.files)) {
+        for (const variable of Object.values(file.var)) {
+          updatePos(variable);
+        }
+      }
+
+      fs.writeFileSync(graphPath, JSON.stringify(graphData, null, 2));
+      return true;
+    } catch (e) {
+      console.error("Failed to update graph positions", e);
+      return false;
+    }
+  },
+);

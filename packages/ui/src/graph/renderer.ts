@@ -12,6 +12,7 @@ export class GraphRenderer {
   layer: Konva.Layer;
   graph: GraphData;
   onSelect?: (id: string) => void;
+  onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void;
 
   private items = new Map<string, Konva.Group | Konva.Circle | Konva.Arrow>();
   private edges = new Map<string, Konva.Arrow>();
@@ -28,6 +29,7 @@ export class GraphRenderer {
     width: number,
     height: number,
     onSelect?: (id: string) => void,
+    onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void,
   ) {
     this.stage = new Konva.Stage({
       container,
@@ -40,6 +42,7 @@ export class GraphRenderer {
     this.stage.add(this.layer);
     this.graph = graph;
     this.onSelect = onSelect;
+    this.onViewportChange = onViewportChange;
 
     this.setupStageEvents();
     this.bindId = this.graph.bind(this.handleGraphEvent.bind(this));
@@ -90,6 +93,21 @@ export class GraphRenderer {
     });
   }
 
+  setViewport(x: number, y: number, zoom: number) {
+    this.stage.position({ x, y });
+    this.stage.scale({ x: zoom, y: zoom });
+  }
+
+  private triggerViewportChange() {
+    if (this.onViewportChange) {
+      this.onViewportChange({
+        x: this.stage.x(),
+        y: this.stage.y(),
+        zoom: this.stage.scaleX(),
+      });
+    }
+  }
+
   private setupStageEvents() {
     const stage = this.stage;
 
@@ -122,6 +140,11 @@ export class GraphRenderer {
       };
 
       stage.position(newPos);
+      this.triggerViewportChange();
+    });
+
+    stage.on("dragend", () => {
+      this.triggerViewportChange();
     });
 
     stage.on("mouseenter", () => (stage.container().style.cursor = "grab"));
