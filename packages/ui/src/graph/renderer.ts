@@ -173,9 +173,11 @@ export class GraphRenderer {
         break;
       case "combo-drag-end":
       case "node-drag-end":
+        this.render();
+        break;
       case "layout-change":
       case "child-moved":
-        // These events are handled elsewhere or don't require immediate visual updates in the renderer
+        this.handleLayoutChange();
         break;
     }
   }
@@ -200,9 +202,6 @@ export class GraphRenderer {
     }
 
     const startRadius = circle.radius();
-    const targetRadius = combo.collapsed
-      ? combo.collapsedRadius
-      : combo.expandedRadius;
 
     // Stop any existing animation on this combo
     if (this.animations.has(id)) {
@@ -250,7 +249,10 @@ export class GraphRenderer {
       // EaseInOut
       const t = rate < 0.5 ? 2 * rate * rate : -1 + (4 - 2 * rate) * rate;
 
-      const currentR = startRadius + (targetRadius - startRadius) * t;
+      const currentTargetRadius = combo.collapsed
+        ? combo.collapsedRadius
+        : combo.expandedRadius;
+      const currentR = startRadius + (currentTargetRadius - startRadius) * t;
 
       circle.radius(currentR);
       this.graph.comboRadiusChange(id, currentR);
@@ -266,7 +268,7 @@ export class GraphRenderer {
         this.animations.delete(id);
         this.animatingCombos.delete(id);
         // Ensure final state
-        circle.radius(targetRadius);
+        circle.radius(currentTargetRadius);
 
         // Cleanup clip
         contentGroup.clipFunc(null);
@@ -324,11 +326,49 @@ export class GraphRenderer {
       const edgeData = this.graph.getEdge(eid);
       const arrow = this.edges.get(eid);
       if (edgeData && arrow) {
-        arrow.points(edgeData.points);
+        if (edgeData.points.length < 4) {
+          arrow.visible(false);
+        } else {
+          arrow.visible(true);
+          arrow.points(edgeData.points);
+        }
       }
     }
   }
 
+
+  private handleLayoutChange() {
+    this.combos.forEach((group, id) => {
+      const combo = this.graph.getCombo(id);
+      if (combo) {
+        group.position({ x: combo.x, y: combo.y });
+        // Also update radius if not animating
+        if (!this.animatingCombos.has(id)) {
+          const circle = group.findOne(`#bg-${id}`) as Konva.Circle;
+          if (circle) {
+            const radius = combo.collapsed
+              ? combo.collapsedRadius
+              : combo.expandedRadius;
+            circle.radius(radius);
+            const label = group.findOne(`#label-${id}`) as Konva.Text;
+            if (label) label.y(radius + 10);
+          }
+        }
+      }
+    });
+
+    this.items.forEach((item, id) => {
+      if (item instanceof Konva.Group && !this.combos.has(id)) {
+        const node = this.graph.getNode(id);
+        if (node) {
+          item.position({ x: node.x, y: node.y });
+        }
+      }
+    });
+
+    this.updateEdges(Array.from(this.edges.keys()));
+    this.layer.batchDraw();
+  }
 
   render() {
     this.stopAllAnimations();

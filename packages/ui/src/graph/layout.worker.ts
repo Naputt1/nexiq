@@ -15,15 +15,15 @@ export type LayoutResponse = {
   nodes: { id: string; x: number; y: number }[];
 };
 
-self.onmessage = (e: MessageEvent<LayoutRequest>) => {
-  const { type, id, nodes, edges, options, iterations = 300 } = e.data;
+self.onmessage = async (e: MessageEvent<LayoutRequest>) => {
+  const { type, id, nodes, edges, options, iterations = 1000 } = e.data;
 
   if (type === "layout") {
     const layout = new ForceLayout(nodes, edges, options);
-    layout.runSteps(iterations);
+    await layout.runSteps(iterations);
 
     const positions = layout.getPositions();
-    
+
     self.postMessage({
       type: "layout-result",
       id,
