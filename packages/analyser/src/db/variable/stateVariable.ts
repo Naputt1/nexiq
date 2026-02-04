@@ -1,16 +1,13 @@
 import type { ComponentFileVarState } from "shared";
 import type { File } from "../fileDB.js";
-import { Variable } from "./variable.js";
+import { ReactVariable } from "./reactVariable.js";
 
-export class StateVariable extends Variable<"data", "state"> {
+export class StateVariable extends ReactVariable<"data", "state"> {
   value: string;
   setter: string | undefined;
 
   constructor(
-    options: Omit<
-      ComponentFileVarState,
-      "kind" | "var" | "components" | "file" | "type"
-    >,
+    options: Omit<ComponentFileVarState, "kind" | "file" | "type">,
     file: File,
   ) {
     super({ ...options, kind: "state", type: "data" }, file);

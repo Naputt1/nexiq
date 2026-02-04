@@ -62,7 +62,8 @@ export interface DetailItemData {
     | "state"
     | "render"
     | "effect"
-    | "memo";
+    | "memo"
+    | "ref";
   typeParams?: TypeDataParam[];
   extends?: string[];
   ui?: {
@@ -1269,7 +1270,9 @@ export class GraphData {
   public getVisiblePoint(
     id: string,
     limitId?: string,
-  ): { item: NodeGraphData | ComboGraphData; isCollapsedAncestor: boolean } | undefined {
+  ):
+    | { item: NodeGraphData | ComboGraphData; isCollapsedAncestor: boolean }
+    | undefined {
     const item = this.getPointByID(id);
     if (!item) return undefined;
 

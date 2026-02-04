@@ -163,6 +163,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   combo: variable.id,
                 });
               }
+            } else if (v.kind == "ref") {
+              nodes.push({
+                id: v.id,
+                label: {
+                  text: v.name,
+                },
+                type: "ref",
+                color: "red",
+                combo: variable.id,
+                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                ui: v.ui,
+              });
             }
           }
 

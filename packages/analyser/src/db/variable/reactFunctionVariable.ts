@@ -6,25 +6,29 @@ import type {
   PropData,
   ReactDependency,
   ReactFunctionVar,
+  RefData,
   State,
 } from "shared";
 import { newUUID } from "../../utils/uuid.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
-import { StateVariable } from "./state.js";
-import { isMemoVariable, isStateVariable } from "./type.js";
+import { StateVariable } from "./stateVariable.js";
+import { isMemoVariable, isRefVariable, isStateVariable } from "./type.js";
 import { MemoVariable } from "./memo.js";
+import { RefVariable } from "./refVariable.js";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
 > extends BaseFunctionVariable<TKind> {
   states: Set<string> = new Set();
   memos: Set<string> = new Set();
+  refs: Set<string> = new Set();
   props: PropData[];
   hooks: string[];
   effects: Record<string, EffectInfo>;
 
   private stateCache: Record<string, string> = {};
+  private refCache: Record<string, string> = {};
 
   constructor(
     options: Omit<
@@ -63,6 +67,31 @@ export abstract class ReactFunctionVariable<
     );
 
     this.states.add(id);
+  }
+
+  public addRef(ref: Omit<RefData, "id">): RefVariable {
+    let id: string;
+    if (ref.value in this.refCache) {
+      id = this.refCache[ref.value]!;
+      delete this.refCache[ref.value];
+    } else {
+      id = newUUID();
+    }
+
+    const refVariable = new RefVariable(
+      {
+        id: id,
+        name: ref.value,
+        dependencies: {},
+        ...ref,
+      },
+      this.file,
+    );
+
+    this.var.set(id, refVariable);
+    this.refs.add(id);
+
+    return refVariable;
   }
 
   public addMemo(memo: Omit<Memo, "id">): MemoVariable {
@@ -112,6 +141,16 @@ export abstract class ReactFunctionVariable<
         }
       }
 
+      for (const refID of this.refs) {
+        const ref = this.var.get(refID);
+        if (ref == null || !isRefVariable(ref)) continue;
+
+        if (ref.name === dep.name) {
+          dep.id = ref.id;
+          continue outer;
+        }
+      }
+
       for (const prop of this.props) {
         if (prop.name == dep.name) {
           // TODO: add id to props
@@ -142,6 +181,12 @@ export abstract class ReactFunctionVariable<
       if (state == null || !isStateVariable(state)) continue;
 
       this.stateCache[state.value] = stateID;
+    }
+
+    for (const variable of this.var.values()) {
+      if (isRefVariable(variable)) {
+        this.refCache[variable.name] = variable.id;
+      }
     }
   }
 

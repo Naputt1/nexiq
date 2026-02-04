@@ -1,5 +1,11 @@
 import type { TypeDataDeclare } from "./types/index.js";
-import type { TypeData } from "./types/primitive.js";
+import type {
+  TypeData,
+  TypeDataLiteralTypeLiteral,
+  TypeDataNull,
+  TypeDataRef,
+  TypeDataUndefined,
+} from "./types/primitive.js";
 
 export type ComponentFileImport = {
   localName: string;
@@ -20,6 +26,12 @@ export interface State extends ComponentLoc {
   id: string;
   value: string;
   setter?: string;
+}
+
+export interface RefData extends ComponentLoc {
+  id: string;
+  value: string;
+  defaultData: PropDataType;
 }
 
 export interface Memo extends ComponentLoc, ReactDependencies {
@@ -43,6 +55,12 @@ export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
   scope?: VariableScope;
 }
+
+export type PropDataType =
+  | TypeDataLiteralTypeLiteral
+  | TypeDataRef
+  | TypeDataNull
+  | TypeDataUndefined;
 
 export interface PropData {
   name: string;
@@ -93,7 +111,7 @@ export interface VariableScope {
 export type VarType = "function" | "data" | "jsx";
 
 export type ReactFunctionVar = "component" | "hook";
-export type ReactStateVar = "state";
+export type ReactStateVar = "state" | "ref";
 export type ReactWithCallbackVar = "memo" | "callback";
 export type ReactVarKind =
   | ReactFunctionVar
@@ -180,6 +198,10 @@ export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
   setter?: string;
 };
 
+export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {
+  defaultData: PropDataType;
+};
+
 export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook"> &
   HookInfo & {
     kind: "hook";
@@ -215,6 +237,7 @@ export type ComponentFileVarFunction =
 export type ComponentFileVar =
   | ComponentFileVarComponent
   | ComponentFileVarState
+  | ComponentFileVarRef
   | ComponentFileVarNormal
   | ComponentFileVarHook
   | ComponentFileVarCallback
