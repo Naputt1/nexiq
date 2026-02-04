@@ -16,6 +16,7 @@ import type {
   ComponentFileVarNormalFunction,
   ComponentFileVarNormalData,
   Memo,
+  RefData,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -205,10 +206,21 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    if (component == null) debugger;
     assert(component != null, "Component not found");
 
     component.addState(state);
+  }
+
+  public comAddRef(
+    loc: VariableLoc,
+    fileName: string,
+    ref: Omit<RefData, "id">,
+  ) {
+    const component = this.files.getHookInfoFromLoc(fileName, loc);
+
+    assert(component != null, "Component not found");
+
+    component.addRef(ref);
   }
 
   public comAddMemo(
