@@ -15,7 +15,12 @@ import type {
   ProjectStatus,
   ReactMapConfig,
 } from "./types";
-import { type JsonData, type ComponentFileVar } from "shared";
+import {
+  type JsonData,
+  type ComponentFileVar,
+  type ComponentInfoRender,
+  type EffectInfo,
+} from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -331,7 +336,10 @@ ipcMain.handle(
           const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
 
           // Helper to recurse and map positions
-          const positionMap = new Map<string, { x: number; y: number }>();
+          const positionMap = new Map<
+            string,
+            { x: number; y: number; isLayoutCalculated?: boolean }
+          >();
 
           // Wait, the output of analyzeProject is 'graph', but here we read the JSON.
           // The JSON structure depends on what analyzeProject returns.
@@ -360,8 +368,24 @@ ipcMain.handle(
 
           const collectPos = (item: ComponentFileVar) => {
             if (item.ui?.x !== undefined && item.ui?.y !== undefined) {
-              positionMap.set(item.id, { x: item.ui.x, y: item.ui.y });
+              positionMap.set(item.id, {
+                x: item.ui.x,
+                y: item.ui.y,
+                isLayoutCalculated: item.ui.isLayoutCalculated,
+              });
             }
+
+            // Collect renders and effects positions
+            if (item.ui?.renders) {
+              for (const [id, pos] of Object.entries(item.ui.renders)) {
+                positionMap.set(id, {
+                  x: pos.x,
+                  y: pos.y,
+                  isLayoutCalculated: true,
+                });
+              }
+            }
+
             if ("var" in item && item.var) {
               for (const v of Object.values(item.var)) {
                 collectPos(v);
@@ -378,8 +402,45 @@ ipcMain.handle(
               if (!item.ui) item.ui = { x: 0, y: 0 };
               item.ui.x = pos.x;
               item.ui.y = pos.y;
-              item.ui.isLayoutCalculated = true; // Mark as calculated
+              item.ui.isLayoutCalculated = pos.isLayoutCalculated;
             }
+
+            // Apply renders and effects positions
+            const renders = "renders" in item ? item.renders : undefined;
+            const effects = "effects" in item ? item.effects : undefined;
+
+            if (renders || effects) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              if (!item.ui.renders) item.ui.renders = {};
+
+              const applyItems = (
+                items: Record<string, ComponentInfoRender | EffectInfo>,
+              ) => {
+                for (const r of Object.values(items)) {
+                  const rPos = positionMap.get(r.id);
+                  if (rPos) {
+                    item.ui!.renders![r.id] = {
+                      x: rPos.x,
+                      y: rPos.y,
+                    };
+                  }
+                }
+              };
+
+              if (renders) applyItems(renders);
+              if (effects) applyItems(effects);
+
+              // Special handle for the render combo itself
+              const renderComboId = `${item.id}-render`;
+              const rcPos = positionMap.get(renderComboId);
+              if (rcPos) {
+                item.ui!.renders![renderComboId] = {
+                  x: rcPos.x,
+                  y: rcPos.y,
+                };
+              }
+            }
+
             if ("var" in item && item.var) {
               for (const v of Object.values(item.var)) {
                 applyPos(v);
@@ -468,6 +529,7 @@ ipcMain.handle(
     projectRoot: string,
     analysisPath: string,
     positions: Record<string, { x: number; y: number; radius?: number }>,
+    contextId?: string,
   ) => {
     const targetPath = analysisPath;
     const configRoot = projectRoot || analysisPath;
@@ -477,7 +539,9 @@ ipcMain.handle(
     if (!fs.existsSync(graphPath)) return false;
 
     try {
-      const graphData = JSON.parse(fs.readFileSync(graphPath, "utf-8")) as JsonData;
+      const graphData = JSON.parse(
+        fs.readFileSync(graphPath, "utf-8"),
+      ) as JsonData;
 
       // Helper to update position recursively
       const updatePos = (item: ComponentFileVar) => {
@@ -485,17 +549,35 @@ ipcMain.handle(
           if (!item.ui) item.ui = { x: 0, y: 0 };
           item.ui.x = positions[item.id].x;
           item.ui.y = positions[item.id].y;
+
+          // If this item is the context combo, it means its children layout is done
+          if (contextId && item.id === contextId) {
+            item.ui.isLayoutCalculated = true;
+          } else if (contextId === "root") {
+            // For root layout, only nodes (non-combos) are "calculated" in terms of their final pos
+            if (item.kind !== "component" && item.kind !== "hook") {
+              item.ui.isLayoutCalculated = true;
+            }
+          } else if (!contextId) {
+            // Full state save from UI: everything is calculated
+            item.ui.isLayoutCalculated = true;
+          } else {
+            // If it's a child being positioned by a combo layout, it's "calculated"
+            item.ui.isLayoutCalculated = true;
+          }
+
           if (positions[item.id].radius !== undefined) {
             item.ui.radius = positions[item.id].radius;
           }
         }
 
         // Update renders positions on the parent component/hook
-        if ("renders" in item && item.renders) {
-          for (const render of Object.values(item.renders)) {
-            // Check both original ID and the composite ID used in the UI
+        const renders = "renders" in item ? item.renders : undefined;
+        if (renders) {
+          for (const render of Object.values(renders)) {
+            // Use the composite ID that matches the UI node
             const compositeId = `${item.id}-render-${render.id}`;
-            const pos = positions[render.id] || positions[compositeId];
+            const pos = positions[compositeId];
 
             if (pos) {
               if (!item.ui) item.ui = { x: 0, y: 0 };
@@ -522,15 +604,17 @@ ipcMain.handle(
         }
 
         // Handle effect nodes (stored in parent's ui.renders for now as effects don't have their own ui property)
-        if ("effects" in item && item.effects) {
-          for (const effect of Object.values(item.effects)) {
-            if (positions[effect.id]) {
+        const effects = "effects" in item ? item.effects : undefined;
+        if (effects) {
+          for (const effect of Object.values(effects)) {
+            const pos = positions[effect.id];
+            if (pos) {
               if (!item.ui) item.ui = { x: 0, y: 0 };
               if (!item.ui.renders) item.ui.renders = {};
               item.ui.renders[effect.id] = {
-                x: positions[effect.id].x,
-                y: positions[effect.id].y,
-                radius: positions[effect.id].radius,
+                x: pos.x,
+                y: pos.y,
+                radius: pos.radius,
               };
             }
           }

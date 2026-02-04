@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc || true && vite build && electron-builder",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@antv/g6": "^5.0.50",

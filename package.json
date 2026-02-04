@@ -7,6 +7,7 @@
   "scripts": {
     "dev:ui": "pnpm --filter=ui dev",
     "test:analyze": "pnpm --filter=analyser test",
+    "test:ui": "pnpm --filter=ui test",
     "snapshot:analyze": "pnpm --filter=analyser snapshot"
   },
   "keywords": [],

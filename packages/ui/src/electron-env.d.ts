@@ -59,7 +59,8 @@ declare global {
         channel: "update-graph-position",
         projectRoot: string,
         analysisPath: string,
-        positions: Record<string, { x: number; y: number }>,
+        positions: Record<string, { x: number; y: number; radius?: number }>,
+        contextId?: string,
       ): Promise<boolean>;
     };
   }
