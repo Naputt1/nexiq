@@ -201,6 +201,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
                   ui: variable.ui?.renders?.[render.id],
                 });
+
+                edges.push({
+                  id: `${variable.id}-render-${render.id}-${v.id}`,
+                  source: `${variable.id}-render-${render.id}`,
+                  target: v.id,
+                });
                 break;
               }
             }
@@ -227,6 +233,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         settypeData(newTypeData);
 
         for (const e of Object.values(graphData.edges)) {
+          if (e.label === "render") continue;
+
           edges.push({
             id: `${e.from}-${e.to}`,
             source: e.from,
@@ -264,7 +272,10 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const savePositions = debounce(() => {
       const allNodes = graph.getAllNodes();
       const allCombos = graph.getAllCombos();
-      const positions: Record<string, { x: number; y: number; radius?: number }> = {};
+      const positions: Record<
+        string,
+        { x: number; y: number; radius?: number }
+      > = {};
 
       allNodes.forEach((n) => {
         if (n.x !== undefined && n.y !== undefined) {

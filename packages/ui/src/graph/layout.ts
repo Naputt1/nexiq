@@ -114,50 +114,51 @@ export class ForceLayout {
       nodes[i].fy = 0;
     }
 
-    // 1) repulsive forces (Coulomb-like) - O(n^2)
-    // F_repulse = k * (q_i * q_j) / d^2, but we'll use a more stable formulation
+    // 1) repulsive forces (O(n^2))
     const repulseCoef = opts.repulsionStrength;
     const minNodeDist = opts.minNodeDistance;
     const collisionK = opts.collisionStrength;
+    const alpha = opts.alpha ?? 1.0;
 
     for (let i = 0; i < n; i++) {
       const ni = nodes[i];
       for (let j = i + 1; j < n; j++) {
         const nj = nodes[j];
-        const dx = ni.x - nj.x;
-        const dy = ni.y - nj.y;
-        const dist2 = dx * dx + dy * dy;
-        const dist = Math.sqrt(dist2) || 1e-6;
+        let dx = ni.x - nj.x;
+        let dy = ni.y - nj.y;
+        let dist2 = dx * dx + dy * dy;
 
-        // normalized vector
+        if (dist2 === 0) {
+          dx = Math.random() * 0.1 - 0.05;
+          dy = Math.random() * 0.1 - 0.05;
+          dist2 = dx * dx + dy * dy;
+        }
+
+        const dist = Math.sqrt(dist2);
         const ux = dx / dist;
         const uy = dy / dist;
 
-        // magnitude (tamed to avoid extreme forces)
-        let force = (repulseCoef * (ni.mass * nj.mass)) / (dist * dist + 1e-6);
+        // Repulsion: inverse-linear distance (Better for long-range convergence)
+        let force = (repulseCoef * ni.mass * nj.mass) / (dist + 1);
 
-        // Collision / Minimum distance force
-        // Effective minimum distance = global min distance + radius of both nodes
+        // Collision / Minimum distance
         const effectiveMinDist = minNodeDist + ni.radius + nj.radius;
-
         if (effectiveMinDist > 0 && dist < effectiveMinDist) {
-          // Apply extra repulsive force if closer than effectiveMinDist
-          // A simple linear spring repulsion: k * (desired - current)
           const overlap = effectiveMinDist - dist;
-          force += collisionK * overlap * 100; // *100 to make it significant
+          force += collisionK * overlap * 100;
         }
 
-        const fx = ux * force;
-        const fy = uy * force;
+        const fx = ux * force * alpha;
+        const fy = uy * force * alpha;
 
         ni.fx += fx;
         ni.fy += fy;
-        nj.fx -= fx; // equal and opposite
+        nj.fx -= fx;
         nj.fy -= fy;
       }
     }
 
-    // 2) attractive forces along edges (Hooke's law)
+    // 2) attractive forces (Hooke's law)
     for (const e of edges) {
       const a = this.lookup.get(e.source);
       const b = this.lookup.get(e.target);
@@ -168,8 +169,7 @@ export class ForceLayout {
       const desired = e.distance ?? opts.linkDistance;
       const strength = e.strength ?? opts.attractionStrength;
 
-      // Hooke: F = -k * (dist - desired)
-      const f = strength * (dist - desired);
+      const f = strength * (dist - desired) * alpha;
 
       const ux = dx / dist;
       const uy = dy / dist;
@@ -177,23 +177,22 @@ export class ForceLayout {
       const fx = ux * f;
       const fy = uy * f;
 
-      // apply to nodes (opposite directions)
       a.fx += fx;
       a.fy += fy;
       b.fx -= fx;
       b.fy -= fy;
     }
 
-    // 3) gravity to center (helps spread)
+    // 3) central gravity
     for (let i = 0; i < n; i++) {
       const node = nodes[i];
-      const gx = -node.x; // center at (0,0)
-      const gy = -node.y;
-      node.fx += gx * opts.gravity * node.mass;
-      node.fy += gy * opts.gravity * node.mass;
+      // Use alpha to cool gravity as well
+      const g = opts.gravity * alpha;
+      node.fx -= node.x * g * node.mass;
+      node.fy -= node.y * g * node.mass;
     }
 
-    // 4) integrate (explicit Euler)
+    // 4) integrate
     const dt = opts.timeStep;
     for (let i = 0; i < n; i++) {
       const node = nodes[i];
@@ -203,13 +202,12 @@ export class ForceLayout {
       node.vx += ax * dt;
       node.vy += ay * dt;
 
-      // damping
       node.vx *= opts.damping;
       node.vy *= opts.damping;
 
-      // limit displacement per tick for stability
       let dx = node.vx * dt;
       let dy = node.vy * dt;
+
       const disp = Math.sqrt(dx * dx + dy * dy);
       if (disp > opts.maxDisplacement) {
         const scale = opts.maxDisplacement / disp;
@@ -223,7 +221,7 @@ export class ForceLayout {
       node.y += dy;
     }
 
-    // cool alpha if used
+    // cool alpha
     if (opts.alpha !== undefined) {
       opts.alpha *= 1 - opts.alphaDecay;
     }
@@ -232,7 +230,7 @@ export class ForceLayout {
     if (this.onTick) {
       await this.onTick(
         nodes.map(({ id, x, y, ...rest }) => ({ id, x, y, ...rest })) as Node[],
-        this.stepCount
+        this.stepCount,
       );
     }
   }
@@ -268,8 +266,8 @@ export class ForceLayout {
   }
 
   // run a fixed number of synchronous steps (useful for testing or node)
-  runSteps(count: number): void {
-    for (let i = 0; i < count; i++) this.step();
+  async runSteps(count: number): Promise<void> {
+    for (let i = 0; i < count; i++) await this.step();
   }
 
   // convenience: get public node positions
