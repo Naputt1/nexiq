@@ -6,6 +6,7 @@ import type {
   ComponentFileVarDependency,
   Memo,
   ReactDependency,
+  RefData,
   State,
   VariableScope,
 } from "shared";
@@ -14,7 +15,7 @@ import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
 import { newUUID } from "../utils/uuid.js";
 import { getProps } from "./propExtractor.js";
-import { getType } from "./type/helper.js";
+import { getExpressionData, getType } from "./type/helper.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -222,6 +223,30 @@ export default function VariableDeclarator(
             if (parent != null) {
               componentDB.comAddMemo(parent.loc, fileName, memo);
             }
+          }
+        } else if (init.callee.name === "useRef") {
+          const id = nodePath.node.id;
+
+          if (t.isIdentifier(id)) {
+            const name = id.name;
+
+            const ref: Omit<RefData, "id"> = {
+              value: name,
+              loc,
+              defaultData:
+                init.arguments.length > 0 && t.isExpression(init.arguments[0])
+                  ? getExpressionData(init.arguments[0]) || {
+                      type: "undefined",
+                    }
+                  : { type: "undefined" },
+            };
+
+            const parent = getVariableComponentName(nodePath);
+            if (parent != null) {
+              componentDB.comAddRef(parent.loc, fileName, ref);
+            }
+          } else {
+            debugger;
           }
         }
       }

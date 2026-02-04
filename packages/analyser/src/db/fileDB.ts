@@ -43,7 +43,9 @@ import { xxh3 } from "@node-rs/xxhash";
 import { DataVariable } from "./variable/dataVariable.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
-import { StateVariable } from "./variable/state.js";
+import { StateVariable } from "./variable/stateVariable.js";
+import { RefVariable } from "./variable/refVariable.js";
+import { MemoVariable } from "./variable/memo.js";
 
 interface FileIds {
   id: string;
@@ -135,11 +137,15 @@ export class File {
       v = new HookVariable(variable, this);
     } else if (variable.kind === "state") {
       v = new StateVariable(variable, this);
+    } else if (variable.kind == "memo") {
+      v = new MemoVariable(variable, this);
+    } else if (variable.kind == "ref") {
+      v = new RefVariable(variable, this);
     } else {
       debugger;
     }
 
-    assert(v != null, "Variable not found");
+    assert(v != null, `Variable not found: ${variable.kind}`);
 
     this.var.set(v.id, v);
     if (isBaseFunctionVariable(v)) {

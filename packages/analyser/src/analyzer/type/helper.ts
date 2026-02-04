@@ -1,4 +1,5 @@
 import type {
+  PropDataType,
   TypeData,
   TypeDataFunction,
   TypeDataFunctionParameter,
@@ -541,4 +542,73 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
   return {
     type: "any",
   };
+}
+
+function getMemberExpressionNames(
+  expr: t.MemberExpression | t.Identifier,
+): string[] | null {
+  if (t.isIdentifier(expr)) {
+    return [expr.name];
+  }
+  if (t.isMemberExpression(expr)) {
+    if (t.isIdentifier(expr.property)) {
+      const left = getMemberExpressionNames(expr.object as any);
+      if (left) {
+        return [...left, expr.property.name];
+      }
+    }
+  }
+  return null;
+}
+
+export function getExpressionData(expr: t.Expression): PropDataType | null {
+  switch (expr.type) {
+    case "BooleanLiteral":
+      return {
+        type: "boolean",
+        value: expr.value,
+      };
+    case "NumericLiteral":
+      return {
+        type: "number",
+        value: expr.value,
+      };
+    case "StringLiteral":
+      return {
+        type: "string",
+        value: expr.value,
+      };
+    case "BigIntLiteral":
+      return {
+        type: "bigint",
+        value: expr.value,
+      };
+    case "NullLiteral":
+      return {
+        type: "null",
+      };
+    case "Identifier":
+      if (expr.name === "undefined") {
+        return {
+          type: "undefined",
+        };
+      }
+      return {
+        type: "ref",
+        refType: "named",
+        name: expr.name,
+      };
+    case "MemberExpression": {
+      const names = getMemberExpressionNames(expr);
+      if (names) {
+        return {
+          type: "ref",
+          refType: "qualified",
+          names,
+        };
+      }
+      break;
+    }
+  }
+  return null;
 }
