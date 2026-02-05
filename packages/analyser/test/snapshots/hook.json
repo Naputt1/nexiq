@@ -44,8 +44,8 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
-          "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+        "b5477134-0065-4c68-a44f-0302cb4457b7": {
+          "id": "b5477134-0065-4c68-a44f-0302cb4457b7",
           "name": "Effect",
           "kind": "component",
           "type": "function",
@@ -56,8 +56,8 @@
             "column": 6
           },
           "var": {
-            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
-              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+            "48b921ef-9be7-4801-bfef-adce53dccc74": {
+              "id": "48b921ef-9be7-4801-bfef-adce53dccc74",
               "name": "refData",
               "kind": "ref",
               "type": "data",
@@ -72,8 +72,8 @@
                 "value": 0
               }
             },
-            "324cabe2-fbc9-4f63-84d7-5363b2436b89": {
-              "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+            "11117530-bc3c-4414-ba48-1fffe39fbc2a": {
+              "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
               "name": "state",
               "kind": "state",
               "type": "data",
@@ -86,8 +86,8 @@
               "value": "state",
               "setter": "setState"
             },
-            "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
-              "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+            "bda8dcd0-269a-41ba-aa0b-899d955ba53a": {
+              "id": "bda8dcd0-269a-41ba-aa0b-899d955ba53a",
               "name": "memoVal",
               "kind": "memo",
               "type": "function",
@@ -110,7 +110,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+                  "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
                   "name": "state"
                 }
               ]
@@ -127,15 +127,15 @@
             }
           },
           "states": [
-            "324cabe2-fbc9-4f63-84d7-5363b2436b89"
+            "11117530-bc3c-4414-ba48-1fffe39fbc2a"
           ],
           "props": [],
           "hooks": [
-            "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+            "5e985070-ef43-47c7-be1d-e95aa196e8f5"
           ],
           "effects": {
-            "71a5333c-fbc1-4ea1-9519-dce12e5b4a87": {
-              "id": "f5a2a38c-b6e5-48ad-a4cd-60a57a95b159",
+            "15614141-51b4-44b5-af7f-e4f70d729aa0": {
+              "id": "3dfd5534-3133-4464-a6ee-ec175d28adb1",
               "scope": {
                 "start": {
                   "line": 11,
@@ -152,21 +152,21 @@
               },
               "reactDeps": [
                 {
-                  "id": "324cabe2-fbc9-4f63-84d7-5363b2436b89",
+                  "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
                   "name": "state"
                 },
                 {
-                  "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+                  "id": "bda8dcd0-269a-41ba-aa0b-899d955ba53a",
                   "name": "memoVal"
                 },
                 {
-                  "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+                  "id": "48b921ef-9be7-4801-bfef-adce53dccc74",
                   "name": "refData"
                 }
               ]
             },
-            "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
-              "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
+            "12aa1d52-41ef-445b-a2bf-e42b43634279": {
+              "id": "bd4c5de9-3a06-40cf-8bee-4cb06331f4b0",
               "scope": {
                 "start": {
                   "line": 15,
@@ -219,20 +219,20 @@
           "name": "useCustomHook",
           "type": "named",
           "exportKind": "function",
-          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0"
+          "id": "5e985070-ef43-47c7-be1d-e95aa196e8f5"
         },
         "useOtherHook": {
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5"
+          "id": "df18fd8d-4809-4a9d-ae80-185ffaad87f6"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "3a8a6b6a-af68-4630-87ed-bb653069ecf0": {
-          "id": "3a8a6b6a-af68-4630-87ed-bb653069ecf0",
+        "5e985070-ef43-47c7-be1d-e95aa196e8f5": {
+          "id": "5e985070-ef43-47c7-be1d-e95aa196e8f5",
           "name": "useCustomHook",
           "kind": "hook",
           "type": "function",
@@ -243,8 +243,8 @@
             "column": 16
           },
           "var": {
-            "c625ffdc-46d9-471d-9145-289a0901db9a": {
-              "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
+            "b9956727-bee6-41f6-bbef-c15fb9aac3ec": {
+              "id": "b9956727-bee6-41f6-bbef-c15fb9aac3ec",
               "name": "value",
               "kind": "state",
               "type": "data",
@@ -269,13 +269,13 @@
             }
           },
           "states": [
-            "c625ffdc-46d9-471d-9145-289a0901db9a"
+            "b9956727-bee6-41f6-bbef-c15fb9aac3ec"
           ],
           "props": [],
           "hooks": [],
           "effects": {
-            "f32b5a8c-0aa5-4307-9def-75171a5fff83": {
-              "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+            "f5b03315-9734-4b01-b0bf-9854f3d7c63f": {
+              "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
               "scope": {
                 "start": {
                   "line": 6,
@@ -292,15 +292,15 @@
               },
               "reactDeps": [
                 {
-                  "id": "c625ffdc-46d9-471d-9145-289a0901db9a",
+                  "id": "b9956727-bee6-41f6-bbef-c15fb9aac3ec",
                   "name": "value"
                 }
               ]
             }
           }
         },
-        "d1b317ec-f1dc-4dec-baee-7696d1e8bea5": {
-          "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
+        "df18fd8d-4809-4a9d-ae80-185ffaad87f6": {
+          "id": "df18fd8d-4809-4a9d-ae80-185ffaad87f6",
           "name": "useOtherHook",
           "kind": "hook",
           "type": "function",
