@@ -311,166 +311,162 @@ ipcMain.handle("get-project", () => {
 
 import { analyzeProject } from "analyser";
 
+async function performAnalysis(analysisPath: string, projectPath: string) {
+  const targetPath = analysisPath;
+  const configRoot = projectPath || analysisPath;
+  const name = path.basename(targetPath);
+  const outputPath = path.join(
+    configRoot,
+    ".react-map",
+    "cache",
+    `${name}.json`,
+  );
+
+  // Ensure output dir exists
+  const outputDir = path.dirname(outputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  console.log("Running analysis on:", targetPath, "into:", outputPath);
+
+  try {
+    const graph = analyzeProject(targetPath, outputPath);
+
+    // Merge with existing position data if available
+    if (fs.existsSync(outputPath)) {
+      try {
+        const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
+
+        // Helper to recurse and map positions
+        const positionMap = new Map<
+          string,
+          { x: number; y: number; isLayoutCalculated?: boolean }
+        >();
+
+        // traverse existingData
+        const traverse = (container: JsonData | null) => {
+          if (!container) return;
+          const files = container.files || {};
+          for (const file of Object.values(files)) {
+            for (const variable of Object.values(file.var || {})) {
+              collectPos(variable);
+            }
+          }
+        };
+
+        const collectPos = (item: ComponentFileVar) => {
+          if (item.ui?.x !== undefined && item.ui?.y !== undefined) {
+            positionMap.set(item.id, {
+              x: item.ui.x,
+              y: item.ui.y,
+              isLayoutCalculated: item.ui.isLayoutCalculated,
+            });
+          }
+
+          // Collect renders and effects positions
+          if (item.ui?.renders) {
+            for (const [id, pos] of Object.entries(item.ui.renders)) {
+              positionMap.set(id, {
+                x: pos.x,
+                y: pos.y,
+                isLayoutCalculated: true,
+              });
+            }
+          }
+
+          if ("var" in item && item.var) {
+            for (const v of Object.values(item.var)) {
+              collectPos(v);
+            }
+          }
+        };
+
+        traverse(existingData);
+
+        // Now apply to new graph
+        const applyPos = (item: ComponentFileVar) => {
+          const pos = positionMap.get(item.id);
+          if (pos) {
+            if (!item.ui) item.ui = { x: 0, y: 0 };
+            item.ui.x = pos.x;
+            item.ui.y = pos.y;
+            item.ui.isLayoutCalculated = pos.isLayoutCalculated;
+          }
+
+          // Apply renders and effects positions
+          const renders = "renders" in item ? item.renders : undefined;
+          const effects = "effects" in item ? item.effects : undefined;
+
+          if (renders || effects) {
+            if (!item.ui) item.ui = { x: 0, y: 0 };
+            if (!item.ui.renders) item.ui.renders = {};
+
+            const applyItems = (
+              items: Record<string, ComponentInfoRender | EffectInfo>,
+            ) => {
+              for (const r of Object.values(items)) {
+                const rPos = positionMap.get(r.id);
+                if (rPos) {
+                  item.ui!.renders![r.id] = {
+                    x: rPos.x,
+                    y: rPos.y,
+                  };
+                }
+              }
+            };
+
+            if (renders) applyItems(renders);
+            if (effects) applyItems(effects);
+
+            // Special handle for the render combo itself
+            const renderComboId = `${item.id}-render`;
+            const rcPos = positionMap.get(renderComboId);
+            if (rcPos) {
+              item.ui!.renders![renderComboId] = {
+                x: rcPos.x,
+                y: rcPos.y,
+              };
+            }
+          }
+
+          if ("var" in item && item.var) {
+            for (const v of Object.values(item.var)) {
+              applyPos(v);
+            }
+          }
+        };
+
+        const traverseApply = (container: JsonData | null) => {
+          if (!container) return;
+          const files = container.files || {};
+          for (const file of Object.values(files)) {
+            for (const variable of Object.values(file.var || {})) {
+              applyPos(variable);
+            }
+          }
+        };
+
+        traverseApply(graph as unknown as JsonData);
+      } catch (e) {
+        console.error("Failed to merge positions", e);
+      }
+    }
+
+    fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
+    console.log("Analysis success, written to:", outputPath);
+    return graph;
+  } catch (error) {
+    console.error("Analysis failed:", error);
+    throw error;
+  }
+}
+
 ipcMain.handle(
   "analyze-project",
   async (_, analysisPath: string, projectPath: string) => {
-    const targetPath = analysisPath;
-    const configRoot = projectPath || analysisPath;
-    const name = path.basename(targetPath);
-    const outputPath = path.join(configRoot, ".react-map", `${name}.json`);
-
-    // Ensure output dir exists
-    const outputDir = path.dirname(outputPath);
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    console.log("Running analysis on:", targetPath, "into:", outputPath);
-
-    try {
-      const graph = analyzeProject(targetPath, outputPath);
-
-      // Merge with existing position data if available
-      if (fs.existsSync(outputPath)) {
-        try {
-          const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
-
-          // Helper to recurse and map positions
-          const positionMap = new Map<
-            string,
-            { x: number; y: number; isLayoutCalculated?: boolean }
-          >();
-
-          // Wait, the output of analyzeProject is 'graph', but here we read the JSON.
-          // The JSON structure depends on what analyzeProject returns.
-          // Based on hook.ts, we have graphData.nodes, graphData.combos in the flattened structure usually?
-          // But analyzeProject returns a structure that hook.ts parses into flat arrays or nested?
-          // hook.ts: loadData parses it.
-          // line 167: for (const file of Object.values(graphData.files))
-          // line 168:   for (const variable of Object.values(file.var))
-          // It seems the stored JSON has `files` and nested `var`.
-
-          // Let's traverse the new graph and apply positions from existingData.
-
-          // We need to traverse efficiently.
-          // Let's build a map of IDs to positions from existingData first.
-
-          // traverse existingData
-          const traverse = (container: JsonData | null) => {
-            if (!container) return;
-            const files = container.files || {};
-            for (const file of Object.values(files)) {
-              for (const variable of Object.values(file.var || {})) {
-                collectPos(variable);
-              }
-            }
-          };
-
-          const collectPos = (item: ComponentFileVar) => {
-            if (item.ui?.x !== undefined && item.ui?.y !== undefined) {
-              positionMap.set(item.id, {
-                x: item.ui.x,
-                y: item.ui.y,
-                isLayoutCalculated: item.ui.isLayoutCalculated,
-              });
-            }
-
-            // Collect renders and effects positions
-            if (item.ui?.renders) {
-              for (const [id, pos] of Object.entries(item.ui.renders)) {
-                positionMap.set(id, {
-                  x: pos.x,
-                  y: pos.y,
-                  isLayoutCalculated: true,
-                });
-              }
-            }
-
-            if ("var" in item && item.var) {
-              for (const v of Object.values(item.var)) {
-                collectPos(v);
-              }
-            }
-          };
-
-          traverse(existingData);
-
-          // Now apply to new graph
-          const applyPos = (item: ComponentFileVar) => {
-            const pos = positionMap.get(item.id);
-            if (pos) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              item.ui.x = pos.x;
-              item.ui.y = pos.y;
-              item.ui.isLayoutCalculated = pos.isLayoutCalculated;
-            }
-
-            // Apply renders and effects positions
-            const renders = "renders" in item ? item.renders : undefined;
-            const effects = "effects" in item ? item.effects : undefined;
-
-            if (renders || effects) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              if (!item.ui.renders) item.ui.renders = {};
-
-              const applyItems = (
-                items: Record<string, ComponentInfoRender | EffectInfo>,
-              ) => {
-                for (const r of Object.values(items)) {
-                  const rPos = positionMap.get(r.id);
-                  if (rPos) {
-                    item.ui!.renders![r.id] = {
-                      x: rPos.x,
-                      y: rPos.y,
-                    };
-                  }
-                }
-              };
-
-              if (renders) applyItems(renders);
-              if (effects) applyItems(effects);
-
-              // Special handle for the render combo itself
-              const renderComboId = `${item.id}-render`;
-              const rcPos = positionMap.get(renderComboId);
-              if (rcPos) {
-                item.ui!.renders![renderComboId] = {
-                  x: rcPos.x,
-                  y: rcPos.y,
-                };
-              }
-            }
-
-            if ("var" in item && item.var) {
-              for (const v of Object.values(item.var)) {
-                applyPos(v);
-              }
-            }
-          };
-
-          const traverseApply = (container: JsonData | null) => {
-            if (!container) return;
-            const files = container.files || {};
-            for (const file of Object.values(files)) {
-              for (const variable of Object.values(file.var || {})) {
-                applyPos(variable);
-              }
-            }
-          };
-
-          traverseApply(graph as unknown as JsonData);
-        } catch (e) {
-          console.error("Failed to merge positions", e);
-        }
-      }
-
-      fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
-      console.log("Analysis success, written to:", outputPath);
-      return name;
-    } catch (error) {
-      console.error("Analysis failed:", error);
-      throw error;
-    }
+    await performAnalysis(analysisPath, projectPath);
+    return path.basename(analysisPath);
   },
 );
 
@@ -481,14 +477,21 @@ ipcMain.handle(
     if (!targetPath) return null;
 
     const name = path.basename(targetPath);
-    const graphPath = path.join(projectRoot, ".react-map", `${name}.json`);
+    const graphPath = path.join(
+      projectRoot,
+      ".react-map",
+      "cache",
+      `${name}.json`,
+    );
 
     console.log("Reading graph data from:", graphPath);
 
     if (fs.existsSync(graphPath)) {
       return JSON.parse(fs.readFileSync(graphPath, "utf-8"));
     }
-    return null;
+
+    // If file doesn't exist, trigger analysis
+    return performAnalysis(targetPath, projectRoot);
   },
 );
 
@@ -534,7 +537,7 @@ ipcMain.handle(
     const targetPath = analysisPath;
     const configRoot = projectRoot || analysisPath;
     const name = path.basename(targetPath);
-    const graphPath = path.join(configRoot, ".react-map", `${name}.json`);
+    const graphPath = path.join(configRoot, ".react-map", "cache", `${name}.json`);
 
     if (!fs.existsSync(graphPath)) return false;
 
