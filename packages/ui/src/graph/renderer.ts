@@ -260,7 +260,7 @@ export class GraphRenderer {
       // Update Label position
       const label = group.findOne(`#label-${id}`) as Konva.Text;
       if (label) {
-        label.y(currentR + 10);
+        label.y(currentR + 10 * combo.scale);
       }
 
       if (time >= duration) {
@@ -315,7 +315,7 @@ export class GraphRenderer {
     // Update label position
     const label = group.findOne(`#label-${id}`) as Konva.Text;
     if (label) {
-      label.y(radius + 10);
+      label.y(radius + 10 * combo.scale);
     }
 
     this.updateEdges(edgeIds);
@@ -331,6 +331,9 @@ export class GraphRenderer {
         } else {
           arrow.visible(true);
           arrow.points(edgeData.points);
+          arrow.strokeWidth(0.5 * edgeData.scale);
+          arrow.pointerWidth(6 * edgeData.scale);
+          arrow.pointerLength(6 * edgeData.scale);
         }
       }
     }
@@ -351,7 +354,7 @@ export class GraphRenderer {
               : combo.expandedRadius;
             circle.radius(radius);
             const label = group.findOne(`#label-${id}`) as Konva.Text;
-            if (label) label.y(radius + 10);
+            if (label) label.y(radius + 10 * combo.scale);
           }
         }
       }
@@ -408,7 +411,9 @@ export class GraphRenderer {
         points: edge.points,
         fill: "#424242",
         stroke: "#666666",
-        strokeWidth: 0.5,
+        strokeWidth: 0.5 * edge.scale,
+        pointerWidth: 6 * edge.scale,
+        pointerLength: 6 * edge.scale,
         lineJoin: "round",
         perfectDrawEnabled: false,
         listening: false,
@@ -506,7 +511,7 @@ export class GraphRenderer {
     }
 
     // Label (Outside content group)
-    this.renderLabel(combo, group, radius + 10);
+    this.renderLabel(combo, group, radius + 10 * combo.scale);
 
     parent.add(group);
     this.combos.set(combo.id, group);
@@ -524,7 +529,7 @@ export class GraphRenderer {
       id: `label-${item.id}`,
       text: item.label.text,
       fill: item.label.fill || "black",
-      fontSize: 12, // Default font size
+      fontSize: 12 * item.scale, // Scale font size
       align: "center",
       y: offsetY,
     });
@@ -587,7 +592,7 @@ export class GraphRenderer {
     group.add(circle);
 
     if (node.label) {
-      this.renderLabel(node, group, (node.radius || 0) + 10);
+      this.renderLabel(node, group, (node.radius || 0) + 10 * node.scale);
     }
 
     parent.add(group);

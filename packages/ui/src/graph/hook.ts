@@ -101,10 +101,12 @@ export interface NodeGraphData extends NodeData {
   color: string;
   isLayoutCalculated: boolean;
   parent?: ComboGraphData;
+  scale: number;
 }
 
 export interface EdgeGraphData extends Partial<GraphItem>, EdgeData {
   points: number[];
+  scale: number;
 }
 
 export interface ComboGraphDataChild {
@@ -124,6 +126,7 @@ export interface ComboGraphData extends ComboData {
   padding: number;
   isLayoutCalculated: boolean;
   parent?: ComboGraphData;
+  scale: number;
 }
 
 export interface ComboGraphDataHookBase extends Omit<ComboGraphData, "child"> {
@@ -160,6 +163,8 @@ export interface GraphDataConfig {
 
 import LayoutWorker from "./layout.worker?worker";
 import type { LayoutRequest, LayoutResponse } from "./layout.worker";
+
+const SCALE_FACTOR = 0.6;
 
 const defaultConfig: GraphDataConfig = {
   node: {
@@ -591,12 +596,12 @@ export class GraphData {
       nodes,
       edges,
       options: {
-        repulsionStrength: 250,
-        linkDistance: 25,
+        repulsionStrength: 250 * combo.scale,
+        linkDistance: 25 * combo.scale,
         damping: 0.8,
         gravity: 0.05,
         timeStep: 0.02,
-        minNodeDistance: 25,
+        minNodeDistance: 25 * combo.scale,
         collisionStrength: 2,
         alpha: 1.0,
         alphaDecay: 0.005,
@@ -648,6 +653,7 @@ export class GraphData {
       parentCombo.child.edges[e.id] = {
         ...e,
         points: [],
+        scale: Math.min(srcNode.scale, targetNode.scale),
       };
       this.edgeParentMap.set(e.id, parentCombo.id);
       this.updateEdgePos([e.id]);
@@ -688,14 +694,22 @@ export class GraphData {
         y = parentCombo.ui.renders[c.id].y;
       }
 
+      const scale = parentCombo.scale * SCALE_FACTOR;
+
+      let radius = c.ui?.radius ?? c.radius ?? this.config.combo.minRadius;
+      if (!c.ui?.radius) {
+        radius *= scale;
+      }
+
       parentCombo.child.nodes[c.id] = {
         ...c,
-        radius: c.ui?.radius ?? c.radius ?? this.config.combo.minRadius,
+        radius,
         color: c.color ?? this.config.node.color,
         isLayoutCalculated: !!c.ui?.isLayoutCalculated,
-        x: x ?? (Math.random() - 0.5) * (size + 1) * 10,
-        y: y ?? (Math.random() - 0.5) * (size + 1) * 10,
+        x: x ?? (Math.random() - 0.5) * (size + 1) * 10 * scale,
+        y: y ?? (Math.random() - 0.5) * (size + 1) * 10 * scale,
         parent: parentCombo,
+        scale,
       };
       this.comboChildMap.set(c.id, c.combo);
       return true;
@@ -744,6 +758,7 @@ export class GraphData {
           isLayoutCalculated: !!n.ui?.isLayoutCalculated,
           x: n.ui?.x ?? n.x ?? (Math.random() - 0.5) * 100, // Use UI position if available
           y: n.ui?.y ?? n.y ?? (Math.random() - 0.5) * 100,
+          scale: 1,
         });
         continue;
       }
@@ -810,6 +825,7 @@ export class GraphData {
         this.edges.set(e.id, {
           ...e,
           points: [],
+          scale: Math.min(srcNode.scale, targetNode.scale),
         });
         this.updateEdgePos([e.id]);
         continue;
@@ -842,6 +858,7 @@ export class GraphData {
         this.edges.set(e.id, {
           ...e,
           points: [],
+          scale: Math.min(srcNode.scale, targetNode.scale),
         });
         this.updateEdgePos([e.id]);
         this.edgeParentMap.delete(e.id);
@@ -898,9 +915,16 @@ export class GraphData {
       const combosSize = Object.keys(parentCombo.child.combos).length;
       const size = nodesSize + combosSize;
 
-      const collapsedRadius = c.collapsedRadius ?? this.config.combo.minRadius;
-      const expandedRadius =
+      const scale = parentCombo.scale * SCALE_FACTOR;
+
+      let collapsedRadius = c.collapsedRadius ?? this.config.combo.minRadius;
+      let expandedRadius =
         c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
+
+      if (!c.ui?.radius) {
+        collapsedRadius *= scale;
+        expandedRadius *= scale;
+      }
 
       parentCombo.child.combos[c.id] = {
         ...c,
@@ -908,11 +932,12 @@ export class GraphData {
         color: c.color ?? this.config.combo.color,
         collapsedRadius,
         expandedRadius,
-        x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * (size + 1) * 50,
-        y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * (size + 1) * 50,
+        x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * (size + 1) * 50 * scale,
+        y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * (size + 1) * 50 * scale,
         padding: c.padding ?? this.config.combo.padding,
         isLayoutCalculated: !!c.ui?.isLayoutCalculated,
         parent: parentCombo,
+        scale,
       };
       this.comboChildMap.set(c.id, c.combo);
       return true;
@@ -963,6 +988,7 @@ export class GraphData {
           y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 10,
           padding: c.padding ?? this.config.combo.padding,
           isLayoutCalculated: !!c.ui?.isLayoutCalculated,
+          scale: 1,
         });
         continue;
       }
@@ -1056,6 +1082,8 @@ export class GraphData {
       const srcNode = srcVisible.item;
       const targetNode = targetVisible.item;
 
+      edge.scale = Math.min(srcNode.scale, targetNode.scale);
+
       if (parentId == null) {
         // Top-level edge or absolute coordinate space required
         const srcPos = this.getAbsolutePosition(srcNode.id);
@@ -1113,9 +1141,9 @@ export class GraphData {
     }
 
     return Math.max(
-      maxRadius + combo.padding,
+      maxRadius + combo.padding * combo.scale,
       combo.collapsedRadius,
-      this.config.combo.maxRadius,
+      this.config.combo.maxRadius * combo.scale,
     );
   }
 
