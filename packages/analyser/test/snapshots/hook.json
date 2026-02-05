@@ -68,8 +68,11 @@
                 "column": 8
               },
               "defaultData": {
-                "type": "number",
-                "value": 0
+                "type": "literal-type",
+                "literal": {
+                  "type": "number",
+                  "value": 0
+                }
               }
             },
             "11117530-bc3c-4414-ba48-1fffe39fbc2a": {

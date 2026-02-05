@@ -152,7 +152,7 @@
     },
     "/src/type.tsx": {
       "path": "/src/type.tsx",
-      "hash": "7c15a64cb8e87591",
+      "hash": "fe6db2bb32aaf78d",
       "import": {
         "React": {
           "localName": "React",
@@ -1090,7 +1090,7 @@
             }
           },
           "loc": {
-            "line": 77,
+            "line": 79,
             "column": 5
           }
         },
@@ -1121,7 +1121,7 @@
             }
           },
           "loc": {
-            "line": 78,
+            "line": 80,
             "column": 5
           }
         },
@@ -1138,7 +1138,7 @@
             }
           },
           "loc": {
-            "line": 80,
+            "line": 82,
             "column": 5
           }
         },
@@ -1158,7 +1158,7 @@
             }
           },
           "loc": {
-            "line": 81,
+            "line": 83,
             "column": 5
           }
         },
@@ -1174,7 +1174,7 @@
             }
           },
           "loc": {
-            "line": 82,
+            "line": 84,
             "column": 5
           }
         },
@@ -1191,7 +1191,7 @@
             }
           },
           "loc": {
-            "line": 83,
+            "line": 85,
             "column": 5
           }
         },
@@ -1215,7 +1215,7 @@
             ]
           },
           "loc": {
-            "line": 86,
+            "line": 88,
             "column": 5
           }
         },
@@ -1236,7 +1236,7 @@
             ]
           },
           "loc": {
-            "line": 89,
+            "line": 91,
             "column": 7
           }
         },
@@ -1254,7 +1254,7 @@
             }
           ],
           "loc": {
-            "line": 93,
+            "line": 95,
             "column": 12
           }
         }
@@ -1281,17 +1281,17 @@
           "file": "/src/type.tsx",
           "dependencies": {},
           "loc": {
-            "line": 88,
+            "line": 90,
             "column": 13
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 88,
+              "line": 90,
               "column": 13
             },
             "end": {
-              "line": 88,
+              "line": 90,
               "column": 41
             }
           },
@@ -1321,17 +1321,17 @@
           "file": "/src/type.tsx",
           "dependencies": {},
           "loc": {
-            "line": 100,
+            "line": 102,
             "column": 13
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 100,
+              "line": 102,
               "column": 13
             },
             "end": {
-              "line": 100,
+              "line": 102,
               "column": 51
             }
           },
@@ -1365,17 +1365,17 @@
           "file": "/src/type.tsx",
           "dependencies": {},
           "loc": {
-            "line": 107,
+            "line": 110,
             "column": 13
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 107,
+              "line": 110,
               "column": 13
             },
             "end": {
-              "line": 107,
+              "line": 110,
               "column": 31
             }
           },
@@ -1409,17 +1409,17 @@
           "file": "/src/type.tsx",
           "dependencies": {},
           "loc": {
-            "line": 111,
+            "line": 114,
             "column": 13
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 111,
+              "line": 114,
               "column": 13
             },
             "end": {
-              "line": 111,
+              "line": 114,
               "column": 39
             }
           },
@@ -1453,17 +1453,17 @@
           "file": "/src/type.tsx",
           "dependencies": {},
           "loc": {
-            "line": 124,
+            "line": 127,
             "column": 16
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 124,
+              "line": 127,
               "column": 16
             },
             "end": {
-              "line": 124,
+              "line": 127,
               "column": 33
             }
           },
@@ -1680,12 +1680,38 @@
               "id": "21f06a15-e570-45b7-aab0-f47d7d5acd7c",
               "dependencies": [
                 {
-                  "id": "title",
-                  "value": ""
+                  "id": "993784b7-8255-48d2-874c-9f7dba92125b",
+                  "name": "title",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "World"
+                    }
+                  }
                 },
                 {
-                  "id": "items",
-                  "value": ""
+                  "id": "11660424-cebb-4984-a78f-084bfdd2b18c",
+                  "name": "items",
+                  "value": {
+                    "type": "literal-array",
+                    "elements": [
+                      {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "a"
+                        }
+                      },
+                      {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "b"
+                        }
+                      }
+                    ]
+                  }
                 }
               ],
               "isDependency": false,

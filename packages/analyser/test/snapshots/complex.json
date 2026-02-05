@@ -942,8 +942,15 @@
               "id": "02c2066f-7120-49d9-897c-f50067b38c35",
               "dependencies": [
                 {
-                  "id": "name",
-                  "value": ""
+                  "id": "ef43ed30-6edb-4148-88cc-7a5bdbcf2288",
+                  "name": "name",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "World"
+                    }
+                  }
                 }
               ],
               "isDependency": false,
@@ -956,8 +963,15 @@
               "id": "ce3e8dfe-79fa-424f-b798-296ed6353e0d",
               "dependencies": [
                 {
-                  "id": "label",
-                  "value": ""
+                  "id": "141953d8-4c83-47fa-a825-8572feec67d3",
+                  "name": "label",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "Click me"
+                    }
+                  }
                 }
               ],
               "isDependency": false,
@@ -979,12 +993,38 @@
               "id": "8ef3e2ed-6137-46cd-823d-144b38190022",
               "dependencies": [
                 {
-                  "id": "title",
-                  "value": ""
+                  "id": "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1",
+                  "name": "title",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "Test"
+                    }
+                  }
                 },
                 {
-                  "id": "items",
-                  "value": ""
+                  "id": "9f56e63f-4054-4c38-9355-d71ffed0bb51",
+                  "name": "items",
+                  "value": {
+                    "type": "literal-array",
+                    "elements": [
+                      {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "a"
+                        }
+                      },
+                      {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "b"
+                        }
+                      }
+                    ]
+                  }
                 }
               ],
               "isDependency": false,

@@ -67,7 +67,7 @@ const FuncParamRenderer: React.FC<{
           <span
             className={cn(
               "pl-4",
-              p.elements.length >= 3 ? "flex flex-col" : ""
+              p.elements.length >= 3 ? "flex flex-col" : "",
             )}
           >
             {p.elements.map((el, i) => (
@@ -132,7 +132,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
 
         for (const [i, quasis] of literal.quasis.entries()) {
           template.push(
-            <React.Fragment key={template.length}>{quasis}</React.Fragment>
+            <React.Fragment key={template.length}>{quasis}</React.Fragment>,
           );
 
           if (i != literal.quasis.length - 1) {
@@ -150,7 +150,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                   depth={depth + 1}
                 />
                 {"}"}
-              </React.Fragment>
+              </React.Fragment>,
             );
           }
         }
@@ -180,6 +180,36 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
         <span className={TypeColors.literal}>{JSON.stringify(literal)}</span>
       );
     }
+
+    case "literal-array":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>[</span>
+          {type.elements.map((el, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              <TypeRenderer type={el} typeData={typeData} depth={depth} />
+            </React.Fragment>
+          ))}
+          <span className={TypeColors.punctuation}>]</span>
+        </span>
+      );
+
+    case "literal-object":
+      return (
+        <span>
+          <span className={TypeColors.punctuation}>{"{"}</span>
+          {Object.entries(type.properties).map(([key, val], i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              <span className={TypeColors.component}>{key}</span>
+              <span className={TypeColors.punctuation}>: </span>
+              <TypeRenderer type={val} typeData={typeData} depth={depth + 1} />
+            </React.Fragment>
+          ))}
+          <span className={TypeColors.punctuation}>{"}"}</span>
+        </span>
+      );
 
     case "array":
       return (
@@ -349,7 +379,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           <span className={TypeColors.punctuation}>(</span>
           <span
             className={cn(
-              type.parameters.length >= 3 ? "pl-4 flex flex-col" : ""
+              type.parameters.length >= 3 ? "pl-4 flex flex-col" : "",
             )}
           >
             {type.parameters.map((param, i) => (
