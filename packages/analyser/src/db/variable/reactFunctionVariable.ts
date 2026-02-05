@@ -33,7 +33,7 @@ export abstract class ReactFunctionVariable<
   constructor(
     options: Omit<
       ComponentFileVarReact2<TKind>,
-      "var" | "components" | "type" | "states"
+      "var" | "components" | "type"
     >,
     file: File,
   ) {
@@ -42,6 +42,9 @@ export abstract class ReactFunctionVariable<
     this.props = options.props;
     this.effects = options.effects;
     this.hooks = options.hooks;
+    if (options.states) {
+      this.states = new Set(options.states);
+    }
   }
 
   public addState(state: Omit<State, "id">) {
@@ -53,8 +56,7 @@ export abstract class ReactFunctionVariable<
       id = newUUID();
     }
 
-    this.var.set(
-      id,
+    this.var.add(
       new StateVariable(
         {
           id: id,
@@ -88,7 +90,7 @@ export abstract class ReactFunctionVariable<
       this.file,
     );
 
-    this.var.set(id, refVariable);
+    this.var.add(refVariable);
     this.refs.add(id);
 
     return refVariable;
@@ -109,7 +111,7 @@ export abstract class ReactFunctionVariable<
       this.file,
     );
 
-    this.var.set(id, memoVariablle);
+    this.var.add(memoVariablle);
     this.memos.add(id);
 
     return memoVariablle;
@@ -173,21 +175,29 @@ export abstract class ReactFunctionVariable<
     };
   }
 
-  public load(data: ReactFunctionVariable<TKind>) {
-    super.load(data);
-
-    for (const stateID of this.states) {
-      const state = this.var.get(stateID);
-      if (state == null || !isStateVariable(state)) continue;
-
-      this.stateCache[state.value] = stateID;
-    }
+  public syncSets() {
+    this.states.clear();
+    this.memos.clear();
+    this.refs.clear();
+    this.stateCache = {};
+    this.refCache = {};
 
     for (const variable of this.var.values()) {
-      if (isRefVariable(variable)) {
+      if (isStateVariable(variable)) {
+        this.states.add(variable.id);
+        this.stateCache[variable.name] = variable.id;
+      } else if (isMemoVariable(variable)) {
+        this.memos.add(variable.id);
+      } else if (isRefVariable(variable)) {
+        this.refs.add(variable.id);
         this.refCache[variable.name] = variable.id;
       }
     }
+  }
+
+  public load(data: ReactFunctionVariable<TKind>) {
+    super.load(data);
+    this.syncSets();
   }
 
   protected getBaseData(): ComponentFileVarReactFunction<TKind> {

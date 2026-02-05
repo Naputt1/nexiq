@@ -24,13 +24,13 @@
           "name": "AliasedA",
           "type": "named",
           "exportKind": "value",
-          "id": "d7da7947-3db3-4ae0-835b-dac20d5ab23e"
+          "id": "e511221a-68b5-4c48-8a6c-77fb563f8628"
         },
         "MainNested": {
           "name": "MainNested",
           "type": "default",
           "exportKind": "value",
-          "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d"
+          "id": "00f33a4d-44d6-467a-afbc-946b5eb163db"
         }
       },
       "defaultExport": "MainNested",
@@ -54,26 +54,26 @@
           "name": "SubComponentA",
           "type": "named",
           "exportKind": "value",
-          "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137"
+          "id": "258d95a9-3d03-40b9-9004-ca2c80b72762"
         },
         "SubComponentB": {
           "name": "SubComponentB",
           "type": "named",
           "exportKind": "component",
-          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52"
+          "id": "c3c16412-0a16-4250-aa69-41cd6cb558ee"
         },
         "MainNested": {
           "name": "MainNested",
           "type": "default",
           "exportKind": "component",
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7"
+          "id": "6b98e78f-f20c-443e-abb1-08c7eb6fde05"
         }
       },
       "defaultExport": "MainNested",
       "tsTypes": {},
       "var": {
-        "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
-          "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+        "258d95a9-3d03-40b9-9004-ca2c80b72762": {
+          "id": "258d95a9-3d03-40b9-9004-ca2c80b72762",
           "name": "SubComponentA",
           "kind": "component",
           "type": "function",
@@ -102,8 +102,8 @@
           "contexts": [],
           "renders": {}
         },
-        "96e6952b-6525-4bd5-af33-dff58e1ffe52": {
-          "id": "96e6952b-6525-4bd5-af33-dff58e1ffe52",
+        "c3c16412-0a16-4250-aa69-41cd6cb558ee": {
+          "id": "c3c16412-0a16-4250-aa69-41cd6cb558ee",
           "name": "SubComponentB",
           "kind": "component",
           "type": "function",
@@ -132,8 +132,8 @@
           "contexts": [],
           "renders": {}
         },
-        "23adce01-2717-489c-9a42-e6485e2f01aa": {
-          "id": "23adce01-2717-489c-9a42-e6485e2f01aa",
+        "c22ab11b-1736-4253-8fb6-bc37fa47cd1e": {
+          "id": "c22ab11b-1736-4253-8fb6-bc37fa47cd1e",
           "name": "InternalComponent",
           "kind": "component",
           "type": "function",
@@ -162,8 +162,8 @@
           "contexts": [],
           "renders": {}
         },
-        "9dc57303-3e9a-41ee-92fc-2aab07d25dd7": {
-          "id": "9dc57303-3e9a-41ee-92fc-2aab07d25dd7",
+        "6b98e78f-f20c-443e-abb1-08c7eb6fde05": {
+          "id": "6b98e78f-f20c-443e-abb1-08c7eb6fde05",
           "name": "MainNested",
           "kind": "component",
           "type": "function",
@@ -225,20 +225,20 @@
           "name": "useCustomHook",
           "type": "named",
           "exportKind": "function",
-          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d"
+          "id": "48b4f9aa-382c-47e9-9809-aca0ec6751e1"
         },
         "useOtherHook": {
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0"
+          "id": "8f2c5c7d-1095-4ab3-b2c5-e1722f3a5567"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "3551d3f2-2e56-49f1-8c18-04bed72b9c0d": {
-          "id": "3551d3f2-2e56-49f1-8c18-04bed72b9c0d",
+        "48b4f9aa-382c-47e9-9809-aca0ec6751e1": {
+          "id": "48b4f9aa-382c-47e9-9809-aca0ec6751e1",
           "name": "useCustomHook",
           "kind": "hook",
           "type": "function",
@@ -249,8 +249,8 @@
             "column": 16
           },
           "var": {
-            "4b97fa8f-c781-4270-98cf-364a2c015862": {
-              "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+            "9eab4ed7-1c2d-461d-8f2d-ab966b8cde34": {
+              "id": "9eab4ed7-1c2d-461d-8f2d-ab966b8cde34",
               "name": "value",
               "kind": "state",
               "type": "data",
@@ -263,8 +263,8 @@
               "value": "value",
               "setter": "setValue"
             },
-            "f32b5a8c-0aa5-4307-9def-75171a5fff83": {
-              "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+            "d8edc170-67a1-4fa0-b283-fb39289d2f90": {
+              "id": "d8edc170-67a1-4fa0-b283-fb39289d2f90",
               "name": "memoVal",
               "kind": "memo",
               "type": "function",
@@ -287,7 +287,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+                  "id": "9eab4ed7-1c2d-461d-8f2d-ab966b8cde34",
                   "name": "value"
                 }
               ]
@@ -304,13 +304,13 @@
             }
           },
           "states": [
-            "4b97fa8f-c781-4270-98cf-364a2c015862"
+            "9eab4ed7-1c2d-461d-8f2d-ab966b8cde34"
           ],
           "props": [],
           "hooks": [],
           "effects": {
-            "5909b328-1690-4605-9200-a15584ba44b1": {
-              "id": "d1b317ec-f1dc-4dec-baee-7696d1e8bea5",
+            "9b3841ee-3723-4b7e-8f9e-1b01e428054a": {
+              "id": "ab8a252f-bb3c-4599-a395-2f29a8824ee3",
               "scope": {
                 "start": {
                   "line": 8,
@@ -327,19 +327,19 @@
               },
               "reactDeps": [
                 {
-                  "id": "4b97fa8f-c781-4270-98cf-364a2c015862",
+                  "id": "9eab4ed7-1c2d-461d-8f2d-ab966b8cde34",
                   "name": "value"
                 },
                 {
-                  "id": "f32b5a8c-0aa5-4307-9def-75171a5fff83",
+                  "id": "d8edc170-67a1-4fa0-b283-fb39289d2f90",
                   "name": "memoVal"
                 }
               ]
             }
           }
         },
-        "39e733ca-65d4-4612-ba06-dcf283e974a0": {
-          "id": "39e733ca-65d4-4612-ba06-dcf283e974a0",
+        "8f2c5c7d-1095-4ab3-b2c5-e1722f3a5567": {
+          "id": "8f2c5c7d-1095-4ab3-b2c5-e1722f3a5567",
           "name": "useOtherHook",
           "kind": "hook",
           "type": "function",
@@ -398,26 +398,26 @@
           "name": "MemoizedComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "ad530bbc-a6d3-4231-998b-15368908343c"
+          "id": "02c2066f-7120-49d9-897c-f50067b38c35"
         },
         "ForwardRefComponent": {
           "name": "ForwardRefComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "349d4ecc-273a-4e15-b915-cd9598704c57"
+          "id": "ce3e8dfe-79fa-424f-b798-296ed6353e0d"
         },
         "WrappedComponent": {
           "name": "WrappedComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "42d3fabc-a292-4505-a161-79335af5dd21"
+          "id": "6ecea1e1-ae95-48e5-b3cb-dc029272a682"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "ad530bbc-a6d3-4231-998b-15368908343c": {
-          "id": "ad530bbc-a6d3-4231-998b-15368908343c",
+        "02c2066f-7120-49d9-897c-f50067b38c35": {
+          "id": "02c2066f-7120-49d9-897c-f50067b38c35",
           "name": "MemoizedComponent",
           "kind": "component",
           "type": "function",
@@ -451,8 +451,8 @@
           "contexts": [],
           "renders": {}
         },
-        "349d4ecc-273a-4e15-b915-cd9598704c57": {
-          "id": "349d4ecc-273a-4e15-b915-cd9598704c57",
+        "ce3e8dfe-79fa-424f-b798-296ed6353e0d": {
+          "id": "ce3e8dfe-79fa-424f-b798-296ed6353e0d",
           "name": "ForwardRefComponent",
           "kind": "component",
           "type": "function",
@@ -481,8 +481,8 @@
           "contexts": [],
           "renders": {}
         },
-        "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b": {
-          "id": "dc0c54d0-8aa2-417b-8b3c-a7dcce459c8b",
+        "5fdef864-0e4d-44a8-817d-63cec35bee2c": {
+          "id": "5fdef864-0e4d-44a8-817d-63cec35bee2c",
           "name": "withLogging",
           "kind": "normal",
           "type": "function",
@@ -504,8 +504,8 @@
             }
           }
         },
-        "42d3fabc-a292-4505-a161-79335af5dd21": {
-          "id": "42d3fabc-a292-4505-a161-79335af5dd21",
+        "6ecea1e1-ae95-48e5-b3cb-dc029272a682": {
+          "id": "6ecea1e1-ae95-48e5-b3cb-dc029272a682",
           "name": "WrappedComponent",
           "kind": "component",
           "type": "function",
@@ -560,14 +560,14 @@
           "name": "DestructuringProps",
           "type": "named",
           "exportKind": "value",
-          "id": "9b232c45-1446-4f50-819f-a63eadb5f464"
+          "id": "8ef3e2ed-6137-46cd-823d-144b38190022"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "9b232c45-1446-4f50-819f-a63eadb5f464": {
-          "id": "9b232c45-1446-4f50-819f-a63eadb5f464",
+        "8ef3e2ed-6137-46cd-823d-144b38190022": {
+          "id": "8ef3e2ed-6137-46cd-823d-144b38190022",
           "name": "DestructuringProps",
           "kind": "component",
           "type": "function",
@@ -604,8 +604,8 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "f24b8c56-3fac-469d-b2f3-efc6e3575137": {
-              "id": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
+            "258d95a9-3d03-40b9-9004-ca2c80b72762": {
+              "id": "258d95a9-3d03-40b9-9004-ca2c80b72762",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -670,26 +670,26 @@
           "name": "MyContext",
           "type": "named",
           "exportKind": "value",
-          "id": "381f2a42-8538-4743-8bfb-e7a60146ca32"
+          "id": "1538cb5e-b492-4bbe-90dc-bfc766c53af7"
         },
         "MyProvider": {
           "name": "MyProvider",
           "type": "named",
           "exportKind": "value",
-          "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf"
+          "id": "f0b92b09-1489-4a15-b47c-2d10eb80f91e"
         },
         "MyConsumer": {
           "name": "MyConsumer",
           "type": "named",
           "exportKind": "value",
-          "id": "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd"
+          "id": "b8b9b1cf-354c-4060-92ab-fbad539e1e7a"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "381f2a42-8538-4743-8bfb-e7a60146ca32": {
-          "id": "381f2a42-8538-4743-8bfb-e7a60146ca32",
+        "1538cb5e-b492-4bbe-90dc-bfc766c53af7": {
+          "id": "1538cb5e-b492-4bbe-90dc-bfc766c53af7",
           "name": "MyContext",
           "kind": "normal",
           "type": "data",
@@ -701,8 +701,8 @@
           },
           "components": {}
         },
-        "40bad021-0b4b-4cac-9d26-eaf02e63efdf": {
-          "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
+        "f0b92b09-1489-4a15-b47c-2d10eb80f91e": {
+          "id": "f0b92b09-1489-4a15-b47c-2d10eb80f91e",
           "name": "MyProvider",
           "kind": "component",
           "type": "function",
@@ -753,8 +753,8 @@
             ]
           }
         },
-        "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd": {
-          "id": "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd",
+        "b8b9b1cf-354c-4060-92ab-fbad539e1e7a": {
+          "id": "b8b9b1cf-354c-4060-92ab-fbad539e1e7a",
           "name": "MyConsumer",
           "kind": "component",
           "type": "function",
@@ -865,14 +865,14 @@
           "name": "ComplexApp",
           "type": "named",
           "exportKind": "component",
-          "id": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75"
+          "id": "ec075f93-e6a4-4244-9b81-93083a57c173"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "cb9f39f0-e6bd-42ab-a980-3723fd55dc75": {
-          "id": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+        "ec075f93-e6a4-4244-9b81-93083a57c173": {
+          "id": "ec075f93-e6a4-4244-9b81-93083a57c173",
           "name": "ComplexApp",
           "kind": "component",
           "type": "function",
@@ -896,14 +896,14 @@
           "states": [],
           "props": [],
           "hooks": [
-            "3551d3f2-2e56-49f1-8c18-04bed72b9c0d"
+            "48b4f9aa-382c-47e9-9809-aca0ec6751e1"
           ],
           "effects": {},
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "40bad021-0b4b-4cac-9d26-eaf02e63efdf": {
-              "id": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
+            "f0b92b09-1489-4a15-b47c-2d10eb80f91e": {
+              "id": "f0b92b09-1489-4a15-b47c-2d10eb80f91e",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -911,8 +911,8 @@
                 "column": 4
               }
             },
-            "adaf1dbd-98e0-440a-8e91-0565ceff7b6d": {
-              "id": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
+            "00f33a4d-44d6-467a-afbc-946b5eb163db": {
+              "id": "00f33a4d-44d6-467a-afbc-946b5eb163db",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -920,8 +920,8 @@
                 "column": 6
               }
             },
-            "d7da7947-3db3-4ae0-835b-dac20d5ab23e": {
-              "id": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
+            "e511221a-68b5-4c48-8a6c-77fb563f8628": {
+              "id": "e511221a-68b5-4c48-8a6c-77fb563f8628",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -929,8 +929,8 @@
                 "column": 6
               }
             },
-            "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd": {
-              "id": "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd",
+            "b8b9b1cf-354c-4060-92ab-fbad539e1e7a": {
+              "id": "b8b9b1cf-354c-4060-92ab-fbad539e1e7a",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -938,8 +938,8 @@
                 "column": 6
               }
             },
-            "ad530bbc-a6d3-4231-998b-15368908343c": {
-              "id": "ad530bbc-a6d3-4231-998b-15368908343c",
+            "02c2066f-7120-49d9-897c-f50067b38c35": {
+              "id": "02c2066f-7120-49d9-897c-f50067b38c35",
               "dependencies": [
                 {
                   "id": "name",
@@ -952,8 +952,8 @@
                 "column": 6
               }
             },
-            "349d4ecc-273a-4e15-b915-cd9598704c57": {
-              "id": "349d4ecc-273a-4e15-b915-cd9598704c57",
+            "ce3e8dfe-79fa-424f-b798-296ed6353e0d": {
+              "id": "ce3e8dfe-79fa-424f-b798-296ed6353e0d",
               "dependencies": [
                 {
                   "id": "label",
@@ -966,8 +966,8 @@
                 "column": 6
               }
             },
-            "42d3fabc-a292-4505-a161-79335af5dd21": {
-              "id": "42d3fabc-a292-4505-a161-79335af5dd21",
+            "6ecea1e1-ae95-48e5-b3cb-dc029272a682": {
+              "id": "6ecea1e1-ae95-48e5-b3cb-dc029272a682",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -975,8 +975,8 @@
                 "column": 6
               }
             },
-            "9b232c45-1446-4f50-819f-a63eadb5f464": {
-              "id": "9b232c45-1446-4f50-819f-a63eadb5f464",
+            "8ef3e2ed-6137-46cd-823d-144b38190022": {
+              "id": "8ef3e2ed-6137-46cd-823d-144b38190022",
               "dependencies": [
                 {
                   "id": "title",
@@ -1000,48 +1000,48 @@
   },
   "edges": [
     {
-      "from": "f24b8c56-3fac-469d-b2f3-efc6e3575137",
-      "to": "9b232c45-1446-4f50-819f-a63eadb5f464",
+      "from": "258d95a9-3d03-40b9-9004-ca2c80b72762",
+      "to": "8ef3e2ed-6137-46cd-823d-144b38190022",
       "label": "render"
     },
     {
-      "from": "40bad021-0b4b-4cac-9d26-eaf02e63efdf",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "f0b92b09-1489-4a15-b47c-2d10eb80f91e",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "adaf1dbd-98e0-440a-8e91-0565ceff7b6d",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "00f33a4d-44d6-467a-afbc-946b5eb163db",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "d7da7947-3db3-4ae0-835b-dac20d5ab23e",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "e511221a-68b5-4c48-8a6c-77fb563f8628",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "5faaee9d-e9eb-4fb9-a60a-9e1630043cbd",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "b8b9b1cf-354c-4060-92ab-fbad539e1e7a",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "ad530bbc-a6d3-4231-998b-15368908343c",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "02c2066f-7120-49d9-897c-f50067b38c35",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "349d4ecc-273a-4e15-b915-cd9598704c57",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "ce3e8dfe-79fa-424f-b798-296ed6353e0d",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "42d3fabc-a292-4505-a161-79335af5dd21",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "6ecea1e1-ae95-48e5-b3cb-dc029272a682",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     },
     {
-      "from": "9b232c45-1446-4f50-819f-a63eadb5f464",
-      "to": "cb9f39f0-e6bd-42ab-a980-3723fd55dc75",
+      "from": "8ef3e2ed-6137-46cd-823d-144b38190022",
+      "to": "ec075f93-e6a4-4244-9b81-93083a57c173",
       "label": "render"
     }
   ]

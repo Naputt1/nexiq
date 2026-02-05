@@ -12,7 +12,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
   constructor(
     options: Omit<
       ComponentFileVarComponent,
-      "kind" | "var" | "components" | "type" | "states"
+      "kind" | "var" | "components" | "type"
     >,
     file: File,
   ) {

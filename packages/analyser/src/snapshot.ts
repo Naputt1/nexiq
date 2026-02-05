@@ -14,6 +14,8 @@ const samples = args._[0]
   ? [args._[0]]
   : ["simple", "complex", "props", "hook", "cache", "cache-new"];
 
+const SEED = "analyser-test-seed";
+
 function main(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
@@ -21,7 +23,7 @@ function main(sample: string) {
 
   assert(fs.existsSync(SRC_DIR), "sample not found: " + SRC_DIR);
 
-  setRandomSeed(args.seed ?? "analyser-test-seed");
+  setRandomSeed(args.seed ?? `${SEED}-${sample}`);
 
   const packageJson = new PackageJson(SRC_DIR);
 
@@ -32,7 +34,7 @@ function main(sample: string) {
   if (sample === "cache-new") {
     const CACHE_FILE = path.resolve(
       process.cwd(),
-      `./test/snapshots/cache.json`
+      `./test/snapshots/cache.json`,
     );
     if (fs.existsSync(CACHE_FILE)) {
       try {
@@ -49,7 +51,7 @@ function main(sample: string) {
     viteConfigPath,
     files,
     packageJson,
-    cacheData
+    cacheData,
   );
   delete graph.src;
   for (const file of Object.values(graph.files)) {
