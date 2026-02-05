@@ -3,7 +3,12 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { TypeRenderer } from "./type-renderer";
-import type { PropData, TypeDataDeclare, TypeDataParam } from "shared";
+import type {
+  ComponentInfoRenderDependency,
+  PropData,
+  TypeDataDeclare,
+  TypeDataParam,
+} from "shared";
 import type { ComboData, NodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 import React from "react";
@@ -83,7 +88,9 @@ export function NodeDetails({
       <CardContent className="p-4 pt-2 text-sm space-y-3 overflow-y-auto">
         <div className="space-y-1">
           <div className="flex gap-2 text-xs">
-            <span className="font-semibold text-muted-foreground/80 min-w-12">ID:</span>
+            <span className="font-semibold text-muted-foreground/80 min-w-12">
+              ID:
+            </span>
             <span className="truncate text-muted-foreground" title={item.id}>
               {item.id}
             </span>
@@ -94,7 +101,9 @@ export function NodeDetails({
               <span className="font-semibold text-muted-foreground/80 min-w-12">
                 File:
               </span>
-              <span className="text-muted-foreground break-all">{item.fileName}</span>
+              <span className="text-muted-foreground break-all">
+                {item.fileName}
+              </span>
             </div>
           )}
         </div>
@@ -140,10 +149,70 @@ export function NodeDetails({
                     className="flex justify-between py-0.5 border-b border-border/50 last:border-0"
                   >
                     <span className="text-primary">{p.name}</span>
-                    <span className="text-muted-foreground italic">{p.type}</span>
+                    <span className="text-muted-foreground italic">
+                      {p.type}
+                    </span>
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        )}
+
+        {item.type === "component" && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-semibold text-muted-foreground">
+                Renders
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {Object.values(nodes)
+
+                .filter((n) => n.combo === selectedId + "-render")
+
+                .map((v) => {
+                  const renders = item.renders;
+
+                  const renderId = v.id.slice(
+                    (selectedId! + "-render-").length,
+                  );
+
+                  const render = renders?.[renderId];
+
+                  if (!render) return null;
+
+                  return (
+                    <div
+                      key={v.id}
+                      className="text-xs font-mono bg-muted/30 p-2 rounded border border-border/50"
+                    >
+                      <div className="font-bold text-primary mb-1">
+                        {v.label?.text}
+                      </div>
+
+                      <div className="space-y-1">
+                        {render.dependencies.map(
+                          (dep: ComponentInfoRenderDependency, j: number) => (
+                            <div key={j} className="flex gap-2">
+                              <span className="text-yellow-200/80">
+                                {dep.name}:
+                              </span>
+
+                              <span className="text-muted-foreground italic">
+                                <TypeRenderer
+                                  type={dep.value}
+                                  typeData={typeData}
+                                />
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}

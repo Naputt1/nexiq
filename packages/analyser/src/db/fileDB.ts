@@ -16,6 +16,7 @@ import type {
   TypeDataDeclare,
   TypeDataFunction,
   TypeDataIndexAccess,
+  TypeDataLiteralType,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
@@ -56,7 +57,7 @@ type TypeDataHandlerMap = {
   array: TypeDataArray;
   parenthesis: TypeDataTypeBodyParathesis;
   "type-literal": TypeDataTypeBodyLiteral;
-  "literal-type": { literal: TypeDataLiteralTypeLiteral };
+  "literal-type": TypeDataLiteralType;
   function: TypeDataFunction;
   tuple: TypeDataTuple;
   "index-access": TypeDataIndexAccess;
@@ -413,7 +414,7 @@ export class File {
 
   private _getDependenciesIds(
     dependencies: ComponentInfoRenderDependency[],
-    depMap: Record<string, number>,
+    depMap: Record<string, number[]>,
     parent: Variable | undefined,
   ) {
     if (parent == null) return;
@@ -421,10 +422,15 @@ export class File {
     if (isBaseFunctionVariable(parent)) {
       for (const com of parent.var.values()) {
         if (Object.keys(depMap).includes(com.name)) {
-          const depI = depMap[com.name];
-          const dep = dependencies[depI!];
-
-          dep!.value = com.id;
+          const depIndices = depMap[com.name];
+          if (depIndices) {
+            for (const depI of depIndices) {
+              const dep = dependencies[depI];
+              if (dep) {
+                dep.valueId = com.id;
+              }
+            }
+          }
 
           delete depMap[com.name];
           if (Object.keys(depMap).length === 0) {
@@ -438,10 +444,15 @@ export class File {
       if (parent.parent == null) {
         for (const com of this.var.values()) {
           if (Object.keys(depMap).includes(com.name)) {
-            const depI = depMap[com.name];
-            const dep = dependencies[depI!];
-
-            dep!.value = com.id;
+            const depIndices = depMap[com.name];
+            if (depIndices) {
+              for (const depI of depIndices) {
+                const dep = dependencies[depI];
+                if (dep) {
+                  dep.valueId = com.id;
+                }
+              }
+            }
 
             delete depMap[com.name];
             if (Object.keys(depMap).length === 0) {
@@ -459,9 +470,25 @@ export class File {
     id: string,
     dependencies: ComponentInfoRenderDependency[],
   ) {
-    const depMap: Record<string, number> = {};
+    const depMap: Record<string, number[]> = {};
     for (const [i, dep] of dependencies.entries()) {
-      depMap[dep.value] = i;
+      let valueName: string | null = null;
+      if (typeof dep.value === "string") {
+        valueName = dep.value;
+      } else if (dep.value && dep.value.type === "ref") {
+        if (dep.value.refType === "named") {
+          valueName = dep.value.name;
+        } else if (dep.value.names.length > 0) {
+          valueName = dep.value.names[0]!;
+        }
+      }
+
+      if (valueName) {
+        if (!depMap[valueName]) {
+          depMap[valueName] = [];
+        }
+        depMap[valueName]!.push(i);
+      }
     }
 
     const parent = this.var.get(id, true);
@@ -913,14 +940,53 @@ export class FileDB {
     file: File,
     params: Set<string>,
   ): boolean {
-    if (!this.hasTypeDataHandler(typeData.type)) return true;
-
-    return FileDB.TYPE_DATA_HANDLERS[typeData.type](
-      this,
-      typeData as never,
-      file,
-      params,
-    );
+    if (typeData.type === "ref") {
+      return FileDB.TYPE_DATA_HANDLERS.ref(this, typeData, file, params);
+    } else if (typeData.type === "union") {
+      return FileDB.TYPE_DATA_HANDLERS.union(this, typeData, file, params);
+    } else if (typeData.type === "intersection") {
+      return FileDB.TYPE_DATA_HANDLERS.intersection(
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "array") {
+      return FileDB.TYPE_DATA_HANDLERS.array(this, typeData, file, params);
+    } else if (typeData.type === "parenthesis") {
+      return FileDB.TYPE_DATA_HANDLERS.parenthesis(
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "type-literal") {
+      return FileDB.TYPE_DATA_HANDLERS["type-literal"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "literal-type") {
+      return FileDB.TYPE_DATA_HANDLERS["literal-type"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "function") {
+      return FileDB.TYPE_DATA_HANDLERS.function(this, typeData, file, params);
+    } else if (typeData.type === "tuple") {
+      return FileDB.TYPE_DATA_HANDLERS.tuple(this, typeData, file, params);
+    } else if (typeData.type === "index-access") {
+      return FileDB.TYPE_DATA_HANDLERS["index-access"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    }
+    return true;
   }
 
   public resolveComPropsTsTypeID(id: string, fileName: string): boolean {

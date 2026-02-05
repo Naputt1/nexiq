@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LabelData } from "./label";
-import type { PropData, TypeData, TypeDataParam } from "shared";
+import type {
+  ComponentInfoRender,
+  PropData,
+  TypeData,
+  TypeDataParam,
+} from "shared";
 import type Konva from "konva";
 import { type Node, type Edge } from "./layout";
 
@@ -66,6 +71,7 @@ export interface DetailItemData {
     | "ref";
   typeParams?: TypeDataParam[];
   extends?: string[];
+  renders?: Record<string, ComponentInfoRender>;
   ui?: {
     renders?: Record<string, { x: number; y: number }>;
     isLayoutCalculated?: boolean;

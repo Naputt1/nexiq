@@ -46,7 +46,7 @@ describe("analyser cache snapshots", () => {
 
   const projectNameNew = "cache-new";
   it(`should match snapshot for ${projectNameNew}`, () => {
-    setRandomSeed(SEED);
+    setRandomSeed(`${SEED}-${projectNameNew}`);
     const projectPath = path.resolve(
       process.cwd(),
       `../sample-project/${projectNameNew}`,

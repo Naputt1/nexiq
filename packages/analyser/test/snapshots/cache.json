@@ -320,8 +320,14 @@
               "id": "27074bc1-f193-45e3-868c-4a2b8d95000e",
               "dependencies": [
                 {
-                  "id": "user",
-                  "value": "3a9d858f-bcf0-4494-806d-8d23c692b2d1"
+                  "id": "86b5a120-5bbe-4717-aed2-56873ef0e71e",
+                  "name": "user",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "user"
+                  },
+                  "valueId": "3a9d858f-bcf0-4494-806d-8d23c692b2d1"
                 }
               ],
               "isDependency": false,
@@ -343,14 +349,14 @@
           "name": "Test",
           "type": "default",
           "exportKind": "value",
-          "id": "f05db32a-ed7c-4082-a880-7b5831281b63"
+          "id": "024195d2-80bc-433a-a246-0d3853ebf752"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "f05db32a-ed7c-4082-a880-7b5831281b63": {
-          "id": "f05db32a-ed7c-4082-a880-7b5831281b63",
+        "024195d2-80bc-433a-a246-0d3853ebf752": {
+          "id": "024195d2-80bc-433a-a246-0d3853ebf752",
           "name": "Test",
           "kind": "component",
           "type": "function",
@@ -390,14 +396,14 @@
           "name": "Test",
           "type": "default",
           "exportKind": "component",
-          "id": "024195d2-80bc-433a-a246-0d3853ebf752"
+          "id": "834dece6-7b1a-4097-aca9-903db81989c6"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "024195d2-80bc-433a-a246-0d3853ebf752": {
-          "id": "024195d2-80bc-433a-a246-0d3853ebf752",
+        "834dece6-7b1a-4097-aca9-903db81989c6": {
+          "id": "834dece6-7b1a-4097-aca9-903db81989c6",
           "name": "Test",
           "kind": "component",
           "type": "function",
@@ -437,14 +443,14 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "value",
-          "id": "272d471f-6834-45fb-971e-5cb46db0ee87"
+          "id": "49556077-7672-4a57-9f32-8197535de446"
         }
       },
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {
-        "8331a7ca-b028-4519-889d-d39b4c752d13": {
-          "id": "8331a7ca-b028-4519-889d-d39b4c752d13",
+        "272d471f-6834-45fb-971e-5cb46db0ee87": {
+          "id": "272d471f-6834-45fb-971e-5cb46db0ee87",
           "name": "Test",
           "kind": "normal",
           "type": "function",
@@ -477,7 +483,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "component",
-          "id": "49556077-7672-4a57-9f32-8197535de446"
+          "id": "6d300e93-d07f-449a-81a9-5bc6bd84fa11"
         }
       },
       "defaultExport": "anonymous",

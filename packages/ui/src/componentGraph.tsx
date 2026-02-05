@@ -102,6 +102,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             propType: variable.propType,
             type: "component",
             ui: variable.ui,
+            renders: variable.renders,
           });
           combos.push({
             id: `${variable.id}-render`,
@@ -402,7 +403,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   // Auto-save state
   const debouncedSaveState = useMemo(
-    () => debounce((path: string) => saveState(path), 1000),
+    () => debounce(saveState, 1000),
     [saveState],
   );
 
