@@ -4,10 +4,15 @@ import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentInfoRenderDependency } from "shared";
 import assert from "assert";
 import { fullDebug } from "../utils/debug.js";
+import generate from "@babel/generator";
+import { newUUID } from "../utils/uuid.js";
+import { getExpressionData } from "./type/helper.js";
+
+const generateFn: typeof generate.default = generate.default || generate;
 
 function getComponentLoc(
   nodePath: traverse.NodePath<t.JSXElement>,
-  fileName: string
+  fileName: string,
 ) {
   const parentFunc = nodePath.getFunctionParent();
   const parentStatement = nodePath.getStatementParent();
@@ -103,9 +108,56 @@ function getComponentLoc(
   return compLoc;
 }
 
+function extractDependencies(
+  expr: t.Expression,
+  name: string,
+  dependency: ComponentInfoRenderDependency[],
+) {
+  const data = getExpressionData(expr);
+  if (data) {
+    dependency.push({
+      id: newUUID(),
+      name: name,
+      value: data,
+    });
+  } else if (t.isObjectExpression(expr)) {
+    for (const prop of expr.properties) {
+      if (t.isObjectProperty(prop)) {
+        let propName = "";
+        if (t.isIdentifier(prop.key)) {
+          propName = prop.key.name;
+        } else if (t.isStringLiteral(prop.key)) {
+          propName = prop.key.value;
+        }
+
+        if (propName && t.isExpression(prop.value)) {
+          extractDependencies(prop.value, propName, dependency);
+        }
+      } else if (t.isSpreadElement(prop)) {
+        extractDependencies(prop.argument, "...", dependency);
+      }
+    }
+  } else if (t.isLogicalExpression(expr)) {
+    extractDependencies(expr.left, name, dependency);
+    extractDependencies(expr.right, name, dependency);
+  } else if (t.isConditionalExpression(expr)) {
+    extractDependencies(expr.consequent, name, dependency);
+    extractDependencies(expr.alternate, name, dependency);
+  } else {
+    dependency.push({
+      id: newUUID(),
+      name: name,
+      value: {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
+      },
+    });
+  }
+}
+
 export default function JSXElement(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.JSXElement> {
   return (nodePath) => {
     const opening = nodePath.node.openingElement.name;
@@ -166,18 +218,35 @@ export default function JSXElement(
             prop.type === "JSXAttribute" &&
             prop.name.type === "JSXIdentifier"
           ) {
-            let value = "";
-            if (
-              prop.value?.type === "JSXExpressionContainer" &&
-              prop.value.expression.type === "Identifier"
-            ) {
-              value = prop.value.expression.name;
+            if (prop.value?.type === "JSXExpressionContainer") {
+              if (t.isExpression(prop.value.expression)) {
+                extractDependencies(
+                  prop.value.expression,
+                  prop.name.name,
+                  dependency,
+                );
+              }
+            } else if (prop.value?.type === "StringLiteral") {
+              dependency.push({
+                id: newUUID(),
+                name: prop.name.name,
+                value: {
+                  type: "literal-type",
+                  literal: { type: "string", value: prop.value.value },
+                },
+              });
+            } else {
+              dependency.push({
+                id: newUUID(),
+                name: prop.name.name,
+                value: {
+                  type: "literal-type",
+                  literal: { type: "string", value: "" },
+                },
+              });
             }
-
-            dependency.push({
-              id: prop.name.name,
-              value: value,
-            });
+          } else if (prop.type === "JSXSpreadAttribute") {
+            extractDependencies(prop.argument, "...", dependency);
           }
         }
 

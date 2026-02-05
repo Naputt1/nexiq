@@ -20,7 +20,7 @@ import { useProjectStore } from "@/hooks/use-project-store";
 interface SidebarProps {
   currentPath: string;
   projectRoot: string;
-  onSelectProject: (path: string) => void;
+  onSelectProject: (path: string) => void | Promise<void>;
   isLoading?: boolean;
 }
 

@@ -32,8 +32,10 @@ const Test65 = {
   title: "test",
 };
 
-interface Parent<T extends Child = any, TStr extends string = any>
-  extends Child {
+interface Parent<
+  T extends Child = any,
+  TStr extends string = any,
+> extends Child {
   title: string;
   i: number;
   items?: string[];
@@ -100,6 +102,7 @@ export const TypePropsVar: React.FC<Test> = ({ title }) => {
 export const TypePropsVarFunction: React.FC<Parent> = function ({
   title,
   items,
+  ...props
 }) {
   return <div></div>;
 };

@@ -545,14 +545,14 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
 }
 
 function getMemberExpressionNames(
-  expr: t.MemberExpression | t.Identifier,
+  expr: t.Expression | t.Super,
 ): string[] | null {
   if (t.isIdentifier(expr)) {
     return [expr.name];
   }
   if (t.isMemberExpression(expr)) {
     if (t.isIdentifier(expr.property)) {
-      const left = getMemberExpressionNames(expr.object as any);
+      const left = getMemberExpressionNames(expr.object);
       if (left) {
         return [...left, expr.property.name];
       }
@@ -565,23 +565,35 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
   switch (expr.type) {
     case "BooleanLiteral":
       return {
-        type: "boolean",
-        value: expr.value,
+        type: "literal-type",
+        literal: {
+          type: "boolean",
+          value: expr.value,
+        },
       };
     case "NumericLiteral":
       return {
-        type: "number",
-        value: expr.value,
+        type: "literal-type",
+        literal: {
+          type: "number",
+          value: expr.value,
+        },
       };
     case "StringLiteral":
       return {
-        type: "string",
-        value: expr.value,
+        type: "literal-type",
+        literal: {
+          type: "string",
+          value: expr.value,
+        },
       };
     case "BigIntLiteral":
       return {
-        type: "bigint",
-        value: expr.value,
+        type: "literal-type",
+        literal: {
+          type: "bigint",
+          value: expr.value,
+        },
       };
     case "NullLiteral":
       return {
@@ -608,6 +620,45 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         };
       }
       break;
+    }
+    case "ArrayExpression": {
+      const elements: PropDataType[] = [];
+      for (const element of expr.elements) {
+        if (t.isExpression(element)) {
+          const data = getExpressionData(element);
+          if (data) {
+            elements.push(data);
+          }
+        }
+      }
+      return {
+        type: "literal-array",
+        elements,
+      };
+    }
+    case "ObjectExpression": {
+      const properties: Record<string, PropDataType> = {};
+      for (const prop of expr.properties) {
+        if (t.isObjectProperty(prop)) {
+          let key: string | null = null;
+          if (t.isIdentifier(prop.key)) {
+            key = prop.key.name;
+          } else if (t.isStringLiteral(prop.key)) {
+            key = prop.key.value;
+          }
+
+          if (key && t.isExpression(prop.value)) {
+            const data = getExpressionData(prop.value);
+            if (data) {
+              properties[key] = data;
+            }
+          }
+        }
+      }
+      return {
+        type: "literal-object",
+        properties,
+      };
     }
   }
   return null;

@@ -101,6 +101,24 @@ export type TypeDataRef = {
     }
 );
 
+export interface TypeDataLiteralArray {
+  type: "literal-array";
+  elements: PropDataType[];
+}
+
+export interface TypeDataLiteralObject {
+  type: "literal-object";
+  properties: Record<string, PropDataType>;
+}
+
+export type PropDataType =
+  | TypeDataLiteralType
+  | TypeDataRef
+  | TypeDataNull
+  | TypeDataUndefined
+  | TypeDataLiteralArray
+  | TypeDataLiteralObject;
+
 export type TypeDataFunctionParameter = {
   param: FuncParam;
   typeData?: TypeData;
@@ -233,4 +251,6 @@ export type TypeData =
   | TypeDataTypeBodyLiteral
   | TypeDataTypeBodyUnion
   | TypeDataTypeBodyIntersection
-  | TypeDataTypeBodyParathesis;
+  | TypeDataTypeBodyParathesis
+  | TypeDataLiteralArray
+  | TypeDataLiteralObject;

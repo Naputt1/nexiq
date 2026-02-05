@@ -1,5 +1,6 @@
 import type { TypeDataDeclare } from "./types/index.js";
 import type {
+  PropDataType,
   TypeData,
   TypeDataLiteralTypeLiteral,
   TypeDataNull,
@@ -42,7 +43,9 @@ export interface Memo extends ComponentLoc, ReactDependencies {
 
 export type ComponentInfoRenderDependency = {
   id: string;
-  value: string;
+  name: string;
+  value: PropDataType;
+  valueId?: string;
 };
 
 export interface ComponentInfoRender extends ComponentLoc {
@@ -55,12 +58,6 @@ export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
   scope?: VariableScope;
 }
-
-export type PropDataType =
-  | TypeDataLiteralTypeLiteral
-  | TypeDataRef
-  | TypeDataNull
-  | TypeDataUndefined;
 
 export interface PropData {
   name: string;
