@@ -23,20 +23,13 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
   protected getBaseData(): ComponentFileVarBaseTypeFunction<"normal"> {
     return {
       ...super.getBaseData(),
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ]),
-      ),
       type: "function",
-      scope: this.scope,
     };
   }
 
   public getData(): ComponentFileVarFunction {
     return {
-      ...super.getBaseData(),
+      ...this.getBaseData(),
       kind: "normal",
     };
   }

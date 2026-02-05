@@ -5,11 +5,12 @@ import type {
 } from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
+import { Scope } from "./scope.js";
 
 export abstract class BaseFunctionVariable<
   TKind extends VarKind,
 > extends Variable<"function", TKind> {
-  var: Map<string, Variable>;
+  var: Scope;
   scope: VariableScope;
 
   constructor(
@@ -20,7 +21,7 @@ export abstract class BaseFunctionVariable<
     file: File,
   ) {
     super({ ...options, type: "function" }, file);
-    this.var = new Map();
+    this.var = new Scope();
     this.scope = options.scope;
   }
 
@@ -34,12 +35,7 @@ export abstract class BaseFunctionVariable<
   protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind> {
     return {
       ...super.getBaseData(),
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ]),
-      ),
+      var: this.var.getData(),
       scope: this.scope,
     };
   }

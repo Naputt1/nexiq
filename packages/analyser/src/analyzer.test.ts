@@ -14,10 +14,10 @@ describe("analyser snapshots", () => {
 
   projects.forEach((projectName) => {
     it(`should match snapshot for ${projectName}`, () => {
-      setRandomSeed(SEED);
+      setRandomSeed(`${SEED}-${projectName}`);
       const projectPath = path.resolve(
         process.cwd(),
-        `../sample-project/${projectName}`
+        `../sample-project/${projectName}`,
       );
       const packageJson = new PackageJson(projectPath);
       const viteConfigPath = getViteConfig(projectPath);
@@ -27,15 +27,15 @@ describe("analyser snapshots", () => {
         projectPath,
         viteConfigPath,
         files,
-        packageJson
+        packageJson,
       );
 
       const snapshotPath = path.resolve(
         process.cwd(),
-        `test/snapshots/${projectName}.json`
+        `test/snapshots/${projectName}.json`,
       );
       const snapshotData: SnapshotData = JSON.parse(
-        fs.readFileSync(snapshotPath, "utf-8")
+        fs.readFileSync(snapshotPath, "utf-8"),
       );
 
       // Compare the result with the stored snapshot

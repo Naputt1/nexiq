@@ -47,10 +47,7 @@ import { StateVariable } from "./variable/stateVariable.js";
 import { RefVariable } from "./variable/refVariable.js";
 import { MemoVariable } from "./variable/memo.js";
 
-interface FileIds {
-  id: string;
-  var: Map<string, FileIds>;
-}
+import { Scope } from "./variable/scope.js";
 
 type TypeDataHandlerMap = {
   ref: TypeDataRef;
@@ -80,7 +77,7 @@ export class File {
   export: Record<string, ComponentFileExport>;
   defaultExport: string | null;
   tsTypes: Map<string, TypeDataDeclare>;
-  var: Map<string, Variable>;
+  var: Scope;
 
   scopes = new Set<Variable<"function">>();
 
@@ -92,10 +89,6 @@ export class File {
   // key = name val = typeData
   private tsTypesID = new Map<string, TypeDataDeclare>();
 
-  private ids = new Map<string, FileIds>();
-
-  private prevIds = new Map<string, string>();
-
   constructor() {
     this.path = "";
     this.fingerPrint = "";
@@ -104,26 +97,10 @@ export class File {
     this.export = {};
     this.defaultExport = null;
     this.tsTypes = new Map();
-    this.var = new Map();
+    this.var = new Scope();
   }
 
-  // Helper to extract IDs recursively
-  public extractIds = (
-    vars: Record<string, ComponentFileVar>,
-    prevIds: Map<string, string>,
-  ) => {
-    for (const key in vars) {
-      const v = vars[key];
-      if (v && v.name && v.id) {
-        prevIds.set(v.name, v.id);
-      }
-      if (v && v.type === "function" && v.var) {
-        this.extractIds(v.var, prevIds);
-      }
-    }
-  };
-
-  private loadVariable(variable: ComponentFileVar) {
+  private loadVariable(variable: ComponentFileVar, scope: Scope = this.var) {
     let v: Variable | undefined;
     if (variable.kind === "normal") {
       if (variable.type === "function") {
@@ -147,22 +124,21 @@ export class File {
 
     assert(v != null, `Variable not found: ${variable.kind}`);
 
-    this.var.set(v.id, v);
+    scope.add(v);
     if (isBaseFunctionVariable(v)) {
       this.scopes.add(v);
     }
 
     this.locIdsMap.set(this.getLocalId(v), v);
 
-    this.ids.set(v.name, {
-      id: v.id,
-      var: new Map(),
-    });
-
     if (variable.type === "function" && isBaseFunctionVariable(v)) {
+      v.var.initPrevIds(variable.var);
       for (const childVar of Object.values(variable.var)) {
-        const child = this.loadVariable(childVar);
-        v.var.set(child.id, child);
+        this.loadVariable(childVar, v.var);
+      }
+
+      if (isHookVariable(v) || isComponentVariable(v)) {
+        v.syncSets();
       }
     }
 
@@ -178,6 +154,10 @@ export class File {
     this.rawData = data;
 
     if (changed) {
+      if (data.var) {
+        this.var.initPrevIds(data.var);
+      }
+
       for (const variable of Object.values(data.var)) {
         this.loadVariable(variable);
       }
@@ -208,10 +188,6 @@ export class File {
       for (const typeData of Object.values(data.tsTypes)) {
         this.tsTypes.set(typeData.id, typeData);
         this.tsTypesID.set(typeData.name, typeData);
-      }
-
-      if (data.var) {
-        this.extractIds(data.var, this.prevIds);
       }
     }
   }
@@ -245,85 +221,6 @@ export class File {
     return id;
   }
 
-  private getParentId(parentPath: string[]): FileIds | undefined {
-    let parent: FileIds = {
-      id: "",
-      var: this.ids,
-    };
-    for (let i = parentPath.length - 1; i >= 0; i--) {
-      if (parent.var.has(parentPath[i]!)) {
-        parent = parent.var.get(parentPath[i]!)!;
-        continue;
-      }
-
-      return undefined;
-    }
-
-    return parent;
-  }
-
-  private getParent(parentPath: string[]) {
-    const ids: string[] = [];
-    let parentId: FileIds = {
-      id: "",
-      var: this.ids,
-    };
-    for (let i = parentPath.length - 1; i >= 0; i--) {
-      if (parentId.var.has(parentPath[i]!)) {
-        parentId = parentId.var.get(parentPath[i]!)!;
-        ids.push(parentId.id);
-        continue;
-      }
-
-      debugger;
-      return undefined;
-    }
-
-    if (ids.length == 0) {
-      return undefined;
-    }
-
-    let parent = undefined;
-    for (const id of ids) {
-      if (parent == null) {
-        parent = this.var.get(id);
-        continue;
-      }
-
-      if (isBaseFunctionVariable(parent)) {
-        parent = parent.var.get(id);
-        if (parent == null) {
-          debugger;
-          return undefined;
-        }
-      }
-    }
-
-    return parent;
-  }
-
-  private getParentFromId(
-    id: string,
-    varables?: Map<string, Variable>,
-  ): Variable | undefined {
-    const _variable = varables ?? this.var;
-
-    if (_variable.has(id)) {
-      return _variable.get(id);
-    }
-
-    for (const [_key, value] of _variable) {
-      if (isBaseFunctionVariable(value)) {
-        const parent = this.getParentFromId(id, value.var);
-        if (parent) {
-          return parent;
-        }
-      }
-    }
-
-    return undefined;
-  }
-
   public getExport(varImport: ComponentFileImport): string | undefined {
     if (varImport.type === "default") {
       if (this.defaultExport != null) {
@@ -340,15 +237,16 @@ export class File {
     return undefined;
   }
 
-  public getNewVarID(name: string): string {
+  public getNewVarID(name: string, scope: Scope): string {
     for (const ex of Object.values(this.export)) {
       if (ex.name === name) {
         return ex.id;
       }
     }
 
-    if (this.prevIds.has(name)) {
-      return this.prevIds.get(name)!;
+    const prevId = scope.getPrevId(name);
+    if (prevId) {
+      return prevId;
     }
 
     return newUUID();
@@ -359,17 +257,24 @@ export class File {
   }
 
   public addVariable(variable: Variable, parentPath?: string[]): string {
-    const id = this.getNewVarID(variable.name);
+    const scope =
+      parentPath && parentPath.length > 0
+        ? this.var.getByPath(parentPath)
+        : this.var;
+
+    if (scope == null) {
+      debugger;
+      //TODO: handle parent not found
+      return "no parent";
+    }
+
+    const id = this.getNewVarID(variable.name, scope);
     variable.id = id;
 
-    if (this.prevIds.has(variable.name)) {
-      const oldVar = this.var.get(id);
-      assert(oldVar != null, "Variable not found");
-
-      if (oldVar.kind === variable.kind) {
-        oldVar.load(variable);
-        variable = oldVar;
-      }
+    const oldVar = scope.get(id);
+    if (oldVar && oldVar.kind === variable.kind) {
+      oldVar.load(variable);
+      variable = oldVar;
     }
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
@@ -378,41 +283,9 @@ export class File {
       this.scopes.add(variable);
     }
 
-    if (parentPath == null || parentPath.length == 0) {
-      this.var.set(id, variable);
-      this.ids.set(variable.name, {
-        id: id,
-        var: new Map(),
-      });
+    scope.add(variable);
 
-      return id;
-    } else {
-      const parentId = this.getParentId(parentPath);
-      // const parentId = this.ids.get(parentPath);
-      if (parentId == null) {
-        debugger;
-        //TODO: handle parent not found
-        return "no parent";
-      }
-
-      const parent = this.getParent(parentPath);
-      if (parent == null) {
-        debugger;
-        //TODO: handle parent not found
-        return "no parent";
-      }
-
-      if (isBaseFunctionVariable(parent)) {
-        parent.var.set(variable.id, variable);
-        variable.parent = parent;
-      }
-      parentId.var.set(variable.name, {
-        id: variable.id,
-        var: new Map(),
-      });
-
-      return variable.id;
-    }
+    return variable.id;
   }
 
   public addMemo(loc: VariableLoc, memo: Omit<Memo, "id">) {
@@ -521,12 +394,7 @@ export class File {
       tsTypes: Object.fromEntries(
         Object.entries(Object.fromEntries(this.tsTypes)),
       ),
-      var: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.var)).map(([k, value]) => [
-          k,
-          value.getData(),
-        ]),
-      ),
+      var: this.var.getData(),
     };
   }
 
@@ -534,22 +402,13 @@ export class File {
     parent: string,
     dependency: ComponentFileVarDependency,
   ) {
-    let variable: ComponentFileVar | null = null;
-    for (const v of Object.values(this.var)) {
-      if (v.name === parent) {
-        variable = v;
-        break;
-      }
-    }
+    const v = this.var.getByName(parent);
 
-    if (variable == null) {
-      debugger;
-    }
-    assert(variable != null, "Parent variable not found");
-    if (variable == null) return;
-    if (variable.kind == "component") return;
+    assert(v != null, "Parent variable not found");
+    if (v == null) return;
+    if (v.kind == "component") return;
 
-    variable.dependencies[dependency.id] = dependency;
+    v.dependencies[dependency.id] = dependency;
   }
 
   private _getDependenciesIds(
@@ -560,7 +419,7 @@ export class File {
     if (parent == null) return;
 
     if (isBaseFunctionVariable(parent)) {
-      for (const [_key, com] of parent.var) {
+      for (const com of parent.var.values()) {
         if (Object.keys(depMap).includes(com.name)) {
           const depI = depMap[com.name];
           const dep = dependencies[depI!];
@@ -577,7 +436,7 @@ export class File {
 
     if (Object.keys(depMap).length > 0) {
       if (parent.parent == null) {
-        for (const [_key, com] of this.var) {
+        for (const com of this.var.values()) {
           if (Object.keys(depMap).includes(com.name)) {
             const depI = depMap[com.name];
             const dep = dependencies[depI!];
@@ -605,7 +464,7 @@ export class File {
       depMap[dep.value] = i;
     }
 
-    const parent = this.getParentFromId(id);
+    const parent = this.var.get(id, true);
 
     if (parent == null) {
       this._getDependenciesIds(dependencies, depMap, this.var.get(id));
@@ -615,10 +474,11 @@ export class File {
   }
 
   public getVariableID(name: string): string | null {
-    const id = this.ids.get(name);
-    if (id != null) {
-      return id.id;
-    }
+    const v = this.var.getByName(name);
+    if (v) return v.id;
+
+    const t = this.tsTypesID.get(name);
+    if (t) return t.id;
 
     return null;
   }
@@ -667,11 +527,9 @@ export class File {
 
   public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
     if (!type.id) {
-      const id = this.getNewVarID(type.name);
+      const id = this.getNewVarID(type.name, this.var); // Root scope
       type.id = id;
     }
-
-    this.ids.set(type.name, { id: type.id, var: new Map() });
 
     this.tsTypes.set(type.id, type);
     this.tsTypesID.set(type.name, type);
@@ -1133,7 +991,7 @@ export class FileDB {
     const file = this.get(fileName);
 
     const typeDeclare = {
-      id: file.getNewVarID(type.name),
+      id: file.getNewVarID(type.name, file.var),
       ...type,
     } as TypeDataDeclare;
 

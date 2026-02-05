@@ -114,6 +114,7 @@ export class ComponentDB {
         {
           id: newUUID(),
           ...component,
+          states: [],
         },
         file,
       ),
@@ -144,6 +145,7 @@ export class ComponentDB {
         {
           id: newUUID(),
           ...variable,
+          states: [],
         },
         file,
       ),
@@ -406,8 +408,7 @@ export class ComponentDB {
 
     // Handle nested var iteration (Map or Record)
     if (isBaseFunctionVariable(variable)) {
-      const vars = this._getValues(variable.var);
-      for (const innerVar of vars) {
+      for (const innerVar of variable.var.values()) {
         this._resolveDependency(
           innerVar,
           variable.kind == "component" ? variable.id : parent,
