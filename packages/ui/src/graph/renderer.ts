@@ -148,7 +148,16 @@ export class GraphRenderer {
     });
 
     stage.on("mouseenter", () => (stage.container().style.cursor = "grab"));
-    stage.on("mousedown", () => (stage.container().style.cursor = "grabbing"));
+    stage.on("mousedown", (e) => {
+      if (e.evt.button === 1) {
+        // Middle mouse button
+        e.evt.preventDefault();
+        stage.startDrag();
+      }
+      if (e.evt.button === 0 || e.evt.button === 1) {
+        stage.container().style.cursor = "grabbing";
+      }
+    });
     stage.on("mouseup", () => (stage.container().style.cursor = "grab"));
   }
 
