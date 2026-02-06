@@ -228,7 +228,7 @@
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "df18fd8d-4809-4a9d-ae80-185ffaad87f6"
+          "id": "0e3f2b12-d30d-433b-9307-0f723bfdfa7a"
         }
       },
       "defaultExport": null,
@@ -246,8 +246,8 @@
             "column": 16
           },
           "var": {
-            "b9956727-bee6-41f6-bbef-c15fb9aac3ec": {
-              "id": "b9956727-bee6-41f6-bbef-c15fb9aac3ec",
+            "491b3bb2-f251-4a17-9feb-67296e366db9": {
+              "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
               "name": "value",
               "kind": "state",
               "type": "data",
@@ -272,13 +272,20 @@
             }
           },
           "states": [
-            "b9956727-bee6-41f6-bbef-c15fb9aac3ec"
+            "491b3bb2-f251-4a17-9feb-67296e366db9"
           ],
-          "props": [],
+          "props": [
+            {
+              "id": "e6074c8d-55f3-4c6d-9283-966a4b3d857a",
+              "name": "initialValue",
+              "type": "any",
+              "kind": "prop"
+            }
+          ],
           "hooks": [],
           "effects": {
-            "f5b03315-9734-4b01-b0bf-9854f3d7c63f": {
-              "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
+            "df18fd8d-4809-4a9d-ae80-185ffaad87f6": {
+              "id": "f5b03315-9734-4b01-b0bf-9854f3d7c63f",
               "scope": {
                 "start": {
                   "line": 6,
@@ -295,15 +302,15 @@
               },
               "reactDeps": [
                 {
-                  "id": "b9956727-bee6-41f6-bbef-c15fb9aac3ec",
+                  "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
                   "name": "value"
                 }
               ]
             }
           }
         },
-        "df18fd8d-4809-4a9d-ae80-185ffaad87f6": {
-          "id": "df18fd8d-4809-4a9d-ae80-185ffaad87f6",
+        "0e3f2b12-d30d-433b-9307-0f723bfdfa7a": {
+          "id": "0e3f2b12-d30d-433b-9307-0f723bfdfa7a",
           "name": "useOtherHook",
           "kind": "hook",
           "type": "function",

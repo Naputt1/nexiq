@@ -59,6 +59,7 @@ export interface DetailItemData {
   id: string;
   fileName: string;
   props?: PropData[];
+  propData?: PropData;
   propType?: TypeData;
   type?:
     | "component"
@@ -68,7 +69,8 @@ export interface DetailItemData {
     | "render"
     | "effect"
     | "memo"
-    | "ref";
+    | "ref"
+    | "prop";
   typeParams?: TypeDataParam[];
   extends?: string[];
   renders?: Record<string, ComponentInfoRender>;

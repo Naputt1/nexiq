@@ -1,0 +1,363 @@
+{
+  "files": {
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "2f43f9bdc2740307",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "useEffect": {
+          "localName": "useEffect",
+          "importedName": "useEffect",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useRef": {
+          "localName": "useRef",
+          "importedName": "useRef",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "ComplexProps": {
+          "name": "ComplexProps",
+          "type": "named",
+          "exportKind": "value",
+          "id": "f5faef1a-1323-44ab-a424-fccf312d4fe9"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {
+        "3de4228f-f084-4b5a-af69-311300b8f277": {
+          "id": "3de4228f-f084-4b5a-af69-311300b8f277",
+          "type": "interface",
+          "name": "Props",
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "a",
+              "type": {
+                "type": "string"
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "b",
+              "type": {
+                "type": "type-literal",
+                "members": [
+                  {
+                    "signatureType": "property",
+                    "name": "x",
+                    "type": {
+                      "type": "number"
+                    }
+                  },
+                  {
+                    "signatureType": "property",
+                    "name": "y",
+                    "type": {
+                      "type": "number"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "c",
+              "type": {
+                "type": "string"
+              }
+            }
+          ],
+          "loc": {
+            "line": 3,
+            "column": 10
+          }
+        }
+      },
+      "var": {
+        "f5faef1a-1323-44ab-a424-fccf312d4fe9": {
+          "id": "f5faef1a-1323-44ab-a424-fccf312d4fe9",
+          "name": "ComplexProps",
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "dependencies": {},
+          "loc": {
+            "line": 12,
+            "column": 13
+          },
+          "var": {
+            "b1e81133-6b05-4617-bdd7-cc434ce723b6": {
+              "id": "b1e81133-6b05-4617-bdd7-cc434ce723b6",
+              "name": "refX",
+              "kind": "ref",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "dependencies": {},
+              "loc": {
+                "line": 17,
+                "column": 8
+              },
+              "defaultData": {
+                "type": "ref",
+                "refType": "named",
+                "name": "c46dc6e3-e3cd-40cb-a71d-901c37574f75"
+              }
+            },
+            "cd223c3f-45d8-42f9-949a-00a2fba34869": {
+              "id": "cd223c3f-45d8-42f9-949a-00a2fba34869",
+              "name": "stateX",
+              "kind": "state",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 8
+              },
+              "value": "stateX",
+              "setter": "setStateX"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 12,
+              "column": 13
+            },
+            "end": {
+              "line": 12,
+              "column": 25
+            }
+          },
+          "states": [
+            "cd223c3f-45d8-42f9-949a-00a2fba34869"
+          ],
+          "props": [
+            {
+              "id": "1a93c9c4-6518-4bdd-9410-1cdd9761b498",
+              "name": "a",
+              "type": "any",
+              "kind": "prop"
+            },
+            {
+              "id": "4c99baa2-4cd8-43e3-b674-5ac08241282e",
+              "name": "b",
+              "type": "any",
+              "kind": "prop",
+              "props": [
+                {
+                  "id": "c46dc6e3-e3cd-40cb-a71d-901c37574f75",
+                  "name": "x",
+                  "type": "any",
+                  "kind": "prop"
+                },
+                {
+                  "id": "c61fda35-64bc-48ff-9381-23302414f32f",
+                  "name": "rename",
+                  "type": "any",
+                  "kind": "prop"
+                },
+                {
+                  "id": "a1b92d4d-26c0-4f94-a1f5-f7dc4e1768ab",
+                  "name": "restInner",
+                  "type": "any",
+                  "kind": "spread"
+                }
+              ]
+            },
+            {
+              "id": "77c8dfe5-e147-4468-9153-bd4cccf370a7",
+              "name": "restOuter",
+              "type": "any",
+              "kind": "spread"
+            }
+          ],
+          "hooks": [],
+          "effects": {
+            "4e2b3b90-a6a6-4f88-b9a7-a12ef34ebfd5": {
+              "id": "13b02d1d-25d1-4ea7-8b51-5141e325f4f4",
+              "scope": {
+                "start": {
+                  "line": 20,
+                  "column": 18
+                },
+                "end": {
+                  "line": 22,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 20,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "1a93c9c4-6518-4bdd-9410-1cdd9761b498",
+                  "name": "a"
+                }
+              ]
+            },
+            "a598bd39-c414-4d02-8ea4-f085a97644db": {
+              "id": "67207759-6971-4f80-9410-080d2f0c33ca",
+              "scope": {
+                "start": {
+                  "line": 24,
+                  "column": 18
+                },
+                "end": {
+                  "line": 26,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 24,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "c46dc6e3-e3cd-40cb-a71d-901c37574f75",
+                  "name": "x"
+                }
+              ]
+            },
+            "059b929e-b021-4422-af25-45677c03e540": {
+              "id": "c53947e1-d8cc-45eb-8839-8adeb1e6d7f8",
+              "scope": {
+                "start": {
+                  "line": 28,
+                  "column": 18
+                },
+                "end": {
+                  "line": 30,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 28,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "a1b92d4d-26c0-4f94-a1f5-f7dc4e1768ab",
+                  "name": "restInner"
+                }
+              ]
+            },
+            "4030c425-a5b1-4b6f-98da-5c46884a37dd": {
+              "id": "68139584-091a-4a40-94e7-9c93e5327332",
+              "scope": {
+                "start": {
+                  "line": 32,
+                  "column": 18
+                },
+                "end": {
+                  "line": 34,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 32,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "77c8dfe5-e147-4468-9153-bd4cccf370a7",
+                  "name": "restOuter"
+                }
+              ]
+            },
+            "d6771206-b852-4e17-9e62-04c6a8a8480b": {
+              "id": "55a7695e-ccf0-46c9-9211-43d6ffb15c96",
+              "scope": {
+                "start": {
+                  "line": 36,
+                  "column": 18
+                },
+                "end": {
+                  "line": 38,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 36,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "cd223c3f-45d8-42f9-949a-00a2fba34869",
+                  "name": "stateX"
+                }
+              ]
+            },
+            "6d6cc1ed-5d0e-433d-8387-cf3f7cbd5a84": {
+              "id": "44de032f-5d4e-4778-845d-67b355a6f4f3",
+              "scope": {
+                "start": {
+                  "line": 40,
+                  "column": 18
+                },
+                "end": {
+                  "line": 42,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 40,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "b1e81133-6b05-4617-bdd7-cc434ce723b6",
+                  "name": "refX"
+                }
+              ]
+            },
+            "d05e8381-b41a-465d-9e5c-c1126fc937c2": {
+              "id": "10dc3ffa-2081-4d49-a255-e19fe57fc2d0",
+              "scope": {
+                "start": {
+                  "line": 44,
+                  "column": 18
+                },
+                "end": {
+                  "line": 46,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 44,
+                "column": 2
+              },
+              "reactDeps": []
+            }
+          },
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "any"
+          }
+        }
+      }
+    }
+  },
+  "edges": []
+}
