@@ -152,8 +152,10 @@
           "states": [],
           "props": [
             {
+              "id": "af46eab8-9ba9-4119-a925-179af6f20d5a",
               "name": "user",
-              "type": "{\n  name: string;\n}"
+              "type": "{\n  name: string;\n}",
+              "kind": "prop"
             }
           ],
           "hooks": [],
@@ -209,19 +211,19 @@
           "name": "UserContext",
           "type": "named",
           "exportKind": "value",
-          "id": "a94b240f-b56d-4a01-a822-a210181cc15d"
+          "id": "e6e97730-ddc9-439d-a0d2-85e5120952b5"
         },
         "App": {
           "name": "App",
           "type": "default",
           "exportKind": "value",
-          "id": "205cc2d3-6e21-41da-a472-17913d681334"
+          "id": "bb820420-5c25-4b40-ae6f-eb6245e5e384"
         }
       },
       "defaultExport": "App",
       "tsTypes": {
-        "2c63f82c-0ab2-443d-9401-53f092690ba4": {
-          "id": "2c63f82c-0ab2-443d-9401-53f092690ba4",
+        "a94b240f-b56d-4a01-a822-a210181cc15d": {
+          "id": "a94b240f-b56d-4a01-a822-a210181cc15d",
           "type": "type",
           "name": "User",
           "body": {
@@ -243,8 +245,8 @@
         }
       },
       "var": {
-        "a94b240f-b56d-4a01-a822-a210181cc15d": {
-          "id": "a94b240f-b56d-4a01-a822-a210181cc15d",
+        "e6e97730-ddc9-439d-a0d2-85e5120952b5": {
+          "id": "e6e97730-ddc9-439d-a0d2-85e5120952b5",
           "name": "UserContext",
           "kind": "normal",
           "type": "data",
@@ -256,8 +258,8 @@
           },
           "components": {}
         },
-        "205cc2d3-6e21-41da-a472-17913d681334": {
-          "id": "205cc2d3-6e21-41da-a472-17913d681334",
+        "bb820420-5c25-4b40-ae6f-eb6245e5e384": {
+          "id": "bb820420-5c25-4b40-ae6f-eb6245e5e384",
           "name": "App",
           "kind": "component",
           "type": "function",
@@ -268,8 +270,8 @@
             "column": 9
           },
           "var": {
-            "bb820420-5c25-4b40-ae6f-eb6245e5e384": {
-              "id": "bb820420-5c25-4b40-ae6f-eb6245e5e384",
+            "cc91e857-72d4-4dfc-8800-d411e4f977f4": {
+              "id": "cc91e857-72d4-4dfc-8800-d411e4f977f4",
               "name": "count",
               "kind": "state",
               "type": "data",
@@ -282,8 +284,8 @@
               "value": "count",
               "setter": "setCount"
             },
-            "cc91e857-72d4-4dfc-8800-d411e4f977f4": {
-              "id": "cc91e857-72d4-4dfc-8800-d411e4f977f4",
+            "743796bf-e74e-4256-8034-96fb81625bd8": {
+              "id": "743796bf-e74e-4256-8034-96fb81625bd8",
               "name": "user",
               "kind": "state",
               "type": "data",
@@ -307,8 +309,8 @@
             }
           },
           "states": [
-            "bb820420-5c25-4b40-ae6f-eb6245e5e384",
-            "cc91e857-72d4-4dfc-8800-d411e4f977f4"
+            "cc91e857-72d4-4dfc-8800-d411e4f977f4",
+            "743796bf-e74e-4256-8034-96fb81625bd8"
           ],
           "props": [],
           "hooks": [],
@@ -320,14 +322,14 @@
               "id": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3",
               "dependencies": [
                 {
-                  "id": "743796bf-e74e-4256-8034-96fb81625bd8",
+                  "id": "1369c342-ede9-4852-bff1-ec280cea24f3",
                   "name": "user",
                   "value": {
                     "type": "ref",
                     "refType": "named",
                     "name": "user"
                   },
-                  "valueId": "cc91e857-72d4-4dfc-8800-d411e4f977f4"
+                  "valueId": "743796bf-e74e-4256-8034-96fb81625bd8"
                 }
               ],
               "isDependency": false,
@@ -349,14 +351,14 @@
           "name": "Test",
           "type": "default",
           "exportKind": "value",
-          "id": "2f7335fe-bb12-48b7-8458-48fe541217e5"
+          "id": "5f363a5d-47d7-46d7-b45a-84688518650e"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "2f7335fe-bb12-48b7-8458-48fe541217e5": {
-          "id": "2f7335fe-bb12-48b7-8458-48fe541217e5",
+        "5f363a5d-47d7-46d7-b45a-84688518650e": {
+          "id": "5f363a5d-47d7-46d7-b45a-84688518650e",
           "name": "Test",
           "kind": "component",
           "type": "function",
@@ -396,14 +398,14 @@
           "name": "Test",
           "type": "default",
           "exportKind": "component",
-          "id": "5f363a5d-47d7-46d7-b45a-84688518650e"
+          "id": "24a38596-b117-43de-bf22-d5a1a46b9426"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "5f363a5d-47d7-46d7-b45a-84688518650e": {
-          "id": "5f363a5d-47d7-46d7-b45a-84688518650e",
+        "24a38596-b117-43de-bf22-d5a1a46b9426": {
+          "id": "24a38596-b117-43de-bf22-d5a1a46b9426",
           "name": "Test",
           "kind": "component",
           "type": "function",
@@ -443,14 +445,14 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "value",
-          "id": "1918428e-2697-426c-8301-52c2d3ca59d4"
+          "id": "0f659f2b-0a89-4ca5-ae6a-f6dfdb6c346d"
         }
       },
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {
-        "f7ef70d9-dd78-4ac3-90bd-2b108d206119": {
-          "id": "f7ef70d9-dd78-4ac3-90bd-2b108d206119",
+        "1918428e-2697-426c-8301-52c2d3ca59d4": {
+          "id": "1918428e-2697-426c-8301-52c2d3ca59d4",
           "name": "Test",
           "kind": "normal",
           "type": "function",
@@ -483,7 +485,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "component",
-          "id": "0f659f2b-0a89-4ca5-ae6a-f6dfdb6c346d"
+          "id": "a5d0f8bc-dd46-4581-8f72-ba3cabab28c0"
         }
       },
       "defaultExport": "anonymous",
@@ -494,7 +496,7 @@
   "edges": [
     {
       "from": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3",
-      "to": "205cc2d3-6e21-41da-a472-17913d681334",
+      "to": "bb820420-5c25-4b40-ae6f-eb6245e5e384",
       "label": "render"
     }
   ]

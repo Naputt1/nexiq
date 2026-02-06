@@ -128,6 +128,24 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "props-complex",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/props-complex",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--seed",
+        "analyser-test-seed",
+        "--no-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "maemoo",
       "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [
