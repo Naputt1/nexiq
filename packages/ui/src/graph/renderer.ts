@@ -426,6 +426,7 @@ export class GraphRenderer {
         lineJoin: "round",
         perfectDrawEnabled: false,
         listening: false,
+        visible: edge.points.length >= 4,
       });
 
       // Add to parent or layer
