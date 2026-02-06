@@ -12,7 +12,7 @@ const args = minimist(process.argv.slice(2));
 
 const samples = args._[0]
   ? [args._[0]]
-  : ["simple", "complex", "props", "hook", "cache", "cache-new"];
+  : ["simple", "complex", "props", "hook", "props-complex", "cache", "cache-new"];
 
 const SEED = "analyser-test-seed";
 

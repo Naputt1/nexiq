@@ -112,7 +112,7 @@ export function NodeDetails({
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-semibold text-muted-foreground">
-                {type === "Node" ? "Definition" : "Properties"}
+                {item.type === "component" ? "Props" : "Definition"}
               </span>
             </div>
             <div className="text-xs font-mono bg-muted/50 p-3 rounded-md border border-border max-w-full overflow-x-auto text-start leading-relaxed shadow-inner">
@@ -148,7 +148,10 @@ export function NodeDetails({
                     key={i}
                     className="flex justify-between py-0.5 border-b border-border/50 last:border-0"
                   >
-                    <span className="text-primary">{p.name}</span>
+                    <span className="text-primary">
+                      {p.kind === "spread" ? "..." : ""}
+                      {p.name}
+                    </span>
                     <span className="text-muted-foreground italic">
                       {p.type}
                     </span>

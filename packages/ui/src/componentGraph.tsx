@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ComponentFile, ComponentFileVar, TypeDataDeclare } from "shared";
+import type {
+  ComponentFile,
+  ComponentFileVar,
+  PropData,
+  PropDataType,
+  TypeDataDeclare,
+} from "shared";
 import useGraph, {
   type ComboData,
   type EdgeData,
@@ -104,6 +110,52 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             ui: variable.ui,
             renders: variable.renders,
           });
+
+          if (variable.props && variable.props.length > 0) {
+            const propsComboId = `${variable.id}-props`;
+            combos.push({
+              id: propsComboId,
+              collapsed: true,
+              label: { text: "props", fill: "black" },
+              color: "green",
+              combo: variable.id,
+              fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+              ui: variable.ui?.renders?.[propsComboId],
+            });
+
+            const addProps = (props: PropData[], parentComboId: string) => {
+              for (const prop of props) {
+                if (prop.props && prop.props.length > 0) {
+                  const subPropsComboId = `${prop.id}-subprops`;
+                  combos.push({
+                    id: subPropsComboId,
+                    collapsed: true,
+                    label: { text: prop.name, fill: "black" },
+                    color: "green",
+                    combo: parentComboId,
+                    fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                    ui: variable.ui?.renders?.[subPropsComboId],
+                  });
+                  addProps(prop.props, subPropsComboId);
+                } else {
+                  nodes.push({
+                    id: prop.id,
+                    label: {
+                      text: (prop.kind === "spread" ? "..." : "") + prop.name,
+                    },
+                    type: "prop",
+                    color: "green",
+                    combo: parentComboId,
+                    propData: prop,
+                    fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                  });
+                }
+              }
+            };
+
+            addProps(variable.props, propsComboId);
+          }
+
           combos.push({
             id: `${variable.id}-render`,
             collapsed: true,
@@ -112,6 +164,14 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
             ui: variable.ui?.renders?.[`${variable.id}-render`],
           });
+
+          const isPropNode = (props: PropData[], id: string): boolean => {
+            for (const p of props) {
+              if (p.id === id) return true;
+              if (p.props && isPropNode(p.props, id)) return true;
+            }
+            return false;
+          };
 
           // for (const stateID of variable.states) {
           //   const state = variable.var[stateID];
@@ -157,11 +217,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               });
 
               for (const dep of v.reactDeps) {
+                const isProp = isPropNode(variable.props || [], dep.id);
                 edges.push({
                   id: `${dep.id}-${v.id}`,
                   source: dep.id,
                   target: v.id,
-                  combo: variable.id,
+                  combo: isProp ? undefined : variable.id,
                 });
               }
             } else if (v.kind == "ref") {
@@ -176,6 +237,33 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
                 ui: v.ui,
               });
+
+              const addRefDefaultDependency = (defaultData: PropDataType) => {
+                if (defaultData.type === "ref") {
+                  const id =
+                    defaultData.refType === "named"
+                      ? defaultData.name
+                      : defaultData.names[0];
+
+                  const isProp = isPropNode(variable.props || [], id);
+                  edges.push({
+                    id: `${id}-${v.id}`,
+                    source: id,
+                    target: v.id,
+                    combo: isProp ? undefined : variable.id,
+                  });
+                } else if (defaultData.type === "literal-array") {
+                  for (const element of defaultData.elements) {
+                    addRefDefaultDependency(element);
+                  }
+                } else if (defaultData.type === "literal-object") {
+                  for (const prop of Object.values(defaultData.properties)) {
+                    addRefDefaultDependency(prop);
+                  }
+                }
+              };
+
+              addRefDefaultDependency(v.defaultData);
             }
           }
 
@@ -192,11 +280,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             for (const dep of effect.reactDeps) {
               if (dep.id == "") continue;
 
+              const isProp = isPropNode(variable.props || [], dep.id);
               edges.push({
                 id: `${dep.id}-${effect.id}`,
                 source: dep.id,
                 target: effect.id,
-                combo: variable.id,
+                combo: isProp ? undefined : variable.id,
               });
             }
           }

@@ -60,8 +60,11 @@ export interface EffectInfo extends ComponentLoc, ReactDependencies {
 }
 
 export interface PropData {
+  id: string;
   name: string;
   type: string;
+  kind: "prop" | "spread";
+  props?: PropData[];
 }
 
 export interface ReactFunctionInfoBase {

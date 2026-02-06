@@ -10,7 +10,7 @@ import type { SnapshotData } from "./types/test.js";
 const SEED = "analyser-test-seed";
 
 describe("analyser snapshots", () => {
-  const projects = ["simple", "complex", "props", "hook"];
+  const projects = ["simple", "complex", "props", "hook", "props-complex"];
 
   projects.forEach((projectName) => {
     it(`should match snapshot for ${projectName}`, () => {
