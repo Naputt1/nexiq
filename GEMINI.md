@@ -77,6 +77,11 @@ From the project root:
 - Shared code should reside in `packages/shared`.
 - Use workspace-relative imports (e.g., `"shared": "workspace:*"`).
 
+### Feature Tracking
+
+- **Requirement**: When adding or editing a feature, you MUST read, edit, or write to `plan/{feature}.md` to track current progress and next steps.
+- **Example**: For the Git feature, refer to `plan/git.md`.
+
 ### Analyser Development
 
 - The analyser logic is located in `packages/analyser/src/analyzer/`.

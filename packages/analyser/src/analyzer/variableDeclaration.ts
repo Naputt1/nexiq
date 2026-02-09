@@ -3,6 +3,9 @@ import traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type {
   ComponentFileVarComponent,
+  ComponentFileVarHook,
+  ComponentFileVarNormalData,
+  ComponentFileVarNormalFunction,
   ComponentFileVarDependency,
   Memo,
   ReactDependency,
@@ -13,9 +16,9 @@ import type {
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getVariableComponentName } from "../variable.js";
-import { newUUID } from "../utils/uuid.js";
 import { getProps } from "./propExtractor.js";
 import { getExpressionData, getType } from "./type/helper.js";
+import { getDeterministicId } from "../utils/hash.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -80,10 +83,9 @@ export default function VariableDeclarator(
           const parentPath = getParentPath(nodePath);
           const component: Omit<
             ComponentFileVarComponent,
-            "id" | "kind" | "states"
+            "id" | "kind" | "states" | "hash" | "file"
           > = {
             name: id.name,
-            file: fileName,
             type: "function",
             componentType: "Function",
             hooks: [],
@@ -121,7 +123,7 @@ export default function VariableDeclarator(
             }
           }
 
-          componentDB.addComponent(component, parentPath);
+          componentDB.addComponent(fileName, component, parentPath);
           return;
         }
       } else if (t.isIdentifier(init.callee)) {
@@ -268,10 +270,9 @@ export default function VariableDeclarator(
       const parentPath = getParentPath(nodePath);
       const component: Omit<
         ComponentFileVarComponent,
-        "id" | "kind" | "states"
+        "id" | "kind" | "states" | "hash" | "file"
       > = {
         name,
-        file: fileName,
         type: "function",
         componentType: "Function",
         hooks: [],
@@ -337,7 +338,7 @@ export default function VariableDeclarator(
         }
       }
 
-      componentDB.addComponent(component, parentPath);
+      componentDB.addComponent(fileName, component, parentPath);
     } else {
       if (nodePath.scope.block.type === "Program") {
         if (
@@ -358,8 +359,7 @@ export default function VariableDeclarator(
           };
 
           if (isHook(name)) {
-            componentDB.addHook({
-              file: fileName,
+            componentDB.addHook(fileName, {
               name,
               type: "function",
               dependencies: {},
@@ -373,7 +373,10 @@ export default function VariableDeclarator(
               ),
               effects: {},
               hooks: [],
-            });
+            } as Omit<
+              ComponentFileVarHook,
+              "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
+            >);
           } else {
             componentDB.addVariable(fileName, {
               name,
@@ -381,7 +384,10 @@ export default function VariableDeclarator(
               dependencies: {},
               loc,
               scope,
-            });
+            } as Omit<
+              ComponentFileVarNormalFunction,
+              "kind" | "file" | "id" | "var" | "components" | "hash"
+            >);
           }
           return;
         }
@@ -389,14 +395,14 @@ export default function VariableDeclarator(
         const dependencies: Record<string, ComponentFileVarDependency> = {};
         if (init?.type === "NewExpression") {
           if (init.callee.type === "Identifier") {
-            const id = newUUID();
+            const id = getDeterministicId(init.callee.name);
             dependencies[id] = {
               id,
               name: init.callee.name,
             };
           }
         } else if (init?.type === "Identifier") {
-          const id = newUUID();
+          const id = getDeterministicId(init.name);
           dependencies[id] = {
             id,
             name: init.name,
@@ -408,7 +414,10 @@ export default function VariableDeclarator(
           type: "data",
           dependencies,
           loc,
-        });
+        } as Omit<
+          ComponentFileVarNormalData,
+          "kind" | "file" | "id" | "var" | "components" | "hash"
+        >);
       } else if (init?.type === "ArrowFunctionExpression") {
         if (
           nodePath.scope.block.type === "FunctionDeclaration" &&
@@ -423,7 +432,10 @@ export default function VariableDeclarator(
               dependencies: {},
               type: "data",
               loc,
-            },
+            } as Omit<
+              ComponentFileVarNormalData,
+              "kind" | "file" | "id" | "var" | "components" | "hash"
+            >,
             parentPath,
           );
         } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
@@ -436,7 +448,10 @@ export default function VariableDeclarator(
               type: "function",
               loc,
               scope,
-            },
+            } as Omit<
+              ComponentFileVarNormalFunction,
+              "kind" | "file" | "id" | "var" | "components" | "hash"
+            >,
             parentPath,
           );
         }

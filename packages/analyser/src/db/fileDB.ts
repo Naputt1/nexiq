@@ -36,11 +36,10 @@ import {
   isBaseFunctionVariable,
   isDataVariable,
 } from "./variable/type.js";
-import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
 import fs from "fs";
 import path from "path";
-import { xxh3 } from "@node-rs/xxhash";
+import { getDeterministicId } from "../utils/hash.js";
 import { DataVariable } from "./variable/dataVariable.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
@@ -212,7 +211,11 @@ export class File {
   }
 
   public addExport(exportData: Omit<ComponentFileExport, "id">) {
-    const id = this.getVariableID(exportData.name) ?? newUUID();
+    let id = this.getVariableID(exportData.name);
+    if (!id) {
+      // Fallback to deterministic ID based on file and name
+      id = getDeterministicId(`${this.path}:${exportData.name}`);
+    }
 
     this.export[exportData.name] = { ...exportData, id };
     if (exportData.type === "default") {
@@ -250,7 +253,8 @@ export class File {
       return prevId;
     }
 
-    return newUUID();
+    // Fallback to deterministic ID based on file and name if no cache
+    return getDeterministicId(`${this.path}:${name}`);
   }
 
   public getLocalId(variable: Variable): string {
@@ -593,7 +597,7 @@ export class File {
     return variable.id;
   }
 
-  public addEffect(loc: VariableLoc, effect: EffectInfo) {
+  public addEffect(loc: VariableLoc, effect: Omit<EffectInfo, "id">) {
     const variable = this.getVariable(loc);
 
     assert(variable != null, "Variable not found");
@@ -634,10 +638,9 @@ export class FileDB {
         }
       }
 
-      const hasher = xxh3.Xxh3.withSeed();
-      hasher.update(fs.readFileSync(path.resolve(this.src_dir, filename)));
-
-      file.hash = hasher.digest().toString(16);
+      file.hash = getDeterministicId(
+        fs.readFileSync(path.resolve(this.src_dir, filename)),
+      );
 
       if (cache) {
         return file.hash !== cache.hash;
@@ -697,10 +700,14 @@ export class FileDB {
     const file = this.get(fileName);
 
     if (Object.hasOwn(file.export, localName)) {
-      return file.export[localName]?.id ?? newUUID();
+      return (
+        file.export[localName]?.id ??
+        getDeterministicId(`${fileName}:${localName}`)
+      );
     }
 
-    return newUUID();
+    // Fallback to deterministic ID based on file and name
+    return getDeterministicId(`${fileName}:${localName}`);
   }
 
   public getData(): JsonData["files"] {

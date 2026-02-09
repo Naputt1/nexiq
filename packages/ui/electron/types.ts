@@ -31,6 +31,7 @@ export interface ProjectStatus {
 export interface IpcEvents {
   "main-process-message": string;
   "reload-project": void;
+  "git-status-changed": void;
 }
 
 export interface AppStateData {

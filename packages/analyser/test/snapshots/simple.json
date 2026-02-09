@@ -59,7 +59,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "value",
-          "id": "d613d984-4123-4dcd-94ed-09353928a7a4"
+          "id": "6010998ed134ea31"
         }
       },
       "defaultExport": "anonymous",
@@ -121,18 +121,19 @@
           "name": "Child",
           "type": "named",
           "exportKind": "component",
-          "id": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3"
+          "id": "c8f7739ce29d1ce0"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3": {
-          "id": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3",
+        "c8f7739ce29d1ce0": {
+          "id": "c8f7739ce29d1ce0",
           "name": "Child",
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
+          "hash": "1914f3d1420ed863",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -152,7 +153,7 @@
           "states": [],
           "props": [
             {
-              "id": "af46eab8-9ba9-4119-a925-179af6f20d5a",
+              "id": "99e389d25c10af32",
               "name": "user",
               "type": "{\n  name: string;\n}",
               "kind": "prop"
@@ -211,19 +212,19 @@
           "name": "UserContext",
           "type": "named",
           "exportKind": "value",
-          "id": "e6e97730-ddc9-439d-a0d2-85e5120952b5"
+          "id": "fa7e21af27b37eb"
         },
         "App": {
           "name": "App",
           "type": "default",
           "exportKind": "value",
-          "id": "bb820420-5c25-4b40-ae6f-eb6245e5e384"
+          "id": "720e9756d239e21b"
         }
       },
       "defaultExport": "App",
       "tsTypes": {
-        "a94b240f-b56d-4a01-a822-a210181cc15d": {
-          "id": "a94b240f-b56d-4a01-a822-a210181cc15d",
+        "5d1e03cf45c78c05": {
+          "id": "5d1e03cf45c78c05",
           "type": "type",
           "name": "User",
           "body": {
@@ -245,12 +246,13 @@
         }
       },
       "var": {
-        "e6e97730-ddc9-439d-a0d2-85e5120952b5": {
-          "id": "e6e97730-ddc9-439d-a0d2-85e5120952b5",
+        "fa7e21af27b37eb": {
+          "id": "fa7e21af27b37eb",
           "name": "UserContext",
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
+          "hash": "b64e40d43274b9e8",
           "dependencies": {},
           "loc": {
             "line": 10,
@@ -258,24 +260,26 @@
           },
           "components": {}
         },
-        "bb820420-5c25-4b40-ae6f-eb6245e5e384": {
-          "id": "bb820420-5c25-4b40-ae6f-eb6245e5e384",
+        "720e9756d239e21b": {
+          "id": "720e9756d239e21b",
           "name": "App",
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
+          "hash": "1c47673d7c049e76",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 9
           },
           "var": {
-            "cc91e857-72d4-4dfc-8800-d411e4f977f4": {
-              "id": "cc91e857-72d4-4dfc-8800-d411e4f977f4",
+            "720e9756d239e21b:state:count": {
+              "id": "720e9756d239e21b:state:count",
               "name": "count",
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
+              "hash": "d55caad445841293",
               "dependencies": {},
               "loc": {
                 "line": 13,
@@ -284,12 +288,13 @@
               "value": "count",
               "setter": "setCount"
             },
-            "743796bf-e74e-4256-8034-96fb81625bd8": {
-              "id": "743796bf-e74e-4256-8034-96fb81625bd8",
+            "720e9756d239e21b:state:user": {
+              "id": "720e9756d239e21b:state:user",
               "name": "user",
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
+              "hash": "30cfe890fa6ecb62",
               "dependencies": {},
               "loc": {
                 "line": 14,
@@ -309,8 +314,8 @@
             }
           },
           "states": [
-            "cc91e857-72d4-4dfc-8800-d411e4f977f4",
-            "743796bf-e74e-4256-8034-96fb81625bd8"
+            "720e9756d239e21b:state:count",
+            "720e9756d239e21b:state:user"
           ],
           "props": [],
           "hooks": [],
@@ -318,18 +323,18 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3": {
-              "id": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3",
+            "c8f7739ce29d1ce0": {
+              "id": "c8f7739ce29d1ce0",
               "dependencies": [
                 {
-                  "id": "1369c342-ede9-4852-bff1-ec280cea24f3",
+                  "id": "99e389d25c10af32",
                   "name": "user",
                   "value": {
                     "type": "ref",
                     "refType": "named",
                     "name": "user"
                   },
-                  "valueId": "743796bf-e74e-4256-8034-96fb81625bd8"
+                  "valueId": "720e9756d239e21b:state:user"
                 }
               ],
               "isDependency": false,
@@ -351,18 +356,19 @@
           "name": "Test",
           "type": "default",
           "exportKind": "value",
-          "id": "5f363a5d-47d7-46d7-b45a-84688518650e"
+          "id": "de02a1f50cd7f036"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "5f363a5d-47d7-46d7-b45a-84688518650e": {
-          "id": "5f363a5d-47d7-46d7-b45a-84688518650e",
+        "de02a1f50cd7f036": {
+          "id": "de02a1f50cd7f036",
           "name": "Test",
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
+          "hash": "6e8588d3dc7bec23",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -398,18 +404,19 @@
           "name": "Test",
           "type": "default",
           "exportKind": "component",
-          "id": "24a38596-b117-43de-bf22-d5a1a46b9426"
+          "id": "911c4f53186fbde1"
         }
       },
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
-        "24a38596-b117-43de-bf22-d5a1a46b9426": {
-          "id": "24a38596-b117-43de-bf22-d5a1a46b9426",
+        "911c4f53186fbde1": {
+          "id": "911c4f53186fbde1",
           "name": "Test",
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
+          "hash": "e9dbd0d431f8412",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -445,18 +452,19 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "value",
-          "id": "0f659f2b-0a89-4ca5-ae6a-f6dfdb6c346d"
+          "id": "9e6977182e780e76"
         }
       },
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {
-        "1918428e-2697-426c-8301-52c2d3ca59d4": {
-          "id": "1918428e-2697-426c-8301-52c2d3ca59d4",
+        "fdf040594420df32": {
+          "id": "fdf040594420df32",
           "name": "Test",
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
+          "hash": "a2a658754707c4ab",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -485,7 +493,7 @@
           "name": "anonymous",
           "type": "default",
           "exportKind": "component",
-          "id": "a5d0f8bc-dd46-4581-8f72-ba3cabab28c0"
+          "id": "e692b9c0ebc21059"
         }
       },
       "defaultExport": "anonymous",
@@ -495,8 +503,8 @@
   },
   "edges": [
     {
-      "from": "fdd77183-7fd1-4fd6-a85f-4d61381ef5f3",
-      "to": "bb820420-5c25-4b40-ae6f-eb6245e5e384",
+      "from": "c8f7739ce29d1ce0",
+      "to": "720e9756d239e21b",
       "label": "render"
     }
   ]

@@ -26,4 +26,11 @@ export class RefVariable extends ReactVariable<"data", "ref"> {
 
     return data;
   }
+
+  protected getDataInternal() {
+    return {
+      name: this.name,
+      defaultData: this.defaultData,
+    };
+  }
 }

@@ -25,8 +25,6 @@
         "./packages/sample-project/simple",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -43,8 +41,6 @@
         "./packages/sample-project/complex",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -61,8 +57,6 @@
         "./packages/sample-project/props",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -79,8 +73,6 @@
         "./packages/sample-project/cache",
         "./out/cache.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -97,8 +89,6 @@
         "./packages/sample-project/cache-new",
         "./graph2.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--cache",
         "./out/cache.json"
       ],
@@ -116,8 +106,6 @@
         "./packages/sample-project/hook",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -134,8 +122,6 @@
         "./packages/sample-project/props-complex",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -152,8 +138,6 @@
         "../maemoo-minibus",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -170,8 +154,6 @@
         "../sysits-hr-2024/web",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",
@@ -188,8 +170,6 @@
         "../mastodon",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--seed",
-        "analyser-test-seed",
         "--no-cache"
       ],
       "cwd": "${workspaceFolder}",

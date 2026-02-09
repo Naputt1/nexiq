@@ -24,13 +24,13 @@
           "name": "AliasedA",
           "type": "named",
           "exportKind": "value",
-          "id": "e511221a-68b5-4c48-8a6c-77fb563f8628"
+          "id": "17390d57f1fb1274"
         },
         "MainNested": {
           "name": "MainNested",
           "type": "default",
           "exportKind": "value",
-          "id": "00f33a4d-44d6-467a-afbc-946b5eb163db"
+          "id": "c3bf01a82bd2e223"
         }
       },
       "defaultExport": "MainNested",
@@ -54,30 +54,31 @@
           "name": "SubComponentA",
           "type": "named",
           "exportKind": "value",
-          "id": "258d95a9-3d03-40b9-9004-ca2c80b72762"
+          "id": "3530ad8032327f16"
         },
         "SubComponentB": {
           "name": "SubComponentB",
           "type": "named",
           "exportKind": "component",
-          "id": "c3c16412-0a16-4250-aa69-41cd6cb558ee"
+          "id": "e1c92ac59ae5f4f3"
         },
         "MainNested": {
           "name": "MainNested",
           "type": "default",
           "exportKind": "component",
-          "id": "6b98e78f-f20c-443e-abb1-08c7eb6fde05"
+          "id": "cd828d2bdd77326e"
         }
       },
       "defaultExport": "MainNested",
       "tsTypes": {},
       "var": {
-        "258d95a9-3d03-40b9-9004-ca2c80b72762": {
-          "id": "258d95a9-3d03-40b9-9004-ca2c80b72762",
+        "3530ad8032327f16": {
+          "id": "3530ad8032327f16",
           "name": "SubComponentA",
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
+          "hash": "b0824f2affd8aed1",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -102,12 +103,13 @@
           "contexts": [],
           "renders": {}
         },
-        "c3c16412-0a16-4250-aa69-41cd6cb558ee": {
-          "id": "c3c16412-0a16-4250-aa69-41cd6cb558ee",
+        "e1c92ac59ae5f4f3": {
+          "id": "e1c92ac59ae5f4f3",
           "name": "SubComponentB",
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
+          "hash": "1b48140e853154f6",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -132,12 +134,13 @@
           "contexts": [],
           "renders": {}
         },
-        "c22ab11b-1736-4253-8fb6-bc37fa47cd1e": {
-          "id": "c22ab11b-1736-4253-8fb6-bc37fa47cd1e",
+        "bf77f96107e1da76": {
+          "id": "bf77f96107e1da76",
           "name": "InternalComponent",
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
+          "hash": "eb6abc89e9d92e4",
           "dependencies": {},
           "loc": {
             "line": 14,
@@ -162,12 +165,13 @@
           "contexts": [],
           "renders": {}
         },
-        "6b98e78f-f20c-443e-abb1-08c7eb6fde05": {
-          "id": "6b98e78f-f20c-443e-abb1-08c7eb6fde05",
+        "cd828d2bdd77326e": {
+          "id": "cd828d2bdd77326e",
           "name": "MainNested",
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
+          "hash": "344f9ca49b809394",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -225,36 +229,38 @@
           "name": "useCustomHook",
           "type": "named",
           "exportKind": "function",
-          "id": "48b4f9aa-382c-47e9-9809-aca0ec6751e1"
+          "id": "810bbf867cc78077"
         },
         "useOtherHook": {
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "8bf2be1f-e0f0-493c-84ab-d817eb09e78a"
+          "id": "911adcc515458fe3"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "48b4f9aa-382c-47e9-9809-aca0ec6751e1": {
-          "id": "48b4f9aa-382c-47e9-9809-aca0ec6751e1",
+        "810bbf867cc78077": {
+          "id": "810bbf867cc78077",
           "name": "useCustomHook",
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
+          "hash": "62dd0b4ac3c2d425",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "d8edc170-67a1-4fa0-b283-fb39289d2f90": {
-              "id": "d8edc170-67a1-4fa0-b283-fb39289d2f90",
+            "810bbf867cc78077:state:value": {
+              "id": "810bbf867cc78077:state:value",
               "name": "value",
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
+              "hash": "4a307d3ebb83269e",
               "dependencies": {},
               "loc": {
                 "line": 4,
@@ -263,12 +269,13 @@
               "value": "value",
               "setter": "setValue"
             },
-            "ab8a252f-bb3c-4599-a395-2f29a8824ee3": {
-              "id": "ab8a252f-bb3c-4599-a395-2f29a8824ee3",
+            "810bbf867cc78077:memo:memoVal": {
+              "id": "810bbf867cc78077:memo:memoVal",
               "name": "memoVal",
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
+              "hash": "a8c88ff07c087b22",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -287,7 +294,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "d8edc170-67a1-4fa0-b283-fb39289d2f90",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 }
               ]
@@ -304,11 +311,11 @@
             }
           },
           "states": [
-            "d8edc170-67a1-4fa0-b283-fb39289d2f90"
+            "810bbf867cc78077:state:value"
           ],
           "props": [
             {
-              "id": "ac4ddf42-4519-464a-a9a9-ce6b210637af",
+              "id": "64354b0e2ded07",
               "name": "initialValue",
               "type": "any",
               "kind": "prop"
@@ -316,8 +323,8 @@
           ],
           "hooks": [],
           "effects": {
-            "8f2c5c7d-1095-4ab3-b2c5-e1722f3a5567": {
-              "id": "9b3841ee-3723-4b7e-8f9e-1b01e428054a",
+            "810bbf867cc78077:effect:8:2": {
+              "id": "810bbf867cc78077:effect:8:2",
               "scope": {
                 "start": {
                   "line": 8,
@@ -334,23 +341,24 @@
               },
               "reactDeps": [
                 {
-                  "id": "d8edc170-67a1-4fa0-b283-fb39289d2f90",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 },
                 {
-                  "id": "ab8a252f-bb3c-4599-a395-2f29a8824ee3",
+                  "id": "810bbf867cc78077:memo:memoVal",
                   "name": "memoVal"
                 }
               ]
             }
           }
         },
-        "8bf2be1f-e0f0-493c-84ab-d817eb09e78a": {
-          "id": "8bf2be1f-e0f0-493c-84ab-d817eb09e78a",
+        "911adcc515458fe3": {
+          "id": "911adcc515458fe3",
           "name": "useOtherHook",
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
+          "hash": "338ff9b92cc53b89",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -405,30 +413,31 @@
           "name": "MemoizedComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "e938b883-ed25-414f-93c0-caebb13a0b57"
+          "id": "6641a461d81f3001"
         },
         "ForwardRefComponent": {
           "name": "ForwardRefComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "782559ca-6a44-44e6-99fa-180acebae519"
+          "id": "d9288162fe11b28b"
         },
         "WrappedComponent": {
           "name": "WrappedComponent",
           "type": "named",
           "exportKind": "value",
-          "id": "b1194a92-b934-495a-b1a3-b56264060c88"
+          "id": "e7b71b962648547f"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "e938b883-ed25-414f-93c0-caebb13a0b57": {
-          "id": "e938b883-ed25-414f-93c0-caebb13a0b57",
+        "6641a461d81f3001": {
+          "id": "6641a461d81f3001",
           "name": "MemoizedComponent",
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
+          "hash": "6e5c0b9a1d0120a3",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -448,7 +457,7 @@
           "states": [],
           "props": [
             {
-              "id": "ce3e8dfe-79fa-424f-b798-296ed6353e0d",
+              "id": "c354ecdc24a77d5",
               "name": "name",
               "type": "string",
               "kind": "prop"
@@ -460,12 +469,13 @@
           "contexts": [],
           "renders": {}
         },
-        "782559ca-6a44-44e6-99fa-180acebae519": {
-          "id": "782559ca-6a44-44e6-99fa-180acebae519",
+        "d9288162fe11b28b": {
+          "id": "d9288162fe11b28b",
           "name": "ForwardRefComponent",
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
+          "hash": "c348b755f4eb45a3",
           "dependencies": {},
           "loc": {
             "line": 7,
@@ -485,7 +495,7 @@
           "states": [],
           "props": [
             {
-              "id": "5fdef864-0e4d-44a8-817d-63cec35bee2c",
+              "id": "f4c4685fb50c1842",
               "name": "props",
               "type": "any",
               "kind": "prop"
@@ -497,12 +507,13 @@
           "contexts": [],
           "renders": {}
         },
-        "8ef3e2ed-6137-46cd-823d-144b38190022": {
-          "id": "8ef3e2ed-6137-46cd-823d-144b38190022",
+        "852e3a2e378138ae": {
+          "id": "852e3a2e378138ae",
           "name": "withLogging",
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
+          "hash": "e74279d74c36616d",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -520,12 +531,13 @@
             }
           }
         },
-        "b1194a92-b934-495a-b1a3-b56264060c88": {
-          "id": "b1194a92-b934-495a-b1a3-b56264060c88",
+        "e7b71b962648547f": {
+          "id": "e7b71b962648547f",
           "name": "WrappedComponent",
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
+          "hash": "b12e08f9b431e957",
           "dependencies": {},
           "loc": {
             "line": 18,
@@ -576,18 +588,19 @@
           "name": "DestructuringProps",
           "type": "named",
           "exportKind": "value",
-          "id": "2f3087d2-ef5e-44af-8fdb-3ca3940283f4"
+          "id": "fc5afc13ded24662"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "2f3087d2-ef5e-44af-8fdb-3ca3940283f4": {
-          "id": "2f3087d2-ef5e-44af-8fdb-3ca3940283f4",
+        "fc5afc13ded24662": {
+          "id": "fc5afc13ded24662",
           "name": "DestructuringProps",
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
+          "hash": "b0b627f02345ad7f",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -607,13 +620,13 @@
           "states": [],
           "props": [
             {
-              "id": "f0b92b09-1489-4a15-b47c-2d10eb80f91e",
+              "id": "96050a97f611a0d5",
               "name": "title",
               "type": "string",
               "kind": "prop"
             },
             {
-              "id": "8641e51a-999e-4ca5-810a-f0261990a57a",
+              "id": "7afe194e60baa1f8",
               "name": "items",
               "type": "string[]",
               "kind": "prop"
@@ -624,8 +637,8 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "258d95a9-3d03-40b9-9004-ca2c80b72762": {
-              "id": "258d95a9-3d03-40b9-9004-ca2c80b72762",
+            "3530ad8032327f16": {
+              "id": "3530ad8032327f16",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -690,30 +703,31 @@
           "name": "MyContext",
           "type": "named",
           "exportKind": "value",
-          "id": "a01148b5-06be-4596-8e78-f8499649f2b4"
+          "id": "d8ee01fcd351f46e"
         },
         "MyProvider": {
           "name": "MyProvider",
           "type": "named",
           "exportKind": "value",
-          "id": "c2355dc1-ffe6-488b-8241-7746f9e7986a"
+          "id": "7f6f2958399f03a2"
         },
         "MyConsumer": {
           "name": "MyConsumer",
           "type": "named",
           "exportKind": "value",
-          "id": "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1"
+          "id": "d86bbbe51e265490"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "a01148b5-06be-4596-8e78-f8499649f2b4": {
-          "id": "a01148b5-06be-4596-8e78-f8499649f2b4",
+        "d8ee01fcd351f46e": {
+          "id": "d8ee01fcd351f46e",
           "name": "MyContext",
           "kind": "normal",
           "type": "data",
           "file": "/src/Context.tsx",
+          "hash": "45f50ccbe33c93e6",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -721,12 +735,13 @@
           },
           "components": {}
         },
-        "c2355dc1-ffe6-488b-8241-7746f9e7986a": {
-          "id": "c2355dc1-ffe6-488b-8241-7746f9e7986a",
+        "7f6f2958399f03a2": {
+          "id": "7f6f2958399f03a2",
           "name": "MyProvider",
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
+          "hash": "d54993b0685d5664",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -746,7 +761,7 @@
           "states": [],
           "props": [
             {
-              "id": "ef43ed30-6edb-4148-88cc-7a5bdbcf2288",
+              "id": "645990c74ae7d7da",
               "name": "children",
               "type": "React.ReactNode",
               "kind": "prop"
@@ -775,12 +790,13 @@
             ]
           }
         },
-        "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1": {
-          "id": "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1",
+        "d86bbbe51e265490": {
+          "id": "d86bbbe51e265490",
           "name": "MyConsumer",
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
+          "hash": "72ef8582735f9559",
           "dependencies": {},
           "loc": {
             "line": 13,
@@ -887,18 +903,19 @@
           "name": "ComplexApp",
           "type": "named",
           "exportKind": "component",
-          "id": "9593460b-35f4-4a46-aca1-1440291f9169"
+          "id": "2697de00a506fa4e"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "9593460b-35f4-4a46-aca1-1440291f9169": {
-          "id": "9593460b-35f4-4a46-aca1-1440291f9169",
+        "2697de00a506fa4e": {
+          "id": "2697de00a506fa4e",
           "name": "ComplexApp",
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
+          "hash": "ebda3a0130aed6ca",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -918,14 +935,14 @@
           "states": [],
           "props": [],
           "hooks": [
-            "48b4f9aa-382c-47e9-9809-aca0ec6751e1"
+            "810bbf867cc78077"
           ],
           "effects": {},
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "c2355dc1-ffe6-488b-8241-7746f9e7986a": {
-              "id": "c2355dc1-ffe6-488b-8241-7746f9e7986a",
+            "7f6f2958399f03a2": {
+              "id": "7f6f2958399f03a2",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -933,8 +950,8 @@
                 "column": 4
               }
             },
-            "00f33a4d-44d6-467a-afbc-946b5eb163db": {
-              "id": "00f33a4d-44d6-467a-afbc-946b5eb163db",
+            "c3bf01a82bd2e223": {
+              "id": "c3bf01a82bd2e223",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -942,8 +959,8 @@
                 "column": 6
               }
             },
-            "e511221a-68b5-4c48-8a6c-77fb563f8628": {
-              "id": "e511221a-68b5-4c48-8a6c-77fb563f8628",
+            "17390d57f1fb1274": {
+              "id": "17390d57f1fb1274",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -951,8 +968,8 @@
                 "column": 6
               }
             },
-            "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1": {
-              "id": "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1",
+            "d86bbbe51e265490": {
+              "id": "d86bbbe51e265490",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -960,11 +977,11 @@
                 "column": 6
               }
             },
-            "e938b883-ed25-414f-93c0-caebb13a0b57": {
-              "id": "e938b883-ed25-414f-93c0-caebb13a0b57",
+            "6641a461d81f3001": {
+              "id": "6641a461d81f3001",
               "dependencies": [
                 {
-                  "id": "fd65e47a-771c-43a2-b09e-c230bfc6cece",
+                  "id": "c354ecdc24a77d5",
                   "name": "name",
                   "value": {
                     "type": "literal-type",
@@ -981,11 +998,11 @@
                 "column": 6
               }
             },
-            "782559ca-6a44-44e6-99fa-180acebae519": {
-              "id": "782559ca-6a44-44e6-99fa-180acebae519",
+            "d9288162fe11b28b": {
+              "id": "d9288162fe11b28b",
               "dependencies": [
                 {
-                  "id": "25028c18-3c44-4fdd-9ff2-102811a5bc3f",
+                  "id": "5fcbb2f8b8df6a6e",
                   "name": "label",
                   "value": {
                     "type": "literal-type",
@@ -1002,8 +1019,8 @@
                 "column": 6
               }
             },
-            "b1194a92-b934-495a-b1a3-b56264060c88": {
-              "id": "b1194a92-b934-495a-b1a3-b56264060c88",
+            "e7b71b962648547f": {
+              "id": "e7b71b962648547f",
               "dependencies": [],
               "isDependency": false,
               "loc": {
@@ -1011,11 +1028,11 @@
                 "column": 6
               }
             },
-            "2f3087d2-ef5e-44af-8fdb-3ca3940283f4": {
-              "id": "2f3087d2-ef5e-44af-8fdb-3ca3940283f4",
+            "fc5afc13ded24662": {
+              "id": "fc5afc13ded24662",
               "dependencies": [
                 {
-                  "id": "072c8813-f3ae-4e01-9c4e-f18aff86da56",
+                  "id": "96050a97f611a0d5",
                   "name": "title",
                   "value": {
                     "type": "literal-type",
@@ -1026,7 +1043,7 @@
                   }
                 },
                 {
-                  "id": "13f1cb1d-07fa-443b-a587-80d9f11709b2",
+                  "id": "7afe194e60baa1f8",
                   "name": "items",
                   "value": {
                     "type": "literal-array",
@@ -1062,48 +1079,48 @@
   },
   "edges": [
     {
-      "from": "258d95a9-3d03-40b9-9004-ca2c80b72762",
-      "to": "2f3087d2-ef5e-44af-8fdb-3ca3940283f4",
+      "from": "3530ad8032327f16",
+      "to": "fc5afc13ded24662",
       "label": "render"
     },
     {
-      "from": "c2355dc1-ffe6-488b-8241-7746f9e7986a",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "7f6f2958399f03a2",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "00f33a4d-44d6-467a-afbc-946b5eb163db",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "c3bf01a82bd2e223",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "e511221a-68b5-4c48-8a6c-77fb563f8628",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "17390d57f1fb1274",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "b645db74-1d1f-4fa4-98f5-0cf413d8d8c1",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "d86bbbe51e265490",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "e938b883-ed25-414f-93c0-caebb13a0b57",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "6641a461d81f3001",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "782559ca-6a44-44e6-99fa-180acebae519",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "d9288162fe11b28b",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "b1194a92-b934-495a-b1a3-b56264060c88",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "e7b71b962648547f",
+      "to": "2697de00a506fa4e",
       "label": "render"
     },
     {
-      "from": "2f3087d2-ef5e-44af-8fdb-3ca3940283f4",
-      "to": "9593460b-35f4-4a46-aca1-1440291f9169",
+      "from": "fc5afc13ded24662",
+      "to": "2697de00a506fa4e",
       "label": "render"
     }
   ]

@@ -44,24 +44,26 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "b5477134-0065-4c68-a44f-0302cb4457b7": {
-          "id": "b5477134-0065-4c68-a44f-0302cb4457b7",
+        "4f14950571afe084": {
+          "id": "4f14950571afe084",
           "name": "Effect",
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
+          "hash": "688bab51dd829bd",
           "dependencies": {},
           "loc": {
             "line": 4,
             "column": 6
           },
           "var": {
-            "48b921ef-9be7-4801-bfef-adce53dccc74": {
-              "id": "48b921ef-9be7-4801-bfef-adce53dccc74",
+            "4f14950571afe084:ref:refData": {
+              "id": "4f14950571afe084:ref:refData",
               "name": "refData",
               "kind": "ref",
               "type": "data",
               "file": "/src/effectt.tsx",
+              "hash": "4eb5d0ba7835eba4",
               "dependencies": {},
               "loc": {
                 "line": 5,
@@ -75,12 +77,13 @@
                 }
               }
             },
-            "11117530-bc3c-4414-ba48-1fffe39fbc2a": {
-              "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
+            "4f14950571afe084:state:state": {
+              "id": "4f14950571afe084:state:state",
               "name": "state",
               "kind": "state",
               "type": "data",
               "file": "/src/effectt.tsx",
+              "hash": "435574cf7d4f33b9",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -89,12 +92,13 @@
               "value": "state",
               "setter": "setState"
             },
-            "bda8dcd0-269a-41ba-aa0b-899d955ba53a": {
-              "id": "bda8dcd0-269a-41ba-aa0b-899d955ba53a",
+            "4f14950571afe084:memo:memoVal": {
+              "id": "4f14950571afe084:memo:memoVal",
               "name": "memoVal",
               "kind": "memo",
               "type": "function",
               "file": "/src/effectt.tsx",
+              "hash": "be219b68591a3cbd",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -113,7 +117,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
+                  "id": "4f14950571afe084:state:state",
                   "name": "state"
                 }
               ]
@@ -130,15 +134,15 @@
             }
           },
           "states": [
-            "11117530-bc3c-4414-ba48-1fffe39fbc2a"
+            "4f14950571afe084:state:state"
           ],
           "props": [],
           "hooks": [
-            "5e985070-ef43-47c7-be1d-e95aa196e8f5"
+            "810bbf867cc78077"
           ],
           "effects": {
-            "15614141-51b4-44b5-af7f-e4f70d729aa0": {
-              "id": "3dfd5534-3133-4464-a6ee-ec175d28adb1",
+            "4f14950571afe084:effect:11:2": {
+              "id": "4f14950571afe084:effect:11:2",
               "scope": {
                 "start": {
                   "line": 11,
@@ -155,21 +159,21 @@
               },
               "reactDeps": [
                 {
-                  "id": "11117530-bc3c-4414-ba48-1fffe39fbc2a",
+                  "id": "4f14950571afe084:state:state",
                   "name": "state"
                 },
                 {
-                  "id": "bda8dcd0-269a-41ba-aa0b-899d955ba53a",
+                  "id": "4f14950571afe084:memo:memoVal",
                   "name": "memoVal"
                 },
                 {
-                  "id": "48b921ef-9be7-4801-bfef-adce53dccc74",
+                  "id": "4f14950571afe084:ref:refData",
                   "name": "refData"
                 }
               ]
             },
-            "12aa1d52-41ef-445b-a2bf-e42b43634279": {
-              "id": "bd4c5de9-3a06-40cf-8bee-4cb06331f4b0",
+            "4f14950571afe084:effect:15:2": {
+              "id": "4f14950571afe084:effect:15:2",
               "scope": {
                 "start": {
                   "line": 15,
@@ -222,36 +226,38 @@
           "name": "useCustomHook",
           "type": "named",
           "exportKind": "function",
-          "id": "5e985070-ef43-47c7-be1d-e95aa196e8f5"
+          "id": "810bbf867cc78077"
         },
         "useOtherHook": {
           "name": "useOtherHook",
           "type": "named",
           "exportKind": "value",
-          "id": "0e3f2b12-d30d-433b-9307-0f723bfdfa7a"
+          "id": "911adcc515458fe3"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "5e985070-ef43-47c7-be1d-e95aa196e8f5": {
-          "id": "5e985070-ef43-47c7-be1d-e95aa196e8f5",
+        "810bbf867cc78077": {
+          "id": "810bbf867cc78077",
           "name": "useCustomHook",
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
+          "hash": "f64b359f4b4751e3",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "491b3bb2-f251-4a17-9feb-67296e366db9": {
-              "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
+            "810bbf867cc78077:state:value": {
+              "id": "810bbf867cc78077:state:value",
               "name": "value",
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
+              "hash": "4a307d3ebb83269e",
               "dependencies": {},
               "loc": {
                 "line": 4,
@@ -272,11 +278,11 @@
             }
           },
           "states": [
-            "491b3bb2-f251-4a17-9feb-67296e366db9"
+            "810bbf867cc78077:state:value"
           ],
           "props": [
             {
-              "id": "e6074c8d-55f3-4c6d-9283-966a4b3d857a",
+              "id": "64354b0e2ded07",
               "name": "initialValue",
               "type": "any",
               "kind": "prop"
@@ -284,8 +290,8 @@
           ],
           "hooks": [],
           "effects": {
-            "df18fd8d-4809-4a9d-ae80-185ffaad87f6": {
-              "id": "f5b03315-9734-4b01-b0bf-9854f3d7c63f",
+            "810bbf867cc78077:effect:6:2": {
+              "id": "810bbf867cc78077:effect:6:2",
               "scope": {
                 "start": {
                   "line": 6,
@@ -302,19 +308,20 @@
               },
               "reactDeps": [
                 {
-                  "id": "491b3bb2-f251-4a17-9feb-67296e366db9",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 }
               ]
             }
           }
         },
-        "0e3f2b12-d30d-433b-9307-0f723bfdfa7a": {
-          "id": "0e3f2b12-d30d-433b-9307-0f723bfdfa7a",
+        "911adcc515458fe3": {
+          "id": "911adcc515458fe3",
           "name": "useOtherHook",
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
+          "hash": "7500c59293c16a3",
           "dependencies": {},
           "loc": {
             "line": 13,

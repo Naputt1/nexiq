@@ -9,7 +9,7 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
   constructor(
     options: Omit<
       ComponentFileVarBaseTypeFunction<"normal">,
-      "var" | "components" | "type" | "kind" | "file"
+      "var" | "components" | "type" | "kind" | "file" | "hash"
     >,
     file: File,
   ) {

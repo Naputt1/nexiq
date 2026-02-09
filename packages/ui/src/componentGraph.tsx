@@ -5,11 +5,14 @@ import type {
   PropData,
   PropDataType,
   TypeDataDeclare,
+  JsonData,
 } from "shared";
 import useGraph, {
   type ComboData,
+  type ComboGraphData,
   type EdgeData,
   type NodeData,
+  type NodeGraphData,
   type useGraphProps,
 } from "./graph/hook";
 import { GraphRenderer } from "./graph/renderer";
@@ -23,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { useAppStateStore } from "./hooks/use-app-state-store";
+import { useGitStore } from "./hooks/useGitStore";
 
 interface ComponentGraphProps {
   projectPath: string;
@@ -44,6 +48,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     saveState,
     isLoaded,
   } = useAppStateStore();
+
+  const { status, selectedCommit, loadAnalyzedDiff } = useGitStore();
 
   const [size, setSize] = useState({
     width: window.innerWidth,
@@ -72,19 +78,23 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hasRestoredViewport = useRef(false);
 
+  const rawGraphDataRef = useRef<JsonData | null>(null);
+
   const loadData = useCallback(
     async (analysisPath?: string) => {
       const targetPath = analysisPath || selectedSubProject || projectPath;
       if (!targetPath) return;
 
       try {
-        // Use configRoot (projectPath) to read data because that's where .react-map is
-        const graphData = await window.ipcRenderer.invoke(
+        const graphData = (await window.ipcRenderer.invoke(
           "read-graph-data",
           projectPath,
           targetPath,
-        );
+        )) as JsonData;
         if (!graphData) throw new Error("Graph data not found");
+        rawGraphDataRef.current = graphData;
+
+        console.log(graphData);
 
         const combos: ComboData[] = [];
         const nodes: NodeData[] = [];
@@ -104,6 +114,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             label: { text: variable.name, fill: "black" },
             combo: parentID,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+            pureFileName: file.path,
+            scope: variable.scope,
             props: variable.props,
             propType: variable.propType,
             type: "component",
@@ -120,6 +132,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               color: "green",
               combo: variable.id,
               fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+              pureFileName: file.path,
               ui: variable.ui?.renders?.[propsComboId],
             });
 
@@ -134,6 +147,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                     color: "green",
                     combo: parentComboId,
                     fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                    pureFileName: file.path,
                     ui: variable.ui?.renders?.[subPropsComboId],
                   });
                   addProps(prop.props, subPropsComboId);
@@ -146,8 +160,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                     type: "prop",
                     color: "green",
                     combo: parentComboId,
-                    propData: prop,
                     fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                    pureFileName: file.path,
                   });
                 }
               }
@@ -162,6 +176,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             label: { text: "render", fill: "black" },
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+            pureFileName: file.path,
             ui: variable.ui?.renders?.[`${variable.id}-render`],
           });
 
@@ -173,25 +188,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             return false;
           };
 
-          // for (const stateID of variable.states) {
-          //   const state = variable.var[stateID];
-          //   if (state == null || state.kind !== "state") continue;
-
-          //   nodes.push({
-          //     id: state.id,
-          //     label: {
-          //       text: state.value,
-          //     },
-          //     type: "state",
-          //     color: "red",
-          //     combo: variable.id,
-          //     fileName: `${fileName}:${state.loc.line}:${state.loc.column}`,
-          //     ui: state.ui,
-          //   });
-          // }
-
           for (const v of Object.values(variable.var)) {
             if (v.kind == "state") {
+              debugger;
               nodes.push({
                 id: v.id,
                 label: {
@@ -201,6 +200,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 color: "red",
                 combo: variable.id,
                 fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                pureFileName: file.path,
+                loc: v.loc,
                 ui: v.ui,
               });
             } else if (v.kind == "memo") {
@@ -213,6 +214,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 color: "red",
                 combo: variable.id,
                 fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                pureFileName: file.path,
+                loc: v.loc,
                 ui: v.ui,
               });
 
@@ -235,6 +238,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 color: "red",
                 combo: variable.id,
                 fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                pureFileName: file.path,
+                loc: v.loc,
                 ui: v.ui,
               });
 
@@ -274,6 +279,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               color: "yellow",
               combo: variable.id,
               fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+              pureFileName: file.path,
+              loc: effect.loc,
               ui: variable.ui?.renders?.[effect.id],
             });
 
@@ -301,6 +308,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   },
                   combo: `${variable.id}-render`,
                   fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+                  pureFileName: file.path,
+                  loc: render.loc,
                   ui: variable.ui?.renders?.[render.id],
                 });
 
@@ -321,9 +330,24 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
         const newTypeData: { [key: string]: TypeDataDeclare } = {};
         for (const file of Object.values(graphData.files)) {
-          for (const variable of Object.values(file.var)) {
-            addCombo(variable, file);
-          }
+          const addAllComponents = (
+            vars: Record<string, ComponentFileVar>,
+            parentID?: string,
+          ) => {
+            for (const variable of Object.values(vars)) {
+              if (variable.kind === "component") {
+                addCombo(variable, file, parentID);
+              }
+              if ("var" in variable && variable.var) {
+                addAllComponents(
+                  variable.var,
+                  variable.kind === "component" ? variable.id : parentID,
+                );
+              }
+            }
+          };
+
+          addAllComponents(file.var);
 
           if (file.tsTypes) {
             for (const typeDeclare of Object.values(file.tsTypes)) {
@@ -361,6 +385,117 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     projectPath,
     targetPath: selectedSubProject || projectPath,
   });
+
+  const highlightGitChanges = useCallback(async () => {
+    if (!graph) return;
+
+    try {
+      const combos = graph.getAllCombos();
+      const nodes = graph.getAllNodes();
+
+      // Reset highlights
+      graph.batch(() => {
+        combos.forEach((c) => {
+          c.gitStatus = undefined;
+          c.visible = true;
+          graph.updateCombo(c);
+        });
+        nodes.forEach((n) => {
+          n.gitStatus = undefined;
+          n.visible = true;
+          graph.updateNode(n);
+        });
+      });
+
+      // Fetch analyzed diff
+      const diffData = await loadAnalyzedDiff(projectPath, selectedCommit);
+
+      if (!diffData) return;
+
+      // Collect all IDs present in the selected commit's data
+      const existingIds = new Set<string>();
+      const traverse = (vars: Record<string, ComponentFileVar>) => {
+        for (const v of Object.values(vars)) {
+          existingIds.add(v.id);
+
+          // Add IDs from effects
+          if ("effects" in v && v.effects) {
+            Object.keys(v.effects).forEach((id) => existingIds.add(id));
+          }
+
+          // Add IDs from renders (and their virtual nodes)
+          if ("renders" in v && v.renders) {
+            Object.values(v.renders).forEach((r) => {
+              existingIds.add(r.id);
+              // The graph uses virtual nodes for renders like `${componentId}-render-${renderId}`
+              existingIds.add(`${v.id}-render-${r.id}`);
+            });
+            // Also add the render combo itself
+            existingIds.add(`${v.id}-render`);
+          }
+
+          // Add props combo ID
+          if ("props" in v && v.props && v.props.length > 0) {
+            existingIds.add(`${v.id}-props`);
+            const addPropsIds = (props: PropData[]) => {
+              props.forEach((p) => {
+                existingIds.add(p.id);
+                if (p.props) addPropsIds(p.props);
+              });
+            };
+            addPropsIds(v.props);
+          }
+
+          if ("components" in v && v.components) {
+            Object.values(v.components).forEach((c) => {
+              existingIds.add(c.id);
+            });
+          }
+
+          if ("var" in v && v.var) traverse(v.var);
+        }
+      };
+      Object.values(diffData.files).forEach((f) => {
+        if (f.var) traverse(f.var);
+      });
+
+      const { added = [], modified = [], deleted = [] } = diffData.diff || {};
+
+      graph.batch(() => {
+        const applyStatus = (item: ComboGraphData | NodeGraphData) => {
+          // If viewing a historical commit, hide components that don't exist yet
+          if (selectedCommit && !existingIds.has(item.id)) {
+            item.visible = false;
+          } else {
+            item.visible = true;
+          }
+
+          if (added.includes(item.id)) {
+            item.gitStatus = "added";
+          } else if (modified.includes(item.id)) {
+            item.gitStatus = "modified";
+          } else if (deleted.includes(item.id)) {
+            item.gitStatus = "deleted";
+          }
+
+          if (item.gitStatus || item.visible === false) {
+            if ("collapsedRadius" in item)
+              graph.updateCombo(item as ComboGraphData);
+            else graph.updateNode(item as NodeGraphData);
+          }
+        };
+
+        combos.forEach(applyStatus);
+        nodes.forEach(applyStatus);
+      });
+    } catch (e) {
+      console.error("Failed to highlight git changes", e);
+    }
+  }, [graph, projectPath, selectedCommit, loadAnalyzedDiff]);
+
+  useEffect(() => {
+    highlightGitChanges();
+  }, [highlightGitChanges, status, selectedCommit]);
 
   const onSelect = useCallback(
     (id: string) => {
@@ -757,6 +892,22 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     }
   };
 
+  const handleLocateFile = useCallback(
+    (filePath: string) => {
+      const nodes = graph.getAllNodes();
+      const combos = graph.getAllCombos();
+
+      const match =
+        combos.find((c) => c.pureFileName === filePath) ||
+        nodes.find((n) => n.fileName?.startsWith(filePath));
+
+      if (match) {
+        onSelect(match.id);
+      }
+    },
+    [graph, onSelect],
+  );
+
   return (
     <div className="w-screen h-screen relative bg-background overflow-hidden">
       <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -764,6 +915,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           currentPath={selectedSubProject || projectPath}
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
+          onLocateFile={handleLocateFile}
           isLoading={isAnalyzing}
         />
         <SidebarInset className="min-w-0">
@@ -778,6 +930,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             nodes={nodesMap}
             combos={combosMap}
             typeData={typeData}
+            projectPath={projectPath}
             onClose={handleClose}
           />
           {isSearchOpen && (
