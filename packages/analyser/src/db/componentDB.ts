@@ -30,9 +30,9 @@ import {
   isBaseFunctionVariable,
   isNormalVariable,
 } from "./variable/type.js";
-import { newUUID } from "../utils/uuid.js";
 import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
+import { getDeterministicId } from "../utils/hash.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -103,16 +103,20 @@ export class ComponentDB {
   }
 
   public addComponent(
-    component: Omit<ComponentFileVarComponent, "id" | "kind" | "states">,
+    fileName: string,
+    component: Omit<
+      ComponentFileVarComponent,
+      "id" | "kind" | "states" | "hash" | "file"
+    >,
     parentPath?: string[],
   ) {
-    const file = this.files.get(component.file);
+    const file = this.files.get(fileName);
 
     const id = this.files.addVariable(
-      component.file,
+      fileName,
       new ComponentVariable(
         {
-          id: newUUID(),
+          id: getDeterministicId(component.name),
           ...component,
           states: [],
         },
@@ -121,29 +125,30 @@ export class ComponentDB {
       parentPath,
     );
 
-    if (this.files.resolveComPropsTsTypeID(id, component.file)) {
+    if (this.files.resolveComPropsTsTypeID(id, fileName)) {
       this.resolveTasks.push({
         type: "comPropsTsType",
-        fileName: component.file,
+        fileName: fileName,
         id,
       });
     }
   }
 
   public addHook(
+    fileName: string,
     variable: Omit<
       ComponentFileVarHook,
-      "id" | "kind" | "var" | "components" | "states"
+      "id" | "kind" | "var" | "components" | "states" | "hash" | "file"
     >,
     parentPath?: string[],
   ) {
-    const file = this.files.get(variable.file);
+    const file = this.files.get(fileName);
 
     this.files.addVariable(
-      variable.file,
+      fileName,
       new HookVariable(
         {
-          id: newUUID(),
+          id: getDeterministicId(variable.name),
           ...variable,
           states: [],
         },
@@ -158,11 +163,11 @@ export class ComponentDB {
     variable:
       | Omit<
           ComponentFileVarNormalFunction,
-          "id" | "kind" | "var" | "components" | "file"
+          "id" | "kind" | "var" | "components" | "file" | "hash"
         >
       | Omit<
           ComponentFileVarNormalData,
-          "id" | "kind" | "var" | "components" | "file"
+          "id" | "kind" | "var" | "components" | "file" | "hash"
         >,
     parentPath?: string[],
   ) {
@@ -172,7 +177,7 @@ export class ComponentDB {
     if (variable.type === "function") {
       v = new FunctionVariable(
         {
-          id: newUUID(),
+          id: getDeterministicId(variable.name),
           ...variable,
         },
         file,
@@ -180,7 +185,7 @@ export class ComponentDB {
     } else if (variable.type === "data") {
       v = new DataVariable(
         {
-          id: newUUID(),
+          id: getDeterministicId(variable.name),
           ...variable,
         },
         file,
@@ -293,10 +298,7 @@ export class ComponentDB {
   ) {
     const file = this.files.get(fileName);
 
-    file.addEffect(loc, {
-      id: newUUID(),
-      ...effect,
-    });
+    file.addEffect(loc, effect);
   }
 
   private getVariableID(name: string, fileName: string): string | null {

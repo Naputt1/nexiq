@@ -35,4 +35,12 @@ export class StateVariable extends ReactVariable<"data", "state"> {
 
     return data;
   }
+
+  protected getDataInternal() {
+    return {
+      name: this.name,
+      value: this.value,
+      setter: this.setter,
+    };
+  }
 }

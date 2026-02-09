@@ -12,7 +12,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
   constructor(
     options: Omit<
       ComponentFileVarComponent,
-      "kind" | "var" | "components" | "type"
+      "kind" | "var" | "components" | "type" | "hash" | "file"
     >,
     file: File,
   ) {
@@ -54,5 +54,14 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     }
 
     return data;
+  }
+
+  protected getDataInternal() {
+    return {
+      ...super.getDataInternal(),
+      componentType: this.componentType,
+      contexts: this.contexts,
+      renders: this.renders,
+    };
   }
 }

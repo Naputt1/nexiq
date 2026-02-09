@@ -4,17 +4,12 @@ import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import minimist from "minimist";
-import { setRandomSeed } from "./utils/uuid.js";
 
 const args = minimist(process.argv.slice(2));
 
 const SRC_DIR = args._[0] || "./sample-src";
 const OUT_FILE = args._[1] || "./out/graph.json";
 const PUBLIC_FILE = args._[2] || "./ui/public/graph.json";
-
-if (args.seed) {
-  setRandomSeed(args.seed);
-}
 
 const CACHE_FILE = args.cache || OUT_FILE;
 
@@ -43,7 +38,7 @@ function main() {
     viteConfigPath,
     files,
     packageJson,
-    cacheData
+    cacheData,
   );
 
   fs.mkdirSync(path.dirname(PUBLIC_FILE), { recursive: true });

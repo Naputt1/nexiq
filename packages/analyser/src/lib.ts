@@ -22,7 +22,7 @@ export function analyzeProject(srcDir: string, cacheFile?: string) {
     viteConfigPath,
     files,
     packageJson,
-    cacheData
+    cacheData,
   );
 
   return graph;

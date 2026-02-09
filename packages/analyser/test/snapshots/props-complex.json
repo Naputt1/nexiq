@@ -38,13 +38,13 @@
           "name": "ComplexProps",
           "type": "named",
           "exportKind": "value",
-          "id": "f5faef1a-1323-44ab-a424-fccf312d4fe9"
+          "id": "475f220157c1b8f9"
         }
       },
       "defaultExport": null,
       "tsTypes": {
-        "3de4228f-f084-4b5a-af69-311300b8f277": {
-          "id": "3de4228f-f084-4b5a-af69-311300b8f277",
+        "a962d7b45a0f56ae": {
+          "id": "a962d7b45a0f56ae",
           "type": "interface",
           "name": "Props",
           "body": [
@@ -93,24 +93,26 @@
         }
       },
       "var": {
-        "f5faef1a-1323-44ab-a424-fccf312d4fe9": {
-          "id": "f5faef1a-1323-44ab-a424-fccf312d4fe9",
+        "475f220157c1b8f9": {
+          "id": "475f220157c1b8f9",
           "name": "ComplexProps",
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
+          "hash": "7b75a1990ff81d8",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 13
           },
           "var": {
-            "b1e81133-6b05-4617-bdd7-cc434ce723b6": {
-              "id": "b1e81133-6b05-4617-bdd7-cc434ce723b6",
+            "475f220157c1b8f9:ref:refX": {
+              "id": "475f220157c1b8f9:ref:refX",
               "name": "refX",
               "kind": "ref",
               "type": "data",
               "file": "/src/App.tsx",
+              "hash": "f1ef0a8f5721b6",
               "dependencies": {},
               "loc": {
                 "line": 17,
@@ -119,15 +121,16 @@
               "defaultData": {
                 "type": "ref",
                 "refType": "named",
-                "name": "c46dc6e3-e3cd-40cb-a71d-901c37574f75"
+                "name": "eaf06c6480b2cd11"
               }
             },
-            "cd223c3f-45d8-42f9-949a-00a2fba34869": {
-              "id": "cd223c3f-45d8-42f9-949a-00a2fba34869",
+            "475f220157c1b8f9:state:stateX": {
+              "id": "475f220157c1b8f9:state:stateX",
               "name": "stateX",
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
+              "hash": "23cdf729e6c0e312",
               "dependencies": {},
               "loc": {
                 "line": 18,
@@ -148,35 +151,35 @@
             }
           },
           "states": [
-            "cd223c3f-45d8-42f9-949a-00a2fba34869"
+            "475f220157c1b8f9:state:stateX"
           ],
           "props": [
             {
-              "id": "1a93c9c4-6518-4bdd-9410-1cdd9761b498",
+              "id": "e6c632b61e964e1f",
               "name": "a",
               "type": "any",
               "kind": "prop"
             },
             {
-              "id": "4c99baa2-4cd8-43e3-b674-5ac08241282e",
+              "id": "575a0b1c44d8843f",
               "name": "b",
               "type": "any",
               "kind": "prop",
               "props": [
                 {
-                  "id": "c46dc6e3-e3cd-40cb-a71d-901c37574f75",
+                  "id": "eaf06c6480b2cd11",
                   "name": "x",
                   "type": "any",
                   "kind": "prop"
                 },
                 {
-                  "id": "c61fda35-64bc-48ff-9381-23302414f32f",
+                  "id": "eed334792bb21cde",
                   "name": "rename",
                   "type": "any",
                   "kind": "prop"
                 },
                 {
-                  "id": "a1b92d4d-26c0-4f94-a1f5-f7dc4e1768ab",
+                  "id": "e222116d3fc82f42",
                   "name": "restInner",
                   "type": "any",
                   "kind": "spread"
@@ -184,7 +187,7 @@
               ]
             },
             {
-              "id": "77c8dfe5-e147-4468-9153-bd4cccf370a7",
+              "id": "89c351255a8beba0",
               "name": "restOuter",
               "type": "any",
               "kind": "spread"
@@ -192,8 +195,8 @@
           ],
           "hooks": [],
           "effects": {
-            "4e2b3b90-a6a6-4f88-b9a7-a12ef34ebfd5": {
-              "id": "13b02d1d-25d1-4ea7-8b51-5141e325f4f4",
+            "475f220157c1b8f9:effect:20:2": {
+              "id": "475f220157c1b8f9:effect:20:2",
               "scope": {
                 "start": {
                   "line": 20,
@@ -210,13 +213,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "1a93c9c4-6518-4bdd-9410-1cdd9761b498",
+                  "id": "e6c632b61e964e1f",
                   "name": "a"
                 }
               ]
             },
-            "a598bd39-c414-4d02-8ea4-f085a97644db": {
-              "id": "67207759-6971-4f80-9410-080d2f0c33ca",
+            "475f220157c1b8f9:effect:24:2": {
+              "id": "475f220157c1b8f9:effect:24:2",
               "scope": {
                 "start": {
                   "line": 24,
@@ -233,13 +236,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "c46dc6e3-e3cd-40cb-a71d-901c37574f75",
+                  "id": "eaf06c6480b2cd11",
                   "name": "x"
                 }
               ]
             },
-            "059b929e-b021-4422-af25-45677c03e540": {
-              "id": "c53947e1-d8cc-45eb-8839-8adeb1e6d7f8",
+            "475f220157c1b8f9:effect:28:2": {
+              "id": "475f220157c1b8f9:effect:28:2",
               "scope": {
                 "start": {
                   "line": 28,
@@ -256,13 +259,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "a1b92d4d-26c0-4f94-a1f5-f7dc4e1768ab",
+                  "id": "e222116d3fc82f42",
                   "name": "restInner"
                 }
               ]
             },
-            "4030c425-a5b1-4b6f-98da-5c46884a37dd": {
-              "id": "68139584-091a-4a40-94e7-9c93e5327332",
+            "475f220157c1b8f9:effect:32:2": {
+              "id": "475f220157c1b8f9:effect:32:2",
               "scope": {
                 "start": {
                   "line": 32,
@@ -279,13 +282,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "77c8dfe5-e147-4468-9153-bd4cccf370a7",
+                  "id": "89c351255a8beba0",
                   "name": "restOuter"
                 }
               ]
             },
-            "d6771206-b852-4e17-9e62-04c6a8a8480b": {
-              "id": "55a7695e-ccf0-46c9-9211-43d6ffb15c96",
+            "475f220157c1b8f9:effect:36:2": {
+              "id": "475f220157c1b8f9:effect:36:2",
               "scope": {
                 "start": {
                   "line": 36,
@@ -302,13 +305,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "cd223c3f-45d8-42f9-949a-00a2fba34869",
+                  "id": "475f220157c1b8f9:state:stateX",
                   "name": "stateX"
                 }
               ]
             },
-            "6d6cc1ed-5d0e-433d-8387-cf3f7cbd5a84": {
-              "id": "44de032f-5d4e-4778-845d-67b355a6f4f3",
+            "475f220157c1b8f9:effect:40:2": {
+              "id": "475f220157c1b8f9:effect:40:2",
               "scope": {
                 "start": {
                   "line": 40,
@@ -325,13 +328,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "b1e81133-6b05-4617-bdd7-cc434ce723b6",
+                  "id": "475f220157c1b8f9:ref:refX",
                   "name": "refX"
                 }
               ]
             },
-            "d05e8381-b41a-465d-9e5c-c1126fc937c2": {
-              "id": "10dc3ffa-2081-4d49-a255-e19fe57fc2d0",
+            "475f220157c1b8f9:effect:44:2": {
+              "id": "475f220157c1b8f9:effect:44:2",
               "scope": {
                 "start": {
                   "line": 44,

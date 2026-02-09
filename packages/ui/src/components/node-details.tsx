@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { X, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { TypeRenderer } from "./type-renderer";
@@ -11,13 +11,16 @@ import type {
 } from "shared";
 import type { ComboData, NodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
-import React from "react";
+import React, { useEffect } from "react";
+import { useGitStore } from "@/hooks/useGitStore";
+import { GitDiffView } from "./GitDiffView";
 
 interface NodeDetailsProps {
   selectedId: string | null;
   nodes: Record<string, NodeData>;
   combos: Record<string, ComboData>;
   typeData: Record<string, TypeDataDeclare>;
+  projectPath: string;
   onClose: () => void;
 }
 
@@ -26,18 +29,41 @@ export function NodeDetails({
   nodes,
   combos,
   typeData,
+  projectPath,
   onClose,
 }: NodeDetailsProps) {
-  if (!selectedId) return null;
+  const { diffs, selectedCommit, loadDiff } = useGitStore();
 
-  const item: NodeData | ComboData | undefined =
-    nodes[selectedId] || combos[selectedId];
+  const item: NodeData | ComboData | undefined = selectedId
+    ? nodes[selectedId] || combos[selectedId]
+    : undefined;
 
-  if (!item) return null;
+  useEffect(() => {
+    if (item?.gitStatus && item.pureFileName) {
+      loadDiff(projectPath, {
+        file: item.pureFileName,
+        commit: selectedCommit || undefined,
+      });
+    }
+    console.log(item?.gitStatus);
+  }, [
+    item?.id,
+    item?.gitStatus,
+    item?.pureFileName,
+    projectPath,
+    selectedCommit,
+    loadDiff,
+  ]);
+
+  if (!selectedId || !item) return null;
 
   const type = nodes[selectedId] ? "Node" : "Combo";
 
+  const diffKey = `${selectedCommit || "current"}-${"working"}-${item.pureFileName || "all"}`;
+  const itemDiffs = diffs[diffKey] || [];
+
   const renderGenerics = (params?: TypeDataParam[]) => {
+    // ...
     if (!params || params.length === 0) return null;
     return (
       <span className="text-muted-foreground pr-1">
@@ -217,6 +243,22 @@ export function NodeDetails({
                   );
                 })}
             </div>
+          </div>
+        )}
+
+        {item.gitStatus && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <GitBranch className="h-4 w-4 text-amber-500" />
+              <span className="font-semibold text-muted-foreground">
+                Git Changes ({item.gitStatus})
+              </span>
+            </div>
+            <GitDiffView
+              diffs={itemDiffs}
+              fileName={item.pureFileName || ""}
+              scope={item.scope}
+            />
           </div>
         )}
       </CardContent>

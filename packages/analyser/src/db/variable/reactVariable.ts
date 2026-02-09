@@ -7,7 +7,7 @@ export abstract class ReactVariable<
   TKind extends ReactVarKind = ReactVarKind,
 > extends Variable<TType, TKind> {
   constructor(
-    options: Omit<ComponentFileVarReact<TType, TKind>, "file">,
+    options: Omit<ComponentFileVarReact<TType, TKind>, "file" | "hash">,
     file: File,
   ) {
     super(options, file);

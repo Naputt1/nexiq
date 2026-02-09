@@ -6,7 +6,7 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
   constructor(
     options: Omit<
       ComponentFileVarHook,
-      "kind" | "var" | "components"
+      "kind" | "var" | "components" | "hash" | "file"
     >,
     file: File,
   ) {

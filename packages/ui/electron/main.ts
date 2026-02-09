@@ -7,7 +7,13 @@ import yaml from "js-yaml";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
-import os from "os";
+import os from "node:os";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const tmp = require("tmp");
+import { simpleGit } from "simple-git";
+
 import type {
   AppStateData,
   PackageJson,
@@ -15,11 +21,15 @@ import type {
   ProjectStatus,
   ReactMapConfig,
 } from "./types";
-import {
-  type JsonData,
-  type ComponentFileVar,
-  type ComponentInfoRender,
-  type EffectInfo,
+import type {
+  JsonData,
+  ComponentFileVar,
+  ComponentInfoRender,
+  EffectInfo,
+  GitStatus,
+  GitCommit,
+  GitFileDiff,
+  GitDiffHunk,
 } from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -309,6 +319,174 @@ ipcMain.handle("get-project", () => {
   return currentProject;
 });
 
+ipcMain.handle(
+  "git-status",
+  async (_, projectRoot: string): Promise<GitStatus> => {
+    const git = simpleGit(projectRoot);
+    const status = await git.status();
+
+    return {
+      current: status.current,
+      tracking: status.tracking,
+      detached: status.detached,
+      files: status.files.map((f) => ({
+        path: f.path,
+        index: f.index,
+        working_dir: f.working_dir,
+      })),
+      staged: status.staged,
+    };
+  },
+);
+
+ipcMain.handle(
+  "git-log",
+  async (_, projectRoot: string, limit: number = 50): Promise<GitCommit[]> => {
+    const git = simpleGit(projectRoot);
+    const log = await git.log({ maxCount: limit });
+
+    return log.all.map((commit) => ({
+      hash: commit.hash,
+      date: commit.date,
+      message: commit.message,
+      author_name: commit.author_name,
+      author_email: commit.author_email,
+    }));
+  },
+);
+
+ipcMain.handle("git-stage", async (_, projectRoot: string, files: string[]) => {
+  const git = simpleGit(projectRoot);
+  await git.add(files);
+});
+
+ipcMain.handle(
+  "git-unstage",
+  async (_, projectRoot: string, files: string[]) => {
+    const git = simpleGit(projectRoot);
+    await git.reset(["HEAD", ...files]);
+  },
+);
+
+ipcMain.handle(
+  "git-diff",
+  async (
+    _,
+    projectRoot: string,
+    options: {
+      file?: string;
+      commit?: string;
+      baseCommit?: string;
+      staged?: boolean;
+    },
+  ): Promise<GitFileDiff[]> => {
+    const git = simpleGit(projectRoot);
+
+    let rawDiff: string;
+    const sanitizedFile = options.file?.startsWith("/")
+      ? options.file.slice(1)
+      : options.file;
+
+    if (options.baseCommit && options.commit) {
+      // Diff between two specific points
+      const args: string[] = [options.baseCommit, options.commit];
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.diff(args);
+    } else if (options.commit && !options.staged) {
+      // Use git show for specific commits to correctly handle root commits
+      const args: string[] = [options.commit];
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.show(args);
+    } else {
+      const args: string[] = [];
+      if (options.staged) {
+        args.push("--staged");
+      }
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.diff(args);
+    }
+
+    return parseRawDiff(rawDiff, sanitizedFile);
+  },
+);
+
+function parseRawDiff(rawDiff: string, filterFile?: string): GitFileDiff[] {
+  const files: GitFileDiff[] = [];
+  if (!rawDiff) return files;
+
+  const fileDiffs = rawDiff.split(/^diff --git /m).slice(1);
+
+  for (const fileDiff of fileDiffs) {
+    const lines = fileDiff.split("\n");
+    const header = lines[0];
+    const pathMatch = header.match(/a\/(.*) b\/(.*)/);
+    if (!pathMatch) continue;
+
+    const filePath = pathMatch[2];
+    if (filterFile && filePath !== filterFile) continue;
+
+    const hunks: GitDiffHunk[] = [];
+    let currentHunk: GitDiffHunk | null = null;
+
+    let oldLineNum = 0;
+    let newLineNum = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith("@@")) {
+        const hunkMatch = line.match(/@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@/);
+        if (hunkMatch) {
+          oldLineNum = parseInt(hunkMatch[1]);
+          newLineNum = parseInt(hunkMatch[3]);
+          currentHunk = {
+            content: line,
+            lines: [],
+            oldStart: oldLineNum,
+            oldLines: parseInt(hunkMatch[2] || "1"),
+            newStart: newLineNum,
+            newLines: parseInt(hunkMatch[4] || "1"),
+          };
+          hunks.push(currentHunk);
+        }
+      } else if (currentHunk) {
+        if (line.startsWith("+")) {
+          currentHunk.lines.push({
+            type: "added",
+            content: line.substring(1),
+            newLineNumber: newLineNum++,
+          });
+        } else if (line.startsWith("-")) {
+          currentHunk.lines.push({
+            type: "deleted",
+            content: line.substring(1),
+            oldLineNumber: oldLineNum++,
+          });
+        } else if (line.startsWith(" ")) {
+          currentHunk.lines.push({
+            type: "normal",
+            content: line.substring(1),
+            oldLineNumber: oldLineNum++,
+            newLineNumber: newLineNum++,
+          });
+        }
+      }
+    }
+
+    files.push({
+      path: filePath,
+      hunks,
+    });
+  }
+
+  return files;
+}
+
 import { analyzeProject } from "analyser";
 
 async function performAnalysis(analysisPath: string, projectPath: string) {
@@ -495,6 +673,101 @@ ipcMain.handle(
   },
 );
 
+ipcMain.handle(
+  "git-analyze-commit",
+  async (_, projectRoot: string, commitHash: string): Promise<JsonData> => {
+    const commitCacheDir = path.join(
+      projectRoot,
+      ".react-map",
+      "cache",
+      "commits",
+    );
+    const cachePath = path.join(commitCacheDir, `${commitHash}.json`);
+
+    if (fs.existsSync(cachePath)) {
+      return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+    }
+
+    if (!fs.existsSync(commitCacheDir)) {
+      fs.mkdirSync(commitCacheDir, { recursive: true });
+    }
+
+    const tempDir = tmp.dirSync({ unsafeCleanup: true });
+    try {
+      // Use git archive to get a clean snapshot of the commit
+      await new Promise<void>((resolve, reject) => {
+        exec(
+          `git archive ${commitHash} | tar -x -C "${tempDir.name}"`,
+          { cwd: projectRoot },
+          (error) => {
+            if (error) reject(error);
+            else resolve();
+          },
+        );
+      });
+
+      const graph = analyzeProject(tempDir.name);
+      fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
+      return graph as unknown as JsonData;
+    } catch (e) {
+      console.error("Failed to analyze commit", commitHash, e);
+      throw e;
+    } finally {
+      tempDir.removeCallback();
+    }
+  },
+);
+
+ipcMain.handle(
+  "analyze-diff",
+  async (_, dataA: JsonData, dataB: JsonData): Promise<JsonData> => {
+    const mapA = new Map<string, string>(); // id -> hash
+    const mapB = new Map<string, string>();
+
+    const collectVars = (data: JsonData, map: Map<string, string>) => {
+      const traverse = (vars: Record<string, ComponentFileVar>) => {
+        for (const v of Object.values(vars)) {
+          map.set(v.id, v.hash ?? "");
+          if ("var" in v && v.var) {
+            traverse(v.var);
+          }
+        }
+      };
+
+      for (const file of Object.values(data.files)) {
+        traverse(file.var);
+      }
+    };
+
+    collectVars(dataA, mapA);
+    collectVars(dataB, mapB);
+
+    const added: string[] = [];
+    const modified: string[] = [];
+    const deleted: string[] = [];
+
+    for (const [id, hashB] of mapB.entries()) {
+      const hashA = mapA.get(id);
+      if (!hashA) {
+        added.push(id);
+      } else if (hashA !== hashB) {
+        modified.push(id);
+      }
+    }
+
+    for (const id of mapA.keys()) {
+      if (!mapB.has(id)) {
+        deleted.push(id);
+      }
+    }
+
+    return {
+      ...dataB,
+      diff: { added, modified, deleted },
+    };
+  },
+);
+
 ipcMain.handle("read-state", async (_, projectRoot: string) => {
   const statePath = path.join(projectRoot, ".react-map", "state.json");
   if (fs.existsSync(statePath)) {
@@ -537,7 +810,12 @@ ipcMain.handle(
     const targetPath = analysisPath;
     const configRoot = projectRoot || analysisPath;
     const name = path.basename(targetPath);
-    const graphPath = path.join(configRoot, ".react-map", "cache", `${name}.json`);
+    const graphPath = path.join(
+      configRoot,
+      ".react-map",
+      "cache",
+      `${name}.json`,
+    );
 
     if (!fs.existsSync(graphPath)) return false;
 

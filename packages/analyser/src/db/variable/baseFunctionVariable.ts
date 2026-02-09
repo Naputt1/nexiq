@@ -16,7 +16,7 @@ export abstract class BaseFunctionVariable<
   constructor(
     options: Omit<
       ComponentFileVarBaseTypeFunction<TKind>,
-      "var" | "components" | "type" | "file"
+      "var" | "components" | "type" | "file" | "hash"
     >,
     file: File,
   ) {
@@ -35,6 +35,14 @@ export abstract class BaseFunctionVariable<
   protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind> {
     return {
       ...super.getBaseData(),
+      var: this.var.getData(),
+      scope: this.scope,
+    };
+  }
+
+  protected getDataInternal() {
+    return {
+      name: this.name,
       var: this.var.getData(),
       scope: this.scope,
     };

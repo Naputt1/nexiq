@@ -30,4 +30,11 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
       ...this.getBaseData(),
     };
   }
+
+  protected getDataInternal() {
+    return {
+      ...super.getDataInternal(),
+      reactDeps: this.reactDeps,
+    };
+  }
 }

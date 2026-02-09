@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import traverse from "@babel/traverse";
 import generate from "@babel/generator";
 import type { PropData } from "shared";
-import { newUUID } from "../utils/uuid.js";
+import { getDeterministicId } from "../utils/hash.js";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
@@ -19,7 +19,7 @@ function resolveTypeMembers(
   for (const member of members) {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
       props.push({
-        id: newUUID(),
+        id: getDeterministicId(member.key.name),
         name: member.key.name,
         type: generateFn(
           member.typeAnnotation?.typeAnnotation ?? t.anyTypeAnnotation(),
@@ -75,7 +75,7 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
           const propName = property.key.name;
           if (t.isIdentifier(property.value)) {
             props.push({
-              id: newUUID(),
+              id: getDeterministicId(property.value.name),
               name: property.value.name,
               type: "any",
               kind: "prop",
@@ -85,7 +85,7 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
             t.isArrayPattern(property.value)
           ) {
             props.push({
-              id: newUUID(),
+              id: getDeterministicId(propName),
               name: propName,
               type: "any",
               kind: "prop",
@@ -96,7 +96,7 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
       } else if (t.isRestElement(property)) {
         if (t.isIdentifier(property.argument)) {
           props.push({
-            id: newUUID(),
+            id: getDeterministicId(property.argument.name),
             name: property.argument.name,
             type: "any",
             kind: "spread",
@@ -112,7 +112,7 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
     }
   } else if (t.isIdentifier(pattern)) {
     props.push({
-      id: newUUID(),
+      id: getDeterministicId(pattern.name),
       name: pattern.name,
       type: "any",
       kind: "prop",

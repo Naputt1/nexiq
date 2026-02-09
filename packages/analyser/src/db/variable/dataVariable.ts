@@ -8,7 +8,7 @@ export class DataVariable extends Variable<"data"> {
   constructor(
     options: Omit<
       ComponentFileVarNormal,
-      "kind" | "var" | "components" | "file"
+      "kind" | "var" | "components" | "file" | "hash"
     >,
     file: File,
   ) {
@@ -30,6 +30,13 @@ export class DataVariable extends Variable<"data"> {
       type: "data",
       kind: "normal",
       loc: this.loc,
+      components: Object.fromEntries(this.components),
+    };
+  }
+
+  protected getDataInternal() {
+    return {
+      name: this.name,
       components: Object.fromEntries(this.components),
     };
   }

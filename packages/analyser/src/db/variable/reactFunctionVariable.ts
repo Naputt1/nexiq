@@ -1,5 +1,4 @@
 import type {
-  ComponentFileVarReact2,
   ComponentFileVarReactFunction,
   EffectInfo,
   Memo,
@@ -11,7 +10,6 @@ import type {
   State,
   TypeDataRef,
 } from "shared";
-import { newUUID } from "../../utils/uuid.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 import { StateVariable } from "./stateVariable.js";
@@ -33,7 +31,10 @@ export abstract class ReactFunctionVariable<
   private refCache: Record<string, string> = {};
 
   constructor(
-    options: Omit<ComponentFileVarReact2<TKind>, "var" | "components" | "type">,
+    options: Omit<
+      ComponentFileVarReactFunction<TKind>,
+      "var" | "components" | "type" | "hash" | "file"
+    >,
     file: File,
   ) {
     super(options, file);
@@ -47,13 +48,7 @@ export abstract class ReactFunctionVariable<
   }
 
   public addState(state: Omit<State, "id">) {
-    let id: string;
-    if (state.value in this.stateCache) {
-      id = this.stateCache[state.value]!;
-      delete this.stateCache[state.value];
-    } else {
-      id = newUUID();
-    }
+    const id = `${this.id}:state:${state.value}`;
 
     this.var.add(
       new StateVariable(
@@ -175,13 +170,7 @@ export abstract class ReactFunctionVariable<
   }
 
   public addRef(ref: Omit<RefData, "id">): RefVariable {
-    let id: string;
-    if (ref.value in this.refCache) {
-      id = this.refCache[ref.value]!;
-      delete this.refCache[ref.value];
-    } else {
-      id = newUUID();
-    }
+    const id = `${this.id}:ref:${ref.value}`;
 
     this.resolveReactDefaultData(ref.defaultData);
 
@@ -202,7 +191,7 @@ export abstract class ReactFunctionVariable<
   }
 
   public addMemo(memo: Omit<Memo, "id">): MemoVariable {
-    const id = newUUID();
+    const id = `${this.id}:memo:${memo.value}`;
 
     this.resolveReactDependencies(memo.reactDeps);
 
@@ -299,7 +288,7 @@ export abstract class ReactFunctionVariable<
   public addEffect(effect: Omit<EffectInfo, "id">) {
     this.resolveReactDependencies(effect.reactDeps);
 
-    const id = newUUID();
+    const id = `${this.id}:effect:${effect.loc.line}:${effect.loc.column}`;
     this.effects[id] = {
       id,
       ...effect,
@@ -334,6 +323,18 @@ export abstract class ReactFunctionVariable<
   protected getBaseData(): ComponentFileVarReactFunction<TKind> {
     return {
       ...super.getBaseData(),
+      states: [...this.states],
+      props: this.props,
+      hooks: this.hooks,
+      effects: this.effects,
+    };
+  }
+
+  protected getDataInternal() {
+    return {
+      name: this.name,
+      var: this.var.getData(),
+      scope: this.scope,
       states: [...this.states],
       props: this.props,
       hooks: this.hooks,

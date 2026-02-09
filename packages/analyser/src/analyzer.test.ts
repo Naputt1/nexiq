@@ -2,19 +2,15 @@ import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import { PackageJson } from "./db/packageJson.js";
-import { setRandomSeed } from "./utils/uuid.js";
 import path from "path";
 import fs from "fs";
 import type { SnapshotData } from "./types/test.js";
-
-const SEED = "analyser-test-seed";
 
 describe("analyser snapshots", () => {
   const projects = ["simple", "complex", "props", "hook", "props-complex"];
 
   projects.forEach((projectName) => {
     it(`should match snapshot for ${projectName}`, () => {
-      setRandomSeed(`${SEED}-${projectName}`);
       const projectPath = path.resolve(
         process.cwd(),
         `../sample-project/${projectName}`,

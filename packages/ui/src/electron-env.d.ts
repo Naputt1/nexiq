@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
-import { JsonData } from "shared";
+import { JsonData, GitStatus, GitCommit, GitFileDiff } from "shared";
 import {
   AppStateData,
   IpcEvents,
@@ -48,6 +48,42 @@ declare global {
         projectRoot: string,
         state: AppStateData,
       ): Promise<boolean>;
+      invoke(channel: "git-status", projectRoot: string): Promise<GitStatus>;
+      invoke(
+        channel: "git-log",
+        projectRoot: string,
+        limit?: number,
+      ): Promise<GitCommit[]>;
+      invoke(
+        channel: "git-stage",
+        projectRoot: string,
+        files: string[],
+      ): Promise<void>;
+      invoke(
+        channel: "git-unstage",
+        projectRoot: string,
+        files: string[],
+      ): Promise<void>;
+      invoke(
+        channel: "git-diff",
+        projectRoot: string,
+        options: {
+          file?: string;
+          commit?: string;
+          staged?: boolean;
+          baseCommit?: string;
+        },
+      ): Promise<GitFileDiff[]>;
+      invoke(
+        channel: "git-analyze-commit",
+        projectRoot: string,
+        commitHash: string,
+      ): Promise<JsonData>;
+      invoke(
+        channel: "analyze-diff",
+        dataA: JsonData,
+        dataB: JsonData,
+      ): Promise<JsonData>;
       on<K extends keyof IpcEvents>(
         channel: K,
         listener: (payload: IpcEvents[K]) => void,

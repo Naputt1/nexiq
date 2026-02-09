@@ -23,6 +23,8 @@ export default defineConfig({
                 "analyser",
                 "fast-glob",
                 "js-yaml",
+                "simple-git",
+                "tmp",
                 "tty",
                 "os",
                 "util",

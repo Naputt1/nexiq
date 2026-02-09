@@ -5,15 +5,12 @@ import type { ComponentInfoRenderDependency } from "shared";
 import assert from "assert";
 import { fullDebug } from "../utils/debug.js";
 import generate from "@babel/generator";
-import { newUUID } from "../utils/uuid.js";
+import { getDeterministicId } from "../utils/hash.js";
 import { getExpressionData } from "./type/helper.js";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
-function getComponentLoc(
-  nodePath: traverse.NodePath<t.JSXElement>,
-  fileName: string,
-) {
+function getComponentLoc(nodePath: traverse.NodePath<t.JSXElement>) {
   const parentFunc = nodePath.getFunctionParent();
   const parentStatement = nodePath.getStatementParent();
 
@@ -116,7 +113,7 @@ function extractDependencies(
   const data = getExpressionData(expr);
   if (data) {
     dependency.push({
-      id: newUUID(),
+      id: getDeterministicId(name),
       name: name,
       value: data,
     });
@@ -145,7 +142,7 @@ function extractDependencies(
     extractDependencies(expr.alternate, name, dependency);
   } else {
     dependency.push({
-      id: newUUID(),
+      id: getDeterministicId(name),
       name: name,
       value: {
         type: "literal-type",
@@ -166,7 +163,7 @@ export default function JSXElement(
       const parentFunc = nodePath.getFunctionParent();
 
       let compName = null;
-      const compLoc = getComponentLoc(nodePath, fileName);
+      const compLoc = getComponentLoc(nodePath);
 
       assert(nodePath.node.loc?.start != null);
       const loc = {
@@ -207,7 +204,7 @@ export default function JSXElement(
       // let id = componentIds.get(key);
 
       // if (id == null) {
-      //   id = newUUID();
+      //   id = "placeholder-id";
       //   componentIds.set(key, id);
       // }
 
@@ -228,7 +225,7 @@ export default function JSXElement(
               }
             } else if (prop.value?.type === "StringLiteral") {
               dependency.push({
-                id: newUUID(),
+                id: getDeterministicId(prop.name.name),
                 name: prop.name.name,
                 value: {
                   type: "literal-type",
@@ -237,7 +234,7 @@ export default function JSXElement(
               });
             } else {
               dependency.push({
-                id: newUUID(),
+                id: getDeterministicId(prop.name.name),
                 name: prop.name.name,
                 value: {
                   type: "literal-type",

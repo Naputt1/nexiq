@@ -5,35 +5,51 @@ export function isHook(filePath: string) {
   return path.basename(filePath).startsWith("use");
 }
 
-export function returnJSX(nodePath: Node): boolean {
+export function returnJSX(node: Node): boolean {
   if (
-    nodePath.type != "FunctionDeclaration" &&
-    nodePath.type != "ArrowFunctionExpression" &&
-    nodePath.type != "FunctionExpression"
+    node.type != "FunctionDeclaration" &&
+    node.type != "ArrowFunctionExpression" &&
+    node.type != "FunctionExpression"
   ) {
     return false;
   }
 
-  if (nodePath.body.type === "JSXElement") {
+  if (node.body.type === "JSXElement" || node.body.type === "JSXFragment") {
     return true;
   }
 
-  if (nodePath.body.type !== "BlockStatement") {
+  if (node.body.type !== "BlockStatement") {
     return false;
   }
 
-  for (const body of nodePath.body.body) {
-    if (body.type === "ReturnStatement") {
+  let hasJSX = false;
+  // Use a simple local visitor or recursive check
+  const check = (n: Node) => {
+    if (hasJSX) return;
+    if (n.type === "ReturnStatement") {
       if (
-        body.argument?.type === "JSXElement" ||
-        body.argument?.type === "JSXFragment"
+        n.argument?.type === "JSXElement" ||
+        n.argument?.type === "JSXFragment"
       ) {
-        return true;
+        hasJSX = true;
       }
     }
-  }
 
-  return false;
+    // Recurse into blocks, if statements, etc.
+    if ("body" in n && n.body && typeof n.body === "object") {
+      if (Array.isArray(n.body)) {
+        n.body.forEach(check);
+      } else {
+        check(n.body as Node);
+      }
+    }
+    if ("consequent" in n && n.consequent) check(n.consequent as Node);
+    if ("alternate" in n && n.alternate) check(n.alternate as Node);
+  };
+
+  node.body.body.forEach(check);
+
+  return hasJSX;
 }
 
 export function containsJSX(nodePath: NodePath): boolean {
