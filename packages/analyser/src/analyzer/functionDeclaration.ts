@@ -4,6 +4,11 @@ import type { ComponentDB } from "../db/componentDB.js";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
+import type {
+  ComponentFileVarComponent,
+  ComponentFileVarHook,
+  ComponentFileVarNormalFunction,
+} from "shared";
 
 function getParentPath(nodePath: traverse.NodePath<t.Node>) {
   const parentPath: string[] = [];
@@ -58,9 +63,8 @@ export default function FunctionDeclaration(
 
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
-        componentDB.addComponent({
+        componentDB.addComponent(fileName, {
           name,
-          file: fileName,
           type: "function",
           componentType: "Function",
           hooks: [],
@@ -72,13 +76,12 @@ export default function FunctionDeclaration(
           loc,
           scope,
           effects: {},
-        });
+        } as Omit<ComponentFileVarComponent, "id" | "kind" | "states" | "hash" | "file">);
         return;
       }
 
       if (isHook(name)) {
-        componentDB.addHook({
-          file: fileName,
+        componentDB.addHook(fileName, {
           name,
           dependencies: {},
           type: "function",
@@ -87,7 +90,7 @@ export default function FunctionDeclaration(
           props: getProps(nodePath),
           effects: {},
           hooks: [],
-        });
+        } as Omit<ComponentFileVarHook, "kind" | "id" | "var" | "components" | "states" | "hash" | "file">);
         return;
       }
 
@@ -97,7 +100,7 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
-      });
+      } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">);
     } else {
       if (
         nodePath.scope.block.type === "FunctionDeclaration" &&
@@ -113,7 +116,7 @@ export default function FunctionDeclaration(
             type: "function",
             loc,
             scope,
-          },
+          } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">,
           parentPath,
         );
       }

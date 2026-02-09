@@ -2,7 +2,6 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": ".",
     "outDir": "./dist",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -37,6 +36,10 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "shared": ["../shared/src/index.ts"]
+    },
     // "emitDeclarationOnly": true,
     // "allowImportingTsExtensions": true
     "experimentalDecorators": true,

@@ -5,6 +5,8 @@ import type {
   PropData,
   TypeData,
   TypeDataParam,
+  VariableLoc,
+  VariableScope,
 } from "shared";
 import type Konva from "konva";
 import { type Node, type Edge } from "./layout";
@@ -58,6 +60,9 @@ export interface PointData extends GraphItem {
 export interface DetailItemData {
   id: string;
   fileName: string;
+  pureFileName?: string;
+  scope?: VariableScope;
+  loc?: VariableLoc;
   props?: PropData[];
   propData?: PropData;
   propType?: TypeData;
@@ -74,6 +79,8 @@ export interface DetailItemData {
   typeParams?: TypeDataParam[];
   extends?: string[];
   renders?: Record<string, ComponentInfoRender>;
+  gitStatus?: "added" | "modified" | "deleted";
+  visible?: boolean;
   ui?: {
     renders?: Record<string, { x: number; y: number }>;
     isLayoutCalculated?: boolean;

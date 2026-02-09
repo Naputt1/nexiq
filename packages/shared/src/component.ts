@@ -124,6 +124,7 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   name: string;
   type: TType;
   file: string;
+  hash?: string;
   dependencies: Record<string, ComponentFileVarDependency>;
   ui?:
     | {
@@ -166,11 +167,6 @@ export type ComponentFileVarReact<
   TType extends VarType,
   TKind extends ReactVarKind,
 > = ComponentFileVarBase<TType, TKind>;
-
-export type ComponentFileVarReact2<TKind extends ReactVarKind> =
-  ComponentFileVarBase<"function", TKind> &
-    ComponentFileVarBaseTypeFunction<TKind> &
-    HookInfo;
 
 export type ComponentFileVarReactFunction<TKind extends ReactVarKind> =
   ComponentFileVarBaseTypeFunction<TKind> & ReactFunctionInfoBase;

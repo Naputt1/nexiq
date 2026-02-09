@@ -394,17 +394,20 @@ export class GraphRenderer {
     const nodes = this.graph.getCurNodes();
     const edges = this.graph.getCurEdges();
 
+    const hasGitChanges = Object.values(combos).some(c => !!c.gitStatus) || 
+                         Object.values(nodes).some(n => !!n.gitStatus);
+
     // Render Edges first (bottom)
-    this.renderEdges(edges);
+    this.renderEdges(edges, undefined, hasGitChanges);
 
     // Render Combos
     for (const combo of Object.values(combos)) {
-      this.renderCombo(combo, this.layer);
+      this.renderCombo(combo, this.layer, hasGitChanges);
     }
 
     // Render Nodes
     for (const node of Object.values(nodes)) {
-      this.renderNode(node, this.layer);
+      this.renderNode(node, this.layer, hasGitChanges);
     }
 
     this.layer.batchDraw();
@@ -413,8 +416,16 @@ export class GraphRenderer {
   private renderEdges(
     edges: Record<string, EdgeGraphData>,
     parent?: Konva.Group,
+    hasGitChanges?: boolean,
   ) {
     for (const edge of Object.values(edges)) {
+      const srcNode = this.graph.getPointByID(edge.source);
+      const targetNode = this.graph.getPointByID(edge.target);
+
+      // If either end is explicitly hidden, hide the edge
+      const isVisible =
+        srcNode?.visible !== false && targetNode?.visible !== false;
+
       const arrow = new Konva.Arrow({
         id: edge.id,
         points: edge.points,
@@ -426,7 +437,8 @@ export class GraphRenderer {
         lineJoin: "round",
         perfectDrawEnabled: false,
         listening: false,
-        visible: edge.points.length >= 4,
+        visible: isVisible && edge.points.length >= 4,
+        opacity: hasGitChanges ? 0.1 : 1,
       });
 
       // Add to parent or layer
@@ -438,12 +450,16 @@ export class GraphRenderer {
     }
   }
 
-  private renderCombo(combo: ComboGraphData, parent: Konva.Container) {
+  private renderCombo(combo: ComboGraphData, parent: Konva.Container, hasGitChanges?: boolean) {
+    // If marked as deleted (future component), hide it entirely when viewing past
+    if (combo.gitStatus === 'deleted' || combo.visible === false) return;
+
     const group = new Konva.Group({
       id: combo.id,
       x: combo.x,
       y: combo.y,
       draggable: true,
+      opacity: hasGitChanges && !combo.gitStatus ? 0.2 : 1,
     });
 
     group.on("dragmove", (e) => {
@@ -523,6 +539,22 @@ export class GraphRenderer {
     // Label (Outside content group)
     this.renderLabel(combo, group, radius + 10 * combo.scale);
 
+    // Git Status Indicator
+    if (combo.gitStatus) {
+      const statusColor = combo.gitStatus === 'added' ? '#22c55e' : 
+                         combo.gitStatus === 'modified' ? '#f59e0b' : '#ef4444';
+      
+      const indicator = new Konva.Circle({
+        x: radius * 0.7,
+        y: -radius * 0.7,
+        radius: 6 * combo.scale,
+        fill: statusColor,
+        stroke: 'white',
+        strokeWidth: 1 * combo.scale,
+      });
+      group.add(indicator);
+    }
+
     parent.add(group);
     this.combos.set(combo.id, group);
     this.items.set(combo.id, group);
@@ -550,12 +582,16 @@ export class GraphRenderer {
     group.add(text);
   }
 
-  private renderNode(node: NodeGraphData, parent: Konva.Container) {
+  private renderNode(node: NodeGraphData, parent: Konva.Container, hasGitChanges?: boolean) {
+    // If marked as deleted (future component), hide it entirely when viewing past
+    if (node.gitStatus === 'deleted' || node.visible === false) return;
+
     const group = new Konva.Group({
       id: node.id,
       x: node.x,
       y: node.y,
       draggable: true,
+      opacity: hasGitChanges && !node.gitStatus ? 0.2 : 1,
     });
 
     group.on("dragmove", (e) => {
@@ -603,6 +639,22 @@ export class GraphRenderer {
 
     if (node.label) {
       this.renderLabel(node, group, (node.radius || 0) + 10 * node.scale);
+    }
+
+    // Git Status Indicator
+    if (node.gitStatus) {
+      const statusColor = node.gitStatus === 'added' ? '#22c55e' : 
+                         node.gitStatus === 'modified' ? '#f59e0b' : '#ef4444';
+      
+      const indicator = new Konva.Circle({
+        x: node.radius * 0.7,
+        y: -node.radius * 0.7,
+        radius: 4 * node.scale,
+        fill: statusColor,
+        stroke: 'white',
+        strokeWidth: 1 * node.scale,
+      });
+      group.add(indicator);
     }
 
     parent.add(group);

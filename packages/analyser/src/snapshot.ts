@@ -4,7 +4,6 @@ import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import minimist from "minimist";
-import { setRandomSeed } from "./utils/uuid.js";
 import assert from "assert";
 import type { SnapshotData } from "./types/test.js";
 
@@ -12,9 +11,15 @@ const args = minimist(process.argv.slice(2));
 
 const samples = args._[0]
   ? [args._[0]]
-  : ["simple", "complex", "props", "hook", "props-complex", "cache", "cache-new"];
-
-const SEED = "analyser-test-seed";
+  : [
+      "simple",
+      "complex",
+      "props",
+      "hook",
+      "props-complex",
+      "cache",
+      "cache-new",
+    ];
 
 function main(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
@@ -22,8 +27,6 @@ function main(sample: string) {
   const PUBLIC_FILE = "../ui/public/graph.json";
 
   assert(fs.existsSync(SRC_DIR), "sample not found: " + SRC_DIR);
-
-  setRandomSeed(args.seed ?? `${SEED}-${sample}`);
 
   const packageJson = new PackageJson(SRC_DIR);
 

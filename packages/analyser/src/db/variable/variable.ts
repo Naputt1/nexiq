@@ -7,6 +7,7 @@ import type {
   VarType,
 } from "shared";
 import type { File } from "../fileDB.js";
+import { getDeterministicId } from "../../utils/hash.js";
 
 export abstract class Variable<
   TType extends VarType = VarType,
@@ -28,7 +29,7 @@ export abstract class Variable<
   } | undefined;
 
   constructor(
-    data: Omit<ComponentFileVarBase<TType, TKind>, "file">,
+    data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,
     file: File,
   ) {
     this.id = data.id;
@@ -55,17 +56,23 @@ export abstract class Variable<
   }
 
   protected getBaseData(): ComponentFileVarBase<TType, TKind> {
+    const data = this.getDataInternal();
+    const hash = getDeterministicId(JSON.stringify(data));
+
     return {
       id: this.id,
       name: this.name,
       kind: this.kind,
       type: this.type,
       file: this.file.path,
+      hash,
       dependencies: this.dependencies,
       loc: this.loc,
       ui: this.ui,
     };
   }
+
+  protected abstract getDataInternal(): any;
 
   public abstract getData(): ComponentFileVar;
 }
