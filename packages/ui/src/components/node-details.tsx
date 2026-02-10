@@ -3,11 +3,12 @@ import { X, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { TypeRenderer } from "./type-renderer";
-import type {
-  ComponentInfoRenderDependency,
-  PropData,
-  TypeDataDeclare,
-  TypeDataParam,
+import {
+  type ComponentInfoRenderDependency,
+  type PropData,
+  type TypeDataDeclare,
+  type TypeDataParam,
+  getDisplayName,
 } from "shared";
 import type { ComboData, NodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
@@ -99,7 +100,7 @@ export function NodeDetails({
             {item.type || type}
           </CardTitle>
           <div className="text-lg font-bold flex items-center gap-1 truncate">
-            <span className="text-primary">{item.label?.text}</span>
+            <span className="text-primary">{getDisplayName(item.name)}</span>
           </div>
         </div>
         <Button
@@ -218,7 +219,7 @@ export function NodeDetails({
                       className="text-xs font-mono bg-muted/30 p-2 rounded border border-border/50"
                     >
                       <div className="font-bold text-primary mb-1">
-                        {v.label?.text}
+                        {getDisplayName(v.name)}
                       </div>
 
                       <div className="space-y-1">

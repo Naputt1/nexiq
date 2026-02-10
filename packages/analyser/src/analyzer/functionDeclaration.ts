@@ -4,6 +4,7 @@ import type { ComponentDB } from "../db/componentDB.js";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
+import { getPattern } from "./pattern.js";
 import type {
   ComponentFileVarComponent,
   ComponentFileVarHook,
@@ -41,9 +42,10 @@ export default function FunctionDeclaration(
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.FunctionDeclaration> {
   return (nodePath) => {
-    const name = nodePath.node.id?.name;
-    if (!name) return;
-    assert(nodePath.node.id?.loc?.start != null);
+    if (!nodePath.node.id) return;
+    const name = nodePath.node.id.name;
+    const pattern = getPattern(nodePath.node.id);
+    assert(nodePath.node.id.loc?.start != null);
 
     const loc = {
       line: nodePath.node.id.loc.start.line,
@@ -64,7 +66,7 @@ export default function FunctionDeclaration(
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
         componentDB.addComponent(fileName, {
-          name,
+          name: pattern,
           type: "function",
           componentType: "Function",
           hooks: [],
@@ -82,7 +84,7 @@ export default function FunctionDeclaration(
 
       if (isHook(name)) {
         componentDB.addHook(fileName, {
-          name,
+          name: pattern,
           dependencies: {},
           type: "function",
           loc,
@@ -95,7 +97,7 @@ export default function FunctionDeclaration(
       }
 
       componentDB.addVariable(fileName, {
-        name,
+        name: pattern,
         dependencies: {},
         type: "function",
         loc,
@@ -111,7 +113,7 @@ export default function FunctionDeclaration(
         componentDB.addVariable(
           fileName,
           {
-            name,
+            name: pattern,
             dependencies: {},
             type: "function",
             loc,

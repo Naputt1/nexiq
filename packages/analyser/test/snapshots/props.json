@@ -37,7 +37,10 @@
         "d8e6b73737ed336b": {
           "id": "d8e6b73737ed336b",
           "type": "type",
-          "name": "Test2",
+          "name": {
+            "type": "identifier",
+            "name": "Test2"
+          },
           "body": {
             "type": "parenthesis",
             "members": {
@@ -52,7 +55,10 @@
         "8eb230baf04d154e": {
           "id": "8eb230baf04d154e",
           "type": "type",
-          "name": "Test3",
+          "name": {
+            "type": "identifier",
+            "name": "Test3"
+          },
           "body": {
             "type": "union",
             "members": [
@@ -121,7 +127,10 @@
         "e776935119c1d638": {
           "id": "e776935119c1d638",
           "type": "interface",
-          "name": "Child4",
+          "name": {
+            "type": "identifier",
+            "name": "Child4"
+          },
           "body": [
             {
               "signatureType": "property",
@@ -220,7 +229,10 @@
         "9caecc2dc3595364": {
           "id": "9caecc2dc3595364",
           "type": "type",
-          "name": "stringAlias",
+          "name": {
+            "type": "identifier",
+            "name": "stringAlias"
+          },
           "body": {
             "type": "string"
           },
@@ -232,7 +244,10 @@
         "b57b12c034f92fe5": {
           "id": "b57b12c034f92fe5",
           "type": "type",
-          "name": "Test",
+          "name": {
+            "type": "identifier",
+            "name": "Test"
+          },
           "body": {
             "type": "union",
             "members": [
@@ -311,7 +326,10 @@
         "81d8a0a28c070c7": {
           "id": "81d8a0a28c070c7",
           "type": "type",
-          "name": "Props",
+          "name": {
+            "type": "identifier",
+            "name": "Props"
+          },
           "body": {
             "type": "type-literal",
             "members": [
@@ -351,7 +369,10 @@
         "8a6e89ba852055ea": {
           "id": "8a6e89ba852055ea",
           "type": "interface",
-          "name": "Child",
+          "name": {
+            "type": "identifier",
+            "name": "Child"
+          },
           "body": [
             {
               "signatureType": "property",
@@ -380,7 +401,10 @@
         "116661688627799b": {
           "id": "116661688627799b",
           "type": "interface",
-          "name": "Parent",
+          "name": {
+            "type": "identifier",
+            "name": "Parent"
+          },
           "body": [
             {
               "signatureType": "property",
@@ -1061,7 +1085,10 @@
         "4cc327889e6992e4": {
           "id": "4cc327889e6992e4",
           "type": "type",
-          "name": "func",
+          "name": {
+            "type": "identifier",
+            "name": "func"
+          },
           "body": {
             "type": "function",
             "params": [],
@@ -1097,7 +1124,10 @@
         "5d6bcf4333f46aef": {
           "id": "5d6bcf4333f46aef",
           "type": "type",
-          "name": "funcP1",
+          "name": {
+            "type": "identifier",
+            "name": "funcP1"
+          },
           "body": {
             "type": "index-access",
             "indexType": {
@@ -1128,7 +1158,10 @@
         "48cecb8b799b04de": {
           "id": "48cecb8b799b04de",
           "type": "type",
-          "name": "y2",
+          "name": {
+            "type": "identifier",
+            "name": "y2"
+          },
           "body": {
             "type": "query",
             "expr": {
@@ -1145,7 +1178,10 @@
         "5ef63a7f4d0c0777": {
           "id": "5ef63a7f4d0c0777",
           "type": "type",
-          "name": "y3",
+          "name": {
+            "type": "identifier",
+            "name": "y3"
+          },
           "body": {
             "type": "query",
             "expr": {
@@ -1165,7 +1201,10 @@
         "f71366eaab33b4c1": {
           "id": "f71366eaab33b4c1",
           "type": "type",
-          "name": "y4",
+          "name": {
+            "type": "identifier",
+            "name": "y4"
+          },
           "body": {
             "type": "query",
             "expr": {
@@ -1181,7 +1220,10 @@
         "bb96b0e950c6ddb4": {
           "id": "bb96b0e950c6ddb4",
           "type": "type",
-          "name": "y5",
+          "name": {
+            "type": "identifier",
+            "name": "y5"
+          },
           "body": {
             "type": "query",
             "expr": {
@@ -1198,7 +1240,10 @@
         "3323e65305301ed5": {
           "id": "3323e65305301ed5",
           "type": "type",
-          "name": "x",
+          "name": {
+            "type": "identifier",
+            "name": "x"
+          },
           "body": {
             "type": "ref",
             "refType": "named",
@@ -1222,7 +1267,10 @@
         "67ab3156a7b11870": {
           "id": "67ab3156a7b11870",
           "type": "type",
-          "name": "InnerType",
+          "name": {
+            "type": "identifier",
+            "name": "InnerType"
+          },
           "body": {
             "type": "type-literal",
             "members": [
@@ -1243,7 +1291,10 @@
         "df9069885e9ae51": {
           "id": "df9069885e9ae51",
           "type": "interface",
-          "name": "InnerType2",
+          "name": {
+            "type": "identifier",
+            "name": "InnerType2"
+          },
           "body": [
             {
               "signatureType": "property",
@@ -1262,11 +1313,14 @@
       "var": {
         "6a52b2c719c0f421": {
           "id": "6a52b2c719c0f421",
-          "name": "Test65",
+          "name": {
+            "type": "identifier",
+            "name": "Test65"
+          },
           "kind": "normal",
           "type": "data",
           "file": "/src/type.tsx",
-          "hash": "ca8baa2190d143cd",
+          "hash": "83556d6bce01ed37",
           "dependencies": {},
           "loc": {
             "line": 31,
@@ -1276,11 +1330,14 @@
         },
         "8138ea1421523344": {
           "id": "8138ea1421523344",
-          "name": "TypePropsVar",
+          "name": {
+            "type": "identifier",
+            "name": "TypePropsVar"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "8abf9cd4628c9077",
+          "hash": "2bfcec7a2a14f6c9",
           "dependencies": {},
           "loc": {
             "line": 90,
@@ -1319,11 +1376,14 @@
         },
         "45d93b507f3cff36": {
           "id": "45d93b507f3cff36",
-          "name": "TypePropsVarFunction",
+          "name": {
+            "type": "identifier",
+            "name": "TypePropsVarFunction"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "8413c87346b3d3db",
+          "hash": "4346f5028a19f658",
           "dependencies": {},
           "loc": {
             "line": 102,
@@ -1374,11 +1434,14 @@
         },
         "d7b08d33fffa91ec": {
           "id": "d7b08d33fffa91ec",
-          "name": "TypePropsVarInline",
+          "name": {
+            "type": "identifier",
+            "name": "TypePropsVarInline"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "fb00dd3d57578d53",
+          "hash": "4dd457748473e49b",
           "dependencies": {},
           "loc": {
             "line": 110,
@@ -1423,11 +1486,14 @@
         },
         "307d2f98b6878b73": {
           "id": "307d2f98b6878b73",
-          "name": "TypePropsVarInlineFunction",
+          "name": {
+            "type": "identifier",
+            "name": "TypePropsVarInlineFunction"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "fec28e62ae93053f",
+          "hash": "3ef6411c483c9811",
           "dependencies": {},
           "loc": {
             "line": 114,
@@ -1472,11 +1538,14 @@
         },
         "12bb1ce455bcb824": {
           "id": "12bb1ce455bcb824",
-          "name": "TypePropsFunction",
+          "name": {
+            "type": "identifier",
+            "name": "TypePropsFunction"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "7102d90bf8a7276f",
+          "hash": "485b13210363a645",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -1572,11 +1641,14 @@
       "var": {
         "fc5afc13ded24662": {
           "id": "fc5afc13ded24662",
-          "name": "DestructuringProps",
+          "name": {
+            "type": "identifier",
+            "name": "DestructuringProps"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "cbe4eb247ad58f68",
+          "hash": "b2e7e4e533c85520",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1684,11 +1756,14 @@
       "var": {
         "720e9756d239e21b": {
           "id": "720e9756d239e21b",
-          "name": "App",
+          "name": {
+            "type": "identifier",
+            "name": "App"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "6a0bc6c1d54b9b",
+          "hash": "c6eb89f42ed5e8dd",
           "dependencies": {},
           "loc": {
             "line": 4,

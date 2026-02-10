@@ -192,6 +192,8 @@ importers:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
 
+  packages/sample-project/git-demo: {}
+
   packages/sample-project/hook:
     dependencies:
       react:

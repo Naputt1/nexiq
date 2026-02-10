@@ -31,6 +31,6 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
     return {
       ...this.getBaseData(),
       kind: "normal",
-    };
+    } as ComponentFileVarFunction;
   }
 }

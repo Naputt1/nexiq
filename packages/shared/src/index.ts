@@ -22,4 +22,3 @@ export type JsonData = {
 export * from "./types/index.js";
 export * from "./component.js";
 export * from "./utils.js";
-export * from "./types/index.js";

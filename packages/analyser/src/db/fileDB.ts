@@ -26,6 +26,7 @@ import type {
   TypeDataTypeBodyUnion,
   VariableLoc,
   VariableScope,
+  VariableName,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -46,6 +47,7 @@ import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js"
 import { StateVariable } from "./variable/stateVariable.js";
 import { RefVariable } from "./variable/refVariable.js";
 import { MemoVariable } from "./variable/memo.js";
+import { getVariableNameKey } from "../analyzer/pattern.js";
 
 import { Scope } from "./variable/scope.js";
 
@@ -187,7 +189,7 @@ export class File {
 
       for (const typeData of Object.values(data.tsTypes)) {
         this.tsTypes.set(typeData.id, typeData);
-        this.tsTypesID.set(typeData.name, typeData);
+        this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
       }
     }
   }
@@ -241,20 +243,21 @@ export class File {
     return undefined;
   }
 
-  public getNewVarID(name: string, scope: Scope): string {
+  public getNewVarID(name: VariableName, scope: Scope): string {
+    const nameKey = getVariableNameKey(name);
     for (const ex of Object.values(this.export)) {
-      if (ex.name === name) {
+      if (ex.name === nameKey) {
         return ex.id;
       }
     }
 
-    const prevId = scope.getPrevId(name);
+    const prevId = scope.getPrevId(nameKey);
     if (prevId) {
       return prevId;
     }
 
     // Fallback to deterministic ID based on file and name if no cache
-    return getDeterministicId(`${this.path}:${name}`);
+    return getDeterministicId(`${this.path}:${nameKey}`);
   }
 
   public getLocalId(variable: Variable): string {
@@ -293,7 +296,7 @@ export class File {
     return variable.id;
   }
 
-  public addMemo(loc: VariableLoc, memo: Omit<Memo, "id">) {
+  public addMemo(loc: VariableLoc, memo: Omit<Memo, "id"> & { name: VariableName }) {
     const component = this.getHookInfoFromLoc(loc);
     assert(component != null, "Component not found");
 
@@ -425,8 +428,9 @@ export class File {
 
     if (isBaseFunctionVariable(parent)) {
       for (const com of parent.var.values()) {
-        if (Object.keys(depMap).includes(com.name)) {
-          const depIndices = depMap[com.name];
+        const comNameKey = getVariableNameKey(com.name);
+        if (Object.keys(depMap).includes(comNameKey)) {
+          const depIndices = depMap[comNameKey];
           if (depIndices) {
             for (const depI of depIndices) {
               const dep = dependencies[depI];
@@ -436,7 +440,7 @@ export class File {
             }
           }
 
-          delete depMap[com.name];
+          delete depMap[comNameKey];
           if (Object.keys(depMap).length === 0) {
             return;
           }
@@ -447,8 +451,9 @@ export class File {
     if (Object.keys(depMap).length > 0) {
       if (parent.parent == null) {
         for (const com of this.var.values()) {
-          if (Object.keys(depMap).includes(com.name)) {
-            const depIndices = depMap[com.name];
+          const comNameKey = getVariableNameKey(com.name);
+          if (Object.keys(depMap).includes(comNameKey)) {
+            const depIndices = depMap[comNameKey];
             if (depIndices) {
               for (const depI of depIndices) {
                 const dep = dependencies[depI];
@@ -458,7 +463,7 @@ export class File {
               }
             }
 
-            delete depMap[com.name];
+            delete depMap[comNameKey];
             if (Object.keys(depMap).length === 0) {
               return;
             }
@@ -557,13 +562,14 @@ export class File {
   }
 
   public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
+    const nameKey = getVariableNameKey(type.name);
     if (!type.id) {
       const id = this.getNewVarID(type.name, this.var); // Root scope
       type.id = id;
     }
 
     this.tsTypes.set(type.id, type);
-    this.tsTypesID.set(type.name, type);
+    this.tsTypesID.set(nameKey, type);
   }
 
   public addRender(
@@ -744,7 +750,11 @@ export class FileDB {
     return file.addVariable(variable, parentPath);
   }
 
-  public addMemo(fileName: string, loc: VariableLoc, memo: Omit<Memo, "id">) {
+  public addMemo(
+    fileName: string,
+    loc: VariableLoc,
+    memo: Omit<Memo, "id"> & { name: VariableName },
+  ) {
     const file = this.get(fileName);
 
     return file.addMemo(loc, {

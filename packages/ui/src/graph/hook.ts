@@ -59,6 +59,7 @@ export interface PointData extends GraphItem {
 
 export interface DetailItemData {
   id: string;
+  name: VariableName;
   fileName: string;
   pureFileName?: string;
   scope?: VariableScope;

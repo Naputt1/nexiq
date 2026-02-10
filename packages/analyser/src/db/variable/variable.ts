@@ -3,6 +3,7 @@ import type {
   ComponentFileVarBase,
   ComponentFileVarDependency,
   VariableLoc,
+  VariableName,
   VarKind,
   VarType,
 } from "shared";
@@ -14,19 +15,22 @@ export abstract class Variable<
   TKind extends VarKind = VarKind,
 > {
   id: string;
-  name: string;
+  name: VariableName;
   file: File;
   type: TType;
   kind: ComponentFileVarBase<TType, TKind>["kind"];
+  parentId?: string | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
   parent?: Variable<"function">;
   loc: VariableLoc;
-  ui?: {
-    x: number;
-    y: number;
-    renders?: Record<string, { x: number; y: number }>;
-    isLayoutCalculated?: boolean | undefined;
-  } | undefined;
+  ui?:
+    | {
+        x: number;
+        y: number;
+        renders?: Record<string, { x: number; y: number }>;
+        isLayoutCalculated?: boolean | undefined;
+      }
+    | undefined;
 
   constructor(
     data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,
@@ -36,6 +40,7 @@ export abstract class Variable<
     this.name = data.name;
     this.type = data.type;
     this.kind = data.kind;
+    this.parentId = data.parentId;
     this.dependencies = data.dependencies;
     this.loc = data.loc;
     this.ui = data.ui;
@@ -66,13 +71,14 @@ export abstract class Variable<
       type: this.type,
       file: this.file.path,
       hash,
+      parentId: this.parentId,
       dependencies: this.dependencies,
       loc: this.loc,
       ui: this.ui,
     };
   }
 
-  protected abstract getDataInternal(): any;
+  protected abstract getDataInternal(): unknown;
 
   public abstract getData(): ComponentFileVar;
 }

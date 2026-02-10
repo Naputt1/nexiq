@@ -9,8 +9,19 @@ interface VariableComponentName {
 }
 
 export function getVariableComponentName(
-  path: NodePath<t.VariableDeclarator>
+  path: NodePath<t.VariableDeclarator>,
+  loc?: VariableLoc,
 ): VariableComponentName | null {
+  if (path == null) return null;
+  if (typeof (path as any).findParent !== "function") return null;
+
+  if (loc && (path as any).loc == null) {
+    (path as any).loc = {
+      start: loc,
+      end: loc,
+    };
+  }
+
   const compPath = path.findParent(
     (p) =>
       p.isFunctionDeclaration() ||
