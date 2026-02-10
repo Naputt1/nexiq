@@ -15,6 +15,7 @@ import {
   type MemoFileVarHook,
   type ComponentFileVarRef,
   type ComponentFileVarComponent,
+  type VariableName,
   getDisplayName,
 } from "shared";
 import useGraph, {
@@ -56,6 +57,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const setViewport = useAppStateStore((s) => s.setViewport);
   const loadState = useAppStateStore((s) => s.loadState);
   const saveState = useAppStateStore((s) => s.saveState);
+  const resetState = useAppStateStore((s) => s.reset);
   const isLoaded = useAppStateStore((s) => s.isLoaded);
 
   const status = useGitStore((s) => s.status);
@@ -63,7 +65,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
 
   const subPath = useMemo(() => {
-    return selectedSubProject && selectedSubProject !== projectPath
+    return selectedSubProject &&
+      selectedSubProject !== projectPath &&
+      selectedSubProject.startsWith(projectPath)
       ? selectedSubProject.replace(projectPath, "").replace(/^[/\\]/, "")
       : undefined;
   }, [selectedSubProject, projectPath]);
@@ -247,6 +251,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           // Add deleted props from parent commit
           Object.keys(deletedObjects).forEach((deletedId) => {
             const obj = deletedObjects[deletedId];
+            if (!obj) return;
+
             // Props are identified by componentId:prop:name
             if (
               deletedId.startsWith(`${propIdPrefix}:prop:`) &&
@@ -256,9 +262,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               if (!propNodes.some((n) => n.id === deletedId)) {
                 propNodes.push({
                   id: deletedId,
-                  name: { type: "identifier", name: obj.name },
+                  name: { type: "identifier", name: (obj as PropData).name },
                   label: {
-                    text: (obj.kind === "spread" ? "..." : "") + obj.name,
+                    text:
+                      ((obj as PropData).kind === "spread" ? "..." : "") +
+                      (obj as PropData).name,
                   },
                   type: "prop",
                   color: "green",
@@ -273,7 +281,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
               if (!componentProps.some((p) => p.id === deletedId)) {
                 componentProps.push({
-                  ...obj,
+                  ...(obj as PropData),
                   gitStatus: "deleted",
                 });
               }
@@ -334,14 +342,23 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
               console.log("deleted", v);
 
+              let name: VariableName;
+              if (v.kind === "prop" || v.kind === "spread") {
+                name = { type: "identifier", name: (v as PropData).name };
+              } else if (v.kind === "effect") {
+                name = { type: "identifier", name: "effect" };
+              } else {
+                name = (v as ComponentFileVar).name;
+              }
+
               const nodeBase: NodeData = {
                 id: v.id,
-                name: v.name,
+                name: name,
                 combo: variable.id,
                 fileName: `${fileName}:${loc.line}:${loc.column}`,
                 pureFileName: filePath,
                 loc: loc,
-                ui: "ui" in v ? v.ui : undefined,
+                ui: "ui" in v ? (v as ComponentFileVar).ui : undefined,
                 radius: 10,
                 gitStatus: "deleted",
               };
@@ -371,7 +388,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                     type: "ref",
                     color: "red",
                   });
-                } else if ((v.kind as string) === "effect") {
+                } else if (v.kind === "effect") {
                   nodes.push({
                     ...nodeBase,
                     type: "effect",
@@ -604,7 +621,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               obj.kind === "state" ||
               obj.kind === "memo" ||
               obj.kind === "ref" ||
-              (obj.kind as string) === "effect")
+              obj.kind === "effect")
           ) {
             // If it's not already in nodes, add it
             if (!nodes.some((n) => n.id === deletedId)) {
@@ -622,9 +639,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               const filePath = (obj as { file?: string }).file || "";
               const loc = "loc" in obj ? obj.loc : undefined;
 
+              let name: VariableName;
+              if (obj.kind === "prop" || obj.kind === "spread") {
+                name = { type: "identifier", name: (obj as PropData).name };
+              } else if (obj.kind === "effect") {
+                name = { type: "identifier", name: "effect" };
+              } else {
+                name = (obj as ComponentFileVar).name;
+              }
+
               const nodeBase: NodeData = {
                 id: obj.id,
-                name: (obj as any).name,
+                name: name,
                 combo: comboId,
                 fileName: loc
                   ? `${graphData.src}${filePath}:${loc.line}:${loc.column}`
@@ -670,7 +696,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   type: "ref",
                   color: "red",
                 });
-              } else if ((obj.kind as string) === "effect") {
+              } else if (obj.kind === "effect") {
                 nodes.push({
                   ...nodeBase,
                   type: "effect",
@@ -891,8 +917,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   // Initial load state
   useEffect(() => {
     hasRestoredViewport.current = false; // Reset flag when project changes
+    resetState();
     loadState(projectPath);
-  }, [projectPath, loadState]);
+  }, [projectPath, loadState, resetState]);
 
   // Auto-save state
   const debouncedSaveState = useMemo(

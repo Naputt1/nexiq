@@ -492,7 +492,18 @@ import { analyzeProject } from "analyser";
 
 async function performAnalysis(analysisPath: string, projectPath: string) {
   const targetPath = analysisPath;
-  const configRoot = projectPath || analysisPath;
+
+  // Ensure configRoot is correct: if analysisPath is not under projectPath, use analysisPath as configRoot
+  let configRoot = projectPath || analysisPath;
+  if (projectPath && analysisPath !== projectPath) {
+    const relative = path.relative(projectPath, analysisPath);
+    const isUnder =
+      relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+    if (!isUnder) {
+      configRoot = analysisPath;
+    }
+  }
+
   const name = path.basename(targetPath);
   const outputPath = path.join(
     configRoot,
@@ -626,7 +637,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
           }
         };
 
-        traverseApply(graph as unknown as JsonData);
+        traverseApply(graph);
       } catch (e) {
         console.error("Failed to merge positions", e);
       }
@@ -682,9 +693,20 @@ ipcMain.handle(
     commitHash: string,
     subPath?: string,
   ): Promise<JsonData> => {
-    const cacheKey = subPath
-      ? `${commitHash}-${subPath.replace(/\//g, "_")}`
-      : commitHash;
+    const git = simpleGit(projectRoot);
+
+    const resolvedHash = await git.revparse([commitHash]);
+
+    // Ensure subPath is relative for cache key
+    const relativeSubPath = subPath
+      ? path.isAbsolute(subPath)
+        ? path.relative(projectRoot, subPath)
+        : subPath
+      : undefined;
+
+    const cacheKey = relativeSubPath
+      ? `${resolvedHash}-${relativeSubPath.replace(/[/\\]/g, "_")}`
+      : resolvedHash;
     const commitCacheDir = path.join(
       projectRoot,
       ".react-map",
@@ -706,7 +728,7 @@ ipcMain.handle(
       // Use git archive to get a clean snapshot of the commit
       await new Promise<void>((resolve, reject) => {
         exec(
-          `git archive ${commitHash} | tar -x -C "${tempDir.name}"`,
+          `git archive ${resolvedHash} | tar -x -C "${tempDir.name}"`,
           { cwd: projectRoot },
           (error) => {
             if (error) reject(error);
@@ -715,16 +737,13 @@ ipcMain.handle(
         );
       });
 
-      const analysisPath = subPath
-        ? path.join(tempDir.name, subPath)
+      const analysisPath = relativeSubPath
+        ? path.join(tempDir.name, relativeSubPath)
         : tempDir.name;
 
       const graph = analyzeProject(analysisPath);
       fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
-      return graph as unknown as JsonData;
-    } catch (e) {
-      console.error("Failed to analyze commit", commitHash, e);
-      throw e;
+      return graph;
     } finally {
       tempDir.removeCallback();
     }
@@ -905,7 +924,18 @@ ipcMain.handle(
     contextId?: string,
   ) => {
     const targetPath = analysisPath;
-    const configRoot = projectRoot || analysisPath;
+
+    // Ensure configRoot is correct: if analysisPath is not under projectRoot, use analysisPath as configRoot
+    let configRoot = projectRoot || analysisPath;
+    if (projectRoot && analysisPath !== projectRoot) {
+      const relative = path.relative(projectRoot, analysisPath);
+      const isUnder =
+        relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+      if (!isUnder) {
+        configRoot = analysisPath;
+      }
+    }
+
     const name = path.basename(targetPath);
     const graphPath = path.join(
       configRoot,

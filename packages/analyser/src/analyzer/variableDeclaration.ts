@@ -256,9 +256,7 @@ export default function VariableDeclarator(
                     | "id"
                     | "var"
                     | "components"
-                    | "states"
-                    | "hash"
-                    | "file"
+                    | "states" | "hash" | "file"
                   >);
                 } else {
                   currentId = componentDB.addVariable(fileName, {
