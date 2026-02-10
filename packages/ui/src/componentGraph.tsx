@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   type ComponentFile,
   type ComponentFileVar,
@@ -6,6 +12,10 @@ import {
   type PropDataType,
   type TypeDataDeclare,
   type JsonData,
+  type ComponentFileVarState,
+  type MemoFileVarHook,
+  type ComponentFileVarRef,
+  type ComponentFileVarComponent,
   getDisplayName,
 } from "shared";
 import useGraph, {
@@ -34,23 +44,30 @@ interface ComponentGraphProps {
 }
 
 const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
-  const {
-    selectedSubProject,
-    setSelectedSubProject,
-    selectedId,
-    setSelectedId,
-    centeredItemId,
-    setCenteredItemId,
-    isSidebarOpen,
-    setIsSidebarOpen,
-    viewport,
-    setViewport,
-    loadState,
-    saveState,
-    isLoaded,
-  } = useAppStateStore();
+  const selectedSubProject = useAppStateStore((s) => s.selectedSubProject);
+  const setSelectedSubProject = useAppStateStore(
+    (s) => s.setSelectedSubProject,
+  );
+  const selectedId = useAppStateStore((s) => s.selectedId);
+  const setSelectedId = useAppStateStore((s) => s.setSelectedId);
+  const centeredItemId = useAppStateStore((s) => s.centeredItemId);
+  const setCenteredItemId = useAppStateStore((s) => s.setCenteredItemId);
+  const isSidebarOpen = useAppStateStore((s) => s.isSidebarOpen);
+  const setIsSidebarOpen = useAppStateStore((s) => s.setIsSidebarOpen);
+  const setViewport = useAppStateStore((s) => s.setViewport);
+  const loadState = useAppStateStore((s) => s.loadState);
+  const saveState = useAppStateStore((s) => s.saveState);
+  const isLoaded = useAppStateStore((s) => s.isLoaded);
 
-  const { status, selectedCommit, loadAnalyzedDiff } = useGitStore();
+  const status = useGitStore((s) => s.status);
+  const selectedCommit = useGitStore((s) => s.selectedCommit);
+  const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
+
+  const subPath = useMemo(() => {
+    return selectedSubProject && selectedSubProject !== projectPath
+      ? selectedSubProject.replace(projectPath, "").replace(/^[/\\]/, "")
+      : undefined;
+  }, [selectedSubProject, projectPath]);
 
   const [size, setSize] = useState({
     width: window.innerWidth,
@@ -87,15 +104,32 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       if (!targetPath) return;
 
       try {
-        const graphData = (await window.ipcRenderer.invoke(
-          "read-graph-data",
-          projectPath,
-          targetPath,
-        )) as JsonData;
+        let graphData: JsonData;
+        if (selectedCommit) {
+          const diffData = await loadAnalyzedDiff(
+            projectPath,
+            selectedCommit,
+            subPath,
+          );
+          if (!diffData) return;
+          graphData = diffData;
+        } else {
+          graphData = (await window.ipcRenderer.invoke(
+            "read-graph-data",
+            projectPath,
+            targetPath,
+          )) as JsonData;
+        }
+
         if (!graphData) throw new Error("Graph data not found");
         rawGraphDataRef.current = graphData;
 
-        console.log(graphData);
+        const {
+          added = [],
+          modified = [],
+          deleted = [],
+          deletedObjects = {},
+        } = graphData.diff || {};
 
         const combos: ComboData[] = [];
         const nodes: NodeData[] = [];
@@ -103,31 +137,154 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
         const addCombo = (
           variable: ComponentFileVar,
-          file: ComponentFile,
+          filePath: string,
           parentID?: string,
         ) => {
           if (variable.kind != "component") return;
-          const fileName = `${graphData.src}${file.path}`;
+          const fileName = `${graphData.src}${filePath}`;
 
-          combos.push({
+          const combo: ComboData = {
             id: variable.id,
             collapsed: true,
             name: variable.name,
             label: { text: getDisplayName(variable.name), fill: "black" },
             combo: parentID,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-            pureFileName: file.path,
+            pureFileName: filePath,
             scope: variable.scope,
             props: variable.props,
             propType: variable.propType,
             type: "component",
             ui: variable.ui,
             renders: variable.renders,
+          };
+
+          if (added.includes(variable.id)) combo.gitStatus = "added";
+          else if (modified.includes(variable.id)) combo.gitStatus = "modified";
+          else if (deleted.includes(variable.id)) combo.gitStatus = "deleted";
+
+          combos.push(combo);
+
+          const propsComboId = `${variable.id}-props`;
+          const propNodes: NodeData[] = [];
+          const propCombos: ComboData[] = [];
+
+          const addProps = (props: PropData[], parentComboId: string) => {
+            for (const prop of props) {
+              if (added.includes(prop.id)) prop.gitStatus = "added";
+              else if (modified.includes(prop.id)) prop.gitStatus = "modified";
+              else if (deleted.includes(prop.id)) prop.gitStatus = "deleted";
+
+              if (prop.props && prop.props.length > 0) {
+                const subPropsComboId = `${prop.id}-subprops`;
+                const subPropsCombo: ComboData = {
+                  id: subPropsComboId,
+                  collapsed: true,
+                  name: { type: "identifier", name: prop.name },
+                  label: { text: prop.name, fill: "black" },
+                  color: "green",
+                  combo: parentComboId,
+                  fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                  pureFileName: filePath,
+                  ui: variable.ui?.renders?.[subPropsComboId],
+                };
+
+                if (added.includes(prop.id)) subPropsCombo.gitStatus = "added";
+                else if (modified.includes(prop.id))
+                  subPropsCombo.gitStatus = "modified";
+                else if (deleted.includes(prop.id))
+                  subPropsCombo.gitStatus = "deleted";
+
+                propCombos.push(subPropsCombo);
+                addProps(prop.props, subPropsComboId);
+              } else {
+                const propNode: NodeData = {
+                  id: prop.id,
+                  name: { type: "identifier", name: prop.name },
+                  label: {
+                    text: (prop.kind === "spread" ? "..." : "") + prop.name,
+                  },
+                  type: "prop",
+                  color: "green",
+                  combo: parentComboId,
+                  fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                  pureFileName: filePath,
+                };
+
+                if (added.includes(prop.id)) propNode.gitStatus = "added";
+                else if (modified.includes(prop.id))
+                  propNode.gitStatus = "modified";
+                else if (deleted.includes(prop.id))
+                  propNode.gitStatus = "deleted";
+
+                propNodes.push(propNode);
+              }
+            }
+          };
+
+          const componentProps = variable.props ? [...variable.props] : [];
+
+          if (variable.props) {
+            addProps(variable.props, propsComboId);
+          }
+
+          // Use the prefix from existing props if available,
+          // otherwise try to find a deleted component with the same name in the same file to get its old ID
+          let propIdPrefix = variable.id;
+          if (variable.props && variable.props.length > 0) {
+            propIdPrefix = variable.props[0].id.split(":prop:")[0];
+          } else {
+            const deletedCompId = Object.keys(deletedObjects).find((id) => {
+              const obj = deletedObjects[id];
+              return (
+                obj.kind === "component" &&
+                getDisplayName(obj.name) === getDisplayName(variable.name) &&
+                obj.file === filePath
+              );
+            });
+            if (deletedCompId) propIdPrefix = deletedCompId;
+          }
+
+          // Add deleted props from parent commit
+          Object.keys(deletedObjects).forEach((deletedId) => {
+            const obj = deletedObjects[deletedId];
+            // Props are identified by componentId:prop:name
+            if (
+              deletedId.startsWith(`${propIdPrefix}:prop:`) &&
+              (obj.kind === "prop" || obj.kind === "spread")
+            ) {
+              // If it's not already in current props (it shouldn't be if it's in deleted)
+              if (!propNodes.some((n) => n.id === deletedId)) {
+                propNodes.push({
+                  id: deletedId,
+                  name: { type: "identifier", name: obj.name },
+                  label: {
+                    text: (obj.kind === "spread" ? "..." : "") + obj.name,
+                  },
+                  type: "prop",
+                  color: "green",
+                  radius: 10,
+                  combo: propsComboId,
+
+                  fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+                  pureFileName: filePath,
+                  gitStatus: "deleted",
+                });
+              }
+
+              if (!componentProps.some((p) => p.id === deletedId)) {
+                componentProps.push({
+                  ...obj,
+                  gitStatus: "deleted",
+                });
+              }
+            }
           });
 
-          if (variable.props && variable.props.length > 0) {
-            const propsComboId = `${variable.id}-props`;
-            combos.push({
+          combo.props = componentProps;
+
+          if (propNodes.length > 0 || propCombos.length > 0) {
+            const propsCombo: ComboData = {
               id: propsComboId,
               collapsed: true,
               name: { type: "identifier", name: "props" },
@@ -135,45 +292,94 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               color: "green",
               combo: variable.id,
               fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-              pureFileName: file.path,
+              pureFileName: filePath,
               ui: variable.ui?.renders?.[propsComboId],
-            });
+            };
 
-            const addProps = (props: PropData[], parentComboId: string) => {
-              for (const prop of props) {
-                if (prop.props && prop.props.length > 0) {
-                  const subPropsComboId = `${prop.id}-subprops`;
-                  combos.push({
-                    id: subPropsComboId,
-                    collapsed: true,
-                    name: { type: "identifier", name: prop.name },
-                    label: { text: prop.name, fill: "black" },
-                    color: "green",
-                    combo: parentComboId,
-                    fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                    pureFileName: file.path,
-                    ui: variable.ui?.renders?.[subPropsComboId],
-                  });
-                  addProps(prop.props, subPropsComboId);
-                } else {
+            // Calculate aggregate status for the props combo
+            const allItems = [...propNodes, ...propCombos];
+            const statuses = allItems
+              .map((i) => i.gitStatus)
+              .filter((s) => s !== undefined);
+
+            if (statuses.length > 0) {
+              const uniqueStatuses = new Set(statuses);
+              // If every single prop is added, status is added.
+              // If every single prop is deleted, status is deleted.
+              // Otherwise, it's modified.
+              if (uniqueStatuses.size === 1) {
+                propsCombo.gitStatus = statuses[0];
+              } else {
+                propsCombo.gitStatus = "modified";
+              }
+            }
+
+            combos.push(propsCombo);
+            combos.push(...propCombos);
+            nodes.push(...propNodes);
+          }
+
+          // Add deleted internal variables from deletedObjects
+          Object.keys(deletedObjects).forEach((deletedId) => {
+            const v = deletedObjects[deletedId];
+            if (!v) return;
+
+            // Check if it belongs to this component and isn't already there
+            if (
+              deletedId.startsWith(`${propIdPrefix}:`) &&
+              !deletedId.startsWith(`${propIdPrefix}:prop:`) &&
+              !nodes.some((n) => n.id === deletedId)
+            ) {
+              const loc = "loc" in v ? v.loc : undefined;
+              if (!loc) return;
+
+              const nodeBase: NodeData = {
+                id: v.id,
+                name: v.name,
+                combo: variable.id,
+                fileName: `${fileName}:${loc.line}:${loc.column}`,
+                pureFileName: filePath,
+                loc: loc,
+                ui: "ui" in v ? v.ui : undefined,
+                radius: 10,
+                gitStatus: "deleted",
+              };
+
+              if ("kind" in v) {
+                if (v.kind === "state") {
+                  const stateVar = v as ComponentFileVarState;
                   nodes.push({
-                    id: prop.id,
-                    name: { type: "identifier", name: prop.name },
-                    label: {
-                      text: (prop.kind === "spread" ? "..." : "") + prop.name,
-                    },
-                    type: "prop",
-                    color: "green",
-                    combo: parentComboId,
-                    fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                    pureFileName: file.path,
+                    ...nodeBase,
+                    label: { text: getDisplayName(stateVar.name) },
+                    type: "state",
+                    color: "red",
+                  });
+                } else if (v.kind === "memo") {
+                  const memoVar = v as MemoFileVarHook;
+                  nodes.push({
+                    ...nodeBase,
+                    label: { text: getDisplayName(memoVar.name) },
+                    type: "memo",
+                    color: "red",
+                  });
+                } else if (v.kind === "ref") {
+                  const refVar = v as ComponentFileVarRef;
+                  nodes.push({
+                    ...nodeBase,
+                    label: { text: getDisplayName(refVar.name) },
+                    type: "ref",
+                    color: "red",
+                  });
+                } else if ((v.kind as string) === "effect") {
+                  nodes.push({
+                    ...nodeBase,
+                    type: "effect",
+                    color: "yellow",
                   });
                 }
               }
-            };
-
-            addProps(variable.props, propsComboId);
-          }
+            }
+          });
 
           combos.push({
             id: `${variable.id}-render`,
@@ -182,7 +388,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             label: { text: "render", fill: "black" },
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-            pureFileName: file.path,
+            pureFileName: filePath,
             ui: variable.ui?.renders?.[`${variable.id}-render`],
           });
 
@@ -195,35 +401,37 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           };
 
           for (const v of Object.values(variable.var)) {
+            const nodeBase: NodeData = {
+              id: v.id,
+              name: v.name,
+              combo: variable.id,
+              fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+              pureFileName: filePath,
+              loc: v.loc,
+              ui: v.ui,
+            };
+
+            if (added.includes(v.id)) nodeBase.gitStatus = "added";
+            else if (modified.includes(v.id)) nodeBase.gitStatus = "modified";
+            else if (deleted.includes(v.id)) nodeBase.gitStatus = "deleted";
+
             if (v.kind == "state") {
               nodes.push({
-                id: v.id,
-                name: v.name,
+                ...nodeBase,
                 label: {
                   text: getDisplayName(v.name),
                 },
                 type: "state",
                 color: "red",
-                combo: variable.id,
-                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
-                pureFileName: file.path,
-                loc: v.loc,
-                ui: v.ui,
               });
             } else if (v.kind == "memo") {
               nodes.push({
-                id: v.id,
-                name: v.name,
+                ...nodeBase,
                 label: {
                   text: getDisplayName(v.name),
                 },
                 type: "memo",
                 color: "red",
-                combo: variable.id,
-                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
-                pureFileName: file.path,
-                loc: v.loc,
-                ui: v.ui,
               });
 
               for (const dep of v.reactDeps) {
@@ -237,18 +445,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               }
             } else if (v.kind == "ref") {
               nodes.push({
-                id: v.id,
-                name: v.name,
+                ...nodeBase,
                 label: {
                   text: getDisplayName(v.name),
                 },
                 type: "ref",
                 color: "red",
-                combo: variable.id,
-                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
-                pureFileName: file.path,
-                loc: v.loc,
-                ui: v.ui,
               });
 
               const addRefDefaultDependency = (defaultData: PropDataType) => {
@@ -281,17 +483,25 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           }
 
           for (const effect of Object.values(variable.effects)) {
-            nodes.push({
+            const effectNode: NodeData = {
               id: effect.id,
               name: { type: "identifier", name: "effect" },
               type: "effect",
               color: "yellow",
               combo: variable.id,
               fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
-              pureFileName: file.path,
+              pureFileName: filePath,
               loc: effect.loc,
               ui: variable.ui?.renders?.[effect.id],
-            });
+            };
+
+            if (added.includes(effect.id)) effectNode.gitStatus = "added";
+            else if (modified.includes(effect.id))
+              effectNode.gitStatus = "modified";
+            else if (deleted.includes(effect.id))
+              effectNode.gitStatus = "deleted";
+
+            nodes.push(effectNode);
 
             for (const dep of effect.reactDeps) {
               if (dep.id == "") continue;
@@ -310,7 +520,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             for (const file of Object.values(graphData.files)) {
               if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
                 const v = file.var[render.id];
-                nodes.push({
+                const renderNode: NodeData = {
                   id: `${variable.id}-render-${render.id}`,
                   name: v.name,
                   label: {
@@ -321,7 +531,16 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   pureFileName: file.path,
                   loc: render.loc,
                   ui: variable.ui?.renders?.[render.id],
-                });
+                };
+
+                // For render nodes, check if the component being rendered was changed
+                if (added.includes(v.id)) renderNode.gitStatus = "added";
+                else if (modified.includes(v.id))
+                  renderNode.gitStatus = "modified";
+                else if (deleted.includes(v.id))
+                  renderNode.gitStatus = "deleted";
+
+                nodes.push(renderNode);
 
                 edges.push({
                   id: `${variable.id}-render-${render.id}-${v.id}`,
@@ -334,7 +553,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           }
 
           for (const v of Object.values(variable.var)) {
-            addCombo(v, file, variable.id);
+            addCombo(v, filePath, variable.id);
           }
         };
 
@@ -346,7 +565,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           ) => {
             for (const variable of Object.values(vars)) {
               if (variable.kind === "component") {
-                addCombo(variable, file, parentID);
+                addCombo(variable, file.path, parentID);
               }
               if ("var" in variable && variable.var) {
                 addAllComponents(
@@ -365,6 +584,100 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             }
           }
         }
+
+        // Add ALL deleted items from deletedObjects
+        Object.keys(deletedObjects).forEach((deletedId) => {
+          const obj = deletedObjects[deletedId];
+          if (!obj) return;
+
+          if ("kind" in obj && obj.kind === "component") {
+            // Add component as combo
+            if (!combos.some((c) => c.id === deletedId)) {
+              const comp = obj as ComponentFileVarComponent;
+              addCombo(comp, comp.file);
+            }
+          } else if (
+            "kind" in obj &&
+            (obj.kind === "prop" ||
+              obj.kind === "spread" ||
+              obj.kind === "state" ||
+              obj.kind === "memo" ||
+              obj.kind === "ref" ||
+              (obj.kind as string) === "effect")
+          ) {
+            // If it's not already in nodes, add it
+            if (!nodes.some((n) => n.id === deletedId)) {
+              // Try to find the parent component ID from the ID prefix (componentId:...)
+              const parts = deletedId.split(":");
+              const parentId = parts.length > 1 ? parts[0] : undefined;
+
+              // If it's a prop, it should go into the 'props' combo of its parent
+              const comboId =
+                (obj.kind === "prop" || obj.kind === "spread") && parentId
+                  ? `${parentId}-props`
+                  : parentId;
+
+              const filePath = (obj as { file?: string }).file || "";
+              const loc = "loc" in obj ? obj.loc : undefined;
+
+              const nodeBase: NodeData = {
+                id: obj.id,
+                name: (obj as any).name,
+                combo: comboId,
+                fileName: loc
+                  ? `${graphData.src}${filePath}:${loc.line}:${loc.column}`
+                  : "",
+                pureFileName: filePath,
+                loc: loc,
+                ui: "ui" in obj ? (obj as ComponentFileVar).ui : undefined,
+                radius: 10,
+                gitStatus: "deleted",
+              };
+
+              if (obj.kind === "prop" || obj.kind === "spread") {
+                const prop = obj as PropData;
+                nodes.push({
+                  ...nodeBase,
+                  label: {
+                    text: (prop.kind === "spread" ? "..." : "") + prop.name,
+                  },
+                  type: "prop",
+                  color: "green",
+                });
+              } else if (obj.kind === "state") {
+                const state = obj as ComponentFileVarState;
+                nodes.push({
+                  ...nodeBase,
+                  label: { text: getDisplayName(state.name) },
+                  type: "state",
+                  color: "red",
+                });
+              } else if (obj.kind === "memo") {
+                const memo = obj as MemoFileVarHook;
+                nodes.push({
+                  ...nodeBase,
+                  label: { text: getDisplayName(memo.name) },
+                  type: "memo",
+                  color: "red",
+                });
+              } else if (obj.kind === "ref") {
+                const ref = obj as ComponentFileVarRef;
+                nodes.push({
+                  ...nodeBase,
+                  label: { text: getDisplayName(ref.name) },
+                  type: "ref",
+                  color: "red",
+                });
+              } else if ((obj.kind as string) === "effect") {
+                nodes.push({
+                  ...nodeBase,
+                  type: "effect",
+                  color: "yellow",
+                });
+              }
+            }
+          }
+        });
 
         settypeData(newTypeData);
 
@@ -387,7 +700,13 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         console.error(err);
       }
     },
-    [projectPath, selectedSubProject],
+    [
+      projectPath,
+      selectedSubProject,
+      selectedCommit,
+      loadAnalyzedDiff,
+      subPath,
+    ],
   );
 
   const graph = useGraph({
@@ -397,102 +716,36 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   });
 
   const highlightGitChanges = useCallback(async () => {
-    if (!graph) return;
+    if (!graph || !rawGraphDataRef.current) return;
 
     try {
       const combos = graph.getAllCombos();
       const nodes = graph.getAllNodes();
 
-      // Reset highlights
-      graph.batch(() => {
-        combos.forEach((c) => {
-          c.gitStatus = undefined;
-          c.visible = true;
-          graph.updateCombo(c);
-        });
-        nodes.forEach((n) => {
-          n.gitStatus = undefined;
-          n.visible = true;
-          graph.updateNode(n);
-        });
-      });
-
-      // Fetch analyzed diff
-      const diffData = await loadAnalyzedDiff(projectPath, selectedCommit);
-
-      if (!diffData) return;
-
-      // Collect all IDs present in the selected commit's data
-      const existingIds = new Set<string>();
-      const traverse = (vars: Record<string, ComponentFileVar>) => {
-        for (const v of Object.values(vars)) {
-          existingIds.add(v.id);
-
-          // Add IDs from effects
-          if ("effects" in v && v.effects) {
-            Object.keys(v.effects).forEach((id) => existingIds.add(id));
-          }
-
-          // Add IDs from renders (and their virtual nodes)
-          if ("renders" in v && v.renders) {
-            Object.values(v.renders).forEach((r) => {
-              existingIds.add(r.id);
-              // The graph uses virtual nodes for renders like `${componentId}-render-${renderId}`
-              existingIds.add(`${v.id}-render-${r.id}`);
-            });
-            // Also add the render combo itself
-            existingIds.add(`${v.id}-render`);
-          }
-
-          // Add props combo ID
-          if ("props" in v && v.props && v.props.length > 0) {
-            existingIds.add(`${v.id}-props`);
-            const addPropsIds = (props: PropData[]) => {
-              props.forEach((p) => {
-                existingIds.add(p.id);
-                if (p.props) addPropsIds(p.props);
-              });
-            };
-            addPropsIds(v.props);
-          }
-
-          if ("components" in v && v.components) {
-            Object.values(v.components).forEach((c) => {
-              existingIds.add(c.id);
-            });
-          }
-
-          if ("var" in v && v.var) traverse(v.var);
-        }
-      };
-      Object.values(diffData.files).forEach((f) => {
-        if (f.var) traverse(f.var);
-      });
-
-      const { added = [], modified = [], deleted = [] } = diffData.diff || {};
+      const {
+        added = [],
+        modified = [],
+        deleted = [],
+      } = rawGraphDataRef.current.diff || {};
 
       graph.batch(() => {
         const applyStatus = (item: ComboGraphData | NodeGraphData) => {
-          // If viewing a historical commit, hide components that don't exist yet
-          if (selectedCommit && !existingIds.has(item.id)) {
-            item.visible = false;
-          } else {
-            item.visible = true;
-          }
-
           if (added.includes(item.id)) {
             item.gitStatus = "added";
           } else if (modified.includes(item.id)) {
             item.gitStatus = "modified";
           } else if (deleted.includes(item.id)) {
             item.gitStatus = "deleted";
+          } else {
+            item.gitStatus = undefined;
           }
 
-          if (item.gitStatus || item.visible === false) {
-            if ("collapsedRadius" in item)
-              graph.updateCombo(item as ComboGraphData);
-            else graph.updateNode(item as NodeGraphData);
-          }
+          // Everything in the current graph should be visible
+          item.visible = true;
+
+          if ("collapsedRadius" in item)
+            graph.updateCombo(item as ComboGraphData);
+          else graph.updateNode(item as NodeGraphData);
         };
 
         combos.forEach(applyStatus);
@@ -501,7 +754,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     } catch (e) {
       console.error("Failed to highlight git changes", e);
     }
-  }, [graph, projectPath, selectedCommit, loadAnalyzedDiff]);
+  }, [graph]);
 
   useEffect(() => {
     highlightGitChanges();
@@ -581,7 +834,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         size.height,
         onSelect,
         (vp) => {
-          setViewport(vp);
+          if (!rendererRef.current?.viewportChangeInProgress) {
+            setViewport(vp);
+          }
         },
       );
     } else {
@@ -589,16 +844,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       rendererRef.current.onSelect = onSelect;
     }
 
-    if (
-      rendererRef.current &&
-      viewport &&
-      !hasRestoredViewport.current &&
-      isLoaded
-    ) {
-      rendererRef.current.setViewport(viewport.x, viewport.y, viewport.zoom);
+    if (rendererRef.current && !hasRestoredViewport.current && isLoaded) {
+      const savedViewport = useAppStateStore.getState().viewport;
+      if (savedViewport) {
+        rendererRef.current.setViewport(
+          savedViewport.x,
+          savedViewport.y,
+          savedViewport.zoom,
+        );
+      }
       hasRestoredViewport.current = true;
     }
-  }, [graph, size.width, size.height, onSelect, viewport, isLoaded]);
+  }, [graph, size.width, size.height, onSelect, isLoaded, setViewport]);
 
   // Clean up
   useEffect(() => {
@@ -648,16 +905,13 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     selectedSubProject,
     centeredItemId,
     isSidebarOpen,
-    viewport,
     debouncedSaveState,
   ]);
 
-  // load data whenever sub-project selection changes
+  // load data whenever sub-project selection or selected commit changes
   useEffect(() => {
-    if (selectedSubProject) {
-      loadData();
-    }
-  }, [selectedSubProject, loadData]);
+    loadData();
+  }, [selectedSubProject, selectedCommit, loadData]);
 
   // Resize observer for container
   const containerRef = useRef<HTMLDivElement>(null);
@@ -921,7 +1175,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   return (
     <div className="w-screen h-screen relative bg-background overflow-hidden">
       <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <ProjectSidebar
+        <MemoizedProjectSidebar
           currentPath={selectedSubProject || projectPath}
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
@@ -935,7 +1189,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               // isSidebarOpen && "hidden",
             )}
           />
-          <NodeDetails
+          <MemoizedNodeDetails
             selectedId={selectedId}
             nodes={nodesMap}
             combos={combosMap}
@@ -1025,5 +1279,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     </div>
   );
 };
+
+const MemoizedProjectSidebar = React.memo(ProjectSidebar);
+const MemoizedNodeDetails = React.memo(NodeDetails);
 
 export default ComponentGraph;

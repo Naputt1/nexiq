@@ -1337,7 +1337,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "2bfcec7a2a14f6c9",
+          "hash": "e3f3e90b40e76999",
           "dependencies": {},
           "loc": {
             "line": 90,
@@ -1357,10 +1357,11 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "a45adc2906a54888:prop:title",
               "name": "title",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "238c42a88fe5a785"
             }
           ],
           "hooks": [],
@@ -1383,7 +1384,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "4346f5028a19f658",
+          "hash": "346f9a4d147702bf",
           "dependencies": {},
           "loc": {
             "line": 102,
@@ -1403,22 +1404,25 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "4eda6d7e65f6114a:prop:title",
               "name": "title",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "238c42a88fe5a785"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "4eda6d7e65f6114a:prop:items",
               "name": "items",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "8d18cedb2fd9d9a0"
             },
             {
-              "id": "f4c4685fb50c1842",
+              "id": "4eda6d7e65f6114a:prop:props",
               "name": "props",
               "type": "any",
-              "kind": "spread"
+              "kind": "spread",
+              "hash": "4495b8899bc413ae"
             }
           ],
           "hooks": [],
@@ -1441,7 +1445,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "4dd457748473e49b",
+          "hash": "2c2aceff5d5bc467",
           "dependencies": {},
           "loc": {
             "line": 110,
@@ -1461,16 +1465,18 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "58bd96c9445f109a:prop:title",
               "name": "title",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "238c42a88fe5a785"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "58bd96c9445f109a:prop:items",
               "name": "items",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "8d18cedb2fd9d9a0"
             }
           ],
           "hooks": [],
@@ -1493,7 +1499,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "3ef6411c483c9811",
+          "hash": "800f685e8dcdf34f",
           "dependencies": {},
           "loc": {
             "line": 114,
@@ -1513,16 +1519,18 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "4da9eef1c97a7646:prop:title",
               "name": "title",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "238c42a88fe5a785"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "4da9eef1c97a7646:prop:items",
               "name": "items",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "8d18cedb2fd9d9a0"
             }
           ],
           "hooks": [],
@@ -1545,7 +1553,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "485b13210363a645",
+          "hash": "958b83b049da7003",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -1565,16 +1573,18 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "12bb1ce455bcb824:prop:title",
               "name": "title",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "238c42a88fe5a785"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "12bb1ce455bcb824:prop:items",
               "name": "items",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "8d18cedb2fd9d9a0"
             }
           ],
           "hooks": [],
@@ -1648,7 +1658,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "b2e7e4e533c85520",
+          "hash": "bf2b04671b35c320",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1668,16 +1678,18 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "d0460c8cee978856:prop:title",
               "name": "title",
               "type": "string",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "b034ee30ef5f566a"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "d0460c8cee978856:prop:items",
               "name": "items",
               "type": "string[]",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "4456340d7d91f5de"
             }
           ],
           "hooks": [],

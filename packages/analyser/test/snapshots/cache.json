@@ -136,7 +136,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "afae6e7414e51942",
+          "hash": "895dc7efe5006947",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -156,10 +156,11 @@
           "states": [],
           "props": [
             {
-              "id": "99e389d25c10af32",
+              "id": "c8f7739ce29d1ce0:prop:user",
               "name": "user",
               "type": "{\n  name: string;\n}",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "43e778a48c712350"
             }
           ],
           "hooks": [],
@@ -278,7 +279,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "3310756108f60fcd",
+          "hash": "1fe8dab0ca773cdf",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -311,6 +312,7 @@
               "type": "data",
               "file": "/src/App.tsx",
               "hash": "40922035c091c1ba",
+              "dependencies": {},
               "loc": {
                 "line": 13,
                 "column": 8
@@ -336,6 +338,7 @@
               "type": "data",
               "file": "/src/App.tsx",
               "hash": "a48e64502df258b7",
+              "dependencies": {},
               "loc": {
                 "line": 14,
                 "column": 8

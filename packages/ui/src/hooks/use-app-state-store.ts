@@ -7,13 +7,15 @@ interface AppState {
   isSidebarOpen: boolean;
   isLoaded: boolean;
   viewport: { x: number; y: number; zoom: number } | null;
-  
+
   setSelectedSubProject: (path: string | null) => void;
   setCenteredItemId: (id: string | null) => void;
   setSelectedId: (id: string | null) => void;
   setIsSidebarOpen: (open: boolean) => void;
-  setViewport: (viewport: { x: number; y: number; zoom: number } | null) => void;
-  
+  setViewport: (
+    viewport: { x: number; y: number; zoom: number } | null,
+  ) => void;
+
   // Persistence helpers
   loadState: (projectRoot: string) => Promise<void>;
   saveState: (projectRoot: string) => Promise<void>;
@@ -59,7 +61,14 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   },
 
   saveState: async (projectRoot: string) => {
-    const { selectedSubProject, centeredItemId, selectedId, isSidebarOpen, viewport, isLoaded } = get();
+    const {
+      selectedSubProject,
+      centeredItemId,
+      selectedId,
+      isSidebarOpen,
+      viewport,
+      isLoaded,
+    } = get();
     if (!isLoaded) return; // Don't save until we've loaded
 
     await window.ipcRenderer.invoke("save-state", projectRoot, {

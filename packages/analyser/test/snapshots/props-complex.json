@@ -105,7 +105,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ff671151bb981a05",
+          "hash": "db0802e42564c5f5",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -122,6 +122,7 @@
               "type": "data",
               "file": "/src/App.tsx",
               "hash": "eb618bf64c9b6b13",
+              "dependencies": {},
               "loc": {
                 "line": 17,
                 "column": 8
@@ -158,6 +159,7 @@
               "type": "data",
               "file": "/src/App.tsx",
               "hash": "34a5cb78731c8725",
+              "dependencies": {},
               "loc": {
                 "line": 18,
                 "column": 8
@@ -178,42 +180,48 @@
           "states": [],
           "props": [
             {
-              "id": "e6c632b61e964e1f",
+              "id": "dfab3f6e914f770:prop:a",
               "name": "a",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "7b4f711815f3c819"
             },
             {
-              "id": "575a0b1c44d8843f",
+              "id": "dfab3f6e914f770:prop:b",
               "name": "b",
               "type": "any",
               "kind": "prop",
               "props": [
                 {
-                  "id": "eaf06c6480b2cd11",
+                  "id": "dfab3f6e914f770:prop:x",
                   "name": "x",
                   "type": "any",
-                  "kind": "prop"
+                  "kind": "prop",
+                  "hash": "d219a1297e37127d"
                 },
                 {
-                  "id": "eed334792bb21cde",
+                  "id": "dfab3f6e914f770:prop:rename",
                   "name": "rename",
                   "type": "any",
-                  "kind": "prop"
+                  "kind": "prop",
+                  "hash": "ae999b01b5fb9295"
                 },
                 {
-                  "id": "e222116d3fc82f42",
+                  "id": "dfab3f6e914f770:prop:restInner",
                   "name": "restInner",
                   "type": "any",
-                  "kind": "spread"
+                  "kind": "spread",
+                  "hash": "d68e40250380211f"
                 }
-              ]
+              ],
+              "hash": "a513527c2c02d974"
             },
             {
-              "id": "89c351255a8beba0",
+              "id": "dfab3f6e914f770:prop:restOuter",
               "name": "restOuter",
               "type": "any",
-              "kind": "spread"
+              "kind": "spread",
+              "hash": "393b5866216153e6"
             }
           ],
           "hooks": [],
@@ -236,7 +244,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "e6c632b61e964e1f",
+                  "id": "dfab3f6e914f770:prop:a",
                   "name": "a"
                 }
               ]
@@ -259,7 +267,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "eaf06c6480b2cd11",
+                  "id": "dfab3f6e914f770:prop:x",
                   "name": "x"
                 }
               ]
@@ -282,7 +290,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "e222116d3fc82f42",
+                  "id": "dfab3f6e914f770:prop:restInner",
                   "name": "restInner"
                 }
               ]
@@ -305,7 +313,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "89c351255a8beba0",
+                  "id": "dfab3f6e914f770:prop:restOuter",
                   "name": "restOuter"
                 }
               ]

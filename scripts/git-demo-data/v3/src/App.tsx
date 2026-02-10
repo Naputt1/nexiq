@@ -7,8 +7,8 @@ import { ThemeProvider } from './ThemeContext';
 export function App() {
   const { count, increment } = useCounter(0);
   
-  const doubledCount = useMemo(() => {
-    return count * 2;
+  const tripleCount = useMemo(() => {
+    return count * 3;
   }, [count]);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function App() {
         <Header />
         <div style={{ display: 'flex' }}>
           <Sidebar />
-          <Content count={count} doubledCount={doubledCount} onIncrement={increment} />
+          <Content count={count} tripleCount={tripleCount} onIncrement={increment} />
         </div>
         {/* Footer deleted in v3 */}
       </div>
@@ -30,11 +30,11 @@ export function App() {
   );
 }
 
-function Content({ count, doubledCount, onIncrement }: any) {
+function Content({ count, tripleCount, onIncrement }: any) {
   return (
     <main>
       <p>Count: {count}</p>
-      <p>Doubled: {doubledCount}</p>
+      <p>Triple: {tripleCount}</p>
       <button onClick={onIncrement}>Increment</button>
     </main>
   );

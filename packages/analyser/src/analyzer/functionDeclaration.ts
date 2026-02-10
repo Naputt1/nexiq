@@ -10,6 +10,7 @@ import type {
   ComponentFileVarHook,
   ComponentFileVarNormalFunction,
 } from "shared";
+import { getDeterministicId } from "../utils/hash.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.Node>) {
   const parentPath: string[] = [];
@@ -52,6 +53,8 @@ export default function FunctionDeclaration(
       column: nodePath.node.id.loc.start.column,
     };
 
+    const componentId = getDeterministicId(`${fileName}:${name}`);
+
     const scope = {
       start: {
         line: nodePath.node.id.loc.start.line,
@@ -70,7 +73,7 @@ export default function FunctionDeclaration(
           type: "function",
           componentType: "Function",
           hooks: [],
-          props: getProps(nodePath),
+          props: getProps(nodePath, undefined, componentId),
           contexts: [],
           renders: {},
           dependencies: {},
@@ -89,7 +92,7 @@ export default function FunctionDeclaration(
           type: "function",
           loc,
           scope,
-          props: getProps(nodePath),
+          props: getProps(nodePath, undefined, componentId),
           effects: {},
           hooks: [],
         } as Omit<ComponentFileVarHook, "kind" | "id" | "var" | "components" | "states" | "hash" | "file">);

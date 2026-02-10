@@ -34,7 +34,7 @@ export function App() {
         <h1>Welcome, {state.name}</h1>
         <div style={{ display: 'flex' }}>
           <Sidebar />
-          <Content count={count} doubledCount={doubledCount} onIncrement={increment} />
+          <Content count={count} onIncrement={increment} version="4.0.0" />
         </div>
         <div style={{ marginTop: '20px' }}>
            <input 

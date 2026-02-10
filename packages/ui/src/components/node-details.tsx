@@ -15,6 +15,7 @@ import { TypeRefRenderer } from "./type-ref-renderer";
 import React, { useEffect } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
 import { GitDiffView } from "./GitDiffView";
+import { cn } from "@/lib/utils";
 
 interface NodeDetailsProps {
   selectedId: string | null;
@@ -173,9 +174,22 @@ export function NodeDetails({
                 item.props?.map((p: PropData, i: number) => (
                   <div
                     key={i}
-                    className="flex justify-between py-0.5 border-b border-border/50 last:border-0"
+                    className={cn(
+                      "flex justify-between py-0.5 border-b border-border/50 last:border-0",
+                      p.gitStatus === "deleted" &&
+                        "opacity-50 line-through bg-destructive/10",
+                      p.gitStatus === "added" && "bg-green-500/10",
+                      p.gitStatus === "modified" && "bg-amber-500/10",
+                    )}
                   >
-                    <span className="text-primary">
+                    <span
+                      className={cn(
+                        "text-primary",
+                        p.gitStatus === "deleted" && "text-destructive",
+                        p.gitStatus === "added" && "text-green-500",
+                        p.gitStatus === "modified" && "text-amber-500",
+                      )}
+                    >
                       {p.kind === "spread" ? "..." : ""}
                       {p.name}
                     </span>
