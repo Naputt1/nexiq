@@ -1,5 +1,10 @@
 import { useState } from "react";
-import type { TypeData, TypeDataDeclare, TypeDataRef } from "shared";
+import {
+  type TypeData,
+  type TypeDataDeclare,
+  type TypeDataRef,
+  getDisplayName,
+} from "shared";
 import { TypeRenderer } from "./type-renderer";
 import React from "react";
 import { TypeColors } from "./type-colors";
@@ -51,7 +56,7 @@ export const TypeRefRenderer: React.FC<TypeRendererProps> = ({
               setExpanded(!expanded);
             }}
           >
-            {targetNode.name}
+            {getDisplayName(targetNode.name)}
           </span>
           {type.params && type.params.length > 0 && (
             <span>

@@ -74,11 +74,14 @@
       "var": {
         "3530ad8032327f16": {
           "id": "3530ad8032327f16",
-          "name": "SubComponentA",
+          "name": {
+            "type": "identifier",
+            "name": "SubComponentA"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "b0824f2affd8aed1",
+          "hash": "a7d7bda8d950608e",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -105,11 +108,14 @@
         },
         "e1c92ac59ae5f4f3": {
           "id": "e1c92ac59ae5f4f3",
-          "name": "SubComponentB",
+          "name": {
+            "type": "identifier",
+            "name": "SubComponentB"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "1b48140e853154f6",
+          "hash": "8b64e9426d377c74",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -136,11 +142,14 @@
         },
         "bf77f96107e1da76": {
           "id": "bf77f96107e1da76",
-          "name": "InternalComponent",
+          "name": {
+            "type": "identifier",
+            "name": "InternalComponent"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "eb6abc89e9d92e4",
+          "hash": "2b656923414169ca",
           "dependencies": {},
           "loc": {
             "line": 14,
@@ -167,11 +176,14 @@
         },
         "cd828d2bdd77326e": {
           "id": "cd828d2bdd77326e",
-          "name": "MainNested",
+          "name": {
+            "type": "identifier",
+            "name": "MainNested"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "344f9ca49b809394",
+          "hash": "4afeab626887a1ba",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -243,40 +255,62 @@
       "var": {
         "810bbf867cc78077": {
           "id": "810bbf867cc78077",
-          "name": "useCustomHook",
+          "name": {
+            "type": "identifier",
+            "name": "useCustomHook"
+          },
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "62dd0b4ac3c2d425",
+          "hash": "f1d9696ede2f9b35",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "810bbf867cc78077:state:value": {
-              "id": "810bbf867cc78077:state:value",
-              "name": "value",
+            "e85efdf475297ae9": {
+              "id": "e85efdf475297ae9",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "value"
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setValue"
+                    }
+                  }
+                ],
+                "raw": "[value, setValue]"
+              },
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
-              "hash": "4a307d3ebb83269e",
-              "dependencies": {},
+              "hash": "3df4b3c4d3f01fd6",
               "loc": {
                 "line": 4,
                 "column": 8
               },
-              "value": "value",
               "setter": "setValue"
             },
-            "810bbf867cc78077:memo:memoVal": {
-              "id": "810bbf867cc78077:memo:memoVal",
-              "name": "memoVal",
+            "cbb29131249ee2d1": {
+              "id": "cbb29131249ee2d1",
+              "name": {
+                "type": "identifier",
+                "name": "memoVal"
+              },
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "a8c88ff07c087b22",
-              "dependencies": {},
+              "hash": "cd90d2b7629628ff",
               "loc": {
                 "line": 6,
                 "column": 8
@@ -294,7 +328,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "810bbf867cc78077:state:value",
+                  "id": "",
                   "name": "value"
                 }
               ]
@@ -310,9 +344,7 @@
               "column": 29
             }
           },
-          "states": [
-            "810bbf867cc78077:state:value"
-          ],
+          "states": [],
           "props": [
             {
               "id": "64354b0e2ded07",
@@ -341,11 +373,11 @@
               },
               "reactDeps": [
                 {
-                  "id": "810bbf867cc78077:state:value",
+                  "id": "",
                   "name": "value"
                 },
                 {
-                  "id": "810bbf867cc78077:memo:memoVal",
+                  "id": "cbb29131249ee2d1",
                   "name": "memoVal"
                 }
               ]
@@ -354,11 +386,14 @@
         },
         "911adcc515458fe3": {
           "id": "911adcc515458fe3",
-          "name": "useOtherHook",
+          "name": {
+            "type": "identifier",
+            "name": "useOtherHook"
+          },
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "338ff9b92cc53b89",
+          "hash": "c59031b6d2a524e8",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -433,87 +468,48 @@
       "var": {
         "6641a461d81f3001": {
           "id": "6641a461d81f3001",
-          "name": "MemoizedComponent",
-          "kind": "component",
-          "type": "function",
+          "name": {
+            "type": "identifier",
+            "name": "MemoizedComponent"
+          },
+          "kind": "normal",
+          "type": "data",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "6e5c0b9a1d0120a3",
+          "hash": "6f93486dbbd64f66",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 13
           },
-          "var": {},
-          "scope": {
-            "start": {
-              "line": 3,
-              "column": 13
-            },
-            "end": {
-              "line": 3,
-              "column": 30
-            }
-          },
-          "states": [],
-          "props": [
-            {
-              "id": "c354ecdc24a77d5",
-              "name": "name",
-              "type": "string",
-              "kind": "prop"
-            }
-          ],
-          "hooks": [],
-          "effects": {},
-          "componentType": "Function",
-          "contexts": [],
-          "renders": {}
+          "components": {}
         },
         "d9288162fe11b28b": {
           "id": "d9288162fe11b28b",
-          "name": "ForwardRefComponent",
-          "kind": "component",
-          "type": "function",
+          "name": {
+            "type": "identifier",
+            "name": "ForwardRefComponent"
+          },
+          "kind": "normal",
+          "type": "data",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "c348b755f4eb45a3",
+          "hash": "7b9b4e585b521503",
           "dependencies": {},
           "loc": {
             "line": 7,
             "column": 13
           },
-          "var": {},
-          "scope": {
-            "start": {
-              "line": 7,
-              "column": 13
-            },
-            "end": {
-              "line": 7,
-              "column": 32
-            }
-          },
-          "states": [],
-          "props": [
-            {
-              "id": "f4c4685fb50c1842",
-              "name": "props",
-              "type": "any",
-              "kind": "prop"
-            }
-          ],
-          "hooks": [],
-          "effects": {},
-          "componentType": "Function",
-          "contexts": [],
-          "renders": {}
+          "components": {}
         },
         "852e3a2e378138ae": {
           "id": "852e3a2e378138ae",
-          "name": "withLogging",
+          "name": {
+            "type": "identifier",
+            "name": "withLogging"
+          },
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "e74279d74c36616d",
+          "hash": "2d4825a439a9f163",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -533,34 +529,20 @@
         },
         "e7b71b962648547f": {
           "id": "e7b71b962648547f",
-          "name": "WrappedComponent",
-          "kind": "component",
-          "type": "function",
+          "name": {
+            "type": "identifier",
+            "name": "WrappedComponent"
+          },
+          "kind": "normal",
+          "type": "data",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "b12e08f9b431e957",
+          "hash": "36f43e61556cfe42",
           "dependencies": {},
           "loc": {
             "line": 18,
             "column": 13
           },
-          "var": {},
-          "scope": {
-            "start": {
-              "line": 18,
-              "column": 13
-            },
-            "end": {
-              "line": 18,
-              "column": 29
-            }
-          },
-          "states": [],
-          "props": [],
-          "hooks": [],
-          "effects": {},
-          "componentType": "Function",
-          "contexts": [],
-          "renders": {}
+          "components": {}
         }
       }
     },
@@ -596,11 +578,14 @@
       "var": {
         "fc5afc13ded24662": {
           "id": "fc5afc13ded24662",
-          "name": "DestructuringProps",
+          "name": {
+            "type": "identifier",
+            "name": "DestructuringProps"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "b0b627f02345ad7f",
+          "hash": "4861bf670c0e5f6d",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -723,11 +708,14 @@
       "var": {
         "d8ee01fcd351f46e": {
           "id": "d8ee01fcd351f46e",
-          "name": "MyContext",
+          "name": {
+            "type": "identifier",
+            "name": "MyContext"
+          },
           "kind": "normal",
           "type": "data",
           "file": "/src/Context.tsx",
-          "hash": "45f50ccbe33c93e6",
+          "hash": "834e1e3bab61864b",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -737,11 +725,14 @@
         },
         "7f6f2958399f03a2": {
           "id": "7f6f2958399f03a2",
-          "name": "MyProvider",
+          "name": {
+            "type": "identifier",
+            "name": "MyProvider"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "d54993b0685d5664",
+          "hash": "3c4a2aa62b7b0ef3",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -792,17 +783,38 @@
         },
         "d86bbbe51e265490": {
           "id": "d86bbbe51e265490",
-          "name": "MyConsumer",
+          "name": {
+            "type": "identifier",
+            "name": "MyConsumer"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "72ef8582735f9559",
+          "hash": "77cce43ea8cd977b",
           "dependencies": {},
           "loc": {
             "line": 13,
             "column": 13
           },
-          "var": {},
+          "var": {
+            "2167fedcfa51078a": {
+              "id": "2167fedcfa51078a",
+              "name": {
+                "type": "identifier",
+                "name": "context"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/Context.tsx",
+              "hash": "7fef27b7d7d95664",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 8
+              },
+              "components": {}
+            }
+          },
           "scope": {
             "start": {
               "line": 13,
@@ -911,17 +923,90 @@
       "var": {
         "2697de00a506fa4e": {
           "id": "2697de00a506fa4e",
-          "name": "ComplexApp",
+          "name": {
+            "type": "identifier",
+            "name": "ComplexApp"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "ebda3a0130aed6ca",
+          "hash": "8bff76935e854579",
           "dependencies": {},
           "loc": {
             "line": 8,
             "column": 16
           },
-          "var": {},
+          "var": {
+            "f42b84f4687ac804": {
+              "id": "f42b84f4687ac804",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "val"
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setVal"
+                    }
+                  }
+                ],
+                "raw": "[val, setVal]"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/ComplexApp.tsx",
+              "hash": "d0162cb06e91d6a4",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 8
+              },
+              "components": {}
+            },
+            "ee8c41a0fb7a77fd": {
+              "id": "ee8c41a0fb7a77fd",
+              "name": {
+                "type": "identifier",
+                "name": "val"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/ComplexApp.tsx",
+              "hash": "8d73a9a7ab878287",
+              "parentId": "f42b84f4687ac804",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 8
+              },
+              "components": {}
+            },
+            "98854eb2f792d592": {
+              "id": "98854eb2f792d592",
+              "name": {
+                "type": "identifier",
+                "name": "setVal"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/ComplexApp.tsx",
+              "hash": "2052aeb50f25207f",
+              "parentId": "f42b84f4687ac804",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 8
+              },
+              "components": {}
+            }
+          },
           "scope": {
             "start": {
               "line": 8,

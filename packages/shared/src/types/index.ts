@@ -1,4 +1,4 @@
-import type { ComponentLoc } from "../component.js";
+import type { ComponentLoc, VariableName } from "../component.js";
 import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
 export * from "./primitive.js";
 export * from "./object.js";
@@ -19,7 +19,7 @@ export interface TypeDataParamFunction extends TypeDataParam {
 export interface TypeDataDeclareBase {
   id: string;
   type: "interface" | "type";
-  name: string;
+  name: VariableName;
 }
 
 export interface TypeDataDeclareInterface

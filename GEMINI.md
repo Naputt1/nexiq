@@ -62,6 +62,7 @@ From the project root:
   ```bash
   pnpm test:analyze
   ```
+  *Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode.*
 
 - **Update Snapshots**:
   ```bash
@@ -85,7 +86,7 @@ From the project root:
 ### Analyser Development
 
 - The analyser logic is located in `packages/analyser/src/analyzer/`.
-- New features should be verified with tests in `packages/analyser/src/analyzer.test.ts`.
+- New features should be verified with tests in `packages/analyser/src/analyzer.test.ts`. Use `pnpm test:analyze` to run tests once and exit.
 - If changing the graph structure, run `pnpm snapshot:analyze` to update baseline snapshots.
 
 ### UI Development

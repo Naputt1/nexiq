@@ -22,6 +22,6 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
   public getData(): ComponentFileVarHook {
     return {
       ...super.getBaseData(),
-    };
+    } as ComponentFileVarHook;
   }
 }

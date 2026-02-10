@@ -9,6 +9,7 @@ import type {
   RefData,
   State,
   TypeDataRef,
+  VariableName,
 } from "shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
@@ -16,6 +17,7 @@ import { StateVariable } from "./stateVariable.js";
 import { isMemoVariable, isRefVariable, isStateVariable } from "./type.js";
 import { MemoVariable } from "./memo.js";
 import { RefVariable } from "./refVariable.js";
+import { getVariableNameKey } from "../../analyzer/pattern.js";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
@@ -47,14 +49,14 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public addState(state: Omit<State, "id">) {
-    const id = `${this.id}:state:${state.value}`;
+  public addState(state: Omit<State, "id"> & { name: VariableName }) {
+    const nameKey = getVariableNameKey(state.name);
+    const id = `${this.id}:state:${nameKey}`;
 
     this.var.add(
       new StateVariable(
         {
           id: id,
-          name: state.value,
           dependencies: {},
           ...state,
         },
@@ -111,7 +113,8 @@ export abstract class ReactFunctionVariable<
         const state = this.var.get(stateID);
         if (state == null || !isStateVariable(state)) continue;
 
-        if (state.value === name || state.setter === name) {
+        const stateNameKey = getVariableNameKey(state.name);
+        if (stateNameKey === name || state.setter === name) {
           if (defaultData.refType === "named") {
             defaultData.name = stateID;
           } else {
@@ -125,7 +128,8 @@ export abstract class ReactFunctionVariable<
         const memo = this.var.get(memoID);
         if (memo == null || !isMemoVariable(memo)) continue;
 
-        if (memo.name === name) {
+        const memoNameKey = getVariableNameKey(memo.name);
+        if (memoNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = memoID;
           } else {
@@ -139,7 +143,8 @@ export abstract class ReactFunctionVariable<
         const ref = this.var.get(refID);
         if (ref == null || !isRefVariable(ref)) continue;
 
-        if (ref.name === name) {
+        const refNameKey = getVariableNameKey(ref.name);
+        if (refNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = refID;
           } else {
@@ -169,15 +174,15 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public addRef(ref: Omit<RefData, "id">): RefVariable {
-    const id = `${this.id}:ref:${ref.value}`;
+  public addRef(ref: Omit<RefData, "id"> & { name: VariableName }): RefVariable {
+    const nameKey = getVariableNameKey(ref.name);
+    const id = `${this.id}:ref:${nameKey}`;
 
     this.resolveReactDefaultData(ref.defaultData);
 
     const refVariable = new RefVariable(
       {
         id: id,
-        name: ref.value,
         dependencies: {},
         ...ref,
       },
@@ -190,15 +195,15 @@ export abstract class ReactFunctionVariable<
     return refVariable;
   }
 
-  public addMemo(memo: Omit<Memo, "id">): MemoVariable {
-    const id = `${this.id}:memo:${memo.value}`;
+  public addMemo(memo: Omit<Memo, "id"> & { name: VariableName }): MemoVariable {
+    const nameKey = getVariableNameKey(memo.name);
+    const id = `${this.id}:memo:${nameKey}`;
 
     this.resolveReactDependencies(memo.reactDeps);
 
     const memoVariablle = new MemoVariable(
       {
         id: id,
-        name: memo.value,
         dependencies: {},
         ...memo,
       },
@@ -221,7 +226,8 @@ export abstract class ReactFunctionVariable<
         const state = this.var.get(stateID);
         if (state == null || !isStateVariable(state)) continue;
 
-        if (state.value === dep.name || state.setter === dep.name) {
+        const stateNameKey = getVariableNameKey(state.name);
+        if (stateNameKey === dep.name || state.setter === dep.name) {
           dep.id = state.id;
           continue outer;
         }
@@ -231,7 +237,8 @@ export abstract class ReactFunctionVariable<
         const memo = this.var.get(memoID);
         if (memo == null || !isMemoVariable(memo)) continue;
 
-        if (memo.name === dep.name) {
+        const memoNameKey = getVariableNameKey(memo.name);
+        if (memoNameKey === dep.name) {
           dep.id = memo.id;
           continue outer;
         }
@@ -241,7 +248,8 @@ export abstract class ReactFunctionVariable<
         const ref = this.var.get(refID);
         if (ref == null || !isRefVariable(ref)) continue;
 
-        if (ref.name === dep.name) {
+        const refNameKey = getVariableNameKey(ref.name);
+        if (refNameKey === dep.name) {
           dep.id = ref.id;
           continue outer;
         }
@@ -305,12 +313,12 @@ export abstract class ReactFunctionVariable<
     for (const variable of this.var.values()) {
       if (isStateVariable(variable)) {
         this.states.add(variable.id);
-        this.stateCache[variable.name] = variable.id;
+        this.stateCache[getVariableNameKey(variable.name)] = variable.id;
       } else if (isMemoVariable(variable)) {
         this.memos.add(variable.id);
       } else if (isRefVariable(variable)) {
         this.refs.add(variable.id);
-        this.refCache[variable.name] = variable.id;
+        this.refCache[getVariableNameKey(variable.name)] = variable.id;
       }
     }
   }

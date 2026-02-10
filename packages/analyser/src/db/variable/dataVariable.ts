@@ -1,4 +1,8 @@
-import type { ComponentFileVarNormal, ComponentInfoRender } from "shared";
+import type {
+  ComponentFileVarNormal,
+  ComponentFileVarNormalData,
+  ComponentInfoRender,
+} from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
@@ -21,17 +25,25 @@ export class DataVariable extends Variable<"data"> {
 
     this.type = data.type;
     // TODO: handle merge
-    this.components = new Map(Object.entries(data.components));
+    if (data.components) {
+      this.components = new Map(Object.entries(data.components));
+    }
   }
 
   public getData(): ComponentFileVarNormal {
     return {
-      ...super.getBaseData(),
+      ...this.getBaseData(),
       type: "data",
       kind: "normal",
-      loc: this.loc,
       components: Object.fromEntries(this.components),
     };
+  }
+
+  protected getBaseData(): ComponentFileVarNormalData {
+    return {
+      ...super.getBaseData(),
+      components: Object.fromEntries(this.components),
+    } as ComponentFileVarNormalData;
   }
 
   protected getDataInternal() {

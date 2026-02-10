@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type {
-  ComponentFile,
-  ComponentFileVar,
-  PropData,
-  PropDataType,
-  TypeDataDeclare,
-  JsonData,
+import {
+  type ComponentFile,
+  type ComponentFileVar,
+  type PropData,
+  type PropDataType,
+  type TypeDataDeclare,
+  type JsonData,
+  getDisplayName,
 } from "shared";
 import useGraph, {
   type ComboData,
@@ -111,7 +112,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           combos.push({
             id: variable.id,
             collapsed: true,
-            label: { text: variable.name, fill: "black" },
+            name: variable.name,
+            label: { text: getDisplayName(variable.name), fill: "black" },
             combo: parentID,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
             pureFileName: file.path,
@@ -128,6 +130,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             combos.push({
               id: propsComboId,
               collapsed: true,
+              name: { type: "identifier", name: "props" },
               label: { text: "props", fill: "black" },
               color: "green",
               combo: variable.id,
@@ -143,6 +146,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   combos.push({
                     id: subPropsComboId,
                     collapsed: true,
+                    name: { type: "identifier", name: prop.name },
                     label: { text: prop.name, fill: "black" },
                     color: "green",
                     combo: parentComboId,
@@ -154,6 +158,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 } else {
                   nodes.push({
                     id: prop.id,
+                    name: { type: "identifier", name: prop.name },
                     label: {
                       text: (prop.kind === "spread" ? "..." : "") + prop.name,
                     },
@@ -173,6 +178,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           combos.push({
             id: `${variable.id}-render`,
             collapsed: true,
+            name: { type: "identifier", name: "render" },
             label: { text: "render", fill: "black" },
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
@@ -190,11 +196,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
           for (const v of Object.values(variable.var)) {
             if (v.kind == "state") {
-              debugger;
               nodes.push({
                 id: v.id,
+                name: v.name,
                 label: {
-                  text: v.value,
+                  text: getDisplayName(v.name),
                 },
                 type: "state",
                 color: "red",
@@ -207,8 +213,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             } else if (v.kind == "memo") {
               nodes.push({
                 id: v.id,
+                name: v.name,
                 label: {
-                  text: v.name,
+                  text: getDisplayName(v.name),
                 },
                 type: "memo",
                 color: "red",
@@ -231,8 +238,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             } else if (v.kind == "ref") {
               nodes.push({
                 id: v.id,
+                name: v.name,
                 label: {
-                  text: v.name,
+                  text: getDisplayName(v.name),
                 },
                 type: "ref",
                 color: "red",
@@ -275,6 +283,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           for (const effect of Object.values(variable.effects)) {
             nodes.push({
               id: effect.id,
+              name: { type: "identifier", name: "effect" },
               type: "effect",
               color: "yellow",
               combo: variable.id,
@@ -303,8 +312,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 const v = file.var[render.id];
                 nodes.push({
                   id: `${variable.id}-render-${render.id}`,
+                  name: v.name,
                   label: {
-                    text: v.name,
+                    text: getDisplayName(v.name),
                   },
                   combo: `${variable.id}-render`,
                   fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
