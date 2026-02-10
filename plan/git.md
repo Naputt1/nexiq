@@ -23,34 +23,34 @@ This plan outlines the integration of Git functionality into the `react-map` UI,
 
 ## Phase 3: Graph Visualization (Done)
 
-- [x] **Component Mapping**: Map diff line numbers to component scopes defined by the analyzer.
-- [x] **Highlighting Logic**: Implement `highlightGitChanges` in `ComponentGraph` to visually mark "dirty" components.
+- [x] **Historical Snapshot Rendering**:
+  - [x] Refactored `loadData` to render the graph structure of the selected commit instead of the current working tree.
+  - [x] Implemented `git archive` based analysis in the Electron main process to generate clean historical snapshots.
+- [x] **Local Context Highlighting**:
+  - [x] Updated `loadAnalyzedDiff` to compare the selected commit (`dataB`) against its immediate parent (`dataA`, using `commitHash^`).
+  - [x] This ensures "Modified" and "Added" indicators reflect changes introduced *within* that specific commit.
 - [x] **Visual Cues**:
   - [x] Update node/combo styles in the renderer to show modified/added/deleted states (amber/green/red indicators).
-  - [x] Add a "Diff View" in Node Details to show specific line changes when a dirty component is selected.
+  - [x] Components that did not exist yet in the historical snapshot are automatically omitted from the graph.
 
 ## Phase 4: Polish & Interaction (In Progress)
 
 - [x] **History UX**:
   - [x] Add "Current Working Tree" to the top of the history list for easier switching.
   - [x] Update "Changes" section to show files from the selected historical commit.
-- [x] **Visual Differentiation**:
-  - [x] Use different colors for "Added" (green) vs "Modified" (amber) in the graph.
-- [x] **Advanced Historical Mapping**:
-  - [x] **Line Shift Resilience**: Use `git diff <commit> HEAD` to calculate line offsets between historical diffs and the current graph.
-  - [x] **Future Components**: Identify and hide components that did not exist yet in the selected historical commit (by checking if their current range is entirely "added" in `git diff <commit> HEAD`).
+- [x] **Monorepo Historical Support**:
+  - [x] Implemented `subPath` scoping for historical analysis to support monorepo sub-projects in past commits.
+- [ ] **Position Persistence**: Borrow positions from the current working tree for historical nodes with matching IDs to maintain visual continuity.
 - [ ] **Auto-refresh**: Trigger Git status updates on file system changes.
-- [ ] **Performance**: Optimize diff parsing for large projects.
 
 ---
 
 ## Current Progress Summary
 
-- **Backend**: Fully implemented. `git-diff` updated to use `git show` for historical diffs.
-- **UI Architecture**: Refactored `GitPanel` to unify history and dynamic file lists.
-- **Core Logic**: `ComponentGraph` identifies "dirty" components, but historical mapping is currently sensitive to line shifts.
-- **Visualization**: Unchanged components are muted.
-- **Next Step**: Implement the "Future Component" detection logic to hide components that weren't born yet when viewing old commits.
+- **Backend**: `git-analyze-commit` supports `subPath` and uses `git archive` for clean historical analysis.
+- **UI Architecture**: `useGitStore` manages `analyzedDiffs` with unique keys for `commit-subpath` combinations.
+- **Core Logic**: `ComponentGraph` renders the "True Past" graph structure.
+- **Next Step**: Implement position borrowing logic to prevent historical graphs from "exploding" (resetting to layout defaults) when switching commits.
 
 ---
 

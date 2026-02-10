@@ -30,6 +30,7 @@ import type {
   GitCommit,
   GitFileDiff,
   GitDiffHunk,
+  PropData,
 } from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -675,14 +676,22 @@ ipcMain.handle(
 
 ipcMain.handle(
   "git-analyze-commit",
-  async (_, projectRoot: string, commitHash: string): Promise<JsonData> => {
+  async (
+    _,
+    projectRoot: string,
+    commitHash: string,
+    subPath?: string,
+  ): Promise<JsonData> => {
+    const cacheKey = subPath
+      ? `${commitHash}-${subPath.replace(/\//g, "_")}`
+      : commitHash;
     const commitCacheDir = path.join(
       projectRoot,
       ".react-map",
       "cache",
       "commits",
     );
-    const cachePath = path.join(commitCacheDir, `${commitHash}.json`);
+    const cachePath = path.join(commitCacheDir, `${cacheKey}.json`);
 
     if (fs.existsSync(cachePath)) {
       return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
@@ -706,7 +715,11 @@ ipcMain.handle(
         );
       });
 
-      const graph = analyzeProject(tempDir.name);
+      const analysisPath = subPath
+        ? path.join(tempDir.name, subPath)
+        : tempDir.name;
+
+      const graph = analyzeProject(analysisPath);
       fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
       return graph as unknown as JsonData;
     } catch (e) {
@@ -725,9 +738,35 @@ ipcMain.handle(
     const mapB = new Map<string, string>();
 
     const collectVars = (data: JsonData, map: Map<string, string>) => {
+      const traverseProps = (props: PropData[]) => {
+        for (const p of props) {
+          map.set(p.id, p.hash ?? "");
+          if (p.props) {
+            traverseProps(p.props);
+          }
+        }
+      };
+
       const traverse = (vars: Record<string, ComponentFileVar>) => {
         for (const v of Object.values(vars)) {
           map.set(v.id, v.hash ?? "");
+
+          if ("props" in v && v.props) {
+            traverseProps(v.props);
+          }
+
+          if ("effects" in v && v.effects) {
+            for (const effect of Object.values(v.effects)) {
+              map.set(effect.id, "");
+            }
+          }
+
+          if ("renders" in v && v.renders) {
+            for (const render of Object.values(v.renders)) {
+              map.set(render.id, "");
+            }
+          }
+
           if ("var" in v && v.var) {
             traverse(v.var);
           }
@@ -735,7 +774,7 @@ ipcMain.handle(
       };
 
       for (const file of Object.values(data.files)) {
-        traverse(file.var);
+        if (file.var) traverse(file.var);
       }
     };
 
@@ -744,26 +783,81 @@ ipcMain.handle(
 
     const added: string[] = [];
     const modified: string[] = [];
-    const deleted: string[] = [];
+    const deletedObjects: Record<
+      string,
+      ComponentFileVar | PropData | EffectInfo
+    > = {};
 
     for (const [id, hashB] of mapB.entries()) {
-      const hashA = mapA.get(id);
-      if (!hashA) {
+      if (!mapA.has(id)) {
         added.push(id);
-      } else if (hashA !== hashB) {
+      } else if (mapA.get(id) !== hashB) {
         modified.push(id);
       }
     }
 
+    const deletedIds = new Set<string>();
     for (const id of mapA.keys()) {
       if (!mapB.has(id)) {
-        deleted.push(id);
+        deletedIds.add(id);
       }
+    }
+
+    if (deletedIds.size > 0) {
+      const collectDeletedObjects = (data: JsonData, targetIds: Set<string>) => {
+        const traverseProps = (props: PropData[], filePath: string) => {
+          for (const p of props) {
+            if (targetIds.has(p.id)) {
+              p.file = filePath;
+              deletedObjects[p.id] = p;
+            }
+            if (p.props) {
+              traverseProps(p.props, filePath);
+            }
+          }
+        };
+
+        const traverse = (vars: Record<string, ComponentFileVar>) => {
+          for (const v of Object.values(vars)) {
+            if (targetIds.has(v.id)) {
+              deletedObjects[v.id] = v;
+            }
+            if ("props" in v && v.props) {
+              traverseProps(v.props, v.file);
+            }
+            if ("effects" in v && v.effects) {
+              for (const effect of Object.values(v.effects)) {
+                if (targetIds.has(effect.id)) {
+                  deletedObjects[effect.id] = {
+                    ...effect,
+                    file: v.file,
+                    kind: "effect",
+                  } as EffectInfo;
+                }
+              }
+            }
+            if ("var" in v && v.var) {
+              traverse(v.var);
+            }
+          }
+        };
+
+        for (const file of Object.values(data.files)) {
+          if (file.var) traverse(file.var);
+        }
+      };
+
+      collectDeletedObjects(dataA, deletedIds);
     }
 
     return {
       ...dataB,
-      diff: { added, modified, deleted },
+      diff: {
+        added,
+        modified,
+        deleted: Array.from(deletedIds),
+        deletedObjects,
+      },
     };
   },
 );

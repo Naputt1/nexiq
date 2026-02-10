@@ -262,7 +262,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "f1d9696ede2f9b35",
+          "hash": "698b5174f8ccba86",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -295,6 +295,7 @@
               "type": "data",
               "file": "/src/Hooks.ts",
               "hash": "3df4b3c4d3f01fd6",
+              "dependencies": {},
               "loc": {
                 "line": 4,
                 "column": 8
@@ -311,6 +312,7 @@
               "type": "function",
               "file": "/src/Hooks.ts",
               "hash": "cd90d2b7629628ff",
+              "dependencies": {},
               "loc": {
                 "line": 6,
                 "column": 8
@@ -347,10 +349,11 @@
           "states": [],
           "props": [
             {
-              "id": "64354b0e2ded07",
+              "id": "810bbf867cc78077:prop:initialValue",
               "name": "initialValue",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "9f760feb8a0dfe2e"
             }
           ],
           "hooks": [],
@@ -585,7 +588,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "4861bf670c0e5f6d",
+          "hash": "dd827ebe592e4cba",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -605,16 +608,18 @@
           "states": [],
           "props": [
             {
-              "id": "96050a97f611a0d5",
+              "id": "d0460c8cee978856:prop:title",
               "name": "title",
               "type": "string",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "b034ee30ef5f566a"
             },
             {
-              "id": "7afe194e60baa1f8",
+              "id": "d0460c8cee978856:prop:items",
               "name": "items",
               "type": "string[]",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "4456340d7d91f5de"
             }
           ],
           "hooks": [],
@@ -732,7 +737,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "3c4a2aa62b7b0ef3",
+          "hash": "b1f252b845ca8e6d",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -752,10 +757,11 @@
           "states": [],
           "props": [
             {
-              "id": "645990c74ae7d7da",
+              "id": "b5834af803ea9050:prop:children",
               "name": "children",
               "type": "React.ReactNode",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "77586bd2881e5282"
             }
           ],
           "hooks": [],

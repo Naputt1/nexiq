@@ -69,23 +69,39 @@ export function ProjectSidebar({
     <ShadcnSidebar collapsible="offcanvas" className="border-r border-border">
       <SidebarHeader className="border-b border-border p-0">
         <div className="flex items-center w-full">
-          <button 
+          <button
             onClick={() => setActiveTab("projects")}
             className={cn(
               "flex-1 flex items-center justify-center py-3 border-b-2 transition-colors",
-              activeTab === "projects" ? "border-primary bg-accent/30" : "border-transparent hover:bg-accent/10"
+              activeTab === "projects"
+                ? "border-primary bg-accent/30"
+                : "border-transparent hover:bg-accent/10",
             )}
           >
-            <Files className={cn("h-4 w-4", activeTab === "projects" ? "text-primary" : "text-muted-foreground")} />
+            <Files
+              className={cn(
+                "h-4 w-4",
+                activeTab === "projects"
+                  ? "text-primary"
+                  : "text-muted-foreground",
+              )}
+            />
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("git")}
             className={cn(
               "flex-1 flex items-center justify-center py-3 border-b-2 transition-colors",
-              activeTab === "git" ? "border-primary bg-accent/30" : "border-transparent hover:bg-accent/10"
+              activeTab === "git"
+                ? "border-primary bg-accent/30"
+                : "border-transparent hover:bg-accent/10",
             )}
           >
-            <GitBranch className={cn("h-4 w-4", activeTab === "git" ? "text-primary" : "text-muted-foreground")} />
+            <GitBranch
+              className={cn(
+                "h-4 w-4",
+                activeTab === "git" ? "text-primary" : "text-muted-foreground",
+              )}
+            />
           </button>
         </div>
       </SidebarHeader>

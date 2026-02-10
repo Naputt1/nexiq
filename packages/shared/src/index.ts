@@ -1,4 +1,9 @@
-import type { ComponentFile } from "./component.js";
+import type {
+  ComponentFile,
+  ComponentFileVar,
+  PropData,
+  EffectInfo,
+} from "./component.js";
 
 export type DataEdge = {
   from: string;
@@ -10,6 +15,7 @@ export type AnalyzedDiff = {
   added: string[];
   modified: string[];
   deleted: string[];
+  deletedObjects?: Record<string, ComponentFileVar | PropData | EffectInfo>;
 };
 
 export type JsonData = {

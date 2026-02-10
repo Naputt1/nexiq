@@ -19,7 +19,7 @@ export function App() {
       <Header />
       <div style={{ display: 'flex' }}>
         <Sidebar />
-        <Content count={count} doubledCount={doubledCount} onIncrement={increment} />
+        <Content count={count} doubledCount={doubledCount} onIncrement={increment} label="Counter v2" />
       </div>
       <Footer />
     </div>
@@ -30,9 +30,10 @@ function Header() {
   return <header>Header v1</header>;
 }
 
-function Content({ count, doubledCount, onIncrement }: any) {
+function Content({ count, doubledCount, onIncrement, label }: any) {
   return (
     <main>
+      <h3>{label}</h3>
       <p>Count: {count}</p>
       <p>Doubled: {doubledCount}</p>
       <button onClick={onIncrement}>Increment</button>

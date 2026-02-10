@@ -6,9 +6,19 @@ import { getDeterministicId } from "../utils/hash.js";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
+function getPropHash(prop: Omit<PropData, "id" | "hash">): string {
+  const { name, type, kind, props } = prop;
+  const base = `${name}:${type}:${kind}`;
+  if (!props || props.length === 0) return getDeterministicId(base);
+  return getDeterministicId(
+    `${base}[${props.map((p) => getPropHash(p)).join(",")}]`,
+  );
+}
+
 function resolveTypeMembers(
   typeLiteral: t.TSTypeLiteral | t.TSInterfaceBody,
   _scope: traverse.Scope,
+  componentId?: string,
 ): PropData[] {
   const props: PropData[] = [];
   const members =
@@ -18,13 +28,19 @@ function resolveTypeMembers(
 
   for (const member of members) {
     if (t.isTSPropertySignature(member) && t.isIdentifier(member.key)) {
-      props.push({
-        id: getDeterministicId(member.key.name),
+      const propBase = {
         name: member.key.name,
         type: generateFn(
           member.typeAnnotation?.typeAnnotation ?? t.anyTypeAnnotation(),
         ).code,
-        kind: "prop",
+        kind: "prop" as const,
+      };
+      props.push({
+        id: componentId
+          ? `${componentId}:prop:${propBase.name}`
+          : getDeterministicId(propBase.name),
+        ...propBase,
+        hash: getPropHash(propBase),
       });
     }
   }
@@ -35,11 +51,12 @@ function resolveType(
   typeAnnotation: t.TSType,
   scope: traverse.Scope,
   depth = 0,
+  componentId?: string,
 ): PropData[] {
   if (depth > 5) return []; // Prevent infinite recursion
 
   if (t.isTSTypeLiteral(typeAnnotation)) {
-    return resolveTypeMembers(typeAnnotation, scope);
+    return resolveTypeMembers(typeAnnotation, scope, componentId);
   }
 
   if (t.isTSTypeReference(typeAnnotation)) {
@@ -53,10 +70,11 @@ function resolveType(
             binding.path.node.typeAnnotation as t.TSType,
             scope,
             depth + 1,
+            componentId,
           );
         } else if (binding.path.isTSInterfaceDeclaration()) {
           // Interfaces might extend others, but let's handle basic body first
-          return resolveTypeMembers(binding.path.node.body, scope);
+          return resolveTypeMembers(binding.path.node.body, scope, componentId);
         }
       }
     }
@@ -65,7 +83,7 @@ function resolveType(
   return [];
 }
 
-function extractFromPattern(pattern: t.LVal): PropData[] {
+function extractFromPattern(pattern: t.LVal, componentId?: string): PropData[] {
   const props: PropData[] = [];
 
   if (t.isObjectPattern(pattern)) {
@@ -74,32 +92,51 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
         if (t.isIdentifier(property.key)) {
           const propName = property.key.name;
           if (t.isIdentifier(property.value)) {
-            props.push({
-              id: getDeterministicId(property.value.name),
+            const propBase = {
               name: property.value.name,
               type: "any",
-              kind: "prop",
+              kind: "prop" as const,
+            };
+            props.push({
+              id: componentId
+                ? `${componentId}:prop:${propBase.name}`
+                : getDeterministicId(propBase.name),
+              ...propBase,
+              hash: getPropHash(propBase),
             });
           } else if (
             t.isObjectPattern(property.value) ||
             t.isArrayPattern(property.value)
           ) {
-            props.push({
-              id: getDeterministicId(propName),
+            const nestedProps = extractFromPattern(property.value, componentId);
+            const propBase = {
               name: propName,
               type: "any",
-              kind: "prop",
-              props: extractFromPattern(property.value),
+              kind: "prop" as const,
+              props: nestedProps,
+            };
+            props.push({
+              id: componentId
+                ? `${componentId}:prop:${propBase.name}`
+                : getDeterministicId(propName),
+              ...propBase,
+              hash: getPropHash(propBase),
             });
           }
         }
       } else if (t.isRestElement(property)) {
         if (t.isIdentifier(property.argument)) {
-          props.push({
-            id: getDeterministicId(property.argument.name),
+          const propBase = {
             name: property.argument.name,
             type: "any",
-            kind: "spread",
+            kind: "spread" as const,
+          };
+          props.push({
+            id: componentId
+              ? `${componentId}:prop:${propBase.name}`
+              : getDeterministicId(propBase.name),
+            ...propBase,
+            hash: getPropHash(propBase),
           });
         }
       }
@@ -107,15 +144,21 @@ function extractFromPattern(pattern: t.LVal): PropData[] {
   } else if (t.isArrayPattern(pattern)) {
     for (const element of pattern.elements) {
       if (element && t.isLVal(element)) {
-        props.push(...extractFromPattern(element));
+        props.push(...extractFromPattern(element, componentId));
       }
     }
   } else if (t.isIdentifier(pattern)) {
-    props.push({
-      id: getDeterministicId(pattern.name),
+    const propBase = {
       name: pattern.name,
       type: "any",
-      kind: "prop",
+      kind: "prop" as const,
+    };
+    props.push({
+      id: componentId
+        ? `${componentId}:prop:${propBase.name}`
+        : getDeterministicId(pattern.name),
+      ...propBase,
+      hash: getPropHash(propBase),
     });
   }
 
@@ -127,6 +170,7 @@ export function getProps(
     t.ArrowFunctionExpression | t.FunctionExpression | t.FunctionDeclaration
   >,
   variableDeclaratorId?: t.Identifier,
+  componentId?: string,
 ): PropData[] {
   // 1. Check React.FC<Props> on the variable declarator (if provided)
   if (variableDeclaratorId) {
@@ -164,7 +208,12 @@ export function getProps(
           typeRef.typeParameters.params.length > 0
         ) {
           const propsType = typeRef.typeParameters.params[0];
-          const resolved = resolveType(propsType as t.TSType, path.scope);
+          const resolved = resolveType(
+            propsType as t.TSType,
+            path.scope,
+            0,
+            componentId,
+          );
           if (resolved.length > 0) return resolved;
         }
       }
@@ -178,7 +227,12 @@ export function getProps(
   if (propsParams.isIdentifier() || propsParams.isObjectPattern()) {
     const typeAnnotation = propsParams.node.typeAnnotation;
     if (t.isTSTypeAnnotation(typeAnnotation)) {
-      const resolved = resolveType(typeAnnotation.typeAnnotation, path.scope);
+      const resolved = resolveType(
+        typeAnnotation.typeAnnotation,
+        path.scope,
+        0,
+        componentId,
+      );
       if (resolved.length > 0) return resolved;
     }
   }
@@ -186,7 +240,7 @@ export function getProps(
   // 3. Fallback: Destructured names with 'any'
   // (Only if we failed to solve types above)
   if (propsParams.isObjectPattern() || propsParams.isIdentifier()) {
-    return extractFromPattern(propsParams.node as t.LVal);
+    return extractFromPattern(propsParams.node as t.LVal, componentId);
   }
 
   return [];

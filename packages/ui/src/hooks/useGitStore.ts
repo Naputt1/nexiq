@@ -23,6 +23,7 @@ interface GitState {
   loadAnalyzedDiff: (
     projectRoot: string,
     commitHash: string | null,
+    subPath?: string,
   ) => Promise<JsonData | undefined>;
 }
 
@@ -104,8 +105,14 @@ export const useGitStore = create<GitState>((set, get) => ({
     }
   },
 
-  loadAnalyzedDiff: async (projectRoot: string, commitHash: string | null) => {
-    const key = commitHash || "current";
+  loadAnalyzedDiff: async (
+    projectRoot: string,
+    commitHash: string | null,
+    subPath?: string,
+  ) => {
+    const key = subPath
+      ? `${commitHash || "current"}-${subPath}`
+      : commitHash || "current";
     const cached = get().analyzedDiffs[key];
     if (cached) return cached;
 
@@ -120,6 +127,7 @@ export const useGitStore = create<GitState>((set, get) => ({
           "git-analyze-commit",
           projectRoot,
           commitHash,
+          subPath,
         );
 
         // 2. Analyze parent commit (handle root commit)
@@ -129,6 +137,7 @@ export const useGitStore = create<GitState>((set, get) => ({
             "git-analyze-commit",
             projectRoot,
             parentHash,
+            subPath,
           );
         } catch {
           // Root commit, use empty graph as parent
@@ -139,6 +148,7 @@ export const useGitStore = create<GitState>((set, get) => ({
         dataB = (await window.ipcRenderer.invoke(
           "read-graph-data",
           projectRoot,
+          subPath ? `${projectRoot}/${subPath}` : undefined,
         ))!;
 
         // 2. HEAD commit
@@ -146,6 +156,7 @@ export const useGitStore = create<GitState>((set, get) => ({
           "git-analyze-commit",
           projectRoot,
           "HEAD",
+          subPath,
         );
       }
 
@@ -155,7 +166,7 @@ export const useGitStore = create<GitState>((set, get) => ({
         dataA,
         dataB,
       );
-      console.log("diffResult", diffResult);
+      
       set((state) => ({
         analyzedDiffs: { ...state.analyzedDiffs, [key]: diffResult },
       }));

@@ -78,6 +78,7 @@ declare global {
         channel: "git-analyze-commit",
         projectRoot: string,
         commitHash: string,
+        subPath?: string,
       ): Promise<JsonData>;
       invoke(
         channel: "analyze-diff",

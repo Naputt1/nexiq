@@ -15,7 +15,7 @@ import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
 import { getExpressionData, getType } from "./type/helper.js";
-import { getPattern } from "./pattern.js";
+import { getPattern, getVariableNameKey } from "./pattern.js";
 import { getDeterministicId } from "../utils/hash.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
@@ -78,6 +78,9 @@ export default function VariableDeclarator(
         | { type: "ref"; extra: { defaultData: PropDataType } },
     ) => {
       const pattern = getPattern(pId);
+      const nameKey = getVariableNameKey(pattern);
+      const componentId = getDeterministicId(nameKey);
+
       assert(pId.loc != null);
       const pLoc = {
         line: pId.loc.start.line,
@@ -152,6 +155,7 @@ export default function VariableDeclarator(
                       t.ArrowFunctionExpression | t.FunctionExpression
                     >,
                     pId,
+                    componentId,
                   )
                 : [],
             contexts: [],
@@ -234,6 +238,7 @@ export default function VariableDeclarator(
                       t.ArrowFunctionExpression | t.FunctionExpression
                     >,
                     pId,
+                    componentId,
                   ),
                   effects: {},
                   hooks: [],
