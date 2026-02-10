@@ -303,6 +303,8 @@ export class File {
     const variable = component.addMemo(memo);
     this.scopes.add(variable);
     this.locIdsMap.set(this.getLocalId(variable), variable);
+
+    return variable.id;
   }
 
   private __getEdgesRaw(variable: ComponentFileVarComponent): DataEdge[] {

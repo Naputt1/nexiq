@@ -143,43 +143,27 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "410654bba91fd376",
+          "hash": "3298528c305df2e7",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "b44dbf775f319a26": {
-              "id": "b44dbf775f319a26",
+            "c8f7739ce29d1ce0:state:count": {
+              "id": "c8f7739ce29d1ce0:state:count",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "count"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setCount"
-                    }
-                  }
-                ],
-                "raw": "[count, setCount]"
+                "type": "identifier",
+                "name": "count"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/Child.tsx",
-              "hash": "40922035c091c1ba",
+              "hash": "4ff21959d5a30c35",
               "dependencies": {},
               "loc": {
                 "line": 4,
-                "column": 8
+                "column": 9
               },
               "setter": "setCount"
             }
@@ -194,7 +178,9 @@
               "column": 21
             }
           },
-          "states": [],
+          "states": [
+            "c8f7739ce29d1ce0:state:count"
+          ],
           "props": [
             {
               "id": "c8f7739ce29d1ce0:prop:user",
@@ -224,7 +210,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "c8f7739ce29d1ce0:state:count",
                   "name": "count"
                 }
               ]
@@ -344,69 +330,44 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "4825bc19e5ff3754",
+          "hash": "cbc41aece5616c6f",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 9
           },
           "var": {
-            "2d309c94587b4929": {
-              "id": "2d309c94587b4929",
+            "720e9756d239e21b:state:count": {
+              "id": "720e9756d239e21b:state:count",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "count"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setCount"
-                    }
-                  }
-                ],
-                "raw": "[count, setCount]"
+                "type": "identifier",
+                "name": "count"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "40922035c091c1ba",
+              "hash": "4ff21959d5a30c35",
               "dependencies": {},
               "loc": {
                 "line": 13,
-                "column": 8
+                "column": 9
               },
               "setter": "setCount"
             },
-            "cc3b5266dd716fd5": {
-              "id": "cc3b5266dd716fd5",
+            "720e9756d239e21b:state:user": {
+              "id": "720e9756d239e21b:state:user",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "user"
-                    }
-                  }
-                ],
-                "raw": "[user]"
+                "type": "identifier",
+                "name": "user"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "a48e64502df258b7",
+              "hash": "6f54959d879ade2",
               "dependencies": {},
               "loc": {
                 "line": 14,
-                "column": 8
+                "column": 9
               }
             }
           },
@@ -421,8 +382,8 @@
             }
           },
           "states": [
-            "2d309c94587b4929",
-            "cc3b5266dd716fd5"
+            "720e9756d239e21b:state:count",
+            "720e9756d239e21b:state:user"
           ],
           "props": [],
           "hooks": [],
@@ -440,7 +401,8 @@
                     "type": "ref",
                     "refType": "named",
                     "name": "user"
-                  }
+                  },
+                  "valueId": "720e9756d239e21b:state:user"
                 }
               ],
               "isDependency": false,

@@ -17,9 +17,6 @@ import type {
   ComponentFileVarNormalData,
   Memo,
   RefData,
-  ComponentFileVarState,
-  MemoFileVarHook,
-  ComponentFileVarRef,
   VariableName,
 } from "shared";
 import { FileDB } from "./fileDB.js";
@@ -37,10 +34,6 @@ import {
 import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
 import { getDeterministicId } from "../utils/hash.js";
-import { getVariableComponentName } from "../variable.js";
-import { StateVariable } from "./variable/stateVariable.js";
-import { MemoVariable } from "./variable/memo.js";
-import { RefVariable } from "./variable/refVariable.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 
 type IResolveAddRender = {
@@ -222,99 +215,6 @@ export class ComponentDB {
     this.files.addVariableDependency(fileName, parent, dependency);
   }
 
-  public addState(
-    fileName: string,
-    variable: Omit<ComponentFileVarState, "id" | "kind" | "file" | "type">,
-    parentPath?: string[],
-  ) {
-    const name = getVariableComponentName(
-      {
-        loc: variable.loc,
-      } as any,
-      variable.loc,
-    );
-
-    if (name) {
-      this.comAddState(name.name, name.loc, fileName, variable);
-    }
-
-    const file = this.files.get(fileName);
-    return this.files.addVariable(
-      fileName,
-      new StateVariable(
-        {
-          id: getDeterministicId(getVariableNameKey(variable.name)),
-          ...variable,
-        },
-        file,
-      ),
-      parentPath,
-    );
-  }
-
-  public addMemo(
-    fileName: string,
-    variable: Omit<
-      MemoFileVarHook,
-      "id" | "kind" | "var" | "components" | "type" | "file"
-    >,
-    parentPath?: string[],
-  ) {
-    const parent = getVariableComponentName(
-      {
-        loc: variable.loc,
-      } as any,
-      variable.loc,
-    );
-
-    if (parent != null) {
-      this.comAddMemo(parent.loc, fileName, variable);
-    }
-
-    const file = this.files.get(fileName);
-    return this.files.addVariable(
-      fileName,
-      new MemoVariable(
-        {
-          id: getDeterministicId(getVariableNameKey(variable.name)),
-          ...variable,
-        },
-        file,
-      ),
-      parentPath,
-    );
-  }
-
-  public addRef(
-    fileName: string,
-    variable: Omit<ComponentFileVarRef, "id" | "kind" | "file" | "type">,
-    parentPath?: string[],
-  ) {
-    const parent = getVariableComponentName(
-      {
-        loc: variable.loc,
-      } as any,
-      variable.loc,
-    );
-
-    if (parent != null) {
-      this.comAddRef(parent.loc, fileName, variable);
-    }
-
-    const file = this.files.get(fileName);
-    return this.files.addVariable(
-      fileName,
-      new RefVariable(
-        {
-          id: getDeterministicId(getVariableNameKey(variable.name)),
-          ...variable,
-        },
-        file,
-      ),
-      parentPath,
-    );
-  }
-
   public comAddState(
     name: string,
     loc: VariableLoc,
@@ -325,7 +225,7 @@ export class ComponentDB {
 
     assert(component != null, "Component not found");
 
-    component.addState(state);
+    return component.addState(state);
   }
 
   public comAddRef(
@@ -337,7 +237,7 @@ export class ComponentDB {
 
     assert(component != null, "Component not found");
 
-    component.addRef(ref);
+    return component.addRef(ref).id;
   }
 
   public comAddMemo(
@@ -345,7 +245,7 @@ export class ComponentDB {
     fileName: string,
     memo: Omit<Memo, "id"> & { name: VariableName },
   ) {
-    this.files.addMemo(fileName, loc, memo);
+    return this.files.addMemo(fileName, loc, memo);
   }
 
   private _getExportId(

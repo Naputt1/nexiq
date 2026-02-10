@@ -49,7 +49,7 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public addState(state: Omit<State, "id"> & { name: VariableName }) {
+  public addState(state: Omit<State, "id"> & { name: VariableName }): string {
     const nameKey = getVariableNameKey(state.name);
     const id = `${this.id}:state:${nameKey}`;
 
@@ -65,6 +65,8 @@ export abstract class ReactFunctionVariable<
     );
 
     this.states.add(id);
+
+    return id;
   }
 
   private __resolveReactDefaultDataProp(

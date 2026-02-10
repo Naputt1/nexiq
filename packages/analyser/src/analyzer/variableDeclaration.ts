@@ -17,6 +17,7 @@ import { getProps } from "./propExtractor.js";
 import { getExpressionData, getType } from "./type/helper.js";
 import { getPattern, getVariableNameKey } from "./pattern.js";
 import { getDeterministicId } from "../utils/hash.js";
+import { getVariableComponentName } from "../variable.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -74,9 +75,12 @@ export default function VariableDeclarator(
       pParentId?: string,
       special?:
         | { type: "state"; extra: { setter: string | undefined } }
-        | { type: "memo"; extra: { scope: VariableScope; reactDeps: ReactDependency[] } }
+        | {
+            type: "memo";
+            extra: { scope: VariableScope; reactDeps: ReactDependency[] };
+          }
         | { type: "ref"; extra: { defaultData: PropDataType } },
-    ) => {
+    ): string | undefined => {
       const pattern = getPattern(pId);
       const nameKey = getVariableNameKey(pattern);
       const componentId = getDeterministicId(nameKey);
@@ -87,188 +91,283 @@ export default function VariableDeclarator(
         column: pId.loc.start.column,
       };
 
+      let currentId: string | undefined;
+
       if (special) {
         if (special.type === "state") {
-          return componentDB.addState(
-            fileName,
-            {
+          const name = getVariableComponentName(nodePath);
+
+          if (name) {
+            currentId = componentDB.comAddState(name.name, name.loc, fileName, {
               name: pattern,
               loc: pLoc,
               parentId: pParentId,
-              dependencies: {},
               ...special.extra,
-            },
-            pParentId ? undefined : getParentPath(nodePath),
-          );
+            });
+          }
         } else if (special.type === "memo") {
-          return componentDB.addMemo(
-            fileName,
-            {
+          const parent = getVariableComponentName(nodePath);
+          if (parent != null) {
+            currentId = componentDB.comAddMemo(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
               parentId: pParentId,
-              dependencies: {},
               ...special.extra,
-            },
-            pParentId ? undefined : getParentPath(nodePath),
-          );
+            });
+          }
         } else if (special.type === "ref") {
-          return componentDB.addRef(
-            fileName,
-            {
+          const parent = getVariableComponentName(nodePath);
+          if (parent != null) {
+            currentId = componentDB.comAddRef(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
               parentId: pParentId,
-              dependencies: {},
               ...special.extra,
-            },
-            pParentId ? undefined : getParentPath(nodePath),
-          );
+            });
+          }
         }
       }
 
-      if (t.isIdentifier(pId)) {
-        const name = pId.name;
+      if (currentId == null) {
+        if (t.isIdentifier(pId)) {
+          const name = pId.name;
 
-        if (
-          init &&
-          (init.type === "JSXElement" ||
-            (!(
-              init.type !== "ArrowFunctionExpression" &&
-              init.type !== "FunctionExpression"
-            ) &&
-              returnJSX(init)))
-        ) {
-          const parentPath = getParentPath(nodePath);
-          const component: Omit<
-            ComponentFileVarComponent,
-            "id" | "kind" | "states" | "hash" | "file"
-          > = {
-            name: pattern,
-            type: "function",
-            componentType: "Function",
-            hooks: [],
-            props:
-              t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)
-                ? getProps(
-                    nodePath.get("init") as traverse.NodePath<
-                      t.ArrowFunctionExpression | t.FunctionExpression
-                    >,
-                    pId,
-                    componentId,
-                  )
-                : [],
-            contexts: [],
-            renders: {},
-            dependencies: {},
-            var: {},
-            effects: {},
-            loc,
-            scope,
-            parentId: pParentId,
-          };
+          if (
+            init &&
+            (init.type === "JSXElement" ||
+              (!(
+                init.type !== "ArrowFunctionExpression" &&
+                init.type !== "FunctionExpression"
+              ) &&
+                returnJSX(init)))
+          ) {
+            const parentPath = getParentPath(nodePath);
+            const component: Omit<
+              ComponentFileVarComponent,
+              "id" | "kind" | "states" | "hash" | "file"
+            > = {
+              name: pattern,
+              type: "function",
+              componentType: "Function",
+              hooks: [],
+              props:
+                t.isArrowFunctionExpression(init) ||
+                t.isFunctionExpression(init)
+                  ? getProps(
+                      nodePath.get("init") as traverse.NodePath<
+                        t.ArrowFunctionExpression | t.FunctionExpression
+                      >,
+                      pId,
+                      componentId,
+                    )
+                  : [],
+              contexts: [],
+              renders: {},
+              dependencies: {},
+              var: {},
+              effects: {},
+              loc,
+              scope,
+              parentId: pParentId,
+            };
 
-          if (pId.typeAnnotation?.type === "TSTypeAnnotation") {
-            const propType = getType(pId.typeAnnotation.typeAnnotation);
+            if (pId.typeAnnotation?.type === "TSTypeAnnotation") {
+              const propType = getType(pId.typeAnnotation.typeAnnotation);
 
-            if (
-              propType.type === "ref" &&
-              propType.refType === "qualified" &&
-              propType.names?.length == 2 &&
-              propType.names[0] == "React" &&
-              propType.names[1] == "FC" &&
-              propType.params?.length == 1
-            ) {
-              component.propType = propType.params[0]!;
-            }
-          }
-
-          if (component.propType == null) {
-            if (
-              nodePath.node.init?.type === "ArrowFunctionExpression" ||
-              nodePath.node.init?.type === "FunctionExpression"
-            ) {
               if (
-                (nodePath.node.init?.type === "ArrowFunctionExpression" ||
-                  nodePath.node.init?.type === "FunctionExpression") &&
-                nodePath.node.init.params.length > 0 &&
-                nodePath.node.init.params[0]!.type === "ObjectPattern" &&
-                nodePath.node.init.params[0]!.typeAnnotation
+                propType.type === "ref" &&
+                propType.refType === "qualified" &&
+                propType.names?.length == 2 &&
+                propType.names[0] == "React" &&
+                propType.names[1] == "FC" &&
+                propType.params?.length == 1
               ) {
-                assert(
-                  nodePath.node.init.params[0]!.typeAnnotation.type ===
-                    "TSTypeAnnotation",
-                );
-                component.propType = getType(
-                  nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation,
-                );
+                component.propType = propType.params[0]!;
               }
             }
-          }
 
-          return componentDB.addComponent(fileName, component, parentPath);
-        } else {
-          if (nodePath.scope.block.type === "Program") {
-            if (
-              init?.type === "ArrowFunctionExpression" ||
-              init?.type === "FunctionExpression"
-            ) {
-              assert(init.body.loc != null, "Function body loc not found");
+            if (component.propType == null) {
+              if (
+                nodePath.node.init?.type === "ArrowFunctionExpression" ||
+                nodePath.node.init?.type === "FunctionExpression"
+              ) {
+                if (
+                  (nodePath.node.init?.type === "ArrowFunctionExpression" ||
+                    nodePath.node.init?.type === "FunctionExpression") &&
+                  nodePath.node.init.params.length > 0 &&
+                  nodePath.node.init.params[0]!.type === "ObjectPattern" &&
+                  nodePath.node.init.params[0]!.typeAnnotation
+                ) {
+                  assert(
+                    nodePath.node.init.params[0]!.typeAnnotation.type ===
+                      "TSTypeAnnotation",
+                  );
+                  component.propType = getType(
+                    nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation,
+                  );
+                }
+              }
+            }
 
-              const scope = {
-                start: {
-                  line: init.body.loc.start.line,
-                  column: init.body.loc.start.column,
-                },
-                end: {
-                  line: init.body.loc.end.line,
-                  column: init.body.loc.end.column,
-                },
-              };
+            currentId = componentDB.addComponent(
+              fileName,
+              component,
+              parentPath,
+            );
+          } else {
+            if (nodePath.scope.block.type === "Program") {
+              if (
+                init?.type === "ArrowFunctionExpression" ||
+                init?.type === "FunctionExpression"
+              ) {
+                assert(init.body.loc != null, "Function body loc not found");
 
-              if (isHook(name)) {
-                return componentDB.addHook(fileName, {
-                  name: pattern,
-                  type: "function",
-                  dependencies: {},
-                  loc,
-                  scope,
-                  props: getProps(
-                    nodePath.get("init") as traverse.NodePath<
-                      t.ArrowFunctionExpression | t.FunctionExpression
-                    >,
-                    pId,
-                    componentId,
-                  ),
-                  effects: {},
-                  hooks: [],
-                  parentId: pParentId,
-                } as Omit<
-                  ComponentFileVarHook,
-                  | "kind"
-                  | "id"
-                  | "var"
-                  | "components"
-                  | "states"
-                  | "hash"
-                  | "file"
-                >);
+                const scope = {
+                  start: {
+                    line: init.body.loc.start.line,
+                    column: init.body.loc.start.column,
+                  },
+                  end: {
+                    line: init.body.loc.end.line,
+                    column: init.body.loc.end.column,
+                  },
+                };
+
+                if (isHook(name)) {
+                  currentId = componentDB.addHook(fileName, {
+                    name: pattern,
+                    type: "function",
+                    dependencies: {},
+                    loc,
+                    scope,
+                    props: getProps(
+                      nodePath.get("init") as traverse.NodePath<
+                        t.ArrowFunctionExpression | t.FunctionExpression
+                      >,
+                      pId,
+                      componentId,
+                    ),
+                    effects: {},
+                    hooks: [],
+                    parentId: pParentId,
+                  } as Omit<
+                    ComponentFileVarHook,
+                    | "kind"
+                    | "id"
+                    | "var"
+                    | "components"
+                    | "states"
+                    | "hash"
+                    | "file"
+                  >);
+                } else {
+                  currentId = componentDB.addVariable(fileName, {
+                    name: pattern,
+                    type: "function",
+                    dependencies: {},
+                    loc,
+                    scope,
+                    parentId: pParentId,
+                  } as Omit<
+                    ComponentFileVarNormalFunction,
+                    "kind" | "file" | "id" | "var" | "components" | "hash"
+                  >);
+                }
               } else {
-                return componentDB.addVariable(fileName, {
+                const dependencies: Record<string, ComponentFileVarDependency> =
+                  {};
+                if (init?.type === "NewExpression") {
+                  if (init.callee.type === "Identifier") {
+                    const id = getDeterministicId(init.callee.name);
+                    dependencies[id] = {
+                      id,
+                      name: init.callee.name,
+                    };
+                  }
+                } else if (init?.type === "Identifier") {
+                  const id = getDeterministicId(init.name);
+                  dependencies[id] = {
+                    id,
+                    name: init.name,
+                  };
+                }
+
+                currentId = componentDB.addVariable(fileName, {
                   name: pattern,
-                  type: "function",
-                  dependencies: {},
+                  type: "data",
+                  dependencies,
                   loc,
-                  scope,
                   parentId: pParentId,
                 } as Omit<
-                  ComponentFileVarNormalFunction,
+                  ComponentFileVarNormalData,
                   "kind" | "file" | "id" | "var" | "components" | "hash"
                 >);
               }
-            }
+            } else if (init?.type === "ArrowFunctionExpression") {
+              if (
+                nodePath.scope.block.type === "FunctionDeclaration" &&
+                nodePath.scope.block.id?.type === "Identifier"
+              ) {
+                const parentPath = getParentPath(nodePath);
 
-            const dependencies: Record<string, ComponentFileVarDependency> = {};
+                currentId = componentDB.addVariable(
+                  fileName,
+                  {
+                    name: pattern,
+                    dependencies: {},
+                    type: "data",
+                    loc,
+                    parentId: pParentId,
+                  } as Omit<
+                    ComponentFileVarNormalData,
+                    "kind" | "file" | "id" | "var" | "components" | "hash"
+                  >,
+                  parentPath,
+                );
+              } else if (
+                nodePath.scope.block.type === "ArrowFunctionExpression"
+              ) {
+                const parentPath = getParentPath(nodePath);
+                currentId = componentDB.addVariable(
+                  fileName,
+                  {
+                    name: pattern,
+                    dependencies: {},
+                    type: "function",
+                    loc,
+                    scope,
+                    parentId: pParentId,
+                  } as Omit<
+                    ComponentFileVarNormalFunction,
+                    "kind" | "file" | "id" | "var" | "components" | "hash"
+                  >,
+                  parentPath,
+                );
+              }
+            } else {
+              // Normal data variable not in Program block
+              const parentPath = getParentPath(nodePath);
+              currentId = componentDB.addVariable(
+                fileName,
+                {
+                  name: pattern,
+                  dependencies: {},
+                  type: "data",
+                  loc,
+                  parentId: pParentId,
+                } as Omit<
+                  ComponentFileVarNormalData,
+                  "kind" | "file" | "id" | "var" | "components" | "hash"
+                >,
+                parentPath,
+              );
+            }
+          }
+        } else if (t.isObjectPattern(pId) || t.isArrayPattern(pId)) {
+          const parentPath = getParentPath(nodePath);
+
+          const dependencies: Record<string, ComponentFileVarDependency> = {};
+          if (pParentId == null) {
             if (init?.type === "NewExpression") {
               if (init.callee.type === "Identifier") {
                 const id = getDeterministicId(init.callee.name);
@@ -284,111 +383,23 @@ export default function VariableDeclarator(
                 name: init.name,
               };
             }
+          }
 
-            return componentDB.addVariable(fileName, {
+          currentId = componentDB.addVariable(
+            fileName,
+            {
               name: pattern,
               type: "data",
               dependencies,
-              loc,
+              loc: pLoc,
               parentId: pParentId,
-            } as Omit<
-              ComponentFileVarNormalData,
-              "kind" | "file" | "id" | "var" | "components" | "hash"
-            >);
-          } else if (init?.type === "ArrowFunctionExpression") {
-            if (
-              nodePath.scope.block.type === "FunctionDeclaration" &&
-              nodePath.scope.block.id?.type === "Identifier"
-            ) {
-              const parentPath = getParentPath(nodePath);
-
-              return componentDB.addVariable(
-                fileName,
-                {
-                  name: pattern,
-                  dependencies: {},
-                  type: "data",
-                  loc,
-                  parentId: pParentId,
-                } as Omit<
-                  ComponentFileVarNormalData,
-                  "kind" | "file" | "id" | "var" | "components" | "hash"
-                >,
-                parentPath,
-              );
-            } else if (
-              nodePath.scope.block.type === "ArrowFunctionExpression"
-            ) {
-              const parentPath = getParentPath(nodePath);
-              return componentDB.addVariable(
-                fileName,
-                {
-                  name: pattern,
-                  dependencies: {},
-                  type: "function",
-                  loc,
-                  scope,
-                  parentId: pParentId,
-                } as Omit<
-                  ComponentFileVarNormalFunction,
-                  "kind" | "file" | "id" | "var" | "components" | "hash"
-                >,
-                parentPath,
-              );
-            }
-          } else {
-            // Normal data variable not in Program block
-            const parentPath = getParentPath(nodePath);
-            return componentDB.addVariable(
-              fileName,
-              {
-                name: pattern,
-                dependencies: {},
-                type: "data",
-                loc,
-                parentId: pParentId,
-              } as Omit<
-                ComponentFileVarNormalData,
-                "kind" | "file" | "id" | "var" | "components" | "hash"
-              >,
-              parentPath,
-            );
-          }
+            },
+            parentPath,
+          );
         }
-      } else if (t.isObjectPattern(pId) || t.isArrayPattern(pId)) {
-        const parentPath = getParentPath(nodePath);
+      }
 
-        const dependencies: Record<string, ComponentFileVarDependency> = {};
-        if (pParentId == null) {
-          if (init?.type === "NewExpression") {
-            if (init.callee.type === "Identifier") {
-              const id = getDeterministicId(init.callee.name);
-              dependencies[id] = {
-                id,
-                name: init.callee.name,
-              };
-            }
-          } else if (init?.type === "Identifier") {
-            const id = getDeterministicId(init.name);
-            dependencies[id] = {
-              id,
-              name: init.name,
-            };
-          }
-        }
-
-        const currentId = componentDB.addVariable(
-          fileName,
-          {
-            name: pattern,
-            type: "data",
-            dependencies,
-            loc: pLoc,
-            parentId: pParentId,
-          },
-          parentPath,
-        );
-
+      if (currentId) {
         if (t.isObjectPattern(pId)) {
           for (const prop of pId.properties) {
             if (t.isObjectProperty(prop)) {
@@ -397,15 +408,15 @@ export default function VariableDeclarator(
               processPattern(prop.argument as t.LVal, currentId);
             }
           }
-        } else {
+        } else if (t.isArrayPattern(pId)) {
           for (const element of pId.elements) {
             if (element) {
               processPattern(element as t.LVal, currentId);
             }
           }
         }
-        return currentId;
       }
+      return currentId;
     };
 
     if (t.isCallExpression(init)) {
@@ -430,6 +441,14 @@ export default function VariableDeclarator(
             if (t.isIdentifier(setterVar)) {
               setterName = setterVar.name;
             }
+          }
+
+          if (t.isArrayPattern(id) && id.elements.length > 0) {
+            processPattern(id.elements[0] as t.LVal, undefined, {
+              type: "state",
+              extra: { setter: setterName },
+            });
+            return;
           }
 
           processPattern(id as t.LVal, undefined, {
