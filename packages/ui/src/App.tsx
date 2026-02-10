@@ -3,32 +3,26 @@ import "./App.css";
 import ComponentGraph from "./componentGraph";
 import { SetupFlow } from "./components/setup-flow/SetupFlow";
 import { useProjectStore } from "./hooks/use-project-store";
-import { useEffect, useState } from "react";
 
 function App() {
-  const { projectRoot: storedProjectRoot, setProjectRoot: setStoredProjectRoot, _hasHydrated } = useProjectStore();
+  const { projectRoot: storedProjectRoot, _hasHydrated } = useProjectStore();
   const [searchParams] = useSearchParams();
   const urlProjectPath = searchParams.get("projectPath");
   const isEmpty = searchParams.get("empty") === "true";
-  
+
   // Use project root from URL if available, otherwise from store (if not explicitly empty)
   const projectRoot = urlProjectPath || (isEmpty ? null : storedProjectRoot);
 
-  useEffect(() => {
-    if (_hasHydrated && !projectRoot && !urlProjectPath && !isEmpty) {
-      // Try to recover from Electron store if local storage is empty and no URL param and not explicitly empty
-      window.ipcRenderer.invoke("get-last-project").then((lastRoot) => {
-        if (lastRoot) {
-          setStoredProjectRoot(lastRoot);
-        }
-      });
-    }
-  }, [_hasHydrated, projectRoot, urlProjectPath, isEmpty, setStoredProjectRoot]);
+  const handleProjectComplete = async (path: string) => {
+    // Save to main process first
+    const wasFocusedElsewhere = await window.ipcRenderer.invoke(
+      "set-last-project",
+      path,
+    );
+    if (wasFocusedElsewhere) return;
 
-  const handleProjectComplete = (path: string) => {
-    // Update URL to include the new project path, effectively removing 'empty' flag if it was there
+    // Then update URL to include the new project path
     window.location.search = `?projectPath=${encodeURIComponent(path)}`;
-    window.ipcRenderer.invoke("set-last-project", path);
   };
 
   if (!_hasHydrated) {

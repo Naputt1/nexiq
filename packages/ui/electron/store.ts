@@ -6,7 +6,7 @@ const DATA_FILE = "recent-projects.json";
 
 interface StoreData {
   recentProjects: string[];
-  lastProjectRoot: string | null;
+  openProjects: string[];
 }
 
 export class Store {
@@ -23,10 +23,10 @@ export class Store {
       const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       return {
         recentProjects: parsed.recentProjects || [],
-        lastProjectRoot: parsed.lastProjectRoot || null,
+        openProjects: parsed.openProjects || [],
       };
     } catch {
-      return { recentProjects: [], lastProjectRoot: null };
+      return { recentProjects: [], openProjects: [] };
     }
   }
 
@@ -42,12 +42,12 @@ export class Store {
     return this.data.recentProjects;
   }
 
-  getLastProject(): string | null {
-    return this.data.lastProjectRoot;
+  getOpenProjects(): string[] {
+    return this.data.openProjects;
   }
 
-  setLastProject(projectPath: string | null) {
-    this.data.lastProjectRoot = projectPath;
+  setOpenProjects(projects: string[]) {
+    this.data.openProjects = projects;
     this.save();
   }
 

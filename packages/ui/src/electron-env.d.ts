@@ -42,7 +42,10 @@ declare global {
         projectRoot: string,
         analysisPath?: string,
       ): Promise<JsonData | null>;
-      invoke(channel: "read-state", projectRoot: string): Promise<AppStateData | null>;
+      invoke(
+        channel: "read-state",
+        projectRoot: string,
+      ): Promise<AppStateData | null>;
       invoke(
         channel: "save-state",
         projectRoot: string,
@@ -91,7 +94,10 @@ declare global {
       ): () => void;
       send(channel: string, ...args: unknown[]): void;
       invoke(channel: "get-last-project"): Promise<string | null>;
-      invoke(channel: "set-last-project", path: string | null): Promise<void>;
+      invoke(
+        channel: "set-last-project",
+        path: string | null,
+      ): Promise<boolean>;
       invoke(
         channel: "update-graph-position",
         projectRoot: string,

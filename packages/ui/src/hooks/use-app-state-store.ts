@@ -5,6 +5,8 @@ interface AppState {
   centeredItemId: string | null;
   selectedId: string | null;
   isSidebarOpen: boolean;
+  activeTab: "projects" | "git";
+  selectedCommit: string | null;
   isLoaded: boolean;
   viewport: { x: number; y: number; zoom: number } | null;
 
@@ -12,6 +14,8 @@ interface AppState {
   setCenteredItemId: (id: string | null) => void;
   setSelectedId: (id: string | null) => void;
   setIsSidebarOpen: (open: boolean) => void;
+  setActiveTab: (tab: "projects" | "git") => void;
+  setSelectedCommit: (commit: string | null) => void;
   setViewport: (
     viewport: { x: number; y: number; zoom: number } | null,
   ) => void;
@@ -27,6 +31,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   centeredItemId: null,
   selectedId: null,
   isSidebarOpen: false,
+  activeTab: "projects",
+  selectedCommit: null,
   isLoaded: false,
   viewport: null,
 
@@ -34,6 +40,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   setCenteredItemId: (id) => set({ centeredItemId: id }),
   setSelectedId: (id) => set({ selectedId: id }),
   setIsSidebarOpen: (open) => set({ isSidebarOpen: open }),
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  setSelectedCommit: (commit) => set({ selectedCommit: commit }),
   setViewport: (viewport) => set({ viewport }),
 
   reset: () =>
@@ -41,6 +49,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       selectedSubProject: null,
       centeredItemId: null,
       selectedId: null,
+      activeTab: "projects",
+      selectedCommit: null,
       viewport: null,
       isLoaded: false,
     }),
@@ -54,6 +64,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         centeredItemId: state.centeredItemId || null,
         selectedId: state.selectedId || null,
         isSidebarOpen: state.isSidebarOpen ?? false,
+        activeTab: state.activeTab || "projects",
+        selectedCommit: state.selectedCommit || null,
         viewport: state.viewport || null,
         isLoaded: true,
       });
@@ -64,6 +76,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         centeredItemId: null,
         selectedId: null,
         isSidebarOpen: false,
+        activeTab: "projects",
+        selectedCommit: null,
         viewport: null,
         isLoaded: true,
       });
@@ -76,6 +90,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       centeredItemId,
       selectedId,
       isSidebarOpen,
+      activeTab,
+      selectedCommit,
       viewport,
       isLoaded,
     } = get();
@@ -103,6 +119,8 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       centeredItemId,
       selectedId,
       isSidebarOpen,
+      activeTab,
+      selectedCommit,
       viewport,
     });
   },

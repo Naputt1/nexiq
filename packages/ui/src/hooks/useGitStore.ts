@@ -4,7 +4,6 @@ import type { GitStatus, GitCommit, GitFileDiff, JsonData } from "shared";
 interface GitState {
   status: GitStatus | null;
   history: GitCommit[];
-  selectedCommit: string | null; // null means "Current Changes"
   diffs: Record<string, GitFileDiff[]>;
   analyzedDiffs: Record<string, JsonData>;
   isLoading: boolean;
@@ -13,7 +12,6 @@ interface GitState {
   // Actions
   refreshStatus: (projectRoot: string) => Promise<void>;
   loadHistory: (projectRoot: string, limit?: number) => Promise<void>;
-  setSelectedCommit: (commitHash: string | null) => void;
   stageFiles: (projectRoot: string, files: string[]) => Promise<void>;
   unstageFiles: (projectRoot: string, files: string[]) => Promise<void>;
   loadDiff: (
@@ -30,7 +28,6 @@ interface GitState {
 export const useGitStore = create<GitState>((set, get) => ({
   status: null,
   history: [],
-  selectedCommit: null,
   diffs: {},
   analyzedDiffs: {},
   isLoading: false,
@@ -62,10 +59,6 @@ export const useGitStore = create<GitState>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
-  },
-
-  setSelectedCommit: (commitHash: string | null) => {
-    set({ selectedCommit: commitHash });
   },
 
   stageFiles: async (projectRoot: string, files: string[]) => {
