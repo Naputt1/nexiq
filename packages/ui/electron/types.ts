@@ -39,5 +39,7 @@ export interface AppStateData {
   centeredItemId: string | null;
   selectedId: string | null;
   isSidebarOpen: boolean;
+  activeTab: "projects" | "git";
+  selectedCommit: string | null;
   viewport?: { x: number; y: number; zoom: number } | null;
 }

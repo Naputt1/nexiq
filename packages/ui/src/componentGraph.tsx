@@ -54,6 +54,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const setCenteredItemId = useAppStateStore((s) => s.setCenteredItemId);
   const isSidebarOpen = useAppStateStore((s) => s.isSidebarOpen);
   const setIsSidebarOpen = useAppStateStore((s) => s.setIsSidebarOpen);
+  const selectedCommit = useAppStateStore((s) => s.selectedCommit);
   const setViewport = useAppStateStore((s) => s.setViewport);
   const loadState = useAppStateStore((s) => s.loadState);
   const saveState = useAppStateStore((s) => s.saveState);
@@ -61,7 +62,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const isLoaded = useAppStateStore((s) => s.isLoaded);
 
   const status = useGitStore((s) => s.status);
-  const selectedCommit = useGitStore((s) => s.selectedCommit);
   const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
 
   const subPath = useMemo(() => {
@@ -929,6 +929,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     [saveState],
   );
 
+  const activeTab = useAppStateStore((s) => s.activeTab);
+
   useEffect(() => {
     debouncedSaveState(projectPath);
   }, [
@@ -936,6 +938,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     selectedSubProject,
     centeredItemId,
     isSidebarOpen,
+    activeTab,
+    selectedCommit,
     debouncedSaveState,
   ]);
 

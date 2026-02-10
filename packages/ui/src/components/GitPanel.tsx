@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
+import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { Button } from "./ui/button";
 import {
   GitBranch,
@@ -24,16 +25,16 @@ export function GitPanel({ projectRoot, onLocateFile }: GitPanelProps) {
   const {
     status,
     history,
-    selectedCommit,
     diffs,
     isLoading,
     refreshStatus,
     loadHistory,
-    setSelectedCommit,
     stageFiles,
     unstageFiles,
     loadDiff,
   } = useGitStore();
+
+  const { selectedCommit, setSelectedCommit } = useAppStateStore();
 
   const [historyLimit, setHistoryLimit] = useState(50);
   const [expandedSections, setExpandedSections] = useState({
