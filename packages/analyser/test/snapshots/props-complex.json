@@ -105,15 +105,15 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "db0802e42564c5f5",
+          "hash": "a34532d1cae65da6",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 13
           },
           "var": {
-            "e1bc39fdda726416": {
-              "id": "e1bc39fdda726416",
+            "475f220157c1b8f9:ref:refX": {
+              "id": "475f220157c1b8f9:ref:refX",
               "name": {
                 "type": "identifier",
                 "name": "refX"
@@ -121,7 +121,7 @@
               "kind": "ref",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "eb618bf64c9b6b13",
+              "hash": "250b274ff4df6745",
               "dependencies": {},
               "loc": {
                 "line": 17,
@@ -130,39 +130,23 @@
               "defaultData": {
                 "type": "ref",
                 "refType": "named",
-                "name": "x"
+                "name": "dfab3f6e914f770:prop:x"
               }
             },
-            "6e7a5b9fc2c93ec9": {
-              "id": "6e7a5b9fc2c93ec9",
+            "475f220157c1b8f9:state:stateX": {
+              "id": "475f220157c1b8f9:state:stateX",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "stateX"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setStateX"
-                    }
-                  }
-                ],
-                "raw": "[stateX, setStateX]"
+                "type": "identifier",
+                "name": "stateX"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "34a5cb78731c8725",
+              "hash": "aba898b5733368ff",
               "dependencies": {},
               "loc": {
                 "line": 18,
-                "column": 8
+                "column": 9
               },
               "setter": "setStateX"
             }
@@ -177,7 +161,9 @@
               "column": 25
             }
           },
-          "states": [],
+          "states": [
+            "475f220157c1b8f9:state:stateX"
+          ],
           "props": [
             {
               "id": "dfab3f6e914f770:prop:a",
@@ -336,7 +322,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "475f220157c1b8f9:state:stateX",
                   "name": "stateX"
                 }
               ]
@@ -359,7 +345,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "e1bc39fdda726416",
+                  "id": "475f220157c1b8f9:ref:refX",
                   "name": "refX"
                 }
               ]

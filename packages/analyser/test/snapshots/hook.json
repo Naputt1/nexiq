@@ -53,15 +53,15 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "522559567613007e",
+          "hash": "5b6bdbc8e6a93712",
           "dependencies": {},
           "loc": {
             "line": 4,
             "column": 6
           },
           "var": {
-            "60dfb2912df438f1": {
-              "id": "60dfb2912df438f1",
+            "4f14950571afe084:ref:refData": {
+              "id": "4f14950571afe084:ref:refData",
               "name": {
                 "type": "identifier",
                 "name": "refData"
@@ -83,36 +83,20 @@
                 }
               }
             },
-            "91c125531e1d4936": {
-              "id": "91c125531e1d4936",
+            "4f14950571afe084:state:state": {
+              "id": "4f14950571afe084:state:state",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "state"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setState"
-                    }
-                  }
-                ],
-                "raw": "[state, setState]"
+                "type": "identifier",
+                "name": "state"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/effectt.tsx",
-              "hash": "49a579ed34668ec0",
+              "hash": "148a19f06b6ace3b",
               "dependencies": {},
               "loc": {
                 "line": 6,
-                "column": 8
+                "column": 9
               },
               "setter": "setState"
             },
@@ -185,8 +169,8 @@
               },
               "components": {}
             },
-            "17e9b506751b2310": {
-              "id": "17e9b506751b2310",
+            "4f14950571afe084:memo:memoVal": {
+              "id": "4f14950571afe084:memo:memoVal",
               "name": {
                 "type": "identifier",
                 "name": "memoVal"
@@ -194,7 +178,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/effectt.tsx",
-              "hash": "ab55bbd1cc024cc",
+              "hash": "404455ff07ccb1e1",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -213,7 +197,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "4f14950571afe084:state:state",
                   "name": "state"
                 }
               ]
@@ -229,7 +213,9 @@
               "column": 12
             }
           },
-          "states": [],
+          "states": [
+            "4f14950571afe084:state:state"
+          ],
           "props": [],
           "hooks": [
             "810bbf867cc78077"
@@ -253,15 +239,15 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "4f14950571afe084:state:state",
                   "name": "state"
                 },
                 {
-                  "id": "17e9b506751b2310",
+                  "id": "4f14950571afe084:memo:memoVal",
                   "name": "memoVal"
                 },
                 {
-                  "id": "60dfb2912df438f1",
+                  "id": "4f14950571afe084:ref:refData",
                   "name": "refData"
                 }
               ]
@@ -341,43 +327,27 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "e868115e296769aa",
+          "hash": "6270f98119bb37bb",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "e85efdf475297ae9": {
-              "id": "e85efdf475297ae9",
+            "810bbf867cc78077:state:value": {
+              "id": "810bbf867cc78077:state:value",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "value"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setValue"
-                    }
-                  }
-                ],
-                "raw": "[value, setValue]"
+                "type": "identifier",
+                "name": "value"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
-              "hash": "3df4b3c4d3f01fd6",
+              "hash": "4fb1ccc8ed5eb856",
               "dependencies": {},
               "loc": {
                 "line": 4,
-                "column": 8
+                "column": 9
               },
               "setter": "setValue"
             }
@@ -392,7 +362,9 @@
               "column": 29
             }
           },
-          "states": [],
+          "states": [
+            "810bbf867cc78077:state:value"
+          ],
           "props": [
             {
               "id": "810bbf867cc78077:prop:initialValue",
@@ -422,7 +394,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 }
               ]
