@@ -804,30 +804,38 @@ ipcMain.handle(
     }
 
     if (deletedIds.size > 0) {
-      const collectDeletedObjects = (data: JsonData, targetIds: Set<string>) => {
-        const traverseProps = (props: PropData[], filePath: string) => {
+      const collectDeletedObjects = (
+        data: JsonData,
+        targetIds: Set<string>,
+      ) => {
+        const traverseProps = (props: PropData[], v: ComponentFileVar) => {
           for (const p of props) {
             if (targetIds.has(p.id)) {
-              p.file = filePath;
-              deletedObjects[p.id] = p;
+              p.file = v.file;
+              deletedObjects[`${v.id}:${p.id}`] = p;
             }
             if (p.props) {
-              traverseProps(p.props, filePath);
+              traverseProps(p.props, v);
             }
           }
         };
 
-        const traverse = (vars: Record<string, ComponentFileVar>) => {
+        const traverse = (
+          vars: Record<string, ComponentFileVar>,
+          parent?: string,
+        ) => {
           for (const v of Object.values(vars)) {
             if (targetIds.has(v.id)) {
-              deletedObjects[v.id] = v;
+              const id = `${parent ? `${parent}:` : ""}${v.id}`;
+              deletedObjects[id] = v;
             }
             if ("props" in v && v.props) {
-              traverseProps(v.props, v.file);
+              traverseProps(v.props, v);
             }
             if ("effects" in v && v.effects) {
               for (const effect of Object.values(v.effects)) {
                 if (targetIds.has(effect.id)) {
+                  //TODO: refactor to use same id format as other vars/props
                   deletedObjects[effect.id] = {
                     ...effect,
                     file: v.file,
@@ -837,7 +845,7 @@ ipcMain.handle(
               }
             }
             if ("var" in v && v.var) {
-              traverse(v.var);
+              traverse(v.var, v.id);
             }
           }
         };
