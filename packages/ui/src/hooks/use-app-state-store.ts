@@ -19,6 +19,7 @@ interface AppState {
   // Persistence helpers
   loadState: (projectRoot: string) => Promise<void>;
   saveState: (projectRoot: string) => Promise<void>;
+  reset: () => void;
 }
 
 export const useAppStateStore = create<AppState>((set, get) => ({
@@ -34,6 +35,15 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   setSelectedId: (id) => set({ selectedId: id }),
   setIsSidebarOpen: (open) => set({ isSidebarOpen: open }),
   setViewport: (viewport) => set({ viewport }),
+
+  reset: () =>
+    set({
+      selectedSubProject: null,
+      centeredItemId: null,
+      selectedId: null,
+      viewport: null,
+      isLoaded: false,
+    }),
 
   loadState: async (projectRoot: string) => {
     set({ isLoaded: false });
@@ -70,6 +80,23 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       isLoaded,
     } = get();
     if (!isLoaded) return; // Don't save until we've loaded
+
+    // Defensive check: ensure selectedSubProject is actually part of this projectRoot
+    if (
+      selectedSubProject &&
+      selectedSubProject !== projectRoot &&
+      !selectedSubProject.startsWith(projectRoot + "/") &&
+      !selectedSubProject.startsWith(projectRoot + "\\")
+    ) {
+      console.warn(
+        "Prevented saving stale subProject from different projectRoot",
+        {
+          selectedSubProject,
+          projectRoot,
+        },
+      );
+      return;
+    }
 
     await window.ipcRenderer.invoke("save-state", projectRoot, {
       selectedSubProject,
