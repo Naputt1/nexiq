@@ -1,4 +1,12 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  Menu,
+  type MenuItemConstructorOptions,
+  type IpcMainInvokeEvent,
+} from "electron";
 import fs from "node:fs";
 import { store } from "./store";
 import fg from "fast-glob";
@@ -13,6 +21,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const tmp = require("tmp");
 import { simpleGit } from "simple-git";
+import { analyzeProject } from "analyser";
 
 import type {
   AppStateData,
@@ -55,24 +64,25 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, "public")
   : RENDERER_DIST;
 
-let win: BrowserWindow | null;
-
-function createWindow() {
-  win = new BrowserWindow({
+function createWindow(projectPath?: string, forceEmpty: boolean = false) {
+  const window = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC!, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
   });
 
-  win.webContents.openDevTools();
+  window.webContents.openDevTools();
 
   // Test active push message to Renderer-process.
-  win.webContents.on("did-finish-load", () => {
-    win?.webContents.send("main-process-message", new Date().toLocaleString());
+  window.webContents.on("did-finish-load", () => {
+    window.webContents.send(
+      "main-process-message",
+      new Date().toLocaleString(),
+    );
   });
 
-  win.webContents.on("before-input-event", (event, input) => {
+  window.webContents.on("before-input-event", (event, input) => {
     const key = input.key.toLowerCase();
     const ctrlOrCmd = input.control || input.meta;
     const shift = input.shift;
@@ -81,7 +91,7 @@ function createWindow() {
     if (ctrlOrCmd && shift && key === "r") {
       event.preventDefault();
       console.log("Reloading the whole app");
-      win!.webContents.reload();
+      window.webContents.reload();
       return;
     }
 
@@ -89,16 +99,145 @@ function createWindow() {
     if (ctrlOrCmd && !shift && key === "r") {
       event.preventDefault();
       console.log("Reloading current project");
-      win?.webContents.send("reload-project");
+      window.webContents.send("reload-project");
+    }
+
+    // Ctrl + Shift + N → new window
+    if (ctrlOrCmd && shift && key === "n") {
+      event.preventDefault();
+      createWindow(undefined, true);
     }
   });
 
   if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL);
+    let url = VITE_DEV_SERVER_URL;
+    const params = new URLSearchParams();
+    if (projectPath) {
+      params.append("projectPath", projectPath);
+    } else if (forceEmpty) {
+      params.append("empty", "true");
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+    window.loadURL(url);
   } else {
-    // win.loadFile('dist/index.html')
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    const indexPath = path.join(RENDERER_DIST, "index.html");
+    const params = new URLSearchParams();
+    if (projectPath) {
+      params.append("projectPath", projectPath);
+    } else if (forceEmpty) {
+      params.append("empty", "true");
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      window.loadURL(`file://${indexPath}?${queryString}`);
+    } else {
+      window.loadFile(indexPath);
+    }
   }
+
+  return window;
+}
+
+function createMenu() {
+  const isMac = process.platform === "darwin";
+
+  const template: MenuItemConstructorOptions[] = [
+    ...(isMac
+      ? ([
+          {
+            label: app.name,
+            submenu: [
+              { role: "about" },
+              { type: "separator" },
+              { role: "services" },
+              { type: "separator" },
+              { role: "hide" },
+              { role: "hideOthers" },
+              { role: "unhide" },
+              { type: "separator" },
+              { role: "quit" },
+            ] as MenuItemConstructorOptions[],
+          },
+        ] as MenuItemConstructorOptions[])
+      : []),
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "New Window",
+          accelerator: "CmdOrCtrl+Shift+N",
+          click: () => {
+            createWindow(undefined, true);
+          },
+        },
+        { type: "separator" },
+        {
+          label: "Open Folder...",
+          accelerator: "CmdOrCtrl+O",
+          click: async () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            const result = await dialog.showOpenDialog(focusedWindow!, {
+              properties: ["openDirectory"],
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+              createWindow(result.filePaths[0]);
+            }
+          },
+        },
+        { type: "separator" },
+        isMac ? { role: "close" } : { role: "quit" },
+      ] as MenuItemConstructorOptions[],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ] as MenuItemConstructorOptions[],
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "toggleDevTools" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+      ] as MenuItemConstructorOptions[],
+    },
+    {
+      label: "Window",
+      submenu: [
+        { role: "minimize" },
+        { role: "zoom" },
+        ...(isMac
+          ? ([
+              { type: "separator" },
+              { role: "front" },
+              { type: "separator" },
+              { role: "window" },
+            ] as MenuItemConstructorOptions[])
+          : ([{ role: "close" }] as MenuItemConstructorOptions[])),
+      ] as MenuItemConstructorOptions[],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -107,7 +246,6 @@ function createWindow() {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-    win = null;
   }
 });
 
@@ -119,9 +257,30 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createMenu();
 
-ipcMain.handle("run-cli", async (_, command: string) => {
+  if (process.platform === "darwin") {
+    const dockMenu = Menu.buildFromTemplate([
+      {
+        label: "New Window",
+        click() {
+          createWindow(undefined, true);
+        },
+      },
+    ]);
+    app.dock?.setMenu(dockMenu);
+  }
+
+  const lastProject = store.getLastProject();
+  if (lastProject && fs.existsSync(lastProject)) {
+    createWindow(lastProject);
+  } else {
+    createWindow();
+  }
+});
+
+ipcMain.handle("run-cli", async (_: IpcMainInvokeEvent, command: string) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) reject(error.message);
@@ -131,7 +290,7 @@ ipcMain.handle("run-cli", async (_, command: string) => {
 });
 
 let firstOpen = true;
-ipcMain.handle("open-vscode", async (_, path: string) => {
+ipcMain.handle("open-vscode", async (_: IpcMainInvokeEvent, path: string) => {
   return new Promise((resolve, reject) => {
     let cmd = `code -g ${path}`;
 
@@ -151,7 +310,8 @@ ipcMain.handle("open-vscode", async (_, path: string) => {
   });
 });
 
-ipcMain.handle("select-directory", async () => {
+ipcMain.handle("select-directory", async (event: IpcMainInvokeEvent) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
   const result = await dialog.showOpenDialog(win!, {
     properties: ["openDirectory"],
   });
@@ -169,124 +329,130 @@ ipcMain.handle("get-last-project", () => {
   return store.getLastProject();
 });
 
-ipcMain.handle("set-last-project", (_, path: string | null) => {
-  store.setLastProject(path);
-});
+ipcMain.handle(
+  "set-last-project",
+  (_: IpcMainInvokeEvent, path: string | null) => {
+    store.setLastProject(path);
+  },
+);
 
-ipcMain.handle("check-project-status", async (_, directoryPath: string) => {
-  const status: ProjectStatus = {
-    hasConfig: false,
-    isMonorepo: false,
-    projectType: "unknown",
-    config: null,
-    subProjects: [],
-  };
+ipcMain.handle(
+  "check-project-status",
+  async (_: IpcMainInvokeEvent, directoryPath: string) => {
+    const status: ProjectStatus = {
+      hasConfig: false,
+      isMonorepo: false,
+      projectType: "unknown",
+      config: null,
+      subProjects: [],
+    };
 
-  try {
-    const configPath = path.join(directoryPath, "react.map.config.json");
-    if (fs.existsSync(configPath)) {
-      status.hasConfig = true;
-      try {
-        status.config = JSON.parse(
-          fs.readFileSync(configPath, "utf-8"),
-        ) as ReactMapConfig;
-      } catch (e) {
-        console.error("Error reading config", e);
-      }
-    }
-
-    const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
-    // const lernaJson = path.join(directoryPath, "lerna.json"); // TODO: support lerna if needed
-    const packageJsonPath = path.join(directoryPath, "package.json");
-
-    let workspacePatterns: string[] = [];
-
-    if (fs.existsSync(pnpmWorkspace)) {
-      status.isMonorepo = true;
-      try {
-        const doc = yaml.load(
-          fs.readFileSync(pnpmWorkspace, "utf-8"),
-        ) as PnpmWorkspace;
-        if (doc && doc.packages && Array.isArray(doc.packages)) {
-          workspacePatterns = doc.packages;
+    try {
+      const configPath = path.join(directoryPath, "react.map.config.json");
+      if (fs.existsSync(configPath)) {
+        status.hasConfig = true;
+        try {
+          status.config = JSON.parse(
+            fs.readFileSync(configPath, "utf-8"),
+          ) as ReactMapConfig;
+        } catch (e) {
+          console.error("Error reading config", e);
         }
-      } catch (e) {
-        console.error("Error reading pnpm-workspace.yaml", e);
       }
-    } else if (fs.existsSync(packageJsonPath)) {
-      try {
-        const pkg = JSON.parse(
-          fs.readFileSync(packageJsonPath, "utf-8"),
-        ) as PackageJson;
-        if (pkg.workspaces) {
-          status.isMonorepo = true;
-          if (Array.isArray(pkg.workspaces)) {
-            workspacePatterns = pkg.workspaces;
-          } else if (
-            pkg.workspaces.packages &&
-            Array.isArray(pkg.workspaces.packages)
-          ) {
-            workspacePatterns = pkg.workspaces.packages;
+
+      const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
+      // const lernaJson = path.join(directoryPath, "lerna.json"); // TODO: support lerna if needed
+      const packageJsonPath = path.join(directoryPath, "package.json");
+
+      let workspacePatterns: string[] = [];
+
+      if (fs.existsSync(pnpmWorkspace)) {
+        status.isMonorepo = true;
+        try {
+          const doc = yaml.load(
+            fs.readFileSync(pnpmWorkspace, "utf-8"),
+          ) as PnpmWorkspace;
+          if (doc && doc.packages && Array.isArray(doc.packages)) {
+            workspacePatterns = doc.packages;
           }
+        } catch (e) {
+          console.error("Error reading pnpm-workspace.yaml", e);
         }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (status.isMonorepo && workspacePatterns.length > 0) {
-      // Resolve packages
-      try {
-        const entries = await fg(
-          workspacePatterns.map((p) =>
-            p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
-          ),
-          {
-            cwd: directoryPath,
-            ignore: ["**/node_modules/**"],
-            absolute: true,
-          },
-        );
-
-        for (const entry of entries) {
-          try {
-            const pkg = JSON.parse(
-              fs.readFileSync(entry, "utf-8"),
-            ) as PackageJson;
-            // We only care about packages that look like apps (vite/next) or have main/module?
-            // For now, list all.
-            status.subProjects.push({
-              name: pkg.name || path.basename(path.dirname(entry)),
-              path: path.dirname(entry),
-            });
-          } catch {
-            // ignore
+      } else if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(
+            fs.readFileSync(packageJsonPath, "utf-8"),
+          ) as PackageJson;
+          if (pkg.workspaces) {
+            status.isMonorepo = true;
+            if (Array.isArray(pkg.workspaces)) {
+              workspacePatterns = pkg.workspaces;
+            } else if (
+              pkg.workspaces.packages &&
+              Array.isArray(pkg.workspaces.packages)
+            ) {
+              workspacePatterns = pkg.workspaces.packages;
+            }
           }
+        } catch {
+          // ignore
         }
-      } catch (e) {
-        console.error("Error resolving workspaces", e);
       }
+
+      if (status.isMonorepo && workspacePatterns.length > 0) {
+        // Resolve packages
+        try {
+          const entries = await fg(
+            workspacePatterns.map((p) =>
+              p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
+            ),
+            {
+              cwd: directoryPath,
+              ignore: ["**/node_modules/**"],
+              absolute: true,
+            },
+          );
+
+          for (const entry of entries) {
+            try {
+              const pkg = JSON.parse(
+                fs.readFileSync(entry, "utf-8"),
+              ) as PackageJson;
+              // We only care about packages that look like apps (vite/next) or have main/module?
+              // For now, list all.
+              status.subProjects.push({
+                name: pkg.name || path.basename(path.dirname(entry)),
+                path: path.dirname(entry),
+              });
+            } catch {
+              // ignore
+            }
+          }
+        } catch (e) {
+          console.error("Error resolving workspaces", e);
+        }
+      }
+
+      if (
+        fs.existsSync(path.join(directoryPath, "vite.config.ts")) ||
+        fs.existsSync(path.join(directoryPath, "vite.config.js"))
+      ) {
+        status.projectType = "vite";
+      } else if (fs.existsSync(path.join(directoryPath, "next.config.js"))) {
+        status.projectType = "next";
+      }
+    } catch (error) {
+      console.error("Error checking project status:", error);
     }
 
-    if (
-      fs.existsSync(path.join(directoryPath, "vite.config.ts")) ||
-      fs.existsSync(path.join(directoryPath, "vite.config.js"))
-    ) {
-      status.projectType = "vite";
-    } else if (fs.existsSync(path.join(directoryPath, "next.config.js"))) {
-      status.projectType = "next";
-    }
-  } catch (error) {
-    console.error("Error checking project status:", error);
-  }
-
-  return status;
-});
+    return status;
+  },
+);
 
 ipcMain.handle(
   "save-project-config",
   async (
-    _,
+    _: IpcMainInvokeEvent,
     {
       config,
       directoryPath,
@@ -310,19 +476,15 @@ ipcMain.handle(
   },
 );
 
-let currentProject: string | null = null;
-
-ipcMain.handle("set-project", (_, path: string) => {
-  currentProject = path;
-});
-
-ipcMain.handle("get-project", () => {
-  return currentProject;
+ipcMain.handle("set-project", (_: IpcMainInvokeEvent, _path: string) => {
+  // We can store it per-window if needed, but for now we'll rely on the renderer
+  // and query params for the initial path.
+  // If we need to track current project in main, we should use a Map<windowId, path>
 });
 
 ipcMain.handle(
   "git-status",
-  async (_, projectRoot: string): Promise<GitStatus> => {
+  async (_: IpcMainInvokeEvent, projectRoot: string): Promise<GitStatus> => {
     const git = simpleGit(projectRoot);
     const status = await git.status();
 
@@ -342,7 +504,11 @@ ipcMain.handle(
 
 ipcMain.handle(
   "git-log",
-  async (_, projectRoot: string, limit: number = 50): Promise<GitCommit[]> => {
+  async (
+    _: IpcMainInvokeEvent,
+    projectRoot: string,
+    limit: number = 50,
+  ): Promise<GitCommit[]> => {
     const git = simpleGit(projectRoot);
     const log = await git.log({ maxCount: limit });
 
@@ -356,14 +522,17 @@ ipcMain.handle(
   },
 );
 
-ipcMain.handle("git-stage", async (_, projectRoot: string, files: string[]) => {
-  const git = simpleGit(projectRoot);
-  await git.add(files);
-});
+ipcMain.handle(
+  "git-stage",
+  async (_: IpcMainInvokeEvent, projectRoot: string, files: string[]) => {
+    const git = simpleGit(projectRoot);
+    await git.add(files);
+  },
+);
 
 ipcMain.handle(
   "git-unstage",
-  async (_, projectRoot: string, files: string[]) => {
+  async (_: IpcMainInvokeEvent, projectRoot: string, files: string[]) => {
     const git = simpleGit(projectRoot);
     await git.reset(["HEAD", ...files]);
   },
@@ -372,7 +541,7 @@ ipcMain.handle(
 ipcMain.handle(
   "git-diff",
   async (
-    _,
+    _: IpcMainInvokeEvent,
     projectRoot: string,
     options: {
       file?: string;
@@ -487,8 +656,6 @@ function parseRawDiff(rawDiff: string, filterFile?: string): GitFileDiff[] {
 
   return files;
 }
-
-import { analyzeProject } from "analyser";
 
 async function performAnalysis(analysisPath: string, projectPath: string) {
   const targetPath = analysisPath;
@@ -654,7 +821,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
 
 ipcMain.handle(
   "analyze-project",
-  async (_, analysisPath: string, projectPath: string) => {
+  async (_: IpcMainInvokeEvent, analysisPath: string, projectPath: string) => {
     await performAnalysis(analysisPath, projectPath);
     return path.basename(analysisPath);
   },
@@ -662,8 +829,8 @@ ipcMain.handle(
 
 ipcMain.handle(
   "read-graph-data",
-  async (_, projectRoot: string, analysisPath?: string) => {
-    const targetPath = analysisPath || currentProject || projectRoot;
+  async (_: IpcMainInvokeEvent, projectRoot: string, analysisPath?: string) => {
+    const targetPath = analysisPath || projectRoot;
     if (!targetPath) return null;
 
     const name = path.basename(targetPath);
@@ -688,7 +855,7 @@ ipcMain.handle(
 ipcMain.handle(
   "git-analyze-commit",
   async (
-    _,
+    _: IpcMainInvokeEvent,
     projectRoot: string,
     commitHash: string,
     subPath?: string,
@@ -752,7 +919,11 @@ ipcMain.handle(
 
 ipcMain.handle(
   "analyze-diff",
-  async (_, dataA: JsonData, dataB: JsonData): Promise<JsonData> => {
+  async (
+    _: IpcMainInvokeEvent,
+    dataA: JsonData,
+    dataB: JsonData,
+  ): Promise<JsonData> => {
     const mapA = new Map<string, string>(); // id -> hash
     const mapB = new Map<string, string>();
 
@@ -884,21 +1055,24 @@ ipcMain.handle(
   },
 );
 
-ipcMain.handle("read-state", async (_, projectRoot: string) => {
-  const statePath = path.join(projectRoot, ".react-map", "state.json");
-  if (fs.existsSync(statePath)) {
-    try {
-      return JSON.parse(fs.readFileSync(statePath, "utf-8"));
-    } catch (e) {
-      console.error("Error reading state.json", e);
+ipcMain.handle(
+  "read-state",
+  async (_: IpcMainInvokeEvent, projectRoot: string) => {
+    const statePath = path.join(projectRoot, ".react-map", "state.json");
+    if (fs.existsSync(statePath)) {
+      try {
+        return JSON.parse(fs.readFileSync(statePath, "utf-8"));
+      } catch (e) {
+        console.error("Error reading state.json", e);
+      }
     }
-  }
-  return null;
-});
+    return null;
+  },
+);
 
 ipcMain.handle(
   "save-state",
-  async (_, projectRoot: string, state: AppStateData) => {
+  async (_: IpcMainInvokeEvent, projectRoot: string, state: AppStateData) => {
     try {
       const dotDir = path.join(projectRoot, ".react-map");
       if (!fs.existsSync(dotDir)) {
@@ -917,7 +1091,7 @@ ipcMain.handle(
 ipcMain.handle(
   "update-graph-position",
   async (
-    _,
+    _: IpcMainInvokeEvent,
     projectRoot: string,
     analysisPath: string,
     positions: Record<string, { x: number; y: number; radius?: number }>,
