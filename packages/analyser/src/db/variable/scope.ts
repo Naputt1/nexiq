@@ -1,6 +1,7 @@
 import type { ComponentFileVar } from "shared";
 import type { Variable } from "./variable.js";
 import { isBaseFunctionVariable } from "./type.js";
+import { getVariableNameKey } from "../../analyzer/pattern.js";
 
 export class Scope {
   private variables = new Map<string, Variable>();
@@ -15,7 +16,8 @@ export class Scope {
   public initPrevIds(vars: Record<string, ComponentFileVar>) {
     for (const v of Object.values(vars)) {
       if (v.name && v.id) {
-        this.prevIds.set(v.name, v.id);
+        const nameKey = getVariableNameKey(v.name);
+        this.prevIds.set(nameKey, v.id);
       }
     }
   }
@@ -26,13 +28,16 @@ export class Scope {
 
   public add(v: Variable) {
     this.variables.set(v.id, v);
-    this.nameToVariable.set(v.name, v);
+    const nameKey = getVariableNameKey(v.name);
+    this.nameToVariable.set(nameKey, v);
     if (this.owner && isBaseFunctionVariable(this.owner)) {
       v.parent = this.owner;
     }
     if (isBaseFunctionVariable(v)) {
-      v.var.parent = this;
-      v.var.owner = v;
+      if (v.var) {
+        v.var.parent = this;
+        v.var.owner = v;
+      }
     }
   }
 

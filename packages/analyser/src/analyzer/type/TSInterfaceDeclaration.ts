@@ -5,12 +5,14 @@ import assert from "assert";
 import type { ComponentDB } from "../../db/componentDB.js";
 import type { TypeDataLiteralBody } from "shared";
 import { getType, getMember } from "./helper.js";
+import { getPattern } from "../pattern.js";
 
 export default function TSInterfaceDeclaration(
   componentDB: ComponentDB,
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.TSInterfaceDeclaration> {
   return (nodePath) => {
+    const pattern = getPattern(nodePath.node.id);
     const name = nodePath.node.id.name;
     assert(nodePath.node.id.loc != null);
 
@@ -32,7 +34,7 @@ export default function TSInterfaceDeclaration(
 
     const typeData: Omit<TypeDataDeclareInterface, "id"> = {
       type: "interface",
-      name,
+      name: pattern,
       body: bodies,
       loc,
     };

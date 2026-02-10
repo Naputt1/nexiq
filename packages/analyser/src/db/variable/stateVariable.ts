@@ -3,7 +3,6 @@ import type { File } from "../fileDB.js";
 import { ReactVariable } from "./reactVariable.js";
 
 export class StateVariable extends ReactVariable<"data", "state"> {
-  value: string;
   setter: string | undefined;
 
   constructor(
@@ -12,7 +11,6 @@ export class StateVariable extends ReactVariable<"data", "state"> {
   ) {
     super({ ...options, kind: "state", type: "data" }, file);
 
-    this.value = options.value;
     this.setter = options.setter;
   }
 
@@ -26,7 +24,6 @@ export class StateVariable extends ReactVariable<"data", "state"> {
     const data: ComponentFileVarState = {
       ...super.getBaseData(),
       kind: "state",
-      value: this.value,
     };
 
     if (this.setter) {
@@ -39,7 +36,6 @@ export class StateVariable extends ReactVariable<"data", "state"> {
   protected getDataInternal() {
     return {
       name: this.name,
-      value: this.value,
       setter: this.setter,
     };
   }

@@ -25,20 +25,20 @@ export type ComponentFileExport = {
 
 export interface State extends ComponentLoc {
   id: string;
-  value: string;
-  setter?: string;
+  setter?: string | undefined;
+  parentId?: string | undefined;
 }
 
 export interface RefData extends ComponentLoc {
   id: string;
-  value: string;
   defaultData: PropDataType;
+  parentId?: string | undefined;
 }
 
 export interface Memo extends ComponentLoc, ReactDependencies {
   id: string;
-  value: string;
   scope: VariableScope;
+  parentId?: string | undefined;
 }
 
 export type ComponentInfoRenderDependency = {
@@ -119,12 +119,31 @@ export type ReactVarKind =
   | ReactWithCallbackVar;
 export type VarKind = "normal" | ReactVarKind;
 
+export type VariableNamePattern =
+  | { type: "identifier"; name: string }
+  | { type: "object"; properties: VariableObjectProperty[]; raw: string }
+  | { type: "array"; elements: VariableArrayElement[]; raw: string }
+  | { type: "rest"; argument: VariableNamePattern };
+
+export type VariableObjectProperty = {
+  key: string;
+  value: VariableNamePattern;
+};
+
+export type VariableArrayElement =
+  | { type: "element"; value: VariableNamePattern }
+  | { type: "rest"; argument: VariableNamePattern }
+  | null;
+
+export type VariableName = VariableNamePattern;
+
 interface ComponentFileVarBaseType<TType extends VarType> {
   id: string;
-  name: string;
+  name: VariableName;
   type: TType;
   file: string;
   hash?: string;
+  parentId?: string | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
   ui?:
     | {
@@ -137,13 +156,13 @@ interface ComponentFileVarBaseType<TType extends VarType> {
     | undefined;
 }
 
-export type ComponentFileVarBase<
+export interface ComponentFileVarBase<
   TType extends VarType,
   TKind extends VarKind,
-> = ComponentLoc &
-  ComponentFileVarBaseType<TType> & {
-    kind: TKind;
-  };
+> extends ComponentLoc,
+    ComponentFileVarBaseType<TType> {
+  kind: TKind;
+}
 
 export interface ComponentFileVarBaseTypeFunction<
   TKind extends VarKind,
@@ -190,8 +209,7 @@ export type ComponentFileVarComponent =
     };
 
 export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
-  value: string;
-  setter?: string;
+  setter?: string | undefined;
 };
 
 export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {

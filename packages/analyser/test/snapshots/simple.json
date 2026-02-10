@@ -129,11 +129,14 @@
       "var": {
         "c8f7739ce29d1ce0": {
           "id": "c8f7739ce29d1ce0",
-          "name": "Child",
+          "name": {
+            "type": "identifier",
+            "name": "Child"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "1914f3d1420ed863",
+          "hash": "afae6e7414e51942",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -226,7 +229,10 @@
         "5d1e03cf45c78c05": {
           "id": "5d1e03cf45c78c05",
           "type": "type",
-          "name": "User",
+          "name": {
+            "type": "identifier",
+            "name": "User"
+          },
           "body": {
             "type": "type-literal",
             "members": [
@@ -248,11 +254,14 @@
       "var": {
         "fa7e21af27b37eb": {
           "id": "fa7e21af27b37eb",
-          "name": "UserContext",
+          "name": {
+            "type": "identifier",
+            "name": "UserContext"
+          },
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
-          "hash": "b64e40d43274b9e8",
+          "hash": "be256203eddd07cf",
           "dependencies": {},
           "loc": {
             "line": 10,
@@ -262,45 +271,75 @@
         },
         "720e9756d239e21b": {
           "id": "720e9756d239e21b",
-          "name": "App",
+          "name": {
+            "type": "identifier",
+            "name": "App"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "1c47673d7c049e76",
+          "hash": "3310756108f60fcd",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 9
           },
           "var": {
-            "720e9756d239e21b:state:count": {
-              "id": "720e9756d239e21b:state:count",
-              "name": "count",
+            "2d309c94587b4929": {
+              "id": "2d309c94587b4929",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "count"
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setCount"
+                    }
+                  }
+                ],
+                "raw": "[count, setCount]"
+              },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "d55caad445841293",
-              "dependencies": {},
+              "hash": "40922035c091c1ba",
               "loc": {
                 "line": 13,
                 "column": 8
               },
-              "value": "count",
               "setter": "setCount"
             },
-            "720e9756d239e21b:state:user": {
-              "id": "720e9756d239e21b:state:user",
-              "name": "user",
+            "cc3b5266dd716fd5": {
+              "id": "cc3b5266dd716fd5",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "user"
+                    }
+                  }
+                ],
+                "raw": "[user]"
+              },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "30cfe890fa6ecb62",
-              "dependencies": {},
+              "hash": "a48e64502df258b7",
               "loc": {
                 "line": 14,
                 "column": 8
-              },
-              "value": "user"
+              }
             }
           },
           "scope": {
@@ -313,10 +352,7 @@
               "column": 12
             }
           },
-          "states": [
-            "720e9756d239e21b:state:count",
-            "720e9756d239e21b:state:user"
-          ],
+          "states": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -333,8 +369,7 @@
                     "type": "ref",
                     "refType": "named",
                     "name": "user"
-                  },
-                  "valueId": "720e9756d239e21b:state:user"
+                  }
                 }
               ],
               "isDependency": false,
@@ -364,11 +399,14 @@
       "var": {
         "de02a1f50cd7f036": {
           "id": "de02a1f50cd7f036",
-          "name": "Test",
+          "name": {
+            "type": "identifier",
+            "name": "Test"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "6e8588d3dc7bec23",
+          "hash": "ff221f82770439ba",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -412,11 +450,14 @@
       "var": {
         "911c4f53186fbde1": {
           "id": "911c4f53186fbde1",
-          "name": "Test",
+          "name": {
+            "type": "identifier",
+            "name": "Test"
+          },
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "e9dbd0d431f8412",
+          "hash": "5ce41e80ee48bf72",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -460,11 +501,14 @@
       "var": {
         "fdf040594420df32": {
           "id": "fdf040594420df32",
-          "name": "Test",
+          "name": {
+            "type": "identifier",
+            "name": "Test"
+          },
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "a2a658754707c4ab",
+          "hash": "6b8363fa3512a796",
           "dependencies": {},
           "loc": {
             "line": 1,
