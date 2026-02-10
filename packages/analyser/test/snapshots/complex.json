@@ -262,48 +262,32 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "698b5174f8ccba86",
+          "hash": "a44e0028e72283b0",
           "dependencies": {},
           "loc": {
             "line": 3,
             "column": 16
           },
           "var": {
-            "e85efdf475297ae9": {
-              "id": "e85efdf475297ae9",
+            "810bbf867cc78077:state:value": {
+              "id": "810bbf867cc78077:state:value",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "value"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setValue"
-                    }
-                  }
-                ],
-                "raw": "[value, setValue]"
+                "type": "identifier",
+                "name": "value"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
-              "hash": "3df4b3c4d3f01fd6",
+              "hash": "4fb1ccc8ed5eb856",
               "dependencies": {},
               "loc": {
                 "line": 4,
-                "column": 8
+                "column": 9
               },
               "setter": "setValue"
             },
-            "cbb29131249ee2d1": {
-              "id": "cbb29131249ee2d1",
+            "810bbf867cc78077:memo:memoVal": {
+              "id": "810bbf867cc78077:memo:memoVal",
               "name": {
                 "type": "identifier",
                 "name": "memoVal"
@@ -311,7 +295,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "cd90d2b7629628ff",
+              "hash": "8f576f48e12754dc",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -330,7 +314,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 }
               ]
@@ -346,7 +330,9 @@
               "column": 29
             }
           },
-          "states": [],
+          "states": [
+            "810bbf867cc78077:state:value"
+          ],
           "props": [
             {
               "id": "810bbf867cc78077:prop:initialValue",
@@ -376,11 +362,11 @@
               },
               "reactDeps": [
                 {
-                  "id": "",
+                  "id": "810bbf867cc78077:state:value",
                   "name": "value"
                 },
                 {
-                  "id": "cbb29131249ee2d1",
+                  "id": "810bbf867cc78077:memo:memoVal",
                   "name": "memoVal"
                 }
               ]

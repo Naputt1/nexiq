@@ -812,7 +812,7 @@ ipcMain.handle(
           for (const p of props) {
             if (targetIds.has(p.id)) {
               p.file = v.file;
-              deletedObjects[`${v.id}:${p.id}`] = p;
+              deletedObjects[p.id] = p;
             }
             if (p.props) {
               traverseProps(p.props, v);
@@ -820,14 +820,10 @@ ipcMain.handle(
           }
         };
 
-        const traverse = (
-          vars: Record<string, ComponentFileVar>,
-          parent?: string,
-        ) => {
+        const traverse = (vars: Record<string, ComponentFileVar>) => {
           for (const v of Object.values(vars)) {
             if (targetIds.has(v.id)) {
-              const id = `${parent ? `${parent}:` : ""}${v.id}`;
-              deletedObjects[id] = v;
+              deletedObjects[v.id] = v;
             }
             if ("props" in v && v.props) {
               traverseProps(v.props, v);
@@ -835,7 +831,6 @@ ipcMain.handle(
             if ("effects" in v && v.effects) {
               for (const effect of Object.values(v.effects)) {
                 if (targetIds.has(effect.id)) {
-                  //TODO: refactor to use same id format as other vars/props
                   deletedObjects[effect.id] = {
                     ...effect,
                     file: v.file,
@@ -845,7 +840,7 @@ ipcMain.handle(
               }
             }
             if ("var" in v && v.var) {
-              traverse(v.var, v.id);
+              traverse(v.var);
             }
           }
         };
