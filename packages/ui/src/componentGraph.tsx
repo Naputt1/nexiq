@@ -239,10 +239,12 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           } else {
             const deletedCompId = Object.keys(deletedObjects).find((id) => {
               const obj = deletedObjects[id];
+              if (!obj) return false;
               return (
                 obj.kind === "component" &&
-                getDisplayName(obj.name) === getDisplayName(variable.name) &&
-                obj.file === filePath
+                getDisplayName((obj as ComponentFileVarComponent).name) ===
+                  getDisplayName(variable.name) &&
+                (obj as ComponentFileVarComponent).file === filePath
               );
             });
             if (deletedCompId) propIdPrefix = deletedCompId;
