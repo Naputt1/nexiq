@@ -34,7 +34,7 @@ export const TypeRefRenderer: React.FC<TypeRendererProps> = ({
   // Quick heuristic: Check if any node in `nodes` has `label.text === name` and `type === 'type' || 'interface'`
 
   const targetNode: TypeDataDeclare | undefined = Object.values(typeData).find(
-    (n) => (n.type === "interface" || n.type === "type") && n.id === name
+    (n) => (n.type === "interface" || n.type === "type") && n.id === name,
   );
 
   if (targetNode) {

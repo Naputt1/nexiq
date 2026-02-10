@@ -22,6 +22,7 @@ export class GraphRenderer {
   private bindId: string | null = null;
   private animatingCombos = new Set<string>();
   private animations = new Map<string, Konva.Animation>();
+  public viewportChangeInProgress = false;
 
   constructor(
     container: HTMLDivElement,
@@ -29,7 +30,11 @@ export class GraphRenderer {
     width: number,
     height: number,
     onSelect?: (id: string) => void,
-    onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void,
+    onViewportChange?: (viewport: {
+      x: number;
+      y: number;
+      zoom: number;
+    }) => void,
   ) {
     this.stage = new Konva.Stage({
       container,
@@ -111,6 +116,8 @@ export class GraphRenderer {
   private setupStageEvents() {
     const stage = this.stage;
 
+    let wheelTimeout: number | null = null;
+
     stage.on("wheel", (e) => {
       e.evt.preventDefault();
 
@@ -140,10 +147,24 @@ export class GraphRenderer {
       };
 
       stage.position(newPos);
-      this.triggerViewportChange();
+
+      // Throttled viewport update for store
+      this.viewportChangeInProgress = true;
+      if (wheelTimeout) clearTimeout(wheelTimeout);
+      wheelTimeout = setTimeout(() => {
+        this.viewportChangeInProgress = false;
+        this.triggerViewportChange();
+        wheelTimeout = null;
+      }, 200);
+    });
+
+    stage.on("dragmove", () => {
+      // Don't trigger store updates while dragging
+      this.viewportChangeInProgress = true;
     });
 
     stage.on("dragend", () => {
+      this.viewportChangeInProgress = false;
       this.triggerViewportChange();
     });
 
@@ -272,6 +293,13 @@ export class GraphRenderer {
         label.y(currentR + 10 * combo.scale);
       }
 
+      // Update Git Status Indicator position
+      const indicator = group.findOne(`#git-status-${id}`) as Konva.Circle;
+      if (indicator) {
+        indicator.x(currentR * 0.7);
+        indicator.y(-currentR * 0.7);
+      }
+
       if (time >= duration) {
         anim.stop();
         this.animations.delete(id);
@@ -327,6 +355,13 @@ export class GraphRenderer {
       label.y(radius + 10 * combo.scale);
     }
 
+    // Update Git Status Indicator position
+    const indicator = group.findOne(`#git-status-${id}`) as Konva.Circle;
+    if (indicator) {
+      indicator.x(radius * 0.7);
+      indicator.y(-radius * 0.7);
+    }
+
     this.updateEdges(edgeIds);
   }
 
@@ -348,7 +383,6 @@ export class GraphRenderer {
     }
   }
 
-
   private handleLayoutChange() {
     this.combos.forEach((group, id) => {
       const combo = this.graph.getCombo(id);
@@ -364,6 +398,15 @@ export class GraphRenderer {
             circle.radius(radius);
             const label = group.findOne(`#label-${id}`) as Konva.Text;
             if (label) label.y(radius + 10 * combo.scale);
+
+            // Update Git Status Indicator position
+            const indicator = group.findOne(
+              `#git-status-${id}`,
+            ) as Konva.Circle;
+            if (indicator) {
+              indicator.x(radius * 0.7);
+              indicator.y(-radius * 0.7);
+            }
           }
         }
       }
@@ -394,8 +437,9 @@ export class GraphRenderer {
     const nodes = this.graph.getCurNodes();
     const edges = this.graph.getCurEdges();
 
-    const hasGitChanges = Object.values(combos).some(c => !!c.gitStatus) || 
-                         Object.values(nodes).some(n => !!n.gitStatus);
+    const hasGitChanges =
+      Object.values(combos).some((c) => !!c.gitStatus) ||
+      Object.values(nodes).some((n) => !!n.gitStatus);
 
     // Render Edges first (bottom)
     this.renderEdges(edges, undefined, hasGitChanges);
@@ -422,9 +466,12 @@ export class GraphRenderer {
       const srcNode = this.graph.getPointByID(edge.source);
       const targetNode = this.graph.getPointByID(edge.target);
 
-      // If either end is explicitly hidden, hide the edge
+      // If either end is explicitly hidden or deleted, hide the edge
       const isVisible =
-        srcNode?.visible !== false && targetNode?.visible !== false;
+        srcNode?.visible !== false &&
+        targetNode?.visible !== false &&
+        srcNode?.gitStatus !== "deleted" &&
+        targetNode?.gitStatus !== "deleted";
 
       const arrow = new Konva.Arrow({
         id: edge.id,
@@ -450,9 +497,13 @@ export class GraphRenderer {
     }
   }
 
-  private renderCombo(combo: ComboGraphData, parent: Konva.Container, hasGitChanges?: boolean) {
-    // If marked as deleted (future component), hide it entirely when viewing past
-    if (combo.gitStatus === 'deleted' || combo.visible === false) return;
+  private renderCombo(
+    combo: ComboGraphData,
+    parent: Konva.Container,
+    hasGitChanges?: boolean,
+  ) {
+    // If explicitly hidden, hide it.
+    if (combo.visible === false) return;
 
     const group = new Konva.Group({
       id: combo.id,
@@ -541,15 +592,20 @@ export class GraphRenderer {
 
     // Git Status Indicator
     if (combo.gitStatus) {
-      const statusColor = combo.gitStatus === 'added' ? '#22c55e' : 
-                         combo.gitStatus === 'modified' ? '#f59e0b' : '#ef4444';
-      
+      const statusColor =
+        combo.gitStatus === "added"
+          ? "#22c55e"
+          : combo.gitStatus === "modified"
+            ? "#f59e0b"
+            : "#ef4444";
+
       const indicator = new Konva.Circle({
+        id: `git-status-${combo.id}`,
         x: radius * 0.7,
         y: -radius * 0.7,
         radius: 6 * combo.scale,
         fill: statusColor,
-        stroke: 'white',
+        stroke: "white",
         strokeWidth: 1 * combo.scale,
       });
       group.add(indicator);
@@ -582,9 +638,13 @@ export class GraphRenderer {
     group.add(text);
   }
 
-  private renderNode(node: NodeGraphData, parent: Konva.Container, hasGitChanges?: boolean) {
-    // If marked as deleted (future component), hide it entirely when viewing past
-    if (node.gitStatus === 'deleted' || node.visible === false) return;
+  private renderNode(
+    node: NodeGraphData,
+    parent: Konva.Container,
+    hasGitChanges?: boolean,
+  ) {
+    // If explicitly hidden, hide it.
+    if (node.visible === false) return;
 
     const group = new Konva.Group({
       id: node.id,
@@ -643,15 +703,20 @@ export class GraphRenderer {
 
     // Git Status Indicator
     if (node.gitStatus) {
-      const statusColor = node.gitStatus === 'added' ? '#22c55e' : 
-                         node.gitStatus === 'modified' ? '#f59e0b' : '#ef4444';
-      
+      const statusColor =
+        node.gitStatus === "added"
+          ? "#22c55e"
+          : node.gitStatus === "modified"
+            ? "#f59e0b"
+            : "#ef4444";
+
       const indicator = new Konva.Circle({
+        id: `git-status-${node.id}`,
         x: node.radius * 0.7,
         y: -node.radius * 0.7,
         radius: 4 * node.scale,
         fill: statusColor,
-        stroke: 'white',
+        stroke: "white",
         strokeWidth: 1 * node.scale,
       });
       group.add(indicator);

@@ -1,12 +1,5 @@
 import type { TypeDataDeclare } from "./types/index.js";
-import type {
-  PropDataType,
-  TypeData,
-  TypeDataLiteralTypeLiteral,
-  TypeDataNull,
-  TypeDataRef,
-  TypeDataUndefined,
-} from "./types/primitive.js";
+import type { PropDataType, TypeData } from "./types/primitive.js";
 
 export type ComponentFileImport = {
   localName: string;
@@ -57,6 +50,8 @@ export interface ComponentInfoRender extends ComponentLoc {
 export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
   scope?: VariableScope;
+  file?: string;
+  kind?: "effect";
 }
 
 export interface PropData {
@@ -65,6 +60,10 @@ export interface PropData {
   type: string;
   kind: "prop" | "spread";
   props?: PropData[];
+  hash?: string;
+  gitStatus?: "added" | "modified" | "deleted";
+  file?: string;
+  loc?: VariableLoc;
 }
 
 export interface ReactFunctionInfoBase {

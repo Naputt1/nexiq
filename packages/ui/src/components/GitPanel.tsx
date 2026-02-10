@@ -64,13 +64,13 @@ export function GitPanel({ projectRoot, onLocateFile }: GitPanelProps) {
     if (!selectedCommit) {
       return status?.files.filter((f) => f.working_dir !== " ") || [];
     }
-    
+
     // For historical commits, get file list from the cached diffs
     const diffKey = `${selectedCommit}-working-all`;
     const historicalDiffs = diffs[diffKey] || [];
-    return historicalDiffs.map(d => ({
+    return historicalDiffs.map((d) => ({
       path: d.path,
-      working_dir: 'M' // Mock as modified for display
+      working_dir: "M", // Mock as modified for display
     }));
   };
 
@@ -129,9 +129,9 @@ export function GitPanel({ projectRoot, onLocateFile }: GitPanelProps) {
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {onLocateFile && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-6 w-6"
                             onClick={() => onLocateFile(file)}
                             title="Locate in Graph"
@@ -169,7 +169,8 @@ export function GitPanel({ projectRoot, onLocateFile }: GitPanelProps) {
                   <ChevronRight className="h-3 w-3" />
                 )}
                 <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {selectedCommit ? "Files in Commit" : "Changes"} ({activeFiles.length})
+                  {selectedCommit ? "Files in Commit" : "Changes"} (
+                  {activeFiles.length})
                 </span>
               </div>
             </div>
@@ -189,9 +190,9 @@ export function GitPanel({ projectRoot, onLocateFile }: GitPanelProps) {
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       {onLocateFile && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-6 w-6"
                           onClick={() => onLocateFile(f.path)}
                           title="Locate in Graph"

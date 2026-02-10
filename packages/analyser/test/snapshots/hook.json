@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "2383bd22dd328fcc",
+          "hash": "522559567613007e",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -70,6 +70,7 @@
               "type": "data",
               "file": "/src/effectt.tsx",
               "hash": "fde4b88cfe3fa980",
+              "dependencies": {},
               "loc": {
                 "line": 5,
                 "column": 8
@@ -108,6 +109,7 @@
               "type": "data",
               "file": "/src/effectt.tsx",
               "hash": "49a579ed34668ec0",
+              "dependencies": {},
               "loc": {
                 "line": 6,
                 "column": 8
@@ -193,6 +195,7 @@
               "type": "function",
               "file": "/src/effectt.tsx",
               "hash": "ab55bbd1cc024cc",
+              "dependencies": {},
               "loc": {
                 "line": 9,
                 "column": 8
@@ -338,7 +341,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "beb733ed6eb03c67",
+          "hash": "e868115e296769aa",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -371,6 +374,7 @@
               "type": "data",
               "file": "/src/Hooks.ts",
               "hash": "3df4b3c4d3f01fd6",
+              "dependencies": {},
               "loc": {
                 "line": 4,
                 "column": 8
@@ -391,10 +395,11 @@
           "states": [],
           "props": [
             {
-              "id": "64354b0e2ded07",
+              "id": "810bbf867cc78077:prop:initialValue",
               "name": "initialValue",
               "type": "any",
-              "kind": "prop"
+              "kind": "prop",
+              "hash": "9f760feb8a0dfe2e"
             }
           ],
           "hooks": [],
