@@ -5,7 +5,6 @@ import type {
   PropData,
   TypeData,
   TypeDataParam,
-  VariableName,
   VariableLoc,
   VariableName,
   VariableScope,
