@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import {
-  type ComponentFile,
   type ComponentFileVar,
   type PropData,
   type PropDataType,
@@ -333,6 +332,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               const loc = "loc" in v ? v.loc : undefined;
               if (!loc) return;
 
+              console.log("deleted", v);
+
               const nodeBase: NodeData = {
                 id: v.id,
                 name: v.name,
@@ -610,6 +611,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               // Try to find the parent component ID from the ID prefix (componentId:...)
               const parts = deletedId.split(":");
               const parentId = parts.length > 1 ? parts[0] : undefined;
+              console.log("add delete", deletedId, parentId);
 
               // If it's a prop, it should go into the 'props' combo of its parent
               const comboId =
