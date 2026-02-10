@@ -542,7 +542,6 @@ export class GraphRenderer {
     });
 
     bg.on("mouseenter", () => {
-      this.graph.calculateComboChildrenLayout(combo.id);
       this.stage.container().style.cursor = "pointer";
     });
     bg.on("mouseleave", () => {

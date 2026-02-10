@@ -6,6 +6,7 @@ import type {
   TypeData,
   TypeDataParam,
   VariableLoc,
+  VariableName,
   VariableScope,
 } from "shared";
 import type Konva from "konva";
@@ -299,11 +300,13 @@ export class GraphData {
                 child: true,
               });
 
-              // Trigger parent layout to accommodate new radius
-              if (combo.combo == null) {
-                this.layout(true);
-              } else {
-                this.calculateComboChildrenLayout(combo.combo, true);
+              // Trigger parent layout to accommodate new radius if not collapsed
+              if (!combo.collapsed) {
+                if (combo.combo == null) {
+                  this.layout(true);
+                } else {
+                  this.calculateComboChildrenLayout(combo.combo, true);
+                }
               }
             }
           }
