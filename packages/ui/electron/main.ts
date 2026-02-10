@@ -64,12 +64,42 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, "public")
   : RENDERER_DIST;
 
+const windowProjects = new Map<number, string | null>();
+let isQuitting = false;
+
+function updateOpenProjects() {
+  const projects = Array.from(windowProjects.values()).map((p) => p || "");
+  store.setOpenProjects(projects);
+}
+
 function createWindow(projectPath?: string, forceEmpty: boolean = false) {
+  if (projectPath) {
+    for (const [id, path] of windowProjects.entries()) {
+      if (path === projectPath) {
+        const existingWindow = BrowserWindow.fromId(id);
+        if (existingWindow) {
+          existingWindow.focus();
+          return existingWindow;
+        }
+      }
+    }
+  }
+
   const window = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC!, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
+  });
+
+  windowProjects.set(window.id, projectPath || null);
+  updateOpenProjects();
+
+  window.on("closed", () => {
+    if (!isQuitting) {
+      windowProjects.delete(window.id);
+      updateOpenProjects();
+    }
   });
 
   window.webContents.openDevTools();
@@ -249,6 +279,16 @@ app.on("window-all-closed", () => {
   }
 });
 
+app.on("before-quit", () => {
+  isQuitting = true;
+  updateOpenProjects();
+});
+
+app.on("will-quit", () => {
+  isQuitting = true;
+  updateOpenProjects();
+});
+
 app.on("activate", () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -272,9 +312,13 @@ app.whenReady().then(() => {
     app.dock?.setMenu(dockMenu);
   }
 
-  const lastProject = store.getLastProject();
-  if (lastProject && fs.existsSync(lastProject)) {
-    createWindow(lastProject);
+  const openProjects = store.getOpenProjects();
+  if (openProjects.length > 0) {
+    openProjects.forEach((project) => {
+      if (project === "" || fs.existsSync(project)) {
+        createWindow(project || undefined);
+      }
+    });
   } else {
     createWindow();
   }
@@ -325,14 +369,30 @@ ipcMain.handle("get-recent-projects", () => {
   return store.getRecentProjects();
 });
 
-ipcMain.handle("get-last-project", () => {
-  return store.getLastProject();
-});
-
 ipcMain.handle(
   "set-last-project",
-  (_: IpcMainInvokeEvent, path: string | null) => {
-    store.setLastProject(path);
+  (event: IpcMainInvokeEvent, path: string | null) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) {
+      if (path) {
+        // Check if already open in ANOTHER window
+        for (const [id, p] of windowProjects.entries()) {
+          if (p === path && id !== window.id) {
+            const existingWindow = BrowserWindow.fromId(id);
+            if (existingWindow) {
+              existingWindow.focus();
+              window.close();
+              return true;
+            }
+          }
+        }
+        windowProjects.set(window.id, path);
+      } else {
+        windowProjects.delete(window.id);
+      }
+      updateOpenProjects();
+    }
+    return false;
   },
 );
 

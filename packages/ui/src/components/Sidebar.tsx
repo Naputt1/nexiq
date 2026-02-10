@@ -13,9 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "./ui/button";
-import { LogOut, Files, GitBranch } from "lucide-react";
-import { useProjectStore } from "@/hooks/use-project-store";
+import { Files, GitBranch } from "lucide-react";
+import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { GitPanel } from "./GitPanel";
 import { cn } from "@/lib/utils";
 
@@ -40,13 +39,7 @@ export function ProjectSidebar({
   isLoading,
 }: SidebarProps) {
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
-  const [activeTab, setActiveTab] = useState<"projects" | "git">("projects");
-  const reset = useProjectStore((state) => state.reset);
-
-  const handleReset = () => {
-    reset();
-    window.ipcRenderer.invoke("set-last-project", null);
-  };
+  const { activeTab, setActiveTab } = useAppStateStore();
 
   useEffect(() => {
     const fetchSubProjects = async () => {
@@ -132,15 +125,6 @@ export function ProjectSidebar({
                     ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleReset}
-                  title="Close Project"
-                  className="h-9 w-9 shrink-0"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
               </SidebarGroupContent>
             </SidebarHeader>
           </SidebarGroup>
