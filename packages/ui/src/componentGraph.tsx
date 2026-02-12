@@ -55,6 +55,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const isSidebarOpen = useAppStateStore((s) => s.isSidebarOpen);
   const setIsSidebarOpen = useAppStateStore((s) => s.setIsSidebarOpen);
   const selectedCommit = useAppStateStore((s) => s.selectedCommit);
+  const activeTab = useAppStateStore((s) => s.activeTab);
   const setViewport = useAppStateStore((s) => s.setViewport);
   const loadState = useAppStateStore((s) => s.loadState);
   const saveState = useAppStateStore((s) => s.saveState);
@@ -63,6 +64,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   const status = useGitStore((s) => s.status);
   const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
+  const clearAnalyzedDiffCache = useGitStore((s) => s.clearAnalyzedDiffCache);
 
   const subPath = useMemo(() => {
     return selectedSubProject &&
@@ -108,7 +110,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
       try {
         let graphData: JsonData;
-        if (selectedCommit) {
+        if (selectedCommit || activeTab === "git") {
           const diffData = await loadAnalyzedDiff(
             projectPath,
             selectedCommit,
@@ -734,6 +736,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       projectPath,
       selectedSubProject,
       selectedCommit,
+      activeTab,
       loadAnalyzedDiff,
       subPath,
     ],
@@ -786,6 +789,111 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     }
   }, [graph]);
 
+  const goToNextMatch = useCallback(() => {
+    if (matches.length === 0) return;
+    const nextIndex = (currentMatchIndex + 1) % matches.length;
+    setCurrentMatchIndex(nextIndex);
+    graph.expandAncestors(matches[nextIndex]);
+    rendererRef.current?.focusItem(matches[nextIndex], 1.5);
+    setSelectedId(matches[nextIndex]);
+  }, [matches, currentMatchIndex, graph, setSelectedId]);
+
+  const goToPrevMatch = useCallback(() => {
+    if (matches.length === 0) return;
+    const prevIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
+    setCurrentMatchIndex(prevIndex);
+    graph.expandAncestors(matches[prevIndex]);
+    rendererRef.current?.focusItem(matches[prevIndex], 1.5);
+    setSelectedId(matches[prevIndex]);
+  }, [matches, currentMatchIndex, graph, setSelectedId]);
+
+  const resetHighlights = useCallback(() => {
+    const combos = graph.getAllCombos();
+    for (const combo of Object.values(combos)) {
+      if (combo.highlighted) {
+        combo.highlighted = false;
+        graph.updateCombo(combo);
+      }
+    }
+    const nodes = graph.getAllNodes();
+    for (const node of Object.values(nodes)) {
+      if (node.highlighted) {
+        node.highlighted = false;
+        graph.updateNode(node);
+      }
+    }
+  }, [graph]);
+
+  const performSearch = useCallback(
+    (value: string) => {
+      let firstMatchId: string | null = null;
+      const newMatches: string[] = [];
+
+      graph.batch(() => {
+        if (value === "") {
+          setMatches([]);
+          setCurrentMatchIndex(-1);
+          resetHighlights();
+          return;
+        }
+
+        const lowerValue = value.toLowerCase();
+
+        const combos = graph.getAllCombos();
+        for (const combo of combos) {
+          if (combo.id.endsWith("-render")) continue;
+
+          const isMatch = combo.label?.text.toLowerCase().includes(lowerValue);
+          if (isMatch) {
+            if (!combo.highlighted) {
+              combo.highlighted = true;
+              graph.updateCombo(combo);
+            }
+            newMatches.push(combo.id);
+          } else if (combo.highlighted) {
+            combo.highlighted = false;
+            graph.updateCombo(combo);
+          }
+        }
+
+        const nodes = graph.getAllNodes();
+        for (const node of nodes) {
+          const isMatch = node.label?.text.toLowerCase().includes(lowerValue);
+          if (isMatch) {
+            if (!node.highlighted) {
+              node.highlighted = true;
+              graph.updateNode(node);
+            }
+            newMatches.push(node.id);
+          } else if (node.highlighted) {
+            node.highlighted = false;
+            graph.updateNode(node);
+          }
+        }
+
+        if (newMatches.length > 0) {
+          firstMatchId = newMatches[0];
+        }
+      });
+
+      setMatches(newMatches);
+      if (newMatches.length > 0) {
+        setCurrentMatchIndex(0);
+        setSelectedId(firstMatchId);
+        // Small timeout to allow the batch render to complete before starting expansion animations
+        setTimeout(() => {
+          if (firstMatchId) {
+            graph.expandAncestors(firstMatchId);
+            rendererRef.current?.focusItem(firstMatchId, 1.5);
+          }
+        }, 50);
+      } else {
+        setCurrentMatchIndex(-1);
+      }
+    },
+    [graph, resetHighlights, setSelectedId],
+  );
+
   useEffect(() => {
     highlightGitChanges();
   }, [highlightGitChanges, status, selectedCommit]);
@@ -794,8 +902,24 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     (id: string) => {
       setSelectedId(id);
       setCenteredItemId(id);
+
+      // Expand all ancestors to make sure the node is visible
+      graph.expandAncestors(id);
+
+      // If the node itself is a combo, we might want to expand it too?
+      // The user said "if combo then it should expand that node".
+      const combo = graph.getCombo(id);
+      if (combo && combo.collapsed) {
+        graph.comboCollapsed(id);
+      }
+
+      // Focus the viewport on the selected item
+      // Small timeout to allow potential layout/expansion to finish or at least start
+      setTimeout(() => {
+        rendererRef.current?.focusItem(id, 1.5);
+      }, 50);
     },
-    [setSelectedId, setCenteredItemId],
+    [setSelectedId, setCenteredItemId, graph],
   );
 
   useEffect(() => {
@@ -914,7 +1038,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         hasRestoredViewport.current = true; // Mark as done so we don't jump again
       }, 100);
     }
-  }, [graphData]);
+  }, [graphData, centeredItemId, graph]);
 
   // Initial load state
   useEffect(() => {
@@ -928,8 +1052,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     () => debounce(saveState, 1000),
     [saveState],
   );
-
-  const activeTab = useAppStateStore((s) => s.activeTab);
 
   useEffect(() => {
     debouncedSaveState(projectPath);
@@ -946,7 +1068,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   // load data whenever sub-project selection or selected commit changes
   useEffect(() => {
     loadData();
-  }, [selectedSubProject, selectedCommit, loadData]);
+  }, [selectedSubProject, selectedCommit, status, graph, loadData]);
 
   // Resize observer for container
   const containerRef = useRef<HTMLDivElement>(null);
@@ -998,7 +1120,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isSearchOpen, matches, currentMatchIndex]);
+  }, [isSearchOpen, matches, currentMatchIndex, goToNextMatch, goToPrevMatch]);
 
   // Focus and select search input when opened
   useEffect(() => {
@@ -1022,112 +1144,10 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   // Trigger search when debounced value changes
   useEffect(() => {
     performSearch(debouncedSearch);
-  }, [debouncedSearch]);
-
-  const performSearch = (value: string) => {
-    let firstMatchId: string | null = null;
-    const newMatches: string[] = [];
-
-    graph.batch(() => {
-      if (value === "") {
-        setMatches([]);
-        setCurrentMatchIndex(-1);
-        resetHighlights();
-        return;
-      }
-
-      const lowerValue = value.toLowerCase();
-
-      const combos = graph.getAllCombos();
-      for (const combo of combos) {
-        if (combo.id.endsWith("-render")) continue;
-
-        const isMatch = combo.label?.text.toLowerCase().includes(lowerValue);
-        if (isMatch) {
-          if (!combo.highlighted) {
-            combo.highlighted = true;
-            graph.updateCombo(combo);
-          }
-          newMatches.push(combo.id);
-        } else if (combo.highlighted) {
-          combo.highlighted = false;
-          graph.updateCombo(combo);
-        }
-      }
-
-      const nodes = graph.getAllNodes();
-      for (const node of nodes) {
-        const isMatch = node.label?.text.toLowerCase().includes(lowerValue);
-        if (isMatch) {
-          if (!node.highlighted) {
-            node.highlighted = true;
-            graph.updateNode(node);
-          }
-          newMatches.push(node.id);
-        } else if (node.highlighted) {
-          node.highlighted = false;
-          graph.updateNode(node);
-        }
-      }
-
-      if (newMatches.length > 0) {
-        firstMatchId = newMatches[0];
-      }
-    });
-
-    setMatches(newMatches);
-    if (newMatches.length > 0) {
-      setCurrentMatchIndex(0);
-      setSelectedId(firstMatchId);
-      // Small timeout to allow the batch render to complete before starting expansion animations
-      setTimeout(() => {
-        if (firstMatchId) {
-          graph.expandAncestors(firstMatchId);
-          rendererRef.current?.focusItem(firstMatchId, 1.5);
-        }
-      }, 50);
-    } else {
-      setCurrentMatchIndex(-1);
-    }
-  };
+  }, [debouncedSearch, performSearch]);
 
   const onSearch = (value: string) => {
     setSearch(value);
-  };
-
-  const resetHighlights = () => {
-    const combos = graph.getAllCombos();
-    for (const combo of Object.values(combos)) {
-      if (combo.highlighted) {
-        combo.highlighted = false;
-        graph.updateCombo(combo);
-      }
-    }
-    const nodes = graph.getAllNodes();
-    for (const node of Object.values(nodes)) {
-      if (node.highlighted) {
-        node.highlighted = false;
-        graph.updateNode(node);
-      }
-    }
-  };
-
-  const goToNextMatch = () => {
-    if (matches.length === 0) return;
-    const nextIndex = (currentMatchIndex + 1) % matches.length;
-    setCurrentMatchIndex(nextIndex);
-    graph.expandAncestors(matches[nextIndex]);
-    rendererRef.current?.focusItem(matches[nextIndex], 1.5);
-    setSelectedId(matches[nextIndex]);
-  };
-
-  const goToPrevMatch = () => {
-    if (matches.length === 0) return;
-    const prevIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
-    setCurrentMatchIndex(prevIndex);
-    graph.expandAncestors(matches[prevIndex]);
-    rendererRef.current?.focusItem(matches[prevIndex], 1.5);
-    setSelectedId(matches[prevIndex]);
   };
 
   const handleReloadProject = useCallback(async () => {
@@ -1141,13 +1161,14 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         targetPath,
         projectPath,
       );
+      clearAnalyzedDiffCache();
       await loadData();
     } catch (e) {
       console.error("Failed to reload project", e);
     } finally {
       setIsAnalyzing(false);
     }
-  }, [selectedSubProject, projectPath, loadData]);
+  }, [selectedSubProject, projectPath, loadData, clearAnalyzedDiffCache]);
 
   useEffect(() => {
     const unsubscribe = window.ipcRenderer.on("reload-project", () => {
@@ -1215,6 +1236,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
           onLocateFile={handleLocateFile}
+          onSelectNode={onSelect}
           isLoading={isAnalyzing}
         />
         <SidebarInset className="min-w-0">

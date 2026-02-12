@@ -21,10 +21,10 @@ export const useProjectStore = create<ProjectState>()(
 
     {
       name: "project-storage",
-      onRehydrateStorage: (state) => {
-        return () => state.setHasHydrated(true);
+      onRehydrateStorage: (_state) => {
+        return (state) => state?.setHasHydrated(true);
       },
-      partialize: (state) => ({}), // Don't persist projectRoot in localStorage
+      partialize: (_state) => ({}), // Don't persist projectRoot in localStorage
     },
   ),
 );

@@ -55,7 +55,7 @@ declare global {
       invoke(
         channel: "git-log",
         projectRoot: string,
-        limit?: number,
+        options?: number | { limit?: number; path?: string },
       ): Promise<GitCommit[]>;
       invoke(
         channel: "git-stage",
