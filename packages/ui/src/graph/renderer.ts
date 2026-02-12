@@ -2,10 +2,8 @@ import Konva from "konva";
 import {
   GraphData,
   type GraphDataCallbackParams,
-  type ComboGraphData,
-  type NodeGraphData,
-  type EdgeGraphData,
 } from "./hook";
+import { GraphNode, GraphCombo, GraphArrow, type RenderContext } from "./items/index";
 
 export class GraphRenderer {
   stage: Konva.Stage;
@@ -239,6 +237,13 @@ export class GraphRenderer {
       this.animations.delete(id);
     }
 
+    const context: RenderContext = {
+      graph: this.graph,
+      onSelect: this.onSelect,
+      hasGitChanges: Object.values(this.graph.getCurCombos()).some((c: GraphCombo) => !!c.gitStatus) || Object.values(this.graph.getCurNodes()).some((n: GraphNode) => !!n.gitStatus),
+      stage: this.stage,
+    };
+
     // Handle children visibility/creation
     if (combo.collapsed) {
       // Collapsing: Remove children immediately
@@ -250,12 +255,14 @@ export class GraphRenderer {
     } else {
       // Expanding: Render children into contentGroup
       if (combo.child) {
-        this.renderEdges(combo.child.edges, contentGroup);
-        for (const sub of Object.values(combo.child.combos)) {
-          this.renderCombo(sub, contentGroup);
+        for (const edge of Object.values(combo.child.edges) as GraphArrow[]) {
+          edge.render(context, contentGroup);
         }
-        for (const node of Object.values(combo.child.nodes)) {
-          this.renderNode(node, contentGroup);
+        for (const sub of Object.values(combo.child.combos) as GraphCombo[]) {
+          sub.render(context, contentGroup);
+        }
+        for (const node of Object.values(combo.child.nodes) as GraphNode[]) {
+          node.render(context, contentGroup);
         }
       }
       // Transparent immediately when expanding
@@ -441,288 +448,38 @@ export class GraphRenderer {
       Object.values(combos).some((c) => !!c.gitStatus) ||
       Object.values(nodes).some((n) => !!n.gitStatus);
 
+    const context: RenderContext = {
+      graph: this.graph,
+      onSelect: this.onSelect,
+      hasGitChanges,
+      stage: this.stage,
+    };
+
     // Render Edges first (bottom)
-    this.renderEdges(edges, undefined, hasGitChanges);
+    for (const edge of Object.values(edges)) {
+      const arrow = edge.render(context, this.layer);
+      this.edges.set(edge.id, arrow);
+      this.items.set(edge.id, arrow);
+    }
 
     // Render Combos
     for (const combo of Object.values(combos)) {
-      this.renderCombo(combo, this.layer, hasGitChanges);
+      const group = combo.render(context, this.layer);
+      this.combos.set(combo.id, group);
+      this.items.set(combo.id, group);
     }
 
     // Render Nodes
     for (const node of Object.values(nodes)) {
-      this.renderNode(node, this.layer, hasGitChanges);
+      const group = node.render(context, this.layer);
+      const circle = group.findOne("Circle") as Konva.Circle;
+      if (circle) {
+        this.nodes.set(node.id, circle);
+      }
+      this.items.set(node.id, group);
     }
 
     this.layer.batchDraw();
   }
 
-  private renderEdges(
-    edges: Record<string, EdgeGraphData>,
-    parent?: Konva.Group,
-    hasGitChanges?: boolean,
-  ) {
-    for (const edge of Object.values(edges)) {
-      const srcNode = this.graph.getPointByID(edge.source);
-      const targetNode = this.graph.getPointByID(edge.target);
-
-      // If either end is explicitly hidden or deleted, hide the edge
-      const isVisible =
-        srcNode?.visible !== false &&
-        targetNode?.visible !== false &&
-        srcNode?.gitStatus !== "deleted" &&
-        targetNode?.gitStatus !== "deleted";
-
-      const arrow = new Konva.Arrow({
-        id: edge.id,
-        points: edge.points,
-        fill: "#424242",
-        stroke: "#666666",
-        strokeWidth: 0.5 * edge.scale,
-        pointerWidth: 6 * edge.scale,
-        pointerLength: 6 * edge.scale,
-        lineJoin: "round",
-        perfectDrawEnabled: false,
-        listening: false,
-        visible: isVisible && edge.points.length >= 4,
-        opacity: hasGitChanges ? 0.1 : 1,
-      });
-
-      // Add to parent or layer
-      if (parent) parent.add(arrow);
-      else this.layer.add(arrow);
-
-      this.edges.set(edge.id, arrow);
-      this.items.set(edge.id, arrow);
-    }
-  }
-
-  private renderCombo(
-    combo: ComboGraphData,
-    parent: Konva.Container,
-    hasGitChanges?: boolean,
-  ) {
-    // If explicitly hidden, hide it.
-    if (combo.visible === false) return;
-
-    const group = new Konva.Group({
-      id: combo.id,
-      x: combo.x,
-      y: combo.y,
-      draggable: true,
-      opacity: hasGitChanges && !combo.gitStatus ? 0.2 : 1,
-    });
-
-    group.on("dragmove", (e) => {
-      e.cancelBubble = true;
-      this.graph.comboDragMove(combo.id, e);
-    });
-
-    group.on("dragend", (e) => {
-      e.cancelBubble = true;
-      this.graph.comboDragEnd(combo.id, e);
-    });
-
-    // Background Circle
-    const radius = combo.collapsed
-      ? combo.collapsedRadius
-      : combo.expandedRadius;
-    const bg = new Konva.Circle({
-      id: `bg-${combo.id}`,
-      radius: radius,
-      stroke: combo.highlighted ? "#007AFF" : combo.color,
-      strokeWidth: combo.highlighted ? 4 : 2,
-      fill: combo.collapsed ? combo.color : "transparent",
-      perfectDrawEnabled: false,
-      shadowColor: "#007AFF",
-      shadowBlur: 40,
-      shadowOpacity: 1,
-      shadowOffset: { x: 0, y: 0 },
-      shadowEnabled: !!combo.highlighted,
-    });
-
-    bg.on("mouseenter", () => {
-      this.stage.container().style.cursor = "pointer";
-    });
-    bg.on("mouseleave", () => {
-      this.stage.container().style.cursor = "grab";
-    });
-
-    bg.on("dblclick", (e) => {
-      e.cancelBubble = true;
-      this.graph.comboCollapsed(combo.id);
-    });
-
-    bg.on("click", (e) => {
-      if (e.evt.cancelBubble) return;
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        window.ipcRenderer.invoke("open-vscode", combo.fileName as string);
-      } else {
-        e.cancelBubble = true;
-        this.onSelect?.(combo.id);
-      }
-    });
-
-    group.add(bg);
-
-    // Content Group (Clipped)
-    const contentGroup = new Konva.Group({
-      id: `content-${combo.id}`,
-    });
-    group.add(contentGroup);
-
-    // If not collapsed, render children into contentGroup
-    if (!combo.collapsed) {
-      if (combo.child) {
-        this.renderEdges(combo.child.edges, contentGroup);
-
-        for (const sub of Object.values(combo.child.combos)) {
-          this.renderCombo(sub, contentGroup);
-        }
-        for (const node of Object.values(combo.child.nodes)) {
-          this.renderNode(node, contentGroup);
-        }
-      }
-    }
-
-    // Label (Outside content group)
-    this.renderLabel(combo, group, radius + 10 * combo.scale);
-
-    // Git Status Indicator
-    if (combo.gitStatus) {
-      const statusColor =
-        combo.gitStatus === "added"
-          ? "#22c55e"
-          : combo.gitStatus === "modified"
-            ? "#f59e0b"
-            : "#ef4444";
-
-      const indicator = new Konva.Circle({
-        id: `git-status-${combo.id}`,
-        x: radius * 0.7,
-        y: -radius * 0.7,
-        radius: 6 * combo.scale,
-        fill: statusColor,
-        stroke: "white",
-        strokeWidth: 1 * combo.scale,
-      });
-      group.add(indicator);
-    }
-
-    parent.add(group);
-    this.combos.set(combo.id, group);
-    this.items.set(combo.id, group);
-  }
-
-  private renderLabel(
-    item: ComboGraphData | NodeGraphData,
-    group: Konva.Group,
-    offsetY: number,
-  ) {
-    if (!item.label) return;
-
-    const text = new Konva.Text({
-      id: `label-${item.id}`,
-      text: item.label.text,
-      fill: item.label.fill || "black",
-      fontSize: 12 * item.scale, // Scale font size
-      align: "center",
-      y: offsetY,
-    });
-
-    // Center the text horizontally
-    text.offsetX(text.width() / 2);
-
-    group.add(text);
-  }
-
-  private renderNode(
-    node: NodeGraphData,
-    parent: Konva.Container,
-    hasGitChanges?: boolean,
-  ) {
-    // If explicitly hidden, hide it.
-    if (node.visible === false) return;
-
-    const group = new Konva.Group({
-      id: node.id,
-      x: node.x,
-      y: node.y,
-      draggable: true,
-      opacity: hasGitChanges && !node.gitStatus ? 0.2 : 1,
-    });
-
-    group.on("dragmove", (e) => {
-      e.cancelBubble = true;
-      if (node.combo) {
-        this.graph.comboChildNodeMove(node.combo, node.id, e);
-      } else {
-        this.graph.nodeDragMove(node.id, e);
-      }
-    });
-
-    group.on("dragend", (e) => {
-      e.cancelBubble = true;
-      if (node.combo) {
-        this.graph.comboChildNodeEnd(node.combo, node.id);
-      } else {
-        this.graph.nodeDragEnd(node.id, e);
-      }
-    });
-
-    group.on("click", (e) => {
-      if (e.evt.ctrlKey) {
-        e.cancelBubble = true;
-        window.ipcRenderer.invoke("open-vscode", node.fileName as string);
-      } else {
-        e.cancelBubble = true;
-        this.onSelect?.(node.id);
-      }
-    });
-
-    const circle = new Konva.Circle({
-      radius: node.radius,
-      fill: node.color,
-      stroke: node.highlighted ? "#007AFF" : undefined,
-      strokeWidth: node.highlighted ? 2 : 0,
-      perfectDrawEnabled: false,
-      shadowColor: "#007AFF",
-      shadowBlur: 20,
-      shadowOpacity: 1,
-      shadowOffset: { x: 0, y: 0 },
-      shadowEnabled: !!node.highlighted,
-    });
-
-    group.add(circle);
-
-    if (node.label) {
-      this.renderLabel(node, group, (node.radius || 0) + 10 * node.scale);
-    }
-
-    // Git Status Indicator
-    if (node.gitStatus) {
-      const statusColor =
-        node.gitStatus === "added"
-          ? "#22c55e"
-          : node.gitStatus === "modified"
-            ? "#f59e0b"
-            : "#ef4444";
-
-      const indicator = new Konva.Circle({
-        id: `git-status-${node.id}`,
-        x: node.radius * 0.7,
-        y: -node.radius * 0.7,
-        radius: 4 * node.scale,
-        fill: statusColor,
-        stroke: "white",
-        strokeWidth: 1 * node.scale,
-      });
-      group.add(indicator);
-    }
-
-    parent.add(group);
-    this.nodes.set(node.id, circle);
-    this.items.set(node.id, group);
-  }
 }
