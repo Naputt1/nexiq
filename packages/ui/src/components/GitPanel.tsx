@@ -38,21 +38,17 @@ export function GitPanel({
   onLocateFile: _onLocateFile,
   onSelectNode,
 }: GitPanelProps) {
-  const {
-    history,
-    isLoading,
-    status,
-    refreshStatus,
-    loadHistory,
-    loadAnalyzedDiff,
-  } = useGitStore();
+  const history = useGitStore((s) => s.history);
+  const isLoading = useGitStore((s) => s.isLoading);
+  const status = useGitStore((s) => s.status);
+  const refreshStatus = useGitStore((s) => s.refreshStatus);
+  const loadHistory = useGitStore((s) => s.loadHistory);
+  const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
 
-  const {
-    selectedCommit,
-    setSelectedCommit,
-    selectedSubProject,
-    setSelectedSubProject,
-  } = useAppStateStore();
+  const selectedCommit = useAppStateStore((s) => s.selectedCommit);
+  const setSelectedCommit = useAppStateStore((s) => s.setSelectedCommit);
+  const selectedSubProject = useAppStateStore((s) => s.selectedSubProject);
+  const setSelectedSubProject = useAppStateStore((s) => s.setSelectedSubProject);
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
   const [analyzedData, setAnalyzedData] = useState<JsonData | null>(null);
 
