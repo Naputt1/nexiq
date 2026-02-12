@@ -4,6 +4,8 @@ import ComponentGraph from "./componentGraph";
 import { SetupFlow } from "./components/setup-flow/SetupFlow";
 import { useProjectStore } from "./hooks/use-project-store";
 
+import { Settings } from "./pages/Settings";
+
 function App() {
   const { projectRoot: storedProjectRoot, _hasHydrated } = useProjectStore();
   const [searchParams] = useSearchParams();
@@ -40,6 +42,10 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<ComponentGraph projectPath={projectRoot} />} />
+      <Route
+        path="/settings"
+        element={<Settings projectPath={projectRoot} />}
+      />
     </Routes>
   );
 }

@@ -15,7 +15,7 @@ export function getViteConfig(dir: string): string | null {
   return null;
 }
 
-export function getFiles(dir: string): string[] {
+export function getFiles(dir: string, customIgnore: string[] = []): string[] {
   return glob.sync("**/*.{js,jsx,ts,tsx}", {
     cwd: dir,
     absolute: false,
@@ -28,6 +28,7 @@ export function getFiles(dir: string): string[] {
       "**/coverage/**",
       "**/public/**",
       "**/vite.config.ts",
+      ...customIgnore,
     ],
   });
 }
