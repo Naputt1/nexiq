@@ -23,6 +23,7 @@ interface SidebarProps {
   projectRoot: string;
   onSelectProject: (path: string) => void | Promise<void>;
   onLocateFile?: (filePath: string) => void;
+  onSelectNode?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -36,6 +37,7 @@ export function ProjectSidebar({
   projectRoot,
   onSelectProject,
   onLocateFile,
+  onSelectNode,
   isLoading,
 }: SidebarProps) {
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
@@ -129,7 +131,11 @@ export function ProjectSidebar({
             </SidebarHeader>
           </SidebarGroup>
         ) : (
-          <GitPanel projectRoot={projectRoot} onLocateFile={onLocateFile} />
+          <GitPanel 
+            projectRoot={projectRoot} 
+            onLocateFile={onLocateFile} 
+            onSelectNode={onSelectNode}
+          />
         )}
       </SidebarContent>
     </ShadcnSidebar>
