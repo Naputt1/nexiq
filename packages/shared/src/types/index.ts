@@ -3,6 +3,7 @@ import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
 export * from "./primitive.js";
 export * from "./object.js";
 export * from "./git.js";
+export * from "./config.js";
 
 export interface TypeDataParam {
   name: string;

@@ -202,7 +202,7 @@ export function GitPanel({
         </div>
 
         {expandedSections.changes && (
-          <div className="flex-1 overflow-auto p-2 pt-0">
+          <div className="flex-1 overflow-auto p-2 pt-0 min-h-0">
             {isLoading || !analyzedData ? (
               <div className="p-4 text-xs text-muted-foreground text-center animate-pulse">
                 Analyzing structural changes...
@@ -236,7 +236,7 @@ export function GitPanel({
         </div>
 
         {expandedSections.history && (
-          <div className="flex-1 overflow-auto p-2 pt-0">
+          <div className="flex-1 overflow-auto p-2 pt-0 min-h-0">
             <div className="space-y-1">
               {/* Current Working Tree at the top */}
               <div
