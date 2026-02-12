@@ -19,11 +19,11 @@ import {
   getDisplayName,
 } from "shared";
 import useGraph, {
-  type ComboData,
-  type ComboGraphData,
-  type EdgeData,
-  type NodeData,
-  type NodeGraphData,
+  GraphCombo,
+  GraphNode,
+  type GraphComboData,
+  type GraphArrowData,
+  type GraphNodeData,
   type useGraphProps,
 } from "./graph/hook";
 import { GraphRenderer } from "./graph/renderer";
@@ -136,9 +136,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           deletedObjects = {},
         } = graphData.diff || {};
 
-        const combos: ComboData[] = [];
-        const nodes: NodeData[] = [];
-        const edges: EdgeData[] = [];
+        const combos: GraphComboData[] = [];
+        const nodes: GraphNodeData[] = [];
+        const edges: GraphArrowData[] = [];
 
         const addCombo = (
           variable: ComponentFileVar,
@@ -148,7 +148,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           if (variable.kind != "component") return;
           const fileName = `${graphData.src}${filePath}`;
 
-          const combo: ComboData = {
+          const combo: GraphComboData = {
             id: variable.id,
             collapsed: true,
             name: variable.name,
@@ -171,8 +171,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           combos.push(combo);
 
           const propsComboId = `${variable.id}-props`;
-          const propNodes: NodeData[] = [];
-          const propCombos: ComboData[] = [];
+          const propNodes: GraphNodeData[] = [];
+          const propCombos: GraphComboData[] = [];
 
           const addProps = (props: PropData[], parentComboId: string) => {
             for (const prop of props) {
@@ -182,7 +182,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
               if (prop.props && prop.props.length > 0) {
                 const subPropsComboId = `${prop.id}-subprops`;
-                const subPropsCombo: ComboData = {
+                const subPropsCombo: GraphComboData = {
                   id: subPropsComboId,
                   collapsed: true,
                   name: { type: "identifier", name: prop.name },
@@ -203,7 +203,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 propCombos.push(subPropsCombo);
                 addProps(prop.props, subPropsComboId);
               } else {
-                const propNode: NodeData = {
+                const propNode: GraphNodeData = {
                   id: prop.id,
                   name: { type: "identifier", name: prop.name },
                   label: {
@@ -295,7 +295,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           combo.props = componentProps;
 
           if (propNodes.length > 0 || propCombos.length > 0) {
-            const propsCombo: ComboData = {
+            const propsCombo: GraphComboData = {
               id: propsComboId,
               collapsed: true,
               name: { type: "identifier", name: "props" },
@@ -355,7 +355,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 name = (v as ComponentFileVar).name;
               }
 
-              const nodeBase: NodeData = {
+              const nodeBase: GraphNodeData = {
                 id: v.id,
                 name: name,
                 combo: variable.id,
@@ -423,7 +423,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           };
 
           for (const v of Object.values(variable.var)) {
-            const nodeBase: NodeData = {
+            const nodeBase: GraphNodeData = {
               id: v.id,
               name: v.name,
               combo: variable.id,
@@ -505,7 +505,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           }
 
           for (const effect of Object.values(variable.effects)) {
-            const effectNode: NodeData = {
+            const effectNode: GraphNodeData = {
               id: effect.id,
               name: { type: "identifier", name: "effect" },
               type: "effect",
@@ -542,7 +542,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             for (const file of Object.values(graphData.files)) {
               if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
                 const v = file.var[render.id];
-                const renderNode: NodeData = {
+                const renderNode: GraphNodeData = {
                   id: `${variable.id}-render-${render.id}`,
                   name: v.name,
                   label: {
@@ -652,7 +652,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 name = (obj as ComponentFileVar).name;
               }
 
-              const nodeBase: NodeData = {
+              const nodeBase: GraphNodeData = {
                 id: obj.id,
                 name: name,
                 combo: comboId,
@@ -762,7 +762,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       } = rawGraphDataRef.current.diff || {};
 
       graph.batch(() => {
-        const applyStatus = (item: ComboGraphData | NodeGraphData) => {
+        const applyStatus = (item: GraphCombo | GraphNode) => {
           if (added.includes(item.id)) {
             item.gitStatus = "added";
           } else if (modified.includes(item.id)) {
@@ -776,9 +776,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           // Everything in the current graph should be visible
           item.visible = true;
 
-          if ("collapsedRadius" in item)
-            graph.updateCombo(item as ComboGraphData);
-          else graph.updateNode(item as NodeGraphData);
+          if ("expandedRadius" in item)
+            graph.updateCombo(item as GraphCombo);
+          else graph.updateNode(item as GraphNode);
         };
 
         combos.forEach(applyStatus);

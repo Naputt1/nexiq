@@ -10,7 +10,7 @@ import {
   type TypeDataParam,
   getDisplayName,
 } from "shared";
-import type { ComboData, NodeData } from "@/graph/hook";
+import type { GraphComboData, GraphNodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 import React, { useEffect } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils";
 
 interface NodeDetailsProps {
   selectedId: string | null;
-  nodes: Record<string, NodeData>;
-  combos: Record<string, ComboData>;
+  nodes: Record<string, GraphNodeData>;
+  combos: Record<string, GraphComboData>;
   typeData: Record<string, TypeDataDeclare>;
   projectPath: string;
   onClose: () => void;
@@ -39,7 +39,7 @@ export function NodeDetails({
   const loadDiff = useGitStore((s) => s.loadDiff);
   const selectedCommit = useAppStateStore((s) => s.selectedCommit);
 
-  const item: NodeData | ComboData | undefined = selectedId
+  const item: GraphNodeData | GraphComboData | undefined = selectedId
     ? nodes[selectedId] || combos[selectedId]
     : undefined;
 

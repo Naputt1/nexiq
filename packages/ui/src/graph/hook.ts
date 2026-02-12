@@ -1,21 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
-import type { LabelData } from "./label";
-import type {
-  ComponentInfoRender,
-  PropData,
-  TypeData,
-  TypeDataParam,
-  VariableLoc,
-  VariableName,
-  VariableScope,
-} from "shared";
+// Graph Data Types
+// Graph Data Class
 import type Konva from "konva";
+import {
+  GraphNode,
+  GraphCombo,
+  GraphArrow,
+  type GraphNodeData,
+  type GraphComboData,
+  type GraphArrowData,
+  type CurRender,
+} from "./items/index";
+
+export {
+  GraphNode,
+  GraphCombo,
+  GraphArrow,
+  type GraphNodeData,
+  type GraphComboData,
+  type GraphArrowData,
+  type CurRender,
+};
 import { type Node, type Edge } from "./layout";
 
 export type useGraphProps = {
-  nodes?: NodeData[];
-  edges?: EdgeData[];
-  combos?: ComboData[];
+  nodes?: GraphNodeData[];
+  edges?: GraphArrowData[];
+  combos?: GraphComboData[];
   config?: GraphDataConfig;
   projectPath?: string;
   targetPath?: string;
@@ -45,125 +56,21 @@ type InnerCallBackParams = { type: "child-moved" } | { type: "layout-change" };
 
 type InnerCallBack = (params: InnerCallBackParams) => void;
 
-export interface GraphItem {
-  x?: number;
-  y?: number;
-}
+// Graph Data Class
 
-export interface PointData extends GraphItem {
-  color?: string;
-  radius?: number;
-  label?: LabelData;
-  combo?: string;
-  highlighted?: boolean;
-}
 
-export interface DetailItemData {
-  id: string;
-  name: VariableName;
-  fileName: string;
-  pureFileName?: string;
-  scope?: VariableScope;
-  loc?: VariableLoc;
-  props?: PropData[];
-  propData?: PropData;
-  propType?: TypeData;
-  type?:
-    | "component"
-    | "type"
-    | "interface"
-    | "state"
-    | "render"
-    | "effect"
-    | "memo"
-    | "ref"
-    | "prop";
-  typeParams?: TypeDataParam[];
-  extends?: string[];
-  renders?: Record<string, ComponentInfoRender>;
-  gitStatus?: "added" | "modified" | "deleted";
-  visible?: boolean;
-  ui?: {
-    renders?: Record<string, { x: number; y: number }>;
-    isLayoutCalculated?: boolean;
-    x?: number;
-    y?: number;
-    radius?: number;
-  };
-}
-
-export interface NodeData extends PointData, DetailItemData {
-  radius?: number;
-}
-
-export type EdgeData = {
-  id: string;
-  source: string;
-  target: string;
-  combo?: string;
-};
-
-export interface ComboData extends PointData, DetailItemData {
-  collapsed?: boolean;
-  collapsedRadius?: number;
-  expandedRadius?: number;
-  animation?: boolean;
-  padding?: number;
-}
-
-export interface NodeGraphData extends NodeData {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-  isLayoutCalculated: boolean;
-  parent?: ComboGraphData;
-  scale: number;
-}
-
-export interface EdgeGraphData extends Partial<GraphItem>, EdgeData {
-  points: number[];
-  scale: number;
-}
-
-export interface ComboGraphDataChild {
-  nodes: Record<string, NodeGraphData>;
-  combos: Record<string, ComboGraphData>;
-  edges: Record<string, EdgeGraphData>;
-}
-
-export interface ComboGraphData extends ComboData {
-  x: number;
-  y: number;
-  color: string;
-  radius: number;
-  child?: ComboGraphDataChild;
-  collapsedRadius: number;
-  expandedRadius: number;
-  padding: number;
-  isLayoutCalculated: boolean;
-  parent?: ComboGraphData;
-  scale: number;
-}
-
-export interface ComboGraphDataHookBase extends Omit<ComboGraphData, "child"> {
-  nodes?: Record<string, NodeGraphData>;
-  edges?: Record<string, EdgeGraphData>;
+export interface GraphComboHookBase extends GraphComboData {
+  nodes?: Record<string, GraphNode>;
+  edges?: Record<string, GraphArrow>;
   combos?: string[];
 }
 
-export interface ComboGraphDataHook extends ComboGraphDataHookBase {
+export interface GraphComboHook extends GraphComboHookBase {
   comboRadiusChange: (id: string, radius: number) => void;
   comboCollapsed: (id: string) => void;
   comboDragMove: (id: string, e: Konva.KonvaEventObject<DragEvent>) => void;
   comboDragEnd: (id: string, e: Konva.KonvaEventObject<DragEvent>) => void;
   comboHover: () => void;
-}
-
-interface CurRender {
-  nodes: Record<string, NodeGraphData>;
-  edges: Record<string, EdgeGraphData>;
-  combos: Record<string, ComboGraphData>;
 }
 
 export interface GraphDataConfig {
@@ -196,18 +103,18 @@ const defaultConfig: GraphDataConfig = {
 };
 
 export class GraphData {
-  private nodes: Map<string, NodeGraphData> = new Map();
-  private edges: Map<string, EdgeGraphData> = new Map();
-  private combos: Map<string, ComboGraphData> = new Map();
+  private nodes: Map<string, GraphNode> = new Map();
+  private edges: Map<string, GraphArrow> = new Map();
+  private combos: Map<string, GraphCombo> = new Map();
 
   private comboChildMap: Map<string, string> = new Map();
   private edgeParentMap: Map<string, string> = new Map();
 
   private callback: Record<string, GraphDataCallback> = {};
 
-  private comboToCreate: ComboData[] = [];
-  private nodeToCreate: NodeData[] = [];
-  private edgeToCreate: EdgeData[] = [];
+  private comboToCreate: GraphComboData[] = [];
+  private nodeToCreate: GraphNodeData[] = [];
+  private edgeToCreate: GraphArrowData[] = [];
   private edgeIds: Record<string, Set<string>> = {};
 
   private config: GraphDataConfig;
@@ -224,9 +131,9 @@ export class GraphData {
   private layoutInProgress: Set<string> = new Set();
 
   constructor(
-    nodes: NodeData[],
-    edges: EdgeData[],
-    combos: ComboData[],
+    nodes: GraphNodeData[],
+    edges: GraphArrowData[],
+    combos: GraphComboData[],
     config?: GraphDataConfig,
     projectPath?: string,
     targetPath?: string,
@@ -302,10 +209,10 @@ export class GraphData {
 
               // Trigger parent layout to accommodate new radius if not collapsed
               if (!combo.collapsed) {
-                if (combo.combo == null) {
+                if (combo.parent == null) {
                   this.layout(true);
                 } else {
-                  this.calculateComboChildrenLayout(combo.combo, true);
+                  this.calculateComboChildrenLayout(combo.parent.id, true);
                 }
               }
             }
@@ -416,9 +323,9 @@ export class GraphData {
   }
 
   public setData(
-    nodes: NodeData[],
-    edges: EdgeData[],
-    combos: ComboData[],
+    nodes: GraphNodeData[],
+    edges: GraphArrowData[],
+    combos: GraphComboData[],
     projectPath?: string,
     targetPath?: string,
   ) {
@@ -433,7 +340,7 @@ export class GraphData {
     });
   }
 
-  private getComboHook(id: string): ComboGraphDataHookBase | undefined {
+  private getComboHook(id: string): GraphComboHookBase | undefined {
     const combo = this.getComboByID(id);
     if (combo == null) return;
 
@@ -447,7 +354,7 @@ export class GraphData {
 
   public useCombo(id: string) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [state, setState] = useState<ComboGraphDataHook | null>(null);
+    const [state, setState] = useState<GraphComboHook | null>(null);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const callback = useCallback(
@@ -456,7 +363,7 @@ export class GraphData {
           const combo = this.getComboHook(id);
           if (combo == null) return;
 
-          setState((s) => {
+          setState((s: GraphComboHook | null) => {
             if (s == null) return null;
 
             return {
@@ -468,7 +375,7 @@ export class GraphData {
           const combo = this.getComboHook(id);
           if (combo == null) return;
 
-          setState((s) => {
+          setState((s: GraphComboHook | null) => {
             if (s == null) return null;
 
             return {
@@ -488,14 +395,14 @@ export class GraphData {
 
       this.innerCallback.set(id, callback);
 
-      const newData: ComboGraphDataHook = {
+      const newData: GraphComboHook = {
         ...combo,
         comboCollapsed: (id: string) => {
           this.comboCollapsed(id);
           const combo = this.getComboHook(id);
           if (combo == null) return;
 
-          setState((s) => {
+          setState((s: GraphComboHook | null) => {
             if (s == null) return null;
 
             return {
@@ -509,7 +416,7 @@ export class GraphData {
           const combo = this.getComboHook(id);
           if (combo == null) return;
 
-          setState((s) => {
+          setState((s: GraphComboHook | null) => {
             if (s == null) return null;
 
             return {
@@ -526,7 +433,7 @@ export class GraphData {
           const combo = this.getComboHook(id);
           if (combo == null) return;
 
-          setState((s) => {
+          setState((s: GraphComboHook | null) => {
             if (s == null) return null;
 
             return {
@@ -629,23 +536,8 @@ export class GraphData {
     } as LayoutRequest);
   }
 
-  private getConnectorPoints = (
-    from: NodeGraphData | ComboGraphData,
-    to: NodeGraphData | ComboGraphData,
-  ) => {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const angle = Math.atan2(-dy, dx);
 
-    return [
-      from.x + -from.radius * Math.cos(angle + Math.PI),
-      from.y + from.radius * Math.sin(angle + Math.PI),
-      to.x + -to.radius * Math.cos(angle),
-      to.y + to.radius * Math.sin(angle),
-    ];
-  };
-
-  private _addChildEdge(e: EdgeData): boolean {
+  private _addChildEdge(e: GraphArrowData): boolean {
     if (e.combo == null) {
       return false;
     }
@@ -669,11 +561,11 @@ export class GraphData {
         return false;
       }
 
-      parentCombo.child.edges[e.id] = {
+      parentCombo.child.edges[e.id] = new GraphArrow({
         ...e,
         points: [],
         scale: Math.min(srcNode.scale, targetNode.scale),
-      };
+      });
       this.edgeParentMap.set(e.id, parentCombo.id);
       this.updateEdgePos([e.id]);
       return true;
@@ -682,7 +574,7 @@ export class GraphData {
     return false;
   }
 
-  private _addChildNode(c: NodeData): boolean {
+  private _addChildNode(c: GraphNodeData): boolean {
     if (c.combo == null) {
       console.error("_addChildNode parent is null", c);
       return false;
@@ -720,7 +612,7 @@ export class GraphData {
         radius *= scale;
       }
 
-      parentCombo.child.nodes[c.id] = {
+      parentCombo.child.nodes[c.id] = new GraphNode({
         ...c,
         radius,
         color: c.color ?? this.config.node.color,
@@ -729,7 +621,7 @@ export class GraphData {
         y: y ?? (Math.random() - 0.5) * (size + 1) * 10 * scale,
         parent: parentCombo,
         scale,
-      };
+      });
       this.comboChildMap.set(c.id, c.combo);
       return true;
     }
@@ -749,7 +641,7 @@ export class GraphData {
       return;
     }
 
-    const newNodeToCreate: NodeData[] = [];
+    const newNodeToCreate: GraphNodeData[] = [];
     for (const c of this.nodeToCreate) {
       if (this._addChildNode(c)) {
         continue;
@@ -766,19 +658,22 @@ export class GraphData {
     }
   }
 
-  public addNodes(nodes: NodeData[]) {
+  public addNodes(nodes: GraphNodeData[]) {
     this.nodes.clear();
     for (const n of nodes) {
       if (n.combo == null) {
-        this.nodes.set(n.id, {
-          ...n,
-          radius: n.ui?.radius ?? n.radius ?? 20,
-          color: n.color ?? this.config.node.color,
-          isLayoutCalculated: !!n.ui?.isLayoutCalculated,
-          x: n.ui?.x ?? n.x ?? (Math.random() - 0.5) * 100, // Use UI position if available
-          y: n.ui?.y ?? n.y ?? (Math.random() - 0.5) * 100,
-          scale: 1,
-        });
+        this.nodes.set(
+          n.id,
+          new GraphNode({
+            ...n,
+            radius: n.ui?.radius ?? n.radius ?? 20,
+            color: n.color ?? this.config.node.color,
+            isLayoutCalculated: !!n.ui?.isLayoutCalculated,
+            x: n.ui?.x ?? n.x ?? (Math.random() - 0.5) * 100, // Use UI position if available
+            y: n.ui?.y ?? n.y ?? (Math.random() - 0.5) * 100,
+            scale: 1,
+          }),
+        );
         continue;
       }
 
@@ -812,8 +707,8 @@ export class GraphData {
     return this.getPointByID(id);
   }
 
-  public getPointByID(id: string): NodeGraphData | ComboGraphData | undefined {
-    let item: NodeGraphData | ComboGraphData | undefined =
+  public getPointByID(id: string): GraphNode | GraphCombo | undefined {
+    let item: GraphNode | GraphCombo | undefined =
       this.nodes.get(id) ?? this.combos.get(id);
 
     if (!item) {
@@ -830,7 +725,7 @@ export class GraphData {
   }
 
   private createEdges() {
-    const newEdgesToCreate: EdgeData[] = [];
+    const newEdgesToCreate: GraphArrowData[] = [];
     for (const e of this.edgeToCreate) {
       if (e.combo == null) {
         const srcNode = this.getPointId(e.source);
@@ -841,11 +736,14 @@ export class GraphData {
           continue;
         }
 
-        this.edges.set(e.id, {
-          ...e,
-          points: [],
-          scale: Math.min(srcNode.scale, targetNode.scale),
-        });
+        this.edges.set(
+          e.id,
+          new GraphArrow({
+            ...e,
+            points: [],
+            scale: Math.min(srcNode.scale, targetNode.scale),
+          }),
+        );
         this.updateEdgePos([e.id]);
         continue;
       }
@@ -858,7 +756,7 @@ export class GraphData {
     this.edgeToCreate = newEdgesToCreate;
   }
 
-  public addEdges(edges: EdgeData[]) {
+  public addEdges(edges: GraphArrowData[]) {
     this.edges.clear();
     this.edgeParentMap.clear();
     for (const e of edges) {
@@ -874,11 +772,14 @@ export class GraphData {
           continue;
         }
 
-        this.edges.set(e.id, {
-          ...e,
-          points: [],
-          scale: Math.min(srcNode.scale, targetNode.scale),
-        });
+        this.edges.set(
+          e.id,
+          new GraphArrow({
+            ...e,
+            points: [],
+            scale: Math.min(srcNode.scale, targetNode.scale),
+          }),
+        );
         this.updateEdgePos([e.id]);
         this.edgeParentMap.delete(e.id);
       }
@@ -893,7 +794,7 @@ export class GraphData {
     this.trigger({ type: "new-edges" });
   }
 
-  private getComboByID(id: string): ComboGraphData | undefined {
+  private getComboByID(id: string): GraphCombo | undefined {
     if (this.combos.has(id)) {
       const parentCombo = this.combos.get(id);
       if (parentCombo != null) {
@@ -914,7 +815,7 @@ export class GraphData {
     return undefined;
   }
 
-  private _addChildCombo(c: ComboData): boolean {
+  private _addChildCombo(c: GraphComboData): boolean {
     if (c.combo == null) {
       console.error("_addChildCombo parent is null", c);
       return false;
@@ -945,7 +846,7 @@ export class GraphData {
         expandedRadius *= scale;
       }
 
-      parentCombo.child.combos[c.id] = {
+      parentCombo.child.combos[c.id] = new GraphCombo({
         ...c,
         radius: c.collapsed ? collapsedRadius : expandedRadius,
         color: c.color ?? this.config.combo.color,
@@ -957,7 +858,7 @@ export class GraphData {
         isLayoutCalculated: !!c.ui?.isLayoutCalculated,
         parent: parentCombo,
         scale,
-      };
+      });
       this.comboChildMap.set(c.id, c.combo);
       return true;
     }
@@ -971,7 +872,7 @@ export class GraphData {
       return;
     }
 
-    const newComboToCreate: ComboData[] = [];
+    const newComboToCreate: GraphComboData[] = [];
     for (const c of this.comboToCreate) {
       if (this._addChildCombo(c)) {
         continue;
@@ -988,7 +889,7 @@ export class GraphData {
     }
   }
 
-  public addCombos(combos: ComboData[]) {
+  public addCombos(combos: GraphComboData[]) {
     this.combos.clear();
     for (const c of combos) {
       if (c.combo == null) {
@@ -997,18 +898,21 @@ export class GraphData {
         const expandedRadius =
           c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
 
-        this.combos.set(c.id, {
-          ...c,
-          radius: c.collapsed ? collapsedRadius : expandedRadius,
-          color: c.color ?? this.config.combo.color,
-          collapsedRadius,
-          expandedRadius,
-          x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * combos.length * 10,
-          y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 10,
-          padding: c.padding ?? this.config.combo.padding,
-          isLayoutCalculated: !!c.ui?.isLayoutCalculated,
-          scale: 1,
-        });
+        this.combos.set(
+          c.id,
+          new GraphCombo({
+            ...c,
+            radius: c.collapsed ? collapsedRadius : expandedRadius,
+            color: c.color ?? this.config.combo.color,
+            collapsedRadius,
+            expandedRadius,
+            x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * combos.length * 10,
+            y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 10,
+            padding: c.padding ?? this.config.combo.padding,
+            isLayoutCalculated: !!c.ui?.isLayoutCalculated,
+            scale: 1,
+          }),
+        );
         continue;
       }
 
@@ -1051,10 +955,10 @@ export class GraphData {
     }
 
     // Recalculate parent layout when expanding/collapsing to avoid overlaps/gaps
-    if (combo.combo == null) {
+    if (combo.parent == null) {
       this.layout(true);
     } else {
-      this.calculateComboChildrenLayout(combo.combo, true);
+      this.calculateComboChildrenLayout(combo.parent.id, true);
     }
   }
 
@@ -1105,17 +1009,10 @@ export class GraphData {
 
       if (parentId == null) {
         // Top-level edge or absolute coordinate space required
-        const srcPos = this.getAbsolutePosition(srcNode.id);
-        const targetPos = this.getAbsolutePosition(targetNode.id);
-        if (srcPos && targetPos) {
-          edge.points = this.getConnectorPoints(
-            { ...srcNode, ...srcPos },
-            { ...targetNode, ...targetPos },
-          );
-        }
+        edge.updatePoints(srcNode, targetNode, true);
       } else {
         // Nested edge: use local positions (siblings)
-        edge.points = this.getConnectorPoints(srcNode, targetNode);
+        edge.updatePoints(srcNode, targetNode, false);
       }
     }
   }
@@ -1144,7 +1041,7 @@ export class GraphData {
     return Array.from(edgeIds);
   }
 
-  private calculateComboRadius(combo: ComboGraphData): number {
+  private calculateComboRadius(combo: GraphCombo): number {
     let maxRadius = 0;
 
     for (const node of Object.values(combo.child?.nodes ?? {})) {
@@ -1216,7 +1113,8 @@ export class GraphData {
     // const parentCombo = this.getTopParent(id);
     // if (parentCombo == null) return;
 
-    if (combo.combo == null) {
+    const parentId = combo.combo;
+    if (parentId == null) {
       this.trigger({
         type: "combo-drag-move",
         id: combo.id,
@@ -1225,8 +1123,8 @@ export class GraphData {
       return;
     }
 
-    this.updateComboRadius(combo.combo);
-    const cb = this.innerCallback.get(combo.combo);
+    this.updateComboRadius(parentId);
+    const cb = this.innerCallback.get(parentId);
     if (cb == null) return;
 
     cb({
@@ -1234,9 +1132,9 @@ export class GraphData {
     });
 
     if (combo.parent != null) {
-      this.updateComboRadius(combo.parent.id);
+      this.updateComboRadius(parentId);
 
-      const parentCb = this.innerCallback.get(combo.parent.id);
+      const parentCb = this.innerCallback.get(parentId);
       if (parentCb == null) return;
 
       parentCb({
@@ -1295,10 +1193,11 @@ export class GraphData {
       type: "child-moved",
     });
 
-    if (combo.parent != null) {
-      this.updateComboRadius(combo.parent.id);
+    const comboId = combo.combo;
+    if (comboId) {
+      this.updateComboRadius(comboId);
 
-      const parentCb = this.innerCallback.get(combo.parent.id);
+      const parentCb = this.innerCallback.get(comboId);
       if (parentCb == null) return;
 
       parentCb({
@@ -1318,12 +1217,12 @@ export class GraphData {
     id: string,
     limitId?: string,
   ):
-    | { item: NodeGraphData | ComboGraphData; isCollapsedAncestor: boolean }
+    | { item: GraphNode | GraphCombo; isCollapsedAncestor: boolean }
     | undefined {
     const item = this.getPointByID(id);
     if (!item) return undefined;
 
-    let highestCollapsed: ComboGraphData | undefined = undefined;
+    let highestCollapsed: GraphCombo | undefined = undefined;
 
     let p = item.parent;
     while (p && p.id !== limitId) {
@@ -1340,7 +1239,7 @@ export class GraphData {
   }
 
   public getAbsolutePosition(id: string): { x: number; y: number } | undefined {
-    let item: NodeGraphData | ComboGraphData | undefined =
+    let item: GraphNode | GraphCombo | undefined =
       this.nodes.get(id) ?? this.combos.get(id);
 
     if (!item) {
@@ -1386,12 +1285,12 @@ export class GraphData {
     return Object.fromEntries(this.combos);
   }
 
-  public updateCombo(combo: ComboGraphData) {
+  public updateCombo(combo: GraphCombo) {
     const target = this.getComboByID(combo.id);
     if (target) {
       Object.assign(target, combo);
     } else {
-      this.combos.set(combo.id, combo);
+      this.combos.set(combo.id, new GraphCombo(combo));
     }
 
     this.trigger({ type: "new-combos" });
@@ -1404,21 +1303,21 @@ export class GraphData {
     });
   }
 
-  public updateNode(node: NodeGraphData) {
+  public updateNode(node: GraphNode) {
     const target = this.getPointId(node.id);
     if (target) {
       Object.assign(target, node);
     } else {
-      this.nodes.set(node.id, node);
+      this.nodes.set(node.id, new GraphNode(node));
     }
     this.trigger({ type: "new-nodes" });
   }
 
-  public getAllNodes(): NodeGraphData[] {
-    const all: NodeGraphData[] = [];
+  public getAllNodes(): GraphNode[] {
+    const all: GraphNode[] = [];
     const collect = (
-      nodes: Record<string, NodeGraphData>,
-      combos: Record<string, ComboGraphData>,
+      nodes: Record<string, GraphNode>,
+      combos: Record<string, GraphCombo>,
     ) => {
       for (const n of Object.values(nodes)) {
         all.push(n);
@@ -1433,9 +1332,9 @@ export class GraphData {
     return all;
   }
 
-  public getAllCombos(): ComboGraphData[] {
-    const all: ComboGraphData[] = [];
-    const collect = (combos: Record<string, ComboGraphData>) => {
+  public getAllCombos(): GraphCombo[] {
+    const all: GraphCombo[] = [];
+    const collect = (combos: Record<string, GraphCombo>) => {
       for (const c of Object.values(combos)) {
         all.push(c);
         if (c.child) {
@@ -1466,10 +1365,10 @@ export class GraphData {
         this.calculateComboChildrenLayout(parentId, true);
 
         // Recalculate parent layout when expanding to avoid overlaps
-        if (parent.combo == null) {
+        if (parent.parent == null) {
           this.layout(true);
         } else {
-          this.calculateComboChildrenLayout(parent.combo, true);
+          this.calculateComboChildrenLayout(parent.parent.id, true);
         }
 
         // Trigger update for the parent combo (internal)
@@ -1485,7 +1384,7 @@ export class GraphData {
   public getNode(id: string) {
     const point = this.getPointByID(id);
     if (point && !("collapsedRadius" in point)) {
-      return point as NodeGraphData;
+      return point as GraphNode;
     }
     return undefined;
   }
@@ -1598,15 +1497,15 @@ export class GraphData {
     combos: {},
   };
 
-  public getCurNodes() {
+  public getCurNodes(): Record<string, GraphNode> {
     return this.curRender.nodes;
   }
 
-  public getCurEdges() {
+  public getCurEdges(): Record<string, GraphArrow> {
     return this.curRender.edges;
   }
 
-  public getCurCombos() {
+  public getCurCombos(): Record<string, GraphCombo> {
     return this.curRender.combos;
   }
 
