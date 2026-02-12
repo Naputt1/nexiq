@@ -29,6 +29,7 @@ import type {
   PnpmWorkspace,
   ProjectStatus,
   ReactMapConfig,
+  SubProject,
 } from "./types";
 import type {
   JsonData,
@@ -473,6 +474,7 @@ ipcMain.handle(
             },
           );
 
+          const subProjects: SubProject[] = [];
           for (const entry of entries) {
             try {
               const pkg = JSON.parse(
@@ -480,7 +482,7 @@ ipcMain.handle(
               ) as PackageJson;
               // We only care about packages that look like apps (vite/next) or have main/module?
               // For now, list all.
-              status.subProjects.push({
+              subProjects.push({
                 name: pkg.name || path.basename(path.dirname(entry)),
                 path: path.dirname(entry),
               });
@@ -488,6 +490,13 @@ ipcMain.handle(
               // ignore
             }
           }
+
+          // Discovery logic for subprojects...
+          // (Existing code for finding subprojects)
+
+          // DO NOT filter subprojects here anymore, so they show up in Settings
+          // status.subProjects = subProjects.filter(...)
+          status.subProjects = subProjects;
         } catch (e) {
           console.error("Error resolving workspaces", e);
         }
@@ -513,25 +522,46 @@ ipcMain.handle(
   "save-project-config",
   async (
     _: IpcMainInvokeEvent,
-    {
-      config,
-      directoryPath,
-    }: { config: ReactMapConfig; directoryPath: string },
+    { config, directoryPath }: { config: ReactMapConfig; directoryPath: string },
   ) => {
     try {
+      // Load existing config to check if ignorePatterns changed
       const configPath = path.join(directoryPath, "react.map.config.json");
-      const dotDir = path.join(directoryPath, ".react-map");
-
-      if (!fs.existsSync(dotDir)) {
-        fs.mkdirSync(dotDir, { recursive: true });
+      let oldConfig: ReactMapConfig | null = null;
+      if (fs.existsSync(configPath)) {
+        try {
+          oldConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        } catch (e) {
+          console.error("Failed to read old config", e);
+        }
       }
 
-      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      const configContent = JSON.stringify(config, null, 2);
+      fs.writeFileSync(configPath, configContent);
       store.addRecentProject(directoryPath);
+
+      // If ignorePatterns changed, clear the analysis cache to force re-analysis
+      const patternsChanged =
+        JSON.stringify(oldConfig?.ignorePatterns) !==
+        JSON.stringify(config.ignorePatterns);
+
+      if (patternsChanged) {
+        const cacheDir = path.join(directoryPath, ".react-map", "cache");
+        if (fs.existsSync(cacheDir)) {
+          const files = fs.readdirSync(cacheDir);
+          for (const file of files) {
+            if (file.endsWith(".json")) {
+              fs.unlinkSync(path.join(cacheDir, file));
+            }
+          }
+          console.log("Ignore patterns changed, cleared cache.");
+        }
+      }
+
       return true;
     } catch (error) {
       console.error("Error saving config:", error);
-      throw error;
+      return false;
     }
   },
 );
@@ -764,7 +794,18 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
   console.log("Running analysis on:", targetPath, "into:", outputPath);
 
   try {
-    const graph = analyzeProject(targetPath, outputPath);
+    const configPath = path.join(configRoot, "react.map.config.json");
+    let ignorePatterns: string[] | undefined = undefined;
+    if (fs.existsSync(configPath)) {
+      try {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        ignorePatterns = config.ignorePatterns;
+      } catch (e) {
+        console.warn("Failed to load config for analysis", e);
+      }
+    }
+
+    const graph = analyzeProject(targetPath, outputPath, ignorePatterns);
 
     // Merge with existing position data if available
     if (fs.existsSync(outputPath)) {
@@ -984,7 +1025,19 @@ ipcMain.handle(
         ? path.join(tempDir.name, relativeSubPath)
         : tempDir.name;
 
-      const graph = analyzeProject(analysisPath);
+      // Load ignore patterns from the project root config to apply to Git analysis
+      const configPath = path.join(projectRoot, "react.map.config.json");
+      let ignorePatterns: string[] | undefined = undefined;
+      if (fs.existsSync(configPath)) {
+        try {
+          const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+          ignorePatterns = config.ignorePatterns;
+        } catch (e) {
+          console.warn("Failed to load config for git analysis", e);
+        }
+      }
+
+      const graph = analyzeProject(analysisPath, undefined, ignorePatterns);
       fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
       return graph;
     } finally {
@@ -1296,6 +1349,65 @@ ipcMain.handle(
     } catch (e) {
       console.error("Failed to update graph positions", e);
       return false;
+    }
+  },
+);
+
+ipcMain.handle(
+  "get-project-icon",
+  async (_: IpcMainInvokeEvent, projectRoot: string): Promise<string | null> => {
+    try {
+      // 1. Check for local icons
+      const localIcons = [
+        "favicon.ico",
+        "logo.svg",
+        "logo.png",
+        "vite.svg",
+        "public/favicon.ico",
+        "public/logo.svg",
+        "public/logo.png",
+        "public/vite.svg",
+      ];
+
+      for (const icon of localIcons) {
+        const iconPath = path.join(projectRoot, icon);
+        if (fs.existsSync(iconPath)) {
+          const buffer = fs.readFileSync(iconPath);
+          const ext = path.extname(icon).toLowerCase();
+          const mimeType =
+            ext === ".svg"
+              ? "image/svg+xml"
+              : ext === ".ico"
+                ? "image/x-icon"
+                : `image/${ext.slice(1)}`;
+          return `data:${mimeType};base64,${buffer.toString("base64")}`;
+        }
+      }
+
+      // 2. Check for GitHub remote
+      if (fs.existsSync(path.join(projectRoot, ".git"))) {
+        const git = simpleGit(projectRoot);
+        try {
+          const remotes = await git.getRemotes(true);
+          const origin = remotes.find((r) => r.name === "origin") || remotes[0];
+          if (origin && origin.refs.fetch) {
+            const url = origin.refs.fetch;
+            // Match github.com/owner/repo or github.com:owner/repo
+            const match = url.match(/github\.com[/:]([^/]+)\//);
+            if (match && match[1]) {
+              const owner = match[1];
+              return `https://github.com/${owner}.png`;
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to get git remotes", e);
+        }
+      }
+
+      return null;
+    } catch (e) {
+      console.error("Failed to get project icon", e);
+      return null;
     }
   },
 );

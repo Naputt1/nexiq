@@ -105,6 +105,7 @@ declare global {
         positions: Record<string, { x: number; y: number; radius?: number }>,
         contextId?: string,
       ): Promise<boolean>;
+      invoke(channel: "get-project-icon", projectRoot: string): Promise<string | null>;
     };
   }
 }

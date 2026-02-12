@@ -48,3 +48,19 @@ describe("analyser snapshots", () => {
     });
   });
 });
+
+describe("analyser ignore patterns", () => {
+  it("should respect ignore patterns in getFiles", () => {
+    const projectPath = path.resolve(
+      process.cwd(),
+      "../sample-project/simple",
+    );
+    
+    const allFiles = getFiles(projectPath);
+    const ignoredFiles = getFiles(projectPath, ["**/App.tsx"]);
+    
+    expect(allFiles.length).toBeGreaterThan(ignoredFiles.length);
+    expect(allFiles).toContain("src/App.tsx");
+    expect(ignoredFiles).not.toContain("src/App.tsx");
+  });
+});
