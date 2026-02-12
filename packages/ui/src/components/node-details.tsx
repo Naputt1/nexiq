@@ -14,6 +14,7 @@ import type { ComboData, NodeData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 import React, { useEffect } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
+import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { GitDiffView } from "./GitDiffView";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,8 @@ export function NodeDetails({
   projectPath,
   onClose,
 }: NodeDetailsProps) {
-  const { diffs, selectedCommit, loadDiff } = useGitStore();
+  const { diffs, loadDiff } = useGitStore();
+  const selectedCommit = useAppStateStore((s) => s.selectedCommit);
 
   const item: NodeData | ComboData | undefined = selectedId
     ? nodes[selectedId] || combos[selectedId]

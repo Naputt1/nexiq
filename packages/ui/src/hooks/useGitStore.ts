@@ -11,7 +11,10 @@ interface GitState {
 
   // Actions
   refreshStatus: (projectRoot: string) => Promise<void>;
-  loadHistory: (projectRoot: string, limit?: number) => Promise<void>;
+  loadHistory: (
+    projectRoot: string,
+    options?: number | { limit?: number; path?: string },
+  ) => Promise<void>;
   stageFiles: (projectRoot: string, files: string[]) => Promise<void>;
   unstageFiles: (projectRoot: string, files: string[]) => Promise<void>;
   loadDiff: (
@@ -23,6 +26,7 @@ interface GitState {
     commitHash: string | null,
     subPath?: string,
   ) => Promise<JsonData | undefined>;
+  clearAnalyzedDiffCache: () => void;
 }
 
 export const useGitStore = create<GitState>((set, get) => ({
@@ -37,7 +41,16 @@ export const useGitStore = create<GitState>((set, get) => ({
     set({ isLoading: true });
     try {
       const status = await window.ipcRenderer.invoke("git-status", projectRoot);
-      set({ status, error: null });
+      // Clear "current" entries from analyzedDiffs cache when status is refreshed
+      set((state) => {
+        const newAnalyzedDiffs = { ...state.analyzedDiffs };
+        Object.keys(newAnalyzedDiffs).forEach((key) => {
+          if (key.startsWith("current")) {
+            delete newAnalyzedDiffs[key];
+          }
+        });
+        return { status, analyzedDiffs: newAnalyzedDiffs, error: null };
+      });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : String(e) });
     } finally {
@@ -45,13 +58,16 @@ export const useGitStore = create<GitState>((set, get) => ({
     }
   },
 
-  loadHistory: async (projectRoot: string, limit?: number) => {
+  loadHistory: async (
+    projectRoot: string,
+    options?: number | { limit?: number; path?: string },
+  ) => {
     set({ isLoading: true });
     try {
       const history = await window.ipcRenderer.invoke(
         "git-log",
         projectRoot,
-        limit,
+        options,
       );
       set({ history, error: null });
     } catch (e) {
@@ -170,4 +186,7 @@ export const useGitStore = create<GitState>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  clearAnalyzedDiffCache: () => set({ analyzedDiffs: {} }),
 }));
+

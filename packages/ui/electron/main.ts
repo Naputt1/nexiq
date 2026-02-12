@@ -20,7 +20,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const tmp = require("tmp");
-import { simpleGit } from "simple-git";
+import { simpleGit, type LogOptions } from "simple-git";
 import { analyzeProject } from "analyser";
 
 import type {
@@ -567,10 +567,26 @@ ipcMain.handle(
   async (
     _: IpcMainInvokeEvent,
     projectRoot: string,
-    limit: number = 50,
+    options: number | { limit?: number; path?: string } = 50,
   ): Promise<GitCommit[]> => {
     const git = simpleGit(projectRoot);
-    const log = await git.log({ maxCount: limit });
+
+    let limit = 50;
+    let pathFilter: string | undefined;
+
+    if (typeof options === "number") {
+      limit = options;
+    } else {
+      limit = options.limit || 50;
+      pathFilter = options.path;
+    }
+
+    const logOptions: LogOptions = { maxCount: limit };
+    if (pathFilter) {
+      logOptions.file = pathFilter;
+    }
+
+    const log = await git.log(logOptions);
 
     return log.all.map((commit) => ({
       hash: commit.hash,
