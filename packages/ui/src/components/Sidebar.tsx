@@ -41,7 +41,8 @@ export function ProjectSidebar({
   isLoading,
 }: SidebarProps) {
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
-  const { activeTab, setActiveTab } = useAppStateStore();
+  const activeTab = useAppStateStore((s) => s.activeTab);
+  const setActiveTab = useAppStateStore((s) => s.setActiveTab);
 
   useEffect(() => {
     const fetchSubProjects = async () => {
