@@ -35,7 +35,8 @@ export function NodeDetails({
   projectPath,
   onClose,
 }: NodeDetailsProps) {
-  const { diffs, loadDiff } = useGitStore();
+  const diffs = useGitStore((s) => s.diffs);
+  const loadDiff = useGitStore((s) => s.loadDiff);
   const selectedCommit = useAppStateStore((s) => s.selectedCommit);
 
   const item: NodeData | ComboData | undefined = selectedId
