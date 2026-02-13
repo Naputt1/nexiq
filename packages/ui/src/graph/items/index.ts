@@ -13,6 +13,7 @@ import type { LabelData } from "../label";
 import type { GraphArrow } from "./arrow";
 import type { GraphCombo } from "./combo";
 import type { GraphNode } from "./node";
+import type { CustomColors } from "../../../electron/types";
 
 export * from "./arrow";
 export * from "./combo";
@@ -36,6 +37,8 @@ export interface RenderContext {
   onSelect?: (id: string) => void;
   hasGitChanges: boolean;
   stage: Konva.Stage;
+  theme: "dark" | "light";
+  customColors?: CustomColors;
 }
 
 export interface Renderable {

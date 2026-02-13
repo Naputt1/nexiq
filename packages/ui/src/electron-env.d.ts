@@ -6,6 +6,7 @@ import {
   IpcEvents,
   ProjectStatus,
   ReactMapConfig,
+  GlobalSettings,
 } from "../electron/types";
 
 declare global {
@@ -106,6 +107,8 @@ declare global {
         contextId?: string,
       ): Promise<boolean>;
       invoke(channel: "get-project-icon", projectRoot: string): Promise<string | null>;
+      invoke(channel: "get-global-config"): Promise<GlobalSettings>;
+      invoke(channel: "save-global-config", config: GlobalSettings): Promise<boolean>;
     };
   }
 }

@@ -1,8 +1,10 @@
 import React, { type JSX } from "react";
 import type { FuncParam, TypeData, TypeDataDeclare } from "shared";
-import { TypeColors } from "./type-colors";
+import { TypeColorClasses } from "./type-colors";
 import { cn } from "@/lib/utils";
 import { TypeRefRenderer } from "./type-ref-renderer";
+import { useConfigStore } from "@/hooks/use-config-store";
+import type { CustomColors } from "../../electron/types";
 
 interface TypeRendererProps {
   type: TypeData | undefined;
@@ -14,36 +16,38 @@ const FuncParamRenderer: React.FC<{
   param: FuncParam;
   typeData: Record<string, TypeDataDeclare>;
   depth: number;
-}> = ({ param, typeData, depth }) => {
+  getStyle: (key: keyof typeof TypeColorClasses) => { className: string; style: React.CSSProperties };
+}> = ({ param, typeData, depth, getStyle }) => {
   const p = param;
 
   switch (p.type) {
     case "named":
-      return <span className={TypeColors.component}>{p.name}</span>;
+      return <span {...getStyle("typeComponent")}>{p.name}</span>;
     case "rest-element":
       return (
         <span>
-          <span className={TypeColors.punctuation}>...</span>
-          <span className={TypeColors.component}>{p.name}</span>
+          <span {...getStyle("typePunctuation")}>...</span>
+          <span {...getStyle("typeComponent")}>{p.name}</span>
         </span>
       );
     case "object-pattern":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"{"}</span>
+          <span {...getStyle("typePunctuation")}>{"{"}</span>
           {p.property.map((prop, i) => (
             <React.Fragment key={i}>
-              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              {i > 0 && <span {...getStyle("typePunctuation")}>, </span>}
               {prop.type === "object-property" ? (
                 <span>
-                  <span className={TypeColors.component}>{prop.key}</span>
+                  <span {...getStyle("typeComponent")}>{prop.key}</span>
                   {!prop.shorthand && (
                     <>
-                      <span className={TypeColors.punctuation}>: </span>
+                      <span {...getStyle("typePunctuation")}>: </span>
                       <FuncParamRenderer
                         param={prop.value}
                         typeData={typeData}
                         depth={depth}
+                        getStyle={getStyle}
                       />
                     </>
                   )}
@@ -53,17 +57,18 @@ const FuncParamRenderer: React.FC<{
                   param={prop}
                   typeData={typeData}
                   depth={depth}
+                  getStyle={getStyle}
                 />
               )}
             </React.Fragment>
           ))}
-          <span className={TypeColors.punctuation}>{"}"}</span>
+          <span {...getStyle("typePunctuation")}>{"}"}</span>
         </span>
       );
     case "array-pattern":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"["}</span>
+          <span {...getStyle("typePunctuation")}>{"["}</span>
           <span
             className={cn(
               "pl-4",
@@ -76,14 +81,15 @@ const FuncParamRenderer: React.FC<{
                   param={el}
                   typeData={typeData}
                   depth={depth}
+                  getStyle={getStyle}
                 />
                 {i < p.elements.length - 1 && (
-                  <span className={TypeColors.punctuation}>, </span>
+                  <span {...getStyle("typePunctuation")}>, </span>
                 )}
               </span>
             ))}
           </span>
-          <span className={TypeColors.punctuation}>{"]"}</span>
+          <span {...getStyle("typePunctuation")}>{"]"}</span>
         </span>
       );
     default:
@@ -96,10 +102,20 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
   typeData,
   depth = 0,
 }) => {
-  if (!type) return <span className={TypeColors.default}>any</span>;
+  const { customColors } = useConfigStore();
+
+  const getStyle = (key: keyof typeof TypeColorClasses) => {
+    const custom = customColors[key as keyof CustomColors];
+    return {
+      className: custom ? "" : TypeColorClasses[key],
+      style: custom ? { color: custom } : {},
+    };
+  };
+
+  if (!type) return <span {...getStyle("typeDefault")}>any</span>;
 
   // Prevent infinite recursion depth (optional safeguard)
-  if (depth > 10) return <span className={TypeColors.punctuation}>...</span>;
+  if (depth > 10) return <span {...getStyle("typePunctuation")}>...</span>;
 
   switch (type.type) {
     case "string":
@@ -112,20 +128,22 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
     case "any":
     case "unknown":
     case "never":
-      return <span className={TypeColors.keyword}>{type.type}</span>;
+      return <span {...getStyle("typeKeyword")}>{type.type}</span>;
 
     case "literal-type": {
       const literal = type.literal;
       if (literal.type === "string")
-        return <span className={TypeColors.string}>"{literal.value}"</span>;
+        return <span {...getStyle("typeString")}>"{literal.value}"</span>;
       if (literal.type === "number")
-        return <span className={TypeColors.number}>{literal.value}</span>;
+        return <span {...getStyle("typeNumber")}>{literal.value}</span>;
       if (literal.type === "boolean")
         return (
-          <span className={TypeColors.boolean}>{literal.value.toString()}</span>
+          <span {...getStyle("typeBoolean")}>
+            {literal.value.toString()}
+          </span>
         );
       if (literal.type == "bigint") {
-        return <span className={TypeColors.number}>{literal.value}</span>;
+        return <span {...getStyle("typeNumber")}>{literal.value}</span>;
       }
       if (literal.type === "template") {
         const template: JSX.Element[] = [];
@@ -155,12 +173,12 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           }
         }
 
-        return <span className={TypeColors.string}>`{template}`</span>;
+        return <span {...getStyle("typeString")}>`{template}`</span>;
       }
       if (literal.type === "unary") {
         if (literal.argument.type == "number") {
           return (
-            <span className={TypeColors.number}>
+            <span {...getStyle("typeNumber")}>
               {literal.prefix ? (
                 <>
                   {literal.operator}
@@ -177,37 +195,37 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
         }
       }
       return (
-        <span className={TypeColors.literal}>{JSON.stringify(literal)}</span>
+        <span {...getStyle("typeLiteral")}>{JSON.stringify(literal)}</span>
       );
     }
 
     case "literal-array":
       return (
         <span>
-          <span className={TypeColors.punctuation}>[</span>
+          <span {...getStyle("typePunctuation")}>[</span>
           {type.elements.map((el, i) => (
             <React.Fragment key={i}>
-              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              {i > 0 && <span {...getStyle("typePunctuation")}>, </span>}
               <TypeRenderer type={el} typeData={typeData} depth={depth} />
             </React.Fragment>
           ))}
-          <span className={TypeColors.punctuation}>]</span>
+          <span {...getStyle("typePunctuation")}>]</span>
         </span>
       );
 
     case "literal-object":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"{"}</span>
+          <span {...getStyle("typePunctuation")}>{"{"}</span>
           {Object.entries(type.properties).map(([key, val], i) => (
             <React.Fragment key={i}>
-              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
-              <span className={TypeColors.component}>{key}</span>
-              <span className={TypeColors.punctuation}>: </span>
+              {i > 0 && <span {...getStyle("typePunctuation")}>, </span>}
+              <span {...getStyle("typeComponent")}>{key}</span>
+              <span {...getStyle("typePunctuation")}>: </span>
               <TypeRenderer type={val} typeData={typeData} depth={depth + 1} />
             </React.Fragment>
           ))}
-          <span className={TypeColors.punctuation}>{"}"}</span>
+          <span {...getStyle("typePunctuation")}>{"}"}</span>
         </span>
       );
 
@@ -215,7 +233,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
       return (
         <span>
           <TypeRenderer type={type.element} typeData={typeData} depth={depth} />
-          <span className={TypeColors.punctuation}>[]</span>
+          <span {...getStyle("typePunctuation")}>[]</span>
         </span>
       );
 
@@ -225,7 +243,12 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           {type.members.map((member, i) => (
             <React.Fragment key={i}>
               {i > 0 && (
-                <span className={cn(TypeColors.punctuation, "mx-1")}>|</span>
+                <span
+                  {...getStyle("typePunctuation")}
+                  className={cn(getStyle("typePunctuation").className, "mx-1")}
+                >
+                  |
+                </span>
               )}
               <TypeRenderer type={member} typeData={typeData} depth={depth} />
             </React.Fragment>
@@ -239,7 +262,12 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
           {type.members.map((member, i) => (
             <React.Fragment key={i}>
               {i > 0 && (
-                <span className={cn(TypeColors.punctuation, "mx-1")}>&</span>
+                <span
+                  {...getStyle("typePunctuation")}
+                  className={cn(getStyle("typePunctuation").className, "mx-1")}
+                >
+                  &
+                </span>
               )}
               <TypeRenderer type={member} typeData={typeData} depth={depth} />
             </React.Fragment>
@@ -250,53 +278,53 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
     case "type-literal":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"{"}</span>
+          <span {...getStyle("typePunctuation")}>{"{"}</span>
           <div className="pl-4 flex flex-col">
             {type.members.map((member, i) => {
               if (member.signatureType === "property") {
                 return (
                   <div key={i}>
-                    <span className={TypeColors.component}>{member.name}</span>
+                    <span {...getStyle("typeComponent")}>{member.name}</span>
                     {member.optional && (
-                      <span className={TypeColors.punctuation}>?</span>
+                      <span {...getStyle("typePunctuation")}>?</span>
                     )}
-                    <span className={TypeColors.punctuation}>: </span>
+                    <span {...getStyle("typePunctuation")}>: </span>
                     <TypeRenderer
                       type={member.type}
                       typeData={typeData}
                       depth={depth + 1}
                     />
-                    <span className={TypeColors.punctuation}>;</span>
+                    <span {...getStyle("typePunctuation")}>;</span>
                   </div>
                 );
               }
               if (member.signatureType === "index") {
                 return (
                   <div key={i}>
-                    <span className={TypeColors.punctuation}>[</span>
-                    <span className={TypeColors.component}>
+                    <span {...getStyle("typePunctuation")}>[</span>
+                    <span {...getStyle("typeComponent")}>
                       {member.parameter.name}
                     </span>
-                    <span className={TypeColors.punctuation}>: </span>
+                    <span {...getStyle("typePunctuation")}>: </span>
                     <TypeRenderer
                       type={member.parameter.type}
                       typeData={typeData}
                       depth={depth + 1}
                     />
-                    <span className={TypeColors.punctuation}>]: </span>
+                    <span {...getStyle("typePunctuation")}>]: </span>
                     <TypeRenderer
                       type={member.type}
                       typeData={typeData}
                       depth={depth + 1}
                     />
-                    <span className={TypeColors.punctuation}>;</span>
+                    <span {...getStyle("typePunctuation")}>;</span>
                   </div>
                 );
               }
               return null;
             })}
           </div>
-          <span className={TypeColors.punctuation}>{"}"}</span>
+          <span {...getStyle("typePunctuation")}>{"}"}</span>
         </span>
       );
 
@@ -308,22 +336,22 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
     case "parenthesis":
       return (
         <span>
-          <span className={TypeColors.punctuation}>(</span>
+          <span {...getStyle("typePunctuation")}>(</span>
           <TypeRenderer type={type.members} typeData={typeData} depth={depth} />
-          <span className={TypeColors.punctuation}>)</span>
+          <span {...getStyle("typePunctuation")}>)</span>
         </span>
       );
 
     case "tuple":
       return (
-        <span className={TypeColors.punctuation}>
-          <span className={TypeColors.punctuation}>[</span>
+        <span {...getStyle("typePunctuation")}>
+          <span {...getStyle("typePunctuation")}>[</span>
           {type.elements.map((element, i) => (
             <React.Fragment key={i}>
-              {i > 0 && <span className={TypeColors.punctuation}>, </span>}
+              {i > 0 && <span {...getStyle("typePunctuation")}>, </span>}
               {element.type == "named" && (
                 <>
-                  <span className={TypeColors.component}>{element.name}</span>
+                  <span {...getStyle("typeComponent")}>{element.name}</span>
                   <span>{`${element.optional ? "?" : ""}: `}</span>
                 </>
               )}
@@ -334,22 +362,28 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               />
             </React.Fragment>
           ))}
-          <span className={TypeColors.punctuation}>]</span>
+          <span {...getStyle("typePunctuation")}>]</span>
         </span>
       );
     case "function":
       return (
         <span>
           {type.params && type.params.length > 0 && (
-            <span className={TypeColors.punctuation}>
+            <span {...getStyle("typePunctuation")}>
               {"<"}
               {type.params.map((p, i) => (
                 <React.Fragment key={i}>
-                  {i > 0 && <span className={TypeColors.punctuation}>, </span>}
-                  <span className={TypeColors.component}>{p.name}</span>
+                  {i > 0 && <span {...getStyle("typePunctuation")}>, </span>}
+                  <span {...getStyle("typeComponent")}>{p.name}</span>
                   {p.constraint && (
                     <>
-                      <span className={cn(TypeColors.punctuation, " mx-1")}>
+                      <span
+                        {...getStyle("typePunctuation")}
+                        className={cn(
+                          getStyle("typePunctuation").className,
+                          " mx-1",
+                        )}
+                      >
                         extends
                       </span>
                       <TypeRenderer
@@ -361,7 +395,13 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                   )}
                   {p.default && (
                     <>
-                      <span className={cn(TypeColors.punctuation, " mx-1")}>
+                      <span
+                        {...getStyle("typePunctuation")}
+                        className={cn(
+                          getStyle("typePunctuation").className,
+                          " mx-1",
+                        )}
+                      >
                         =
                       </span>
                       <TypeRenderer
@@ -376,7 +416,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
               {">"}
             </span>
           )}
-          <span className={TypeColors.punctuation}>(</span>
+          <span {...getStyle("typePunctuation")}>(</span>
           <span
             className={cn(
               type.parameters.length >= 3 ? "pl-4 flex flex-col" : "",
@@ -388,13 +428,14 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                   param={param.param}
                   typeData={typeData}
                   depth={depth}
+                  getStyle={getStyle}
                 />
                 {param.optional ? (
-                  <span className={TypeColors.punctuation}>?</span>
+                  <span {...getStyle("typePunctuation")}>?</span>
                 ) : undefined}
                 {param.typeData && (
                   <>
-                    <span className={TypeColors.punctuation}>: </span>
+                    <span {...getStyle("typePunctuation")}>: </span>
                     <TypeRenderer
                       type={param.typeData}
                       typeData={typeData}
@@ -403,13 +444,13 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
                   </>
                 )}
                 {i < type.parameters.length - 1 && (
-                  <span className={TypeColors.punctuation}>, </span>
+                  <span {...getStyle("typePunctuation")}>, </span>
                 )}
               </span>
             ))}
           </span>
-          <span className={TypeColors.punctuation}>)</span>
-          <span className={TypeColors.punctuation}>{" => "}</span>
+          <span {...getStyle("typePunctuation")}>)</span>
+          <span {...getStyle("typePunctuation")}>{" => "}</span>
           <TypeRenderer type={type.return} typeData={typeData} depth={depth} />
         </span>
       );
@@ -421,30 +462,30 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
             typeData={typeData}
             depth={depth}
           />
-          <span className={TypeColors.punctuation}>{"["}</span>
+          <span {...getStyle("typePunctuation")}>{"["}</span>
           <TypeRenderer
             type={type.indexType}
             typeData={typeData}
             depth={depth}
           />
-          <span className={TypeColors.punctuation}>{"]"}</span>
+          <span {...getStyle("typePunctuation")}>{"]"}</span>
         </span>
       );
     case "query":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"typeof "}</span>
+          <span {...getStyle("typePunctuation")}>{"typeof "}</span>
           <TypeRenderer type={type.expr} typeData={typeData} depth={depth} />
         </span>
       );
     case "import":
       return (
         <span>
-          <span className={TypeColors.punctuation}>{"import("}</span>
-          <span className={TypeColors.component}>"{type.name}"</span>
-          <span className={TypeColors.punctuation}>{")"}</span>
+          <span {...getStyle("typePunctuation")}>{"import("}</span>
+          <span {...getStyle("typeComponent")}>"{type.name}"</span>
+          <span {...getStyle("typePunctuation")}>{")"}</span>
           {type.qualifier && (
-            <span className={TypeColors.punctuation}>
+            <span {...getStyle("typePunctuation")}>
               {`.${type.qualifier}`}
             </span>
           )}
@@ -452,7 +493,7 @@ export const TypeRenderer: React.FC<TypeRendererProps> = ({
       );
     default:
       return (
-        <span className={TypeColors.default}>
+        <span {...getStyle("typeDefault")}>
           {(type as { type: string }).type}
         </span>
       );

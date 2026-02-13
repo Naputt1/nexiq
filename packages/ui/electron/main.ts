@@ -1411,3 +1411,12 @@ ipcMain.handle(
     }
   },
 );
+
+ipcMain.handle("get-global-config", async () => {
+  return store.getGlobalConfig();
+});
+
+ipcMain.handle("save-global-config", async (_: IpcMainInvokeEvent, config: { theme: "dark" | "light"; graphTheme: "dark" | "light" }) => {
+  store.saveGlobalConfig(config);
+  return true;
+});

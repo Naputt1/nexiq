@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Files, GitBranch, Settings as SettingsIcon } from "lucide-react";
+import { Files, GitBranch, Settings as SettingsIcon, Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { GitPanel } from "./GitPanel";
@@ -109,7 +109,7 @@ export function ProjectSidebar({
       <SidebarHeader className="border-b border-border p-0">
         <div className="flex h-12 items-center px-4">
           <div className={cn("flex items-center gap-2 font-semibold w-full", isCollapsed && "justify-center")}>
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-zinc-900 text-white shrink-0 overflow-hidden">
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground shrink-0 overflow-hidden">
               {iconUrl ? (
                 <img src={iconUrl} alt={projectName} className="h-full w-full object-cover" />
               ) : (
@@ -123,14 +123,14 @@ export function ProjectSidebar({
         </div>
 
         <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
-          <div className="flex p-1 bg-zinc-900/50 rounded-md">
+          <div className="flex p-1 bg-muted/50 rounded-md">
             <button
               onClick={() => setActiveTab("projects")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded transition-all",
                 activeTab === "projects"
-                  ? "bg-zinc-800 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200",
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Files className="h-3.5 w-3.5" />
@@ -141,8 +141,8 @@ export function ProjectSidebar({
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded transition-all",
                 activeTab === "git"
-                  ? "bg-zinc-800 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200",
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <GitBranch className="h-3.5 w-3.5" />
@@ -213,24 +213,44 @@ export function ProjectSidebar({
         )}
       </SidebarContent>
 
-      <SidebarFooter className={cn("p-4 border-t border-border", isCollapsed && "flex justify-center p-2")}>
+      <SidebarFooter className={cn("p-4 border-t border-border flex flex-col gap-2", isCollapsed && "flex justify-center p-2")}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link 
-                to={`/settings?projectPath=${encodeURIComponent(projectRoot)}`}
+                to={`/project-settings?projectPath=${encodeURIComponent(projectRoot)}`}
                 className={cn(
                   "flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2",
                   isCollapsed && "p-2 justify-center"
                 )}
               >
                 <SettingsIcon className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                <span className="group-data-[collapsible=icon]:hidden">Project Settings</span>
               </Link>
             </TooltipTrigger>
             {isCollapsed && (
               <TooltipContent side="right">
-                Settings
+                Project Settings
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link 
+                to={`/global-settings?projectPath=${encodeURIComponent(projectRoot)}`}
+                className={cn(
+                  "flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2",
+                  isCollapsed && "p-2 justify-center"
+                )}
+              >
+                <Settings2 className="h-4 w-4" />
+                <span className="group-data-[collapsible=icon]:hidden">Global Settings</span>
+              </Link>
+            </TooltipTrigger>
+            {isCollapsed && (
+              <TooltipContent side="right">
+                Global Settings
               </TooltipContent>
             )}
           </Tooltip>
