@@ -47,14 +47,23 @@ export class GraphCombo extends BaseNode {
     let fillColor = this.color;
     if (context.customColors) {
       if (this.type === "component") {
-        fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+        fillColor =
+          context.customColors.componentNode ||
+          (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+      }
+      if (this.type === "hook") {
+        fillColor =
+          context.customColors.hookNode ||
+          (context.theme === "dark" ? "#8b5cf6" : "#7c3aed"); // Purple for hooks
       }
       // Add other combo types if they exist, e.g. props combo
       if (this.id.endsWith("-props")) {
         fillColor = context.customColors.propNode || "#22c55e";
       }
       if (this.id.endsWith("-render")) {
-        fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+        fillColor =
+          context.customColors.renderNode ||
+          (context.theme === "dark" ? "#3b82f6" : "#2563eb");
       }
     }
 

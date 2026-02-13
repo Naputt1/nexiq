@@ -782,7 +782,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "77cce43ea8cd977b",
+          "hash": "a74fd4b751676359",
           "dependencies": {},
           "loc": {
             "line": 13,
@@ -799,7 +799,12 @@
               "type": "data",
               "file": "/src/Context.tsx",
               "hash": "7fef27b7d7d95664",
-              "dependencies": {},
+              "dependencies": {
+                "9b64e47d47fcd4f6": {
+                  "id": "9b64e47d47fcd4f6",
+                  "name": "useContext"
+                }
+              },
               "loc": {
                 "line": 14,
                 "column": 8
@@ -922,7 +927,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "8bff76935e854579",
+          "hash": "7589ae560fcda20a",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -955,7 +960,12 @@
               "type": "data",
               "file": "/src/ComplexApp.tsx",
               "hash": "d0162cb06e91d6a4",
-              "dependencies": {},
+              "dependencies": {
+                "fafbb8e860b2efbe": {
+                  "id": "fafbb8e860b2efbe",
+                  "name": "useCustomHook"
+                }
+              },
               "loc": {
                 "line": 9,
                 "column": 8
@@ -1199,6 +1209,11 @@
       "from": "fc5afc13ded24662",
       "to": "2697de00a506fa4e",
       "label": "render"
+    },
+    {
+      "from": "2697de00a506fa4e",
+      "to": "810bbf867cc78077",
+      "label": "hook"
     }
   ]
 }

@@ -70,17 +70,20 @@ export interface DetailItemData {
   propType?: TypeData;
   type?:
     | "component"
+    | "hook"
     | "type"
     | "interface"
     | "state"
     | "render"
     | "effect"
     | "memo"
+    | "callback"
     | "ref"
     | "prop";
   typeParams?: TypeDataParam[];
   extends?: string[];
   renders?: Record<string, ComponentInfoRender>;
+  hooks?: string[];
   gitStatus?: "added" | "modified" | "deleted";
   visible?: boolean;
   ui?: {
