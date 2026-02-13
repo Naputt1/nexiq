@@ -257,6 +257,7 @@ export type ComponentFileVar =
   | ComponentFileVarRef
   | ComponentFileVarNormal
   | ComponentFileVarHook
+  | ComponentFileVarHookCall
   | ComponentFileVarCallback
   | MemoFileVarHook
   | ComponentFileVarFunction;

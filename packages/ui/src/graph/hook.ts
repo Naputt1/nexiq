@@ -97,7 +97,7 @@ const defaultConfig: GraphDataConfig = {
   combo: {
     color: "blue",
     minRadius: 20,
-    maxRadius: 40,
+    maxRadius: 20,
     padding: 10,
   },
 };

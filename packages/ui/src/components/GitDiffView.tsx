@@ -42,11 +42,6 @@ export function GitDiffView({ diffs, fileName, scope }: GitDiffViewProps) {
           <div className="font-mono text-[11px] leading-tight">
             {hunk.lines.map((line, j) => {
               // Filter lines to show some context but focus on scope
-              const isAddedOrDeleted = line.type !== "normal";
-              const lineNum = line.newLineNumber || line.oldLineNumber || 0;
-              const isInScope =
-                !scope ||
-                (lineNum >= scope.start.line && lineNum <= scope.end.line);
 
               const lineStyle = {
                 backgroundColor:
