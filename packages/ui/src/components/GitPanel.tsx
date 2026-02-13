@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense, useCallback } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
 import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { Button } from "./ui/button";
@@ -11,7 +11,6 @@ import {
   Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
 import {
   Select,
   SelectContent,
@@ -19,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { GitChangeTree } from "./GitChangeTree";
 import type { JsonData } from "shared";
+
+import { GitChangeTree } from "./GitChangeTree";
+import { GitHistoryList } from "./GitHistoryList";
 
 interface GitPanelProps {
   projectRoot: string;
@@ -48,7 +49,9 @@ export function GitPanel({
   const selectedCommit = useAppStateStore((s) => s.selectedCommit);
   const setSelectedCommit = useAppStateStore((s) => s.setSelectedCommit);
   const selectedSubProject = useAppStateStore((s) => s.selectedSubProject);
-  const setSelectedSubProject = useAppStateStore((s) => s.setSelectedSubProject);
+  const setSelectedSubProject = useAppStateStore(
+    (s) => s.setSelectedSubProject,
+  );
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
   const [analyzedData, setAnalyzedData] = useState<JsonData | null>(null);
 
@@ -91,17 +94,14 @@ export function GitPanel({
 
   useEffect(() => {
     refreshStatus(projectRoot);
+  }, [projectRoot, refreshStatus]);
+
+  useEffect(() => {
     loadHistory(projectRoot, {
       limit: historyLimit,
       path: relativeFilterPath,
     });
-  }, [
-    projectRoot,
-    refreshStatus,
-    loadHistory,
-    historyLimit,
-    relativeFilterPath,
-  ]);
+  }, [projectRoot, loadHistory, historyLimit, relativeFilterPath]);
 
   useEffect(() => {
     const load = async () => {
@@ -123,21 +123,38 @@ export function GitPanel({
     status,
   ]);
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
+  const toggleSection = useCallback(
+    (section: keyof typeof expandedSections) => {
+      setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+    },
+    [],
+  );
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refreshStatus(projectRoot);
     loadHistory(projectRoot, {
       limit: historyLimit,
       path: relativeFilterPath,
     });
-  };
+  }, [
+    projectRoot,
+    refreshStatus,
+    loadHistory,
+    historyLimit,
+    relativeFilterPath,
+  ]);
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setHistoryLimit((prev) => prev + 50);
-  };
+  }, []);
+
+  const subProjectItems = useMemo(() => {
+    return subProjects.map((p) => (
+      <SelectItem key={p.path} value={p.path}>
+        {p.name}
+      </SelectItem>
+    ));
+  }, [subProjects]);
 
   return (
     <div className="flex flex-col h-full bg-background border-r border-border text-start">
@@ -174,17 +191,13 @@ export function GitPanel({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={projectRoot}>Entire Project</SelectItem>
-            {subProjects.map((p) => (
-              <SelectItem key={p.path} value={p.path}>
-                {p.name}
-              </SelectItem>
-            ))}
+            {subProjectItems}
           </SelectContent>
         </Select>
       </div>
 
       {/* Structural Changes (Dynamic based on selection) */}
-      <div className="flex-[2] min-h-0 flex flex-col border-b border-border">
+      <div className="flex-2 min-h-0 flex flex-col border-b border-border">
         <div
           className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-accent shrink-0"
           onClick={() => toggleSection("changes")}
@@ -202,13 +215,32 @@ export function GitPanel({
         </div>
 
         {expandedSections.changes && (
-          <div className="flex-1 overflow-auto p-2 pt-0 min-h-0">
-            {isLoading || !analyzedData ? (
+          <div className="flex-1 overflow-auto p-2 pt-0 min-h-0 relative">
+            {!analyzedData && isLoading ? (
               <div className="p-4 text-xs text-muted-foreground text-center animate-pulse">
                 Analyzing structural changes...
               </div>
+            ) : analyzedData ? (
+              <>
+                <Suspense
+                  fallback={
+                    <div className="p-4 text-xs text-muted-foreground text-center animate-pulse">
+                      Loading tree...
+                    </div>
+                  }
+                >
+                  <GitChangeTree data={analyzedData} onLocate={onSelectNode} />
+                </Suspense>
+                {isLoading && (
+                  <div className="absolute inset-0 bg-background/20 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                    <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </>
             ) : (
-              <GitChangeTree data={analyzedData} onLocate={onSelectNode} />
+              <div className="p-4 text-xs text-muted-foreground text-center">
+                No changes detected.
+              </div>
             )}
           </div>
         )}
@@ -236,60 +268,14 @@ export function GitPanel({
         </div>
 
         {expandedSections.history && (
-          <div className="flex-1 overflow-auto p-2 pt-0 min-h-0">
-            <div className="space-y-1">
-              {/* Current Working Tree at the top */}
-              <div
-                className={cn(
-                  "px-4 py-2 cursor-pointer hover:bg-accent rounded flex flex-col gap-1 border-l-2",
-                  selectedCommit === null
-                    ? "border-primary bg-accent/50"
-                    : "border-transparent",
-                )}
-                onClick={() => setSelectedCommit(null)}
-              >
-                <span className="text-xs font-bold">Current Changes</span>
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-                  <span>WORKING TREE</span>
-                </div>
-              </div>
-
-              <Separator className="my-1 mx-2" />
-
-              {history.map((commit) => (
-                <div
-                  key={commit.hash}
-                  className={cn(
-                    "px-4 py-2 cursor-pointer hover:bg-accent rounded flex flex-col gap-1 border-l-2",
-                    selectedCommit === commit.hash
-                      ? "border-primary bg-accent/50"
-                      : "border-transparent",
-                  )}
-                  onClick={() => {
-                    setSelectedCommit(commit.hash);
-                  }}
-                >
-                  <span className="text-xs font-medium line-clamp-1">
-                    {commit.message}
-                  </span>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>{commit.author_name}</span>
-                    <span>{commit.hash.substring(0, 7)}</span>
-                  </div>
-                </div>
-              ))}
-              {history.length >= historyLimit && (
-                <Button
-                  variant="ghost"
-                  className="w-full text-[10px] py-1 h-auto mt-2"
-                  onClick={handleLoadMore}
-                  disabled={isLoading}
-                >
-                  Load More...
-                </Button>
-              )}
-            </div>
-          </div>
+          <GitHistoryList
+            history={history}
+            selectedCommit={selectedCommit}
+            onSelectCommit={setSelectedCommit}
+            isLoading={isLoading}
+            onLoadMore={handleLoadMore}
+            historyLimit={historyLimit}
+          />
         )}
       </div>
     </div>
