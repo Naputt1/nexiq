@@ -435,160 +435,168 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             return false;
           };
 
-          for (const v of Object.values(variable.var)) {
-            const nodeBase: GraphNodeData = {
-              id: v.id,
-              name: v.name,
-              combo: variable.id,
-              fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
-              pureFileName: filePath,
-              loc: v.loc,
-              ui: v.ui,
-            };
-
-            if (added.includes(v.id)) nodeBase.gitStatus = "added";
-            else if (modified.includes(v.id)) nodeBase.gitStatus = "modified";
-            else if (deleted.includes(v.id)) nodeBase.gitStatus = "deleted";
-
-            if (v.kind == "state") {
-              nodes.push({
-                ...nodeBase,
-                label: {
-                  text: getDisplayName(v.name),
-                },
-                type: "state",
-                color: "red",
-              });
-            } else if (v.kind == "memo" || v.kind == "callback") {
-              nodes.push({
-                ...nodeBase,
-                label: {
-                  text: getDisplayName(v.name),
-                },
-                type: v.kind,
-                color: "red",
-              });
-
-              for (const dep of (v as MemoFileVarHook).reactDeps) {
-                const isProp = isPropNode(variable.props || [], dep.id);
-                edges.push({
-                  id: `${dep.id}-${v.id}`,
-                  source: dep.id,
-                  target: v.id,
-                  combo: isProp ? undefined : variable.id,
-                });
-              }
-            } else if (v.kind == "ref") {
-              nodes.push({
-                ...nodeBase,
-                label: {
-                  text: getDisplayName(v.name),
-                },
-                type: "ref",
-                color: "red",
-              });
-
-              const addRefDefaultDependency = (defaultData: PropDataType) => {
-                if (defaultData.type === "ref") {
-                  const id =
-                    defaultData.refType === "named"
-                      ? defaultData.name
-                      : defaultData.names[0];
-
-                  const isProp = isPropNode(variable.props || [], id);
-                  edges.push({
-                    id: `${id}-${v.id}`,
-                    source: id,
-                    target: v.id,
-                    combo: isProp ? undefined : variable.id,
-                  });
-                } else if (defaultData.type === "literal-array") {
-                  for (const element of defaultData.elements) {
-                    addRefDefaultDependency(element);
-                  }
-                } else if (defaultData.type === "literal-object") {
-                  for (const prop of Object.values(defaultData.properties)) {
-                    addRefDefaultDependency(prop);
-                  }
-                }
+          if (variable.var) {
+            for (const v of Object.values(variable.var)) {
+              const nodeBase: GraphNodeData = {
+                id: v.id,
+                name: v.name,
+                combo: variable.id,
+                fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
+                pureFileName: filePath,
+                loc: v.loc,
+                ui: v.ui,
               };
 
-              addRefDefaultDependency(v.defaultData);
-            }
-          }
+              if (added.includes(v.id)) nodeBase.gitStatus = "added";
+              else if (modified.includes(v.id)) nodeBase.gitStatus = "modified";
+              else if (deleted.includes(v.id)) nodeBase.gitStatus = "deleted";
 
-          for (const effect of Object.values(variable.effects)) {
-            const effectNode: GraphNodeData = {
-              id: effect.id,
-              name: { type: "identifier", name: "effect" },
-              type: "effect",
-              color: "yellow",
-              combo: variable.id,
-              fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
-              pureFileName: filePath,
-              loc: effect.loc,
-              ui: variable.ui?.renders?.[effect.id],
-            };
-
-            if (added.includes(effect.id)) effectNode.gitStatus = "added";
-            else if (modified.includes(effect.id))
-              effectNode.gitStatus = "modified";
-            else if (deleted.includes(effect.id))
-              effectNode.gitStatus = "deleted";
-
-            nodes.push(effectNode);
-
-            for (const dep of effect.reactDeps) {
-              if (dep.id == "") continue;
-
-              const isProp = isPropNode(variable.props || [], dep.id);
-              edges.push({
-                id: `${dep.id}-${effect.id}`,
-                source: dep.id,
-                target: effect.id,
-                combo: isProp ? undefined : variable.id,
-              });
-            }
-          }
-
-          for (const render of Object.values(variable.renders)) {
-            for (const file of Object.values(graphData.files)) {
-              if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
-                const v = file.var[render.id];
-                const renderNode: GraphNodeData = {
-                  id: `${variable.id}-render-${render.id}`,
-                  name: v.name,
+              if (v.kind == "state") {
+                nodes.push({
+                  ...nodeBase,
                   label: {
                     text: getDisplayName(v.name),
                   },
-                  combo: `${variable.id}-render`,
-                  fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
-                  pureFileName: file.path,
-                  loc: render.loc,
-                  ui: variable.ui?.renders?.[render.id],
+                  type: "state",
+                  color: "red",
+                });
+              } else if (v.kind == "memo" || v.kind == "callback") {
+                nodes.push({
+                  ...nodeBase,
+                  label: {
+                    text: getDisplayName(v.name),
+                  },
+                  type: v.kind,
+                  color: "red",
+                });
+
+                for (const dep of (v as MemoFileVarHook).reactDeps) {
+                  const isProp = isPropNode(variable.props || [], dep.id);
+                  edges.push({
+                    id: `${dep.id}-${v.id}`,
+                    source: dep.id,
+                    target: v.id,
+                    combo: isProp ? undefined : variable.id,
+                  });
+                }
+              } else if (v.kind == "ref") {
+                nodes.push({
+                  ...nodeBase,
+                  label: {
+                    text: getDisplayName(v.name),
+                  },
+                  type: "ref",
+                  color: "red",
+                });
+
+                const addRefDefaultDependency = (defaultData: PropDataType) => {
+                  if (defaultData.type === "ref") {
+                    const id =
+                      defaultData.refType === "named"
+                        ? defaultData.name
+                        : defaultData.names[0];
+
+                    const isProp = isPropNode(variable.props || [], id);
+                    edges.push({
+                      id: `${id}-${v.id}`,
+                      source: id,
+                      target: v.id,
+                      combo: isProp ? undefined : variable.id,
+                    });
+                  } else if (defaultData.type === "literal-array") {
+                    for (const element of defaultData.elements) {
+                      addRefDefaultDependency(element);
+                    }
+                  } else if (defaultData.type === "literal-object") {
+                    for (const prop of Object.values(defaultData.properties)) {
+                      addRefDefaultDependency(prop);
+                    }
+                  }
                 };
 
-                // For render nodes, check if the component being rendered was changed
-                if (added.includes(v.id)) renderNode.gitStatus = "added";
-                else if (modified.includes(v.id))
-                  renderNode.gitStatus = "modified";
-                else if (deleted.includes(v.id))
-                  renderNode.gitStatus = "deleted";
-
-                nodes.push(renderNode);
-
-                edges.push({
-                  id: `${variable.id}-render-${render.id}-${v.id}`,
-                  source: `${variable.id}-render-${render.id}`,
-                  target: v.id,
-                });
-                break;
+                addRefDefaultDependency(v.defaultData);
               }
             }
           }
 
-          for (const v of Object.values(variable.var)) {
-            addCombo(v, filePath, variable.id);
+          if (variable.effects) {
+            for (const effect of Object.values(variable.effects)) {
+              const effectNode: GraphNodeData = {
+                id: effect.id,
+                name: { type: "identifier", name: "effect" },
+                type: "effect",
+                color: "yellow",
+                combo: variable.id,
+                fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
+                pureFileName: filePath,
+                loc: effect.loc,
+                ui: variable.ui?.renders?.[effect.id],
+              };
+
+              if (added.includes(effect.id)) effectNode.gitStatus = "added";
+              else if (modified.includes(effect.id))
+                effectNode.gitStatus = "modified";
+              else if (deleted.includes(effect.id))
+                effectNode.gitStatus = "deleted";
+
+              nodes.push(effectNode);
+
+              for (const dep of effect.reactDeps) {
+                if (dep.id == "") continue;
+
+                const isProp = isPropNode(variable.props || [], dep.id);
+                edges.push({
+                  id: `${dep.id}-${effect.id}`,
+                  source: dep.id,
+                  target: effect.id,
+                  combo: isProp ? undefined : variable.id,
+                });
+              }
+            }
+          }
+
+          if (variable.kind === "component" && variable.renders) {
+            for (const render of Object.values(variable.renders)) {
+              for (const file of Object.values(graphData.files)) {
+                if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
+                  const v = file.var[render.id];
+                  const renderNode: GraphNodeData = {
+                    id: `${variable.id}-render-${render.id}`,
+                    name: v.name,
+                    label: {
+                      text: getDisplayName(v.name),
+                    },
+                    combo: `${variable.id}-render`,
+                    fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
+                    pureFileName: file.path,
+                    loc: render.loc,
+                    ui: variable.ui?.renders?.[render.id],
+                  };
+
+                  // For render nodes, check if the component being rendered was changed
+                  if (added.includes(v.id)) renderNode.gitStatus = "added";
+                  else if (modified.includes(v.id))
+                    renderNode.gitStatus = "modified";
+                  else if (deleted.includes(v.id))
+                    renderNode.gitStatus = "deleted";
+
+                  nodes.push(renderNode);
+
+                  edges.push({
+                    id: `${variable.id}-render-${render.id}-${v.id}`,
+                    source: `${variable.id}-render-${render.id}`,
+                    target: v.id,
+                  });
+                  break;
+                }
+              }
+            }
+          }
+
+          if (variable.var) {
+            for (const v of Object.values(variable.var)) {
+              addCombo(v, filePath, variable.id);
+            }
           }
         };
 
@@ -598,6 +606,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             vars: Record<string, ComponentFileVar>,
             parentID?: string,
           ) => {
+            if (!vars) return;
             for (const variable of Object.values(vars)) {
               if (variable.kind === "component" || variable.kind === "hook") {
                 addCombo(variable, file.path, parentID);
