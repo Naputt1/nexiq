@@ -17,6 +17,7 @@ const samples = args._[0]
       "props",
       "hook",
       "props-complex",
+      "destructuring-hook",
       "cache",
       "cache-new",
     ];

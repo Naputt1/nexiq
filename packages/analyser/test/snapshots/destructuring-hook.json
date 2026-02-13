@@ -1,0 +1,182 @@
+{
+  "files": {
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "7b6c5720adaa3021",
+      "import": {
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useContext": {
+          "localName": "useContext",
+          "importedName": "useContext",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createContext": {
+          "localName": "createContext",
+          "importedName": "createContext",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "component",
+          "id": "720e9756d239e21b"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "79efcff64fa4f3f2": {
+          "id": "79efcff64fa4f3f2",
+          "name": {
+            "type": "identifier",
+            "name": "MyContext"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/App.tsx",
+          "hash": "834e1e3bab61864b",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 6
+          },
+          "components": {}
+        },
+        "9cbcac3147d6febb": {
+          "id": "9cbcac3147d6febb",
+          "name": {
+            "type": "identifier",
+            "name": "useTranslation"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "11c55a130bda3706",
+          "dependencies": {},
+          "loc": {
+            "line": 5,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 5,
+              "column": 30
+            },
+            "end": {
+              "line": 5,
+              "column": 53
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {}
+        },
+        "720e9756d239e21b": {
+          "id": "720e9756d239e21b",
+          "name": {
+            "type": "identifier",
+            "name": "App"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "9ab3d7ad9d48e44",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 16
+          },
+          "var": {
+            "93c269b0cd2ffeae": {
+              "id": "93c269b0cd2ffeae",
+              "name": {
+                "type": "identifier",
+                "name": "t"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "a4d93ee42fb8432d",
+              "dependencies": {
+                "901f82a3ea3a1843": {
+                  "id": "901f82a3ea3a1843",
+                  "name": "useTranslation"
+                }
+              },
+              "loc": {
+                "line": 8,
+                "column": 10
+              },
+              "components": {}
+            },
+            "c68c0061a9cfe93f": {
+              "id": "c68c0061a9cfe93f",
+              "name": {
+                "type": "identifier",
+                "name": "theme"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "3149a5f32b0e96a8",
+              "dependencies": {
+                "9b64e47d47fcd4f6": {
+                  "id": "9b64e47d47fcd4f6",
+                  "name": "useContext"
+                }
+              },
+              "loc": {
+                "line": 9,
+                "column": 10
+              },
+              "components": {}
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 7,
+              "column": 16
+            },
+            "end": {
+              "line": 7,
+              "column": 19
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {}
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "93c269b0cd2ffeae",
+      "to": "901f82a3ea3a1843",
+      "label": "hook"
+    },
+    {
+      "from": "c68c0061a9cfe93f",
+      "to": "9b64e47d47fcd4f6",
+      "label": "hook"
+    }
+  ]
+}
