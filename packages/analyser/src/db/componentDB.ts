@@ -248,6 +248,14 @@ export class ComponentDB {
     return this.files.addMemo(fileName, loc, memo);
   }
 
+  public comAddCallback(
+    loc: VariableLoc,
+    fileName: string,
+    callback: Omit<Memo, "id"> & { name: VariableName },
+  ) {
+    return this.files.addCallback(fileName, loc, callback);
+  }
+
   private _getExportId(
     fileName: string,
     name: string,

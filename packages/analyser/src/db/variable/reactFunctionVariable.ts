@@ -16,6 +16,7 @@ import type { File } from "../fileDB.js";
 import { StateVariable } from "./stateVariable.js";
 import { isMemoVariable, isRefVariable, isStateVariable } from "./type.js";
 import { MemoVariable } from "./memo.js";
+import { CallbackVariable } from "./callbackVariable.js";
 import { RefVariable } from "./refVariable.js";
 import { getVariableNameKey } from "../../analyzer/pattern.js";
 
@@ -78,7 +79,8 @@ export abstract class ReactFunctionVariable<
         defaultData.name = propData.id;
         return true;
       }
-    } else {
+    }
+    else {
       if (
         defaultData.names.length > 0 &&
         propData.name === defaultData.names[0]
@@ -106,7 +108,8 @@ export abstract class ReactFunctionVariable<
             if (this.__resolveReactDefaultDataProp(innerProp, defaultData))
               return;
           }
-        } else {
+        }
+        else {
           if (this.__resolveReactDefaultDataProp(prop, defaultData)) return;
         }
       }
@@ -119,7 +122,8 @@ export abstract class ReactFunctionVariable<
         if (stateNameKey === name || state.setter === name) {
           if (defaultData.refType === "named") {
             defaultData.name = stateID;
-          } else {
+          }
+          else {
             defaultData.names[0] = stateID;
           }
           return;
@@ -134,7 +138,8 @@ export abstract class ReactFunctionVariable<
         if (memoNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = memoID;
-          } else {
+          }
+          else {
             defaultData.names[0] = memoID;
           }
           return;
@@ -149,7 +154,8 @@ export abstract class ReactFunctionVariable<
         if (refNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = refID;
-          } else {
+          }
+          else {
             defaultData.names[0] = refID;
           }
           return;
@@ -160,16 +166,19 @@ export abstract class ReactFunctionVariable<
       if (v) {
         if (defaultData.refType === "named") {
           defaultData.name = v.id;
-        } else {
+        }
+        else {
           defaultData.names[0] = v.id;
         }
         return;
       }
-    } else if (defaultData.type === "literal-array") {
+    }
+    else if (defaultData.type === "literal-array") {
       for (const element of defaultData.elements) {
         this.resolveReactDefaultData(element);
       }
-    } else if (defaultData.type === "literal-object") {
+    }
+    else if (defaultData.type === "literal-object") {
       for (const prop of Object.values(defaultData.properties)) {
         this.resolveReactDefaultData(prop);
       }
@@ -218,8 +227,34 @@ export abstract class ReactFunctionVariable<
     return memoVariablle;
   }
 
+  public addCallback(
+    callback: Omit<Memo, "id"> & { name: VariableName },
+  ): CallbackVariable {
+    const nameKey = getVariableNameKey(callback.name);
+    const id = `${this.id}:callback:${nameKey}`;
+
+    this.resolveReactDependencies(callback.reactDeps);
+
+    const callbackVariable = new CallbackVariable(
+      {
+        id: id,
+        dependencies: {},
+        ...callback,
+      },
+      this.file,
+    );
+
+    this.var.add(callbackVariable);
+    this.memos.add(id); // Reuse memos set for now or add callbacks set
+
+    return callbackVariable;
+  }
+
+
   public addHook(hook: string) {
-    this.hooks.push(hook);
+    if (!this.hooks.includes(hook)) {
+      this.hooks.push(hook);
+    }
   }
 
   public resolveReactDependencies(reactDeps: ReactDependency[]) {

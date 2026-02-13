@@ -158,7 +158,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           filePath: string,
           parentID?: string,
         ) => {
-          if (variable.kind != "component") return;
+          if (variable.kind !== "component" && variable.kind !== "hook") return;
           const fileName = `${graphData.src}${filePath}`;
 
           const combo: GraphComboData = {
@@ -172,9 +172,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             scope: variable.scope,
             props: variable.props,
             propType: variable.propType,
-            type: "component",
+            type: variable.kind,
             ui: variable.ui,
-            renders: variable.renders,
+            hooks: variable.hooks,
+            renders:
+              variable.kind === "component" ? variable.renders : undefined,
           };
 
           if (added.includes(variable.id)) combo.gitStatus = "added";
@@ -256,7 +258,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               const obj = deletedObjects[id];
               if (!obj) return false;
               return (
-                obj.kind === "component" &&
+                (obj.kind === "component" || obj.kind === "hook") &&
                 getDisplayName((obj as ComponentFileVarComponent).name) ===
                   getDisplayName(variable.name) &&
                 (obj as ComponentFileVarComponent).file === filePath
@@ -457,17 +459,17 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 type: "state",
                 color: "red",
               });
-            } else if (v.kind == "memo") {
+            } else if (v.kind == "memo" || v.kind == "callback") {
               nodes.push({
                 ...nodeBase,
                 label: {
                   text: getDisplayName(v.name),
                 },
-                type: "memo",
+                type: v.kind,
                 color: "red",
               });
 
-              for (const dep of v.reactDeps) {
+              for (const dep of (v as MemoFileVarHook).reactDeps) {
                 const isProp = isPropNode(variable.props || [], dep.id);
                 edges.push({
                   id: `${dep.id}-${v.id}`,
@@ -597,13 +599,15 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             parentID?: string,
           ) => {
             for (const variable of Object.values(vars)) {
-              if (variable.kind === "component") {
+              if (variable.kind === "component" || variable.kind === "hook") {
                 addCombo(variable, file.path, parentID);
               }
               if ("var" in variable && variable.var) {
                 addAllComponents(
                   variable.var,
-                  variable.kind === "component" ? variable.id : parentID,
+                  variable.kind === "component" || variable.kind === "hook"
+                    ? variable.id
+                    : parentID,
                 );
               }
             }
@@ -623,8 +627,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           const obj = deletedObjects[deletedId];
           if (!obj) return;
 
-          if ("kind" in obj && obj.kind === "component") {
-            // Add component as combo
+          if (
+            "kind" in obj &&
+            (obj.kind === "component" || obj.kind === "hook")
+          ) {
+            // Add component or hook as combo
             if (!combos.some((c) => c.id === deletedId)) {
               const comp = obj as ComponentFileVarComponent;
               addCombo(comp, comp.file);
@@ -1271,6 +1278,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             typeData={typeData}
             projectPath={projectPath}
             onClose={handleClose}
+            onSelect={onSelect}
+            graph={graph}
           />
           {isSearchOpen && (
             <div className="absolute top-4 right-4 z-50 flex items-center bg-popover border border-border rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
