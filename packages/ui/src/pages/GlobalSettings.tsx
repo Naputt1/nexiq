@@ -148,6 +148,8 @@ export function GlobalSettings({ projectPath }: GlobalSettingsProps) {
               <h3 className="text-sm font-semibold opacity-70">Graph Node Types</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <ColorInput label="Component" colorKey="componentNode" defaultValue={isDark ? "#3b82f6" : "#2563eb"} />
+                <ColorInput label="Hook" colorKey="hookNode" defaultValue={isDark ? "#8b5cf6" : "#7c3aed"} />
+                <ColorInput label="Callback" colorKey="callbackNode" defaultValue="#ef4444" />
                 <ColorInput label="State" colorKey="stateNode" defaultValue="#ef4444" />
                 <ColorInput label="Memo" colorKey="memoNode" defaultValue="#ef4444" />
                 <ColorInput label="Ref" colorKey="refNode" defaultValue="#ef4444" />
