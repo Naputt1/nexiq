@@ -21,8 +21,8 @@ import { useConfigStore } from "@/hooks/use-config-store";
 
 interface NodeDetailsProps {
   selectedId: string | null;
-  nodes: Record<string, GraphNodeData>;
-  combos: Record<string, GraphComboData>;
+  item: GraphNodeData | GraphComboData | undefined;
+  renderNodes: GraphNodeData[];
   typeData: Record<string, TypeDataDeclare>;
   projectPath: string;
   onClose: () => void;
@@ -30,8 +30,8 @@ interface NodeDetailsProps {
 
 export function NodeDetails({
   selectedId,
-  nodes,
-  combos,
+  item,
+  renderNodes,
   typeData,
   projectPath,
   onClose,
@@ -42,10 +42,6 @@ export function NodeDetails({
 
   const { customColors } = useConfigStore();
 
-  const item: GraphNodeData | GraphComboData | undefined = selectedId
-    ? nodes[selectedId] || combos[selectedId]
-    : undefined;
-
   useEffect(() => {
     if (item?.gitStatus && item.pureFileName) {
       loadDiff(projectPath, {
@@ -53,7 +49,6 @@ export function NodeDetails({
         commit: selectedCommit || undefined,
       });
     }
-    console.log(item?.gitStatus);
   }, [
     item?.id,
     item?.gitStatus,
@@ -65,7 +60,7 @@ export function NodeDetails({
 
   if (!selectedId || !item) return null;
 
-  const type = nodes[selectedId] ? "Node" : "Combo";
+  const type = item.type || (item.hasOwnProperty("collapsedRadius") ? "Combo" : "Node");
 
   const diffKey = `${selectedCommit || "current"}-${"working"}-${item.pureFileName || "all"}`;
   const itemDiffs = diffs[diffKey] || [];
@@ -220,51 +215,47 @@ export function NodeDetails({
             </div>
 
             <div className="space-y-4">
-              {Object.values(nodes)
+              {renderNodes.map((v) => {
+                const renders = item.renders;
 
-                .filter((n) => n.combo === selectedId + "-render")
+                const renderId = v.id.slice(
+                  (selectedId! + "-render-").length,
+                );
 
-                .map((v) => {
-                  const renders = item.renders;
+                const render = renders?.[renderId];
 
-                  const renderId = v.id.slice(
-                    (selectedId! + "-render-").length,
-                  );
+                if (!render) return null;
 
-                  const render = renders?.[renderId];
-
-                  if (!render) return null;
-
-                  return (
-                    <div
-                      key={v.id}
-                      className="text-xs font-mono bg-muted/30 p-2 rounded border border-border/50"
-                    >
-                      <div className="font-bold text-primary mb-1">
-                        {getDisplayName(v.name)}
-                      </div>
-
-                      <div className="space-y-1">
-                        {render.dependencies.map(
-                          (dep: ComponentInfoRenderDependency, i: number) => (
-                            <div key={i} className="flex gap-2">
-                              <span style={customColors?.genericsColor ? { color: customColors.genericsColor, opacity: 0.8 } : {}} className={cn(!customColors?.genericsColor && "text-yellow-200/80")}>
-                                {dep.name}:
-                              </span>
-
-                              <span className="text-muted-foreground italic">
-                                <TypeRenderer
-                                  type={dep.value}
-                                  typeData={typeData}
-                                />
-                              </span>
-                            </div>
-                          ),
-                        )}
-                      </div>
+                return (
+                  <div
+                    key={v.id}
+                    className="text-xs font-mono bg-muted/30 p-2 rounded border border-border/50"
+                  >
+                    <div className="font-bold text-primary mb-1">
+                      {getDisplayName(v.name)}
                     </div>
-                  );
-                })}
+
+                    <div className="space-y-1">
+                      {render.dependencies.map(
+                        (dep: ComponentInfoRenderDependency, i: number) => (
+                          <div key={i} className="flex gap-2">
+                            <span style={customColors?.genericsColor ? { color: customColors.genericsColor, opacity: 0.8 } : {}} className={cn(!customColors?.genericsColor && "text-yellow-200/80")}>
+                              {dep.name}:
+                            </span>
+
+                            <span className="text-muted-foreground italic">
+                              <TypeRenderer
+                                type={dep.value}
+                                typeData={typeData}
+                              />
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
