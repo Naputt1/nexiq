@@ -158,6 +158,7 @@ export default function VariableDeclarator(
               "kind" | "file" | "id" | "var" | "components" | "hash"
             >,
             parentPath,
+            "hook",
           );
         }
       }
@@ -437,15 +438,15 @@ export default function VariableDeclarator(
         if (t.isObjectPattern(pId)) {
           for (const prop of pId.properties) {
             if (t.isObjectProperty(prop)) {
-              processPattern(prop.value as t.LVal, currentId);
+              processPattern(prop.value as t.LVal, currentId, special);
             } else if (t.isRestElement(prop)) {
-              processPattern(prop.argument as t.LVal, currentId);
+              processPattern(prop.argument as t.LVal, currentId, special);
             }
           }
         } else if (t.isArrayPattern(pId)) {
           for (const element of pId.elements) {
             if (element) {
-              processPattern(element as t.LVal, currentId);
+              processPattern(element as t.LVal, currentId, special);
             }
           }
         }
@@ -607,11 +608,20 @@ export default function VariableDeclarator(
           }
 
           const dependencies: Record<string, ComponentFileVarDependency> = {};
-          const id = getDeterministicId(init.callee.name);
-          dependencies[id] = {
-            id,
+          const depId = getDeterministicId(init.callee.name);
+          dependencies[depId] = {
+            id: depId,
             name: init.callee.name,
           };
+
+          const id = nodePath.node.id;
+          if (t.isArrayPattern(id) && id.elements.length > 0) {
+            processPattern(id.elements[0] as t.LVal, undefined, {
+              type: "hook",
+              extra: { dependencies },
+            });
+            return;
+          }
 
           processPattern(nodePath.node.id as t.LVal, undefined, {
             type: "hook",
