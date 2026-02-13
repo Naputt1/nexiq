@@ -1,6 +1,6 @@
-import type { ReactMapConfig, SubProject } from "shared";
+import type { ReactMapConfig, SubProject, CustomColors } from "shared";
 
-export type { ReactMapConfig, SubProject };
+export type { ReactMapConfig, SubProject, CustomColors };
 
 export interface PnpmWorkspace {
   packages?: string[];
@@ -33,4 +33,8 @@ export interface AppStateData {
   activeTab: "projects" | "git";
   selectedCommit: string | null;
   viewport?: { x: number; y: number; zoom: number } | null;
+}
+export interface GlobalSettings {
+  theme: "dark" | "light";
+  customColors?: CustomColors;
 }

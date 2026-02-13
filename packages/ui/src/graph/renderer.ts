@@ -4,6 +4,7 @@ import {
   type GraphDataCallbackParams,
 } from "./hook";
 import { GraphNode, GraphCombo, GraphArrow, type RenderContext } from "./items/index";
+import type { CustomColors } from "../../electron/types";
 
 export class GraphRenderer {
   stage: Konva.Stage;
@@ -11,6 +12,8 @@ export class GraphRenderer {
   graph: GraphData;
   onSelect?: (id: string) => void;
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void;
+  theme: "dark" | "light" = "dark";
+  customColors?: CustomColors;
 
   private items = new Map<string, Konva.Group | Konva.Circle | Konva.Arrow>();
   private edges = new Map<string, Konva.Arrow>();
@@ -33,6 +36,8 @@ export class GraphRenderer {
       y: number;
       zoom: number;
     }) => void,
+    theme: "dark" | "light" = "dark",
+    customColors?: CustomColors,
   ) {
     this.stage = new Konva.Stage({
       container,
@@ -46,6 +51,8 @@ export class GraphRenderer {
     this.graph = graph;
     this.onSelect = onSelect;
     this.onViewportChange = onViewportChange;
+    this.theme = theme;
+    this.customColors = customColors;
 
     this.setupStageEvents();
     this.bindId = this.graph.bind(this.handleGraphEvent.bind(this));
@@ -242,6 +249,8 @@ export class GraphRenderer {
       onSelect: this.onSelect,
       hasGitChanges: Object.values(this.graph.getCurCombos()).some((c: GraphCombo) => !!c.gitStatus) || Object.values(this.graph.getCurNodes()).some((n: GraphNode) => !!n.gitStatus),
       stage: this.stage,
+      theme: this.theme,
+      customColors: this.customColors,
     };
 
     // Handle children visibility/creation
@@ -453,6 +462,8 @@ export class GraphRenderer {
       onSelect: this.onSelect,
       hasGitChanges,
       stage: this.stage,
+      theme: this.theme,
+      customColors: this.customColors,
     };
 
     // Render Edges first (bottom)
@@ -482,4 +493,13 @@ export class GraphRenderer {
     this.layer.batchDraw();
   }
 
+  setTheme(theme: "dark" | "light") {
+    this.theme = theme;
+    this.render();
+  }
+
+  setCustomColors(colors: CustomColors) {
+    this.customColors = colors;
+    this.render();
+  }
 }

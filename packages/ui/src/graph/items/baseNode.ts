@@ -86,13 +86,13 @@ export abstract class BaseNode implements Renderable {
     parent: Konva.Container,
   ): Konva.Group | Konva.Arrow;
 
-  protected renderLabel(group: Konva.Group, offsetY: number) {
+  protected renderLabel(group: Konva.Group, offsetY: number, context: RenderContext) {
     if (!this.label) return;
-
+ 
     const text = new Konva.Text({
       id: `label-${this.id}`,
       text: this.label.text,
-      fill: this.label.fill || "black",
+      fill: this.label.fill || context.customColors?.labelColor || (context.theme === "dark" ? "white" : "black"),
       fontSize: 12 * this.scale,
       align: "center",
       y: offsetY,
@@ -102,15 +102,15 @@ export abstract class BaseNode implements Renderable {
     group.add(text);
   }
 
-  protected renderGitStatus(group: Konva.Group, radius: number, indicatorSize: number = 4) {
+  protected renderGitStatus(group: Konva.Group, radius: number, indicatorSize: number = 4, context: RenderContext) {
     if (!this.gitStatus) return;
 
     const statusColor =
       this.gitStatus === "added"
-        ? "#22c55e"
+        ? context.customColors?.gitAdded || "#22c55e"
         : this.gitStatus === "modified"
-          ? "#f59e0b"
-          : "#ef4444";
+          ? context.customColors?.gitModified || "#f59e0b"
+          : context.customColors?.gitDeleted || "#ef4444";
 
     const indicator = new Konva.Circle({
       id: `git-status-${this.id}`,

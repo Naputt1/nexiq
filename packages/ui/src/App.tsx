@@ -1,16 +1,24 @@
 import { Route, Routes, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import "./App.css";
 import ComponentGraph from "./componentGraph";
 import { SetupFlow } from "./components/setup-flow/SetupFlow";
 import { useProjectStore } from "./hooks/use-project-store";
 
-import { Settings } from "./pages/Settings";
+import { ProjectSettings } from "./pages/ProjectSettings";
+import { GlobalSettings } from "./pages/GlobalSettings";
 
 function App() {
-  const { projectRoot: storedProjectRoot, _hasHydrated } = useProjectStore();
+  const { projectRoot: storedProjectRoot, _hasHydrated, setProjectRoot } = useProjectStore();
   const [searchParams] = useSearchParams();
   const urlProjectPath = searchParams.get("projectPath");
   const isEmpty = searchParams.get("empty") === "true";
+
+  useEffect(() => {
+    if (urlProjectPath) {
+      setProjectRoot(urlProjectPath);
+    }
+  }, [urlProjectPath, setProjectRoot]);
 
   // Use project root from URL if available, otherwise from store (if not explicitly empty)
   const projectRoot = urlProjectPath || (isEmpty ? null : storedProjectRoot);
@@ -30,7 +38,7 @@ function App() {
   if (!_hasHydrated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-white">
-        <div className="animate-spin text-blue-500 text-3xl">●</div>
+        <div className="animate-spin text-primary text-3xl">●</div>
       </div>
     );
   }
@@ -43,8 +51,12 @@ function App() {
     <Routes>
       <Route path="/" element={<ComponentGraph projectPath={projectRoot} />} />
       <Route
-        path="/settings"
-        element={<Settings projectPath={projectRoot} />}
+        path="/project-settings"
+        element={<ProjectSettings projectPath={projectRoot} />}
+      />
+      <Route
+        path="/global-settings"
+        element={<GlobalSettings projectPath={projectRoot} />}
       />
     </Routes>
   );
