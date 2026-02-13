@@ -38,12 +38,14 @@ export abstract class BaseNode implements Renderable {
   propType?: TypeData;
   type?:
     | "component"
+    | "hook"
     | "type"
     | "interface"
     | "state"
     | "render"
     | "effect"
     | "memo"
+    | "callback"
     | "ref"
     | "prop";
   typeParams?: TypeDataParam[];
@@ -85,6 +87,8 @@ export abstract class BaseNode implements Renderable {
     context: RenderContext,
     parent: Konva.Container,
   ): Konva.Group | Konva.Arrow;
+
+  abstract getFillColor(context: RenderContext): string;
 
   protected renderLabel(group: Konva.Group, offsetY: number, context: RenderContext) {
     if (!this.label) return;

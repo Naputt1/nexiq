@@ -46,28 +46,16 @@ export class GraphNode extends BaseNode {
 
     const highlightColor = context.customColors?.nodeHighlight || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
 
-    let fillColor = this.color;
-    if (context.customColors) {
-      switch (this.type) {
-        case "state": fillColor = context.customColors.stateNode || "#ef4444"; break;
-        case "memo": fillColor = context.customColors.memoNode || "#ef4444"; break;
-        case "callback": fillColor = context.customColors.callbackNode || "#ef4444"; break;
-        case "ref": fillColor = context.customColors.refNode || "#ef4444"; break;
-        case "effect": fillColor = context.customColors.effectNode || "#eab308"; break;
-        case "prop": fillColor = context.customColors.propNode || "#22c55e"; break;
-        case "render": fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
-        case "component": fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
-      }
-    }
+    const fillColor = this.getFillColor(context);
 
     const circle = new Konva.Circle({
       radius: this.radius,
       fill: fillColor,
       stroke: this.highlighted ? highlightColor : undefined,
-      strokeWidth: this.highlighted ? 2 : 0,
+      strokeWidth: this.highlighted ? 2 * this.scale : 0,
       perfectDrawEnabled: false,
       shadowColor: highlightColor,
-      shadowBlur: 20,
+      shadowBlur: 20 * this.scale,
       shadowOpacity: 1,
       shadowOffset: { x: 0, y: 0 },
       shadowEnabled: !!this.highlighted,
@@ -83,5 +71,24 @@ export class GraphNode extends BaseNode {
 
     parent.add(group);
     return group;
+  }
+
+  getFillColor(context: RenderContext): string {
+    let fillColor = this.color;
+    if (context.customColors) {
+      switch (this.type) {
+        case "state": fillColor = context.customColors.stateNode || "#ef4444"; break;
+        case "memo": fillColor = context.customColors.memoNode || "#ef4444"; break;
+        case "callback": fillColor = context.customColors.callbackNode || "#ef4444"; break;
+        case "ref": fillColor = context.customColors.refNode || "#ef4444"; break;
+        case "effect": fillColor = context.customColors.effectNode || "#eab308"; break;
+        case "prop": fillColor = context.customColors.propNode || "#22c55e"; break;
+        case "render": fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
+        case "component": fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
+        case "hook": fillColor = context.customColors.hookNode || (context.theme === "dark" ? "#8b5cf6" : "#7c3aed"); break;
+        default: break;
+      }
+    }
+    return fillColor;
   }
 }

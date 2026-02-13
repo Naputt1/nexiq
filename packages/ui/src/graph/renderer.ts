@@ -259,7 +259,7 @@ export class GraphRenderer {
       contentGroup.destroyChildren();
 
       // Fill color immediately when collapsing
-      circle.fill(combo.color);
+      circle.fill(combo.getFillColor(context));
       contentGroup.clipFunc(null);
     } else {
       // Expanding: Render children into contentGroup
@@ -327,7 +327,7 @@ export class GraphRenderer {
         contentGroup.clipFunc(null);
 
         // Ensure final fill
-        circle.fill(combo.collapsed ? combo.color : "transparent");
+        circle.fill(combo.collapsed ? combo.getFillColor(context) : "transparent");
       }
     }, this.layer);
 
