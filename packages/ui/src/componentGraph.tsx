@@ -357,8 +357,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               const loc = "loc" in v ? v.loc : undefined;
               if (!loc) return;
 
-              console.log("deleted", v);
-
               let name: VariableName;
               if (v.kind === "prop" || v.kind === "spread") {
                 name = { type: "identifier", name: (v as PropData).name };
@@ -789,8 +787,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           // Everything in the current graph should be visible
           item.visible = true;
 
-          if ("expandedRadius" in item)
-            graph.updateCombo(item as GraphCombo);
+          if ("expandedRadius" in item) graph.updateCombo(item as GraphCombo);
           else graph.updateNode(item as GraphNode);
         };
 
@@ -1044,7 +1041,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     const time = performance.now();
     graph.render();
     console.log("layout", performance.now() - time);
+  }, [graphData, graph]);
 
+  useEffect(() => {
     // After render, center on saved item if it exists AND we haven't restored a viewport
     if (centeredItemId && !hasRestoredViewport.current) {
       setTimeout(() => {
@@ -1053,7 +1052,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         hasRestoredViewport.current = true; // Mark as done so we don't jump again
       }, 100);
     }
-  }, [graphData, centeredItemId, graph]);
+  }, [centeredItemId, graph]);
 
   // Initial load state
   useEffect(() => {
@@ -1194,38 +1193,42 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     };
   }, [handleReloadProject]);
 
-  const nodesMap = useMemo(() => {
-    if (!selectedId) return {};
-    const nodes = graph.getAllNodes();
-    return Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const selectedItem = useMemo(() => {
+    if (!selectedId) return undefined;
+    return graph.getPointByID(selectedId);
   }, [selectedId, graph]);
 
-  const combosMap = useMemo(() => {
-    if (!selectedId) return {};
-    const combos = graph.getAllCombos();
-    return Object.fromEntries(combos.map((c) => [c.id, c]));
-  }, [selectedId, graph]);
+  const renderNodes = useMemo(() => {
+    if (!selectedId || selectedItem?.type !== "component") return [];
+    const renderComboId = selectedId + "-render";
+    const renderCombo = graph.getCombo(renderComboId);
+    if (!renderCombo || !renderCombo.child) return [];
+    return Object.values(renderCombo.child.nodes);
+  }, [selectedId, selectedItem, graph]);
 
   const handleClose = useCallback(() => {
     setSelectedId(null);
   }, [setSelectedId]);
 
-  const handleProjectSwitch = async (path: string) => {
-    if (path === selectedSubProject) return; // No change
+  const handleProjectSwitch = useCallback(
+    async (path: string) => {
+      if (path === selectedSubProject) return; // No change
 
-    setIsAnalyzing(true);
-    setSelectedSubProject(path);
-    try {
-      // Trigger analysis on new path, storing config in projectRoot
-      await window.ipcRenderer.invoke("analyze-project", path, projectPath);
+      setIsAnalyzing(true);
+      setSelectedSubProject(path);
+      try {
+        // Trigger analysis on new path, storing config in projectRoot
+        await window.ipcRenderer.invoke("analyze-project", path, projectPath);
 
-      // Data will be reloaded by the useEffect watching loadData/selectedSubProject
-    } catch (e) {
-      console.error("Failed to switch project", e);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+        // Data will be reloaded by the useEffect watching loadData/selectedSubProject
+      } catch (e) {
+        console.error("Failed to switch project", e);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    },
+    [selectedSubProject, projectPath, setSelectedSubProject],
+  );
 
   const handleLocateFile = useCallback(
     (filePath: string) => {
@@ -1263,8 +1266,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           />
           <MemoizedNodeDetails
             selectedId={selectedId}
-            nodes={nodesMap}
-            combos={combosMap}
+            item={selectedItem}
+            renderNodes={renderNodes}
             typeData={typeData}
             projectPath={projectPath}
             onClose={handleClose}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, memo } from "react";
 import {
   ChevronRight,
   ChevronDown,
@@ -22,36 +22,71 @@ import {
 } from "shared";
 
 import { useConfigStore } from "@/hooks/use-config-store";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface GitChangeTreeProps {
   data: JsonData;
   onLocate?: (id: string) => void;
 }
 
-export function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
+type FlatItem = 
+  | { type: 'file'; id: string; key: string; path: string; depth: number; hasChildren: boolean; fileName: string }
+  | { type: 'var'; id: string; key: string; item: ComponentFileVar; depth: number; hasChildren: boolean; isDeleted: boolean; isAdded: boolean; isModified: boolean }
+  | { type: 'child'; id: string; key: string; item: ComponentFileVar | PropData | EffectInfo; depth: number; isDeleted: boolean; isAdded: boolean; isModified: boolean; kind: string; name: string };
+
+export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
   const diff = data.diff;
   const { customColors } = useConfigStore();
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  const allFiles = useMemo(() => {
-    if (!diff) return [];
-    const files = new Set(Object.keys(data.files));
-    if (diff.deletedObjects) {
-      Object.values(diff.deletedObjects).forEach((obj) => {
-        const fileObj = obj as { file?: string };
-        if (fileObj.file) {
-          files.add(fileObj.file);
-        }
+  // Optimize diff lookups with Sets
+  const diffSets = useMemo(() => {
+    if (!diff) return null;
+    return {
+      added: new Set(diff.added),
+      modified: new Set(diff.modified),
+      deleted: new Set(diff.deleted),
+    };
+  }, [diff]);
+
+  // Initialize expanded files
+  useEffect(() => {
+    if (diff) {
+      const initialExpanded = new Set<string>();
+      Object.keys(data.files).forEach(path => initialExpanded.add(path));
+      // Also expand top-level vars by default
+      Object.values(data.files).forEach(f => {
+        Object.values(f.var || {}).forEach(v => initialExpanded.add(v.id));
       });
+      setExpandedIds(initialExpanded);
     }
-    return Array.from(files).sort();
   }, [data, diff]);
 
-  const changedFiles = useMemo(() => {
-    if (!diff) return [];
-    return allFiles.filter((path) => {
+  const toggleExpand = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const flattenedItems = useMemo(() => {
+    if (!diff || !diffSets) return [];
+
+    const result: FlatItem[] = [];
+
+    const allFiles = Array.from(new Set([
+      ...Object.keys(data.files),
+      ...(diff.deletedObjects ? Object.values(diff.deletedObjects).map(obj => (obj as any).file).filter(Boolean) : [])
+    ])).sort();
+
+    const changedFiles = allFiles.filter((path) => {
       const currentVars = data.files[path]?.var || {};
       const hasCurrentChanges = Object.values(currentVars).some((v) =>
-        hasChanges(v, diff),
+        hasChanges(v, diff, diffSets),
       );
       if (hasCurrentChanges) return true;
 
@@ -59,11 +94,127 @@ export function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
         diff.deletedObjects &&
         Object.values(diff.deletedObjects).some((obj) => {
           const fileObj = obj as { file?: string };
-          return fileObj.file === path && !obj.id.includes(":"); // Only top-level deleted vars in file
+          return fileObj.file === path && !obj.id.includes(":"); 
         });
       return !!hasDeletedInFile;
     });
-  }, [allFiles, data, diff]);
+
+    const getChildren = (item: ComponentFileVar): (ComponentFileVar | PropData | EffectInfo)[] => {
+      const list: (ComponentFileVar | PropData | EffectInfo)[] = [];
+      if ("props" in item && item.props) {
+        list.push(...item.props.filter((p) => hasChanges(p, diff, diffSets)));
+      }
+      if ("effects" in item && item.effects) {
+        list.push(...Object.values(item.effects).filter((e) => hasChanges(e, diff, diffSets)));
+      }
+      if ("var" in item && item.var) {
+        list.push(...Object.values(item.var).filter((v) => hasChanges(v, diff, diffSets)));
+      }
+      if (diff.deletedObjects) {
+        Object.values(diff.deletedObjects).forEach((obj) => {
+          if ((obj as any).parentId === item.id) {
+            if (!list.some((existing) => existing.id === obj.id)) {
+              list.push(obj);
+            }
+          }
+        });
+      }
+      return list;
+    };
+
+    const addVarToResult = (item: ComponentFileVar, depth: number, parentKey: string) => {
+      const isAdded = diffSets.added.has(item.id);
+      const isModified = diffSets.modified.has(item.id);
+      const isDeleted = diffSets.deleted.has(item.id);
+      const children = getChildren(item);
+      const hasChildren = children.length > 0;
+      const key = `${parentKey}-var-${item.id}`;
+
+      result.push({
+        type: 'var',
+        id: item.id,
+        key,
+        item,
+        depth,
+        hasChildren,
+        isAdded,
+        isModified,
+        isDeleted
+      });
+
+      if (expandedIds.has(item.id) && hasChildren) {
+        children.forEach(child => {
+          if ("kind" in child && (['component', 'hook', 'state', 'ref', 'memo', 'callback', 'normal'].includes(child.kind))) {
+            addVarToResult(child as ComponentFileVar, depth + 1, key);
+          } else {
+            let name = "";
+            let kind = "";
+            if ("name" in child && typeof child.name === "string") {
+              name = child.name;
+              kind = "prop";
+            } else if (child.id.includes(":effect:")) {
+              name = "effect";
+              kind = "effect";
+            } else if ("kind" in child && child.kind === "spread") {
+              name = (child as PropData).name;
+              kind = "spread";
+            }
+            result.push({
+              type: 'child',
+              id: child.id,
+              key: `${key}-child-${child.id}`,
+              item: child,
+              depth: depth + 1,
+              isAdded: diffSets.added.has(child.id),
+              isModified: diffSets.modified.has(child.id),
+              isDeleted: diffSets.deleted.has(child.id),
+              kind,
+              name
+            });
+          }
+        });
+      }
+    };
+
+    changedFiles.forEach(path => {
+      const vars = data.files[path]?.var || {};
+      const topLevelChanges: (ComponentFileVar | PropData | EffectInfo)[] = [];
+      Object.values(vars).forEach((v) => { if (hasChanges(v, diff, diffSets)) topLevelChanges.push(v); });
+      if (diff.deletedObjects) {
+        Object.values(diff.deletedObjects).forEach((obj) => {
+          if ((obj as any).file === path && !((obj as any).parentId || obj.id.includes(":"))) {
+            topLevelChanges.push(obj);
+          }
+        });
+      }
+
+      const hasChildren = topLevelChanges.length > 0;
+      const key = `file-${path}`;
+      result.push({
+        type: 'file',
+        id: path,
+        key,
+        path,
+        depth: 0,
+        hasChildren,
+        fileName: path.split("/").pop() || path
+      });
+
+      if (expandedIds.has(path) && hasChildren) {
+        topLevelChanges.forEach(v => addVarToResult(v as ComponentFileVar, 1, key));
+      }
+    });
+
+    return result;
+  }, [data, diff, diffSets, expandedIds]);
+
+  const virtualizer = useVirtualizer({
+    count: flattenedItems.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 28,
+    overscan: 10,
+    getItemKey: (index) => flattenedItems[index]?.key || index,
+  });
 
   if (!diff)
     return (
@@ -73,56 +224,178 @@ export function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
     );
 
   return (
-    <div className="space-y-1">
-      {changedFiles.map((path) => (
-        <FileNode
-          key={path}
-          path={path}
-          vars={data.files[path]?.var || {}}
-          diff={diff}
-          onLocate={onLocate}
-        />
-      ))}
+    <div 
+      ref={parentRef}
+      className="h-full overflow-auto"
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const item = flattenedItems[virtualItem.index];
+          if (!item) return null;
+
+          if (item.type === 'file') {
+            const isOpen = expandedIds.has(item.id);
+            return (
+              <div
+                key={virtualItem.key}
+                className="absolute top-0 left-0 w-full flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group"
+                style={{
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+                onClick={() => toggleExpand(item.id)}
+              >
+                {item.hasChildren ? (
+                  isOpen ? (
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  )
+                ) : <div className="w-3" />}
+                <span className="text-xs font-medium truncate flex-1" title={item.path}>
+                  {item.fileName}
+                </span>
+              </div>
+            );
+          }
+
+          if (item.type === 'var') {
+            const isOpen = expandedIds.has(item.id);
+            const statusStyle = customColors ? {
+              color: item.isAdded ? customColors.gitAdded || "#22c55e" :
+                     item.isModified ? customColors.gitModified || "#f59e0b" :
+                     item.isDeleted ? customColors.gitDeleted || "#ef4444" : undefined
+            } : {};
+
+            return (
+              <div
+                key={virtualItem.key}
+                className={cn(
+                  "absolute top-0 left-0 w-full flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group text-xs",
+                  item.isAdded && !customColors?.gitAdded && "text-green-500",
+                  item.isModified && !customColors?.gitModified && "text-amber-500",
+                  item.isDeleted && !customColors?.gitDeleted && "text-red-500",
+                )}
+                style={{
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                  paddingLeft: `${item.depth * 12 + 8}px`,
+                  ...statusStyle
+                }}
+                onClick={() => !item.isDeleted && onLocate?.(item.id)}
+              >
+                <div
+                  className="flex items-center justify-center w-4 h-4 hover:bg-accent-foreground/10 rounded-sm shrink-0"
+                  onClick={(e) => item.hasChildren && toggleExpand(item.id, e)}
+                >
+                  {item.hasChildren &&
+                    (isOpen ? (
+                      <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                    ))}
+                </div>
+                <div className="flex items-center gap-1 flex-1 min-w-0">
+                  <NodeIcon kind={item.item.kind} className="h-3 w-3 shrink-0" />
+                  <span className="truncate font-medium" title={getDisplayName(item.item.name)}>
+                    {getDisplayName(item.item.name)}
+                  </span>
+                  {item.isAdded && <span className="text-[10px] ml-1 opacity-70">added</span>}
+                  {item.isModified && <span className="text-[10px] ml-1 opacity-70">mod</span>}
+                  {item.isDeleted && <span className="text-[10px] ml-1 opacity-70">deleted</span>}
+                </div>
+                {!item.isDeleted && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Search className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          if (item.type === 'child') {
+            const statusStyle = customColors ? {
+              color: item.isAdded ? customColors.gitAdded || "#22c55e" :
+                     item.isModified ? customColors.gitModified || "#f59e0b" :
+                     item.isDeleted ? customColors.gitDeleted || "#ef4444" : undefined
+            } : {};
+
+            return (
+              <div
+                key={virtualItem.key}
+                className={cn(
+                  "absolute top-0 left-0 w-full flex items-center gap-1 px-2 py-0.5 hover:bg-accent rounded text-[11px] group cursor-pointer",
+                  item.isAdded && !customColors?.gitAdded && "text-green-500",
+                  item.isModified && !customColors?.gitModified && "text-amber-500",
+                  item.isDeleted && !customColors?.gitDeleted && "text-red-500",
+                )}
+                style={{
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                  paddingLeft: `${item.depth * 12 + 8}px`,
+                  ...statusStyle
+                }}
+                onClick={() => !item.isDeleted && onLocate?.(item.id)}
+              >
+                <div className="w-4" />
+                <NodeIcon kind={item.kind} className="h-3 w-3 shrink-0" />
+                <span className="truncate flex-1" title={item.name}>
+                  {item.name}
+                </span>
+                {!item.isDeleted && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Search className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return null;
+        })}
+      </div>
     </div>
   );
-}
+});
 
 function hasChanges(
   item: ComponentFileVar | PropData | EffectInfo,
   diff: AnalyzedDiff,
+  sets: { added: Set<string>, modified: Set<string>, deleted: Set<string> }
 ): boolean {
   if (
-    diff.added.includes(item.id) ||
-    diff.modified.includes(item.id) ||
-    diff.deleted.includes(item.id)
+    sets.added.has(item.id) ||
+    sets.modified.has(item.id) ||
+    sets.deleted.has(item.id)
   ) {
     return true;
   }
 
-  // Check current children
   if ("var" in item && item.var) {
-    if (Object.values(item.var).some((v) => hasChanges(v, diff))) return true;
+    if (Object.values(item.var).some((v) => hasChanges(v, diff, sets))) return true;
   }
 
   if ("props" in item && item.props) {
-    if (item.props.some((p) => hasChanges(p, diff))) return true;
+    if (item.props.some((p) => hasChanges(p, diff, sets))) return true;
   }
 
   if ("effects" in item && item.effects) {
-    if (Object.values(item.effects).some((e) => hasChanges(e, diff)))
+    if (Object.values(item.effects).some((e) => hasChanges(e, diff, sets)))
       return true;
   }
 
-  // Check if any deleted item claims this as parent
   if (diff.deletedObjects) {
     return Object.values(diff.deletedObjects).some((obj) => {
       const objAny = obj as { parentId?: string };
       if (objAny.parentId === item.id) return true;
-      // Props and effects often use ID prefixing
       if (obj.id.startsWith(item.id + ":")) {
         const suffix = obj.id.substring(item.id.length + 1);
-        // It's a direct child if it doesn't have further nesting colons
-        // (excluding the 'prop:' or 'render:' prefixes themselves)
         return (
           !suffix.includes(":") ||
           (suffix.startsWith("prop:") && !suffix.substring(5).includes(":")) ||
@@ -134,288 +407,6 @@ function hasChanges(
   }
 
   return false;
-}
-
-function FileNode({
-  path,
-  vars,
-  diff,
-  onLocate,
-}: {
-  path: string;
-  vars: Record<string, ComponentFileVar>;
-  diff: AnalyzedDiff;
-  onLocate?: (id: string) => void;
-}) {
-  const [isOpen, setIsOpen] = useState(true);
-  const fileName = path.split("/").pop() || path;
-
-  const topLevelChanges = useMemo(() => {
-    const items: (ComponentFileVar | PropData | EffectInfo)[] = [];
-
-    // Current changed vars
-    Object.values(vars).forEach((v) => {
-      if (hasChanges(v, diff)) items.push(v);
-    });
-
-    // Deleted items that belong to this file and don't have a parent
-    if (diff.deletedObjects) {
-      Object.values(diff.deletedObjects).forEach((obj) => {
-        const objAny = obj as { file?: string; parentId?: string };
-        if (objAny.file === path) {
-          const hasParent = objAny.parentId || obj.id.includes(":");
-          if (!hasParent) {
-            items.push(obj);
-          }
-        }
-      });
-    }
-
-    return items;
-  }, [vars, diff, path]);
-
-  return (
-    <div>
-      <div
-        className="flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? (
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="h-3 w-3 text-muted-foreground" />
-        )}
-        <span className="text-xs font-medium truncate flex-1" title={path}>
-          {fileName}
-        </span>
-      </div>
-      {isOpen && (
-        <div className="ml-4 space-y-1 mt-1">
-          {topLevelChanges.map((item) => (
-            <VarNode
-              key={item.id}
-              item={item as ComponentFileVar}
-              diff={diff}
-              onLocate={onLocate}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function VarNode({
-  item,
-  diff,
-  depth = 0,
-  onLocate,
-}: {
-  item: ComponentFileVar;
-  diff: AnalyzedDiff;
-  depth?: number;
-  onLocate?: (id: string) => void;
-}) {
-  const [isOpen, setIsOpen] = useState(depth === 0);
-  const { customColors } = useConfigStore();
-  const isAdded = diff.added.includes(item.id);
-  const isModified = diff.modified.includes(item.id);
-  const isDeleted = diff.deleted.includes(item.id);
-
-  const statusStyle = useMemo(() => {
-    if (!customColors) return {};
-    if (isAdded) return { color: customColors.gitAdded || "#22c55e" };
-    if (isModified) return { color: customColors.gitModified || "#f59e0b" };
-    if (isDeleted) return { color: customColors.gitDeleted || "#ef4444" };
-    return {};
-  }, [customColors, isAdded, isModified, isDeleted]);
-
-  const children = useMemo(() => {
-    const list: (ComponentFileVar | PropData | EffectInfo)[] = [];
-
-    // 1. Current children
-    if ("props" in item && item.props) {
-      list.push(...item.props.filter((p) => hasChanges(p, diff)));
-    }
-
-    if ("effects" in item && item.effects) {
-      list.push(
-        ...Object.values(item.effects).filter((e) => hasChanges(e, diff)),
-      );
-    }
-
-    if ("var" in item && item.var) {
-      list.push(...Object.values(item.var).filter((v) => hasChanges(v, diff)));
-    }
-
-    // 2. Deleted children
-    if (diff.deletedObjects) {
-      Object.values(diff.deletedObjects).forEach((obj) => {
-        const objAny = obj as { parentId?: string };
-        if (objAny.parentId === item.id) {
-          if (!list.some((existing) => existing.id === obj.id)) {
-            list.push(obj);
-          }
-        }
-      });
-    }
-
-    return list;
-  }, [item, diff]);
-
-  const hasChildren = children.length > 0;
-
-  return (
-    <div>
-      <div
-        className={cn(
-          "flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group text-xs",
-          isAdded && !customColors?.gitAdded && "text-green-500",
-          isModified && !customColors?.gitModified && "text-amber-500",
-          isDeleted && !customColors?.gitDeleted && "text-red-500",
-        )}
-        style={statusStyle}
-        onClick={() => !isDeleted && onLocate?.(item.id)}
-      >
-        <div
-          className="flex items-center justify-center w-4 h-4 hover:bg-accent-foreground/10 rounded-sm shrink-0"
-          onClick={(e) => {
-            if (hasChildren) {
-              e.stopPropagation();
-              setIsOpen(!isOpen);
-            }
-          }}
-        >
-          {hasChildren &&
-            (isOpen ? (
-              <ChevronDown className="h-3 w-3 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            ))}
-        </div>
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          <NodeIcon kind={item.kind} className="h-3 w-3 shrink-0" />
-          <span
-            className="truncate font-medium"
-            title={getDisplayName(item.name)}
-          >
-            {getDisplayName(item.name)}
-          </span>
-          {isAdded && (
-            <span className="text-[10px] ml-1 opacity-70">added</span>
-          )}
-          {isModified && (
-            <span className="text-[10px] ml-1 opacity-70">mod</span>
-          )}
-          {isDeleted && (
-            <span className="text-[10px] ml-1 opacity-70">deleted</span>
-          )}
-        </div>
-
-        {!isDeleted && (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Search className="h-3 w-3 text-muted-foreground" />
-          </div>
-        )}
-      </div>
-      {isOpen && hasChildren && (
-        <div className="ml-4 space-y-0.5 border-l border-border pl-1 mt-0.5">
-          {children.map((child) => (
-            <ChildNode
-              key={child.id}
-              item={child}
-              diff={diff}
-              onLocate={onLocate}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ChildNode({
-  item,
-  diff,
-  onLocate,
-}: {
-  item: ComponentFileVar | PropData | EffectInfo;
-  diff: AnalyzedDiff;
-  onLocate?: (id: string) => void;
-}) {
-  const { customColors } = useConfigStore();
-  // If it's a ComponentFileVar, use VarNode recursively
-  if (
-    "kind" in item &&
-    (item.kind === "component" ||
-      item.kind === "hook" ||
-      item.kind === "state" ||
-      item.kind === "ref" ||
-      item.kind === "memo" ||
-      item.kind === "callback" ||
-      item.kind === "normal")
-  ) {
-    return (
-      <VarNode
-        item={item as ComponentFileVar}
-        diff={diff}
-        depth={1}
-        onLocate={onLocate}
-      />
-    );
-  }
-
-  // Otherwise it's a Prop or Effect
-  const isAdded = diff.added.includes(item.id);
-  const isModified = diff.modified.includes(item.id);
-  const isDeleted = diff.deleted.includes(item.id);
-
-  const statusStyle = {
-    color: isAdded
-      ? customColors?.gitAdded || "#22c55e"
-      : isModified
-        ? customColors?.gitModified || "#f59e0b"
-        : isDeleted
-          ? customColors?.gitDeleted || "#ef4444"
-          : undefined,
-  };
-
-  let name = "";
-  let kind = "";
-  if ("name" in item && typeof item.name === "string") {
-    name = item.name;
-    kind = "prop";
-  } else if (item.id.includes(":effect:")) {
-    name = "effect";
-    kind = "effect";
-  } else if ("kind" in item && item.kind === "spread") {
-    name = (item as PropData).name;
-    kind = "spread";
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-1 px-2 py-0.5 hover:bg-accent rounded text-[11px] group cursor-pointer",
-        isAdded && !customColors?.gitAdded && "text-green-500",
-        isModified && !customColors?.gitModified && "text-amber-500",
-        isDeleted && !customColors?.gitDeleted && "text-red-500",
-      )}
-      style={statusStyle}
-      onClick={() => !isDeleted && onLocate?.(item.id)}
-    >
-      <div className="w-4" />
-      <NodeIcon kind={kind} className="h-3 w-3 shrink-0" />
-      <span className="truncate flex-1" title={name}>
-        {name}
-      </span>
-      {!isDeleted && (
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <Search className="h-3 w-3 text-muted-foreground" />
-        </div>
-      )}
-    </div>
-  );
 }
 
 function NodeIcon({ kind, className }: { kind: string; className?: string }) {
@@ -440,4 +431,3 @@ function NodeIcon({ kind, className }: { kind: string; className?: string }) {
       return <Box className={className} />;
   }
 }
-
