@@ -427,16 +427,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             }
           });
 
-          combos.push({
-            id: `${variable.id}-render`,
-            collapsed: true,
-            name: { type: "identifier", name: "render" },
-            label: { text: "render" },
-            combo: variable.id,
-            fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-            pureFileName: filePath,
-            ui: variable.ui?.renders?.[`${variable.id}-render`],
-          });
+          if (variable.kind === "component") {
+            combos.push({
+              id: `${variable.id}-render`,
+              collapsed: true,
+              name: { type: "identifier", name: "render" },
+              label: { text: "render" },
+              combo: variable.id,
+              fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+              pureFileName: filePath,
+              ui: variable.ui?.renders?.[`${variable.id}-render`],
+            });
+          }
 
           const isPropNode = (props: PropData[], id: string): boolean => {
             for (const p of props) {
@@ -971,9 +973,24 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   }, [highlightGitChanges, status, selectedCommit]);
 
   const onSelect = useCallback(
-    (id: string, center = true) => {
+    (id: string, center = true, highlight = false) => {
       setSelectedId(id);
       setCenteredItemId(id);
+
+      if (highlight) {
+        resetHighlights();
+        const combo = graph.getCombo(id);
+        if (combo) {
+          combo.highlighted = true;
+          graph.updateCombo(combo);
+        } else {
+          const node = graph.getNode(id);
+          if (node) {
+            node.highlighted = true;
+            graph.updateNode(node);
+          }
+        }
+      }
 
       // Expand all ancestors to make sure the node is visible
       graph.expandAncestors(id);
@@ -986,8 +1003,19 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         }, 50);
       }
     },
-    [setSelectedId, setCenteredItemId, graph],
+    [setSelectedId, setCenteredItemId, graph, resetHighlights],
   );
+
+  // Clear search and highlights when search bar is closed
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setSearch("");
+      setDebouncedSearch("");
+      setMatches([]);
+      setCurrentMatchIndex(-1);
+      resetHighlights();
+    }
+  }, [isSearchOpen, resetHighlights]);
 
   useEffect(() => {
     const savePositions = debounce(() => {
@@ -1311,7 +1339,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
           onLocateFile={handleLocateFile}
-          onSelectNode={onSelect}
+          onSelectNode={(id) => onSelect(id, true, true)}
           isLoading={isAnalyzing}
         />
         <SidebarInset className="min-w-0">
@@ -1328,7 +1356,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             typeData={typeData}
             projectPath={projectPath}
             onClose={handleClose}
-            onSelect={onSelect}
+            onSelect={(id) => onSelect(id, true, true)}
             graph={graph}
           />
           {isSearchOpen && (
