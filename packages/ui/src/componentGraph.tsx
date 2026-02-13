@@ -17,6 +17,9 @@ import {
   type ComponentFileVarComponent,
   type VariableName,
   getDisplayName,
+  type ComponentFileVarHookCall,
+  type ComponentFileVarCallback,
+  type VariableLoc,
 } from "shared";
 import useGraph, {
   GraphCombo,
@@ -153,12 +156,17 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         const nodes: GraphNodeData[] = [];
         const edges: GraphArrowData[] = [];
 
+        const hookCallMap = new Map<string, string>(); // ParentID:TargetHookName -> CallNodeID
+        const hookComboNameMap = new Map<string, string>(); // HookID -> HookName
+
         const addCombo = (
           variable: ComponentFileVar,
           filePath: string,
           parentID?: string,
         ) => {
           if (variable.kind !== "component" && variable.kind !== "hook") return;
+          if (variable.type !== "function") return; // Definition must be a function
+
           const fileName = `${graphData.src}${filePath}`;
 
           const combo: GraphComboData = {
@@ -175,6 +183,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             type: variable.kind,
             ui: variable.ui,
             hooks: variable.hooks,
+            collapsedRadius:
+              variable.kind === "hook" && parentID ? 10 : undefined,
             renders:
               variable.kind === "component" ? variable.renders : undefined,
           };
@@ -226,6 +236,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   },
                   type: "prop",
                   color: "green",
+                  radius: 10,
                   combo: parentComboId,
                   fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
                   pureFileName: filePath,
@@ -374,7 +385,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 combo: variable.id,
                 fileName: `${fileName}:${loc.line}:${loc.column}`,
                 pureFileName: filePath,
-                loc: loc,
+                loc: loc as VariableLoc,
                 ui: "ui" in v ? (v as ComponentFileVar).ui : undefined,
                 radius: 10,
                 gitStatus: "deleted",
@@ -437,6 +448,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
           if (variable.var) {
             for (const v of Object.values(variable.var)) {
+              if (!v.loc) continue;
+
               const nodeBase: GraphNodeData = {
                 id: v.id,
                 name: v.name,
@@ -445,6 +458,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 pureFileName: filePath,
                 loc: v.loc,
                 ui: v.ui,
+                radius: 10,
               };
 
               if (added.includes(v.id)) nodeBase.gitStatus = "added";
@@ -460,39 +474,48 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   type: "state",
                   color: "red",
                 });
-              } else if (v.kind == "hook") {
+              } else if (v.kind == "hook" && v.type !== "function") {
+                const hookCall = v as ComponentFileVarHookCall;
                 nodes.push({
                   ...nodeBase,
                   label: {
-                    text: getDisplayName(v.name),
+                    text: getDisplayName(hookCall.name),
                   },
                   type: "hook",
                   color: "red",
                 });
+
+                if (hookCall.dependencies) {
+                  for (const dep of Object.values(hookCall.dependencies)) {
+                    hookCallMap.set(`${variable.id}:${dep.name}`, hookCall.id);
+                  }
+                }
               } else if (v.kind == "memo" || v.kind == "callback") {
+                const withCallback = v as MemoFileVarHook | ComponentFileVarCallback;
                 nodes.push({
                   ...nodeBase,
                   label: {
-                    text: getDisplayName(v.name),
+                    text: getDisplayName(withCallback.name),
                   },
                   type: v.kind,
                   color: "red",
                 });
 
-                for (const dep of (v as MemoFileVarHook).reactDeps) {
+                for (const dep of withCallback.reactDeps) {
                   const isProp = isPropNode(variable.props || [], dep.id);
                   edges.push({
-                    id: `${dep.id}-${v.id}`,
+                    id: `${dep.id}-${withCallback.id}`,
                     source: dep.id,
-                    target: v.id,
+                    target: withCallback.id,
                     combo: isProp ? undefined : variable.id,
                   });
                 }
               } else if (v.kind == "ref") {
+                const refVar = v as ComponentFileVarRef;
                 nodes.push({
                   ...nodeBase,
                   label: {
-                    text: getDisplayName(v.name),
+                    text: getDisplayName(refVar.name),
                   },
                   type: "ref",
                   color: "red",
@@ -507,9 +530,9 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
                     const isProp = isPropNode(variable.props || [], id);
                     edges.push({
-                      id: `${id}-${v.id}`,
+                      id: `${id}-${refVar.id}`,
                       source: id,
-                      target: v.id,
+                      target: refVar.id,
                       combo: isProp ? undefined : variable.id,
                     });
                   } else if (defaultData.type === "literal-array") {
@@ -523,7 +546,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   }
                 };
 
-                addRefDefaultDependency(v.defaultData);
+                addRefDefaultDependency(refVar.defaultData);
               }
             }
           }
@@ -535,6 +558,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                 name: { type: "identifier", name: "effect" },
                 type: "effect",
                 color: "yellow",
+                radius: 10,
                 combo: variable.id,
                 fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
                 pureFileName: filePath,
@@ -576,6 +600,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                       text: getDisplayName(v.name),
                     },
                     combo: `${variable.id}-render`,
+                    radius: 10,
                     fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
                     pureFileName: file.path,
                     loc: render.loc,
@@ -601,12 +626,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               }
             }
           }
-
-          if (variable.var) {
-            for (const v of Object.values(variable.var)) {
-              addCombo(v, filePath, variable.id);
-            }
-          }
         };
 
         const newTypeData: { [key: string]: TypeDataDeclare } = {};
@@ -617,8 +636,17 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           ) => {
             if (!vars) return;
             for (const variable of Object.values(vars)) {
-              if (variable.kind === "component" || variable.kind === "hook") {
+              if (
+                variable.kind === "component" ||
+                (variable.kind === "hook" && variable.type === "function")
+              ) {
                 addCombo(variable, file.path, parentID);
+                if (variable.kind === "hook") {
+                  hookComboNameMap.set(
+                    variable.id,
+                    getDisplayName(variable.name),
+                  );
+                }
               }
               if ("var" in variable && variable.var) {
                 addAllComponents(
@@ -696,7 +724,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   ? `${graphData.src}${filePath}:${loc.line}:${loc.column}`
                   : "",
                 pureFileName: filePath,
-                loc: loc,
+                loc: loc as VariableLoc,
                 ui: "ui" in obj ? (obj as ComponentFileVar).ui : undefined,
                 radius: 10,
                 gitStatus: "deleted",
@@ -752,9 +780,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         for (const e of Object.values(graphData.edges)) {
           if (e.label === "render") continue;
 
+          let source = e.from;
+          const targetName = hookComboNameMap.get(e.to);
+          if (targetName) {
+            const redirectedSource = hookCallMap.get(`${e.from}:${targetName}`);
+            if (redirectedSource) {
+              source = redirectedSource;
+            }
+          }
+
           edges.push({
-            id: `${e.from}-${e.to}`,
-            source: e.from,
+            id: `${source}-${e.to}`,
+            source: source,
             target: e.to,
           });
         }
@@ -940,13 +977,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
       // Expand all ancestors to make sure the node is visible
       graph.expandAncestors(id);
-
-      // If the node itself is a combo, we might want to expand it too?
-      // The user said "if combo then it should expand that node".
-      const combo = graph.getCombo(id);
-      if (combo && combo.collapsed) {
-        graph.comboCollapsed(id);
-      }
 
       // Focus the viewport on the selected item
       // Small timeout to allow potential layout/expansion to finish or at least start
