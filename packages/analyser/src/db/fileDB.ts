@@ -27,6 +27,7 @@ import type {
   VariableLoc,
   VariableScope,
   VariableName,
+  ComponentFileVarHook,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -299,7 +300,10 @@ export class File {
     return variable.id;
   }
 
-  public addMemo(loc: VariableLoc, memo: Omit<Memo, "id"> & { name: VariableName }) {
+  public addMemo(
+    loc: VariableLoc,
+    memo: Omit<Memo, "id"> & { name: VariableName },
+  ) {
     const component = this.getHookInfoFromLoc(loc);
     assert(component != null, "Component not found");
 
@@ -384,6 +388,14 @@ export class File {
     for (const v of variable.var.values()) {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
+      } else if (v.kind === "hook") {
+        for (const dep of Object.values(v.dependencies)) {
+          edges.push({
+            from: v.id,
+            to: dep.id,
+            label: "hook",
+          });
+        }
       }
     }
 
