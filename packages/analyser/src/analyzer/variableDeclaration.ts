@@ -144,26 +144,28 @@ export default function VariableDeclarator(
             });
           }
         } else if (special.type === "hook") {
-          const parentPath = getParentPath(nodePath);
-          currentId = componentDB.addVariable(
-            fileName,
-            {
-              name: pattern,
-              type: "data",
-              dependencies: special.extra.dependencies,
-              loc: pLoc,
-              parentId: pParentId,
-            } as Omit<
-              ComponentFileVarNormalData,
-              "kind" | "file" | "id" | "var" | "components" | "hash"
-            >,
-            parentPath,
-            "hook",
-          );
+          if (t.isIdentifier(pId)) {
+            const parentPath = getParentPath(nodePath);
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                type: "data",
+                dependencies: special.extra.dependencies,
+                loc: pLoc,
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalData,
+                "kind" | "file" | "id" | "var" | "components" | "hash"
+              >,
+              parentPath,
+              "hook",
+            );
+          }
         }
       }
 
-      if (currentId == null) {
+      if (currentId == null && !special) {
         if (t.isIdentifier(pId)) {
           const name = pId.name;
 
@@ -434,7 +436,10 @@ export default function VariableDeclarator(
         }
       }
 
-      if (currentId) {
+      if (
+        currentId ||
+        (special && (t.isObjectPattern(pId) || t.isArrayPattern(pId)))
+      ) {
         if (t.isObjectPattern(pId)) {
           for (const prop of pId.properties) {
             if (t.isObjectProperty(prop)) {
