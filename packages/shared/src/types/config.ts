@@ -11,10 +11,12 @@ export interface CustomColors {
   // Node types
   stateNode?: string;
   memoNode?: string;
+  callbackNode?: string;
   refNode?: string;
   effectNode?: string;
   propNode?: string;
   componentNode?: string;
+  hookNode?: string;
   renderNode?: string;
   // Type highlighting
   typeKeyword?: string;

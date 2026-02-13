@@ -51,6 +51,7 @@ export class GraphNode extends BaseNode {
       switch (this.type) {
         case "state": fillColor = context.customColors.stateNode || "#ef4444"; break;
         case "memo": fillColor = context.customColors.memoNode || "#ef4444"; break;
+        case "callback": fillColor = context.customColors.callbackNode || "#ef4444"; break;
         case "ref": fillColor = context.customColors.refNode || "#ef4444"; break;
         case "effect": fillColor = context.customColors.effectNode || "#eab308"; break;
         case "prop": fillColor = context.customColors.propNode || "#22c55e"; break;

@@ -79,7 +79,15 @@ export default function VariableDeclarator(
             type: "memo";
             extra: { scope: VariableScope; reactDeps: ReactDependency[] };
           }
-        | { type: "ref"; extra: { defaultData: PropDataType } },
+        | {
+            type: "callback";
+            extra: { scope: VariableScope; reactDeps: ReactDependency[] };
+          }
+        | { type: "ref"; extra: { defaultData: PropDataType } }
+        | {
+            type: "hook";
+            extra: { dependencies: Record<string, ComponentFileVarDependency> };
+          },
     ): string | undefined => {
       const pattern = getPattern(pId);
       const nameKey = getVariableNameKey(pattern);
@@ -115,6 +123,16 @@ export default function VariableDeclarator(
               ...special.extra,
             });
           }
+        } else if (special.type === "callback") {
+          const parent = getVariableComponentName(nodePath);
+          if (parent != null) {
+            currentId = componentDB.comAddCallback(parent.loc, fileName, {
+              name: pattern,
+              loc: pLoc,
+              parentId: pParentId,
+              ...special.extra,
+            });
+          }
         } else if (special.type === "ref") {
           const parent = getVariableComponentName(nodePath);
           if (parent != null) {
@@ -125,6 +143,22 @@ export default function VariableDeclarator(
               ...special.extra,
             });
           }
+        } else if (special.type === "hook") {
+          const parentPath = getParentPath(nodePath);
+          currentId = componentDB.addVariable(
+            fileName,
+            {
+              name: pattern,
+              type: "data",
+              dependencies: special.extra.dependencies,
+              loc: pLoc,
+              parentId: pParentId,
+            } as Omit<
+              ComponentFileVarNormalData,
+              "kind" | "file" | "id" | "var" | "components" | "hash"
+            >,
+            parentPath,
+          );
         }
       }
 
@@ -256,7 +290,9 @@ export default function VariableDeclarator(
                     | "id"
                     | "var"
                     | "components"
-                    | "states" | "hash" | "file"
+                    | "states"
+                    | "hash"
+                    | "file"
                   >);
                 } else {
                   currentId = componentDB.addVariable(fileName, {
@@ -503,6 +539,47 @@ export default function VariableDeclarator(
             extra: { scope, reactDeps },
           });
           return;
+        } else if (init.callee.name === "useCallback") {
+          const id = nodePath.node.id;
+
+          let scope: VariableScope | undefined;
+          const reactDeps: ReactDependency[] = [];
+          if (init.arguments.length > 0) {
+            if (t.isArrowFunctionExpression(init.arguments[0])) {
+              assert(init.arguments[0].loc != null, "Function loc not found");
+
+              scope = {
+                start: {
+                  line: init.arguments[0].loc.start.line,
+                  column: init.arguments[0].loc.start.column,
+                },
+                end: {
+                  line: init.arguments[0].loc.end.line,
+                  column: init.arguments[0].loc.end.column,
+                },
+              };
+            }
+          }
+
+          if (init.arguments.length > 1) {
+            if (t.isArrayExpression(init.arguments[1])) {
+              for (const element of init.arguments[1].elements) {
+                if (t.isIdentifier(element)) {
+                  reactDeps.push({
+                    id: "",
+                    name: element.name,
+                  });
+                }
+              }
+            }
+          }
+
+          assert(scope != null, "Scope not found");
+          processPattern(id as t.LVal, undefined, {
+            type: "callback",
+            extra: { scope, reactDeps },
+          });
+          return;
         } else if (init.callee.name === "useRef") {
           const id = nodePath.node.id;
 
@@ -516,6 +593,29 @@ export default function VariableDeclarator(
           processPattern(id as t.LVal, undefined, {
             type: "ref",
             extra: { defaultData },
+          });
+          return;
+        } else if (isHook(init.callee.name)) {
+          const name = getVariableComponentName(nodePath);
+          if (name) {
+            componentDB.comAddHook(
+              name.name,
+              name.loc,
+              fileName,
+              init.callee.name,
+            );
+          }
+
+          const dependencies: Record<string, ComponentFileVarDependency> = {};
+          const id = getDeterministicId(init.callee.name);
+          dependencies[id] = {
+            id,
+            name: init.callee.name,
+          };
+
+          processPattern(nodePath.node.id as t.LVal, undefined, {
+            type: "hook",
+            extra: { dependencies },
           });
           return;
         }

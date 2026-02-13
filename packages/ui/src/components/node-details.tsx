@@ -10,7 +10,7 @@ import {
   type TypeDataParam,
   getDisplayName,
 } from "shared";
-import type { GraphComboData, GraphNodeData } from "@/graph/hook";
+import type { GraphComboData, GraphNodeData, GraphData } from "@/graph/hook";
 import { TypeRefRenderer } from "./type-ref-renderer";
 import React, { useEffect } from "react";
 import { useGitStore } from "@/hooks/useGitStore";
@@ -26,6 +26,8 @@ interface NodeDetailsProps {
   typeData: Record<string, TypeDataDeclare>;
   projectPath: string;
   onClose: () => void;
+  onSelect?: (id: string) => void;
+  graph: GraphData;
 }
 
 export function NodeDetails({
@@ -35,6 +37,8 @@ export function NodeDetails({
   typeData,
   projectPath,
   onClose,
+  onSelect,
+  graph,
 }: NodeDetailsProps) {
   const diffs = useGitStore((s) => s.diffs);
   const loadDiff = useGitStore((s) => s.loadDiff);
@@ -253,6 +257,30 @@ export function NodeDetails({
                         ),
                       )}
                     </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {item.hooks && item.hooks.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-semibold text-muted-foreground">Hooks</span>
+            </div>
+            <div className="space-y-1">
+              {item.hooks.map((hookId) => {
+                const hookItem = graph.getPointByID(hookId);
+                return (
+                  <div
+                    key={hookId}
+                    className="flex items-center justify-between text-xs font-mono bg-muted/30 p-2 rounded border border-border/50 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => onSelect?.(hookId)}
+                  >
+                    <span className="text-primary">
+                      {hookItem ? getDisplayName(hookItem.name) : hookId}
+                    </span>
                   </div>
                 );
               })}

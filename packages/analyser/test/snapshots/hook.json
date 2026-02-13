@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "5b6bdbc8e6a93712",
+          "hash": "37b67c00bdd8ed11",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -126,7 +126,12 @@
               "type": "data",
               "file": "/src/effectt.tsx",
               "hash": "942f58d5296d023a",
-              "dependencies": {},
+              "dependencies": {
+                "fafbb8e860b2efbe": {
+                  "id": "fafbb8e860b2efbe",
+                  "name": "useCustomHook"
+                }
+              },
               "loc": {
                 "line": 7,
                 "column": 8
@@ -435,5 +440,11 @@
       }
     }
   },
-  "edges": []
+  "edges": [
+    {
+      "from": "4f14950571afe084",
+      "to": "810bbf867cc78077",
+      "label": "hook"
+    }
+  ]
 }

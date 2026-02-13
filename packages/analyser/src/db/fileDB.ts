@@ -47,6 +47,7 @@ import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js"
 import { StateVariable } from "./variable/stateVariable.js";
 import { RefVariable } from "./variable/refVariable.js";
 import { MemoVariable } from "./variable/memo.js";
+import { CallbackVariable } from "./variable/callbackVariable.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 
 import { Scope } from "./variable/scope.js";
@@ -118,6 +119,8 @@ export class File {
       v = new StateVariable(variable, this);
     } else if (variable.kind == "memo") {
       v = new MemoVariable(variable, this);
+    } else if (variable.kind == "callback") {
+      v = new CallbackVariable(variable, this);
     } else if (variable.kind == "ref") {
       v = new RefVariable(variable, this);
     } else {
@@ -307,41 +310,81 @@ export class File {
     return variable.id;
   }
 
-  private __getEdgesRaw(variable: ComponentFileVarComponent): DataEdge[] {
+  public addCallback(
+    loc: VariableLoc,
+    callback: Omit<Memo, "id"> & { name: VariableName },
+  ) {
+    const component = this.getHookInfoFromLoc(loc);
+    assert(component != null, "Component not found");
+
+    const variable = component.addCallback(callback);
+    this.scopes.add(variable);
+    this.locIdsMap.set(this.getLocalId(variable), variable);
+
+    return variable.id;
+  }
+
+  private __getEdgesRaw(
+    variable: ComponentFileVarComponent | ComponentFileVarHook,
+  ): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    for (const render of Object.values(variable.renders)) {
-      edges.push({
-        from: render.id,
-        to: variable.id,
-        label: "render",
-      });
+    if (variable.kind === "component") {
+      for (const render of Object.values(variable.renders)) {
+        edges.push({
+          from: render.id,
+          to: variable.id,
+          label: "render",
+        });
+      }
     }
 
-    for (const v of Object.values(variable.var)) {
-      if (v.kind != "component") continue;
+    if (variable.hooks) {
+      for (const hookId of variable.hooks) {
+        edges.push({
+          from: variable.id,
+          to: hookId,
+          label: "hook",
+        });
+      }
+    }
 
-      edges.push(...this.__getEdgesRaw(v));
+    if (variable.var) {
+      for (const v of Object.values(variable.var)) {
+        if (v.kind == "component" || v.kind == "hook") {
+          edges.push(...this.__getEdgesRaw(v));
+        }
+      }
     }
 
     return edges;
   }
 
-  private __getEdges(variable: ComponentVariable): DataEdge[] {
+  private __getEdges(variable: ReactFunctionVariable): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    for (const render of Object.values(variable.renders)) {
+    if (isComponentVariable(variable)) {
+      for (const render of Object.values(variable.renders)) {
+        edges.push({
+          from: render.id,
+          to: variable.id,
+          label: "render",
+        });
+      }
+    }
+
+    for (const hookId of variable.hooks) {
       edges.push({
-        from: render.id,
-        to: variable.id,
-        label: "render",
+        from: variable.id,
+        to: hookId,
+        label: "hook",
       });
     }
 
     for (const v of variable.var.values()) {
-      if (!isComponentVariable(v)) continue;
-
-      edges.push(...this.__getEdges(v));
+      if (isComponentVariable(v) || isHookVariable(v)) {
+        edges.push(...this.__getEdges(v));
+      }
     }
 
     return edges;
@@ -351,15 +394,19 @@ export class File {
     const edges: DataEdge[] = [];
     if (!this.init && this.rawData) {
       for (const variable of Object.values(this.rawData.var)) {
-        if (variable.kind != "component") continue;
-
-        edges.push(...this.__getEdgesRaw(variable));
+        if (variable.kind == "component" || variable.kind == "hook") {
+          edges.push(
+            ...this.__getEdgesRaw(
+              variable as ComponentFileVarComponent | ComponentFileVarHook,
+            ),
+          );
+        }
       }
     } else {
       for (const variable of this.var.values()) {
-        if (!isComponentVariable(variable)) continue;
-
-        edges.push(...this.__getEdges(variable));
+        if (isComponentVariable(variable) || isHookVariable(variable)) {
+          edges.push(...this.__getEdges(variable));
+        }
       }
     }
 
@@ -761,6 +808,18 @@ export class FileDB {
 
     return file.addMemo(loc, {
       ...memo,
+    });
+  }
+
+  public addCallback(
+    fileName: string,
+    loc: VariableLoc,
+    callback: Omit<Memo, "id"> & { name: VariableName },
+  ) {
+    const file = this.get(fileName);
+
+    return file.addCallback(loc, {
+      ...callback,
     });
   }
 
