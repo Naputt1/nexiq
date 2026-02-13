@@ -54,8 +54,8 @@ export class GraphArrow implements Renderable {
     const arrow = new Konva.Arrow({
       id: this.id,
       points: this.points,
-      fill: "#424242",
-      stroke: "#666666",
+      fill: context.customColors?.arrowColor || (context.theme === "dark" ? "#888" : "#424242"),
+      stroke: context.customColors?.arrowColor || (context.theme === "dark" ? "#666" : "#666666"),
       strokeWidth: 0.5 * this.scale,
       pointerWidth: 6 * this.scale,
       pointerLength: 6 * this.scale,

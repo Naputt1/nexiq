@@ -44,13 +44,28 @@ export class GraphNode extends BaseNode {
       }
     });
 
+    const highlightColor = context.customColors?.nodeHighlight || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+
+    let fillColor = this.color;
+    if (context.customColors) {
+      switch (this.type) {
+        case "state": fillColor = context.customColors.stateNode || "#ef4444"; break;
+        case "memo": fillColor = context.customColors.memoNode || "#ef4444"; break;
+        case "ref": fillColor = context.customColors.refNode || "#ef4444"; break;
+        case "effect": fillColor = context.customColors.effectNode || "#eab308"; break;
+        case "prop": fillColor = context.customColors.propNode || "#22c55e"; break;
+        case "render": fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
+        case "component": fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
+      }
+    }
+
     const circle = new Konva.Circle({
       radius: this.radius,
-      fill: this.color,
-      stroke: this.highlighted ? "#007AFF" : undefined,
+      fill: fillColor,
+      stroke: this.highlighted ? highlightColor : undefined,
       strokeWidth: this.highlighted ? 2 : 0,
       perfectDrawEnabled: false,
-      shadowColor: "#007AFF",
+      shadowColor: highlightColor,
       shadowBlur: 20,
       shadowOpacity: 1,
       shadowOffset: { x: 0, y: 0 },
@@ -60,10 +75,10 @@ export class GraphNode extends BaseNode {
     group.add(circle);
 
     if (this.label) {
-      this.renderLabel(group, (this.radius || 0) + 10 * this.scale);
+      this.renderLabel(group, (this.radius || 0) + 10 * this.scale, context);
     }
 
-    this.renderGitStatus(group, this.radius, 4);
+    this.renderGitStatus(group, this.radius, 4, context);
 
     parent.add(group);
     return group;

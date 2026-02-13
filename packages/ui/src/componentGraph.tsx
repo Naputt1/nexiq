@@ -38,6 +38,7 @@ import {
 
 import { useAppStateStore } from "./hooks/use-app-state-store";
 import { useGitStore } from "./hooks/useGitStore";
+import { useConfigStore } from "./hooks/use-config-store";
 
 interface ComponentGraphProps {
   projectPath: string;
@@ -100,6 +101,18 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hasRestoredViewport = useRef(false);
+  const { theme, customColors, fetchConfig } = useConfigStore();
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
+  // Use useEffect to update renderer theme when customColors or theme changes
+  useEffect(() => {
+    if (rendererRef.current) {
+      rendererRef.current.setCustomColors(customColors || {});
+    }
+  }, [customColors, theme]);
 
   const rawGraphDataRef = useRef<JsonData | null>(null);
 
@@ -152,7 +165,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             id: variable.id,
             collapsed: true,
             name: variable.name,
-            label: { text: getDisplayName(variable.name), fill: "black" },
+            label: { text: getDisplayName(variable.name) },
             combo: parentID,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
             pureFileName: filePath,
@@ -186,7 +199,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   id: subPropsComboId,
                   collapsed: true,
                   name: { type: "identifier", name: prop.name },
-                  label: { text: prop.name, fill: "black" },
+                  label: { text: prop.name },
                   color: "green",
                   combo: parentComboId,
                   fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
@@ -299,7 +312,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
               id: propsComboId,
               collapsed: true,
               name: { type: "identifier", name: "props" },
-              label: { text: "props", fill: "black" },
+              label: { text: "props" },
               color: "green",
               combo: variable.id,
               fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
@@ -407,7 +420,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             id: `${variable.id}-render`,
             collapsed: true,
             name: { type: "identifier", name: "render" },
-            label: { text: "render", fill: "black" },
+            label: { text: "render" },
             combo: variable.id,
             fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
             pureFileName: filePath,
@@ -992,6 +1005,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
             setViewport(vp);
           }
         },
+        document.documentElement.classList.contains("dark") ? "dark" : "light",
+        customColors,
       );
     } else {
       rendererRef.current.resize(size.width, size.height);

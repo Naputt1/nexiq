@@ -17,6 +17,7 @@ import { useGitStore } from "@/hooks/useGitStore";
 import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { GitDiffView } from "./GitDiffView";
 import { cn } from "@/lib/utils";
+import { useConfigStore } from "@/hooks/use-config-store";
 
 interface NodeDetailsProps {
   selectedId: string | null;
@@ -38,6 +39,8 @@ export function NodeDetails({
   const diffs = useGitStore((s) => s.diffs);
   const loadDiff = useGitStore((s) => s.loadDiff);
   const selectedCommit = useAppStateStore((s) => s.selectedCommit);
+
+  const { customColors } = useConfigStore();
 
   const item: GraphNodeData | GraphComboData | undefined = selectedId
     ? nodes[selectedId] || combos[selectedId]
@@ -68,7 +71,9 @@ export function NodeDetails({
   const itemDiffs = diffs[diffKey] || [];
 
   const renderGenerics = (params?: TypeDataParam[]) => {
-    // ...
+    const genericsStyle = customColors?.genericsColor ? { color: customColors.genericsColor } : {};
+    const keywordStyle = customColors?.typeKeyword ? { color: customColors.typeKeyword } : {};
+
     if (!params || params.length === 0) return null;
     return (
       <span className="text-muted-foreground pr-1">
@@ -76,16 +81,16 @@ export function NodeDetails({
         {params.map((p, i) => (
           <span key={i}>
             {i > 0 && ", "}
-            <span className="text-yellow-200">{p.name}</span>
+            <span style={genericsStyle} className={cn(!customColors?.genericsColor && "text-yellow-200")}>{p.name}</span>
             {p.constraint && (
               <>
-                <span className="text-purple-400"> extends </span>
+                <span style={keywordStyle} className={cn(!customColors?.typeKeyword && "text-purple-400")}> extends </span>
                 <TypeRenderer type={p.constraint} typeData={typeData} />
               </>
             )}
             {p.default && (
               <>
-                <span className="text-purple-400"> = </span>
+                <span style={keywordStyle} className={cn(!customColors?.typeKeyword && "text-purple-400")}> = </span>
                 <TypeRenderer type={p.default} typeData={typeData} />
               </>
             )}
@@ -149,7 +154,7 @@ export function NodeDetails({
             <div className="text-xs font-mono bg-muted/50 p-3 rounded-md border border-border max-w-full overflow-x-auto text-start leading-relaxed shadow-inner">
               {renderGenerics(item.typeParams)}
               {item.extends && (
-                <span className="text-purple-400">
+                <span style={customColors?.typeKeyword ? { color: customColors.typeKeyword } : {}} className={cn(!customColors?.typeKeyword && "text-purple-400")}>
                   {"extends "}
                   {item.extends.map((param, i) => {
                     return (
@@ -241,9 +246,9 @@ export function NodeDetails({
 
                       <div className="space-y-1">
                         {render.dependencies.map(
-                          (dep: ComponentInfoRenderDependency, j: number) => (
-                            <div key={j} className="flex gap-2">
-                              <span className="text-yellow-200/80">
+                          (dep: ComponentInfoRenderDependency, i: number) => (
+                            <div key={i} className="flex gap-2">
+                              <span style={customColors?.genericsColor ? { color: customColors.genericsColor, opacity: 0.8 } : {}} className={cn(!customColors?.genericsColor && "text-yellow-200/80")}>
                                 {dep.name}:
                               </span>
 

@@ -1,5 +1,6 @@
 import type { GitFileDiff } from "shared";
 import { cn } from "@/lib/utils";
+import { useConfigStore } from "@/hooks/use-config-store";
 
 interface GitDiffViewProps {
   diffs: GitFileDiff[];
@@ -8,6 +9,7 @@ interface GitDiffViewProps {
 }
 
 export function GitDiffView({ diffs, fileName, scope }: GitDiffViewProps) {
+  const { customColors } = useConfigStore();
   const fileDiff = diffs.find((d) => d.path === fileName);
   if (!fileDiff)
     return (
@@ -46,19 +48,31 @@ export function GitDiffView({ diffs, fileName, scope }: GitDiffViewProps) {
                 !scope ||
                 (lineNum >= scope.start.line && lineNum <= scope.end.line);
 
-              if (!isInScope && !isAddedOrDeleted) return null;
+              const lineStyle = {
+                backgroundColor:
+                  line.type === "added"
+                    ? (customColors?.gitAdded || "#22c55e") + "1a" // 10% opacity
+                    : line.type === "deleted"
+                      ? (customColors?.gitDeleted || "#ef4444") + "1a"
+                      : undefined,
+                color:
+                  line.type === "added"
+                    ? customColors?.gitAdded || "#22c55e"
+                    : line.type === "deleted"
+                      ? customColors?.gitDeleted || "#ef4444"
+                      : undefined,
+              };
 
               return (
                 <div
                   key={j}
                   className={cn(
                     "flex gap-2 px-2 whitespace-pre-wrap",
-                    line.type === "added"
-                      ? "bg-green-500/10 text-green-400"
-                      : line.type === "deleted"
-                        ? "bg-red-500/10 text-red-400"
-                        : "text-muted-foreground",
+                    line.type === "added" && !customColors?.gitAdded && "bg-green-500/10 text-green-400",
+                    line.type === "deleted" && !customColors?.gitDeleted && "bg-red-500/10 text-red-400",
+                    line.type === "normal" && "text-muted-foreground",
                   )}
+                  style={lineStyle}
                 >
                   <span className="w-8 shrink-0 text-right opacity-50 select-none">
                     {line.newLineNumber || line.oldLineNumber}

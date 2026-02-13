@@ -1,12 +1,15 @@
 import { app } from "electron";
 import path from "node:path";
 import fs from "node:fs";
+import type { CustomColors } from "./types";
 
 const DATA_FILE = "recent-projects.json";
 
 interface StoreData {
   recentProjects: string[];
   openProjects: string[];
+  theme: "dark" | "light";
+  customColors?: CustomColors;
 }
 
 export class Store {
@@ -24,9 +27,15 @@ export class Store {
       return {
         recentProjects: parsed.recentProjects || [],
         openProjects: parsed.openProjects || [],
+        theme: parsed.theme || parsed.graphTheme || "dark",
+        customColors: parsed.customColors,
       };
     } catch {
-      return { recentProjects: [], openProjects: [] };
+      return {
+        recentProjects: [],
+        openProjects: [],
+        theme: "dark",
+      };
     }
   }
 
@@ -67,6 +76,22 @@ export class Store {
     this.data.recentProjects = this.data.recentProjects.filter(
       (p) => p !== projectPath,
     );
+    this.save();
+  }
+
+  getGlobalConfig(): { theme: "dark" | "light"; customColors?: CustomColors } {
+    return {
+      theme: this.data.theme,
+      customColors: this.data.customColors,
+    };
+  }
+
+  saveGlobalConfig(config: {
+    theme: "dark" | "light";
+    customColors?: CustomColors;
+  }) {
+    this.data.theme = config.theme;
+    this.data.customColors = config.customColors;
     this.save();
   }
 }

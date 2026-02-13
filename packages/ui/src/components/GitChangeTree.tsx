@@ -21,6 +21,8 @@ import {
   type AnalyzedDiff,
 } from "shared";
 
+import { useConfigStore } from "@/hooks/use-config-store";
+
 interface GitChangeTreeProps {
   data: JsonData;
   onLocate?: (id: string) => void;
@@ -28,6 +30,7 @@ interface GitChangeTreeProps {
 
 export function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
   const diff = data.diff;
+  const { customColors } = useConfigStore();
 
   const allFiles = useMemo(() => {
     if (!diff) return [];
@@ -214,9 +217,18 @@ function VarNode({
   onLocate?: (id: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(depth === 0);
+  const { customColors } = useConfigStore();
   const isAdded = diff.added.includes(item.id);
   const isModified = diff.modified.includes(item.id);
   const isDeleted = diff.deleted.includes(item.id);
+
+  const statusStyle = useMemo(() => {
+    if (!customColors) return {};
+    if (isAdded) return { color: customColors.gitAdded || "#22c55e" };
+    if (isModified) return { color: customColors.gitModified || "#f59e0b" };
+    if (isDeleted) return { color: customColors.gitDeleted || "#ef4444" };
+    return {};
+  }, [customColors, isAdded, isModified, isDeleted]);
 
   const children = useMemo(() => {
     const list: (ComponentFileVar | PropData | EffectInfo)[] = [];
@@ -244,18 +256,6 @@ function VarNode({
           if (!list.some((existing) => existing.id === obj.id)) {
             list.push(obj);
           }
-        } else if (obj.id.startsWith(item.id + ":")) {
-          const suffix = obj.id.substring(item.id.length + 1);
-          const isDirectChild =
-            !suffix.includes(":") ||
-            (suffix.startsWith("prop:") &&
-              !suffix.substring(5).includes(":")) ||
-            (suffix.startsWith("render:") &&
-              !suffix.substring(7).includes(":"));
-
-          if (isDirectChild && !list.some((existing) => existing.id === obj.id)) {
-            list.push(obj);
-          }
         }
       });
     }
@@ -270,10 +270,11 @@ function VarNode({
       <div
         className={cn(
           "flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group text-xs",
-          isAdded && "text-green-500",
-          isModified && "text-amber-500",
-          isDeleted && "text-red-500",
+          isAdded && !customColors?.gitAdded && "text-green-500",
+          isModified && !customColors?.gitModified && "text-amber-500",
+          isDeleted && !customColors?.gitDeleted && "text-red-500",
         )}
+        style={statusStyle}
         onClick={() => !isDeleted && onLocate?.(item.id)}
       >
         <div
@@ -342,6 +343,7 @@ function ChildNode({
   diff: AnalyzedDiff;
   onLocate?: (id: string) => void;
 }) {
+  const { customColors } = useConfigStore();
   // If it's a ComponentFileVar, use VarNode recursively
   if (
     "kind" in item &&
@@ -368,6 +370,16 @@ function ChildNode({
   const isModified = diff.modified.includes(item.id);
   const isDeleted = diff.deleted.includes(item.id);
 
+  const statusStyle = {
+    color: isAdded
+      ? customColors?.gitAdded || "#22c55e"
+      : isModified
+        ? customColors?.gitModified || "#f59e0b"
+        : isDeleted
+          ? customColors?.gitDeleted || "#ef4444"
+          : undefined,
+  };
+
   let name = "";
   let kind = "";
   if ("name" in item && typeof item.name === "string") {
@@ -385,10 +397,11 @@ function ChildNode({
     <div
       className={cn(
         "flex items-center gap-1 px-2 py-0.5 hover:bg-accent rounded text-[11px] group cursor-pointer",
-        isAdded && "text-green-500",
-        isModified && "text-amber-500",
-        isDeleted && "text-red-500",
+        isAdded && !customColors?.gitAdded && "text-green-500",
+        isModified && !customColors?.gitModified && "text-amber-500",
+        isDeleted && !customColors?.gitDeleted && "text-red-500",
       )}
+      style={statusStyle}
       onClick={() => !isDeleted && onLocate?.(item.id)}
     >
       <div className="w-4" />

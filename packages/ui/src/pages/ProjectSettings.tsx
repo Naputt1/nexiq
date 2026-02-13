@@ -11,7 +11,7 @@ interface SettingsProps {
   projectPath: string;
 }
 
-export function Settings({ projectPath }: SettingsProps) {
+export function ProjectSettings({ projectPath }: SettingsProps) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,22 +20,26 @@ export function Settings({ projectPath }: SettingsProps) {
   const [selectedIgnoreSubProjects, setSelectedIgnoreSubProjects] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchStatus = async () => {
+    const fetchData = async () => {
       try {
-        const res = await window.ipcRenderer.invoke("check-project-status", projectPath);
-        setStatus(res);
-        if (res.config) {
-          setIgnorePatterns((res.config.ignorePatterns || []).join("\n"));
-          setSelectedIgnoreSubProjects(res.config.ignoreSubProjects || []);
+        const projectRes = await window.ipcRenderer.invoke("check-project-status", projectPath);
+        setStatus(projectRes);
+        if (projectRes.config) {
+          setIgnorePatterns((projectRes.config.ignorePatterns || []).join("\n"));
+          setSelectedIgnoreSubProjects(projectRes.config.ignoreSubProjects || []);
         }
       } catch (e) {
-        console.error("Failed to fetch project status", e);
+        console.error("Failed to fetch settings", e);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchStatus();
+    fetchData();
   }, [projectPath]);
+
+  const goBack = () => {
+    navigate(`/?projectPath=${encodeURIComponent(projectPath)}`);
+  };
 
   const handleSave = async () => {
     if (!status) return;
@@ -58,7 +62,7 @@ export function Settings({ projectPath }: SettingsProps) {
       });
 
       // Navigate back to the graph
-      navigate(`/?projectPath=${encodeURIComponent(projectPath)}`);
+      goBack();
     } catch (err: unknown) {
       console.error("Failed to save config", err);
     } finally {
@@ -84,7 +88,7 @@ export function Settings({ projectPath }: SettingsProps) {
     <div className="p-8 max-w-4xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>

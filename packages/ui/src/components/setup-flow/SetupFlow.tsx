@@ -48,11 +48,11 @@ export function SetupFlow({ onComplete }: SetupFlowProps) {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-white">
-      <div className="text-center">
-        <div className="animate-spin text-blue-500 mb-4 text-3xl">●</div>
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="animate-spin text-primary mb-4 text-3xl">●</div>
         <p className="text-zinc-500">Loading...</p>
-        <Button onClick={() => setStep("welcome")} variant="link" className="mt-4 text-red-500">
-          Reset
+        <Button onClick={() => setStep("welcome")} variant="link" className="mt-4 text-destructive">
+          Go to welcome screen
         </Button>
       </div>
     </div>

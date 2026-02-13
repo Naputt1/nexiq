@@ -42,14 +42,30 @@ export class GraphCombo extends BaseNode {
 
     // Background Circle
     const radius = this.collapsed ? this.collapsedRadius : this.expandedRadius;
+    const highlightColor = context.customColors?.comboHighlight || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+    
+    let fillColor = this.color;
+    if (context.customColors) {
+      if (this.type === "component") {
+        fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+      }
+      // Add other combo types if they exist, e.g. props combo
+      if (this.id.endsWith("-props")) {
+        fillColor = context.customColors.propNode || "#22c55e";
+      }
+      if (this.id.endsWith("-render")) {
+        fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb");
+      }
+    }
+
     const bg = new Konva.Circle({
       id: `bg-${this.id}`,
       radius: radius,
-      stroke: this.highlighted ? "#007AFF" : this.color,
+      stroke: this.highlighted ? highlightColor : (context.theme === "dark" ? "#555" : fillColor),
       strokeWidth: this.highlighted ? 4 : 2,
-      fill: this.collapsed ? this.color : "transparent",
+      fill: this.collapsed ? fillColor : "transparent",
       perfectDrawEnabled: false,
-      shadowColor: "#007AFF",
+      shadowColor: highlightColor,
       shadowBlur: 40,
       shadowOpacity: 1,
       shadowOffset: { x: 0, y: 0 },
@@ -108,10 +124,10 @@ export class GraphCombo extends BaseNode {
     }
 
     // Label
-    this.renderLabel(group, radius + 10 * this.scale);
+    this.renderLabel(group, radius + 10 * this.scale, context);
 
     // Git Status
-    this.renderGitStatus(group, radius, 6);
+    this.renderGitStatus(group, radius, 6, context);
 
     parent.add(group);
     return group;
