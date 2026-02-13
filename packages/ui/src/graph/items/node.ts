@@ -40,7 +40,7 @@ export class GraphNode extends BaseNode {
         window.ipcRenderer.invoke("open-vscode", this.fileName);
       } else {
         e.cancelBubble = true;
-        context.onSelect?.(this.id);
+        context.onSelect?.(this.id, false);
       }
     });
 
@@ -68,6 +68,10 @@ export class GraphNode extends BaseNode {
     }
 
     this.renderGitStatus(group, this.radius, 4, context);
+
+    if (context.registerItem) {
+      context.registerItem(this.id, group);
+    }
 
     parent.add(group);
     return group;

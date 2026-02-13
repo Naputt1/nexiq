@@ -66,6 +66,10 @@ export class GraphArrow implements Renderable {
       opacity: context.hasGitChanges ? 0.1 : 1,
     });
 
+    if (context.registerItem) {
+      context.registerItem(this.id, arrow);
+    }
+
     parent.add(arrow);
 
     return arrow;

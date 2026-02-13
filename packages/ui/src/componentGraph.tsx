@@ -971,7 +971,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   }, [highlightGitChanges, status, selectedCommit]);
 
   const onSelect = useCallback(
-    (id: string) => {
+    (id: string, center = true) => {
       setSelectedId(id);
       setCenteredItemId(id);
 
@@ -980,9 +980,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
       // Focus the viewport on the selected item
       // Small timeout to allow potential layout/expansion to finish or at least start
-      setTimeout(() => {
-        rendererRef.current?.focusItem(id, 1.5);
-      }, 50);
+      if (center) {
+        setTimeout(() => {
+          rendererRef.current?.focusItem(id, 1.5);
+        }, 50);
+      }
     },
     [setSelectedId, setCenteredItemId, graph],
   );

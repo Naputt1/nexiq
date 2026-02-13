@@ -79,7 +79,7 @@ export class GraphCombo extends BaseNode {
         window.ipcRenderer.invoke("open-vscode", this.fileName);
       } else {
         e.cancelBubble = true;
-        context.onSelect?.(this.id);
+        context.onSelect?.(this.id, false);
       }
     });
 
@@ -109,6 +109,10 @@ export class GraphCombo extends BaseNode {
 
     // Git Status
     this.renderGitStatus(group, radius, 6, context);
+
+    if (context.registerItem) {
+      context.registerItem(this.id, group);
+    }
 
     parent.add(group);
     return group;
