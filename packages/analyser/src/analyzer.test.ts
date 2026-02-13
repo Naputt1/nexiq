@@ -7,7 +7,7 @@ import fs from "fs";
 import type { SnapshotData } from "./types/test.js";
 
 describe("analyser snapshots", () => {
-  const projects = ["simple", "complex", "props", "hook", "props-complex"];
+  const projects = ["simple", "complex", "props", "hook", "props-complex", "destructuring-hook"];
 
   projects.forEach((projectName) => {
     it(`should match snapshot for ${projectName}`, () => {
