@@ -460,6 +460,15 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                   type: "state",
                   color: "red",
                 });
+              } else if (v.kind == "hook") {
+                nodes.push({
+                  ...nodeBase,
+                  label: {
+                    text: getDisplayName(v.name),
+                  },
+                  type: "hook",
+                  color: "red",
+                });
               } else if (v.kind == "memo" || v.kind == "callback") {
                 nodes.push({
                   ...nodeBase,

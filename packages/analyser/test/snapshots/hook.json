@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "37b67c00bdd8ed11",
+          "hash": "20fd8d21c9c5414e",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -100,32 +100,16 @@
               },
               "setter": "setState"
             },
-            "15a655f87f0f428b": {
-              "id": "15a655f87f0f428b",
+            "4b5a33021757d7b9": {
+              "id": "4b5a33021757d7b9",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "state2"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setState2"
-                    }
-                  }
-                ],
-                "raw": "[state2, setState2]"
+                "type": "identifier",
+                "name": "state2"
               },
-              "kind": "normal",
+              "kind": "hook",
               "type": "data",
               "file": "/src/effectt.tsx",
-              "hash": "942f58d5296d023a",
+              "hash": "945ccda9267b7d65",
               "dependencies": {
                 "fafbb8e860b2efbe": {
                   "id": "fafbb8e860b2efbe",
@@ -134,43 +118,7 @@
               },
               "loc": {
                 "line": 7,
-                "column": 8
-              },
-              "components": {}
-            },
-            "4b5a33021757d7b9": {
-              "id": "4b5a33021757d7b9",
-              "name": {
-                "type": "identifier",
-                "name": "state2"
-              },
-              "kind": "normal",
-              "type": "data",
-              "file": "/src/effectt.tsx",
-              "hash": "945ccda9267b7d65",
-              "parentId": "15a655f87f0f428b",
-              "dependencies": {},
-              "loc": {
-                "line": 7,
-                "column": 8
-              },
-              "components": {}
-            },
-            "46aedd7e22f0da94": {
-              "id": "46aedd7e22f0da94",
-              "name": {
-                "type": "identifier",
-                "name": "setState2"
-              },
-              "kind": "normal",
-              "type": "data",
-              "file": "/src/effectt.tsx",
-              "hash": "53f2931386baee99",
-              "parentId": "15a655f87f0f428b",
-              "dependencies": {},
-              "loc": {
-                "line": 7,
-                "column": 8
+                "column": 9
               },
               "components": {}
             },
@@ -444,6 +392,11 @@
     {
       "from": "4f14950571afe084",
       "to": "810bbf867cc78077",
+      "label": "hook"
+    },
+    {
+      "from": "4b5a33021757d7b9",
+      "to": "fafbb8e860b2efbe",
       "label": "hook"
     }
   ]

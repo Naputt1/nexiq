@@ -782,7 +782,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "a74fd4b751676359",
+          "hash": "ac251f15225a2d77",
           "dependencies": {},
           "loc": {
             "line": 13,
@@ -795,7 +795,7 @@
                 "type": "identifier",
                 "name": "context"
               },
-              "kind": "normal",
+              "kind": "hook",
               "type": "data",
               "file": "/src/Context.tsx",
               "hash": "7fef27b7d7d95664",
@@ -927,39 +927,23 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "7589ae560fcda20a",
+          "hash": "82f3c30c0711d1db",
           "dependencies": {},
           "loc": {
             "line": 8,
             "column": 16
           },
           "var": {
-            "f42b84f4687ac804": {
-              "id": "f42b84f4687ac804",
+            "ee8c41a0fb7a77fd": {
+              "id": "ee8c41a0fb7a77fd",
               "name": {
-                "type": "array",
-                "elements": [
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "val"
-                    }
-                  },
-                  {
-                    "type": "element",
-                    "value": {
-                      "type": "identifier",
-                      "name": "setVal"
-                    }
-                  }
-                ],
-                "raw": "[val, setVal]"
+                "type": "identifier",
+                "name": "val"
               },
-              "kind": "normal",
+              "kind": "hook",
               "type": "data",
               "file": "/src/ComplexApp.tsx",
-              "hash": "d0162cb06e91d6a4",
+              "hash": "8d73a9a7ab878287",
               "dependencies": {
                 "fafbb8e860b2efbe": {
                   "id": "fafbb8e860b2efbe",
@@ -968,43 +952,7 @@
               },
               "loc": {
                 "line": 9,
-                "column": 8
-              },
-              "components": {}
-            },
-            "ee8c41a0fb7a77fd": {
-              "id": "ee8c41a0fb7a77fd",
-              "name": {
-                "type": "identifier",
-                "name": "val"
-              },
-              "kind": "normal",
-              "type": "data",
-              "file": "/src/ComplexApp.tsx",
-              "hash": "8d73a9a7ab878287",
-              "parentId": "f42b84f4687ac804",
-              "dependencies": {},
-              "loc": {
-                "line": 9,
-                "column": 8
-              },
-              "components": {}
-            },
-            "98854eb2f792d592": {
-              "id": "98854eb2f792d592",
-              "name": {
-                "type": "identifier",
-                "name": "setVal"
-              },
-              "kind": "normal",
-              "type": "data",
-              "file": "/src/ComplexApp.tsx",
-              "hash": "2052aeb50f25207f",
-              "parentId": "f42b84f4687ac804",
-              "dependencies": {},
-              "loc": {
-                "line": 9,
-                "column": 8
+                "column": 9
               },
               "components": {}
             }
@@ -1171,6 +1119,11 @@
       "label": "render"
     },
     {
+      "from": "2167fedcfa51078a",
+      "to": "9b64e47d47fcd4f6",
+      "label": "hook"
+    },
+    {
       "from": "7f6f2958399f03a2",
       "to": "2697de00a506fa4e",
       "label": "render"
@@ -1213,6 +1166,11 @@
     {
       "from": "2697de00a506fa4e",
       "to": "810bbf867cc78077",
+      "label": "hook"
+    },
+    {
+      "from": "ee8c41a0fb7a77fd",
+      "to": "fafbb8e860b2efbe",
       "label": "hook"
     }
   ]

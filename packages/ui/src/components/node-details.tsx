@@ -64,14 +64,22 @@ export function NodeDetails({
 
   if (!selectedId || !item) return null;
 
-  const type = item.type || (item.hasOwnProperty("collapsedRadius") ? "Combo" : "Node");
+  const type =
+    item.type ||
+    (Object.prototype.hasOwnProperty.call(item, "collapsedRadius")
+      ? "Combo"
+      : "Node");
 
   const diffKey = `${selectedCommit || "current"}-${"working"}-${item.pureFileName || "all"}`;
   const itemDiffs = diffs[diffKey] || [];
 
   const renderGenerics = (params?: TypeDataParam[]) => {
-    const genericsStyle = customColors?.genericsColor ? { color: customColors.genericsColor } : {};
-    const keywordStyle = customColors?.typeKeyword ? { color: customColors.typeKeyword } : {};
+    const genericsStyle = customColors?.genericsColor
+      ? { color: customColors.genericsColor }
+      : {};
+    const keywordStyle = customColors?.typeKeyword
+      ? { color: customColors.typeKeyword }
+      : {};
 
     if (!params || params.length === 0) return null;
     return (
@@ -80,16 +88,37 @@ export function NodeDetails({
         {params.map((p, i) => (
           <span key={i}>
             {i > 0 && ", "}
-            <span style={genericsStyle} className={cn(!customColors?.genericsColor && "text-yellow-200")}>{p.name}</span>
+            <span
+              style={genericsStyle}
+              className={cn(!customColors?.genericsColor && "text-yellow-200")}
+            >
+              {p.name}
+            </span>
             {p.constraint && (
               <>
-                <span style={keywordStyle} className={cn(!customColors?.typeKeyword && "text-purple-400")}> extends </span>
+                <span
+                  style={keywordStyle}
+                  className={cn(
+                    !customColors?.typeKeyword && "text-purple-400",
+                  )}
+                >
+                  {" "}
+                  extends{" "}
+                </span>
                 <TypeRenderer type={p.constraint} typeData={typeData} />
               </>
             )}
             {p.default && (
               <>
-                <span style={keywordStyle} className={cn(!customColors?.typeKeyword && "text-purple-400")}> = </span>
+                <span
+                  style={keywordStyle}
+                  className={cn(
+                    !customColors?.typeKeyword && "text-purple-400",
+                  )}
+                >
+                  {" "}
+                  ={" "}
+                </span>
                 <TypeRenderer type={p.default} typeData={typeData} />
               </>
             )}
@@ -153,7 +182,16 @@ export function NodeDetails({
             <div className="text-xs font-mono bg-muted/50 p-3 rounded-md border border-border max-w-full overflow-x-auto text-start leading-relaxed shadow-inner">
               {renderGenerics(item.typeParams)}
               {item.extends && (
-                <span style={customColors?.typeKeyword ? { color: customColors.typeKeyword } : {}} className={cn(!customColors?.typeKeyword && "text-purple-400")}>
+                <span
+                  style={
+                    customColors?.typeKeyword
+                      ? { color: customColors.typeKeyword }
+                      : {}
+                  }
+                  className={cn(
+                    !customColors?.typeKeyword && "text-purple-400",
+                  )}
+                >
                   {"extends "}
                   {item.extends.map((param, i) => {
                     return (
@@ -222,9 +260,7 @@ export function NodeDetails({
               {renderNodes.map((v) => {
                 const renders = item.renders;
 
-                const renderId = v.id.slice(
-                  (selectedId! + "-render-").length,
-                );
+                const renderId = v.id.slice((selectedId! + "-render-").length);
 
                 const render = renders?.[renderId];
 
@@ -243,7 +279,20 @@ export function NodeDetails({
                       {render.dependencies.map(
                         (dep: ComponentInfoRenderDependency, i: number) => (
                           <div key={i} className="flex gap-2">
-                            <span style={customColors?.genericsColor ? { color: customColors.genericsColor, opacity: 0.8 } : {}} className={cn(!customColors?.genericsColor && "text-yellow-200/80")}>
+                            <span
+                              style={
+                                customColors?.genericsColor
+                                  ? {
+                                      color: customColors.genericsColor,
+                                      opacity: 0.8,
+                                    }
+                                  : {}
+                              }
+                              className={cn(
+                                !customColors?.genericsColor &&
+                                  "text-yellow-200/80",
+                              )}
+                            >
                               {dep.name}:
                             </span>
 

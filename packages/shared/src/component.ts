@@ -220,6 +220,10 @@ export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook"> &
     kind: "hook";
   };
 
+export type ComponentFileVarHookCall = ComponentFileVarBaseTypeData<"hook"> & {
+  kind: "hook";
+};
+
 export type ComponentFileVarCallback =
   ComponentFileVarReactWithCallback<"callback"> & ReactDependencies;
 

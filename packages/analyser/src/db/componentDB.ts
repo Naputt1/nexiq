@@ -18,6 +18,7 @@ import type {
   Memo,
   RefData,
   VariableName,
+  VarKind,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -178,6 +179,7 @@ export class ComponentDB {
           "id" | "kind" | "var" | "components" | "file" | "hash"
         >,
     parentPath?: string[],
+    kind?: VarKind,
   ) {
     const file = this.files.get(fileName);
 
@@ -193,10 +195,13 @@ export class ComponentDB {
         file,
       );
     } else if (variable.type === "data") {
+      assert(kind != null);
+
       v = new DataVariable(
         {
           id: getDeterministicId(nameKey),
           ...variable,
+          kind,
         },
         file,
       );

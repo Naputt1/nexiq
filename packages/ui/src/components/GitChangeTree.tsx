@@ -29,12 +29,44 @@ interface GitChangeTreeProps {
   onLocate?: (id: string) => void;
 }
 
-type FlatItem = 
-  | { type: 'file'; id: string; key: string; path: string; depth: number; hasChildren: boolean; fileName: string }
-  | { type: 'var'; id: string; key: string; item: ComponentFileVar; depth: number; hasChildren: boolean; isDeleted: boolean; isAdded: boolean; isModified: boolean }
-  | { type: 'child'; id: string; key: string; item: ComponentFileVar | PropData | EffectInfo; depth: number; isDeleted: boolean; isAdded: boolean; isModified: boolean; kind: string; name: string };
+type FlatItem =
+  | {
+      type: "file";
+      id: string;
+      key: string;
+      path: string;
+      depth: number;
+      hasChildren: boolean;
+      fileName: string;
+    }
+  | {
+      type: "var";
+      id: string;
+      key: string;
+      item: ComponentFileVar;
+      depth: number;
+      hasChildren: boolean;
+      isDeleted: boolean;
+      isAdded: boolean;
+      isModified: boolean;
+    }
+  | {
+      type: "child";
+      id: string;
+      key: string;
+      item: ComponentFileVar | PropData | EffectInfo;
+      depth: number;
+      isDeleted: boolean;
+      isAdded: boolean;
+      isModified: boolean;
+      kind: string;
+      name: string;
+    };
 
-export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: GitChangeTreeProps) {
+export const GitChangeTree = memo(function GitChangeTree({
+  data,
+  onLocate,
+}: GitChangeTreeProps) {
   const diff = data.diff;
   const { customColors } = useConfigStore();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -54,10 +86,10 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
   useEffect(() => {
     if (diff) {
       const initialExpanded = new Set<string>();
-      Object.keys(data.files).forEach(path => initialExpanded.add(path));
+      Object.keys(data.files).forEach((path) => initialExpanded.add(path));
       // Also expand top-level vars by default
-      Object.values(data.files).forEach(f => {
-        Object.values(f.var || {}).forEach(v => initialExpanded.add(v.id));
+      Object.values(data.files).forEach((f) => {
+        Object.values(f.var || {}).forEach((v) => initialExpanded.add(v.id));
       });
       setExpandedIds(initialExpanded);
     }
@@ -65,7 +97,7 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
 
   const toggleExpand = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -78,10 +110,16 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
 
     const result: FlatItem[] = [];
 
-    const allFiles = Array.from(new Set([
-      ...Object.keys(data.files),
-      ...(diff.deletedObjects ? Object.values(diff.deletedObjects).map(obj => (obj as any).file).filter(Boolean) : [])
-    ])).sort();
+    const allFiles = Array.from(
+      new Set([
+        ...Object.keys(data.files),
+        ...(diff.deletedObjects
+          ? Object.values(diff.deletedObjects)
+              .map((obj) => ("file" in obj ? obj.file : undefined))
+              .filter((f): f is string => typeof f === "string")
+          : []),
+      ]),
+    ).sort();
 
     const changedFiles = allFiles.filter((path) => {
       const currentVars = data.files[path]?.var || {};
@@ -93,26 +131,40 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
       const hasDeletedInFile =
         diff.deletedObjects &&
         Object.values(diff.deletedObjects).some((obj) => {
-          const fileObj = obj as { file?: string };
-          return fileObj.file === path && !obj.id.includes(":"); 
+          const file = "file" in obj ? obj.file : undefined;
+          return file === path && !obj.id.includes(":");
         });
       return !!hasDeletedInFile;
     });
 
-    const getChildren = (item: ComponentFileVar): (ComponentFileVar | PropData | EffectInfo)[] => {
+    const getChildren = (
+      item: ComponentFileVar,
+    ): (ComponentFileVar | PropData | EffectInfo)[] => {
       const list: (ComponentFileVar | PropData | EffectInfo)[] = [];
       if ("props" in item && item.props) {
         list.push(...item.props.filter((p) => hasChanges(p, diff, diffSets)));
       }
       if ("effects" in item && item.effects) {
-        list.push(...Object.values(item.effects).filter((e) => hasChanges(e, diff, diffSets)));
+        list.push(
+          ...Object.values(item.effects).filter((e) =>
+            hasChanges(e, diff, diffSets),
+          ),
+        );
       }
       if ("var" in item && item.var) {
-        list.push(...Object.values(item.var).filter((v) => hasChanges(v, diff, diffSets)));
+        list.push(
+          ...Object.values(item.var).filter((v) =>
+            hasChanges(v, diff, diffSets),
+          ),
+        );
       }
       if (diff.deletedObjects) {
         Object.values(diff.deletedObjects).forEach((obj) => {
-          if ((obj as any).parentId === item.id) {
+          const parentId =
+            "parentId" in obj
+              ? (obj as { parentId?: string }).parentId
+              : undefined;
+          if (parentId === item.id) {
             if (!list.some((existing) => existing.id === obj.id)) {
               list.push(obj);
             }
@@ -122,7 +174,11 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
       return list;
     };
 
-    const addVarToResult = (item: ComponentFileVar, depth: number, parentKey: string) => {
+    const addVarToResult = (
+      item: ComponentFileVar,
+      depth: number,
+      parentKey: string,
+    ) => {
       const isAdded = diffSets.added.has(item.id);
       const isModified = diffSets.modified.has(item.id);
       const isDeleted = diffSets.deleted.has(item.id);
@@ -131,7 +187,7 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
       const key = `${parentKey}-var-${item.id}`;
 
       result.push({
-        type: 'var',
+        type: "var",
         id: item.id,
         key,
         item,
@@ -139,12 +195,23 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
         hasChildren,
         isAdded,
         isModified,
-        isDeleted
+        isDeleted,
       });
 
       if (expandedIds.has(item.id) && hasChildren) {
-        children.forEach(child => {
-          if ("kind" in child && (['component', 'hook', 'state', 'ref', 'memo', 'callback', 'normal'].includes(child.kind))) {
+        children.forEach((child) => {
+          if (
+            "kind" in child &&
+            [
+              "component",
+              "hook",
+              "state",
+              "ref",
+              "memo",
+              "callback",
+              "normal",
+            ].includes(child.kind!)
+          ) {
             addVarToResult(child as ComponentFileVar, depth + 1, key);
           } else {
             let name = "";
@@ -160,7 +227,7 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
               kind = "spread";
             }
             result.push({
-              type: 'child',
+              type: "child",
               id: child.id,
               key: `${key}-child-${child.id}`,
               item: child,
@@ -169,20 +236,27 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
               isModified: diffSets.modified.has(child.id),
               isDeleted: diffSets.deleted.has(child.id),
               kind,
-              name
+              name,
             });
           }
         });
       }
     };
 
-    changedFiles.forEach(path => {
+    changedFiles.forEach((path) => {
       const vars = data.files[path]?.var || {};
       const topLevelChanges: (ComponentFileVar | PropData | EffectInfo)[] = [];
-      Object.values(vars).forEach((v) => { if (hasChanges(v, diff, diffSets)) topLevelChanges.push(v); });
+      Object.values(vars).forEach((v) => {
+        if (hasChanges(v, diff, diffSets)) topLevelChanges.push(v);
+      });
       if (diff.deletedObjects) {
         Object.values(diff.deletedObjects).forEach((obj) => {
-          if ((obj as any).file === path && !((obj as any).parentId || obj.id.includes(":"))) {
+          const file = "file" in obj ? obj.file : undefined;
+          const parentId =
+            "parentId" in obj
+              ? (obj as { parentId?: string }).parentId
+              : undefined;
+          if (file === path && !(parentId || obj.id.includes(":"))) {
             topLevelChanges.push(obj);
           }
         });
@@ -191,17 +265,19 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
       const hasChildren = topLevelChanges.length > 0;
       const key = `file-${path}`;
       result.push({
-        type: 'file',
+        type: "file",
         id: path,
         key,
         path,
         depth: 0,
         hasChildren,
-        fileName: path.split("/").pop() || path
+        fileName: path.split("/").pop() || path,
       });
 
       if (expandedIds.has(path) && hasChildren) {
-        topLevelChanges.forEach(v => addVarToResult(v as ComponentFileVar, 1, key));
+        topLevelChanges.forEach((v) =>
+          addVarToResult(v as ComponentFileVar, 1, key),
+        );
       }
     });
 
@@ -224,22 +300,19 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
     );
 
   return (
-    <div 
-      ref={parentRef}
-      className="h-full overflow-auto"
-    >
+    <div ref={parentRef} className="h-full overflow-auto">
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
+          width: "100%",
+          position: "relative",
         }}
       >
         {virtualizer.getVirtualItems().map((virtualItem) => {
           const item = flattenedItems[virtualItem.index];
           if (!item) return null;
 
-          if (item.type === 'file') {
+          if (item.type === "file") {
             const isOpen = expandedIds.has(item.id);
             return (
               <div
@@ -257,21 +330,32 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
                   ) : (
                     <ChevronRight className="h-3 w-3 text-muted-foreground" />
                   )
-                ) : <div className="w-3" />}
-                <span className="text-xs font-medium truncate flex-1" title={item.path}>
+                ) : (
+                  <div className="w-3" />
+                )}
+                <span
+                  className="text-xs font-medium truncate flex-1"
+                  title={item.path}
+                >
                   {item.fileName}
                 </span>
               </div>
             );
           }
 
-          if (item.type === 'var') {
+          if (item.type === "var") {
             const isOpen = expandedIds.has(item.id);
-            const statusStyle = customColors ? {
-              color: item.isAdded ? customColors.gitAdded || "#22c55e" :
-                     item.isModified ? customColors.gitModified || "#f59e0b" :
-                     item.isDeleted ? customColors.gitDeleted || "#ef4444" : undefined
-            } : {};
+            const statusStyle = customColors
+              ? {
+                  color: item.isAdded
+                    ? customColors.gitAdded || "#22c55e"
+                    : item.isModified
+                      ? customColors.gitModified || "#f59e0b"
+                      : item.isDeleted
+                        ? customColors.gitDeleted || "#ef4444"
+                        : undefined,
+                }
+              : {};
 
             return (
               <div
@@ -279,14 +363,16 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
                 className={cn(
                   "absolute top-0 left-0 w-full flex items-center gap-1 px-2 py-1 hover:bg-accent rounded cursor-pointer group text-xs",
                   item.isAdded && !customColors?.gitAdded && "text-green-500",
-                  item.isModified && !customColors?.gitModified && "text-amber-500",
+                  item.isModified &&
+                    !customColors?.gitModified &&
+                    "text-amber-500",
                   item.isDeleted && !customColors?.gitDeleted && "text-red-500",
                 )}
                 style={{
                   height: `${virtualItem.size}px`,
                   transform: `translateY(${virtualItem.start}px)`,
                   paddingLeft: `${item.depth * 12 + 8}px`,
-                  ...statusStyle
+                  ...statusStyle,
                 }}
                 onClick={() => !item.isDeleted && onLocate?.(item.id)}
               >
@@ -302,13 +388,25 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
                     ))}
                 </div>
                 <div className="flex items-center gap-1 flex-1 min-w-0">
-                  <NodeIcon kind={item.item.kind} className="h-3 w-3 shrink-0" />
-                  <span className="truncate font-medium" title={getDisplayName(item.item.name)}>
+                  <NodeIcon
+                    kind={item.item.kind}
+                    className="h-3 w-3 shrink-0"
+                  />
+                  <span
+                    className="truncate font-medium"
+                    title={getDisplayName(item.item.name)}
+                  >
                     {getDisplayName(item.item.name)}
                   </span>
-                  {item.isAdded && <span className="text-[10px] ml-1 opacity-70">added</span>}
-                  {item.isModified && <span className="text-[10px] ml-1 opacity-70">mod</span>}
-                  {item.isDeleted && <span className="text-[10px] ml-1 opacity-70">deleted</span>}
+                  {item.isAdded && (
+                    <span className="text-[10px] ml-1 opacity-70">added</span>
+                  )}
+                  {item.isModified && (
+                    <span className="text-[10px] ml-1 opacity-70">mod</span>
+                  )}
+                  {item.isDeleted && (
+                    <span className="text-[10px] ml-1 opacity-70">deleted</span>
+                  )}
                 </div>
                 {!item.isDeleted && (
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -319,12 +417,18 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
             );
           }
 
-          if (item.type === 'child') {
-            const statusStyle = customColors ? {
-              color: item.isAdded ? customColors.gitAdded || "#22c55e" :
-                     item.isModified ? customColors.gitModified || "#f59e0b" :
-                     item.isDeleted ? customColors.gitDeleted || "#ef4444" : undefined
-            } : {};
+          if (item.type === "child") {
+            const statusStyle = customColors
+              ? {
+                  color: item.isAdded
+                    ? customColors.gitAdded || "#22c55e"
+                    : item.isModified
+                      ? customColors.gitModified || "#f59e0b"
+                      : item.isDeleted
+                        ? customColors.gitDeleted || "#ef4444"
+                        : undefined,
+                }
+              : {};
 
             return (
               <div
@@ -332,14 +436,16 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
                 className={cn(
                   "absolute top-0 left-0 w-full flex items-center gap-1 px-2 py-0.5 hover:bg-accent rounded text-[11px] group cursor-pointer",
                   item.isAdded && !customColors?.gitAdded && "text-green-500",
-                  item.isModified && !customColors?.gitModified && "text-amber-500",
+                  item.isModified &&
+                    !customColors?.gitModified &&
+                    "text-amber-500",
                   item.isDeleted && !customColors?.gitDeleted && "text-red-500",
                 )}
                 style={{
                   height: `${virtualItem.size}px`,
                   transform: `translateY(${virtualItem.start}px)`,
                   paddingLeft: `${item.depth * 12 + 8}px`,
-                  ...statusStyle
+                  ...statusStyle,
                 }}
                 onClick={() => !item.isDeleted && onLocate?.(item.id)}
               >
@@ -367,7 +473,7 @@ export const GitChangeTree = memo(function GitChangeTree({ data, onLocate }: Git
 function hasChanges(
   item: ComponentFileVar | PropData | EffectInfo,
   diff: AnalyzedDiff,
-  sets: { added: Set<string>, modified: Set<string>, deleted: Set<string> }
+  sets: { added: Set<string>; modified: Set<string>; deleted: Set<string> },
 ): boolean {
   if (
     sets.added.has(item.id) ||
@@ -378,7 +484,8 @@ function hasChanges(
   }
 
   if ("var" in item && item.var) {
-    if (Object.values(item.var).some((v) => hasChanges(v, diff, sets))) return true;
+    if (Object.values(item.var).some((v) => hasChanges(v, diff, sets)))
+      return true;
   }
 
   if ("props" in item && item.props) {
@@ -392,8 +499,9 @@ function hasChanges(
 
   if (diff.deletedObjects) {
     return Object.values(diff.deletedObjects).some((obj) => {
-      const objAny = obj as { parentId?: string };
-      if (objAny.parentId === item.id) return true;
+      const parentId =
+        "parentId" in obj ? (obj as { parentId?: string }).parentId : undefined;
+      if (parentId === item.id) return true;
       if (obj.id.startsWith(item.id + ":")) {
         const suffix = obj.id.substring(item.id.length + 1);
         return (
