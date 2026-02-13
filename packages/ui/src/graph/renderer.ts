@@ -247,6 +247,21 @@ export class GraphRenderer {
     const context: RenderContext = {
       graph: this.graph,
       onSelect: this.onSelect,
+      registerItem: (id, item) => {
+        this.items.set(id, item);
+        if (item instanceof Konva.Group && item.id() === id) {
+          if (this.graph.getCombo(id)) {
+            this.combos.set(id, item);
+          } else if (this.graph.getNode(id)) {
+            const circle = item.findOne("Circle") as Konva.Circle;
+            if (circle) {
+              this.nodes.set(id, circle);
+            }
+          }
+        } else if (item instanceof Konva.Arrow) {
+          this.edges.set(id, item);
+        }
+      },
       hasGitChanges: Object.values(this.graph.getCurCombos()).some((c: GraphCombo) => !!c.gitStatus) || Object.values(this.graph.getCurNodes()).some((n: GraphNode) => !!n.gitStatus),
       stage: this.stage,
       theme: this.theme,
@@ -460,6 +475,23 @@ export class GraphRenderer {
     const context: RenderContext = {
       graph: this.graph,
       onSelect: this.onSelect,
+      registerItem: (id, item) => {
+        this.items.set(id, item);
+        if (item instanceof Konva.Group && item.id() === id) {
+          // Check if it's a combo group (it has a bg circle usually)
+          // Actually, we can check the graph data
+          if (this.graph.getCombo(id)) {
+            this.combos.set(id, item);
+          } else if (this.graph.getNode(id)) {
+            const circle = item.findOne("Circle") as Konva.Circle;
+            if (circle) {
+              this.nodes.set(id, circle);
+            }
+          }
+        } else if (item instanceof Konva.Arrow) {
+          this.edges.set(id, item);
+        }
+      },
       hasGitChanges,
       stage: this.stage,
       theme: this.theme,
@@ -468,26 +500,17 @@ export class GraphRenderer {
 
     // Render Edges first (bottom)
     for (const edge of Object.values(edges)) {
-      const arrow = edge.render(context, this.layer);
-      this.edges.set(edge.id, arrow);
-      this.items.set(edge.id, arrow);
+      edge.render(context, this.layer);
     }
 
     // Render Combos
     for (const combo of Object.values(combos)) {
-      const group = combo.render(context, this.layer);
-      this.combos.set(combo.id, group);
-      this.items.set(combo.id, group);
+      combo.render(context, this.layer);
     }
 
     // Render Nodes
     for (const node of Object.values(nodes)) {
-      const group = node.render(context, this.layer);
-      const circle = group.findOne("Circle") as Konva.Circle;
-      if (circle) {
-        this.nodes.set(node.id, circle);
-      }
-      this.items.set(node.id, group);
+      node.render(context, this.layer);
     }
 
     this.layer.batchDraw();
