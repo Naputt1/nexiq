@@ -10,7 +10,7 @@ export class GraphRenderer {
   stage: Konva.Stage;
   layer: Konva.Layer;
   graph: GraphData;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, center?: boolean, highlight?: boolean) => void;
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void;
   theme: "dark" | "light" = "dark";
   customColors?: CustomColors;
@@ -30,7 +30,7 @@ export class GraphRenderer {
     graph: GraphData,
     width: number,
     height: number,
-    onSelect?: (id: string) => void,
+    onSelect?: (id: string, center?: boolean, highlight?: boolean) => void,
     onViewportChange?: (viewport: {
       x: number;
       y: number;

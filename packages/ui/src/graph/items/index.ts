@@ -34,7 +34,7 @@ export type ComboChild = CurRender;
 
 export interface RenderContext {
   graph: GraphData;
-  onSelect?: (id: string, center?: boolean) => void;
+  onSelect?: (id: string, center?: boolean, highlight?: boolean) => void;
   registerItem?: (id: string, item: Konva.Group | Konva.Circle | Konva.Arrow) => void;
   hasGitChanges: boolean;
   stage: Konva.Stage;
