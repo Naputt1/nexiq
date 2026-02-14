@@ -25,6 +25,8 @@ export interface IpcEvents {
   "git-status-changed": void;
 }
 
+export type GraphViewType = "component";
+
 export interface AppStateData {
   selectedSubProject: string | null;
   centeredItemId: string | null;
@@ -33,6 +35,7 @@ export interface AppStateData {
   activeTab: "projects" | "git";
   selectedCommit: string | null;
   viewport?: { x: number; y: number; zoom: number } | null;
+  view?: GraphViewType;
 }
 export interface GlobalSettings {
   theme: "dark" | "light";

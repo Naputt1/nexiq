@@ -19,6 +19,7 @@ import { Files, GitBranch, Settings as SettingsIcon, Settings2 } from "lucide-re
 import { Link } from "react-router-dom";
 import { useAppStateStore } from "@/hooks/use-app-state-store";
 import { GitPanel } from "./GitPanel";
+import { ViewSwitcher } from "./ViewSwitcher";
 import { cn } from "@/lib/utils";
 import type { ProjectStatus } from "../../electron/types";
 import {
@@ -173,32 +174,40 @@ export function ProjectSidebar({
             >
               <GitBranch className="h-5 w-5" />
             </button>
+            <ViewSwitcher isCollapsed={true} />
           </div>
         ) : activeTab === "projects" ? (
           <SidebarGroup className="p-0 flex-1 min-h-0">
             <SidebarHeader className="border-none">
-              <SidebarGroupContent className="flex items-center gap-2 p-2 pt-4">
-                <Select
-                  value={currentPath}
-                  onValueChange={(val) => onSelectProject(val)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="w-full">
-                    <span>
-                      <SelectValue placeholder="Select Project" />
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={projectRoot}>
-                      Root ({projectName})
-                    </SelectItem>
-                    {filteredSubProjects.map((pkg: SubProject) => (
-                      <SelectItem key={pkg.path} value={pkg.path}>
-                        {pkg.name}
+              <SidebarGroupContent className="flex flex-col gap-2 p-2 pt-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground px-2">
+                    Project
+                  </label>
+                  <Select
+                    value={currentPath}
+                    onValueChange={(val) => onSelectProject(val)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full h-8 text-xs">
+                      <span>
+                        <SelectValue placeholder="Select Project" />
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={projectRoot}>
+                        Root ({projectName})
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      {filteredSubProjects.map((pkg: SubProject) => (
+                        <SelectItem key={pkg.path} value={pkg.path}>
+                          {pkg.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <ViewSwitcher />
               </SidebarGroupContent>
             </SidebarHeader>
           </SidebarGroup>
