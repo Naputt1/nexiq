@@ -7,6 +7,7 @@ import type { VarKind, VarType } from "shared";
 import type { StateVariable } from "./stateVariable.js";
 import type { MemoVariable } from "./memo.js";
 import type { RefVariable } from "./refVariable.js";
+import type { CallHookVariable } from "./callHookVariable.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
   return v.kind === "component" && v.type === "function";
@@ -14,6 +15,10 @@ export function isComponentVariable(v: Variable): v is ComponentVariable {
 
 export function isHookVariable(v: Variable): v is HookVariable {
   return v.kind === "hook" && v.type === "function";
+}
+
+export function isCallHookVariable(v: Variable): v is CallHookVariable {
+  return v.kind === "hook" && v.type === "data";
 }
 
 export function isNormalVariable(v: Variable): v is DataVariable {

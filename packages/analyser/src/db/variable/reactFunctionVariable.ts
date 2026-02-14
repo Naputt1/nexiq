@@ -7,7 +7,6 @@ import type {
   ReactDependency,
   ReactFunctionVar,
   RefData,
-  State,
   TypeDataRef,
   VariableName,
 } from "shared";
@@ -19,6 +18,7 @@ import { MemoVariable } from "./memo.js";
 import { CallbackVariable } from "./callbackVariable.js";
 import { RefVariable } from "./refVariable.js";
 import { getVariableNameKey } from "../../analyzer/pattern.js";
+import { CallHookVariable } from "./callHookVariable.js";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
@@ -50,7 +50,15 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public addState(state: Omit<State, "id"> & { name: VariableName }): string {
+  public addState(
+    state: Omit<
+      Omit<
+        ConstructorParameters<typeof StateVariable>[0],
+        "id" | "dependencies"
+      >,
+      "id"
+    > & { name: VariableName },
+  ): string {
     const nameKey = getVariableNameKey(state.name);
     const id = `${this.id}:state:${nameKey}`;
 
@@ -70,6 +78,25 @@ export abstract class ReactFunctionVariable<
     return id;
   }
 
+  public addCallHook(
+    calHook: Omit<ConstructorParameters<typeof CallHookVariable>[0], "id">,
+  ): string {
+    const nameKey = getVariableNameKey(calHook.name);
+    const id = `${this.id}:callhook:${nameKey}`;
+
+    this.var.add(
+      new CallHookVariable(
+        {
+          id,
+          ...calHook,
+        },
+        this.file,
+      ),
+    );
+
+    return id;
+  }
+
   private __resolveReactDefaultDataProp(
     propData: PropData,
     defaultData: TypeDataRef,
@@ -79,8 +106,7 @@ export abstract class ReactFunctionVariable<
         defaultData.name = propData.id;
         return true;
       }
-    }
-    else {
+    } else {
       if (
         defaultData.names.length > 0 &&
         propData.name === defaultData.names[0]
@@ -108,8 +134,7 @@ export abstract class ReactFunctionVariable<
             if (this.__resolveReactDefaultDataProp(innerProp, defaultData))
               return;
           }
-        }
-        else {
+        } else {
           if (this.__resolveReactDefaultDataProp(prop, defaultData)) return;
         }
       }
@@ -122,8 +147,7 @@ export abstract class ReactFunctionVariable<
         if (stateNameKey === name || state.setter === name) {
           if (defaultData.refType === "named") {
             defaultData.name = stateID;
-          }
-          else {
+          } else {
             defaultData.names[0] = stateID;
           }
           return;
@@ -138,8 +162,7 @@ export abstract class ReactFunctionVariable<
         if (memoNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = memoID;
-          }
-          else {
+          } else {
             defaultData.names[0] = memoID;
           }
           return;
@@ -154,8 +177,7 @@ export abstract class ReactFunctionVariable<
         if (refNameKey === name) {
           if (defaultData.refType === "named") {
             defaultData.name = refID;
-          }
-          else {
+          } else {
             defaultData.names[0] = refID;
           }
           return;
@@ -166,26 +188,25 @@ export abstract class ReactFunctionVariable<
       if (v) {
         if (defaultData.refType === "named") {
           defaultData.name = v.id;
-        }
-        else {
+        } else {
           defaultData.names[0] = v.id;
         }
         return;
       }
-    }
-    else if (defaultData.type === "literal-array") {
+    } else if (defaultData.type === "literal-array") {
       for (const element of defaultData.elements) {
         this.resolveReactDefaultData(element);
       }
-    }
-    else if (defaultData.type === "literal-object") {
+    } else if (defaultData.type === "literal-object") {
       for (const prop of Object.values(defaultData.properties)) {
         this.resolveReactDefaultData(prop);
       }
     }
   }
 
-  public addRef(ref: Omit<RefData, "id"> & { name: VariableName }): RefVariable {
+  public addRef(
+    ref: Omit<RefData, "id"> & { name: VariableName },
+  ): RefVariable {
     const nameKey = getVariableNameKey(ref.name);
     const id = `${this.id}:ref:${nameKey}`;
 
@@ -206,7 +227,9 @@ export abstract class ReactFunctionVariable<
     return refVariable;
   }
 
-  public addMemo(memo: Omit<Memo, "id"> & { name: VariableName }): MemoVariable {
+  public addMemo(
+    memo: Omit<Memo, "id"> & { name: VariableName },
+  ): MemoVariable {
     const nameKey = getVariableNameKey(memo.name);
     const id = `${this.id}:memo:${nameKey}`;
 
@@ -249,7 +272,6 @@ export abstract class ReactFunctionVariable<
 
     return callbackVariable;
   }
-
 
   public addHook(hook: string) {
     if (!this.hooks.includes(hook)) {

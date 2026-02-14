@@ -52,6 +52,7 @@ import { CallbackVariable } from "./variable/callbackVariable.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 
 import { Scope } from "./variable/scope.js";
+import { CallHookVariable } from "./variable/callHookVariable.js";
 
 type TypeDataHandlerMap = {
   ref: TypeDataRef;
@@ -115,7 +116,11 @@ export class File {
     } else if (variable.kind === "component") {
       v = new ComponentVariable(variable, this);
     } else if (variable.kind === "hook") {
-      v = new HookVariable(variable, this);
+      if (variable.type === "function") {
+        v = new HookVariable(variable, this);
+      } else {
+        v = new CallHookVariable(variable, this);
+      }
     } else if (variable.kind === "state") {
       v = new StateVariable(variable, this);
     } else if (variable.kind == "memo") {
@@ -355,7 +360,10 @@ export class File {
 
     if (variable.var) {
       for (const v of Object.values(variable.var)) {
-        if (v.kind == "component" || v.kind == "hook") {
+        if (
+          v.kind == "component" ||
+          (v.kind == "hook" && v.type == "function")
+        ) {
           edges.push(...this.__getEdgesRaw(v));
         }
       }

@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "20fd8d21c9c5414e",
+          "hash": "bc2e6f361ea457d8",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -100,8 +100,8 @@
               },
               "setter": "setState"
             },
-            "4b5a33021757d7b9": {
-              "id": "4b5a33021757d7b9",
+            "4f14950571afe084:callhook:state2": {
+              "id": "4f14950571afe084:callhook:state2",
               "name": {
                 "type": "identifier",
                 "name": "state2"
@@ -109,18 +109,13 @@
               "kind": "hook",
               "type": "data",
               "file": "/src/effectt.tsx",
-              "hash": "945ccda9267b7d65",
-              "dependencies": {
-                "fafbb8e860b2efbe": {
-                  "id": "fafbb8e860b2efbe",
-                  "name": "useCustomHook"
-                }
-              },
+              "hash": "869b58f22bfc4088",
+              "dependencies": {},
               "loc": {
                 "line": 7,
                 "column": 9
               },
-              "components": {}
+              "call": "useCustomHook"
             },
             "4f14950571afe084:memo:memoVal": {
               "id": "4f14950571afe084:memo:memoVal",
@@ -223,7 +218,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "4b5a33021757d7b9",
+                  "id": "4f14950571afe084:callhook:state2",
                   "name": "state2"
                 }
               ]
@@ -392,11 +387,6 @@
     {
       "from": "4f14950571afe084",
       "to": "810bbf867cc78077",
-      "label": "hook"
-    },
-    {
-      "from": "4b5a33021757d7b9",
-      "to": "fafbb8e860b2efbe",
       "label": "hook"
     }
   ]

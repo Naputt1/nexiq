@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentInfoRenderDependency } from "shared";
 import assert from "assert";
@@ -56,6 +56,7 @@ function getComponentLoc(nodePath: traverse.NodePath<t.JSXElement>) {
               parentStatement.parentPath.parentPath.parentPath?.type ===
               "JSXExpressionContainer"
             ) {
+              // intentionally empty
             } else {
               fullDebug();
             }

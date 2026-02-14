@@ -4,7 +4,7 @@ import type {
   VariableObjectProperty,
   VariableArrayElement,
 } from "shared";
-import generate from "@babel/generator";
+import { generateFn } from "src/utils/babel.js";
 
 export function getPattern(node: t.LVal): VariableNamePattern {
   if (t.isIdentifier(node)) {
@@ -24,27 +24,30 @@ export function getPattern(node: t.LVal): VariableNamePattern {
       } else if (t.isRestElement(prop)) {
         properties.push({
           key: "rest",
-          value: { type: "rest", argument: getPattern(prop.argument as t.LVal) },
+          value: {
+            type: "rest",
+            argument: getPattern(prop.argument as t.LVal),
+          },
         });
       }
     }
     return {
       type: "object",
       properties,
-      raw: typeof generate === "function" ? (generate as any)(node).code : (generate as any).default(node).code,
+      raw: generateFn(node).code,
     };
   } else if (t.isArrayPattern(node)) {
     const elements: VariableArrayElement[] = node.elements.map((el) => {
       if (el == null) return null;
       if (t.isRestElement(el)) {
-        return { type: "rest", argument: getPattern(el.argument as t.LVal) };
+        return { type: "rest", value: getPattern(el.argument as t.LVal) };
       }
       return { type: "element", value: getPattern(el as t.LVal) };
     });
     return {
       type: "array",
       elements,
-      raw: typeof generate === "function" ? (generate as any)(node).code : (generate as any).default(node).code,
+      raw: generateFn(node).code,
     };
   } else if (t.isRestElement(node)) {
     return { type: "rest", argument: getPattern(node.argument as t.LVal) };

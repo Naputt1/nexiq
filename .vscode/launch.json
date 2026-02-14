@@ -132,6 +132,22 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "destructuring-hook",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/destructuring-hook",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "maemoo",
       "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [

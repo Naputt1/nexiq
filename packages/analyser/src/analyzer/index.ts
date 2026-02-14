@@ -3,7 +3,6 @@ import type { PackageJson } from "../db/packageJson.js";
 import { getViteAliases } from "../vite.js";
 import fs from "fs";
 import path from "path";
-import traverse from "@babel/traverse";
 import { parseCode } from "./utils.js";
 import type { File } from "@babel/types";
 import ImportDeclaration from "./importDeclaration.js";
@@ -17,13 +16,14 @@ import CallExpression from "./callExpression.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 import type { JsonData } from "shared";
+import { traverseFn } from "src/utils/babel.js";
 
 function analyzeFiles(
   SRC_DIR: string,
   viteConfigPath: string | null,
   files: string[],
   packageJson: PackageJson,
-  cacheData?: JsonData
+  cacheData?: JsonData,
 ) {
   const componentDB = new ComponentDB({
     packageJson,
@@ -48,7 +48,6 @@ function analyzeFiles(
       continue;
     }
 
-    const traverseFn: typeof traverse.default = traverse.default || traverse;
     traverseFn(ast, {
       ImportDeclaration: ImportDeclaration(componentDB, fileName),
       ExportNamedDeclaration: ExportNamedDeclaration(componentDB, fileName),

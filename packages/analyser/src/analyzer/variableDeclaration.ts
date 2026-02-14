@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type * as traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type {
   ComponentFileVarComponent,
@@ -86,7 +86,10 @@ export default function VariableDeclarator(
         | { type: "ref"; extra: { defaultData: PropDataType } }
         | {
             type: "hook";
-            extra: { dependencies: Record<string, ComponentFileVarDependency> };
+            extra: {
+              dependencies: Record<string, ComponentFileVarDependency>;
+              call: string;
+            };
           },
     ): string | undefined => {
       const pattern = getPattern(pId);
@@ -144,23 +147,14 @@ export default function VariableDeclarator(
             });
           }
         } else if (special.type === "hook") {
-          if (t.isIdentifier(pId)) {
-            const parentPath = getParentPath(nodePath);
-            currentId = componentDB.addVariable(
-              fileName,
-              {
-                name: pattern,
-                type: "data",
-                dependencies: special.extra.dependencies,
-                loc: pLoc,
-                parentId: pParentId,
-              } as Omit<
-                ComponentFileVarNormalData,
-                "kind" | "file" | "id" | "var" | "components" | "hash"
-              >,
-              parentPath,
-              "hook",
-            );
+          const parent = getVariableComponentName(nodePath);
+          if (parent != null) {
+            currentId = componentDB.comAddCallHook(parent.loc, fileName, {
+              name: pattern,
+              loc: pLoc,
+              parentId: pParentId,
+              ...special.extra,
+            });
           }
         }
       }
@@ -436,26 +430,26 @@ export default function VariableDeclarator(
         }
       }
 
-      if (
-        currentId ||
-        (special && (t.isObjectPattern(pId) || t.isArrayPattern(pId)))
-      ) {
-        if (t.isObjectPattern(pId)) {
-          for (const prop of pId.properties) {
-            if (t.isObjectProperty(prop)) {
-              processPattern(prop.value as t.LVal, currentId, special);
-            } else if (t.isRestElement(prop)) {
-              processPattern(prop.argument as t.LVal, currentId, special);
-            }
-          }
-        } else if (t.isArrayPattern(pId)) {
-          for (const element of pId.elements) {
-            if (element) {
-              processPattern(element as t.LVal, currentId, special);
-            }
-          }
-        }
-      }
+      // if (
+      //   currentId ||
+      //   (special && (t.isObjectPattern(pId) || t.isArrayPattern(pId)))
+      // ) {
+      //   if (t.isObjectPattern(pId)) {
+      //     for (const prop of pId.properties) {
+      //       if (t.isObjectProperty(prop)) {
+      //         processPattern(prop.value as t.LVal, currentId, special);
+      //       } else if (t.isRestElement(prop)) {
+      //         processPattern(prop.argument as t.LVal, currentId, special);
+      //       }
+      //     }
+      //   } else if (t.isArrayPattern(pId)) {
+      //     for (const element of pId.elements) {
+      //       if (element) {
+      //         processPattern(element as t.LVal, currentId, special);
+      //       }
+      //     }
+      //   }
+      // }
       return currentId;
     };
 
@@ -612,25 +606,21 @@ export default function VariableDeclarator(
             );
           }
 
+          //TODO: add dependencies
           const dependencies: Record<string, ComponentFileVarDependency> = {};
-          const depId = getDeterministicId(init.callee.name);
-          dependencies[depId] = {
-            id: depId,
-            name: init.callee.name,
-          };
 
           const id = nodePath.node.id;
           if (t.isArrayPattern(id) && id.elements.length > 0) {
             processPattern(id.elements[0] as t.LVal, undefined, {
               type: "hook",
-              extra: { dependencies },
+              extra: { dependencies, call: init.callee.name },
             });
             return;
           }
 
           processPattern(nodePath.node.id as t.LVal, undefined, {
             type: "hook",
-            extra: { dependencies },
+            extra: { dependencies, call: init.callee.name },
           });
           return;
         }

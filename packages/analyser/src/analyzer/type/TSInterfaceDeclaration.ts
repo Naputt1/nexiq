@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { TypeDataDeclareInterface, TypeDataParam } from "shared";
 import assert from "assert";
 import type { ComponentDB } from "../../db/componentDB.js";
@@ -13,10 +13,7 @@ export default function TSInterfaceDeclaration(
 ): traverse.VisitNode<traverse.Node, t.TSInterfaceDeclaration> {
   return (nodePath) => {
     const pattern = getPattern(nodePath.node.id);
-    const name = nodePath.node.id.name;
     assert(nodePath.node.id.loc != null);
-
-    if (name === "InnerType") debugger;
 
     const loc = {
       line: nodePath.node.id.loc.start.line,

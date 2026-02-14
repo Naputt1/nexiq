@@ -304,23 +304,6 @@
         }
       },
       "var": {
-        "fa7e21af27b37eb": {
-          "id": "fa7e21af27b37eb",
-          "name": {
-            "type": "identifier",
-            "name": "UserContext"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/App.tsx",
-          "hash": "be256203eddd07cf",
-          "dependencies": {},
-          "loc": {
-            "line": 10,
-            "column": 13
-          },
-          "components": {}
-        },
         "720e9756d239e21b": {
           "id": "720e9756d239e21b",
           "name": {

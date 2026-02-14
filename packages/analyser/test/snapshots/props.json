@@ -1311,23 +1311,6 @@
         }
       },
       "var": {
-        "6a52b2c719c0f421": {
-          "id": "6a52b2c719c0f421",
-          "name": {
-            "type": "identifier",
-            "name": "Test65"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/type.tsx",
-          "hash": "83556d6bce01ed37",
-          "dependencies": {},
-          "loc": {
-            "line": 31,
-            "column": 6
-          },
-          "components": {}
-        },
         "8138ea1421523344": {
           "id": "8138ea1421523344",
           "name": {
