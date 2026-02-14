@@ -2,9 +2,10 @@ import fs from "fs";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { CallExpression, ObjectProperty } from "@babel/types";
+import { traverseFn } from "./utils/babel.js";
 
 export function getViteAliases(
-  viteConfigFile?: string | null
+  viteConfigFile?: string | null,
 ): Record<string, string> {
   if (!viteConfigFile) {
     return {};
@@ -19,7 +20,6 @@ export function getViteAliases(
 
   const aliases: Record<string, string> = {};
 
-  const traverseFn: typeof traverse.default = traverse.default || traverse;
   traverseFn(ast, {
     ObjectProperty(path: traverse.NodePath<ObjectProperty>) {
       const key = path.node.key;

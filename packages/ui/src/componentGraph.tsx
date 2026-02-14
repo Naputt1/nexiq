@@ -5,10 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  type TypeDataDeclare,
-  type JsonData,
-} from "shared";
+import { type TypeDataDeclare, type JsonData } from "shared";
 import useGraph, {
   GraphCombo,
   GraphNode,
@@ -143,6 +140,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           combos,
           typeData: newTypeData,
         } = VIEW_GENERATORS[view](graphData);
+
+        console.log("typeData", { nodes, edges, combos });
 
         settypeData(newTypeData);
         setGraphData({

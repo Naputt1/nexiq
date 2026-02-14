@@ -1,7 +1,6 @@
 import assert from "assert";
 import type {
   ComponentFileImport,
-  State,
   DataEdge,
   ComponentFileExport,
   JsonData,
@@ -36,6 +35,7 @@ import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
 import { getDeterministicId } from "../utils/hash.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
+import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -195,7 +195,11 @@ export class ComponentDB {
         file,
       );
     } else if (variable.type === "data") {
-      assert(kind != null);
+      // assert(kind != null);
+      if (kind == null) {
+        debugger;
+        return;
+      }
 
       v = new DataVariable(
         {
@@ -224,13 +228,25 @@ export class ComponentDB {
     name: string,
     loc: VariableLoc,
     fileName: string,
-    state: Omit<State, "id"> & { name: VariableName },
+    state: Parameters<ReactFunctionVariable["addState"]>[0],
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
     assert(component != null, "Component not found");
 
     return component.addState(state);
+  }
+
+  public comAddCallHook(
+    loc: VariableLoc,
+    fileName: string,
+    callHook: Parameters<ReactFunctionVariable["addCallHook"]>[0],
+  ) {
+    const component = this.files.getHookInfoFromLoc(fileName, loc);
+
+    assert(component != null, "Component not found");
+
+    return component.addCallHook(callHook);
   }
 
   public comAddRef(

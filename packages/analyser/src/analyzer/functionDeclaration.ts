@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { isHook, returnJSX } from "../utils.js";
 import assert from "assert";
@@ -81,7 +81,10 @@ export default function FunctionDeclaration(
           loc,
           scope,
           effects: {},
-        } as Omit<ComponentFileVarComponent, "id" | "kind" | "states" | "hash" | "file">);
+        } as Omit<
+          ComponentFileVarComponent,
+          "id" | "kind" | "states" | "hash" | "file"
+        >);
         return;
       }
 
@@ -95,7 +98,10 @@ export default function FunctionDeclaration(
           props: getProps(nodePath, undefined, componentId),
           effects: {},
           hooks: [],
-        } as Omit<ComponentFileVarHook, "kind" | "id" | "var" | "components" | "states" | "hash" | "file">);
+        } as Omit<
+          ComponentFileVarHook,
+          "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
+        >);
         return;
       }
 
@@ -105,7 +111,10 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
-      } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">);
+      } as Omit<
+        ComponentFileVarNormalFunction,
+        "kind" | "file" | "id" | "var" | "components" | "hash"
+      >);
     } else {
       if (
         nodePath.scope.block.type === "FunctionDeclaration" &&
@@ -121,7 +130,10 @@ export default function FunctionDeclaration(
             type: "function",
             loc,
             scope,
-          } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">,
+          } as Omit<
+            ComponentFileVarNormalFunction,
+            "kind" | "file" | "id" | "var" | "components" | "hash"
+          >,
           parentPath,
         );
       }

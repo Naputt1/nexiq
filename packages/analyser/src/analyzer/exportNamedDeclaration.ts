@@ -1,12 +1,12 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentFileExport } from "shared";
 import assert from "assert";
 
 export default function ExportNamedDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ExportNamedDeclaration> {
   return (nodePath) => {
     const decl = nodePath.node.declaration;

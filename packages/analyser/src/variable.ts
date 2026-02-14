@@ -13,7 +13,7 @@ export function getVariableComponentName(
   loc?: VariableLoc,
 ): VariableComponentName | null {
   if (path == null) return null;
-  if (typeof (path as any).findParent !== "function") return null;
+  if (typeof path.findParent !== "function") return null;
 
   if (loc && (path as any).loc == null) {
     (path as any).loc = {
@@ -28,7 +28,7 @@ export function getVariableComponentName(
       (p.isVariableDeclarator() &&
         t.isIdentifier(p.node.id) &&
         (t.isArrowFunctionExpression(p.node.init) ||
-          t.isFunctionExpression(p.node.init)))
+          t.isFunctionExpression(p.node.init))),
   );
 
   if (compPath) {

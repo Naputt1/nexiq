@@ -58,7 +58,6 @@ type InnerCallBack = (params: InnerCallBackParams) => void;
 
 // Graph Data Class
 
-
 export interface GraphComboHookBase extends GraphComboData {
   nodes?: Record<string, GraphNode>;
   edges?: Record<string, GraphArrow>;
@@ -536,7 +535,6 @@ export class GraphData {
     } as LayoutRequest);
   }
 
-
   private _addChildEdge(e: GraphArrowData): boolean {
     if (e.combo == null) {
       return false;
@@ -794,7 +792,7 @@ export class GraphData {
     this.trigger({ type: "new-edges" });
   }
 
-  private getComboByID(id: string): GraphCombo | undefined {
+  private getComboByID(id: string, i?: number): GraphCombo | undefined {
     if (this.combos.has(id)) {
       const parentCombo = this.combos.get(id);
       if (parentCombo != null) {
@@ -805,7 +803,7 @@ export class GraphData {
     if (this.comboChildMap.has(id)) {
       const parentId = this.comboChildMap.get(id);
       if (parentId != null) {
-        const parent = this.getComboByID(parentId);
+        const parent = this.getComboByID(parentId, (i ?? 1) + 1);
         if (parent != null) {
           return parent.child?.combos[id];
         }

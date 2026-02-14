@@ -131,7 +131,7 @@ export type VariableObjectProperty = {
 
 export type VariableArrayElement =
   | { type: "element"; value: VariableNamePattern }
-  | { type: "rest"; argument: VariableNamePattern }
+  | { type: "rest"; value: VariableNamePattern }
   | null;
 
 export type VariableName = VariableNamePattern;
@@ -158,8 +158,8 @@ interface ComponentFileVarBaseType<TType extends VarType> {
 export interface ComponentFileVarBase<
   TType extends VarType,
   TKind extends VarKind,
-> extends ComponentLoc,
-    ComponentFileVarBaseType<TType> {
+>
+  extends ComponentLoc, ComponentFileVarBaseType<TType> {
   kind: TKind;
 }
 
@@ -211,6 +211,10 @@ export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
   setter?: string | undefined;
 };
 
+export type ComponentFileVarCallHook = ComponentFileVarReact<"data", "hook"> & {
+  call: string;
+};
+
 export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {
   defaultData: PropDataType;
 };
@@ -219,10 +223,6 @@ export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook"> &
   HookInfo & {
     kind: "hook";
   };
-
-export type ComponentFileVarHookCall = ComponentFileVarBaseTypeData<"hook"> & {
-  kind: "hook";
-};
 
 export type ComponentFileVarCallback =
   ComponentFileVarReactWithCallback<"callback"> & ReactDependencies;
@@ -254,10 +254,10 @@ export type ComponentFileVarFunction =
 export type ComponentFileVar =
   | ComponentFileVarComponent
   | ComponentFileVarState
+  | ComponentFileVarCallHook
   | ComponentFileVarRef
   | ComponentFileVarNormal
   | ComponentFileVarHook
-  | ComponentFileVarHookCall
   | ComponentFileVarCallback
   | MemoFileVarHook
   | ComponentFileVarFunction;

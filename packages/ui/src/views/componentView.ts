@@ -10,9 +10,9 @@ import {
   type ComponentFileVarComponent,
   type VariableName,
   getDisplayName,
-  type ComponentFileVarHookCall,
   type ComponentFileVarCallback,
   type VariableLoc,
+  type ReactVarKind,
 } from "shared";
 import {
   type GraphComboData,
@@ -228,7 +228,10 @@ export const generateComponentGraphData = (
         // If every single prop is deleted, status is deleted.
         // Otherwise, it's modified.
         if (uniqueStatuses.size === 1) {
-          propsCombo.gitStatus = statuses[0] as "added" | "modified" | "deleted";
+          propsCombo.gitStatus = statuses[0] as
+            | "added"
+            | "modified"
+            | "deleted";
         } else {
           propsCombo.gitStatus = "modified";
         }
@@ -265,7 +268,7 @@ export const generateComponentGraphData = (
         const nodeBase: GraphNodeData = {
           id: v.id,
           name: name,
-          combo: variable.id,
+          combo: ("parentId" in v ? v.parentId : undefined) || variable.id,
           fileName: `${fileName}:${loc.line}:${loc.column}`,
           pureFileName: filePath,
           loc: loc as VariableLoc,
@@ -274,31 +277,63 @@ export const generateComponentGraphData = (
           gitStatus: "deleted",
         };
 
+        const isPattern = name.type === "object" || name.type === "array";
+
         if ("kind" in v) {
           if (v.kind === "state") {
             const stateVar = v as ComponentFileVarState;
-            nodes.push({
-              ...nodeBase,
-              label: { text: getDisplayName(stateVar.name) },
-              type: "state",
-              color: "red",
-            });
+            if (isPattern) {
+              combos.push({
+                ...nodeBase,
+                label: { text: getDisplayName(stateVar.name) },
+                type: "state",
+                color: "red",
+                collapsed: true,
+              });
+            } else {
+              nodes.push({
+                ...nodeBase,
+                label: { text: getDisplayName(stateVar.name) },
+                type: "state",
+                color: "red",
+              });
+            }
           } else if (v.kind === "memo") {
             const memoVar = v as MemoFileVarHook;
-            nodes.push({
-              ...nodeBase,
-              label: { text: getDisplayName(memoVar.name) },
-              type: "memo",
-              color: "red",
-            });
+            if (isPattern) {
+              combos.push({
+                ...nodeBase,
+                label: { text: getDisplayName(memoVar.name) },
+                type: "memo",
+                color: "red",
+                collapsed: true,
+              });
+            } else {
+              nodes.push({
+                ...nodeBase,
+                label: { text: getDisplayName(memoVar.name) },
+                type: "memo",
+                color: "red",
+              });
+            }
           } else if (v.kind === "ref") {
             const refVar = v as ComponentFileVarRef;
-            nodes.push({
-              ...nodeBase,
-              label: { text: getDisplayName(refVar.name) },
-              type: "ref",
-              color: "red",
-            });
+            if (isPattern) {
+              combos.push({
+                ...nodeBase,
+                label: { text: getDisplayName(refVar.name) },
+                type: "ref",
+                color: "red",
+                collapsed: true,
+              });
+            } else {
+              nodes.push({
+                ...nodeBase,
+                label: { text: getDisplayName(refVar.name) },
+                type: "ref",
+                color: "red",
+              });
+            }
           } else if (v.kind === "effect") {
             nodes.push({
               ...nodeBase,
@@ -330,7 +365,7 @@ export const generateComponentGraphData = (
         const nodeBase: GraphNodeData = {
           id: v.id,
           name: v.name,
-          combo: variable.id,
+          combo: v.parentId || variable.id,
           fileName: `${fileName}:${v.loc.line}:${v.loc.column}`,
           pureFileName: filePath,
           loc: v.loc,
@@ -342,25 +377,85 @@ export const generateComponentGraphData = (
         else if (modified.includes(v.id)) nodeBase.gitStatus = "modified";
         else if (deleted.includes(v.id)) nodeBase.gitStatus = "deleted";
 
+        const isPattern = v.name.type === "object" || v.name.type === "array";
+
         if (v.kind == "state") {
-          nodes.push({
-            ...nodeBase,
-            label: {
-              text: getDisplayName(v.name),
-            },
-            type: "state",
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(v.name) },
+              type: "state",
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: {
+                text: getDisplayName(v.name),
+              },
+              type: "state",
+              color: "red",
+            });
+          }
         } else if (v.kind == "hook" && v.type !== "function") {
-          const hookCall = v as ComponentFileVarHookCall;
-          nodes.push({
-            ...nodeBase,
-            label: {
-              text: getDisplayName(hookCall.name),
-            },
-            type: "hook",
-            color: "red",
-          });
+          const hookCall = v;
+
+          const addDestructiveVariable = (
+            v: VariableName,
+            type: ReactVarKind,
+            parentName: string,
+            parent?: string,
+          ) => {
+            if (v.type == "object" || v.type === "array") {
+              const comboId = parent ? `${parent}-${parentName}` : nodeBase.id;
+              const combo: GraphComboData = {
+                ...nodeBase,
+                id: comboId,
+                label: {
+                  text: parentName,
+                },
+                type: type,
+                color: "red",
+                collapsed: false,
+              };
+              if (parent) combo.combo = parent;
+
+              combos.push(combo);
+
+              if (v.type === "array") {
+                for (const [i, element] of v.elements.entries()) {
+                  if (element != null) {
+                    addDestructiveVariable(
+                      element.value,
+                      type,
+                      "" + i,
+                      comboId,
+                    );
+                  }
+                }
+              } else if (v.type === "object") {
+                for (const prop of v.properties) {
+                  addDestructiveVariable(prop.value, type, prop.key, comboId);
+                }
+              }
+            } else {
+              const name =
+                v.type === "identifier" ? v.name : `...${v.argument}`;
+              nodes.push({
+                ...nodeBase,
+                id: parent ? `${parent}-${name}` : nodeBase.id,
+                combo: parent,
+                label: {
+                  text: name,
+                },
+                type: type,
+                color: "red",
+              });
+            }
+          };
+
+          addDestructiveVariable(hookCall.name, hookCall.kind, hookCall.call);
 
           if (hookCall.dependencies) {
             for (const dep of Object.values(hookCall.dependencies)) {
@@ -369,14 +464,24 @@ export const generateComponentGraphData = (
           }
         } else if (v.kind == "memo" || v.kind == "callback") {
           const withCallback = v as MemoFileVarHook | ComponentFileVarCallback;
-          nodes.push({
-            ...nodeBase,
-            label: {
-              text: getDisplayName(withCallback.name),
-            },
-            type: v.kind,
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(withCallback.name) },
+              type: v.kind,
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: {
+                text: getDisplayName(withCallback.name),
+              },
+              type: v.kind,
+              color: "red",
+            });
+          }
 
           for (const dep of withCallback.reactDeps) {
             const isProp = isPropNode(variable.props || [], dep.id);
@@ -389,14 +494,24 @@ export const generateComponentGraphData = (
           }
         } else if (v.kind == "ref") {
           const refVar = v as ComponentFileVarRef;
-          nodes.push({
-            ...nodeBase,
-            label: {
-              text: getDisplayName(refVar.name),
-            },
-            type: "ref",
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(refVar.name) },
+              type: "ref",
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: {
+                text: getDisplayName(refVar.name),
+              },
+              type: "ref",
+              color: "red",
+            });
+          }
 
           const addRefDefaultDependency = (defaultData: PropDataType) => {
             if (defaultData.type === "ref") {
@@ -424,6 +539,24 @@ export const generateComponentGraphData = (
           };
 
           addRefDefaultDependency(refVar.defaultData);
+        } else {
+          // Normal variables
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(v.name) },
+              type: v.kind as any,
+              color: "blue",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: { text: getDisplayName(v.name) },
+              type: v.kind as any,
+              color: "blue",
+            });
+          }
         }
       }
     }
@@ -563,7 +696,9 @@ export const generateComponentGraphData = (
       if (!nodes.some((n) => n.id === deletedId)) {
         // Try to find the parent component ID from the ID prefix (componentId:...)
         const parts = deletedId.split(":");
-        const parentId = parts.length > 1 ? parts[0] : undefined;
+        const parentIdFromParts = parts.length > 1 ? parts[0] : undefined;
+        const parentId =
+          ("parentId" in obj ? obj.parentId : undefined) || parentIdFromParts;
 
         // If it's a prop, it should go into the 'props' combo of its parent
         const comboId =
@@ -597,6 +732,8 @@ export const generateComponentGraphData = (
           gitStatus: "deleted",
         };
 
+        const isPattern = name.type === "object" || name.type === "array";
+
         if (obj.kind === "prop" || obj.kind === "spread") {
           const prop = obj as PropData;
           nodes.push({
@@ -609,28 +746,58 @@ export const generateComponentGraphData = (
           });
         } else if (obj.kind === "state") {
           const state = obj as ComponentFileVarState;
-          nodes.push({
-            ...nodeBase,
-            label: { text: getDisplayName(state.name) },
-            type: "state",
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(state.name) },
+              type: "state",
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: { text: getDisplayName(state.name) },
+              type: "state",
+              color: "red",
+            });
+          }
         } else if (obj.kind === "memo") {
           const memo = obj as MemoFileVarHook;
-          nodes.push({
-            ...nodeBase,
-            label: { text: getDisplayName(memo.name) },
-            type: "memo",
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(memo.name) },
+              type: "memo",
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: { text: getDisplayName(memo.name) },
+              type: "memo",
+              color: "red",
+            });
+          }
         } else if (obj.kind === "ref") {
           const ref = obj as ComponentFileVarRef;
-          nodes.push({
-            ...nodeBase,
-            label: { text: getDisplayName(ref.name) },
-            type: "ref",
-            color: "red",
-          });
+          if (isPattern) {
+            combos.push({
+              ...nodeBase,
+              label: { text: getDisplayName(ref.name) },
+              type: "ref",
+              color: "red",
+              collapsed: true,
+            });
+          } else {
+            nodes.push({
+              ...nodeBase,
+              label: { text: getDisplayName(ref.name) },
+              type: "ref",
+              color: "red",
+            });
+          }
         } else if (obj.kind === "effect") {
           nodes.push({
             ...nodeBase,

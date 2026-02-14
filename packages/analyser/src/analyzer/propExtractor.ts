@@ -1,5 +1,5 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import generate from "@babel/generator";
 import type { PropData } from "shared";
 import { getDeterministicId } from "../utils/hash.js";
