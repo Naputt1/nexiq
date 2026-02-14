@@ -9,7 +9,7 @@ import { ProjectSettings } from "./pages/ProjectSettings";
 import { GlobalSettings } from "./pages/GlobalSettings";
 
 function App() {
-  const { projectRoot: storedProjectRoot, _hasHydrated, setProjectRoot } = useProjectStore();
+  const { projectRoot: storedProjectRoot, setProjectRoot } = useProjectStore();
   const [searchParams] = useSearchParams();
   const urlProjectPath = searchParams.get("projectPath");
   const isEmpty = searchParams.get("empty") === "true";
@@ -23,6 +23,15 @@ function App() {
   // Use project root from URL if available, otherwise from store (if not explicitly empty)
   const projectRoot = urlProjectPath || (isEmpty ? null : storedProjectRoot);
 
+  useEffect(() => {
+    if (projectRoot) {
+      const name = projectRoot.split(/[/\\]/).filter(Boolean).pop();
+      document.title = name ? `${name} - react-map` : "react-map";
+    } else {
+      document.title = "react-map";
+    }
+  }, [projectRoot]);
+
   const handleProjectComplete = async (path: string) => {
     // Save to main process first
     const wasFocusedElsewhere = await window.ipcRenderer.invoke(
@@ -34,14 +43,6 @@ function App() {
     // Then update URL to include the new project path
     window.location.search = `?projectPath=${encodeURIComponent(path)}`;
   };
-
-  if (!_hasHydrated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-white">
-        <div className="animate-spin text-primary text-3xl">●</div>
-      </div>
-    );
-  }
 
   if (!projectRoot) {
     return <SetupFlow onComplete={handleProjectComplete} />;
