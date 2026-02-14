@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { GraphViewType } from "../../electron/types";
 
 interface AppState {
   selectedSubProject: string | null;
@@ -9,6 +10,7 @@ interface AppState {
   selectedCommit: string | null;
   isLoaded: boolean;
   viewport: { x: number; y: number; zoom: number } | null;
+  view: GraphViewType;
 
   setSelectedSubProject: (path: string | null) => void;
   setCenteredItemId: (id: string | null) => void;
@@ -19,6 +21,7 @@ interface AppState {
   setViewport: (
     viewport: { x: number; y: number; zoom: number } | null,
   ) => void;
+  setView: (view: GraphViewType) => void;
 
   // Persistence helpers
   loadState: (projectRoot: string) => Promise<void>;
@@ -35,6 +38,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   selectedCommit: null,
   isLoaded: false,
   viewport: null,
+  view: "component",
 
   setSelectedSubProject: (path) => set({ selectedSubProject: path }),
   setCenteredItemId: (id) => set({ centeredItemId: id }),
@@ -43,6 +47,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedCommit: (commit) => set({ selectedCommit: commit }),
   setViewport: (viewport) => set({ viewport }),
+  setView: (view) => set({ view }),
 
   reset: () =>
     set({
@@ -53,6 +58,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       selectedCommit: null,
       viewport: null,
       isLoaded: false,
+      view: "component",
     }),
 
   loadState: async (projectRoot: string) => {
@@ -67,6 +73,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         activeTab: state.activeTab || "projects",
         selectedCommit: state.selectedCommit || null,
         viewport: state.viewport || null,
+        view: state.view || "component",
         isLoaded: true,
       });
     } else {
@@ -79,6 +86,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
         activeTab: "projects",
         selectedCommit: null,
         viewport: null,
+        view: "component",
         isLoaded: true,
       });
     }
@@ -93,6 +101,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       activeTab,
       selectedCommit,
       viewport,
+      view,
       isLoaded,
     } = get();
     if (!isLoaded) return; // Don't save until we've loaded
@@ -122,6 +131,7 @@ export const useAppStateStore = create<AppState>((set, get) => ({
       activeTab,
       selectedCommit,
       viewport,
+      view,
     });
   },
 }));
