@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import type { CustomColors } from "../../electron/types";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ export function GlobalSettings({ projectPath }: GlobalSettingsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [appTheme, setAppTheme] = useState<"dark" | "light">("dark");
+  const [autoReload, setAutoReload] = useState<boolean>(true);
   const [customColors, setCustomColors] = useState<CustomColors>({});
 
   const goBack = () => {
@@ -28,9 +30,16 @@ export function GlobalSettings({ projectPath }: GlobalSettingsProps) {
   useEffect(() => {
     const fetchGlobalConfig = async () => {
       try {
-        const globalConfig = await window.ipcRenderer.invoke("get-global-config");
+        const globalConfig = await window.ipcRenderer.invoke(
+          "get-global-config",
+        );
         if (globalConfig) {
           setAppTheme(globalConfig.theme);
+          setAutoReload(
+            globalConfig.autoReload !== undefined
+              ? globalConfig.autoReload
+              : true,
+          );
           setCustomColors(globalConfig.customColors || {});
         }
       } catch (e) {
@@ -47,6 +56,7 @@ export function GlobalSettings({ projectPath }: GlobalSettingsProps) {
     try {
       await window.ipcRenderer.invoke("save-global-config", {
         theme: appTheme,
+        autoReload: autoReload,
         customColors: customColors,
       });
 
@@ -121,12 +131,33 @@ export function GlobalSettings({ projectPath }: GlobalSettingsProps) {
                 <label className="text-sm font-medium">Application Theme</label>
                 <select
                   value={appTheme}
-                  onChange={(e) => setAppTheme(e.target.value as "dark" | "light")}
+                  onChange={(e) =>
+                    setAppTheme(e.target.value as "dark" | "light")
+                  }
                   className="w-full p-2 rounded-md border border-input bg-background"
                 >
                   <option value="dark">Dark</option>
                   <option value="light">Light</option>
                 </select>
+              </div>
+              <div className="flex items-center space-x-2 pt-8">
+                <Checkbox
+                  id="auto-reload"
+                  checked={autoReload}
+                  onCheckedChange={(checked) => setAutoReload(!!checked)}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="auto-reload"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Auto-reload on file changes
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically re-analyze and refresh the graph when you save
+                    files.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
