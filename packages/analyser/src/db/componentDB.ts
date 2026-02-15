@@ -30,6 +30,7 @@ import {
   isComponentVariable,
   isBaseFunctionVariable,
   isNormalVariable,
+  isCallHookVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
@@ -54,6 +55,14 @@ type IResolveAddHook = {
   loc: VariableLoc;
 };
 
+type IResolveCallHook = {
+  type: "comResolveCallHook";
+  fileName: string;
+  loc: VariableLoc;
+  id: string;
+  hook: string;
+};
+
 type IResolveTsType = {
   type: "tsType";
   fileName: string;
@@ -69,6 +78,7 @@ type IResolveComPropsTsType = {
 type ComponentDBResolve =
   | IResolveAddRender
   | IResolveAddHook
+  | IResolveCallHook
   | IResolveTsType
   | IResolveComPropsTsType;
 
@@ -246,7 +256,40 @@ export class ComponentDB {
 
     assert(component != null, "Component not found");
 
-    return component.addCallHook(callHook);
+    const id = component.addCallHook(callHook);
+
+    const hookName = callHook.call.name;
+    const comImport = this.files.getImport(fileName, hookName);
+
+    if (comImport?.source !== "react") {
+      const exportInfo = this._getExportId(fileName, hookName);
+      let hookId: string | null = null;
+
+      if (exportInfo) {
+        hookId = exportInfo.id;
+      } else {
+        hookId = this.getVariableID(hookName, fileName);
+      }
+
+      if (hookId) {
+        const v = component.var.get(id);
+        if (v && isCallHookVariable(v)) {
+          v.call.id = hookId;
+        }
+      } else {
+        if (this.isResolve) return id;
+
+        this.addResolveTask({
+          type: "comResolveCallHook",
+          fileName,
+          loc,
+          id,
+          hook: hookName,
+        });
+      }
+    }
+
+    return id;
   }
 
   public comAddRef(
@@ -356,9 +399,21 @@ export class ComponentDB {
     dependencry: ComponentInfoRenderDependency[],
     loc: VariableLoc,
   ) {
-    const exportInfo = this._getExportId(fileName, tag);
+    let srcId = "";
+    let isDependency = false;
 
-    if (exportInfo == null) {
+    const exportInfo = this._getExportId(fileName, tag);
+    if (exportInfo) {
+      srcId = exportInfo.id;
+      isDependency = exportInfo.isDependency;
+    } else {
+      const localId = this.getVariableID(tag, fileName);
+      if (localId) {
+        srcId = localId;
+      }
+    }
+
+    if (!srcId) {
       if (this.isResolve) return;
 
       this.addResolveTask({
@@ -375,9 +430,9 @@ export class ComponentDB {
     this.files.addRender(
       fileName,
       comLoc,
-      exportInfo.id,
+      srcId,
       dependencry,
-      exportInfo.isDependency,
+      isDependency,
       loc,
     );
   }
@@ -506,6 +561,27 @@ export class ComponentDB {
     },
     comAddHook: (db, task) => {
       db.comAddHook(task.name, task.loc, task.fileName, task.hook);
+    },
+    comResolveCallHook: (db, task) => {
+      const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
+      if (component) {
+        const exportInfo = db._getExportId(task.fileName, task.hook);
+        let hookId: string | null = null;
+        if (exportInfo) {
+          hookId = exportInfo.id;
+        } else {
+          hookId = db.getVariableID(task.hook, task.fileName);
+        }
+
+        if (hookId) {
+          const v = component.var.get(task.id);
+          if (v && isCallHookVariable(v)) {
+            v.call.id = hookId;
+          }
+          return true;
+        }
+      }
+      return false;
     },
     tsType: (db, task) => {
       const file = db.files.get(task.fileName);

@@ -1,11 +1,15 @@
 import type { ComponentFileVar } from "shared";
 import type { Variable } from "./variable.js";
 import { isBaseFunctionVariable } from "./type.js";
-import { getVariableNameKey } from "../../analyzer/pattern.js";
+import {
+  getVariableNameKey,
+  getPatternIdentifiers,
+} from "../../analyzer/pattern.js";
 
 export class Scope {
   private variables = new Map<string, Variable>();
   private nameToVariable = new Map<string, Variable>();
+  private nameToId = new Map<string, string>();
   private prevIds = new Map<string, string>();
 
   constructor(
@@ -30,6 +34,21 @@ export class Scope {
     this.variables.set(v.id, v);
     const nameKey = getVariableNameKey(v.name);
     this.nameToVariable.set(nameKey, v);
+    this.nameToId.set(nameKey, v.id);
+
+    // Register all identifiers in the pattern
+    // If it's a hook call data, we want identifiers to point to their specific nested IDs
+    const isHookCall = v.kind === "hook" && v.type === "data";
+    const identifiers = getPatternIdentifiers(
+      v.name,
+      isHookCall ? v.id : undefined,
+    );
+
+    for (const id of identifiers) {
+      this.nameToVariable.set(id.name, v);
+      this.nameToId.set(id.name, id.id);
+    }
+
     if (this.owner && isBaseFunctionVariable(this.owner)) {
       v.parent = this.owner;
     }
@@ -57,6 +76,10 @@ export class Scope {
 
   public getByName(name: string): Variable | undefined {
     return this.nameToVariable.get(name);
+  }
+
+  public getIdByName(name: string): string | undefined {
+    return this.nameToId.get(name);
   }
 
   public getByPath(path: string[]): Scope | undefined {

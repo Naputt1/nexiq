@@ -1,22 +1,50 @@
-import { useState, useContext, createContext } from "react";
-import { Child } from "./Child";
-import { Other } from "./Other";
+import { useState, useContext, createContext, useEffect } from "react";
 
-const MyContext = createContext({ theme: 'dark' });
+const MyContext = createContext({ theme: "light" });
 
-const useTranslation = () => ({ t: (s: string) => s });
-const useQuery = () => ({ data: 'foo', isLoading: false, error: null });
+function useTranslation() {
+  return { t: (key: string) => key };
+}
 
-export function App() {
+function useQuery() {
+  return {
+    data: { user: { name: "John", settings: { theme: "dark" } } },
+    isLoading: false,
+    error: null,
+  };
+}
+
+export const App = () => {
   const { t } = useTranslation();
   const { theme } = useContext(MyContext);
-  const { data, isLoading, error } = useQuery();
+  const {
+    data: {
+      user: {
+        name,
+        settings: { theme: userTheme },
+      },
+    },
+    isLoading,
+    error,
+  } = useQuery();
+
+  useEffect(() => {}, [userTheme]);
 
   return (
     <div>
-      {t('hello')} {theme} 
+      <h1>{t("welcome")}</h1>
+      <p>Theme: {theme}</p>
+      <p>User: {name}</p>
+      <p>User Theme: {userTheme}</p>
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error</p>}
+      <Child data={name} />
       <Other loading={isLoading} />
-      <Child data={data} />
     </div>
   );
-}
+};
+
+const Child = ({ data }: { data: string }) => <div>{data}</div>;
+const Other = ({ loading }: { loading: boolean }) => (
+  <div>{loading ? "Loading..." : "Done"}</div>
+);

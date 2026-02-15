@@ -76,12 +76,17 @@
           "id": "3530ad8032327f16",
           "name": {
             "type": "identifier",
-            "name": "SubComponentA"
+            "name": "SubComponentA",
+            "loc": {
+              "line": 3,
+              "column": 13
+            },
+            "id": "f3e2b8bb45918c2c"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "a7d7bda8d950608e",
+          "hash": "f48b0bcfadaefa74",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -110,12 +115,17 @@
           "id": "e1c92ac59ae5f4f3",
           "name": {
             "type": "identifier",
-            "name": "SubComponentB"
+            "name": "SubComponentB",
+            "loc": {
+              "line": 5,
+              "column": 16
+            },
+            "id": "b70072a47e3ec01d"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "8b64e9426d377c74",
+          "hash": "82557a19d8633af4",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -138,18 +148,33 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {
+            "3530ad8032327f16": {
+              "id": "3530ad8032327f16",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 8,
+                "column": 6
+              }
+            }
+          }
         },
         "bf77f96107e1da76": {
           "id": "bf77f96107e1da76",
           "name": {
             "type": "identifier",
-            "name": "InternalComponent"
+            "name": "InternalComponent",
+            "loc": {
+              "line": 14,
+              "column": 6
+            },
+            "id": "d0a2066979b348e0"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "2b656923414169ca",
+          "hash": "874fa5959be7206a",
           "dependencies": {},
           "loc": {
             "line": 14,
@@ -178,12 +203,17 @@
           "id": "cd828d2bdd77326e",
           "name": {
             "type": "identifier",
-            "name": "MainNested"
+            "name": "MainNested",
+            "loc": {
+              "line": 16,
+              "column": 24
+            },
+            "id": "760a1dfbff8ba738"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "4afeab626887a1ba",
+          "hash": "750909888f15c89e",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -206,7 +236,26 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {
+            "e1c92ac59ae5f4f3": {
+              "id": "e1c92ac59ae5f4f3",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 19,
+                "column": 6
+              }
+            },
+            "bf77f96107e1da76": {
+              "id": "bf77f96107e1da76",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 20,
+                "column": 6
+              }
+            }
+          }
         }
       }
     },
@@ -257,12 +306,17 @@
           "id": "810bbf867cc78077",
           "name": {
             "type": "identifier",
-            "name": "useCustomHook"
+            "name": "useCustomHook",
+            "loc": {
+              "line": 3,
+              "column": 16
+            },
+            "id": "fafbb8e860b2efbe"
           },
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "a44e0028e72283b0",
+          "hash": "9509ddcb0a838617",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -273,12 +327,17 @@
               "id": "810bbf867cc78077:state:value",
               "name": {
                 "type": "identifier",
-                "name": "value"
+                "name": "value",
+                "loc": {
+                  "line": 4,
+                  "column": 9
+                },
+                "id": "91e929b3843d5179"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/Hooks.ts",
-              "hash": "4fb1ccc8ed5eb856",
+              "hash": "ce5a755774970fab",
               "dependencies": {},
               "loc": {
                 "line": 4,
@@ -290,12 +349,17 @@
               "id": "810bbf867cc78077:memo:memoVal",
               "name": {
                 "type": "identifier",
-                "name": "memoVal"
+                "name": "memoVal",
+                "loc": {
+                  "line": 6,
+                  "column": 8
+                },
+                "id": "b379e6c7178e8d48"
               },
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "8f576f48e12754dc",
+              "hash": "f1ed3a89df94d2e1",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -377,12 +441,17 @@
           "id": "911adcc515458fe3",
           "name": {
             "type": "identifier",
-            "name": "useOtherHook"
+            "name": "useOtherHook",
+            "loc": {
+              "line": 16,
+              "column": 13
+            },
+            "id": "f65aa188e87e4d2e"
           },
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "c59031b6d2a524e8",
+          "hash": "6c1faf7d0f6c9486",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -459,12 +528,17 @@
           "id": "852e3a2e378138ae",
           "name": {
             "type": "identifier",
-            "name": "withLogging"
+            "name": "withLogging",
+            "loc": {
+              "line": 11,
+              "column": 6
+            },
+            "id": "738a200726547e84"
           },
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "2d4825a439a9f163",
+          "hash": "6f2e55a40bf013e2",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -518,12 +592,17 @@
           "id": "fc5afc13ded24662",
           "name": {
             "type": "identifier",
-            "name": "DestructuringProps"
+            "name": "DestructuringProps",
+            "loc": {
+              "line": 4,
+              "column": 13
+            },
+            "id": "d0460c8cee978856"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "dd827ebe592e4cba",
+          "hash": "5c0e93b6512dd320",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -650,12 +729,17 @@
           "id": "7f6f2958399f03a2",
           "name": {
             "type": "identifier",
-            "name": "MyProvider"
+            "name": "MyProvider",
+            "loc": {
+              "line": 5,
+              "column": 13
+            },
+            "id": "b5834af803ea9050"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "b1f252b845ca8e6d",
+          "hash": "480c58de2a1c1032",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -709,34 +793,47 @@
           "id": "d86bbbe51e265490",
           "name": {
             "type": "identifier",
-            "name": "MyConsumer"
+            "name": "MyConsumer",
+            "loc": {
+              "line": 13,
+              "column": 13
+            },
+            "id": "713a7059781ecb34"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "c185c2d23f7eb9e6",
+          "hash": "beee0739059460b0",
           "dependencies": {},
           "loc": {
             "line": 13,
             "column": 13
           },
           "var": {
-            "d86bbbe51e265490:callhook:context": {
-              "id": "d86bbbe51e265490:callhook:context",
+            "d86bbbe51e265490:callhook:useContext:14:8": {
+              "id": "d86bbbe51e265490:callhook:useContext:14:8",
               "name": {
                 "type": "identifier",
-                "name": "context"
+                "name": "context",
+                "loc": {
+                  "line": 14,
+                  "column": 8
+                },
+                "id": "1d674766870476ec"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/Context.tsx",
-              "hash": "c2b80c589bc05ea9",
+              "hash": "ff90e7efaf53ee08",
               "dependencies": {},
               "loc": {
                 "line": 14,
                 "column": 8
               },
-              "call": "useContext"
+              "call": {
+                "id": "9b64e47d47fcd4f6",
+                "name": "useContext"
+              }
             }
           },
           "scope": {
@@ -849,34 +946,47 @@
           "id": "2697de00a506fa4e",
           "name": {
             "type": "identifier",
-            "name": "ComplexApp"
+            "name": "ComplexApp",
+            "loc": {
+              "line": 8,
+              "column": 16
+            },
+            "id": "83770cbad2f467d5"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "82c30d0fefacfc27",
+          "hash": "883d7667f6c7dbdb",
           "dependencies": {},
           "loc": {
             "line": 8,
             "column": 16
           },
           "var": {
-            "2697de00a506fa4e:callhook:val": {
-              "id": "2697de00a506fa4e:callhook:val",
+            "2697de00a506fa4e:callhook:useCustomHook:9:9": {
+              "id": "2697de00a506fa4e:callhook:useCustomHook:9:9",
               "name": {
                 "type": "identifier",
-                "name": "val"
+                "name": "val",
+                "loc": {
+                  "line": 9,
+                  "column": 9
+                },
+                "id": "2e8ccb8abf7340ff"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/ComplexApp.tsx",
-              "hash": "35da37dda3b46294",
+              "hash": "87784c44499dd9c1",
               "dependencies": {},
               "loc": {
                 "line": 9,
                 "column": 9
               },
-              "call": "useCustomHook"
+              "call": {
+                "id": "810bbf867cc78077",
+                "name": "useCustomHook"
+              }
             }
           },
           "scope": {
@@ -1037,8 +1147,28 @@
   "edges": [
     {
       "from": "3530ad8032327f16",
+      "to": "e1c92ac59ae5f4f3",
+      "label": "render"
+    },
+    {
+      "from": "e1c92ac59ae5f4f3",
+      "to": "cd828d2bdd77326e",
+      "label": "render"
+    },
+    {
+      "from": "bf77f96107e1da76",
+      "to": "cd828d2bdd77326e",
+      "label": "render"
+    },
+    {
+      "from": "3530ad8032327f16",
       "to": "fc5afc13ded24662",
       "label": "render"
+    },
+    {
+      "from": "d86bbbe51e265490:callhook:useContext:14:8",
+      "to": "9b64e47d47fcd4f6",
+      "label": "hook"
     },
     {
       "from": "7f6f2958399f03a2",
@@ -1082,6 +1212,11 @@
     },
     {
       "from": "2697de00a506fa4e",
+      "to": "810bbf867cc78077",
+      "label": "hook"
+    },
+    {
+      "from": "2697de00a506fa4e:callhook:useCustomHook:9:9",
       "to": "810bbf867cc78077",
       "label": "hook"
     }

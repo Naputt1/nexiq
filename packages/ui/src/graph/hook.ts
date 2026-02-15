@@ -128,6 +128,7 @@ export class GraphData {
   private targetPath?: string;
 
   private layoutInProgress: Set<string> = new Set();
+  private draggingId: string | null = null;
 
   constructor(
     nodes: GraphNodeData[],
@@ -147,6 +148,7 @@ export class GraphData {
         this.batch(() => {
           if (id === "root") {
             for (const n of nodes) {
+              if (n.id === this.draggingId) continue;
               const node = this.getPointByID(n.id);
               if (node) {
                 node.x = n.x;
@@ -174,6 +176,7 @@ export class GraphData {
             const combo = this.getComboByID(id);
             if (combo) {
               for (const n of nodes) {
+                if (n.id === this.draggingId) continue;
                 const node =
                   combo.child?.nodes[n.id] ?? combo.child?.combos[n.id];
                 if (node) {
@@ -195,7 +198,11 @@ export class GraphData {
 
               this.updateEdgePos(Array.from(edgeIds));
 
+              const oldRadius = combo.expandedRadius;
               combo.expandedRadius = this.calculateComboRadius(combo);
+              if (!combo.collapsed) {
+                combo.radius = combo.expandedRadius;
+              }
               combo.isLayoutCalculated = true;
               this.innerCallback.get(id)?.({ type: "layout-change" });
 
@@ -206,8 +213,8 @@ export class GraphData {
                 child: true,
               });
 
-              // Trigger parent layout to accommodate new radius if not collapsed
-              if (!combo.collapsed) {
+              // Trigger parent layout to accommodate new radius if not collapsed AND changed significantly
+              if (!combo.collapsed && Math.abs(combo.expandedRadius - oldRadius) > 1) {
                 if (combo.parent == null) {
                   this.layout(true);
                 } else {
@@ -249,6 +256,10 @@ export class GraphData {
 
   public unbind(id: string) {
     delete this.callback[id];
+  }
+
+  public setDraggingId(id: string | null) {
+    this.draggingId = id;
   }
 
   private trigger(data: GraphDataCallbackParams) {
@@ -495,6 +506,7 @@ export class GraphData {
         x: n.x, // Pass existing X if available (from persistence)
         y: n.y,
         radius: n.radius,
+        fixed: n.id === this.draggingId,
       });
     }
 
@@ -504,6 +516,7 @@ export class GraphData {
         x: c.x,
         y: c.y,
         radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
+        fixed: c.id === this.draggingId,
       });
     }
 
@@ -550,10 +563,8 @@ export class GraphData {
         };
       }
 
-      const srcNode =
-        parentCombo.child.nodes[e.source] ?? parentCombo.child.combos[e.source];
-      const targetNode =
-        parentCombo.child.nodes[e.target] ?? parentCombo.child.combos[e.target];
+      const srcNode = this.getPointId(e.source);
+      const targetNode = this.getPointId(e.target);
 
       if (srcNode == null || targetNode == null) {
         return false;
@@ -792,7 +803,12 @@ export class GraphData {
     this.trigger({ type: "new-edges" });
   }
 
-  private getComboByID(id: string, i?: number): GraphCombo | undefined {
+  private getComboByID(id: string, i = 0): GraphCombo | undefined {
+    if (i > 100) {
+      console.error("getComboByID: recursion depth exceeded for ID", id);
+      return undefined;
+    }
+
     if (this.combos.has(id)) {
       const parentCombo = this.combos.get(id);
       if (parentCombo != null) {
@@ -803,7 +819,11 @@ export class GraphData {
     if (this.comboChildMap.has(id)) {
       const parentId = this.comboChildMap.get(id);
       if (parentId != null) {
-        const parent = this.getComboByID(parentId, (i ?? 1) + 1);
+        if (parentId === id) {
+          console.error("getComboByID: self-parent cycle detected for ID", id);
+          return undefined;
+        }
+        const parent = this.getComboByID(parentId, i + 1);
         if (parent != null) {
           return parent.child?.combos[id];
         }
@@ -880,6 +900,7 @@ export class GraphData {
     }
 
     const prevCount = this.comboToCreate.length;
+    this.nodeToCreate = this.nodeToCreate; // Refresh node list just in case
     this.comboToCreate = newComboToCreate;
 
     if (this.comboToCreate.length > 0) {
@@ -938,6 +959,7 @@ export class GraphData {
     }
 
     combo.collapsed = !combo.collapsed;
+    combo.radius = combo.collapsed ? combo.collapsedRadius : combo.expandedRadius;
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
@@ -1005,13 +1027,8 @@ export class GraphData {
 
       edge.scale = Math.min(srcNode.scale, targetNode.scale);
 
-      if (parentId == null) {
-        // Top-level edge or absolute coordinate space required
-        edge.updatePoints(srcNode, targetNode, true);
-      } else {
-        // Nested edge: use local positions (siblings)
-        edge.updatePoints(srcNode, targetNode, false);
-      }
+      const parentNode = parentId ? this.getComboByID(parentId) : undefined;
+      edge.updatePoints(srcNode, targetNode, parentNode);
     }
   }
 
@@ -1531,6 +1548,13 @@ export class GraphData {
   }
 
   public layout(force = false) {
+    // Trigger layout for all expanded combos
+    for (const c of this.getAllCombos()) {
+      if (!c.collapsed) {
+        this.calculateComboChildrenLayout(c.id, false);
+      }
+    }
+
     const allItems = [...this.nodes.values(), ...this.combos.values()];
     const allCalculated = allItems.every((c) => c.isLayoutCalculated);
 
@@ -1548,6 +1572,7 @@ export class GraphData {
         x: n.x,
         y: n.y,
         radius: n.radius,
+        fixed: n.id === this.draggingId,
       });
     }
 
@@ -1557,6 +1582,7 @@ export class GraphData {
         x: c.x,
         y: c.y,
         radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
+        fixed: c.id === this.draggingId,
       });
     }
 
@@ -1607,7 +1633,7 @@ export class GraphData {
 
   public render() {
     // Run the layout algorithm once
-    this.layout();
+    this.layout(true);
 
     // Show all nodes/combos/edges initially (no viewport culling on initial render)
     // Viewport culling can be handled by the rendering layer if needed

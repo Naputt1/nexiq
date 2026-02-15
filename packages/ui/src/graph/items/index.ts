@@ -83,7 +83,8 @@ export interface DetailItemData {
     | "memo"
     | "callback"
     | "ref"
-    | "prop";
+    | "prop"
+    | "normal";
   typeParams?: TypeDataParam[];
   extends?: string[];
   renders?: Record<string, ComponentInfoRender>;
@@ -91,7 +92,8 @@ export interface DetailItemData {
   gitStatus?: "added" | "modified" | "deleted";
   visible?: boolean;
   ui?: {
-    renders?: Record<string, { x: number; y: number }>;
+    renders?: Record<string, { x: number; y: number; radius?: number }>;
+    vars?: Record<string, { x: number; y: number; radius?: number }>;
     isLayoutCalculated?: boolean;
     x?: number;
     y?: number;

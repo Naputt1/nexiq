@@ -88,11 +88,11 @@ export default function VariableDeclarator(
             type: "hook";
             extra: {
               dependencies: Record<string, ComponentFileVarDependency>;
-              call: string;
+              call: { id: string; name: string };
             };
           },
     ): string | undefined => {
-      const pattern = getPattern(pId);
+      const pattern = getPattern(pId, pParentId);
       const nameKey = getVariableNameKey(pattern);
       const componentId = getDeterministicId(nameKey);
 
@@ -112,7 +112,6 @@ export default function VariableDeclarator(
             currentId = componentDB.comAddState(name.name, name.loc, fileName, {
               name: pattern,
               loc: pLoc,
-              parentId: pParentId,
               ...special.extra,
             });
           }
@@ -122,7 +121,6 @@ export default function VariableDeclarator(
             currentId = componentDB.comAddMemo(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
-              parentId: pParentId,
               ...special.extra,
             });
           }
@@ -132,7 +130,6 @@ export default function VariableDeclarator(
             currentId = componentDB.comAddCallback(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
-              parentId: pParentId,
               ...special.extra,
             });
           }
@@ -142,7 +139,6 @@ export default function VariableDeclarator(
             currentId = componentDB.comAddRef(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
-              parentId: pParentId,
               ...special.extra,
             });
           }
@@ -152,7 +148,6 @@ export default function VariableDeclarator(
             currentId = componentDB.comAddCallHook(parent.loc, fileName, {
               name: pattern,
               loc: pLoc,
-              parentId: pParentId,
               ...special.extra,
             });
           }
@@ -430,31 +425,15 @@ export default function VariableDeclarator(
         }
       }
 
-      // if (
-      //   currentId ||
-      //   (special && (t.isObjectPattern(pId) || t.isArrayPattern(pId)))
-      // ) {
-      //   if (t.isObjectPattern(pId)) {
-      //     for (const prop of pId.properties) {
-      //       if (t.isObjectProperty(prop)) {
-      //         processPattern(prop.value as t.LVal, currentId, special);
-      //       } else if (t.isRestElement(prop)) {
-      //         processPattern(prop.argument as t.LVal, currentId, special);
-      //       }
-      //     }
-      //   } else if (t.isArrayPattern(pId)) {
-      //     for (const element of pId.elements) {
-      //       if (element) {
-      //         processPattern(element as t.LVal, currentId, special);
-      //       }
-      //     }
-      //   }
-      // }
       return currentId;
     };
 
     if (t.isCallExpression(init)) {
       const firstArgPath = nodePath.get("init").get("arguments")[0];
+      const calleeName = t.isIdentifier(init.callee)
+        ? init.callee.name
+        : "call";
+      const patternPrefix = `${calleeName}-${loc.line}-${loc.column}`;
 
       if (
         (t.isArrowFunctionExpression(firstArgPath?.node) ||
@@ -462,7 +441,7 @@ export default function VariableDeclarator(
         returnJSX(firstArgPath.node)
       ) {
         if (id.type == "Identifier") {
-          processPattern(id as t.LVal);
+          processPattern(id as t.LVal, patternPrefix);
           return;
         }
       } else if (t.isIdentifier(init.callee)) {
@@ -478,14 +457,14 @@ export default function VariableDeclarator(
           }
 
           if (t.isArrayPattern(id) && id.elements.length > 0) {
-            processPattern(id.elements[0] as t.LVal, undefined, {
+            processPattern(id.elements[0] as t.LVal, patternPrefix, {
               type: "state",
               extra: { setter: setterName },
             });
             return;
           }
 
-          processPattern(id as t.LVal, undefined, {
+          processPattern(id as t.LVal, patternPrefix, {
             type: "state",
             extra: { setter: setterName },
           });
@@ -534,7 +513,7 @@ export default function VariableDeclarator(
           }
 
           assert(scope != null, "Scope not found");
-          processPattern(id as t.LVal, undefined, {
+          processPattern(id as t.LVal, patternPrefix, {
             type: "memo",
             extra: { scope, reactDeps },
           });
@@ -575,7 +554,7 @@ export default function VariableDeclarator(
           }
 
           assert(scope != null, "Scope not found");
-          processPattern(id as t.LVal, undefined, {
+          processPattern(id as t.LVal, patternPrefix, {
             type: "callback",
             extra: { scope, reactDeps },
           });
@@ -590,7 +569,7 @@ export default function VariableDeclarator(
                 }
               : ({ type: "undefined" } as PropDataType);
 
-          processPattern(id as t.LVal, undefined, {
+          processPattern(id as t.LVal, patternPrefix, {
             type: "ref",
             extra: { defaultData },
           });
@@ -611,16 +590,28 @@ export default function VariableDeclarator(
 
           const id = nodePath.node.id;
           if (t.isArrayPattern(id) && id.elements.length > 0) {
-            processPattern(id.elements[0] as t.LVal, undefined, {
+            processPattern(id.elements[0] as t.LVal, patternPrefix, {
               type: "hook",
-              extra: { dependencies, call: init.callee.name },
+              extra: {
+                dependencies,
+                call: {
+                  id: getDeterministicId(init.callee.name),
+                  name: init.callee.name,
+                },
+              },
             });
             return;
           }
 
-          processPattern(nodePath.node.id as t.LVal, undefined, {
+          processPattern(nodePath.node.id as t.LVal, patternPrefix, {
             type: "hook",
-            extra: { dependencies, call: init.callee.name },
+            extra: {
+              dependencies,
+              call: {
+                id: getDeterministicId(init.callee.name),
+                name: init.callee.name,
+              },
+            },
           });
           return;
         }

@@ -48,7 +48,12 @@
           "type": "interface",
           "name": {
             "type": "identifier",
-            "name": "Props"
+            "name": "Props",
+            "loc": {
+              "line": 3,
+              "column": 10
+            },
+            "id": "2e507c3e1f0383bb"
           },
           "body": [
             {
@@ -100,12 +105,17 @@
           "id": "475f220157c1b8f9",
           "name": {
             "type": "identifier",
-            "name": "ComplexProps"
+            "name": "ComplexProps",
+            "loc": {
+              "line": 12,
+              "column": 13
+            },
+            "id": "dfab3f6e914f770"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "a34532d1cae65da6",
+          "hash": "8ec6139b2246a698",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -116,12 +126,17 @@
               "id": "475f220157c1b8f9:ref:refX",
               "name": {
                 "type": "identifier",
-                "name": "refX"
+                "name": "refX",
+                "loc": {
+                  "line": 17,
+                  "column": 8
+                },
+                "id": "33dd827779de31d2"
               },
               "kind": "ref",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "250b274ff4df6745",
+              "hash": "de0a84717d2f03e7",
               "dependencies": {},
               "loc": {
                 "line": 17,
@@ -137,12 +152,17 @@
               "id": "475f220157c1b8f9:state:stateX",
               "name": {
                 "type": "identifier",
-                "name": "stateX"
+                "name": "stateX",
+                "loc": {
+                  "line": 18,
+                  "column": 9
+                },
+                "id": "e27bd3272ae701c1"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "aba898b5733368ff",
+              "hash": "c5091ee0394e3492",
               "dependencies": {},
               "loc": {
                 "line": 18,

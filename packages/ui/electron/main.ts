@@ -849,6 +849,21 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
             }
           }
 
+          // Collect virtual variables positions
+          if (item.ui?.vars) {
+            for (const [id, pos] of Object.entries(item.ui.vars)) {
+              // Use a prefixed ID to avoid collisions in positionMap if necessary, 
+              // but since these are relative IDs, they should be stored under their absolute ID if possible.
+              // Actually, positionMap is global for the whole file. 
+              // The IDs in item.ui.vars are relative. We should probably prefix them.
+              positionMap.set(`${item.id}:${id}`, {
+                x: pos.x,
+                y: pos.y,
+                isLayoutCalculated: true,
+              });
+            }
+          }
+
           if ("var" in item && item.var) {
             for (const v of Object.values(item.var)) {
               collectPos(v);
@@ -872,9 +887,10 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
           const renders = "renders" in item ? item.renders : undefined;
           const effects = "effects" in item ? item.effects : undefined;
 
-          if (renders || effects) {
+          if (renders || effects || item.ui?.vars) {
             if (!item.ui) item.ui = { x: 0, y: 0 };
             if (!item.ui.renders) item.ui.renders = {};
+            if (!item.ui.vars) item.ui.vars = {};
 
             const applyItems = (
               items: Record<string, ComponentInfoRender | EffectInfo>,
@@ -901,6 +917,18 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
                 x: rcPos.x,
                 y: rcPos.y,
               };
+            }
+
+            // Apply virtual variables positions
+            // We need to find all keys in positionMap that start with item.id + ":"
+            for (const [fullId, pos] of positionMap.entries()) {
+              if (fullId.startsWith(`${item.id}:`)) {
+                const virtualId = fullId.slice(item.id.length + 1);
+                item.ui!.vars![virtualId] = {
+                  x: pos.x,
+                  y: pos.y,
+                };
+              }
             }
           }
 
@@ -1282,52 +1310,60 @@ ipcMain.handle(
           }
         }
 
-        // Update renders positions on the parent component/hook
-        const renders = "renders" in item ? item.renders : undefined;
-        if (renders) {
-          for (const render of Object.values(renders)) {
-            // Use the composite ID that matches the UI node
-            const compositeId = `${item.id}-render-${render.id}`;
-            const pos = positions[compositeId];
-
-            if (pos) {
+        // Store positions for virtual variables (destructuring) and other sub-items
+        // These are identified by IDs that start with item.id + "-"
+        for (const [posId, pos] of Object.entries(positions)) {
+          if (posId.startsWith(`${item.id}-`)) {
+            // Check if it's a render node
+            const renderPrefix = `${item.id}-render-`;
+            if (posId.startsWith(renderPrefix)) {
+              const renderId = posId.slice(renderPrefix.length);
               if (!item.ui) item.ui = { x: 0, y: 0 };
               if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[render.id] = {
+              item.ui.renders[renderId] = {
                 x: pos.x,
                 y: pos.y,
                 radius: pos.radius,
               };
+              continue;
             }
-          }
 
-          // Handle the render combo itself
-          const renderComboId = `${item.id}-render`;
-          if (positions[renderComboId]) {
+            // Check if it's the render combo itself
+            const renderComboId = `${item.id}-render`;
+            if (posId === renderComboId) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[renderComboId] = {
+                x: pos.x,
+                y: pos.y,
+                radius: pos.radius,
+              };
+              continue;
+            }
+
+            // Check if it's an effect node
+            const effectId = posId; // effect IDs are globally unique but often prefixed with parent ID
+            const effects = "effects" in item ? item.effects : undefined;
+            if (effects && effects[effectId]) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[effectId] = {
+                x: pos.x,
+                y: pos.y,
+                radius: pos.radius,
+              };
+              continue;
+            }
+
+            // Otherwise, it's likely a virtual variable from destructuring
+            const virtualVarId = posId.slice(item.id.length + 1);
             if (!item.ui) item.ui = { x: 0, y: 0 };
-            if (!item.ui.renders) item.ui.renders = {};
-            item.ui.renders[renderComboId] = {
-              x: positions[renderComboId].x,
-              y: positions[renderComboId].y,
-              radius: positions[renderComboId].radius,
+            if (!item.ui.vars) item.ui.vars = {};
+            item.ui.vars[virtualVarId] = {
+              x: pos.x,
+              y: pos.y,
+              radius: pos.radius,
             };
-          }
-        }
-
-        // Handle effect nodes (stored in parent's ui.renders for now as effects don't have their own ui property)
-        const effects = "effects" in item ? item.effects : undefined;
-        if (effects) {
-          for (const effect of Object.values(effects)) {
-            const pos = positions[effect.id];
-            if (pos) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[effect.id] = {
-                x: pos.x,
-                y: pos.y,
-                radius: pos.radius,
-              };
-            }
           }
         }
 

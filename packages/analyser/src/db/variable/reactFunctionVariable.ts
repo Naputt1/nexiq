@@ -81,8 +81,7 @@ export abstract class ReactFunctionVariable<
   public addCallHook(
     calHook: Omit<ConstructorParameters<typeof CallHookVariable>[0], "id">,
   ): string {
-    const nameKey = getVariableNameKey(calHook.name);
-    const id = `${this.id}:callhook:${nameKey}`;
+    const id = `${this.id}:callhook:${calHook.call.name}:${calHook.loc.line}:${calHook.loc.column}`;
 
     this.var.add(
       new CallHookVariable(
@@ -334,9 +333,9 @@ export abstract class ReactFunctionVariable<
         continue outer;
       }
 
-      const v = this.var.getByName(dep.name);
-      if (v) {
-        dep.id = v.id;
+      const depId = this.var.getIdByName(dep.name);
+      if (depId) {
+        dep.id = depId;
         continue outer;
       }
 

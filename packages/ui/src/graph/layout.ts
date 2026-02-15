@@ -7,6 +7,7 @@ export type Node = {
   vy?: number;
   mass?: number;
   radius?: number;
+  fixed?: boolean;
   // any additional data you want to carry
   [key: string]: unknown;
 };
@@ -196,6 +197,11 @@ export class ForceLayout {
     const dt = opts.timeStep;
     for (let i = 0; i < n; i++) {
       const node = nodes[i];
+      if (node.fixed) {
+        node.vx = 0;
+        node.vy = 0;
+        continue;
+      }
       const ax = node.fx / node.mass;
       const ay = node.fy / node.mass;
 
