@@ -4,7 +4,7 @@ import type {
   VariableObjectProperty,
   VariableArrayElement,
 } from "shared";
-import { generateFn } from "src/utils/babel.js";
+import { generateFn } from "../utils/babel.js";
 
 export function getPattern(node: t.LVal): VariableNamePattern {
   if (t.isIdentifier(node)) {

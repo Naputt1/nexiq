@@ -16,7 +16,7 @@ import CallExpression from "./callExpression.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 import type { JsonData } from "shared";
-import { traverseFn } from "src/utils/babel.js";
+import { traverseFn } from "../utils/babel.js";
 
 function analyzeFiles(
   SRC_DIR: string,

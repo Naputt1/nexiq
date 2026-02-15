@@ -1311,6 +1311,104 @@ export class GraphData {
     this.trigger({ type: "new-nodes" });
   }
 
+  public updateDataByPath(path: string[], value: unknown) {
+    const category = path[0];
+    const key = path[path.length - 1];
+
+    if (category === "nodes" || category === "combos" || category === "edges") {
+      // Find the target item by looking for an ID in the path
+      let item: GraphNode | GraphCombo | GraphArrow | null = null;
+      let propPath: string[] = [];
+
+      // Search backwards for the first ID that matches an item
+      for (let i = path.length - 2; i >= 0; i--) {
+        const id = path[i];
+        const found =
+          category === "edges" ? this.getEdge(id) : this.getPointByID(id);
+        if (found) {
+          item = found;
+          propPath = path.slice(i + 1);
+          break;
+        }
+      }
+
+      if (item) {
+        if (propPath.length === 0) {
+          // If editing the whole item, only allow if it's an object
+          if (typeof value === "object" && value !== null) {
+            Object.assign(item, value);
+            this.refresh();
+          }
+          return;
+        }
+
+        const lastProp = propPath[propPath.length - 1];
+
+        // Special case for combo collapsed
+        if (
+          lastProp === "collapsed" &&
+          item instanceof GraphCombo &&
+          "collapsed" in item
+        ) {
+          if (item.collapsed !== value) {
+            this.comboCollapsed(item.id);
+          }
+          return;
+        }
+
+        // Traverse to the property to update
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let current: any = item;
+        for (let i = 0; i < propPath.length - 1; i++) {
+          const p = propPath[i];
+          if (
+            current[p] === undefined ||
+            current[p] === null ||
+            typeof current[p] !== "object"
+          ) {
+            return;
+          }
+          current = current[p];
+        }
+
+        if (current && lastProp in current) {
+          current[lastProp] = value;
+
+          // Handle side effects for radius changes
+          if (
+            lastProp === "radius" ||
+            lastProp === "expandedRadius" ||
+            lastProp === "collapsedRadius"
+          ) {
+            const parent = (item as { parent?: { id: string } }).parent;
+            if (parent) {
+              this.updateComboRadius(parent.id);
+            }
+          }
+
+          this.refresh();
+        }
+      }
+    } else if (category === "config") {
+      let current = this.config as unknown as Record<string, unknown>;
+      for (let i = 1; i < path.length - 1; i++) {
+        const p = path[i];
+        if (current[p] && typeof current[p] === "object") {
+          current = current[p] as Record<string, unknown>;
+        } else {
+          return;
+        }
+      }
+      if (current) {
+        current[key] = value;
+        this.refresh();
+      }
+    } else if (category === "projectPath" || category === "targetPath") {
+      (this as unknown as Record<string, unknown>)[category] = value;
+      this.refresh();
+    }
+  }
+
   public getAllNodes(): GraphNode[] {
     const all: GraphNode[] = [];
     const collect = (
@@ -1543,6 +1641,19 @@ const useGraph: (option: useGraphProps) => GraphData = ({
   useEffect(() => {
     data.setData(nodes, edges, combos, projectPath, targetPath);
   }, [nodes, edges, combos, projectPath, targetPath, data]);
+
+  // Register graph instance for devtools
+  useEffect(() => {
+    import("../hooks/use-graph-store").then(({ useGraphStore }) => {
+      useGraphStore.getState().setGraphInstance(data);
+    });
+
+    return () => {
+      import("../hooks/use-graph-store").then(({ useGraphStore }) => {
+        useGraphStore.getState().setGraphInstance(null);
+      });
+    };
+  }, [data]);
 
   return data;
 };
