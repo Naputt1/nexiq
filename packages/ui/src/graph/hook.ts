@@ -214,11 +214,18 @@ export class GraphData {
               });
 
               // Trigger parent layout to accommodate new radius if not collapsed AND changed significantly
-              if (!combo.collapsed && Math.abs(combo.expandedRadius - oldRadius) > 1) {
+              if (
+                !combo.collapsed &&
+                Math.abs(combo.expandedRadius - oldRadius) > 1
+              ) {
                 if (combo.parent == null) {
-                  this.layout(true);
+                  this.layout(true, combo.id);
                 } else {
-                  this.calculateComboChildrenLayout(combo.parent.id, true);
+                  this.calculateComboChildrenLayout(
+                    combo.parent.id,
+                    true,
+                    combo.id,
+                  );
                 }
               }
             }
@@ -463,7 +470,11 @@ export class GraphData {
     return { ...state };
   }
 
-  public calculateComboChildrenLayout(id: string, force = false) {
+  public calculateComboChildrenLayout(
+    id: string,
+    force = false,
+    fixedId?: string,
+  ) {
     const combo = this.getComboByID(id);
     if (combo == null) return;
     if (!force && combo.isLayoutCalculated) return;
@@ -506,7 +517,7 @@ export class GraphData {
         x: n.x, // Pass existing X if available (from persistence)
         y: n.y,
         radius: n.radius,
-        fixed: n.id === this.draggingId,
+        fixed: n.id === this.draggingId || n.id === fixedId,
       });
     }
 
@@ -516,7 +527,7 @@ export class GraphData {
         x: c.x,
         y: c.y,
         radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
-        fixed: c.id === this.draggingId,
+        fixed: c.id === this.draggingId || c.id === fixedId,
       });
     }
 
@@ -900,7 +911,6 @@ export class GraphData {
     }
 
     const prevCount = this.comboToCreate.length;
-    this.nodeToCreate = this.nodeToCreate; // Refresh node list just in case
     this.comboToCreate = newComboToCreate;
 
     if (this.comboToCreate.length > 0) {
@@ -976,9 +986,9 @@ export class GraphData {
 
     // Recalculate parent layout when expanding/collapsing to avoid overlaps/gaps
     if (combo.parent == null) {
-      this.layout(true);
+      this.layout(true, id);
     } else {
-      this.calculateComboChildrenLayout(combo.parent.id, true);
+      this.calculateComboChildrenLayout(combo.parent.id, true, id);
     }
   }
 
@@ -1479,9 +1489,9 @@ export class GraphData {
 
         // Recalculate parent layout when expanding to avoid overlaps
         if (parent.parent == null) {
-          this.layout(true);
+          this.layout(true, parentId);
         } else {
-          this.calculateComboChildrenLayout(parent.parent.id, true);
+          this.calculateComboChildrenLayout(parent.parent.id, true, parentId);
         }
 
         // Trigger update for the parent combo (internal)
@@ -1547,7 +1557,7 @@ export class GraphData {
     return this.getComboByID(id);
   }
 
-  public layout(force = false) {
+  public layout(force = false, fixedId?: string) {
     // Trigger layout for all expanded combos
     for (const c of this.getAllCombos()) {
       if (!c.collapsed) {
@@ -1572,7 +1582,7 @@ export class GraphData {
         x: n.x,
         y: n.y,
         radius: n.radius,
-        fixed: n.id === this.draggingId,
+        fixed: n.id === this.draggingId || n.id === fixedId,
       });
     }
 
@@ -1582,7 +1592,7 @@ export class GraphData {
         x: c.x,
         y: c.y,
         radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
-        fixed: c.id === this.draggingId,
+        fixed: c.id === this.draggingId || c.id === fixedId,
       });
     }
 
