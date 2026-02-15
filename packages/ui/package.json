@@ -54,6 +54,8 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@tanstack/devtools-vite": "^0.5.1",
+    "@tanstack/react-devtools": "^0.9.5",
     "@tanstack/react-virtual": "^3.13.18",
     "analyser": "workspace:*",
     "fast-glob": "^3.3.3",
