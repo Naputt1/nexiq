@@ -65,7 +65,7 @@ export const AppStatePluginComponent = () => {
   return (
     <div className="h-full flex flex-col text-white p-2 overflow-hidden">
       <div className="flex-1 overflow-auto">
-        <JsonViewer data={combinedState} onEdit={handleEdit} level={0} />
+        <JsonViewer data={combinedState} onEdit={handleEdit} />
       </div>
     </div>
   );
