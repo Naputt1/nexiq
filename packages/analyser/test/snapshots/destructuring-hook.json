@@ -19,12 +19,17 @@
           "id": "e2fadfbcb969c568",
           "name": {
             "type": "identifier",
-            "name": "Other"
+            "name": "Other",
+            "loc": {
+              "line": 1,
+              "column": 13
+            },
+            "id": "106cd2d66b99891b"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Other.tsx",
-          "hash": "449996d9f1f0bb6b",
+          "hash": "ca9afea1a70f0b90",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -90,12 +95,17 @@
           "id": "c8f7739ce29d1ce0",
           "name": {
             "type": "identifier",
-            "name": "Child"
+            "name": "Child",
+            "loc": {
+              "line": 1,
+              "column": 13
+            },
+            "id": "ad470f3d3d72162a"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "add20e3ba37e92b0",
+          "hash": "ee8f7fe0e8c24135",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -144,7 +154,7 @@
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
-      "hash": "f6a51209e3bbe330",
+      "hash": "a00c6e8e6d936897",
       "import": {
         "useState": {
           "localName": "useState",
@@ -167,17 +177,10 @@
           "type": "named",
           "importKind": "value"
         },
-        "Child": {
-          "localName": "Child",
-          "importedName": "Child",
-          "source": "/src/Child.tsx",
-          "type": "named",
-          "importKind": "value"
-        },
-        "Other": {
-          "localName": "Other",
-          "importedName": "Other",
-          "source": "/src/Other.tsx",
+        "useEffect": {
+          "localName": "useEffect",
+          "importedName": "useEffect",
+          "source": "react",
           "type": "named",
           "importKind": "value"
         }
@@ -186,7 +189,7 @@
         "App": {
           "name": "App",
           "type": "named",
-          "exportKind": "component",
+          "exportKind": "value",
           "id": "720e9756d239e21b"
         }
       },
@@ -197,26 +200,31 @@
           "id": "9cbcac3147d6febb",
           "name": {
             "type": "identifier",
-            "name": "useTranslation"
+            "name": "useTranslation",
+            "loc": {
+              "line": 5,
+              "column": 9
+            },
+            "id": "901f82a3ea3a1843"
           },
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "35ec0050025008b2",
+          "hash": "b46910e640b7b90f",
           "dependencies": {},
           "loc": {
-            "line": 7,
-            "column": 6
+            "line": 5,
+            "column": 9
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 7,
-              "column": 30
+              "line": 5,
+              "column": 9
             },
             "end": {
-              "line": 7,
-              "column": 53
+              "line": 5,
+              "column": 23
             }
           },
           "states": [],
@@ -228,26 +236,31 @@
           "id": "1f7b51dffd81c3d9",
           "name": {
             "type": "identifier",
-            "name": "useQuery"
+            "name": "useQuery",
+            "loc": {
+              "line": 9,
+              "column": 9
+            },
+            "id": "74403709fb70f0cf"
           },
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "49abf5c3b0bf846d",
+          "hash": "bda6273692caf985",
           "dependencies": {},
           "loc": {
-            "line": 8,
-            "column": 6
+            "line": 9,
+            "column": 9
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 8,
-              "column": 24
+              "line": 9,
+              "column": 9
             },
             "end": {
-              "line": 8,
-              "column": 70
+              "line": 9,
+              "column": 17
             }
           },
           "states": [],
@@ -259,20 +272,25 @@
           "id": "720e9756d239e21b",
           "name": {
             "type": "identifier",
-            "name": "App"
+            "name": "App",
+            "loc": {
+              "line": 17,
+              "column": 13
+            },
+            "id": "ce7286aa30b0e33b"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "b226317c9bb0d370",
+          "hash": "b885f175641d0ca6",
           "dependencies": {},
           "loc": {
-            "line": 10,
-            "column": 16
+            "line": 17,
+            "column": 13
           },
           "var": {
-            "720e9756d239e21b:callhook:{\n  t\n}": {
-              "id": "720e9756d239e21b:callhook:{\n  t\n}",
+            "720e9756d239e21b:callhook:useTranslation:18:8": {
+              "id": "720e9756d239e21b:callhook:useTranslation:18:8",
               "name": {
                 "type": "object",
                 "properties": [
@@ -280,25 +298,42 @@
                     "key": "t",
                     "value": {
                       "type": "identifier",
-                      "name": "t"
+                      "name": "t",
+                      "loc": {
+                        "line": 18,
+                        "column": 10
+                      },
+                      "id": "f1fec4ddd3676ea2"
+                    },
+                    "loc": {
+                      "line": 18,
+                      "column": 10
                     }
                   }
                 ],
-                "raw": "{\n  t\n}"
+                "raw": "{\n  t\n}",
+                "loc": {
+                  "line": 18,
+                  "column": 8
+                },
+                "id": "47662527b11bc907"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "342b72ffbeb51f5f",
+              "hash": "92140ebbcd352799",
               "dependencies": {},
               "loc": {
-                "line": 11,
+                "line": 18,
                 "column": 8
               },
-              "call": "useTranslation"
+              "call": {
+                "id": "9cbcac3147d6febb",
+                "name": "useTranslation"
+              }
             },
-            "720e9756d239e21b:callhook:{\n  theme\n}": {
-              "id": "720e9756d239e21b:callhook:{\n  theme\n}",
+            "720e9756d239e21b:callhook:useContext:19:8": {
+              "id": "720e9756d239e21b:callhook:useContext:19:8",
               "name": {
                 "type": "object",
                 "properties": [
@@ -306,83 +341,249 @@
                     "key": "theme",
                     "value": {
                       "type": "identifier",
-                      "name": "theme"
+                      "name": "theme",
+                      "loc": {
+                        "line": 19,
+                        "column": 10
+                      },
+                      "id": "cf403375cff0104d"
+                    },
+                    "loc": {
+                      "line": 19,
+                      "column": 10
                     }
                   }
                 ],
-                "raw": "{\n  theme\n}"
+                "raw": "{\n  theme\n}",
+                "loc": {
+                  "line": 19,
+                  "column": 8
+                },
+                "id": "d18575ade747f9b8"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "586b7a007a2ae03",
+              "hash": "14ad27cfcb980dce",
               "dependencies": {},
               "loc": {
-                "line": 12,
+                "line": 19,
                 "column": 8
               },
-              "call": "useContext"
+              "call": {
+                "id": "9b64e47d47fcd4f6",
+                "name": "useContext"
+              }
             },
-            "720e9756d239e21b:callhook:{\n  data,\n  isLoading,\n  error\n}": {
-              "id": "720e9756d239e21b:callhook:{\n  data,\n  isLoading,\n  error\n}",
+            "720e9756d239e21b:callhook:useQuery:20:8": {
+              "id": "720e9756d239e21b:callhook:useQuery:20:8",
               "name": {
                 "type": "object",
                 "properties": [
                   {
                     "key": "data",
                     "value": {
-                      "type": "identifier",
-                      "name": "data"
+                      "type": "object",
+                      "properties": [
+                        {
+                          "key": "user",
+                          "value": {
+                            "type": "object",
+                            "properties": [
+                              {
+                                "key": "name",
+                                "value": {
+                                  "type": "identifier",
+                                  "name": "name",
+                                  "loc": {
+                                    "line": 23,
+                                    "column": 8
+                                  },
+                                  "id": "b2a927f35d152a98"
+                                },
+                                "loc": {
+                                  "line": 23,
+                                  "column": 8
+                                }
+                              },
+                              {
+                                "key": "settings",
+                                "value": {
+                                  "type": "object",
+                                  "properties": [
+                                    {
+                                      "key": "theme",
+                                      "value": {
+                                        "type": "identifier",
+                                        "name": "userTheme",
+                                        "loc": {
+                                          "line": 24,
+                                          "column": 27
+                                        },
+                                        "id": "e041bdc3f4381531"
+                                      },
+                                      "loc": {
+                                        "line": 24,
+                                        "column": 20
+                                      }
+                                    }
+                                  ],
+                                  "raw": "{\n  theme: userTheme\n}",
+                                  "loc": {
+                                    "line": 24,
+                                    "column": 18
+                                  },
+                                  "id": "a69bd57e80a07b4a"
+                                },
+                                "loc": {
+                                  "line": 24,
+                                  "column": 8
+                                }
+                              }
+                            ],
+                            "raw": "{\n  name,\n  settings: {\n    theme: userTheme\n  }\n}",
+                            "loc": {
+                              "line": 22,
+                              "column": 12
+                            },
+                            "id": "a3432ca4b88d34aa"
+                          },
+                          "loc": {
+                            "line": 22,
+                            "column": 6
+                          }
+                        }
+                      ],
+                      "raw": "{\n  user: {\n    name,\n    settings: {\n      theme: userTheme\n    }\n  }\n}",
+                      "loc": {
+                        "line": 21,
+                        "column": 10
+                      },
+                      "id": "96f37b6bf26e1ad2"
+                    },
+                    "loc": {
+                      "line": 21,
+                      "column": 4
                     }
                   },
                   {
                     "key": "isLoading",
                     "value": {
                       "type": "identifier",
-                      "name": "isLoading"
+                      "name": "isLoading",
+                      "loc": {
+                        "line": 27,
+                        "column": 4
+                      },
+                      "id": "fad6c664e0252046"
+                    },
+                    "loc": {
+                      "line": 27,
+                      "column": 4
                     }
                   },
                   {
                     "key": "error",
                     "value": {
                       "type": "identifier",
-                      "name": "error"
+                      "name": "error",
+                      "loc": {
+                        "line": 28,
+                        "column": 4
+                      },
+                      "id": "fa5d61181890980e"
+                    },
+                    "loc": {
+                      "line": 28,
+                      "column": 4
                     }
                   }
                 ],
-                "raw": "{\n  data,\n  isLoading,\n  error\n}"
+                "raw": "{\n  data: {\n    user: {\n      name,\n      settings: {\n        theme: userTheme\n      }\n    }\n  },\n  isLoading,\n  error\n}",
+                "loc": {
+                  "line": 20,
+                  "column": 8
+                },
+                "id": "f4dae429b650daea"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "afc6cf0b9653bba2",
+              "hash": "a47a0364a95f0326",
               "dependencies": {},
               "loc": {
-                "line": 13,
+                "line": 20,
                 "column": 8
               },
-              "call": "useQuery"
+              "call": {
+                "id": "1f7b51dffd81c3d9",
+                "name": "useQuery"
+              }
             }
           },
           "scope": {
             "start": {
-              "line": 10,
-              "column": 16
+              "line": 17,
+              "column": 13
             },
             "end": {
-              "line": 10,
-              "column": 19
+              "line": 17,
+              "column": 16
             }
           },
           "states": [],
           "props": [],
           "hooks": [],
-          "effects": {},
+          "effects": {
+            "720e9756d239e21b:effect:31:2": {
+              "id": "720e9756d239e21b:effect:31:2",
+              "scope": {
+                "start": {
+                  "line": 31,
+                  "column": 18
+                },
+                "end": {
+                  "line": 31,
+                  "column": 20
+                }
+              },
+              "loc": {
+                "line": 31,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "720e9756d239e21b:callhook:useQuery:20:8:f4dae429b650daea:96f37b6bf26e1ad2:a3432ca4b88d34aa:a69bd57e80a07b4a:e041bdc3f4381531",
+                  "name": "userTheme"
+                }
+              ]
+            }
+          },
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "e2fadfbcb969c568": {
-              "id": "e2fadfbcb969c568",
+            "1eb5061ae05ec5e0": {
+              "id": "1eb5061ae05ec5e0",
+              "dependencies": [
+                {
+                  "id": "e4b7943fd57d5d1e",
+                  "name": "data",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "name"
+                  },
+                  "valueId": "720e9756d239e21b:callhook:useQuery:20:8:f4dae429b650daea:96f37b6bf26e1ad2:a3432ca4b88d34aa:b2a927f35d152a98"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 41,
+                "column": 6
+              }
+            },
+            "551f7d7d04578ad1": {
+              "id": "551f7d7d04578ad1",
               "dependencies": [
                 {
                   "id": "6b1c7ef67821ce66",
@@ -391,34 +592,134 @@
                     "type": "ref",
                     "refType": "named",
                     "name": "isLoading"
-                  }
+                  },
+                  "valueId": "720e9756d239e21b:callhook:useQuery:20:8:f4dae429b650daea:fad6c664e0252046"
                 }
               ],
               "isDependency": false,
               "loc": {
-                "line": 18,
-                "column": 6
-              }
-            },
-            "c8f7739ce29d1ce0": {
-              "id": "c8f7739ce29d1ce0",
-              "dependencies": [
-                {
-                  "id": "e4b7943fd57d5d1e",
-                  "name": "data",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "data"
-                  }
-                }
-              ],
-              "isDependency": false,
-              "loc": {
-                "line": 19,
+                "line": 42,
                 "column": 6
               }
             }
+          }
+        },
+        "1eb5061ae05ec5e0": {
+          "id": "1eb5061ae05ec5e0",
+          "name": {
+            "type": "identifier",
+            "name": "Child",
+            "loc": {
+              "line": 47,
+              "column": 6
+            },
+            "id": "ad470f3d3d72162a"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "24f8dd1aa0794d8e",
+          "dependencies": {},
+          "loc": {
+            "line": 47,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 47,
+              "column": 6
+            },
+            "end": {
+              "line": 47,
+              "column": 11
+            }
+          },
+          "states": [],
+          "props": [
+            {
+              "id": "ad470f3d3d72162a:prop:data",
+              "name": "data",
+              "type": "string",
+              "kind": "prop",
+              "hash": "613703bbf4eb9912"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "data",
+                "type": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        },
+        "551f7d7d04578ad1": {
+          "id": "551f7d7d04578ad1",
+          "name": {
+            "type": "identifier",
+            "name": "Other",
+            "loc": {
+              "line": 48,
+              "column": 6
+            },
+            "id": "106cd2d66b99891b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "611ef31831303a79",
+          "dependencies": {},
+          "loc": {
+            "line": 48,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 48,
+              "column": 6
+            },
+            "end": {
+              "line": 48,
+              "column": 11
+            }
+          },
+          "states": [],
+          "props": [
+            {
+              "id": "106cd2d66b99891b:prop:loading",
+              "name": "loading",
+              "type": "boolean",
+              "kind": "prop",
+              "hash": "729e2262cd7465d6"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "loading",
+                "type": {
+                  "type": "boolean"
+                }
+              }
+            ]
           }
         }
       }
@@ -426,14 +727,29 @@
   },
   "edges": [
     {
-      "from": "e2fadfbcb969c568",
+      "from": "1eb5061ae05ec5e0",
       "to": "720e9756d239e21b",
       "label": "render"
     },
     {
-      "from": "c8f7739ce29d1ce0",
+      "from": "551f7d7d04578ad1",
       "to": "720e9756d239e21b",
       "label": "render"
+    },
+    {
+      "from": "720e9756d239e21b:callhook:useTranslation:18:8",
+      "to": "9cbcac3147d6febb",
+      "label": "hook"
+    },
+    {
+      "from": "720e9756d239e21b:callhook:useContext:19:8",
+      "to": "9b64e47d47fcd4f6",
+      "label": "hook"
+    },
+    {
+      "from": "720e9756d239e21b:callhook:useQuery:20:8",
+      "to": "1f7b51dffd81c3d9",
+      "label": "hook"
     }
   ]
 }

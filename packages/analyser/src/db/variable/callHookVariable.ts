@@ -3,7 +3,7 @@ import type { File } from "../fileDB.js";
 import { ReactVariable } from "./reactVariable.js";
 
 export class CallHookVariable extends ReactVariable<"data", "hook"> {
-  call: string;
+  call: { id: string; name: string };
 
   constructor(
     options: Omit<ComponentFileVarCallHook, "kind" | "file" | "type">,

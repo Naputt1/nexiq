@@ -138,12 +138,17 @@
           "id": "c8f7739ce29d1ce0",
           "name": {
             "type": "identifier",
-            "name": "Child"
+            "name": "Child",
+            "loc": {
+              "line": 3,
+              "column": 16
+            },
+            "id": "ad470f3d3d72162a"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "3298528c305df2e7",
+          "hash": "732e2cbbd0640239",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -154,12 +159,17 @@
               "id": "c8f7739ce29d1ce0:state:count",
               "name": {
                 "type": "identifier",
-                "name": "count"
+                "name": "count",
+                "loc": {
+                  "line": 4,
+                  "column": 9
+                },
+                "id": "51e13e79c87160dd"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/Child.tsx",
-              "hash": "4ff21959d5a30c35",
+              "hash": "366b3983b2d18a0f",
               "dependencies": {},
               "loc": {
                 "line": 4,
@@ -283,7 +293,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "User"
+            "name": "User",
+            "loc": {
+              "line": 7,
+              "column": 5
+            },
+            "id": "933938f5b9947a3c"
           },
           "body": {
             "type": "type-literal",
@@ -308,12 +323,17 @@
           "id": "720e9756d239e21b",
           "name": {
             "type": "identifier",
-            "name": "App"
+            "name": "App",
+            "loc": {
+              "line": 12,
+              "column": 9
+            },
+            "id": "ce7286aa30b0e33b"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "cbc41aece5616c6f",
+          "hash": "73d86796f7926956",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -324,12 +344,17 @@
               "id": "720e9756d239e21b:state:count",
               "name": {
                 "type": "identifier",
-                "name": "count"
+                "name": "count",
+                "loc": {
+                  "line": 13,
+                  "column": 9
+                },
+                "id": "adc7e27a4dab499c"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "4ff21959d5a30c35",
+              "hash": "c4e3f79b6f80868a",
               "dependencies": {},
               "loc": {
                 "line": 13,
@@ -341,12 +366,17 @@
               "id": "720e9756d239e21b:state:user",
               "name": {
                 "type": "identifier",
-                "name": "user"
+                "name": "user",
+                "loc": {
+                  "line": 14,
+                  "column": 9
+                },
+                "id": "e4b71564275c75e4"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "6f54959d879ade2",
+              "hash": "37db5747f82381bb",
               "dependencies": {},
               "loc": {
                 "line": 14,
@@ -385,7 +415,7 @@
                     "refType": "named",
                     "name": "user"
                   },
-                  "valueId": "720e9756d239e21b:state:user"
+                  "valueId": "e4b71564275c75e4"
                 }
               ],
               "isDependency": false,
@@ -417,12 +447,17 @@
           "id": "de02a1f50cd7f036",
           "name": {
             "type": "identifier",
-            "name": "Test"
+            "name": "Test",
+            "loc": {
+              "line": 1,
+              "column": 6
+            },
+            "id": "b3f5bb77a55fad5e"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "ff221f82770439ba",
+          "hash": "c2d79074b80c85b2",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -468,12 +503,17 @@
           "id": "911c4f53186fbde1",
           "name": {
             "type": "identifier",
-            "name": "Test"
+            "name": "Test",
+            "loc": {
+              "line": 1,
+              "column": 24
+            },
+            "id": "b3f5bb77a55fad5e"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "5ce41e80ee48bf72",
+          "hash": "87858a6ac24b4213",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -519,12 +559,17 @@
           "id": "fdf040594420df32",
           "name": {
             "type": "identifier",
-            "name": "Test"
+            "name": "Test",
+            "loc": {
+              "line": 1,
+              "column": 9
+            },
+            "id": "b3f5bb77a55fad5e"
           },
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "6b8363fa3512a796",
+          "hash": "a896680e4ebc1f38",
           "dependencies": {},
           "loc": {
             "line": 1,

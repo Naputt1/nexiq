@@ -95,7 +95,12 @@ export const generateComponentGraphData = (
           const subPropsCombo: GraphComboData = {
             id: subPropsComboId,
             collapsed: true,
-            name: { type: "identifier", name: prop.name },
+            name: {
+              type: "identifier",
+              name: prop.name,
+              id: prop.id,
+              loc: prop.loc || variable.loc,
+            },
             label: { text: prop.name },
             color: "green",
             combo: parentComboId,
@@ -115,7 +120,12 @@ export const generateComponentGraphData = (
         } else {
           const propNode: GraphNodeData = {
             id: prop.id,
-            name: { type: "identifier", name: prop.name },
+            name: {
+              type: "identifier",
+              name: prop.name,
+              id: prop.id,
+              loc: prop.loc || variable.loc,
+            },
             label: {
               text: (prop.kind === "spread" ? "..." : "") + prop.name,
             },
@@ -175,7 +185,12 @@ export const generateComponentGraphData = (
         if (!propNodes.some((n) => n.id === deletedId)) {
           propNodes.push({
             id: deletedId,
-            name: { type: "identifier", name: (obj as PropData).name },
+            name: {
+              type: "identifier",
+              name: (obj as PropData).name,
+              id: deletedId,
+              loc: (obj as PropData).loc || variable.loc,
+            },
             label: {
               text:
                 ((obj as PropData).kind === "spread" ? "..." : "") +
@@ -207,7 +222,12 @@ export const generateComponentGraphData = (
       const propsCombo: GraphComboData = {
         id: propsComboId,
         collapsed: true,
-        name: { type: "identifier", name: "props" },
+        name: {
+          type: "identifier",
+          name: "props",
+          id: propsComboId,
+          loc: variable.loc,
+        },
         label: { text: "props" },
         color: "green",
         combo: variable.id,
@@ -258,9 +278,14 @@ export const generateComponentGraphData = (
 
         let name: VariableName;
         if (v.kind === "prop" || v.kind === "spread") {
-          name = { type: "identifier", name: (v as PropData).name };
+          name = {
+            type: "identifier",
+            name: (v as PropData).name,
+            loc: (v as PropData).loc || loc,
+            id: v.id,
+          };
         } else if (v.kind === "effect") {
-          name = { type: "identifier", name: "effect" };
+          name = { type: "identifier", name: "effect", loc: loc, id: v.id };
         } else {
           name = (v as ComponentFileVar).name;
         }
@@ -349,7 +374,12 @@ export const generateComponentGraphData = (
       combos.push({
         id: `${variable.id}-render`,
         collapsed: true,
-        name: { type: "identifier", name: "render" },
+        name: {
+          type: "identifier",
+          name: "render",
+          id: `${variable.id}-render`,
+          loc: variable.loc,
+        },
         label: { text: "render" },
         combo: variable.id,
         fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
@@ -406,23 +436,47 @@ export const generateComponentGraphData = (
             type: ReactVarKind,
             parentName: string,
             parent?: string,
+            virtualPath?: string,
           ) => {
+            const currentPath = virtualPath
+              ? `${virtualPath}-${parentName}`
+              : parentName;
+
+            // Use parent or hookCall.id as base to ensure uniqueness and correct nesting
+            const vId = v.id || `virtual-${currentPath}`;
+            const uniqueId = `${parent || hookCall.id}:${vId}`;
+
             if (v.type == "object" || v.type === "array") {
-              const comboId = parent ? `${parent}-${parentName}` : nodeBase.id;
+              const comboId = uniqueId;
+              const virtualId = parent ? currentPath : undefined;
+              const savedUi = virtualId
+                ? hookCall.ui?.vars?.[virtualId]
+                : undefined;
+
+              const vLoc = v.loc || nodeBase.loc;
               const combo: GraphComboData = {
                 ...nodeBase,
                 id: comboId,
+                name: v,
                 label: {
                   text: parentName,
                 },
                 type: type,
                 color: "red",
-                collapsed: false,
+                collapsed: parent != null,
+                ui: savedUi || (parent ? undefined : nodeBase.ui),
+                loc: vLoc,
+                fileName:
+                  vLoc && vLoc.line != null
+                    ? `${fileName}:${vLoc.line}:${vLoc.column}`
+                    : nodeBase.fileName,
               };
-              if (parent) combo.combo = parent;
+              // Crucial: prevent self-parent cycles
+              if (parent && parent !== comboId) {
+                combo.combo = parent;
+              }
 
               combos.push(combo);
-
               if (v.type === "array") {
                 for (const [i, element] of v.elements.entries()) {
                   if (element != null) {
@@ -431,31 +485,70 @@ export const generateComponentGraphData = (
                       type,
                       "" + i,
                       comboId,
+                      currentPath,
                     );
                   }
                 }
               } else if (v.type === "object") {
                 for (const prop of v.properties) {
-                  addDestructiveVariable(prop.value, type, prop.key, comboId);
+                  addDestructiveVariable(
+                    prop.value,
+                    type,
+                    prop.key,
+                    comboId,
+                    currentPath,
+                  );
                 }
               }
+
+              return comboId;
             } else {
               const name =
                 v.type === "identifier" ? v.name : `...${v.argument}`;
-              nodes.push({
+              const virtualId = parent ? currentPath : undefined;
+              const savedUi = virtualId
+                ? hookCall.ui?.vars?.[virtualId]
+                : undefined;
+
+              const vLoc = v.loc || nodeBase.loc;
+              const node: GraphNodeData = {
                 ...nodeBase,
-                id: parent ? `${parent}-${name}` : nodeBase.id,
-                combo: parent,
+                id: uniqueId,
+                name: v,
+                combo: parent
+                  ? parent !== uniqueId
+                    ? parent
+                    : undefined
+                  : nodeBase.combo,
                 label: {
                   text: name,
                 },
                 type: type,
                 color: "red",
-              });
+                ui: savedUi || (parent ? undefined : nodeBase.ui),
+                loc: vLoc,
+                fileName:
+                  vLoc && vLoc.line != null
+                    ? `${fileName}:${vLoc.line}:${vLoc.column}`
+                    : nodeBase.fileName,
+              };
+              nodes.push(node);
+
+              return uniqueId;
             }
           };
 
-          addDestructiveVariable(hookCall.name, hookCall.kind, hookCall.call);
+          const id = addDestructiveVariable(
+            hookCall.name,
+            hookCall.kind,
+            hookCall.call.name,
+          );
+
+          edges.push({
+            id: `${id}-${hookCall.call.id}`,
+            source: id,
+            target: hookCall.call.id,
+          });
 
           if (hookCall.dependencies) {
             for (const dep of Object.values(hookCall.dependencies)) {
@@ -545,7 +638,7 @@ export const generateComponentGraphData = (
             combos.push({
               ...nodeBase,
               label: { text: getDisplayName(v.name) },
-              type: v.kind as any,
+              type: v.kind as GraphNodeData["type"],
               color: "blue",
               collapsed: true,
             });
@@ -553,7 +646,7 @@ export const generateComponentGraphData = (
             nodes.push({
               ...nodeBase,
               label: { text: getDisplayName(v.name) },
-              type: v.kind as any,
+              type: v.kind as GraphNodeData["type"],
               color: "blue",
             });
           }
@@ -565,7 +658,12 @@ export const generateComponentGraphData = (
       for (const effect of Object.values(variable.effects)) {
         const effectNode: GraphNodeData = {
           id: effect.id,
-          name: { type: "identifier", name: "effect" },
+          name: {
+            type: "identifier",
+            name: "effect",
+            id: effect.id,
+            loc: effect.loc,
+          },
           type: "effect",
           color: "yellow",
           radius: 10,
@@ -711,13 +809,22 @@ export const generateComponentGraphData = (
 
         let name: VariableName;
         if (obj.kind === "prop" || obj.kind === "spread") {
-          name = { type: "identifier", name: (obj as PropData).name };
+          name = {
+            type: "identifier",
+            name: (obj as PropData).name,
+            loc: (obj as PropData).loc || loc || { line: 0, column: 0 },
+            id: obj.id,
+          };
         } else if (obj.kind === "effect") {
-          name = { type: "identifier", name: "effect" };
+          name = {
+            type: "identifier",
+            name: "effect",
+            loc: loc || { line: 0, column: 0 },
+            id: obj.id,
+          };
         } else {
           name = (obj as ComponentFileVar).name;
         }
-
         const nodeBase: GraphNodeData = {
           id: obj.id,
           name: name,

@@ -39,7 +39,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "Test2"
+            "name": "Test2",
+            "loc": {
+              "line": 3,
+              "column": 12
+            },
+            "id": "21e830e9f705ddfd"
           },
           "body": {
             "type": "parenthesis",
@@ -57,7 +62,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "Test3"
+            "name": "Test3",
+            "loc": {
+              "line": 5,
+              "column": 12
+            },
+            "id": "432fe86ba6cacfdb"
           },
           "body": {
             "type": "union",
@@ -129,7 +139,12 @@
           "type": "interface",
           "name": {
             "type": "identifier",
-            "name": "Child4"
+            "name": "Child4",
+            "loc": {
+              "line": 16,
+              "column": 17
+            },
+            "id": "6ca59cb98b708baa"
           },
           "body": [
             {
@@ -231,7 +246,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "stringAlias"
+            "name": "stringAlias",
+            "loc": {
+              "line": 5,
+              "column": 5
+            },
+            "id": "6d5d044a3d7c87a7"
           },
           "body": {
             "type": "string"
@@ -246,7 +266,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "Test"
+            "name": "Test",
+            "loc": {
+              "line": 7,
+              "column": 5
+            },
+            "id": "b3f5bb77a55fad5e"
           },
           "body": {
             "type": "union",
@@ -328,7 +353,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "Props"
+            "name": "Props",
+            "loc": {
+              "line": 20,
+              "column": 5
+            },
+            "id": "2e507c3e1f0383bb"
           },
           "body": {
             "type": "type-literal",
@@ -371,7 +401,12 @@
           "type": "interface",
           "name": {
             "type": "identifier",
-            "name": "Child"
+            "name": "Child",
+            "loc": {
+              "line": 26,
+              "column": 10
+            },
+            "id": "ad470f3d3d72162a"
           },
           "body": [
             {
@@ -403,7 +438,12 @@
           "type": "interface",
           "name": {
             "type": "identifier",
-            "name": "Parent"
+            "name": "Parent",
+            "loc": {
+              "line": 35,
+              "column": 10
+            },
+            "id": "7bbf003fe07a211a"
           },
           "body": [
             {
@@ -1087,7 +1127,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "func"
+            "name": "func",
+            "loc": {
+              "line": 79,
+              "column": 5
+            },
+            "id": "924b614b0eaf63a8"
           },
           "body": {
             "type": "function",
@@ -1126,7 +1171,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "funcP1"
+            "name": "funcP1",
+            "loc": {
+              "line": 80,
+              "column": 5
+            },
+            "id": "4862a67c415b236a"
           },
           "body": {
             "type": "index-access",
@@ -1160,7 +1210,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "y2"
+            "name": "y2",
+            "loc": {
+              "line": 82,
+              "column": 5
+            },
+            "id": "74c501adbb4eb0d7"
           },
           "body": {
             "type": "query",
@@ -1180,7 +1235,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "y3"
+            "name": "y3",
+            "loc": {
+              "line": 83,
+              "column": 5
+            },
+            "id": "aaa1686f6ec7708d"
           },
           "body": {
             "type": "query",
@@ -1203,7 +1263,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "y4"
+            "name": "y4",
+            "loc": {
+              "line": 84,
+              "column": 5
+            },
+            "id": "8223b68cdace61a5"
           },
           "body": {
             "type": "query",
@@ -1222,7 +1287,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "y5"
+            "name": "y5",
+            "loc": {
+              "line": 85,
+              "column": 5
+            },
+            "id": "6cca43fc85ca7f12"
           },
           "body": {
             "type": "query",
@@ -1242,7 +1312,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "x"
+            "name": "x",
+            "loc": {
+              "line": 88,
+              "column": 5
+            },
+            "id": "eaf06c6480b2cd11"
           },
           "body": {
             "type": "ref",
@@ -1269,7 +1344,12 @@
           "type": "type",
           "name": {
             "type": "identifier",
-            "name": "InnerType"
+            "name": "InnerType",
+            "loc": {
+              "line": 91,
+              "column": 7
+            },
+            "id": "c650dd4383073aea"
           },
           "body": {
             "type": "type-literal",
@@ -1293,7 +1373,12 @@
           "type": "interface",
           "name": {
             "type": "identifier",
-            "name": "InnerType2"
+            "name": "InnerType2",
+            "loc": {
+              "line": 95,
+              "column": 12
+            },
+            "id": "3f102b2e64123f12"
           },
           "body": [
             {
@@ -1315,12 +1400,17 @@
           "id": "8138ea1421523344",
           "name": {
             "type": "identifier",
-            "name": "TypePropsVar"
+            "name": "TypePropsVar",
+            "loc": {
+              "line": 90,
+              "column": 13
+            },
+            "id": "a45adc2906a54888"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "e3f3e90b40e76999",
+          "hash": "48f5f7c3fecdfcff",
           "dependencies": {},
           "loc": {
             "line": 90,
@@ -1362,12 +1452,17 @@
           "id": "45d93b507f3cff36",
           "name": {
             "type": "identifier",
-            "name": "TypePropsVarFunction"
+            "name": "TypePropsVarFunction",
+            "loc": {
+              "line": 102,
+              "column": 13
+            },
+            "id": "4eda6d7e65f6114a"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "346f9a4d147702bf",
+          "hash": "749402a252a6133a",
           "dependencies": {},
           "loc": {
             "line": 102,
@@ -1423,12 +1518,17 @@
           "id": "d7b08d33fffa91ec",
           "name": {
             "type": "identifier",
-            "name": "TypePropsVarInline"
+            "name": "TypePropsVarInline",
+            "loc": {
+              "line": 110,
+              "column": 13
+            },
+            "id": "58bd96c9445f109a"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "2c2aceff5d5bc467",
+          "hash": "d9368b81b24f8f85",
           "dependencies": {},
           "loc": {
             "line": 110,
@@ -1477,12 +1577,17 @@
           "id": "307d2f98b6878b73",
           "name": {
             "type": "identifier",
-            "name": "TypePropsVarInlineFunction"
+            "name": "TypePropsVarInlineFunction",
+            "loc": {
+              "line": 114,
+              "column": 13
+            },
+            "id": "4da9eef1c97a7646"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "800f685e8dcdf34f",
+          "hash": "cf6b98446b56de3d",
           "dependencies": {},
           "loc": {
             "line": 114,
@@ -1531,12 +1636,17 @@
           "id": "12bb1ce455bcb824",
           "name": {
             "type": "identifier",
-            "name": "TypePropsFunction"
+            "name": "TypePropsFunction",
+            "loc": {
+              "line": 127,
+              "column": 16
+            },
+            "id": "b0e3466c364c5ee8"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "958b83b049da7003",
+          "hash": "5038364e32ebe581",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -1636,12 +1746,17 @@
           "id": "fc5afc13ded24662",
           "name": {
             "type": "identifier",
-            "name": "DestructuringProps"
+            "name": "DestructuringProps",
+            "loc": {
+              "line": 3,
+              "column": 13
+            },
+            "id": "d0460c8cee978856"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "bf2b04671b35c320",
+          "hash": "77bf8816e15f6fa4",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1753,12 +1868,17 @@
           "id": "720e9756d239e21b",
           "name": {
             "type": "identifier",
-            "name": "App"
+            "name": "App",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "ce7286aa30b0e33b"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "c6eb89f42ed5e8dd",
+          "hash": "8ab02f85e2749d89",
           "dependencies": {},
           "loc": {
             "line": 4,

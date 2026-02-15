@@ -119,19 +119,32 @@ export type ReactVarKind =
 export type VarKind = "normal" | ReactVarKind;
 
 export type VariableNamePattern =
-  | { type: "identifier"; name: string }
-  | { type: "object"; properties: VariableObjectProperty[]; raw: string }
-  | { type: "array"; elements: VariableArrayElement[]; raw: string }
-  | { type: "rest"; argument: VariableNamePattern };
+  | { type: "identifier"; name: string; loc: VariableLoc; id: string }
+  | {
+      type: "object";
+      properties: VariableObjectProperty[];
+      raw: string;
+      loc: VariableLoc;
+      id: string;
+    }
+  | {
+      type: "array";
+      elements: VariableArrayElement[];
+      raw: string;
+      loc: VariableLoc;
+      id: string;
+    }
+  | { type: "rest"; argument: VariableNamePattern; loc: VariableLoc; id: string };
 
 export type VariableObjectProperty = {
   key: string;
   value: VariableNamePattern;
+  loc: VariableLoc;
 };
 
 export type VariableArrayElement =
-  | { type: "element"; value: VariableNamePattern }
-  | { type: "rest"; value: VariableNamePattern }
+  | { type: "element"; value: VariableNamePattern; loc: VariableLoc }
+  | { type: "rest"; value: VariableNamePattern; loc: VariableLoc }
   | null;
 
 export type VariableName = VariableNamePattern;
@@ -150,6 +163,7 @@ interface ComponentFileVarBaseType<TType extends VarType> {
         y: number;
         radius?: number;
         renders?: Record<string, { x: number; y: number; radius?: number }>;
+        vars?: Record<string, { x: number; y: number; radius?: number }>;
         isLayoutCalculated?: boolean | undefined;
       }
     | undefined;
@@ -212,7 +226,7 @@ export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
 };
 
 export type ComponentFileVarCallHook = ComponentFileVarReact<"data", "hook"> & {
-  call: string;
+  call: { id: string; name: string };
 };
 
 export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {

@@ -4,6 +4,7 @@ import type {
   ComponentFileExport,
   ComponentFileImport,
   ComponentFileVar,
+  ComponentFileVarCallHook,
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
@@ -37,6 +38,7 @@ import {
   isNormalVariable,
   isBaseFunctionVariable,
   isDataVariable,
+  isCallHookVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import fs from "fs";
@@ -364,7 +366,27 @@ export class File {
           v.kind == "component" ||
           (v.kind == "hook" && v.type == "function")
         ) {
-          edges.push(...this.__getEdgesRaw(v));
+          edges.push(
+            ...this.__getEdgesRaw(
+              v as ComponentFileVarComponent | ComponentFileVarHook,
+            ),
+          );
+        } else if (v.kind == "hook" && v.type == "data") {
+          const hookCall = v as ComponentFileVarCallHook;
+          if (hookCall.call.id) {
+            edges.push({
+              from: hookCall.id,
+              to: hookCall.call.id,
+              label: "hook",
+            });
+          }
+          for (const dep of Object.values(hookCall.dependencies)) {
+            edges.push({
+              from: hookCall.id,
+              to: dep.id,
+              label: "hook",
+            });
+          }
         }
       }
     }
@@ -397,6 +419,13 @@ export class File {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
       } else if (v.kind === "hook") {
+        if (v && isCallHookVariable(v)) {
+          edges.push({
+            from: v.id,
+            to: v.call.id,
+            label: "hook",
+          });
+        }
         for (const dep of Object.values(v.dependencies)) {
           edges.push({
             from: v.id,
@@ -496,46 +525,42 @@ export class File {
     if (parent == null) return;
 
     if (isBaseFunctionVariable(parent)) {
-      for (const com of parent.var.values()) {
-        const comNameKey = getVariableNameKey(com.name);
-        if (Object.keys(depMap).includes(comNameKey)) {
-          const depIndices = depMap[comNameKey];
+      for (const name of Object.keys(depMap)) {
+        const id = parent.var.getIdByName(name);
+        if (id) {
+          const depIndices = depMap[name];
           if (depIndices) {
             for (const depI of depIndices) {
               const dep = dependencies[depI];
               if (dep) {
-                dep.valueId = com.id;
+                dep.valueId = id;
               }
             }
           }
-
-          delete depMap[comNameKey];
-          if (Object.keys(depMap).length === 0) {
-            return;
-          }
+          delete depMap[name];
         }
+      }
+
+      if (Object.keys(depMap).length === 0) {
+        return;
       }
     }
 
     if (Object.keys(depMap).length > 0) {
       if (parent.parent == null) {
-        for (const com of this.var.values()) {
-          const comNameKey = getVariableNameKey(com.name);
-          if (Object.keys(depMap).includes(comNameKey)) {
-            const depIndices = depMap[comNameKey];
+        for (const name of Object.keys(depMap)) {
+          const id = this.var.getIdByName(name);
+          if (id) {
+            const depIndices = depMap[name];
             if (depIndices) {
               for (const depI of depIndices) {
                 const dep = dependencies[depI];
                 if (dep) {
-                  dep.valueId = com.id;
+                  dep.valueId = id;
                 }
               }
             }
-
-            delete depMap[comNameKey];
-            if (Object.keys(depMap).length === 0) {
-              return;
-            }
+            delete depMap[name];
           }
         }
         return;

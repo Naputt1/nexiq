@@ -23,9 +23,18 @@ export class GraphArrow implements Renderable {
     this.opacity = data.opacity ?? 1;
   }
 
-  updatePoints(from: BaseNode, to: BaseNode, isAbsolute: boolean = false) {
-    const fromPos = isAbsolute ? from.getAbsolutePosition() : from;
-    const toPos = isAbsolute ? to.getAbsolutePosition() : to;
+  updatePoints(from: BaseNode, to: BaseNode, relativeTo?: BaseNode) {
+    const fromAbs = from.getAbsolutePosition();
+    const toAbs = to.getAbsolutePosition();
+
+    let fromPos = fromAbs;
+    let toPos = toAbs;
+
+    if (relativeTo) {
+      const relAbs = relativeTo.getAbsolutePosition();
+      fromPos = { x: fromAbs.x - relAbs.x, y: fromAbs.y - relAbs.y };
+      toPos = { x: toAbs.x - relAbs.x, y: toAbs.y - relAbs.y };
+    }
 
     const dx = toPos.x - fromPos.x;
     const dy = toPos.y - fromPos.y;

@@ -16,6 +16,11 @@ export class GraphNode extends BaseNode {
       opacity: context.hasGitChanges && !this.gitStatus ? 0.2 : 1,
     });
 
+    group.on("dragstart", (e) => {
+      e.cancelBubble = true;
+      context.graph.setDraggingId(this.id);
+    });
+
     group.on("dragmove", (e) => {
       e.cancelBubble = true;
       if (this.parent) {
@@ -27,6 +32,7 @@ export class GraphNode extends BaseNode {
 
     group.on("dragend", (e) => {
       e.cancelBubble = true;
+      context.graph.setDraggingId(null);
       if (this.parent) {
         context.graph.comboChildNodeEnd(this.parent.id, this.id);
       } else {
