@@ -21,6 +21,7 @@ export default defineConfig({
             rollupOptions: {
               external: [
                 "electron",
+                "@parcel/watcher",
                 "@node-rs/xxhash",
                 "analyser",
                 "fast-glob",

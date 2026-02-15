@@ -10,6 +10,7 @@ interface StoreData {
   openProjects: string[];
   theme: "dark" | "light";
   customColors?: CustomColors;
+  autoReload: boolean;
 }
 
 export class Store {
@@ -29,12 +30,14 @@ export class Store {
         openProjects: parsed.openProjects || [],
         theme: parsed.theme || parsed.graphTheme || "dark",
         customColors: parsed.customColors,
+        autoReload: parsed.autoReload !== undefined ? parsed.autoReload : true,
       };
     } catch {
       return {
         recentProjects: [],
         openProjects: [],
         theme: "dark",
+        autoReload: true,
       };
     }
   }
@@ -79,19 +82,27 @@ export class Store {
     this.save();
   }
 
-  getGlobalConfig(): { theme: "dark" | "light"; customColors?: CustomColors } {
+  getGlobalConfig(): {
+    theme: "dark" | "light";
+    customColors?: CustomColors;
+    autoReload: boolean;
+  } {
     return {
       theme: this.data.theme,
       customColors: this.data.customColors,
+      autoReload: this.data.autoReload,
     };
   }
 
   saveGlobalConfig(config: {
     theme: "dark" | "light";
     customColors?: CustomColors;
+    autoReload?: boolean;
   }) {
-    this.data.theme = config.theme;
-    this.data.customColors = config.customColors;
+    if (config.theme) this.data.theme = config.theme;
+    if (config.customColors) this.data.customColors = config.customColors;
+    if (config.autoReload !== undefined)
+      this.data.autoReload = config.autoReload;
     this.save();
   }
 }

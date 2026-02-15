@@ -21,6 +21,7 @@
     },
     "onlyBuiltDependencies": [
       "@node-rs/xxhash",
+      "@parcel/watcher",
       "bson",
       "electron",
       "electron-winstaller",

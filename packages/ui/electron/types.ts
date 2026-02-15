@@ -40,4 +40,5 @@ export interface AppStateData {
 export interface GlobalSettings {
   theme: "dark" | "light";
   customColors?: CustomColors;
+  autoReload?: boolean;
 }
