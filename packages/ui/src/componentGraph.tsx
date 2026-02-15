@@ -141,8 +141,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           typeData: newTypeData,
         } = VIEW_GENERATORS[view](graphData);
 
-        console.log("typeData", { nodes, edges, combos });
-
         settypeData(newTypeData);
         setGraphData({
           nodes,
