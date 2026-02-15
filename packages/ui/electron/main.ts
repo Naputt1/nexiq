@@ -213,6 +213,8 @@ function createWindow(projectPath?: string, forceEmpty: boolean = false) {
     },
   });
 
+  window.maximize();
+
   windowProjects.set(window.id, projectPath || null);
   updateOpenProjects();
 
