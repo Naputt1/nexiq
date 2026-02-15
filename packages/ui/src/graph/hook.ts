@@ -969,7 +969,9 @@ export class GraphData {
     }
 
     combo.collapsed = !combo.collapsed;
-    combo.radius = combo.collapsed ? combo.collapsedRadius : combo.expandedRadius;
+    combo.radius = combo.collapsed
+      ? combo.collapsedRadius
+      : combo.expandedRadius;
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
@@ -1657,8 +1659,6 @@ export class GraphData {
     this.trigger({ type: "new-combos" });
     this.trigger({ type: "new-nodes" });
     this.trigger({ type: "new-edges" });
-
-    console.log("render done", this);
   }
 }
 
