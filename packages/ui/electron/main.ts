@@ -1239,7 +1239,14 @@ ipcMain.handle(
           map.set(v.id, v.hash ?? "");
 
           if ("props" in v && v.props) {
-            traverseProps(v.props);
+            if (v.type === "jsx") {
+              // JSX variables have ComponentInfoRenderDependency[] which don't need prop traversal for hash
+              for (const p of v.props) {
+                map.set(p.id, "");
+              }
+            } else {
+              traverseProps(v.props as PropData[]);
+            }
           }
 
           if ("effects" in v && v.effects) {
@@ -1313,7 +1320,17 @@ ipcMain.handle(
               deletedObjects[v.id] = v;
             }
             if ("props" in v && v.props) {
-              traverseProps(v.props, v);
+              if (v.type === "jsx") {
+                for (const p of v.props) {
+                  if (targetIds.has(p.id)) {
+                    // PropData and ComponentInfoRenderDependency are slightly different but we treat them as ChangeItemType conceptually
+                    const pWithFile = { ...p, file: v.file } as unknown as PropData;
+                    deletedObjects[p.id] = pWithFile;
+                  }
+                }
+              } else {
+                traverseProps(v.props as PropData[], v);
+              }
             }
             if ("effects" in v && v.effects) {
               for (const effect of Object.values(v.effects)) {

@@ -19,6 +19,7 @@ import {
   type PropData,
   type EffectInfo,
   type AnalyzedDiff,
+  type ComponentInfoRenderDependency,
 } from "shared";
 
 import { useConfigStore } from "@/hooks/use-config-store";
@@ -28,6 +29,12 @@ interface GitChangeTreeProps {
   data: JsonData;
   onLocate?: (id: string) => void;
 }
+
+type ChangeItemType =
+  | ComponentFileVar
+  | PropData
+  | EffectInfo
+  | ComponentInfoRenderDependency;
 
 type FlatItem =
   | {
@@ -54,7 +61,7 @@ type FlatItem =
       type: "child";
       id: string;
       key: string;
-      item: ComponentFileVar | PropData | EffectInfo;
+      item: ChangeItemType;
       depth: number;
       isDeleted: boolean;
       isAdded: boolean;
@@ -139,10 +146,19 @@ export const GitChangeTree = memo(function GitChangeTree({
 
     const getChildren = (
       item: ComponentFileVar,
-    ): (ComponentFileVar | PropData | EffectInfo)[] => {
-      const list: (ComponentFileVar | PropData | EffectInfo)[] = [];
+    ): (ComponentFileVar | PropData | EffectInfo | ComponentInfoRenderDependency)[] => {
+      const list: (
+        | ComponentFileVar
+        | PropData
+        | EffectInfo
+        | ComponentInfoRenderDependency
+      )[] = [];
       if ("props" in item && item.props) {
-        list.push(...item.props.filter((p) => hasChanges(p, diff, diffSets)));
+        list.push(
+          ...(item.props.filter((p) =>
+            hasChanges(p, diff, diffSets),
+          ) as ChangeItemType[]),
+        );
       }
       if ("effects" in item && item.effects) {
         list.push(
@@ -284,6 +300,7 @@ export const GitChangeTree = memo(function GitChangeTree({
     return result;
   }, [data, diff, diffSets, expandedIds]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: flattenedItems.length,
     getScrollElement: () => parentRef.current,
@@ -471,7 +488,7 @@ export const GitChangeTree = memo(function GitChangeTree({
 });
 
 function hasChanges(
-  item: ComponentFileVar | PropData | EffectInfo,
+  item: ChangeItemType,
   diff: AnalyzedDiff,
   sets: { added: Set<string>; modified: Set<string>; deleted: Set<string> },
 ): boolean {
@@ -489,7 +506,10 @@ function hasChanges(
   }
 
   if ("props" in item && item.props) {
-    if (item.props.some((p) => hasChanges(p, diff, sets))) return true;
+    if (
+      (item.props as ChangeItemType[]).some((p) => hasChanges(p, diff, sets))
+    )
+      return true;
   }
 
   if ("effects" in item && item.effects) {

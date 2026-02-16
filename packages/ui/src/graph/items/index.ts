@@ -84,12 +84,15 @@ export interface DetailItemData {
     | "callback"
     | "ref"
     | "prop"
-    | "normal";
+    | "normal"
+    | "jsx";
   typeParams?: TypeDataParam[];
   extends?: string[];
+  tag?: string;
   renders?: Record<string, ComponentInfoRender>;
   hooks?: string[];
   gitStatus?: "added" | "modified" | "deleted";
+  declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   visible?: boolean;
   ui?: {
     renders?: Record<string, { x: number; y: number; radius?: number }>;

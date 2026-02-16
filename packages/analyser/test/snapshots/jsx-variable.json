@@ -1,0 +1,1066 @@
+{
+  "files": {
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "63e5fad14263c51f",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "value",
+          "id": "720e9756d239e21b"
+        }
+      },
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "1eb5061ae05ec5e0": {
+          "id": "1eb5061ae05ec5e0",
+          "name": {
+            "type": "identifier",
+            "name": "Child",
+            "loc": {
+              "line": 3,
+              "column": 6
+            },
+            "id": "ad470f3d3d72162a"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "3404fab2cf571981",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 6
+            },
+            "end": {
+              "line": 3,
+              "column": 11
+            }
+          },
+          "states": [],
+          "props": [
+            {
+              "id": "ad470f3d3d72162a:prop:prop",
+              "name": "prop",
+              "type": "any",
+              "kind": "prop",
+              "hash": "190e951a40da0a2b"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {},
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "prop",
+                "type": {
+                  "type": "any"
+                }
+              }
+            ]
+          }
+        },
+        "8da3247129689b7b": {
+          "id": "8da3247129689b7b",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@3:43",
+            "loc": {
+              "line": 3,
+              "column": 43
+            },
+            "id": "e4446d0ef2537eeb"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "ac88443768512709": {
+              "id": "ac88443768512709",
+              "name": "prop"
+            }
+          },
+          "loc": {
+            "line": 3,
+            "column": 43
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
+        "1da2c815756ff756": {
+          "id": "1da2c815756ff756",
+          "name": {
+            "type": "identifier",
+            "name": "Child2",
+            "loc": {
+              "line": 4,
+              "column": 6
+            },
+            "id": "d3ca264457c9ed70"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "e7eda5e79d2f2aaf",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 6
+            },
+            "end": {
+              "line": 4,
+              "column": 12
+            }
+          },
+          "states": [],
+          "props": [
+            {
+              "id": "d3ca264457c9ed70:prop:children",
+              "name": "children",
+              "type": "any",
+              "kind": "prop",
+              "hash": "ff601f5e72cf1428"
+            },
+            {
+              "id": "d3ca264457c9ed70:prop:prop",
+              "name": "prop",
+              "type": "any",
+              "kind": "prop",
+              "hash": "190e951a40da0a2b"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {
+            "7522acb7d4e337da": {
+              "id": "div",
+              "instanceId": "7522acb7d4e337da",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "77e9e4a1556d5f7e",
+                  "name": "...",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "prop"
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 5,
+                "column": 2
+              },
+              "renders": {}
+            }
+          },
+          "propType": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "property",
+                "name": "children",
+                "type": {
+                  "type": "any"
+                }
+              },
+              {
+                "signatureType": "property",
+                "name": "prop",
+                "type": {
+                  "type": "any"
+                }
+              }
+            ]
+          }
+        },
+        "3842e3b986b2cdf7": {
+          "id": "3842e3b986b2cdf7",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@5:2",
+            "loc": {
+              "line": 5,
+              "column": 2
+            },
+            "id": "e011c4ac92501474"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "77feffabdbd26213",
+          "dependencies": {
+            "645990c74ae7d7da": {
+              "id": "645990c74ae7d7da",
+              "name": "children"
+            }
+          },
+          "loc": {
+            "line": 5,
+            "column": 2
+          },
+          "tag": "div",
+          "props": [
+            {
+              "id": "77e9e4a1556d5f7e",
+              "name": "...",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "prop"
+              }
+            }
+          ],
+          "renders": {}
+        },
+        "720e9756d239e21b": {
+          "id": "720e9756d239e21b",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 8,
+              "column": 13
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "4e65bb009c7ef033",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 8,
+            "column": 13
+          },
+          "var": {
+            "ae10f5dc074f5fce": {
+              "id": "ae10f5dc074f5fce",
+              "name": {
+                "type": "identifier",
+                "name": "x",
+                "loc": {
+                  "line": 9,
+                  "column": 8
+                },
+                "id": "eaf06c6480b2cd11"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "a261dcbdf202fe68",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 8
+              },
+              "renders": {}
+            },
+            "f80cff8e1d289948": {
+              "id": "f80cff8e1d289948",
+              "name": {
+                "type": "identifier",
+                "name": "y",
+                "loc": {
+                  "line": 10,
+                  "column": 6
+                },
+                "id": "272b57e6d7c0a9e5"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "28723454b7f00e2",
+              "declarationKind": "let",
+              "dependencies": {},
+              "loc": {
+                "line": 10,
+                "column": 6
+              },
+              "renders": {}
+            },
+            "cddf66cf3ca36be9": {
+              "id": "cddf66cf3ca36be9",
+              "name": {
+                "type": "identifier",
+                "name": "z",
+                "loc": {
+                  "line": 11,
+                  "column": 6
+                },
+                "id": "54a7d9dde88eadb0"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "b91385f4bccf8c21",
+              "declarationKind": "var",
+              "dependencies": {},
+              "loc": {
+                "line": 11,
+                "column": 6
+              },
+              "renders": {}
+            },
+            "2d1fa18c65fbd2cf": {
+              "id": "2d1fa18c65fbd2cf",
+              "name": {
+                "type": "identifier",
+                "name": "v",
+                "loc": {
+                  "line": 12,
+                  "column": 8
+                },
+                "id": "f7042be43fb80714"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "c0e4d5a317c84fef",
+              "declarationKind": "const",
+              "dependencies": {
+                "eaf06c6480b2cd11": {
+                  "id": "eaf06c6480b2cd11",
+                  "name": "x"
+                }
+              },
+              "loc": {
+                "line": 12,
+                "column": 8
+              },
+              "tag": "Child",
+              "props": [
+                {
+                  "id": "ac88443768512709",
+                  "name": "prop",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "x"
+                  },
+                  "valueId": "eaf06c6480b2cd11"
+                }
+              ],
+              "renders": {
+                "6662fdc3cd79077b": {
+                  "id": "1eb5061ae05ec5e0",
+                  "instanceId": "6662fdc3cd79077b",
+                  "tag": "Child",
+                  "dependencies": [
+                    {
+                      "id": "ac88443768512709",
+                      "name": "prop",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "x"
+                      },
+                      "valueId": "eaf06c6480b2cd11"
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 12,
+                    "column": 12
+                  },
+                  "renders": {}
+                }
+              }
+            },
+            "260a00681925d7ca": {
+              "id": "260a00681925d7ca",
+              "name": {
+                "type": "identifier",
+                "name": "CustomForm",
+                "loc": {
+                  "line": 14,
+                  "column": 8
+                },
+                "id": "e4a8ef36d16c4eb8"
+              },
+              "kind": "component",
+              "type": "function",
+              "file": "/src/App.tsx",
+              "hash": "9683e91bf95d2979",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 8
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 14,
+                  "column": 8
+                },
+                "end": {
+                  "line": 14,
+                  "column": 18
+                }
+              },
+              "states": [],
+              "props": [
+                {
+                  "id": "e4a8ef36d16c4eb8:prop:children",
+                  "name": "children",
+                  "type": "any",
+                  "kind": "prop",
+                  "hash": "ff601f5e72cf1428"
+                }
+              ],
+              "hooks": [],
+              "effects": {},
+              "componentType": "Function",
+              "contexts": [],
+              "renders": {},
+              "propType": {
+                "type": "any"
+              }
+            },
+            "36d4e96f89d21579": {
+              "id": "36d4e96f89d21579",
+              "name": {
+                "type": "identifier",
+                "name": "form",
+                "loc": {
+                  "line": 15,
+                  "column": 8
+                },
+                "id": "a5952880e9bb8442"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "4e1309864aaa5341",
+              "declarationKind": "const",
+              "dependencies": {
+                "c840afbf0738e2aa": {
+                  "id": "c840afbf0738e2aa",
+                  "name": "jsx@17:6"
+                }
+              },
+              "loc": {
+                "line": 15,
+                "column": 8
+              },
+              "tag": "CustomForm",
+              "props": [],
+              "renders": {
+                "8aa9a970039ad2f": {
+                  "id": "input",
+                  "instanceId": "8aa9a970039ad2f",
+                  "tag": "input",
+                  "dependencies": [
+                    {
+                      "id": "4703abfdcb310e86",
+                      "name": "type",
+                      "value": {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "text"
+                        }
+                      }
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 17,
+                    "column": 6
+                  },
+                  "parentId": "",
+                  "renders": {}
+                }
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 8,
+              "column": 13
+            },
+            "end": {
+              "line": 8,
+              "column": 16
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {
+            "796aca4cf65364ff": {
+              "id": "div",
+              "instanceId": "796aca4cf65364ff",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "51db861cceddb843",
+                  "name": "className",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "x"
+                  },
+                  "valueId": "eaf06c6480b2cd11"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 22,
+                "column": 4
+              },
+              "renders": {
+                "45111d1c90277a1": {
+                  "id": "div",
+                  "instanceId": "45111d1c90277a1",
+                  "tag": "div",
+                  "dependencies": [
+                    {
+                      "id": "51db861cceddb843",
+                      "name": "className",
+                      "value": {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "nested-1"
+                        }
+                      }
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 23,
+                    "column": 6
+                  },
+                  "parentId": "796aca4cf65364ff",
+                  "renders": {
+                    "2d0d3bcd71638cd6": {
+                      "id": "div",
+                      "instanceId": "2d0d3bcd71638cd6",
+                      "tag": "div",
+                      "dependencies": [
+                        {
+                          "id": "51db861cceddb843",
+                          "name": "className",
+                          "value": {
+                            "type": "ref",
+                            "refType": "named",
+                            "name": "y"
+                          },
+                          "valueId": "272b57e6d7c0a9e5"
+                        }
+                      ],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 24,
+                        "column": 8
+                      },
+                      "parentId": "45111d1c90277a1",
+                      "renders": {
+                        "537429e7b6753b4": {
+                          "id": "f7042be43fb80714",
+                          "instanceId": "537429e7b6753b4",
+                          "tag": "v",
+                          "dependencies": [],
+                          "isDependency": false,
+                          "loc": {
+                            "line": 25,
+                            "column": 10
+                          },
+                          "parentId": "2d0d3bcd71638cd6",
+                          "renders": {}
+                        },
+                        "91d718e155814183": {
+                          "id": "a5952880e9bb8442",
+                          "instanceId": "91d718e155814183",
+                          "tag": "form",
+                          "dependencies": [],
+                          "isDependency": false,
+                          "loc": {
+                            "line": 26,
+                            "column": 10
+                          },
+                          "parentId": "2d0d3bcd71638cd6",
+                          "renders": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "f2405d1e83860577": {
+                  "id": "1da2c815756ff756",
+                  "instanceId": "f2405d1e83860577",
+                  "tag": "Child2",
+                  "dependencies": [
+                    {
+                      "id": "ac88443768512709",
+                      "name": "prop",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "y"
+                      },
+                      "valueId": "272b57e6d7c0a9e5"
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 29,
+                    "column": 6
+                  },
+                  "parentId": "796aca4cf65364ff",
+                  "renders": {
+                    "e3883a2e8eb32905": {
+                      "id": "Fragment",
+                      "instanceId": "e3883a2e8eb32905",
+                      "tag": "Fragment",
+                      "dependencies": [],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 30,
+                        "column": 8
+                      },
+                      "parentId": "f2405d1e83860577",
+                      "renders": {
+                        "6341bee8d3b151b": {
+                          "id": "span",
+                          "instanceId": "6341bee8d3b151b",
+                          "tag": "span",
+                          "dependencies": [
+                            {
+                              "id": "51db861cceddb843",
+                              "name": "className",
+                              "value": {
+                                "type": "literal-type",
+                                "literal": {
+                                  "type": "string",
+                                  "value": "active"
+                                }
+                              }
+                            },
+                            {
+                              "id": "51db861cceddb843",
+                              "name": "className",
+                              "value": {
+                                "type": "literal-type",
+                                "literal": {
+                                  "type": "string",
+                                  "value": ""
+                                }
+                              }
+                            }
+                          ],
+                          "isDependency": false,
+                          "loc": {
+                            "line": 31,
+                            "column": 10
+                          },
+                          "parentId": "e3883a2e8eb32905",
+                          "renders": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "f34a4cecd7199dac": {
+          "id": "f34a4cecd7199dac",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@14:44",
+            "loc": {
+              "line": 14,
+              "column": 44
+            },
+            "id": "f84b4e24fb93ccc2"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "75cfbb48d8f6cb39",
+          "dependencies": {
+            "645990c74ae7d7da": {
+              "id": "645990c74ae7d7da",
+              "name": "children"
+            }
+          },
+          "loc": {
+            "line": 14,
+            "column": 44
+          },
+          "tag": "form",
+          "props": [],
+          "renders": {}
+        },
+        "c840afbf0738e2aa": {
+          "id": "c840afbf0738e2aa",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@17:6",
+            "loc": {
+              "line": 17,
+              "column": 6
+            },
+            "id": "1293bc52b3b0e2a6"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "bce6c36d0f383249",
+          "dependencies": {},
+          "loc": {
+            "line": 17,
+            "column": 6
+          },
+          "tag": "input",
+          "props": [
+            {
+              "id": "4703abfdcb310e86",
+              "name": "type",
+              "value": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "text"
+                }
+              }
+            }
+          ],
+          "renders": {}
+        },
+        "7112873505f25bfe": {
+          "id": "7112873505f25bfe",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@22:4",
+            "loc": {
+              "line": 22,
+              "column": 4
+            },
+            "id": "492f8e6e9def7a50"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "b6c613cdc80c3f13",
+          "dependencies": {
+            "eaf06c6480b2cd11": {
+              "id": "eaf06c6480b2cd11",
+              "name": "x"
+            },
+            "c710a8be9a8fb7f4": {
+              "id": "c710a8be9a8fb7f4",
+              "name": "jsx@23:6"
+            },
+            "3f3cc534ae48649f": {
+              "id": "3f3cc534ae48649f",
+              "name": "jsx@29:6"
+            }
+          },
+          "loc": {
+            "line": 22,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [
+            {
+              "id": "51db861cceddb843",
+              "name": "className",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "x"
+              },
+              "valueId": "eaf06c6480b2cd11"
+            }
+          ],
+          "renders": {}
+        },
+        "c710a8be9a8fb7f4": {
+          "id": "c710a8be9a8fb7f4",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@23:6",
+            "loc": {
+              "line": 23,
+              "column": 6
+            },
+            "id": "ff72b085e69fa362"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "2b322c2269048967",
+          "dependencies": {
+            "8bf04e13bbc63cd4": {
+              "id": "8bf04e13bbc63cd4",
+              "name": "jsx@24:8"
+            }
+          },
+          "loc": {
+            "line": 23,
+            "column": 6
+          },
+          "tag": "div",
+          "props": [
+            {
+              "id": "51db861cceddb843",
+              "name": "className",
+              "value": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "nested-1"
+                }
+              }
+            }
+          ],
+          "renders": {}
+        },
+        "8bf04e13bbc63cd4": {
+          "id": "8bf04e13bbc63cd4",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@24:8",
+            "loc": {
+              "line": 24,
+              "column": 8
+            },
+            "id": "591b6f160a54a698"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "306cba7cdf766070",
+          "dependencies": {
+            "272b57e6d7c0a9e5": {
+              "id": "272b57e6d7c0a9e5",
+              "name": "y"
+            },
+            "f7042be43fb80714": {
+              "id": "f7042be43fb80714",
+              "name": "v"
+            },
+            "a5952880e9bb8442": {
+              "id": "a5952880e9bb8442",
+              "name": "form"
+            }
+          },
+          "loc": {
+            "line": 24,
+            "column": 8
+          },
+          "tag": "div",
+          "props": [
+            {
+              "id": "51db861cceddb843",
+              "name": "className",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "y"
+              },
+              "valueId": "272b57e6d7c0a9e5"
+            }
+          ],
+          "renders": {}
+        },
+        "3f3cc534ae48649f": {
+          "id": "3f3cc534ae48649f",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@29:6",
+            "loc": {
+              "line": 29,
+              "column": 6
+            },
+            "id": "20e5978bd24ed261"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "d8e5f6157f72f128",
+          "dependencies": {
+            "272b57e6d7c0a9e5": {
+              "id": "272b57e6d7c0a9e5",
+              "name": "y"
+            },
+            "c9d05a6190cf9ac3": {
+              "id": "c9d05a6190cf9ac3",
+              "name": "jsx@30:8"
+            }
+          },
+          "loc": {
+            "line": 29,
+            "column": 6
+          },
+          "tag": "Child2",
+          "props": [
+            {
+              "id": "ac88443768512709",
+              "name": "prop",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "y"
+              },
+              "valueId": "272b57e6d7c0a9e5"
+            }
+          ],
+          "renders": {}
+        },
+        "c9d05a6190cf9ac3": {
+          "id": "c9d05a6190cf9ac3",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@30:8",
+            "loc": {
+              "line": 30,
+              "column": 8
+            },
+            "id": "24c58a97a2ece720"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "6bf7b1e877723172",
+          "dependencies": {
+            "c15a21aaa5f3e668": {
+              "id": "c15a21aaa5f3e668",
+              "name": "jsx@31:10"
+            }
+          },
+          "loc": {
+            "line": 30,
+            "column": 8
+          },
+          "tag": "Fragment",
+          "props": [],
+          "renders": {}
+        },
+        "c15a21aaa5f3e668": {
+          "id": "c15a21aaa5f3e668",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@31:10",
+            "loc": {
+              "line": 31,
+              "column": 10
+            },
+            "id": "b122ade46778379c"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "be9777bbf3ae7876",
+          "dependencies": {
+            "eaf06c6480b2cd11": {
+              "id": "eaf06c6480b2cd11",
+              "name": "x"
+            },
+            "272b57e6d7c0a9e5": {
+              "id": "272b57e6d7c0a9e5",
+              "name": "y"
+            }
+          },
+          "loc": {
+            "line": 31,
+            "column": 10
+          },
+          "tag": "span",
+          "props": [
+            {
+              "id": "51db861cceddb843",
+              "name": "className",
+              "value": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "active"
+                }
+              }
+            },
+            {
+              "id": "51db861cceddb843",
+              "name": "className",
+              "value": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": ""
+                }
+              }
+            }
+          ],
+          "renders": {}
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "div",
+      "to": "1da2c815756ff756",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "720e9756d239e21b",
+      "label": "render"
+    },
+    {
+      "from": "2d1fa18c65fbd2cf",
+      "to": "eaf06c6480b2cd11",
+      "label": "hook"
+    },
+    {
+      "from": "36d4e96f89d21579",
+      "to": "c840afbf0738e2aa",
+      "label": "hook"
+    }
+  ]
+}

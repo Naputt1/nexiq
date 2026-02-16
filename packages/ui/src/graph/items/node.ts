@@ -96,7 +96,14 @@ export class GraphNode extends BaseNode {
         case "render": fillColor = context.customColors.renderNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
         case "component": fillColor = context.customColors.componentNode || (context.theme === "dark" ? "#3b82f6" : "#2563eb"); break;
         case "hook": fillColor = context.customColors.hookNode || (context.theme === "dark" ? "#8b5cf6" : "#7c3aed"); break;
-        default: break;
+        case "jsx": fillColor = "#f97316"; break; // orange
+        case "type":
+        case "interface":
+        case "normal":
+        case undefined:
+          break;
+        default:
+          break;
       }
     }
     return fillColor;

@@ -8,6 +8,7 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
+  ComponentInfoRender,
   DataEdge,
   EffectInfo,
   JsonData,
@@ -32,6 +33,7 @@ import type {
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
+import { JSXVariable } from "./variable/jsx.js";
 import {
   isHookVariable,
   isComponentVariable,
@@ -39,6 +41,7 @@ import {
   isBaseFunctionVariable,
   isDataVariable,
   isCallHookVariable,
+  isJSXVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import fs from "fs";
@@ -109,7 +112,9 @@ export class File {
 
   private loadVariable(variable: ComponentFileVar, scope: Scope = this.var) {
     let v: Variable | undefined;
-    if (variable.kind === "normal") {
+    if (variable.type === "jsx") {
+      v = new JSXVariable(variable, this);
+    } else if (variable.kind === "normal") {
       if (variable.type === "function") {
         v = new FunctionVariable(variable, this);
       } else {
@@ -129,7 +134,7 @@ export class File {
       v = new MemoVariable(variable, this);
     } else if (variable.kind == "callback") {
       v = new CallbackVariable(variable, this);
-    } else if (variable.kind == "ref") {
+    } else if (variable.kind === "ref") {
       v = new RefVariable(variable, this);
     } else {
       debugger;
@@ -302,6 +307,10 @@ export class File {
       this.scopes.add(variable);
     }
 
+    if (isJSXVariable(variable)) {
+      this.getDependenciesIds(variable.id, variable.props);
+    }
+
     scope.add(variable);
 
     return variable.id;
@@ -371,21 +380,25 @@ export class File {
               v as ComponentFileVarComponent | ComponentFileVarHook,
             ),
           );
-        } else if (v.kind == "hook" && v.type == "data") {
-          const hookCall = v as ComponentFileVarCallHook;
-          if (hookCall.call.id) {
-            edges.push({
-              from: hookCall.id,
-              to: hookCall.call.id,
-              label: "hook",
-            });
+        } else {
+          if (v.kind == "hook" && v.type == "data") {
+            const hookCall = v as ComponentFileVarCallHook;
+            if (hookCall.call.id) {
+              edges.push({
+                from: hookCall.id,
+                to: hookCall.call.id,
+                label: "hook",
+              });
+            }
           }
-          for (const dep of Object.values(hookCall.dependencies)) {
-            edges.push({
-              from: hookCall.id,
-              to: dep.id,
-              label: "hook",
-            });
+          if (v.dependencies) {
+            for (const dep of Object.values(v.dependencies)) {
+              edges.push({
+                from: v.id,
+                to: dep.id,
+                label: "hook",
+              });
+            }
           }
         }
       }
@@ -418,7 +431,7 @@ export class File {
     for (const v of variable.var.values()) {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
-      } else if (v.kind === "hook") {
+      } else {
         if (v && isCallHookVariable(v)) {
           edges.push({
             from: v.id,
@@ -508,7 +521,10 @@ export class File {
     parent: string,
     dependency: ComponentFileVarDependency,
   ) {
-    const v = this.var.getByName(parent);
+    let v = this.var.getByName(parent);
+    if (!v) {
+      v = this.var.get(parent, true);
+    }
 
     assert(v != null, "Parent variable not found");
     if (v == null) return;
@@ -573,6 +589,7 @@ export class File {
     id: string,
     dependencies: ComponentInfoRenderDependency[],
   ) {
+    if (!dependencies) return;
     const depMap: Record<string, number[]> = {};
     for (const [i, dep] of dependencies.entries()) {
       let valueName: string | null = null;
@@ -669,29 +686,59 @@ export class File {
   public addRender(
     comLoc: string,
     srcId: string,
+    instanceId: string,
+    tag: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    parentId?: string,
   ) {
     const variable = this.locIdsMap.get(comLoc);
     if (variable == null) return;
     if (!variable) return;
     this.getDependenciesIds(variable.id, dependencies);
 
-    if (isComponentVariable(variable)) {
-      variable.renders[srcId] = {
-        id: srcId,
-        dependencies,
-        isDependency,
-        loc,
-      };
-    } else if (isNormalVariable(variable) && isDataVariable(variable)) {
-      variable.components.set(srcId, {
-        id: srcId,
-        dependencies,
-        isDependency,
-        loc,
-      });
+    const newRender: ComponentInfoRender = {
+      id: srcId,
+      instanceId,
+      tag,
+      dependencies,
+      isDependency,
+      loc,
+      parentId,
+      renders: {},
+    };
+
+    let targetMap: Record<string, ComponentInfoRender> | undefined;
+
+    if (
+      isComponentVariable(variable) ||
+      isJSXVariable(variable) ||
+      (isNormalVariable(variable) && isDataVariable(variable))
+    ) {
+      if (parentId) {
+        const findParent = (
+          map: Record<string, ComponentInfoRender>,
+        ): ComponentInfoRender | undefined => {
+          if (map[parentId]) return map[parentId];
+          for (const r of Object.values(map)) {
+            const found = findParent(r.renders);
+            if (found) return found;
+          }
+          return undefined;
+        };
+
+        const parent = findParent(variable.renders);
+        if (parent) {
+          targetMap = parent.renders;
+        }
+      }
+
+      if (!targetMap) {
+        targetMap = variable.renders;
+      }
+
+      targetMap[instanceId] = newRender;
     }
 
     return variable.id;
@@ -1195,12 +1242,24 @@ export class FileDB {
     fileName: string,
     comLoc: string,
     srcId: string,
+    instanceId: string,
+    tag: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    parentId?: string,
   ) {
     const file = this.get(fileName);
 
-    return file.addRender(comLoc, srcId, dependencies, isDependency, loc);
+    return file.addRender(
+      comLoc,
+      srcId,
+      instanceId,
+      tag,
+      dependencies,
+      isDependency,
+      loc,
+      parentId,
+    );
   }
 }

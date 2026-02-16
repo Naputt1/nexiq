@@ -18,6 +18,7 @@ import { getExpressionData, getType } from "./type/helper.js";
 import { getPattern, getVariableNameKey } from "./pattern.js";
 import { getDeterministicId } from "../utils/hash.js";
 import { getVariableComponentName } from "../variable.js";
+import { generateFn } from "../utils/babel.js";
 
 function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
   const parentPath: string[] = [];
@@ -53,6 +54,11 @@ export default function VariableDeclarator(
     const id = nodePath.node.id;
     const init = nodePath.node.init;
     assert(nodePath.node.id?.loc?.start != null);
+
+    const declarationKind =
+      nodePath.parent.type === "VariableDeclaration"
+        ? nodePath.parent.kind
+        : undefined;
 
     const loc = {
       line: nodePath.node.id.loc.start.line,
@@ -160,12 +166,11 @@ export default function VariableDeclarator(
 
           if (
             init &&
-            (init.type === "JSXElement" ||
-              (!(
-                init.type !== "ArrowFunctionExpression" &&
-                init.type !== "FunctionExpression"
-              ) &&
-                returnJSX(init)))
+            !(
+              init.type !== "ArrowFunctionExpression" &&
+              init.type !== "FunctionExpression"
+            ) &&
+            returnJSX(init)
           ) {
             const parentPath = getParentPath(nodePath);
             const component: Omit<
@@ -176,17 +181,13 @@ export default function VariableDeclarator(
               type: "function",
               componentType: "Function",
               hooks: [],
-              props:
-                t.isArrowFunctionExpression(init) ||
-                t.isFunctionExpression(init)
-                  ? getProps(
-                      nodePath.get("init") as traverse.NodePath<
-                        t.ArrowFunctionExpression | t.FunctionExpression
-                      >,
-                      pId,
-                      componentId,
-                    )
-                  : [],
+              props: getProps(
+                nodePath.get("init") as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >,
+                pId,
+                componentId,
+              ),
               contexts: [],
               renders: {},
               dependencies: {},
@@ -239,6 +240,30 @@ export default function VariableDeclarator(
               fileName,
               component,
               parentPath,
+              declarationKind,
+            );
+          } else if (init && init.type === "JSXElement") {
+            const parentPath = getParentPath(nodePath);
+            const opening = init.openingElement.name;
+            let tag = "";
+            if (opening.type === "JSXIdentifier") {
+              tag = opening.name;
+            } else if (opening.type === "JSXMemberExpression") {
+              tag = generateFn(opening).code;
+            }
+
+            currentId = componentDB.addJSXVariable(
+              fileName,
+              {
+                name: pattern,
+                tag,
+                props: [], // Will be filled by JSXElement visitor
+                loc,
+                dependencies: {},
+                renders: {},
+              },
+              parentPath,
+              declarationKind,
             );
           } else {
             if (nodePath.scope.block.type === "Program") {
@@ -260,44 +285,55 @@ export default function VariableDeclarator(
                 };
 
                 if (isHook(name)) {
-                  currentId = componentDB.addHook(fileName, {
-                    name: pattern,
-                    type: "function",
-                    dependencies: {},
-                    loc,
-                    scope,
-                    props: getProps(
-                      nodePath.get("init") as traverse.NodePath<
-                        t.ArrowFunctionExpression | t.FunctionExpression
-                      >,
-                      pId,
-                      componentId,
-                    ),
-                    effects: {},
-                    hooks: [],
-                    parentId: pParentId,
-                  } as Omit<
-                    ComponentFileVarHook,
-                    | "kind"
-                    | "id"
-                    | "var"
-                    | "components"
-                    | "states"
-                    | "hash"
-                    | "file"
-                  >);
+                  currentId = componentDB.addHook(
+                    fileName,
+                    {
+                      name: pattern,
+                      type: "function",
+                      dependencies: {},
+                      loc,
+                      scope,
+                      props: getProps(
+                        nodePath.get("init") as traverse.NodePath<
+                          t.ArrowFunctionExpression | t.FunctionExpression
+                        >,
+                        pId,
+                        componentId,
+                      ),
+                      effects: {},
+                      hooks: [],
+                      parentId: pParentId,
+                    } as Omit<
+                      ComponentFileVarHook,
+                      | "kind"
+                      | "id"
+                      | "var"
+                      | "renders"
+                      | "states"
+                      | "hash"
+                      | "file"
+                    >,
+                    undefined,
+                    declarationKind,
+                  );
                 } else {
-                  currentId = componentDB.addVariable(fileName, {
-                    name: pattern,
-                    type: "function",
-                    dependencies: {},
-                    loc,
-                    scope,
-                    parentId: pParentId,
-                  } as Omit<
-                    ComponentFileVarNormalFunction,
-                    "kind" | "file" | "id" | "var" | "components" | "hash"
-                  >);
+                  currentId = componentDB.addVariable(
+                    fileName,
+                    {
+                      name: pattern,
+                      type: "function",
+                      dependencies: {},
+                      loc,
+                      scope,
+                      parentId: pParentId,
+                    } as Omit<
+                      ComponentFileVarNormalFunction,
+                      "kind" | "file" | "id" | "var" | "renders" | "hash"
+                    >,
+                    undefined,
+                    undefined,
+                    declarationKind,
+                  );
                 }
               } else {
                 const dependencies: Record<string, ComponentFileVarDependency> =
@@ -318,16 +354,22 @@ export default function VariableDeclarator(
                   };
                 }
 
-                currentId = componentDB.addVariable(fileName, {
-                  name: pattern,
-                  type: "data",
-                  dependencies,
-                  loc,
-                  parentId: pParentId,
-                } as Omit<
-                  ComponentFileVarNormalData,
-                  "kind" | "file" | "id" | "var" | "components" | "hash"
-                >);
+                currentId = componentDB.addVariable(
+                  fileName,
+                  {
+                    name: pattern,
+                    type: "data",
+                    dependencies,
+                    loc,
+                    parentId: pParentId,
+                  } as Omit<
+                    ComponentFileVarNormalData,
+                    "kind" | "file" | "id" | "var" | "renders" | "hash"
+                  >,
+                  undefined,
+                  "normal",
+                  declarationKind,
+                );
               }
             } else if (init?.type === "ArrowFunctionExpression") {
               if (
@@ -346,9 +388,11 @@ export default function VariableDeclarator(
                     parentId: pParentId,
                   } as Omit<
                     ComponentFileVarNormalData,
-                    "kind" | "file" | "id" | "var" | "components" | "hash"
+                    "kind" | "file" | "id" | "var" | "renders" | "hash"
                   >,
                   parentPath,
+                  "normal",
+                  declarationKind,
                 );
               } else if (
                 nodePath.scope.block.type === "ArrowFunctionExpression"
@@ -365,9 +409,11 @@ export default function VariableDeclarator(
                     parentId: pParentId,
                   } as Omit<
                     ComponentFileVarNormalFunction,
-                    "kind" | "file" | "id" | "var" | "components" | "hash"
+                    "kind" | "file" | "id" | "var" | "renders" | "hash"
                   >,
                   parentPath,
+                  undefined,
+                  declarationKind,
                 );
               }
             } else {
@@ -383,9 +429,11 @@ export default function VariableDeclarator(
                   parentId: pParentId,
                 } as Omit<
                   ComponentFileVarNormalData,
-                  "kind" | "file" | "id" | "var" | "components" | "hash"
+                  "kind" | "file" | "id" | "var" | "renders" | "hash"
                 >,
                 parentPath,
+                "normal",
+                declarationKind,
               );
             }
           }
@@ -421,7 +469,8 @@ export default function VariableDeclarator(
               parentId: pParentId,
             },
             parentPath,
-          );
+            "normal",
+            );
         }
       }
 
@@ -441,7 +490,11 @@ export default function VariableDeclarator(
         returnJSX(firstArgPath.node)
       ) {
         if (id.type == "Identifier") {
-          processPattern(id as t.LVal, patternPrefix);
+          processPattern(
+            id as t.LVal,
+            patternPrefix,
+            undefined,
+            );
           return;
         }
       } else if (t.isIdentifier(init.callee)) {
@@ -457,17 +510,25 @@ export default function VariableDeclarator(
           }
 
           if (t.isArrayPattern(id) && id.elements.length > 0) {
-            processPattern(id.elements[0] as t.LVal, patternPrefix, {
-              type: "state",
-              extra: { setter: setterName },
-            });
+            processPattern(
+              id.elements[0] as t.LVal,
+              patternPrefix,
+              {
+                type: "state",
+                extra: { setter: setterName },
+              },
+            );
             return;
           }
 
-          processPattern(id as t.LVal, patternPrefix, {
-            type: "state",
-            extra: { setter: setterName },
-          });
+          processPattern(
+            id as t.LVal,
+            patternPrefix,
+            {
+              type: "state",
+              extra: { setter: setterName },
+            },
+            );
           return;
         } else if (init.callee.name === "useMemo") {
           const id = nodePath.node.id;
@@ -513,10 +574,14 @@ export default function VariableDeclarator(
           }
 
           assert(scope != null, "Scope not found");
-          processPattern(id as t.LVal, patternPrefix, {
-            type: "memo",
-            extra: { scope, reactDeps },
-          });
+          processPattern(
+            id as t.LVal,
+            patternPrefix,
+            {
+              type: "memo",
+              extra: { scope, reactDeps },
+            },
+            );
           return;
         } else if (init.callee.name === "useCallback") {
           const id = nodePath.node.id;
@@ -554,10 +619,14 @@ export default function VariableDeclarator(
           }
 
           assert(scope != null, "Scope not found");
-          processPattern(id as t.LVal, patternPrefix, {
-            type: "callback",
-            extra: { scope, reactDeps },
-          });
+          processPattern(
+            id as t.LVal,
+            patternPrefix,
+            {
+              type: "callback",
+              extra: { scope, reactDeps },
+            },
+            );
           return;
         } else if (init.callee.name === "useRef") {
           const id = nodePath.node.id;
@@ -569,10 +638,14 @@ export default function VariableDeclarator(
                 }
               : ({ type: "undefined" } as PropDataType);
 
-          processPattern(id as t.LVal, patternPrefix, {
-            type: "ref",
-            extra: { defaultData },
-          });
+          processPattern(
+            id as t.LVal,
+            patternPrefix,
+            {
+              type: "ref",
+              extra: { defaultData },
+            },
+            );
           return;
         } else if (isHook(init.callee.name)) {
           const name = getVariableComponentName(nodePath);
@@ -590,7 +663,27 @@ export default function VariableDeclarator(
 
           const id = nodePath.node.id;
           if (t.isArrayPattern(id) && id.elements.length > 0) {
-            processPattern(id.elements[0] as t.LVal, patternPrefix, {
+            processPattern(
+              id.elements[0] as t.LVal,
+              patternPrefix,
+              {
+                type: "hook",
+                extra: {
+                  dependencies,
+                  call: {
+                    id: getDeterministicId(init.callee.name),
+                    name: init.callee.name,
+                  },
+                },
+              },
+            );
+            return;
+          }
+
+          processPattern(
+            nodePath.node.id as t.LVal,
+            patternPrefix,
+            {
               type: "hook",
               extra: {
                 dependencies,
@@ -599,24 +692,12 @@ export default function VariableDeclarator(
                   name: init.callee.name,
                 },
               },
-            });
-            return;
-          }
-
-          processPattern(nodePath.node.id as t.LVal, patternPrefix, {
-            type: "hook",
-            extra: {
-              dependencies,
-              call: {
-                id: getDeterministicId(init.callee.name),
-                name: init.callee.name,
-              },
             },
-          });
+            );
           return;
         }
       }
     }
-    processPattern(id as t.LVal);
+    processPattern(id as t.LVal, undefined, undefined);
   };
 }

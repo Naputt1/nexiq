@@ -116,6 +116,7 @@
           "type": "function",
           "file": "/src/App.tsx",
           "hash": "8ec6139b2246a698",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -395,6 +396,39 @@
           "propType": {
             "type": "any"
           }
+        },
+        "575944dc1a051d53": {
+          "id": "575944dc1a051d53",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@49:4",
+            "loc": {
+              "line": 49,
+              "column": 4
+            },
+            "id": "9ed988e627142d52"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "e6c632b61e964e1f": {
+              "id": "e6c632b61e964e1f",
+              "name": "a"
+            },
+            "eaf06c6480b2cd11": {
+              "id": "eaf06c6480b2cd11",
+              "name": "x"
+            }
+          },
+          "loc": {
+            "line": 49,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
         }
       }
     }

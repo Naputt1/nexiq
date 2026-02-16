@@ -57,7 +57,7 @@ function analyzeFiles(
       ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
       FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
       VariableDeclarator: VariableDeclarator(componentDB, fileName),
-      JSXElement: JSXElement(componentDB, fileName),
+      ...JSXElement(componentDB, fileName),
       CallExpression: CallExpression(componentDB, fileName),
 
       TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),

@@ -8,17 +8,17 @@ import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
 export class DataVariable extends Variable<"data"> {
-  components: Map<string, ComponentInfoRender>;
+  renders: Record<string, ComponentInfoRender>;
 
   constructor(
     options: Omit<
       ComponentFileVarNormal,
-      "kind" | "var" | "components" | "file" | "hash"
+      "kind" | "var" | "renders" | "file" | "hash"
     > & { kind?: VarKind },
     file: File,
   ) {
     super({ ...options, kind: options.kind ?? "normal", type: "data" }, file);
-    this.components = new Map();
+    this.renders = {};
   }
 
   public load(data: DataVariable) {
@@ -26,8 +26,8 @@ export class DataVariable extends Variable<"data"> {
 
     this.type = data.type;
     // TODO: handle merge
-    if (data.components) {
-      this.components = new Map(Object.entries(data.components));
+    if (data.renders) {
+      this.renders = { ...data.renders };
     }
   }
 
@@ -36,21 +36,21 @@ export class DataVariable extends Variable<"data"> {
       ...this.getBaseData(),
       type: "data",
       kind: this.kind as "normal",
-      components: Object.fromEntries(this.components),
+      renders: this.renders,
     };
   }
 
   protected getBaseData(): ComponentFileVarNormalData {
     return {
       ...super.getBaseData(),
-      components: Object.fromEntries(this.components),
+      renders: this.renders,
     } as ComponentFileVarNormalData;
   }
 
   protected getDataInternal() {
     return {
       name: this.name,
-      components: Object.fromEntries(this.components),
+      renders: this.renders,
     };
   }
 }

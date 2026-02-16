@@ -15,8 +15,10 @@ export function getVariableComponentName(
   if (path == null) return null;
   if (typeof path.findParent !== "function") return null;
 
-  if (loc && (path as any).loc == null) {
-    (path as any).loc = {
+  const pathWithLoc = path as { loc?: { start: VariableLoc; end: VariableLoc } | null };
+
+  if (loc && pathWithLoc.loc == null) {
+    pathWithLoc.loc = {
       start: loc,
       end: loc,
     };
