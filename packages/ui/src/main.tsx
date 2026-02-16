@@ -2,34 +2,53 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import { BrowserRouter } from "react-router-dom";
-import { scan } from "react-scan";
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { AppStatePluginComponent, GraphStatePluginComponent } from "./devtools";
+import { HashRouter } from "react-router-dom";
 
-scan({
-  enabled: true,
-});
+const root = createRoot(document.getElementById("root")!);
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-      <TanStackDevtools
-        plugins={[
-          {
-            name: "App State",
-            render: <AppStatePluginComponent />,
-          },
-          {
-            name: "Graph State",
-            render: <GraphStatePluginComponent />,
-          },
-        ]}
-      />
-    </BrowserRouter>
-  </StrictMode>,
-);
+const init = async () => {
+  if (import.meta.env.DEV) {
+    const { scan } = await import("react-scan");
+    scan({
+      enabled: true,
+    });
+
+    const { TanStackDevtools } = await import("@tanstack/react-devtools");
+    const { AppStatePluginComponent, GraphStatePluginComponent } = await import(
+      "./devtools"
+    );
+
+    root.render(
+      <StrictMode>
+        <HashRouter>
+          <App />
+          <TanStackDevtools
+            plugins={[
+              {
+                name: "App State",
+                render: <AppStatePluginComponent />,
+              },
+              {
+                name: "Graph State",
+                render: <GraphStatePluginComponent />,
+              },
+            ]}
+          />
+        </HashRouter>
+      </StrictMode>,
+    );
+  } else {
+    root.render(
+      <StrictMode>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </StrictMode>,
+    );
+  }
+};
+
+init();
 
 // Use contextBridge
 window.ipcRenderer.on("main-process-message", (message: string) => {
