@@ -11,8 +11,13 @@ import { GlobalSettings } from "./pages/GlobalSettings";
 function App() {
   const { projectRoot: storedProjectRoot, setProjectRoot } = useProjectStore();
   const [searchParams] = useSearchParams();
-  const urlProjectPath = searchParams.get("projectPath");
-  const isEmpty = searchParams.get("empty") === "true";
+  
+  // Try to get projectPath from hash (via useSearchParams) or from main URL search
+  const urlProjectPath = searchParams.get("projectPath") || 
+                         new URLSearchParams(window.location.search).get("projectPath");
+  
+  const isEmpty = searchParams.get("empty") === "true" || 
+                  new URLSearchParams(window.location.search).get("empty") === "true";
 
   useEffect(() => {
     if (urlProjectPath) {
@@ -40,8 +45,8 @@ function App() {
     );
     if (wasFocusedElsewhere) return;
 
-    // Then update URL to include the new project path
-    window.location.search = `?projectPath=${encodeURIComponent(path)}`;
+    // Use hash-based navigation for compatibility with HashRouter
+    window.location.hash = `/?projectPath=${encodeURIComponent(path)}`;
   };
 
   if (!projectRoot) {

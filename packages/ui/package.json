@@ -2,11 +2,14 @@
   "name": "ui",
   "private": true,
   "version": "0.0.0",
+  "description": "React component structure visualizer",
+  "author": "naputt",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc || true && vite build && electron-builder",
+    "build": "../../scripts/build-electron.sh",
+    "build:vite": "tsc || true && vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run"
@@ -36,7 +39,6 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
     "react-scan": "^0.4.3",
-    "shared": "workspace:*",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.3",
@@ -59,10 +61,15 @@
     "@tanstack/react-devtools": "^0.9.5",
     "@tanstack/react-virtual": "^3.13.18",
     "analyser": "workspace:*",
+    "shared": "workspace:*",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "simple-git": "^3.30.0",
     "tmp": "^0.2.5",
     "zustand": "^5.0.11"
-  }
+  },
+  "bundledDependencies": [
+    "@node-rs/xxhash",
+    "@parcel/watcher"
+  ]
 }

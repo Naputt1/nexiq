@@ -7,42 +7,31 @@ import { builtinModules } from "node:module";
 import { devtools } from "@tanstack/devtools-vite";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
-    devtools(),
+    mode === "development" && devtools(),
     electron({
       main: {
         // Shortcut of `build.lib.entry`.
         entry: "electron/main.ts",
         vite: {
           build: {
+            target: "node18",
             rollupOptions: {
               external: [
                 "electron",
                 "@parcel/watcher",
                 "@node-rs/xxhash",
                 "analyser",
+                "shared",
                 "fast-glob",
                 "js-yaml",
                 "simple-git",
                 "tmp",
-                "tty",
-                "os",
-                "util",
-                "fs",
-                "path",
-                "child_process",
-                "module",
-                "node:tty",
-                "node:os",
-                "node:util",
-                "node:fs",
-                "node:path",
-                "node:child_process",
-                "node:module",
                 ...builtinModules,
+                ...builtinModules.map((m) => `node:${m}`),
               ],
             },
           },
@@ -53,14 +42,6 @@ export default defineConfig({
         // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
         input: path.join(__dirname, "electron/preload.ts"),
       },
-      // Ployfill the Electron and Node.js API for Renderer process.
-      // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
-      // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
-      renderer:
-        process.env.NODE_ENV === "test"
-          ? // https://github.com/electron-vite/vite-plugin-electron-renderer/issues/78#issuecomment-2053600808
-            undefined
-          : {},
     }),
   ],
   optimizeDeps: {
@@ -72,4 +53,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-});
+}));

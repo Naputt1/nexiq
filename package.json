@@ -9,7 +9,8 @@
     "test:analyze": "pnpm --filter=analyser test",
     "test:ui": "pnpm --filter=ui test",
     "snapshot:analyze": "pnpm --filter=analyser snapshot",
-    "build:analyze": "pnpm --filter=analyser build"
+    "build:analyze": "pnpm --filter=analyser build",
+    "build:ui": "scripts/build-electron.sh"
   },
   "keywords": [],
   "author": "",

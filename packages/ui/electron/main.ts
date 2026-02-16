@@ -16,11 +16,9 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
 import os from "node:os";
-import { createRequire } from "node:module";
 import * as watcher from "@parcel/watcher";
 
-const require = createRequire(import.meta.url);
-const tmp = require("tmp");
+import tmp from "tmp";
 import { simpleGit, type LogOptions } from "simple-git";
 import { analyzeProject } from "analyser";
 
@@ -225,7 +223,9 @@ function createWindow(projectPath?: string, forceEmpty: boolean = false) {
     }
   });
 
-  window.webContents.openDevTools();
+  if (VITE_DEV_SERVER_URL) {
+    window.webContents.openDevTools();
+  }
 
   // Test active push message to Renderer-process.
   window.webContents.on("did-finish-load", () => {
@@ -287,7 +287,7 @@ function createWindow(projectPath?: string, forceEmpty: boolean = false) {
 
     const queryString = params.toString();
     if (queryString) {
-      window.loadURL(`file://${indexPath}?${queryString}`);
+      window.loadURL(`file://${indexPath}#/?${queryString}`);
     } else {
       window.loadFile(indexPath);
     }
