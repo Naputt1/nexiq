@@ -7,7 +7,7 @@ export default function ExportAllDeclaration(
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ExportAllDeclaration> {
   return (nodePath) => {
-    const source = componentDB.getImportFileName(
+    const _source = componentDB.getImportFileName(
       nodePath.node.source.value,
       fileName,
     );

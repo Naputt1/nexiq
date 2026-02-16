@@ -170,6 +170,26 @@ export function NodeDetails({
               </span>
             </div>
           )}
+
+          {item.declarationKind && (
+            <div className="flex gap-2 text-xs">
+              <span className="font-semibold text-muted-foreground/80 min-w-12">
+                Kind:
+              </span>
+              <span className="text-muted-foreground">
+                {item.declarationKind}
+              </span>
+            </div>
+          )}
+
+          {item.tag && (
+            <div className="flex gap-2 text-xs">
+              <span className="font-semibold text-muted-foreground/80 min-w-12">
+                Tag:
+              </span>
+              <span className="text-muted-foreground">{item.tag}</span>
+            </div>
+          )}
         </div>
 
         {(item.propType || (item.props && item.props.length > 0)) && (

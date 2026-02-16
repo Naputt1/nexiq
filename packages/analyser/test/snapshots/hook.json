@@ -59,6 +59,7 @@
           "type": "function",
           "file": "/src/effectt.tsx",
           "hash": "32a78504d0619752",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -255,6 +256,30 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {}
+        },
+        "531ac1f83523a7a6": {
+          "id": "531ac1f83523a7a6",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@19:9",
+            "loc": {
+              "line": 19,
+              "column": 9
+            },
+            "id": "95ee842f306c8de1"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/effectt.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {},
+          "loc": {
+            "line": 19,
+            "column": 9
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
         }
       }
     },
@@ -402,6 +427,7 @@
           "type": "function",
           "file": "/src/Hooks.ts",
           "hash": "5d49826436bd94a8",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 13,

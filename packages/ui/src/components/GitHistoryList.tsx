@@ -53,6 +53,7 @@ export const GitHistoryList = memo(function GitHistoryList({
 }: GitHistoryListProps) {
   const historyParentRef = useRef<HTMLDivElement>(null);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const historyVirtualizer = useVirtualizer({
     count: history.length + 2, // Current Changes + Separator + History
     getScrollElement: () => historyParentRef.current,

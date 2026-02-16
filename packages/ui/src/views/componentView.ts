@@ -8,11 +8,13 @@ import {
   type MemoFileVarHook,
   type ComponentFileVarRef,
   type ComponentFileVarComponent,
+  type ComponentFileVarJSX,
   type VariableName,
   getDisplayName,
   type ComponentFileVarCallback,
   type VariableLoc,
   type ReactVarKind,
+  type ComponentInfoRender,
 } from "shared";
 import {
   type GraphComboData,
@@ -44,6 +46,139 @@ export const generateComponentGraphData = (
       if (p.props && isPropNode(p.props, id)) return true;
     }
     return false;
+  };
+
+  const findVariableById = (idOrName: string): ComponentFileVar | undefined => {
+    for (const file of Object.values(graphData.files)) {
+      if (file.var[idOrName]) return file.var[idOrName];
+      // Search in nested variables
+      const searchNested = (
+        vars: Record<string, ComponentFileVar>,
+      ): ComponentFileVar | undefined => {
+        for (const v of Object.values(vars)) {
+          if (
+            v.id === idOrName ||
+            v.name.id === idOrName ||
+            getDisplayName(v.name) === idOrName
+          )
+            return v;
+          if ("var" in v && v.var) {
+            const found = searchNested(
+              v.var as Record<string, ComponentFileVar>,
+            );
+            if (found) return found;
+          }
+        }
+        return undefined;
+      };
+      const found = searchNested(file.var);
+      if (found) return found;
+    }
+    return undefined;
+  };
+
+  const isAnonymousJSX = (name: VariableName | string): boolean => {
+    const n =
+      typeof name === "string"
+        ? name
+        : name.type === "identifier"
+          ? name.name
+          : "";
+    return n.startsWith("jsx@");
+  };
+
+  const addRenderNodes = (
+    renders: Record<string, ComponentInfoRender>,
+    ownerId: string,
+    parentComboId: string,
+    filePath: string,
+    fileNamePrefix: string,
+  ) => {
+    for (const render of Object.values(renders)) {
+      const v = findVariableById(render.id);
+      const renderNodeId = `${ownerId}-render-${render.instanceId}`;
+      const vIsJSXWithRenders =
+        v?.type === "jsx" && v.renders && Object.keys(v.renders).length > 0;
+      const hasChildren =
+        (render.renders && Object.keys(render.renders).length > 0) ||
+        vIsJSXWithRenders;
+
+      const commonData = {
+        id: renderNodeId,
+        name: v
+          ? v.name
+          : {
+              type: "identifier" as const,
+              name: render.tag,
+              id: render.id,
+              loc: render.loc,
+            },
+        label: {
+          text:
+            v && !isAnonymousJSX(v.name) ? getDisplayName(v.name) : render.tag,
+        },
+        combo: render.parentId
+          ? `${ownerId}-render-${render.parentId}`
+          : parentComboId,
+        fileName: `${fileNamePrefix}:${render.loc.line}:${render.loc.column}`,
+        pureFileName: filePath,
+        loc: render.loc,
+        ui: graphData.files[filePath]?.var[ownerId]?.ui?.renders?.[
+          render.instanceId
+        ],
+        type: "render" as const,
+      };
+
+      if (hasChildren) {
+        const renderCombo: GraphComboData = {
+          ...commonData,
+          collapsed: true,
+        };
+        if (v && added.includes(v.id)) renderCombo.gitStatus = "added";
+        else if (v && modified.includes(v.id))
+          renderCombo.gitStatus = "modified";
+        else if (v && deleted.includes(v.id)) renderCombo.gitStatus = "deleted";
+        combos.push(renderCombo);
+      } else {
+        const renderNode: GraphNodeData = {
+          ...commonData,
+          radius: 10,
+        };
+        if (v && added.includes(v.id)) renderNode.gitStatus = "added";
+        else if (v && modified.includes(v.id))
+          renderNode.gitStatus = "modified";
+        else if (v && deleted.includes(v.id)) renderNode.gitStatus = "deleted";
+        nodes.push(renderNode);
+      }
+
+      if (v) {
+        edges.push({
+          id: `${renderNodeId}-${v.id}`,
+          source: renderNodeId,
+          target: v.id,
+        });
+      }
+
+      if (render.renders && Object.keys(render.renders).length > 0) {
+        addRenderNodes(
+          render.renders,
+          ownerId,
+          hasChildren ? renderNodeId : parentComboId,
+          filePath,
+          fileNamePrefix,
+        );
+      }
+
+      if (vIsJSXWithRenders && v && v.type === "jsx") {
+        addRenderNodes(
+          v.renders,
+          ownerId,
+          renderNodeId,
+          filePath,
+          fileNamePrefix,
+        );
+      }
+    }
   };
 
   const addCombo = (
@@ -139,7 +274,7 @@ export const generateComponentGraphData = (
 
           if (added.includes(prop.id)) propNode.gitStatus = "added";
           else if (modified.includes(prop.id)) propNode.gitStatus = "modified";
-          else if (deleted.includes(prop.id)) propNode.gitStatus = "deleted";
+          else if (deleted.includes(prop.id)) delete propNode.gitStatus; // Special case for prop deletion
 
           propNodes.push(propNode);
         }
@@ -264,8 +399,8 @@ export const generateComponentGraphData = (
 
     // Add deleted internal variables from deletedObjects
     Object.keys(deletedObjects).forEach((deletedId) => {
-      const v = deletedObjects[deletedId];
-      if (!v) return;
+      const obj = deletedObjects[deletedId];
+      if (!obj) return;
 
       // Check if it belongs to this component and isn't already there
       if (
@@ -273,40 +408,40 @@ export const generateComponentGraphData = (
         !deletedId.startsWith(`${propIdPrefix}:prop:`) &&
         !nodes.some((n) => n.id === deletedId)
       ) {
-        const loc = "loc" in v ? v.loc : undefined;
+        const loc = "loc" in obj ? obj.loc : undefined;
         if (!loc) return;
 
         let name: VariableName;
-        if (v.kind === "prop" || v.kind === "spread") {
+        if (obj.kind === "prop" || obj.kind === "spread") {
           name = {
             type: "identifier",
-            name: (v as PropData).name,
-            loc: (v as PropData).loc || loc,
-            id: v.id,
+            name: (obj as PropData).name,
+            loc: (obj as PropData).loc || loc,
+            id: obj.id,
           };
-        } else if (v.kind === "effect") {
-          name = { type: "identifier", name: "effect", loc: loc, id: v.id };
+        } else if (obj.kind === "effect") {
+          name = { type: "identifier", name: "effect", loc: loc, id: obj.id };
         } else {
-          name = (v as ComponentFileVar).name;
+          name = (obj as ComponentFileVar).name;
         }
 
         const nodeBase: GraphNodeData = {
-          id: v.id,
+          id: obj.id,
           name: name,
-          combo: ("parentId" in v ? v.parentId : undefined) || variable.id,
+          combo: ("parentId" in obj ? obj.parentId : undefined) || variable.id,
           fileName: `${fileName}:${loc.line}:${loc.column}`,
           pureFileName: filePath,
           loc: loc as VariableLoc,
-          ui: "ui" in v ? (v as ComponentFileVar).ui : undefined,
+          ui: "ui" in obj ? (obj as ComponentFileVar).ui : undefined,
           radius: 10,
           gitStatus: "deleted",
         };
 
         const isPattern = name.type === "object" || name.type === "array";
 
-        if ("kind" in v) {
-          if (v.kind === "state") {
-            const stateVar = v as ComponentFileVarState;
+        if ("kind" in obj) {
+          if (obj.kind === "state") {
+            const stateVar = obj as ComponentFileVarState;
             if (isPattern) {
               combos.push({
                 ...nodeBase,
@@ -323,8 +458,8 @@ export const generateComponentGraphData = (
                 color: "red",
               });
             }
-          } else if (v.kind === "memo") {
-            const memoVar = v as MemoFileVarHook;
+          } else if (obj.kind === "memo") {
+            const memoVar = obj as MemoFileVarHook;
             if (isPattern) {
               combos.push({
                 ...nodeBase,
@@ -341,8 +476,8 @@ export const generateComponentGraphData = (
                 color: "red",
               });
             }
-          } else if (v.kind === "ref") {
-            const refVar = v as ComponentFileVarRef;
+          } else if (obj.kind === "ref") {
+            const refVar = obj as ComponentFileVarRef;
             if (isPattern) {
               combos.push({
                 ...nodeBase,
@@ -359,7 +494,7 @@ export const generateComponentGraphData = (
                 color: "red",
               });
             }
-          } else if (v.kind === "effect") {
+          } else if (obj.kind === "effect") {
             nodes.push({
               ...nodeBase,
               type: "effect",
@@ -370,27 +505,57 @@ export const generateComponentGraphData = (
       }
     });
 
+    const renderComboId = `${variable.id}-render`;
     if (variable.kind === "component") {
       combos.push({
-        id: `${variable.id}-render`,
+        id: renderComboId,
         collapsed: true,
         name: {
           type: "identifier",
           name: "render",
-          id: `${variable.id}-render`,
+          id: renderComboId,
           loc: variable.loc,
         },
         label: { text: "render" },
         combo: variable.id,
         fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
         pureFileName: filePath,
-        ui: variable.ui?.renders?.[`${variable.id}-render`],
+        ui: variable.ui?.renders?.[renderComboId],
       });
+
+      if (variable.renders) {
+        addRenderNodes(
+          variable.renders,
+          variable.id,
+          renderComboId,
+          filePath,
+          fileName,
+        );
+      }
     }
 
-    if (variable.var) {
-      for (const v of Object.values(variable.var)) {
+    if ("var" in variable && variable.var) {
+      for (const v of Object.values(
+        variable.var as Record<string, ComponentFileVar>,
+      )) {
         if (!v.loc) continue;
+
+        // Skip components and hooks as they are already added as combos
+        if (
+          v.kind === "component" ||
+          (v.kind === "hook" && v.type === "function")
+        ) {
+          continue;
+        }
+
+        // Skip anonymous JSX elements as they are in the render tree
+        if (
+          v.type === "jsx" &&
+          v.name.type === "identifier" &&
+          v.name.name.startsWith("jsx@")
+        ) {
+          continue;
+        }
 
         const nodeBase: GraphNodeData = {
           id: v.id,
@@ -401,6 +566,7 @@ export const generateComponentGraphData = (
           loc: v.loc,
           ui: v.ui,
           radius: 10,
+          declarationKind: v.declarationKind,
         };
 
         if (added.includes(v.id)) nodeBase.gitStatus = "added";
@@ -428,7 +594,7 @@ export const generateComponentGraphData = (
               color: "red",
             });
           }
-        } else if (v.kind == "hook" && v.type !== "function") {
+        } else if (v.kind === "hook") {
           const hookCall = v;
 
           const addDestructiveVariable = (
@@ -634,21 +800,46 @@ export const generateComponentGraphData = (
           addRefDefaultDependency(refVar.defaultData);
         } else {
           // Normal variables
-          if (isPattern) {
-            combos.push({
-              ...nodeBase,
-              label: { text: getDisplayName(v.name) },
-              type: v.kind as GraphNodeData["type"],
-              color: "blue",
+          const labelText =
+            v.type === "jsx" && isAnonymousJSX(v.name)
+              ? (v as ComponentFileVarJSX).tag
+              : getDisplayName(v.name);
+          const commonVarData = {
+            ...nodeBase,
+            label: { text: labelText },
+            type: (v.type === "jsx" ? "jsx" : v.kind) as GraphNodeData["type"],
+            color: v.type === "jsx" ? "orange" : "blue",
+            tag: v.type === "jsx" ? (v as ComponentFileVarJSX).tag : undefined,
+          };
+
+          const isJSXWithRenders =
+            v.type === "jsx" && v.renders && Object.keys(v.renders).length > 0;
+
+          if (isPattern || isJSXWithRenders) {
+            const varCombo: GraphComboData = {
+              ...commonVarData,
               collapsed: true,
-            });
+            };
+            combos.push(varCombo);
+
+            if (v.type === "jsx" && v.renders) {
+              addRenderNodes(v.renders, v.id, v.id, filePath, fileName);
+            }
           } else {
-            nodes.push({
-              ...nodeBase,
-              label: { text: getDisplayName(v.name) },
-              type: v.kind as GraphNodeData["type"],
-              color: "blue",
-            });
+            nodes.push(commonVarData);
+          }
+
+          if (v.type === "jsx") {
+            const tagId = (v as ComponentFileVarJSX).tag;
+            const targetV =
+              findVariableById(tagId) || graphData.files[filePath]?.var[tagId];
+            if (targetV) {
+              edges.push({
+                id: `${v.id}-${targetV.id}`,
+                source: v.id,
+                target: targetV.id,
+              });
+            }
           }
         }
       }
@@ -694,43 +885,6 @@ export const generateComponentGraphData = (
         }
       }
     }
-
-    if (variable.kind === "component" && variable.renders) {
-      for (const render of Object.values(variable.renders)) {
-        for (const file of Object.values(graphData.files)) {
-          if (Object.prototype.hasOwnProperty.call(file.var, render.id)) {
-            const v = file.var[render.id];
-            const renderNode: GraphNodeData = {
-              id: `${variable.id}-render-${render.id}`,
-              name: v.name,
-              label: {
-                text: getDisplayName(v.name),
-              },
-              combo: `${variable.id}-render`,
-              radius: 10,
-              fileName: `${fileName}:${render.loc.line}:${render.loc.column}`,
-              pureFileName: file.path,
-              loc: render.loc,
-              ui: variable.ui?.renders?.[render.id],
-            };
-
-            // For render nodes, check if the component being rendered was changed
-            if (added.includes(v.id)) renderNode.gitStatus = "added";
-            else if (modified.includes(v.id)) renderNode.gitStatus = "modified";
-            else if (deleted.includes(v.id)) renderNode.gitStatus = "deleted";
-
-            nodes.push(renderNode);
-
-            edges.push({
-              id: `${variable.id}-render-${render.id}-${v.id}`,
-              source: `${variable.id}-render-${render.id}`,
-              target: v.id,
-            });
-            break;
-          }
-        }
-      }
-    }
   };
 
   const typeData: { [key: string]: TypeDataDeclare } = {};
@@ -752,7 +906,7 @@ export const generateComponentGraphData = (
         }
         if ("var" in variable && variable.var) {
           addAllComponents(
-            variable.var,
+            variable.var as Record<string, ComponentFileVar>,
             variable.kind === "component" || variable.kind === "hook"
               ? variable.id
               : parentID,

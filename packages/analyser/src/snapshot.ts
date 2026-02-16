@@ -18,6 +18,7 @@ const samples = args._[0]
       "hook",
       "props-complex",
       "destructuring-hook",
+      "jsx-variable",
       "cache",
       "cache-new",
     ];

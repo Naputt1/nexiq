@@ -146,6 +146,9 @@ export class GraphCombo extends BaseNode {
           context.customColors.renderNode ||
           (context.theme === "dark" ? "#3b82f6" : "#2563eb");
       }
+      if (this.type === "jsx") {
+        fillColor = "#f97316"; // orange
+      }
     }
     return fillColor;
   }

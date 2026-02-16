@@ -1,0 +1,7 @@
+{
+  "name": "sample-jsx-variable",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0"
+  }
+}

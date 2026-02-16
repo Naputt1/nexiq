@@ -530,18 +530,29 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           expr,
         };
       } else {
-        debugger;
+        return { type: "any" };
       }
-
-      break;
-    default: {
-      debugger;
-    }
+    case "TSIntrinsicKeyword":
+    case "TSObjectKeyword":
+    case "TSSymbolKeyword":
+    case "TSThisType":
+    case "TSConstructorType":
+    case "TSTypePredicate":
+    case "TSOptionalType":
+    case "TSRestType":
+    case "TSConditionalType":
+    case "TSInferType":
+    case "TSTypeOperator":
+    case "TSMappedType":
+    case "TSTemplateLiteralType":
+    case "TSExpressionWithTypeArguments":
+    case "TSImportType":
+      return { type: "any" };
+    default:
+      return {
+        type: "any",
+      };
   }
-
-  return {
-    type: "any",
-  };
 }
 
 function getMemberExpressionNames(
@@ -562,6 +573,7 @@ function getMemberExpressionNames(
 }
 
 export function getExpressionData(expr: t.Expression): PropDataType | null {
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (expr.type) {
     case "BooleanLiteral":
       return {
@@ -660,6 +672,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         properties,
       };
     }
+    default:
+      break;
   }
   return null;
 }

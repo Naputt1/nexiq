@@ -451,7 +451,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       }
       hasRestoredViewport.current = true;
     }
-  }, [graph, size.width, size.height, onSelect, isLoaded, setViewport]);
+  }, [graph, size.width, size.height, onSelect, isLoaded, setViewport, customColors]);
 
   // Clean up
   useEffect(() => {

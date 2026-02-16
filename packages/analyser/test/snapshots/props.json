@@ -1396,6 +1396,29 @@
         }
       },
       "var": {
+        "6a52b2c719c0f421": {
+          "id": "6a52b2c719c0f421",
+          "name": {
+            "type": "identifier",
+            "name": "Test65",
+            "loc": {
+              "line": 31,
+              "column": 6
+            },
+            "id": "d48f9cf5a64fd350"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/type.tsx",
+          "hash": "1091f3291d640d61",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 31,
+            "column": 6
+          },
+          "renders": {}
+        },
         "8138ea1421523344": {
           "id": "8138ea1421523344",
           "name": {
@@ -1411,6 +1434,7 @@
           "type": "function",
           "file": "/src/type.tsx",
           "hash": "48f5f7c3fecdfcff",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 90,
@@ -1448,6 +1472,30 @@
             "name": "b57b12c034f92fe5"
           }
         },
+        "3297b7b0d8574328": {
+          "id": "3297b7b0d8574328",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@99:9",
+            "loc": {
+              "line": 99,
+              "column": 9
+            },
+            "id": "cb4b6f918d9505bd"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {},
+          "loc": {
+            "line": 99,
+            "column": 9
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
         "45d93b507f3cff36": {
           "id": "45d93b507f3cff36",
           "name": {
@@ -1463,6 +1511,7 @@
           "type": "function",
           "file": "/src/type.tsx",
           "hash": "749402a252a6133a",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 102,
@@ -1514,6 +1563,30 @@
             "name": "116661688627799b"
           }
         },
+        "4500183b586faeb0": {
+          "id": "4500183b586faeb0",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@107:9",
+            "loc": {
+              "line": 107,
+              "column": 9
+            },
+            "id": "171fd0bcbbebe411"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {},
+          "loc": {
+            "line": 107,
+            "column": 9
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
         "d7b08d33fffa91ec": {
           "id": "d7b08d33fffa91ec",
           "name": {
@@ -1529,6 +1602,7 @@
           "type": "function",
           "file": "/src/type.tsx",
           "hash": "d9368b81b24f8f85",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 110,
@@ -1573,6 +1647,30 @@
             "name": "8a6e89ba852055ea"
           }
         },
+        "3e7b3bddfd75fcbe": {
+          "id": "3e7b3bddfd75fcbe",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@111:9",
+            "loc": {
+              "line": 111,
+              "column": 9
+            },
+            "id": "5acb6fb49be88ad5"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {},
+          "loc": {
+            "line": 111,
+            "column": 9
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
         "307d2f98b6878b73": {
           "id": "307d2f98b6878b73",
           "name": {
@@ -1588,6 +1686,7 @@
           "type": "function",
           "file": "/src/type.tsx",
           "hash": "cf6b98446b56de3d",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 114,
@@ -1632,6 +1731,136 @@
             "name": "81d8a0a28c070c7"
           }
         },
+        "fe35cb95145430fa": {
+          "id": "fe35cb95145430fa",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@116:4",
+            "loc": {
+              "line": 116,
+              "column": 4
+            },
+            "id": "cca8e67fe4a5d0ad"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "ac8088d542282d4a": {
+              "id": "ac8088d542282d4a",
+              "name": "jsx@117:6"
+            },
+            "23c62eef57ece3d8": {
+              "id": "23c62eef57ece3d8",
+              "name": "jsx@118:6"
+            }
+          },
+          "loc": {
+            "line": 116,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
+        "ac8088d542282d4a": {
+          "id": "ac8088d542282d4a",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@117:6",
+            "loc": {
+              "line": 117,
+              "column": 6
+            },
+            "id": "bebf60dfeca9fc24"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "25f74ab844f4b022",
+          "dependencies": {
+            "96050a97f611a0d5": {
+              "id": "96050a97f611a0d5",
+              "name": "title"
+            }
+          },
+          "loc": {
+            "line": 117,
+            "column": 6
+          },
+          "tag": "h1",
+          "props": [],
+          "renders": {}
+        },
+        "23c62eef57ece3d8": {
+          "id": "23c62eef57ece3d8",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@118:6",
+            "loc": {
+              "line": 118,
+              "column": 6
+            },
+            "id": "c853d7bcaa635ed"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "b054e36df8126fb8",
+          "dependencies": {
+            "b0428f53c3c46096": {
+              "id": "b0428f53c3c46096",
+              "name": "jsx@120:10"
+            }
+          },
+          "loc": {
+            "line": 118,
+            "column": 6
+          },
+          "tag": "ul",
+          "props": [],
+          "renders": {}
+        },
+        "b0428f53c3c46096": {
+          "id": "b0428f53c3c46096",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@120:10",
+            "loc": {
+              "line": 120,
+              "column": 10
+            },
+            "id": "831c801447729687"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "ddba20b8d0d0cf92",
+          "dependencies": {
+            "6ca8f7b0f03f9e41": {
+              "id": "6ca8f7b0f03f9e41",
+              "name": "item"
+            }
+          },
+          "loc": {
+            "line": 120,
+            "column": 10
+          },
+          "tag": "li",
+          "props": [
+            {
+              "id": "bbea0d63a05165e3",
+              "name": "key",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "item"
+              }
+            }
+          ],
+          "renders": {}
+        },
         "12bb1ce455bcb824": {
           "id": "12bb1ce455bcb824",
           "name": {
@@ -1646,7 +1875,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "5038364e32ebe581",
+          "hash": "17e8ea6162e6d4ac",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -1684,6 +1913,159 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
+          "renders": {
+            "c3533f70d792a91e": {
+              "id": "li",
+              "instanceId": "c3533f70d792a91e",
+              "tag": "li",
+              "dependencies": [
+                {
+                  "id": "bbea0d63a05165e3",
+                  "name": "key",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "item"
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 133,
+                "column": 10
+              },
+              "renders": {}
+            }
+          }
+        },
+        "999d4e3e365540be": {
+          "id": "999d4e3e365540be",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@129:4",
+            "loc": {
+              "line": 129,
+              "column": 4
+            },
+            "id": "eaf92ed69f6bc876"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "fb2aa535c3a3c86f": {
+              "id": "fb2aa535c3a3c86f",
+              "name": "jsx@130:6"
+            },
+            "2faf99e39fab5b88": {
+              "id": "2faf99e39fab5b88",
+              "name": "jsx@131:6"
+            }
+          },
+          "loc": {
+            "line": 129,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
+        "fb2aa535c3a3c86f": {
+          "id": "fb2aa535c3a3c86f",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@130:6",
+            "loc": {
+              "line": 130,
+              "column": 6
+            },
+            "id": "f27c2eb46d72c5cb"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "25f74ab844f4b022",
+          "dependencies": {
+            "96050a97f611a0d5": {
+              "id": "96050a97f611a0d5",
+              "name": "title"
+            }
+          },
+          "loc": {
+            "line": 130,
+            "column": 6
+          },
+          "tag": "h1",
+          "props": [],
+          "renders": {}
+        },
+        "2faf99e39fab5b88": {
+          "id": "2faf99e39fab5b88",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@131:6",
+            "loc": {
+              "line": 131,
+              "column": 6
+            },
+            "id": "39ba70a00704fbb6"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "b054e36df8126fb8",
+          "dependencies": {
+            "f69c2b826620248f": {
+              "id": "f69c2b826620248f",
+              "name": "jsx@133:10"
+            }
+          },
+          "loc": {
+            "line": 131,
+            "column": 6
+          },
+          "tag": "ul",
+          "props": [],
+          "renders": {}
+        },
+        "f69c2b826620248f": {
+          "id": "f69c2b826620248f",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@133:10",
+            "loc": {
+              "line": 133,
+              "column": 10
+            },
+            "id": "6c698e2a6683527f"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/type.tsx",
+          "hash": "ddba20b8d0d0cf92",
+          "dependencies": {
+            "6ca8f7b0f03f9e41": {
+              "id": "6ca8f7b0f03f9e41",
+              "name": "item"
+            }
+          },
+          "loc": {
+            "line": 133,
+            "column": 10
+          },
+          "tag": "li",
+          "props": [
+            {
+              "id": "bbea0d63a05165e3",
+              "name": "key",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "item"
+              }
+            }
+          ],
           "renders": {}
         }
       }
@@ -1717,7 +2099,61 @@
       "export": {},
       "defaultExport": null,
       "tsTypes": {},
-      "var": {}
+      "var": {
+        "5d40439caddb84f4": {
+          "id": "5d40439caddb84f4",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@7:2",
+            "loc": {
+              "line": 7,
+              "column": 2
+            },
+            "id": "fedf1e566455b3f6"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "8b0ce63c3303625",
+          "dependencies": {
+            "68440d3db0f83d40": {
+              "id": "68440d3db0f83d40",
+              "name": "jsx@8:4"
+            }
+          },
+          "loc": {
+            "line": 7,
+            "column": 2
+          },
+          "tag": "StrictMode",
+          "props": [],
+          "renders": {}
+        },
+        "68440d3db0f83d40": {
+          "id": "68440d3db0f83d40",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@8:4",
+            "loc": {
+              "line": 8,
+              "column": 4
+            },
+            "id": "8ac6d21b71862809"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "9b8d16fae2f63173",
+          "dependencies": {},
+          "loc": {
+            "line": 8,
+            "column": 4
+          },
+          "tag": "App",
+          "props": [],
+          "renders": {}
+        }
+      }
     },
     "/src/Destructuring.tsx": {
       "path": "/src/Destructuring.tsx",
@@ -1756,7 +2192,8 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "77bf8816e15f6fa4",
+          "hash": "815ddc234525425d",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1794,7 +2231,30 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {},
+          "renders": {
+            "2f804de73b26b9af": {
+              "id": "li",
+              "instanceId": "2f804de73b26b9af",
+              "tag": "li",
+              "dependencies": [
+                {
+                  "id": "bbea0d63a05165e3",
+                  "name": "key",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "item"
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 15,
+                "column": 10
+              },
+              "renders": {}
+            }
+          },
           "propType": {
             "type": "type-literal",
             "members": [
@@ -1817,6 +2277,136 @@
               }
             ]
           }
+        },
+        "2b2bdf5334ef1587": {
+          "id": "2b2bdf5334ef1587",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@11:4",
+            "loc": {
+              "line": 11,
+              "column": 4
+            },
+            "id": "7a583c6c06e1e0b9"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/Destructuring.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "aad3024e086d54e4": {
+              "id": "aad3024e086d54e4",
+              "name": "jsx@12:6"
+            },
+            "fca3de61d96b2d55": {
+              "id": "fca3de61d96b2d55",
+              "name": "jsx@13:6"
+            }
+          },
+          "loc": {
+            "line": 11,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
+        "aad3024e086d54e4": {
+          "id": "aad3024e086d54e4",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@12:6",
+            "loc": {
+              "line": 12,
+              "column": 6
+            },
+            "id": "1cb36bef813ac66a"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/Destructuring.tsx",
+          "hash": "25f74ab844f4b022",
+          "dependencies": {
+            "96050a97f611a0d5": {
+              "id": "96050a97f611a0d5",
+              "name": "title"
+            }
+          },
+          "loc": {
+            "line": 12,
+            "column": 6
+          },
+          "tag": "h1",
+          "props": [],
+          "renders": {}
+        },
+        "fca3de61d96b2d55": {
+          "id": "fca3de61d96b2d55",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@13:6",
+            "loc": {
+              "line": 13,
+              "column": 6
+            },
+            "id": "38a6425d327ab480"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/Destructuring.tsx",
+          "hash": "b054e36df8126fb8",
+          "dependencies": {
+            "7ce19eba8ffe0cf7": {
+              "id": "7ce19eba8ffe0cf7",
+              "name": "jsx@15:10"
+            }
+          },
+          "loc": {
+            "line": 13,
+            "column": 6
+          },
+          "tag": "ul",
+          "props": [],
+          "renders": {}
+        },
+        "7ce19eba8ffe0cf7": {
+          "id": "7ce19eba8ffe0cf7",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@15:10",
+            "loc": {
+              "line": 15,
+              "column": 10
+            },
+            "id": "e3f6bfda13b67ad7"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/Destructuring.tsx",
+          "hash": "ddba20b8d0d0cf92",
+          "dependencies": {
+            "6ca8f7b0f03f9e41": {
+              "id": "6ca8f7b0f03f9e41",
+              "name": "item"
+            }
+          },
+          "loc": {
+            "line": 15,
+            "column": 10
+          },
+          "tag": "li",
+          "props": [
+            {
+              "id": "bbea0d63a05165e3",
+              "name": "key",
+              "value": {
+                "type": "ref",
+                "refType": "named",
+                "name": "item"
+              }
+            }
+          ],
+          "renders": {}
         }
       }
     },
@@ -1878,7 +2468,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8ab02f85e2749d89",
+          "hash": "b0263fd29d2986d9",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -1902,8 +2492,10 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {
-            "fc5afc13ded24662": {
+            "65c6d11f0aabf6aa": {
               "id": "fc5afc13ded24662",
+              "instanceId": "65c6d11f0aabf6aa",
+              "tag": "DestructuringProps",
               "dependencies": [
                 {
                   "id": "96050a97f611a0d5",
@@ -1944,14 +2536,113 @@
               "loc": {
                 "line": 7,
                 "column": 6
-              }
+              },
+              "renders": {}
             }
           }
+        },
+        "2072264802bd4b5f": {
+          "id": "2072264802bd4b5f",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@6:4",
+            "loc": {
+              "line": 6,
+              "column": 4
+            },
+            "id": "69e4aca41756b725"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "8032ea85ac847d3f",
+          "dependencies": {
+            "dc5e7a6dd4694804": {
+              "id": "dc5e7a6dd4694804",
+              "name": "jsx@7:6"
+            }
+          },
+          "loc": {
+            "line": 6,
+            "column": 4
+          },
+          "tag": "div",
+          "props": [],
+          "renders": {}
+        },
+        "dc5e7a6dd4694804": {
+          "id": "dc5e7a6dd4694804",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@7:6",
+            "loc": {
+              "line": 7,
+              "column": 6
+            },
+            "id": "b78d1940a674e310"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/App.tsx",
+          "hash": "68af5d8f3146f882",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 6
+          },
+          "tag": "DestructuringProps",
+          "props": [
+            {
+              "id": "96050a97f611a0d5",
+              "name": "title",
+              "value": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "World"
+                }
+              }
+            },
+            {
+              "id": "7afe194e60baa1f8",
+              "name": "items",
+              "value": {
+                "type": "literal-array",
+                "elements": [
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "a"
+                    }
+                  },
+                  {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "b"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "renders": {}
         }
       }
     }
   },
   "edges": [
+    {
+      "from": "li",
+      "to": "12bb1ce455bcb824",
+      "label": "render"
+    },
+    {
+      "from": "li",
+      "to": "fc5afc13ded24662",
+      "label": "render"
+    },
     {
       "from": "fc5afc13ded24662",
       "to": "720e9756d239e21b",

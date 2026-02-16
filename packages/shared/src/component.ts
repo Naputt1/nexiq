@@ -43,8 +43,12 @@ export type ComponentInfoRenderDependency = {
 
 export interface ComponentInfoRender extends ComponentLoc {
   id: string;
+  tag: string;
+  instanceId: string;
+  parentId?: string | undefined;
   dependencies: ComponentInfoRenderDependency[];
-  isDependency?: boolean;
+  isDependency?: boolean | undefined;
+  renders: Record<string, ComponentInfoRender>;
 }
 
 export interface EffectInfo extends ComponentLoc, ReactDependencies {
@@ -154,8 +158,9 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   name: VariableName;
   type: TType;
   file: string;
-  hash?: string;
+  hash?: string | undefined;
   parentId?: string | undefined;
+  declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
   ui?:
     | {
@@ -246,7 +251,7 @@ export type MemoFileVarHook = ComponentFileVarReactWithCallback<"memo"> &
 
 export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
   ComponentFileVarBase<TType, "normal"> & {
-    components: Record<string, ComponentInfoRender>;
+    renders: Record<string, ComponentInfoRender>;
     kind: "normal";
   };
 
@@ -259,6 +264,14 @@ export type ComponentFileVarNormalData = ComponentFileVarNormalBase<"data"> &
 export type ComponentFileVarNormal =
   | ComponentFileVarNormalFunction
   | ComponentFileVarNormalData;
+
+export interface ComponentFileVarJSX
+  extends ComponentFileVarBase<"jsx", "normal"> {
+  type: "jsx";
+  tag: string;
+  props: ComponentInfoRenderDependency[];
+  renders: Record<string, ComponentInfoRender>;
+}
 
 export type ComponentFileVarFunction =
   ComponentFileVarBaseTypeFunction<"normal"> & {
@@ -274,7 +287,8 @@ export type ComponentFileVar =
   | ComponentFileVarHook
   | ComponentFileVarCallback
   | MemoFileVarHook
-  | ComponentFileVarFunction;
+  | ComponentFileVarFunction
+  | ComponentFileVarJSX;
 
 export type ComponentFile = {
   path: string;

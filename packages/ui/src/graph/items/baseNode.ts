@@ -47,7 +47,9 @@ export abstract class BaseNode implements Renderable {
     | "memo"
     | "callback"
     | "ref"
-    | "prop";
+    | "prop"
+    | "jsx"
+    | "normal";
   typeParams?: TypeDataParam[];
   extends?: string[];
   renders?: Record<string, ComponentInfoRender>;

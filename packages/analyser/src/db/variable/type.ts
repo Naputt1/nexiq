@@ -8,9 +8,14 @@ import type { StateVariable } from "./stateVariable.js";
 import type { MemoVariable } from "./memo.js";
 import type { RefVariable } from "./refVariable.js";
 import type { CallHookVariable } from "./callHookVariable.js";
+import type { JSXVariable } from "./jsx.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
   return v.kind === "component" && v.type === "function";
+}
+
+export function isJSXVariable(v: Variable): v is JSXVariable {
+  return v.type === "jsx";
 }
 
 export function isHookVariable(v: Variable): v is HookVariable {
