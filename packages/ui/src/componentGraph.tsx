@@ -317,6 +317,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     highlightGitChanges();
   }, [highlightGitChanges, status, selectedCommit]);
 
+  useEffect(() => {
+    window.reactMapGraph = graph;
+    window.reactMapSearch = performSearch;
+  }, [graph, performSearch]);
+
   const onSelect = useCallback(
     (id: string, center = true, highlight = false) => {
       setSelectedId(id);

@@ -8,6 +8,7 @@ import {
   ReactMapConfig,
   GlobalSettings,
 } from "../electron/types";
+import type { GraphData } from "./graph/hook";
 
 declare global {
   namespace NodeJS {
@@ -18,6 +19,8 @@ declare global {
   }
 
   interface Window {
+    reactMapGraph: GraphData;
+    reactMapSearch: (value: string) => void;
     ipcRenderer: {
       invoke(channel: "run-cli", command: string): Promise<string>;
       invoke(channel: "open-vscode", path: string): Promise<string>;
