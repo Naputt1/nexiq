@@ -31,11 +31,19 @@ export class GraphCombo extends BaseNode {
     });
 
     group.on("dragstart", (e) => {
+      if (e.evt && e.evt.button !== 0) {
+        group.stopDrag();
+        return;
+      }
       e.cancelBubble = true;
       context.graph.setDraggingId(this.id);
     });
 
     group.on("dragmove", (e) => {
+      if (e.evt && e.evt.button !== 0) {
+        group.stopDrag();
+        return;
+      }
       e.cancelBubble = true;
       context.graph.comboDragMove(this.id, e);
     });
@@ -64,6 +72,24 @@ export class GraphCombo extends BaseNode {
       shadowOpacity: 1,
       shadowOffset: { x: 0, y: 0 },
       shadowEnabled: !!this.highlighted,
+    });
+
+    group.on("mousedown", (e) => {
+      const isLeft = e.evt.button === 0;
+      group.draggable(isLeft);
+      if (e.evt.button === 1) {
+        e.cancelBubble = true;
+        context.stage.startDrag();
+        context.stage.container().style.cursor = "grabbing";
+      }
+    });
+
+    group.on("mouseup", () => {
+      group.draggable(true);
+    });
+
+    group.on("mouseleave", () => {
+      group.draggable(true);
     });
 
     bg.on("mouseenter", () => {

@@ -27,7 +27,7 @@ export function isCallHookVariable(v: Variable): v is CallHookVariable {
 }
 
 export function isNormalVariable(v: Variable): v is DataVariable {
-  return v.kind === "normal";
+  return v.kind === "normal" && v.type === "data";
 }
 
 export function isBaseFunctionVariable<TKind extends VarKind>(

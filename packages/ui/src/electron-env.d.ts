@@ -109,9 +109,20 @@ declare global {
         positions: Record<string, { x: number; y: number; radius?: number }>,
         contextId?: string,
       ): Promise<boolean>;
-      invoke(channel: "get-project-icon", projectRoot: string): Promise<string | null>;
+      invoke(
+        channel: "get-project-icon",
+        projectRoot: string,
+      ): Promise<string | null>;
       invoke(channel: "get-global-config"): Promise<GlobalSettings>;
-      invoke(channel: "save-global-config", config: GlobalSettings): Promise<boolean>;
+      invoke(
+        channel: "save-global-config",
+        config: GlobalSettings,
+      ): Promise<boolean>;
+      invoke(
+        channel: "save-state",
+        projectRoot: string,
+        state: AppStateData,
+      ): Promise<boolean>;
     };
   }
 }

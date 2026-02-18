@@ -36,6 +36,12 @@ export interface AppStateData {
   selectedCommit: string | null;
   viewport?: { x: number; y: number; zoom: number } | null;
   view?: GraphViewType;
+  sidebar: {
+    right: {
+      width?: number;
+      height?: number;
+    };
+  };
 }
 export interface GlobalSettings {
   theme: "dark" | "light";

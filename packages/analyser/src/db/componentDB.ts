@@ -154,7 +154,13 @@ export class ComponentDB {
       "id" | "kind" | "states" | "hash" | "file"
     >,
     parentPath?: string[],
-    declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined,
+    declarationKind?:
+      | "const"
+      | "let"
+      | "var"
+      | "using"
+      | "await using"
+      | undefined,
   ) {
     const file = this.files.get(fileName);
 
@@ -189,7 +195,13 @@ export class ComponentDB {
     fileName: string,
     jsx: Omit<ComponentFileVarJSX, "id" | "kind" | "type" | "hash" | "file">,
     parentPath?: string[],
-    declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined,
+    declarationKind?:
+      | "const"
+      | "let"
+      | "var"
+      | "using"
+      | "await using"
+      | undefined,
   ) {
     const file = this.files.get(fileName);
 
@@ -226,7 +238,13 @@ export class ComponentDB {
       "id" | "kind" | "var" | "renders" | "states" | "hash" | "file"
     >,
     parentPath?: string[],
-    declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined,
+    declarationKind?:
+      | "const"
+      | "let"
+      | "var"
+      | "using"
+      | "await using"
+      | undefined,
   ) {
     const file = this.files.get(fileName);
 
@@ -260,7 +278,13 @@ export class ComponentDB {
         >,
     parentPath?: string[],
     kind?: VarKind,
-    declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined,
+    declarationKind?:
+      | "const"
+      | "let"
+      | "var"
+      | "using"
+      | "await using"
+      | undefined,
   ) {
     const file = this.files.get(fileName);
 
@@ -588,11 +612,19 @@ export class ComponentDB {
     return [];
   }
 
-  private _resolveDependency(variable: Variable, parent?: string) {
+  private _resolveDependency(
+    variable: Variable,
+    parent?: string,
+    visited: Set<string> = new Set(),
+  ) {
+    if (visited.has(variable.id)) return;
+    visited.add(variable.id);
+
     const resolveRenders = (
       renders: Record<string, ComponentInfoRender>,
       pId?: string,
     ) => {
+      if (!renders) return;
       for (const render of Object.values(renders)) {
         if (!render.isDependency && pId != null) {
           this.edges.push({
@@ -605,7 +637,12 @@ export class ComponentDB {
       }
     };
 
-    if (variable.kind === "component" && isComponentVariable(variable)) {
+    if (
+      variable.kind === "component" &&
+      isComponentVariable(variable) &&
+      variable.renders &&
+      typeof variable.renders === "object"
+    ) {
       for (const render of Object.values(variable.renders)) {
         if (render.isDependency) continue;
 
@@ -616,7 +653,11 @@ export class ComponentDB {
         });
         resolveRenders(render.renders, variable.id);
       }
-    } else if (variable.kind === "normal" && isNormalVariable(variable)) {
+    } else if (
+      isNormalVariable(variable) &&
+      variable.renders &&
+      typeof variable.renders === "object"
+    ) {
       if (parent != null) {
         for (const render of Object.values(variable.renders)) {
           if (render.isDependency) continue;
@@ -629,7 +670,11 @@ export class ComponentDB {
           resolveRenders(render.renders, parent);
         }
       }
-    } else if (isJSXVariable(variable)) {
+    } else if (
+      isJSXVariable(variable) &&
+      variable.renders &&
+      typeof variable.renders === "object"
+    ) {
       if (parent != null) {
         this.edges.push({
           from: parent,
@@ -646,6 +691,7 @@ export class ComponentDB {
         this._resolveDependency(
           innerVar,
           variable.kind == "component" ? variable.id : parent,
+          visited,
         );
       }
     }
@@ -740,11 +786,12 @@ export class ComponentDB {
   public resolve() {
     this.isResolve = true;
 
-    const maxRetries = 100;
+    const maxRetries = 1000;
     let retries = 0;
 
     while (this.resolveTasks.length > 0 && retries < maxRetries) {
       const currentTasks = [...this.resolveTasks];
+      const prevTaskCount = this.resolveTasks.length;
       this.resolveTasks = [];
 
       for (const task of currentTasks) {
@@ -766,6 +813,10 @@ export class ComponentDB {
     if (retries >= maxRetries && this.resolveTasks.length > 0) {
       console.warn(
         "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
+        {
+          remainingTasks: this.resolveTasks.length,
+          taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
+        },
       );
     }
 

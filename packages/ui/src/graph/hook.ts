@@ -130,6 +130,16 @@ export class GraphData {
   private layoutInProgress: Set<string> = new Set();
   private draggingId: string | null = null;
 
+  public lastModified: number = Date.now();
+  private cachedAbsolutePositions: Map<string, { x: number; y: number }> =
+    new Map();
+  private cachedBounds: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  } | null = null;
+
   constructor(
     nodes: GraphNodeData[],
     edges: GraphArrowData[],
@@ -231,6 +241,7 @@ export class GraphData {
             }
           }
 
+          this.markModified();
           // Trigger IPC update
           this.savePositions(nodes, id);
         }, true); // onlyLayout = true
@@ -253,6 +264,12 @@ export class GraphData {
     this.addCombos(combos);
     this.addNodes(nodes);
     this.addEdges(edges);
+  }
+
+  private markModified() {
+    this.lastModified = Date.now();
+    this.cachedAbsolutePositions.clear();
+    this.cachedBounds = null;
   }
 
   public bind(cb: GraphDataCallback) {
@@ -337,6 +354,7 @@ export class GraphData {
     this.nodeToCreate = [];
     this.edgeToCreate = [];
     this.edgeIds = {};
+    this.markModified();
   }
 
   public setData(
@@ -712,6 +730,7 @@ export class GraphData {
     }
 
     this.createEdges();
+    this.markModified();
 
     this.trigger({ type: "new-nodes" });
   }
@@ -811,6 +830,7 @@ export class GraphData {
       this.edgeToCreate.push(e);
     }
 
+    this.markModified();
     this.trigger({ type: "new-edges" });
   }
 
@@ -957,6 +977,7 @@ export class GraphData {
     this._addNodes();
 
     this.createEdges();
+    this.markModified();
 
     this.trigger({ type: "new-combos" });
   }
@@ -976,6 +997,7 @@ export class GraphData {
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
 
+    this.markModified();
     this.trigger({
       type: "combo-collapsed",
       id: combo.id,
@@ -1006,6 +1028,7 @@ export class GraphData {
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
 
+    this.markModified();
     this.trigger({
       type: "combo-radius-change",
       id: combo.id,
@@ -1106,6 +1129,7 @@ export class GraphData {
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
+    this.markModified();
     this.trigger({
       type: "combo-radius-change",
       id: id,
@@ -1136,6 +1160,8 @@ export class GraphData {
 
     const edgeIds = this.getComboEdges(id);
     this.updateEdgePos(edgeIds);
+
+    this.markModified();
 
     // const parentCombo = this.getTopParent(id);
     // if (parentCombo == null) return;
@@ -1206,6 +1232,7 @@ export class GraphData {
 
     this.updateEdgePos(Array.from(edgeIds));
 
+    this.markModified();
     this.trigger({
       type: "node-drag-move",
       id: nodeId,
@@ -1266,6 +1293,10 @@ export class GraphData {
   }
 
   public getAbsolutePosition(id: string): { x: number; y: number } | undefined {
+    if (this.cachedAbsolutePositions.has(id)) {
+      return this.cachedAbsolutePositions.get(id);
+    }
+
     let item: GraphNode | GraphCombo | undefined =
       this.nodes.get(id) ?? this.combos.get(id);
 
@@ -1297,7 +1328,9 @@ export class GraphData {
       }
     }
 
-    return { x, y };
+    const pos = { x, y };
+    this.cachedAbsolutePositions.set(id, pos);
+    return pos;
   }
 
   public getNodes() {
@@ -1320,6 +1353,7 @@ export class GraphData {
       this.combos.set(combo.id, new GraphCombo(combo));
     }
 
+    this.markModified();
     this.trigger({ type: "new-combos" });
 
     const cb = this.innerCallback.get(combo.id);
@@ -1337,6 +1371,7 @@ export class GraphData {
     } else {
       this.nodes.set(node.id, new GraphNode(node));
     }
+    this.markModified();
     this.trigger({ type: "new-nodes" });
   }
 
@@ -1366,6 +1401,7 @@ export class GraphData {
           // If editing the whole item, only allow if it's an object
           if (typeof value === "object" && value !== null) {
             Object.assign(item, value);
+            this.markModified();
             this.refresh();
           }
           return;
@@ -1415,6 +1451,7 @@ export class GraphData {
             }
           }
 
+          this.markModified();
           this.refresh();
         }
       }
@@ -1430,10 +1467,12 @@ export class GraphData {
       }
       if (current) {
         current[key] = value;
+        this.markModified();
         this.refresh();
       }
     } else if (category === "projectPath" || category === "targetPath") {
       (this as unknown as Record<string, unknown>)[category] = value;
+      this.markModified();
       this.refresh();
     }
   }
@@ -1541,6 +1580,7 @@ export class GraphData {
 
     this.updateEdgePos(Array.from(edgeIds));
 
+    this.markModified();
     this.trigger({
       type: "node-drag-move",
       id: nodeId,
@@ -1643,6 +1683,75 @@ export class GraphData {
     return this.curRender.combos;
   }
 
+  public getContentBounds(): {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  } {
+    if (this.cachedBounds) return this.cachedBounds;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    const allNodes = this.getAllNodes();
+    const allCombos = this.getAllCombos();
+
+    if (allNodes.length === 0 && allCombos.length === 0) {
+      return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+    }
+
+    allNodes.forEach((n) => {
+      const pos = this.getAbsolutePosition(n.id);
+      if (pos) {
+        minX = Math.min(minX, pos.x - n.radius);
+        minY = Math.min(minY, pos.y - n.radius);
+        maxX = Math.max(maxX, pos.x + n.radius);
+        maxY = Math.max(maxY, pos.y + n.radius);
+      }
+    });
+
+    allCombos.forEach((c) => {
+      const pos = this.getAbsolutePosition(c.id);
+      if (pos) {
+        const r = c.collapsed ? c.collapsedRadius : c.expandedRadius;
+        minX = Math.min(minX, pos.x - r);
+        minY = Math.min(minY, pos.y - r);
+        maxX = Math.max(maxX, pos.x + r);
+        maxY = Math.max(maxY, pos.y + r);
+      }
+    });
+
+    // If no positions are found, return a default
+    if (minX === Infinity) {
+      const defaultBounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+      this.cachedBounds = defaultBounds;
+      return defaultBounds;
+    }
+
+    const bounds = { minX, minY, maxX, maxY };
+    this.cachedBounds = bounds;
+    return bounds;
+  }
+
+  public getMinItemScale(): number {
+    let minScale = 1;
+    const allNodes = this.getAllNodes();
+    const allCombos = this.getAllCombos();
+
+    allNodes.forEach((n) => {
+      if (n.scale && n.scale < minScale) minScale = n.scale;
+    });
+
+    allCombos.forEach((c) => {
+      if (c.scale && c.scale < minScale) minScale = c.scale;
+    });
+
+    return minScale;
+  }
+
   public render() {
     // Run the layout algorithm once
     this.layout(true);
@@ -1654,6 +1763,8 @@ export class GraphData {
       edges: Object.fromEntries(this.edges),
       combos: Object.fromEntries(this.combos),
     };
+
+    this.markModified();
 
     // Trigger final updates to render everything
     this.trigger({ type: "new-combos" });

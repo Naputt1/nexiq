@@ -12,20 +12,29 @@ import useGraph, {
   type useGraphProps,
 } from "./graph/hook";
 import { GraphRenderer } from "./graph/renderer";
-import { NodeDetails } from "./components/node-details";
 import { ProjectSidebar } from "./components/Sidebar";
+import { RightSidebar } from "./components/RightSidebar";
+import { ZoomSlider } from "./components/ZoomSlider";
 import { cn, debounce } from "@/lib/utils";
 import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "./components/ui/resizable";
+import { useDefaultLayout } from "react-resizable-panels";
 
-import { useAppStateStore } from "./hooks/use-app-state-store";
+import { setupAutoSave, useAppStateStore } from "./hooks/use-app-state-store";
 import type { GraphViewType } from "../electron/types";
 import { useGitStore } from "./hooks/useGitStore";
 import { useConfigStore } from "./hooks/use-config-store";
 import { generateComponentGraphData, type GraphViewGenerator } from "./views";
+import ViewWorker from "./views/view.worker?worker";
+import { Loader2 } from "lucide-react";
 
 const VIEW_GENERATORS: Record<GraphViewType, GraphViewGenerator> = {
   component: generateComponentGraphData,
@@ -50,14 +59,54 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   const activeTab = useAppStateStore((s) => s.activeTab);
   const setViewport = useAppStateStore((s) => s.setViewport);
   const loadState = useAppStateStore((s) => s.loadState);
-  const saveState = useAppStateStore((s) => s.saveState);
   const resetState = useAppStateStore((s) => s.reset);
   const isLoaded = useAppStateStore((s) => s.isLoaded);
   const view = useAppStateStore((s) => s.view);
+  const setRightSidebarWidthRatio = useAppStateStore(
+    (s) => s.setRightSidebarWidth,
+  );
+  const sidebarWidth = useAppStateStore((s) => s.sidebar.right.width);
 
   const status = useGitStore((s) => s.status);
   const loadAnalyzedDiff = useGitStore((s) => s.loadAnalyzedDiff);
   const clearAnalyzedDiffCache = useGitStore((s) => s.clearAnalyzedDiffCache);
+
+  const viewport = useAppStateStore((s) => s.viewport);
+
+  const [isGeneratingView, setIsGeneratingView] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
+
+  // Persistence bridge for useDefaultLayout
+  const storage = useMemo(
+    () => ({
+      getItem: () => {
+        return JSON.stringify({
+          main: 100 - sidebarWidth,
+          sidebar: sidebarWidth,
+        });
+      },
+      setItem: (_: string, value: string) => {
+        const layout = JSON.parse(value);
+        if (layout.sidebar !== undefined) {
+          setRightSidebarWidthRatio(layout.sidebar);
+        }
+      },
+    }),
+    [sidebarWidth, setRightSidebarWidthRatio],
+  );
+
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "main-horizontal",
+    panelIds: ["main", "sidebar"],
+    storage,
+  });
+
+  useEffect(() => {
+    workerRef.current = new ViewWorker();
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
 
   const subPath = useMemo(() => {
     return selectedSubProject &&
@@ -78,6 +127,15 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     combos: [],
   });
 
+  const rendererRef = useRef<GraphRenderer | null>(null);
+
+  const zoomRange = useMemo(() => {
+    if (rendererRef.current) {
+      return rendererRef.current.getZoomRange();
+    }
+    return { min: 0.1, max: 5 };
+  }, [graphData]); // Re-calculate when graph data changes
+
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -89,7 +147,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     {},
   );
 
-  const rendererRef = useRef<GraphRenderer | null>(null);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hasRestoredViewport = useRef(false);
@@ -105,6 +162,11 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       rendererRef.current.setCustomColors(customColors || {});
     }
   }, [customColors, theme]);
+
+  useEffect(() => {
+    const unsubscribe = setupAutoSave(projectPath);
+    return () => unsubscribe();
+  }, [projectPath]);
 
   const rawGraphDataRef = useRef<JsonData | null>(null);
 
@@ -134,21 +196,40 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         if (!graphData) throw new Error("Graph data not found");
         rawGraphDataRef.current = graphData;
 
-        const {
-          nodes,
-          edges,
-          combos,
-          typeData: newTypeData,
-        } = VIEW_GENERATORS[view](graphData);
+        setIsGeneratingView(true);
+        if (workerRef.current) {
+          workerRef.current.onmessage = (e) => {
+            const {
+              nodes,
+              edges,
+              combos,
+              typeData: newTypeData,
+            } = e.data.result;
+            settypeData(newTypeData);
+            setGraphData({ nodes, edges, combos });
+            setIsGeneratingView(false);
+          };
+          workerRef.current.postMessage({ type: view, data: graphData });
+        } else {
+          // Fallback if worker not available
+          const {
+            nodes,
+            edges,
+            combos,
+            typeData: newTypeData,
+          } = VIEW_GENERATORS[view](graphData);
 
-        settypeData(newTypeData);
-        setGraphData({
-          nodes,
-          edges,
-          combos,
-        });
+          settypeData(newTypeData);
+          setGraphData({
+            nodes,
+            edges,
+            combos,
+          });
+          setIsGeneratingView(false);
+        }
       } catch (err) {
         console.error(err);
+        setIsGeneratingView(false);
       }
     },
     [
@@ -456,7 +537,15 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       }
       hasRestoredViewport.current = true;
     }
-  }, [graph, size.width, size.height, onSelect, isLoaded, setViewport, customColors]);
+  }, [
+    graph,
+    size.width,
+    size.height,
+    onSelect,
+    isLoaded,
+    setViewport,
+    customColors,
+  ]);
 
   // Clean up
   useEffect(() => {
@@ -496,24 +585,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     loadState(projectPath);
   }, [projectPath, loadState, resetState]);
 
-  // Auto-save state
-  const debouncedSaveState = useMemo(
-    () => debounce(saveState, 1000),
-    [saveState],
-  );
-
-  useEffect(() => {
-    debouncedSaveState(projectPath);
-  }, [
-    projectPath,
-    selectedSubProject,
-    centeredItemId,
-    isSidebarOpen,
-    activeTab,
-    selectedCommit,
-    debouncedSaveState,
-  ]);
-
   // load data whenever sub-project selection or selected commit changes
   useEffect(() => {
     loadData();
@@ -521,25 +592,39 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   // Resize observer for container
   const containerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setSize({ width, height });
-      }
-    });
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
+  // const debouncedSetSize = useMemo(() => debounce(setSize, 100), []);
 
-  // Force re-calculation of size when sidebar toggles
+  // useEffect(() => {
+  //   if (!containerRef.current) return;
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { width, height } = entry.contentRect;
+
+  //       // Always tell the renderer to resize immediately (it uses RAF internally now)
+  //       rendererRef.current?.resize(width, height);
+
+  //       if (isResizingRightSidebarWidth || isResizingRightSidebarHeight) {
+  //         debouncedSetSize({ width, height });
+  //       } else {
+  //         setSize({ width, height });
+  //       }
+  //     }
+  //   });
+  //   resizeObserver.observe(containerRef.current);
+  //   return () => resizeObserver.disconnect();
+  // }, [
+  //   isResizingRightSidebarWidth,
+  //   isResizingRightSidebarHeight,
+  //   debouncedSetSize,
+  // ]);
+
+  // Force re-calculation of size when sidebar toggles or right sidebar width changes
   useEffect(() => {
     if (containerRef.current) {
       const { width, height } = containerRef.current.getBoundingClientRect();
       setSize({ width, height });
     }
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, selectedId]);
 
   // handle global shortcuts
   useEffect(() => {
@@ -645,6 +730,33 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     setSelectedId(null);
   }, [setSelectedId]);
 
+  const handleZoomChange = useCallback((zoom: number) => {
+    rendererRef.current?.setZoom(zoom);
+  }, []);
+
+  const handleSelectNode = useCallback(
+    (id: string) => {
+      onSelect(id, true, true);
+    },
+    [onSelect],
+  );
+
+  const handleLocateFile = useCallback(
+    (filePath: string) => {
+      const nodes = graph.getAllNodes();
+      const combos = graph.getAllCombos();
+
+      const match =
+        combos.find((c) => c.pureFileName === filePath) ||
+        nodes.find((n) => n.fileName?.startsWith(filePath));
+
+      if (match) {
+        onSelect(match.id);
+      }
+    },
+    [graph, onSelect],
+  );
+
   const handleProjectSwitch = useCallback(
     async (path: string) => {
       if (path === selectedSubProject) return; // No change
@@ -665,22 +777,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     [selectedSubProject, projectPath, setSelectedSubProject],
   );
 
-  const handleLocateFile = useCallback(
-    (filePath: string) => {
-      const nodes = graph.getAllNodes();
-      const combos = graph.getAllCombos();
-
-      const match =
-        combos.find((c) => c.pureFileName === filePath) ||
-        nodes.find((n) => n.fileName?.startsWith(filePath));
-
-      if (match) {
-        onSelect(match.id);
-      }
-    },
-    [graph, onSelect],
-  );
-
   return (
     <div className="w-screen h-screen relative bg-background overflow-hidden">
       <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -689,103 +785,149 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
           projectRoot={projectPath}
           onSelectProject={handleProjectSwitch}
           onLocateFile={handleLocateFile}
-          onSelectNode={(id) => onSelect(id, true, true)}
+          onSelectNode={handleSelectNode}
           isLoading={isAnalyzing}
         />
         <SidebarInset className="min-w-0">
-          <SidebarTrigger
-            className={cn(
-              "absolute top-4 left-4 z-50",
-              // isSidebarOpen && "hidden",
-            )}
-          />
-          <MemoizedNodeDetails
-            selectedId={selectedId}
-            item={selectedItem}
-            renderNodes={renderNodes}
-            typeData={typeData}
-            projectPath={projectPath}
-            onClose={handleClose}
-            onSelect={(id) => onSelect(id, true, true)}
-            graph={graph}
-          />
-          {isSearchOpen && (
-            <div className="absolute top-4 right-4 z-50 flex items-center bg-popover border border-border rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="flex items-center gap-1">
-                <div className="relative flex items-center">
-                  <input
-                    ref={searchInputRef}
-                    autoFocus
-                    type="text"
-                    value={search}
-                    placeholder="Find"
-                    onChange={(e) => onSearch(e.target.value)}
-                    className="bg-muted text-foreground pl-2 pr-16 py-1 outline-none text-sm w-64 border border-transparent focus:border-primary rounded-sm placeholder:text-muted-foreground"
-                  />
-                  <div className="absolute right-2 text-[11px] text-muted-foreground pointer-events-none">
-                    {matches.length > 0 ? (
-                      <span className="text-foreground">
-                        {currentMatchIndex + 1} of {matches.length}
+          <ResizablePanelGroup
+            orientation="horizontal"
+            className="h-full w-full overflow-hidden"
+            defaultLayout={defaultLayout}
+            onLayoutChanged={onLayoutChanged}
+          >
+            <ResizablePanel id="main" minSize="30%">
+              <div className="flex-1 relative min-w-0 h-full">
+                <SidebarTrigger
+                  className={cn(
+                    "absolute top-4 left-4 z-50",
+                    // isSidebarOpen && "hidden",
+                  )}
+                />
+                {isSearchOpen && (
+                  <div className="absolute top-4 right-4 z-50 flex items-center bg-popover border border-border rounded shadow-lg p-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center gap-1">
+                      <div className="relative flex items-center">
+                        <input
+                          ref={searchInputRef}
+                          autoFocus
+                          type="text"
+                          value={search}
+                          placeholder="Find"
+                          onChange={(e) => onSearch(e.target.value)}
+                          className="bg-muted text-foreground pl-2 pr-16 py-1 outline-none text-sm w-64 border border-transparent focus:border-primary rounded-sm placeholder:text-muted-foreground"
+                        />
+                        <div className="absolute right-2 text-[11px] text-muted-foreground pointer-events-none">
+                          {matches.length > 0 ? (
+                            <span className="text-foreground">
+                              {currentMatchIndex + 1} of {matches.length}
+                            </span>
+                          ) : search !== "" ? (
+                            <span className="text-destructive">No results</span>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center border-l border-border pl-1 gap-1">
+                        <button
+                          onClick={goToPrevMatch}
+                          className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
+                          title="Previous Match (Shift+Enter)"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <path d="M7.707 5.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L8 7.414l-3.707 3.707a1 1 0 0 1-1.414-1.414l4-4z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={goToNextMatch}
+                          className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
+                          title="Next Match (Enter)"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <path d="M7.707 10.707a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L8 8.586l-3.707-3.707a1 1 0 0 0-1.414 1.414l4 4z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setIsSearchOpen(false)}
+                          className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors ml-1"
+                          title="Close (Esc)"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                          >
+                            <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div
+                  ref={containerRef}
+                  className="w-full h-full overflow-hidden relative min-w-0"
+                >
+                  <div className="absolute inset-0" ref={graphContainerRef} />
+                  {/* {(isResizingRightSidebarWidth ||
+                    isResizingRightSidebarHeight) && (
+                    <div
+                      className={cn(
+                        "absolute inset-0 z-[100] bg-transparent",
+                        // isResizingRightSidebarWidth
+                        //   ? "cursor-ew-resize"
+                        //   :
+                        "cursor-ns-resize",
+                      )}
+                    />
+                  )} */}
+                  {isGeneratingView && (
+                    <div className="absolute inset-0 z-[110] bg-background/50 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                      <span className="text-sm font-medium text-muted-foreground animate-pulse">
+                        Generating graph view...
                       </span>
-                    ) : search !== "" ? (
-                      <span className="text-destructive">No results</span>
-                    ) : null}
+                    </div>
+                  )}
+                  {/* Zoom Slider */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 z-[60]">
+                    <ZoomSlider
+                      value={viewport?.zoom || 1}
+                      min={zoomRange.min}
+                      max={zoomRange.max}
+                      onChange={handleZoomChange}
+                    />
                   </div>
                 </div>
-
-                <div className="flex items-center border-l border-border pl-1 gap-1">
-                  <button
-                    onClick={goToPrevMatch}
-                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
-                    title="Previous Match (Shift+Enter)"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                    >
-                      <path d="M7.707 5.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L8 7.414l-3.707 3.707a1 1 0 0 1-1.414-1.414l4-4z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={goToNextMatch}
-                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors"
-                    title="Next Match (Enter)"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                    >
-                      <path d="M7.707 10.707a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L8 8.586l-3.707-3.707a1 1 0 0 0-1.414 1.414l4 4z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setIsSearchOpen(false)}
-                    className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm text-muted-foreground transition-colors ml-1"
-                    title="Close (Esc)"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                    >
-                      <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
-                    </svg>
-                  </button>
-                </div>
               </div>
-            </div>
-          )}
-          <div
-            ref={containerRef}
-            className="flex flex-1 flex-col h-full overflow-hidden relative min-w-0"
-          >
-            <div className="absolute inset-0" ref={graphContainerRef} />
-          </div>
+            </ResizablePanel>
+            {selectedId && (
+              <>
+                <ResizableHandle withHandle />
+                <ResizablePanel id="sidebar" minSize="15%" maxSize="50%">
+                  <RightSidebar
+                    selectedId={selectedId}
+                    graph={graph}
+                    typeData={typeData}
+                    projectPath={projectPath}
+                    onClose={handleClose}
+                    onSelect={handleSelectNode}
+                    renderNodes={renderNodes}
+                  />
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
         </SidebarInset>
       </SidebarProvider>
     </div>
@@ -793,6 +935,5 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 };
 
 const MemoizedProjectSidebar = React.memo(ProjectSidebar);
-const MemoizedNodeDetails = React.memo(NodeDetails);
 
 export default ComponentGraph;

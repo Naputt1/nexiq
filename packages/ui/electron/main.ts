@@ -1324,7 +1324,10 @@ ipcMain.handle(
                 for (const p of v.props) {
                   if (targetIds.has(p.id)) {
                     // PropData and ComponentInfoRenderDependency are slightly different but we treat them as ChangeItemType conceptually
-                    const pWithFile = { ...p, file: v.file } as unknown as PropData;
+                    const pWithFile = {
+                      ...p,
+                      file: v.file,
+                    } as unknown as PropData;
                     deletedObjects[p.id] = pWithFile;
                   }
                 }
@@ -1392,7 +1395,9 @@ ipcMain.handle(
       if (!fs.existsSync(dotDir)) {
         fs.mkdirSync(dotDir, { recursive: true });
       }
+
       const statePath = path.join(dotDir, "state.json");
+      console.log("Saving state to:", statePath, state);
       fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
       return true;
     } catch (error) {

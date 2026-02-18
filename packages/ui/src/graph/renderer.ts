@@ -1,14 +1,17 @@
 import Konva from "konva";
+import { GraphData, type GraphDataCallbackParams } from "./hook";
 import {
-  GraphData,
-  type GraphDataCallbackParams,
-} from "./hook";
-import { GraphNode, GraphCombo, GraphArrow, type RenderContext } from "./items/index";
+  GraphNode,
+  GraphCombo,
+  GraphArrow,
+  type RenderContext,
+} from "./items/index";
 import type { CustomColors } from "../../electron/types";
 
 export class GraphRenderer {
   stage: Konva.Stage;
   layer: Konva.Layer;
+  minimapLayer: Konva.Layer;
   graph: GraphData;
   onSelect?: (id: string, center?: boolean, highlight?: boolean) => void;
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void;
@@ -24,6 +27,14 @@ export class GraphRenderer {
   private animatingCombos = new Set<string>();
   private animations = new Map<string, Konva.Animation>();
   public viewportChangeInProgress = false;
+
+  private lastRenderedMinimapTimestamp: number = 0;
+  private minimapContentGroup: Konva.Group | null = null;
+  private resizeAnimationFrame: number | null = null;
+  private minimapTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  private minimapSize = 150;
+  private minimapPadding = 10;
 
   constructor(
     container: HTMLDivElement,
@@ -44,10 +55,18 @@ export class GraphRenderer {
       width,
       height,
       draggable: true,
+      dragBoundFunc: (pos) => this.constrainViewport(pos),
     });
 
     this.layer = new Konva.Layer();
     this.stage.add(this.layer);
+
+    this.minimapLayer = new Konva.Layer({
+      listening: false, // Minimap is display-only for now
+      visible: false,
+    });
+    this.stage.add(this.minimapLayer);
+
     this.graph = graph;
     this.onSelect = onSelect;
     this.onViewportChange = onViewportChange;
@@ -59,6 +78,34 @@ export class GraphRenderer {
 
     // Initial render
     this.render();
+  }
+
+  private constrainViewport(pos: { x: number; y: number }) {
+    const scale = this.stage.scaleX();
+    const bounds = this.graph.getContentBounds();
+    const padding = 100; // Allow some overflow
+
+    // Content bounds in stage coordinates
+    const minX = (bounds.minX - padding) * scale;
+    const minY = (bounds.minY - padding) * scale;
+    const maxX = (bounds.maxX + padding) * scale;
+    const maxY = (bounds.maxY + padding) * scale;
+
+    const width = this.stage.width();
+    const height = this.stage.height();
+
+    // Limit X such that at least some content is visible
+    let newX = pos.x;
+    if (newX + maxX < padding * scale) newX = padding * scale - maxX;
+    if (newX + minX > width - padding * scale)
+      newX = width - padding * scale - minX;
+
+    let newY = pos.y;
+    if (newY + maxY < padding * scale) newY = padding * scale - maxY;
+    if (newY + minY > height - padding * scale)
+      newY = height - padding * scale - minY;
+
+    return { x: newX, y: newY };
   }
 
   destroy() {
@@ -76,8 +123,16 @@ export class GraphRenderer {
   }
 
   resize(width: number, height: number) {
-    this.stage.width(width);
-    this.stage.height(height);
+    if (this.resizeAnimationFrame !== null) {
+      cancelAnimationFrame(this.resizeAnimationFrame);
+    }
+
+    this.resizeAnimationFrame = requestAnimationFrame(() => {
+      this.stage.width(width);
+      this.stage.height(height);
+      this.requestMinimapRender();
+      this.resizeAnimationFrame = null;
+    });
   }
 
   focusItem(id: string, scale: number = 1.5) {
@@ -106,6 +161,62 @@ export class GraphRenderer {
   setViewport(x: number, y: number, zoom: number) {
     this.stage.position({ x, y });
     this.stage.scale({ x: zoom, y: zoom });
+    this.requestMinimapRender();
+  }
+
+  setZoom(zoom: number) {
+    const oldScale = this.stage.scaleX();
+    const center = {
+      x: this.stage.width() / 2,
+      y: this.stage.height() / 2,
+    };
+
+    const mousePointTo = {
+      x: (center.x - this.stage.x()) / oldScale,
+      y: (center.y - this.stage.y()) / oldScale,
+    };
+
+    this.stage.scale({ x: zoom, y: zoom });
+
+    const newPos = {
+      x: center.x - mousePointTo.x * zoom,
+      y: center.y - mousePointTo.y * zoom,
+    };
+
+    const constrainedPos = this.constrainViewport(newPos);
+    this.stage.position(constrainedPos);
+    this.requestMinimapRender();
+    this.triggerViewportChange();
+  }
+
+  private requestMinimapRender() {
+    this.minimapLayer.show();
+    if (this.minimapTimeout) {
+      clearTimeout(this.minimapTimeout);
+    }
+    this.renderMinimap();
+    this.minimapTimeout = setTimeout(() => {
+      this.minimapLayer.hide();
+      this.minimapLayer.batchDraw();
+      this.minimapTimeout = null;
+    }, 2000);
+  }
+
+  public getZoomRange() {
+    const bounds = this.graph.getContentBounds();
+    const contentWidth = bounds.maxX - bounds.minX;
+    const contentHeight = bounds.maxY - bounds.minY;
+    const minScale = Math.min(
+      this.stage.width() / (contentWidth + 400),
+      this.stage.height() / (contentHeight + 400),
+      0.1,
+    );
+
+    // Dynamically calculate max scale based on the deepest child
+    const minItemScale = this.graph.getMinItemScale();
+    const maxScale = Math.max(10, 2 / minItemScale);
+
+    return { min: minScale, max: maxScale };
   }
 
   private triggerViewportChange() {
@@ -142,7 +253,13 @@ export class GraphRenderer {
       }
 
       const scaleBy = 1.1;
-      const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      let newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+      // Zoom constraints
+      const { min: minScale, max: maxScale } = this.getZoomRange();
+
+      if (newScale < minScale) newScale = minScale;
+      if (newScale > maxScale) newScale = maxScale;
 
       stage.scale({ x: newScale, y: newScale });
 
@@ -151,7 +268,11 @@ export class GraphRenderer {
         y: pointer.y - mousePointTo.y * newScale,
       };
 
-      stage.position(newPos);
+      // Apply constraints after zoom
+      const constrainedPos = this.constrainViewport(newPos);
+      stage.position(constrainedPos);
+
+      this.requestMinimapRender();
 
       // Throttled viewport update for store
       this.viewportChangeInProgress = true;
@@ -166,6 +287,7 @@ export class GraphRenderer {
     stage.on("dragmove", () => {
       // Don't trigger store updates while dragging
       this.viewportChangeInProgress = true;
+      this.requestMinimapRender();
     });
 
     stage.on("dragend", () => {
@@ -176,8 +298,10 @@ export class GraphRenderer {
     stage.on("mouseenter", () => (stage.container().style.cursor = "grab"));
     stage.on("mousedown", (e) => {
       if (e.evt.button === 1) {
-        // Middle mouse button
+        // Middle mouse button - pan the canvas
         e.evt.preventDefault();
+        // If we are over a draggable element, Konva might be starting a drag on it.
+        // The children's dragstart handler will now handle button 0 check.
         stage.startDrag();
       }
       if (e.evt.button === 0 || e.evt.button === 1) {
@@ -185,6 +309,161 @@ export class GraphRenderer {
       }
     });
     stage.on("mouseup", () => (stage.container().style.cursor = "grab"));
+  }
+
+  private renderMinimap() {
+    if (!this.minimapLayer.visible()) return;
+
+    // Fix minimap layer to the screen by counteracting stage transform
+    const stageScale = this.stage.scaleX();
+    const invScale = 1 / stageScale;
+    this.minimapLayer.scale({ x: invScale, y: invScale });
+    this.minimapLayer.position({
+      x: -this.stage.x() * invScale,
+      y: -this.stage.y() * invScale,
+    });
+
+    const bounds = this.graph.getContentBounds();
+    const contentWidth = bounds.maxX - bounds.minX;
+    const contentHeight = bounds.maxY - bounds.minY;
+
+    if (contentWidth <= 0 || contentHeight <= 0) return;
+
+    const padding = 20;
+    const totalWidth = contentWidth + padding * 2;
+    const totalHeight = contentHeight + padding * 2;
+
+    const scale = Math.min(
+      this.minimapSize / totalWidth,
+      this.minimapSize / totalHeight,
+    );
+
+    const mmWidth = totalWidth * scale;
+    const mmHeight = totalHeight * scale;
+
+    const xOffset = this.stage.width() - mmWidth - this.minimapPadding;
+    const yOffset = this.minimapPadding;
+
+    // Check if we need to redraw the dots/background
+    const needsFullRedraw =
+      !this.minimapContentGroup ||
+      this.lastRenderedMinimapTimestamp < this.graph.lastModified;
+
+    if (needsFullRedraw) {
+      if (this.minimapContentGroup) {
+        this.minimapContentGroup.destroy();
+      }
+
+      this.minimapContentGroup = new Konva.Group();
+      this.minimapLayer.add(this.minimapContentGroup);
+
+      // Minimap Background
+      const bg = new Konva.Rect({
+        x: xOffset,
+        y: yOffset,
+        width: mmWidth,
+        height: mmHeight,
+        fill: this.theme === "dark" ? "#1e1e1e" : "#f5f5f5",
+        stroke: this.theme === "dark" ? "#333" : "#ddd",
+        strokeWidth: 1,
+        cornerRadius: 4,
+        shadowBlur: 10,
+        shadowOpacity: 0.2,
+      });
+      this.minimapContentGroup.add(bg);
+
+      // Use a single custom shape to draw ALL dots at once - MUCH FASTER
+      const combos = this.graph.getAllCombos();
+      const nodes = this.graph.getAllNodes();
+
+      const dotsShape = new Konva.Shape({
+        sceneFunc: (ctx, shape) => {
+          ctx.beginPath();
+
+          const getMMX = (x: number) =>
+            xOffset + (x - (bounds.minX - padding)) * scale;
+          const getMMY = (y: number) =>
+            yOffset + (y - (bounds.minY - padding)) * scale;
+
+          // Draw Combos
+          ctx.fillStyle = this.theme === "dark" ? "#444" : "#ccc";
+          combos.forEach((c) => {
+            const pos = this.graph.getAbsolutePosition(c.id);
+            if (pos) {
+              const mx = getMMX(pos.x);
+              const my = getMMY(pos.y);
+              ctx.moveTo(mx + 2, my);
+              ctx.arc(mx, my, 2, 0, Math.PI * 2);
+            }
+          });
+          ctx.fill();
+
+          // Draw Nodes
+          ctx.beginPath();
+          ctx.fillStyle = this.theme === "dark" ? "#666" : "#aaa";
+          nodes.forEach((n) => {
+            const pos = this.graph.getAbsolutePosition(n.id);
+            if (pos) {
+              const mx = getMMX(pos.x);
+              const my = getMMY(pos.y);
+              ctx.moveTo(mx + 1, my);
+              ctx.arc(mx, my, 1, 0, Math.PI * 2);
+            }
+          });
+          ctx.fill();
+
+          ctx.fillStrokeShape(shape);
+        },
+      });
+      this.minimapContentGroup.add(dotsShape);
+
+      this.lastRenderedMinimapTimestamp = Date.now();
+    }
+
+    // Viewport rectangle - always redraw this as it changes frequently
+    let vpRect = this.minimapLayer.findOne("#viewport-rect") as Konva.Rect;
+    if (!vpRect) {
+      vpRect = new Konva.Rect({
+        id: "viewport-rect",
+        stroke: "#3b82f6",
+        strokeWidth: 1,
+        fill: "rgba(59, 130, 246, 0.1)",
+      });
+      this.minimapLayer.add(vpRect);
+    }
+    // Always move to top to stay above content
+    vpRect.moveToTop();
+
+    const getMMX = (x: number) =>
+      xOffset + (x - (bounds.minX - padding)) * scale;
+    const getMMY = (y: number) =>
+      yOffset + (y - (bounds.minY - padding)) * scale;
+
+    const stageX = -this.stage.x() / this.stage.scaleX();
+    const stageY = -this.stage.y() / this.stage.scaleX();
+    const stageW = this.stage.width() / this.stage.scaleX();
+    const stageH = this.stage.height() / this.stage.scaleX();
+
+    const vpX = getMMX(stageX);
+    const vpY = getMMY(stageY);
+    const vpW = stageW * scale;
+    const vpH = stageH * scale;
+
+    // Clip viewport rect to minimap bounds
+    const rectX = Math.max(xOffset, vpX);
+    const rectY = Math.max(yOffset, vpY);
+    const rectW = Math.min(mmWidth - (rectX - xOffset), vpW - (rectX - vpX));
+    const rectH = Math.min(mmHeight - (rectY - yOffset), vpH - (rectY - vpY));
+
+    if (rectW > 0 && rectH > 0) {
+      vpRect.show();
+      vpRect.position({ x: rectX, y: rectY });
+      vpRect.size({ width: rectW, height: rectH });
+    } else {
+      vpRect.hide();
+    }
+
+    this.minimapLayer.batchDraw();
   }
 
   private handleGraphEvent(params: GraphDataCallbackParams) {
@@ -199,9 +478,11 @@ export class GraphRenderer {
         break;
       case "combo-drag-move":
         this.handleComboDragMove(params.id, params.edgeIds);
+        this.requestMinimapRender();
         break;
       case "node-drag-move":
         this.updateEdges(params.edgeIds);
+        this.requestMinimapRender();
         break;
       case "combo-radius-change":
         this.handleComboRadiusChange(params.id, params.edgeIds);
@@ -262,7 +543,13 @@ export class GraphRenderer {
           this.edges.set(id, item);
         }
       },
-      hasGitChanges: Object.values(this.graph.getCurCombos()).some((c: GraphCombo) => !!c.gitStatus) || Object.values(this.graph.getCurNodes()).some((n: GraphNode) => !!n.gitStatus),
+      hasGitChanges:
+        Object.values(this.graph.getCurCombos()).some(
+          (c: GraphCombo) => !!c.gitStatus,
+        ) ||
+        Object.values(this.graph.getCurNodes()).some(
+          (n: GraphNode) => !!n.gitStatus,
+        ),
       stage: this.stage,
       theme: this.theme,
       customColors: this.customColors,
@@ -342,7 +629,9 @@ export class GraphRenderer {
         contentGroup.clipFunc(null);
 
         // Ensure final fill
-        circle.fill(combo.collapsed ? combo.getFillColor(context) : "transparent");
+        circle.fill(
+          combo.collapsed ? combo.getFillColor(context) : "transparent",
+        );
       }
     }, this.layer);
 
@@ -454,6 +743,7 @@ export class GraphRenderer {
 
     this.updateEdges(Array.from(this.edges.keys()));
     this.layer.batchDraw();
+    this.requestMinimapRender();
   }
 
   render() {
@@ -514,6 +804,7 @@ export class GraphRenderer {
     }
 
     this.layer.batchDraw();
+    this.requestMinimapRender();
   }
 
   setTheme(theme: "dark" | "light") {

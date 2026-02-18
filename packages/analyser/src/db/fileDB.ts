@@ -349,7 +349,7 @@ export class File {
   ): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (variable.kind === "component") {
+    if (variable.kind === "component" && variable.renders) {
       for (const render of Object.values(variable.renders)) {
         edges.push({
           from: render.id,
@@ -410,7 +410,7 @@ export class File {
   private __getEdges(variable: ReactFunctionVariable): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (isComponentVariable(variable)) {
+    if (isComponentVariable(variable) && variable.renders) {
       for (const render of Object.values(variable.renders)) {
         edges.push({
           from: render.id,
@@ -714,7 +714,7 @@ export class File {
     if (
       isComponentVariable(variable) ||
       isJSXVariable(variable) ||
-      (isNormalVariable(variable) && isDataVariable(variable))
+      isNormalVariable(variable)
     ) {
       if (parentId) {
         const findParent = (
