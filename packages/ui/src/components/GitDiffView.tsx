@@ -1,6 +1,12 @@
 import type { GitFileDiff } from "shared";
 import { cn } from "@/lib/utils";
 import { useConfigStore } from "@/hooks/use-config-store";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 interface GitDiffViewProps {
   diffs: GitFileDiff[];
@@ -13,9 +19,14 @@ export function GitDiffView({ diffs, fileName, scope }: GitDiffViewProps) {
   const fileDiff = diffs.find((d) => d.path === fileName);
   if (!fileDiff)
     return (
-      <div className="text-xs text-muted-foreground italic">
-        No changes found in diff for this section.
-      </div>
+      <Empty className="border-dashed py-4 min-h-32">
+        <EmptyHeader>
+          <EmptyTitle className="text-sm">No Git Changes</EmptyTitle>
+          <EmptyDescription className="text-xs">
+            No changes were found in this file's diff.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
 
   const relevantHunks = fileDiff.hunks.filter((hunk) => {
@@ -26,9 +37,14 @@ export function GitDiffView({ diffs, fileName, scope }: GitDiffViewProps) {
 
   if (relevantHunks.length === 0) {
     return (
-      <div className="text-xs text-muted-foreground italic">
-        Changes in this file are outside this component's scope.
-      </div>
+      <Empty className="border-dashed py-4 min-h-32">
+        <EmptyHeader>
+          <EmptyTitle className="text-sm">Outside Scope</EmptyTitle>
+          <EmptyDescription className="text-xs">
+            Changes in this file are outside this component's scope.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 

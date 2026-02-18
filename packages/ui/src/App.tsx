@@ -7,17 +7,24 @@ import { useProjectStore } from "./hooks/use-project-store";
 
 import { ProjectSettings } from "./pages/ProjectSettings";
 import { GlobalSettings } from "./pages/GlobalSettings";
+import { useRegisterZustandStore } from "@sucoza/zustand-devtools-plugin";
+import { useAppStateStore } from "./hooks/use-app-state-store";
 
 function App() {
   const { projectRoot: storedProjectRoot, setProjectRoot } = useProjectStore();
   const [searchParams] = useSearchParams();
-  
+
+  useRegisterZustandStore("ProjectStore", useProjectStore);
+  useRegisterZustandStore("AppStateStore", useAppStateStore);
+
   // Try to get projectPath from hash (via useSearchParams) or from main URL search
-  const urlProjectPath = searchParams.get("projectPath") || 
-                         new URLSearchParams(window.location.search).get("projectPath");
-  
-  const isEmpty = searchParams.get("empty") === "true" || 
-                  new URLSearchParams(window.location.search).get("empty") === "true";
+  const urlProjectPath =
+    searchParams.get("projectPath") ||
+    new URLSearchParams(window.location.search).get("projectPath");
+
+  const isEmpty =
+    searchParams.get("empty") === "true" ||
+    new URLSearchParams(window.location.search).get("empty") === "true";
 
   useEffect(() => {
     if (urlProjectPath) {

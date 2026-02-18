@@ -17,11 +17,19 @@ export class GraphNode extends BaseNode {
     });
 
     group.on("dragstart", (e) => {
+      if (e.evt && e.evt.button !== 0) {
+        group.stopDrag();
+        return;
+      }
       e.cancelBubble = true;
       context.graph.setDraggingId(this.id);
     });
 
     group.on("dragmove", (e) => {
+      if (e.evt && e.evt.button !== 0) {
+        group.stopDrag();
+        return;
+      }
       e.cancelBubble = true;
       if (this.parent) {
         context.graph.comboChildNodeMove(this.parent.id, this.id, e);
@@ -38,6 +46,24 @@ export class GraphNode extends BaseNode {
       } else {
         context.graph.nodeDragEnd(this.id, e);
       }
+    });
+
+    group.on("mousedown", (e) => {
+      const isLeft = e.evt.button === 0;
+      group.draggable(isLeft);
+      if (e.evt.button === 1) {
+        e.cancelBubble = true;
+        context.stage.startDrag();
+        context.stage.container().style.cursor = "grabbing";
+      }
+    });
+
+    group.on("mouseup", () => {
+      group.draggable(true);
+    });
+
+    group.on("mouseleave", () => {
+      group.draggable(true);
     });
 
     group.on("click", (e) => {
