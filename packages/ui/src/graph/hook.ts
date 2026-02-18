@@ -223,11 +223,8 @@ export class GraphData {
                 child: true,
               });
 
-              // Trigger parent layout to accommodate new radius if not collapsed AND changed significantly
-              if (
-                !combo.collapsed &&
-                Math.abs(combo.expandedRadius - oldRadius) > 1
-              ) {
+              // Trigger parent layout to accommodate new radius if changed significantly
+              if (Math.abs(combo.expandedRadius - oldRadius) > 1) {
                 if (combo.parent == null) {
                   this.layout(true, combo.id);
                 } else {
@@ -544,7 +541,7 @@ export class GraphData {
         id: c.id,
         x: c.x,
         y: c.y,
-        radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
+        radius: c.expandedRadius,
         fixed: c.id === this.draggingId || c.id === fixedId,
       });
     }
@@ -1005,14 +1002,7 @@ export class GraphData {
 
     if (!combo.collapsed) {
       // Ensure children of this combo are laid out so we know its expanded size
-      this.calculateComboChildrenLayout(id, true);
-    }
-
-    // Recalculate parent layout when expanding/collapsing to avoid overlaps/gaps
-    if (combo.parent == null) {
-      this.layout(true, id);
-    } else {
-      this.calculateComboChildrenLayout(combo.parent.id, true, id);
+      this.calculateComboChildrenLayout(id, false);
     }
   }
 
@@ -1102,7 +1092,7 @@ export class GraphData {
     for (const childCombo of Object.values(combo.child?.combos ?? {})) {
       const dist =
         Math.sqrt(childCombo.x * childCombo.x + childCombo.y * childCombo.y) +
-        childCombo.radius;
+        childCombo.expandedRadius;
       if (dist > maxRadius) maxRadius = dist;
     }
 
@@ -1526,14 +1516,7 @@ export class GraphData {
         });
 
         // Ensure child layout is calculated if it hasn't been before
-        this.calculateComboChildrenLayout(parentId, true);
-
-        // Recalculate parent layout when expanding to avoid overlaps
-        if (parent.parent == null) {
-          this.layout(true, parentId);
-        } else {
-          this.calculateComboChildrenLayout(parent.parent.id, true, parentId);
-        }
+        this.calculateComboChildrenLayout(parentId, false);
 
         // Trigger update for the parent combo (internal)
         const cb = this.innerCallback.get(parentId);
@@ -1633,7 +1616,7 @@ export class GraphData {
         id: c.id,
         x: c.x,
         y: c.y,
-        radius: c.collapsed ? c.collapsedRadius : c.expandedRadius,
+        radius: c.expandedRadius,
         fixed: c.id === this.draggingId || c.id === fixedId,
       });
     }
