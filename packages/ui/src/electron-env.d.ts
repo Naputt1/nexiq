@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
-import { JsonData, GitStatus, GitCommit, GitFileDiff } from "shared";
+import { JsonData, GitStatus, GitCommit, GitFileDiff, UIStateMap } from "shared";
 import {
   AppStateData,
   IpcEvents,
@@ -106,7 +106,7 @@ declare global {
         channel: "update-graph-position",
         projectRoot: string,
         analysisPath: string,
-        positions: Record<string, { x: number; y: number; radius?: number }>,
+        positions: UIStateMap,
         contextId?: string,
       ): Promise<boolean>;
       invoke(

@@ -34,7 +34,10 @@ import { useGitStore } from "./hooks/useGitStore";
 import { useConfigStore } from "./hooks/use-config-store";
 import { generateComponentGraphData, type GraphViewGenerator } from "./views";
 import ViewWorker from "./views/view.worker?worker";
+import { type ViewWorkerResponse } from "./views/view.worker";
 import { Loader2 } from "lucide-react";
+
+import { extractUIState } from "./graph/utils/ui-state";
 
 const VIEW_GENERATORS: Record<GraphViewType, GraphViewGenerator> = {
   component: generateComponentGraphData,
@@ -198,7 +201,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
         setIsGeneratingView(true);
         if (workerRef.current) {
-          workerRef.current.onmessage = (e) => {
+          workerRef.current.onmessage = (e: MessageEvent<ViewWorkerResponse>) => {
             const {
               nodes,
               edges,
@@ -450,27 +453,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   useEffect(() => {
     const savePositions = debounce(() => {
-      const allNodes = graph.getAllNodes();
-      const allCombos = graph.getAllCombos();
-      const positions: Record<
-        string,
-        { x: number; y: number; radius?: number }
-      > = {};
-
-      allNodes.forEach((n) => {
-        if (n.x !== undefined && n.y !== undefined) {
-          positions[n.id] = { x: n.x, y: n.y };
-        }
-      });
-      allCombos.forEach((c) => {
-        if (c.x !== undefined && c.y !== undefined) {
-          positions[c.id] = {
-            x: c.x,
-            y: c.y,
-            radius: c.expandedRadius || c.radius,
-          };
-        }
-      });
+      const positions = extractUIState(graph);
 
       const targetPath = selectedSubProject || projectPath;
       if (Object.keys(positions).length > 0) {
@@ -490,7 +473,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
         data.type === "combo-drag-end" ||
         data.type === "node-drag-end" ||
         data.type === "layout-change" ||
-        data.type === "child-moved"
+        data.type === "child-moved" ||
+        data.type === "combo-collapsed"
       ) {
         savePositions();
       }
@@ -892,7 +876,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                     />
                   )} */}
                   {isGeneratingView && (
-                    <div className="absolute inset-0 z-[110] bg-background/50 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                    <div className="absolute inset-0 z-110 bg-background/50 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
                       <span className="text-sm font-medium text-muted-foreground animate-pulse">
                         Generating graph view...
@@ -900,7 +884,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
                     </div>
                   )}
                   {/* Zoom Slider */}
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 z-[60]">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 z-60">
                     <ZoomSlider
                       value={viewport?.zoom || 1}
                       min={zoomRange.min}

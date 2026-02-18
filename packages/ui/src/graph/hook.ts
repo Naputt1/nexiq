@@ -22,6 +22,7 @@ export {
   type CurRender,
 };
 import { type Node, type Edge } from "./layout";
+import { type UIItemState } from "shared";
 
 export type useGraphProps = {
   nodes?: GraphNodeData[];
@@ -239,8 +240,6 @@ export class GraphData {
           }
 
           this.markModified();
-          // Trigger IPC update
-          this.savePositions(nodes, id);
         }, true); // onlyLayout = true
       }
     };
@@ -287,25 +286,6 @@ export class GraphData {
     if (this.isBatching) return;
     for (const cb of Object.values(this.callback)) {
       cb(data);
-    }
-  }
-
-  private savePositions(
-    nodes: { id: string; x: number; y: number }[],
-    contextId: string,
-  ) {
-    if (this.projectPath && this.targetPath) {
-      const positions: Record<string, { x: number; y: number }> = {};
-      for (const n of nodes) {
-        positions[n.id] = { x: n.x, y: n.y };
-      }
-      window.ipcRenderer.invoke(
-        "update-graph-position",
-        this.projectPath,
-        this.targetPath,
-        positions,
-        contextId,
-      );
     }
   }
 
@@ -495,29 +475,6 @@ export class GraphData {
     if (!force && combo.isLayoutCalculated) return;
     if (this.layoutInProgress.has(id)) return;
 
-    // Check if all children already have positions from UI or parent renders
-    const children = [
-      ...Object.values(combo.child?.nodes ?? {}),
-      ...Object.values(combo.child?.combos ?? {}),
-    ];
-
-    if (!force && children.length > 0) {
-      const allCalculated = children.every((c) => c.isLayoutCalculated);
-
-      if (allCalculated) {
-        combo.isLayoutCalculated = true;
-        // Need to update edge positions since they might not be calculated
-        const edgeIds = new Set<string>();
-        for (const child of children) {
-          const ids = this.getComboEdges(child.id);
-          for (const eid of ids) edgeIds.add(eid);
-        }
-        this.updateEdgePos(Array.from(edgeIds));
-        this.trigger({ type: "layout-change" });
-        return;
-      }
-    }
-
     // Check if we already have positions (from persistence)
     // If all children have x,y != 0 (or some check), maybe skips?
     // But persistence layer should set isLayoutCalculated = true if loaded.
@@ -642,8 +599,21 @@ export class GraphData {
 
       const scale = parentCombo.scale * SCALE_FACTOR;
 
-      let radius = c.ui?.radius ?? c.radius ?? this.config.combo.minRadius;
-      if (!c.ui?.radius) {
+      const getDeepSavedUi = (id: string, parent: GraphCombo): UIItemState | undefined => {
+        if (c.ui) return c.ui;
+        let current: GraphCombo | undefined = parent;
+        while (current) {
+          if (current.ui?.renders?.[id]) return current.ui.renders[id];
+          if (current.ui?.vars?.[id]) return current.ui.vars[id];
+          current = current.parent;
+        }
+        return undefined;
+      };
+
+      const savedUi = getDeepSavedUi(c.id, parentCombo);
+
+      let radius = savedUi?.radius ?? c.radius ?? this.config.combo.minRadius;
+      if (!savedUi?.radius) {
         radius *= scale;
       }
 
@@ -651,7 +621,7 @@ export class GraphData {
         ...c,
         radius,
         color: c.color ?? this.config.node.color,
-        isLayoutCalculated: !!c.ui?.isLayoutCalculated,
+        isLayoutCalculated: !!savedUi?.isLayoutCalculated,
         x: x ?? (Math.random() - 0.5) * (size + 1) * 10 * scale,
         y: y ?? (Math.random() - 0.5) * (size + 1) * 10 * scale,
         parent: parentCombo,
@@ -883,25 +853,48 @@ export class GraphData {
 
       const scale = parentCombo.scale * SCALE_FACTOR;
 
-      let collapsedRadius = c.collapsedRadius ?? this.config.combo.minRadius;
-      let expandedRadius =
-        c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
+      const getDeepSavedUi = (id: string, parent: GraphCombo): UIItemState | undefined => {
+        if (c.ui) return c.ui;
+        let current: GraphCombo | undefined = parent;
+        while (current) {
+          if (current.ui?.renders?.[id]) return current.ui.renders[id];
+          if (current.ui?.vars?.[id]) return current.ui.vars[id];
+          current = current.parent;
+        }
+        return undefined;
+      };
 
-      if (!c.ui?.radius) {
+      const savedUi = getDeepSavedUi(c.id, parentCombo);
+
+      let collapsedRadius =
+        savedUi?.collapsedRadius ?? c.collapsedRadius ?? this.config.combo.minRadius;
+      if (!savedUi?.collapsedRadius && !savedUi?.radius) {
         collapsedRadius *= scale;
+      }
+
+      let expandedRadius =
+        savedUi?.expandedRadius ??
+        savedUi?.radius ??
+        c.expandedRadius ??
+        this.config.combo.maxRadius;
+
+      if (!savedUi?.expandedRadius && !savedUi?.radius) {
         expandedRadius *= scale;
       }
 
       parentCombo.child.combos[c.id] = new GraphCombo({
         ...c,
-        radius: c.collapsed ? collapsedRadius : expandedRadius,
+        collapsed: savedUi?.collapsed ?? c.collapsed,
+        radius: (savedUi?.collapsed ?? c.collapsed)
+          ? (savedUi?.radius ?? collapsedRadius)
+          : (savedUi?.expandedRadius ?? expandedRadius),
         color: c.color ?? this.config.combo.color,
-        collapsedRadius,
-        expandedRadius,
+        collapsedRadius: savedUi?.collapsedRadius ?? collapsedRadius,
+        expandedRadius: savedUi?.expandedRadius ?? expandedRadius,
         x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * (size + 1) * 50 * scale,
         y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * (size + 1) * 50 * scale,
         padding: c.padding ?? this.config.combo.padding,
-        isLayoutCalculated: !!c.ui?.isLayoutCalculated,
+        isLayoutCalculated: !!savedUi?.isLayoutCalculated,
         parent: parentCombo,
         scale,
       });
@@ -940,18 +933,26 @@ export class GraphData {
     for (const c of combos) {
       if (c.combo == null) {
         const collapsedRadius =
-          c.collapsedRadius ?? this.config.combo.minRadius;
+          c.ui?.collapsedRadius ??
+          c.collapsedRadius ??
+          this.config.combo.minRadius;
         const expandedRadius =
-          c.ui?.radius ?? c.expandedRadius ?? this.config.combo.maxRadius;
+          c.ui?.expandedRadius ??
+          c.ui?.radius ??
+          c.expandedRadius ??
+          this.config.combo.maxRadius;
 
         this.combos.set(
           c.id,
           new GraphCombo({
             ...c,
-            radius: c.collapsed ? collapsedRadius : expandedRadius,
+            collapsed: c.ui?.collapsed ?? c.collapsed,
+            radius: (c.ui?.collapsed ?? c.collapsed)
+              ? (c.ui?.radius ?? collapsedRadius)
+              : (c.ui?.expandedRadius ?? expandedRadius),
             color: c.color ?? this.config.combo.color,
-            collapsedRadius,
-            expandedRadius,
+            collapsedRadius: c.ui?.collapsedRadius ?? collapsedRadius,
+            expandedRadius: c.ui?.expandedRadius ?? expandedRadius,
             x: c.ui?.x ?? c.x ?? (Math.random() - 0.5) * combos.length * 10,
             y: c.ui?.y ?? c.y ?? (Math.random() - 0.5) * combos.length * 10,
             padding: c.padding ?? this.config.combo.padding,
@@ -1412,8 +1413,7 @@ export class GraphData {
         }
 
         // Traverse to the property to update
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let current: any = item;
+        let current = item as unknown as Record<string, unknown>;
         for (let i = 0; i < propPath.length - 1; i++) {
           const p = propPath[i];
           if (
@@ -1423,7 +1423,7 @@ export class GraphData {
           ) {
             return;
           }
-          current = current[p];
+          current = current[p] as Record<string, unknown>;
         }
 
         if (current && lastProp in current) {

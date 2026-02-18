@@ -6,6 +6,7 @@ import type {
   VariableName,
   VarKind,
   VarType,
+  UIItemState,
 } from "shared";
 import type { File } from "../fileDB.js";
 import { getDeterministicId } from "../../utils/hash.js";
@@ -24,14 +25,10 @@ export abstract class Variable<
   dependencies: Record<string, ComponentFileVarDependency>;
   parent?: Variable<"function">;
   loc: VariableLoc;
-  ui?:
-    | {
-        x: number;
-        y: number;
-        renders?: Record<string, { x: number; y: number }>;
-        isLayoutCalculated?: boolean | undefined;
-      }
-    | undefined;
+  ui?: UIItemState & {
+    renders?: Record<string, UIItemState>;
+    vars?: Record<string, UIItemState>;
+  };
 
   constructor(
     data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,

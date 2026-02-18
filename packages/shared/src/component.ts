@@ -1,4 +1,4 @@
-import type { TypeDataDeclare } from "./types/index.js";
+import type { TypeDataDeclare, UIItemState } from "./types/index.js";
 import type { PropDataType, TypeData } from "./types/primitive.js";
 
 export type ComponentFileImport = {
@@ -162,16 +162,10 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   parentId?: string | undefined;
   declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  ui?:
-    | {
-        x: number;
-        y: number;
-        radius?: number;
-        renders?: Record<string, { x: number; y: number; radius?: number }>;
-        vars?: Record<string, { x: number; y: number; radius?: number }>;
-        isLayoutCalculated?: boolean | undefined;
-      }
-    | undefined;
+  ui?: UIItemState & {
+    renders?: Record<string, UIItemState>;
+    vars?: Record<string, UIItemState>;
+  };
 }
 
 export interface ComponentFileVarBase<

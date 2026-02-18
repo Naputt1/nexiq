@@ -123,9 +123,7 @@ export const generateComponentGraphData = (
         fileName: `${fileNamePrefix}:${render.loc.line}:${render.loc.column}`,
         pureFileName: filePath,
         loc: render.loc,
-        ui: graphData.files[filePath]?.var[ownerId]?.ui?.renders?.[
-          render.instanceId
-        ],
+        ui: graphData.files[filePath]?.var[ownerId]?.ui?.renders?.[renderNodeId],
         type: "render" as const,
       };
 
@@ -614,10 +612,7 @@ export const generateComponentGraphData = (
 
             if (v.type == "object" || v.type === "array") {
               const comboId = uniqueId;
-              const virtualId = parent ? currentPath : undefined;
-              const savedUi = virtualId
-                ? hookCall.ui?.vars?.[virtualId]
-                : undefined;
+              const savedUi = hookCall.ui?.vars?.[uniqueId];
 
               const vLoc = v.loc || nodeBase.loc;
               const combo: GraphComboData = {
@@ -671,10 +666,7 @@ export const generateComponentGraphData = (
             } else {
               const name =
                 v.type === "identifier" ? v.name : `...${v.argument}`;
-              const virtualId = parent ? currentPath : undefined;
-              const savedUi = virtualId
-                ? hookCall.ui?.vars?.[virtualId]
-                : undefined;
+              const savedUi = hookCall.ui?.vars?.[uniqueId];
 
               const vLoc = v.loc || nodeBase.loc;
               const node: GraphNodeData = {

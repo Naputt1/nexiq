@@ -34,13 +34,14 @@ import type {
 import type {
   JsonData,
   ComponentFileVar,
-  ComponentInfoRender,
   EffectInfo,
   GitStatus,
   GitCommit,
   GitFileDiff,
   GitDiffHunk,
   PropData,
+  UIStateMap,
+  UIItemState,
 } from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -953,10 +954,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
         const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
 
         // Helper to recurse and map positions
-        const positionMap = new Map<
-          string,
-          { x: number; y: number; isLayoutCalculated?: boolean }
-        >();
+        const positionMap = new Map<string, UIItemState>();
 
         // traverse existingData
         const traverse = (container: JsonData | null) => {
@@ -970,37 +968,29 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
         };
 
         const collectPos = (item: ComponentFileVar) => {
-          if (item.ui?.x !== undefined && item.ui?.y !== undefined) {
+          if (item.ui) {
             positionMap.set(item.id, {
               x: item.ui.x,
               y: item.ui.y,
+              radius: item.ui.radius,
+              collapsedRadius: item.ui.collapsedRadius,
+              expandedRadius: item.ui.expandedRadius,
               isLayoutCalculated: item.ui.isLayoutCalculated,
+              collapsed: item.ui.collapsed,
             });
-          }
 
-          // Collect renders and effects positions
-          if (item.ui?.renders) {
-            for (const [id, pos] of Object.entries(item.ui.renders)) {
-              positionMap.set(id, {
-                x: pos.x,
-                y: pos.y,
-                isLayoutCalculated: true,
-              });
+            // Collect renders and effects positions
+            if (item.ui.renders) {
+              for (const [id, pos] of Object.entries(item.ui.renders)) {
+                positionMap.set(id, pos);
+              }
             }
-          }
 
-          // Collect virtual variables positions
-          if (item.ui?.vars) {
-            for (const [id, pos] of Object.entries(item.ui.vars)) {
-              // Use a prefixed ID to avoid collisions in positionMap if necessary,
-              // but since these are relative IDs, they should be stored under their absolute ID if possible.
-              // Actually, positionMap is global for the whole file.
-              // The IDs in item.ui.vars are relative. We should probably prefix them.
-              positionMap.set(`${item.id}:${id}`, {
-                x: pos.x,
-                y: pos.y,
-                isLayoutCalculated: true,
-              });
+            // Collect virtual variables positions
+            if (item.ui.vars) {
+              for (const [id, pos] of Object.entries(item.ui.vars)) {
+                positionMap.set(id, pos);
+              }
             }
           }
 
@@ -1018,56 +1008,28 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
           const pos = positionMap.get(item.id);
           if (pos) {
             if (!item.ui) item.ui = { x: 0, y: 0 };
-            item.ui.x = pos.x;
-            item.ui.y = pos.y;
-            item.ui.isLayoutCalculated = pos.isLayoutCalculated;
+            Object.assign(item.ui, pos);
           }
 
-          // Apply renders and effects positions
-          const renders = "renders" in item ? item.renders : undefined;
-          const effects = "effects" in item ? item.effects : undefined;
+          // Apply to sub-items (renders, effects, virtual vars)
+          const renderComboId = `${item.id}-render`;
+          const renderPrefix = `${item.id}-render-`;
+          const varPrefix = `${item.id}:`;
 
-          if (renders || effects || item.ui?.vars) {
-            if (!item.ui) item.ui = { x: 0, y: 0 };
-            if (!item.ui.renders) item.ui.renders = {};
-            if (!item.ui.vars) item.ui.vars = {};
+          for (const [id, subPos] of positionMap.entries()) {
+            if (
+              id === renderComboId ||
+              id.startsWith(renderPrefix) ||
+              id.startsWith(varPrefix)
+            ) {
+              if (!item.ui) item.ui = { x: 0, y: 0 };
 
-            const applyItems = (
-              items: Record<string, ComponentInfoRender | EffectInfo>,
-            ) => {
-              for (const r of Object.values(items)) {
-                const rPos = positionMap.get(r.id);
-                if (rPos) {
-                  item.ui!.renders![r.id] = {
-                    x: rPos.x,
-                    y: rPos.y,
-                  };
-                }
-              }
-            };
-
-            if (renders) applyItems(renders);
-            if (effects) applyItems(effects);
-
-            // Special handle for the render combo itself
-            const renderComboId = `${item.id}-render`;
-            const rcPos = positionMap.get(renderComboId);
-            if (rcPos) {
-              item.ui!.renders![renderComboId] = {
-                x: rcPos.x,
-                y: rcPos.y,
-              };
-            }
-
-            // Apply virtual variables positions
-            // We need to find all keys in positionMap that start with item.id + ":"
-            for (const [fullId, pos] of positionMap.entries()) {
-              if (fullId.startsWith(`${item.id}:`)) {
-                const virtualId = fullId.slice(item.id.length + 1);
-                item.ui!.vars![virtualId] = {
-                  x: pos.x,
-                  y: pos.y,
-                };
+              if (id === renderComboId || id.startsWith(renderPrefix)) {
+                if (!item.ui.renders) item.ui.renders = {};
+                item.ui.renders[id] = subPos;
+              } else {
+                if (!item.ui.vars) item.ui.vars = {};
+                item.ui.vars[id] = subPos;
               }
             }
           }
@@ -1413,7 +1375,7 @@ ipcMain.handle(
     _: IpcMainInvokeEvent,
     projectRoot: string,
     analysisPath: string,
-    positions: Record<string, { x: number; y: number; radius?: number }>,
+    positions: UIStateMap,
     contextId?: string,
   ) => {
     const targetPath = analysisPath;
@@ -1444,101 +1406,99 @@ ipcMain.handle(
         fs.readFileSync(graphPath, "utf-8"),
       ) as JsonData;
 
-      // Helper to update position recursively
-      const updatePos = (item: ComponentFileVar) => {
-        if (positions[item.id]) {
+      const applyUIState = (item: ComponentFileVar, stateMap: UIStateMap) => {
+        const state = stateMap[item.id];
+        if (state) {
           if (!item.ui) item.ui = { x: 0, y: 0 };
-          item.ui.x = positions[item.id].x;
-          item.ui.y = positions[item.id].y;
+          item.ui.x = state.x;
+          item.ui.y = state.y;
 
-          // If this item is the context combo, it means its children layout is done
+          if (state.radius !== undefined) {
+            item.ui.radius = state.radius;
+          }
+          if (state.collapsedRadius !== undefined) {
+            item.ui.collapsedRadius = state.collapsedRadius;
+          }
+          if (state.expandedRadius !== undefined) {
+            item.ui.expandedRadius = state.expandedRadius;
+          }
+          if (state.collapsed !== undefined) {
+            item.ui.collapsed = state.collapsed;
+          }
+
+          const isCombo =
+            item.kind === "component" ||
+            (item.kind === "hook" && item.type === "function");
+
+          // Handle layout status
           if (contextId && item.id === contextId) {
             item.ui.isLayoutCalculated = true;
           } else if (contextId === "root") {
-            // For root layout, only nodes (non-combos) are "calculated" in terms of their final pos
-            if (item.kind !== "component" && item.kind !== "hook") {
-              item.ui.isLayoutCalculated = true;
-            }
-          } else if (!contextId) {
-            // Full state save from UI: everything is calculated
-            item.ui.isLayoutCalculated = true;
-          } else {
-            // If it's a child being positioned by a combo layout, it's "calculated"
-            item.ui.isLayoutCalculated = true;
-          }
-
-          if (positions[item.id].radius !== undefined) {
-            item.ui.radius = positions[item.id].radius;
+            if (!isCombo) item.ui.isLayoutCalculated = true;
+          } else if (contextId) {
+            // Child of a combo layout
+            if (!isCombo) item.ui.isLayoutCalculated = true;
+          } else if (state.isLayoutCalculated !== undefined) {
+            // Full save from UI: trust the UI state
+            item.ui.isLayoutCalculated = state.isLayoutCalculated;
           }
         }
 
-        // Store positions for virtual variables (destructuring) and other sub-items
-        // These are identified by IDs that start with item.id + "-"
-        for (const [posId, pos] of Object.entries(positions)) {
-          if (posId.startsWith(`${item.id}-`)) {
-            // Check if it's a render node
-            const renderPrefix = `${item.id}-render-`;
-            if (posId.startsWith(renderPrefix)) {
-              const renderId = posId.slice(renderPrefix.length);
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[renderId] = {
-                x: pos.x,
-                y: pos.y,
-                radius: pos.radius,
-              };
-              continue;
-            }
+        // Apply to sub-items (renders, effects, virtual vars)
+        // We look for any keys in stateMap that are prefixed with this item's ID followed by a separator
+        const renderComboId = `${item.id}-render`;
+        const renderPrefix = `${item.id}-render-`;
+        const varPrefix = `${item.id}:`;
 
-            // Check if it's the render combo itself
-            const renderComboId = `${item.id}-render`;
-            if (posId === renderComboId) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[renderComboId] = {
-                x: pos.x,
-                y: pos.y,
-                radius: pos.radius,
-              };
-              continue;
-            }
-
-            // Check if it's an effect node
-            const effectId = posId; // effect IDs are globally unique but often prefixed with parent ID
-            const effects = "effects" in item ? item.effects : undefined;
-            if (effects && effects[effectId]) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[effectId] = {
-                x: pos.x,
-                y: pos.y,
-                radius: pos.radius,
-              };
-              continue;
-            }
-
-            // Otherwise, it's likely a virtual variable from destructuring
-            const virtualVarId = posId.slice(item.id.length + 1);
+        for (const [id, subState] of Object.entries(stateMap)) {
+          if (
+            id === renderComboId ||
+            id.startsWith(renderPrefix) ||
+            id.startsWith(varPrefix)
+          ) {
             if (!item.ui) item.ui = { x: 0, y: 0 };
-            if (!item.ui.vars) item.ui.vars = {};
-            item.ui.vars[virtualVarId] = {
-              x: pos.x,
-              y: pos.y,
-              radius: pos.radius,
-            };
+
+            // Render/Effect nodes
+            if (id === renderComboId || id.startsWith(renderPrefix)) {
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[id] = {
+                x: subState.x,
+                y: subState.y,
+                radius: subState.radius,
+                collapsedRadius: subState.collapsedRadius,
+                expandedRadius: subState.expandedRadius,
+                isLayoutCalculated:
+                  contextId === id ? true : subState.isLayoutCalculated,
+                collapsed: subState.collapsed,
+              };
+            } else {
+              // Virtual variables (destructuring)
+              if (!item.ui.vars) item.ui.vars = {};
+              item.ui.vars[id] = {
+                x: subState.x,
+                y: subState.y,
+                radius: subState.radius,
+                collapsedRadius: subState.collapsedRadius,
+                expandedRadius: subState.expandedRadius,
+                isLayoutCalculated:
+                  contextId === id ? true : subState.isLayoutCalculated,
+                collapsed: subState.collapsed,
+              };
+            }
           }
         }
 
+        // Recurse into children
         if ("var" in item && item.var) {
           for (const v of Object.values(item.var)) {
-            updatePos(v);
+            applyUIState(v, stateMap);
           }
         }
       };
 
       for (const file of Object.values(graphData.files)) {
         for (const variable of Object.values(file.var)) {
-          updatePos(variable);
+          applyUIState(variable, positions);
         }
       }
 
