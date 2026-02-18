@@ -24,8 +24,7 @@ export interface TypeDataDeclareBase {
 }
 
 export interface TypeDataDeclareInterface
-  extends TypeDataDeclareBase,
-    ComponentLoc {
+  extends TypeDataDeclareBase, ComponentLoc {
   type: "interface";
   extends?: string[];
   body: TypeDataLiteralBody[];
@@ -49,3 +48,15 @@ export type ComponentTypeData =
       type: "inline";
       body: TypeData;
     };
+
+export interface UIItemState {
+  x: number;
+  y: number;
+  radius?: number;
+  collapsedRadius?: number;
+  expandedRadius?: number;
+  isLayoutCalculated?: boolean;
+  collapsed?: boolean;
+}
+
+export type UIStateMap = Record<string, UIItemState>;

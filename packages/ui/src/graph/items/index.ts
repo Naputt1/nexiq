@@ -7,6 +7,7 @@ import type {
   VariableLoc,
   VariableName,
   VariableScope,
+  UIItemState,
 } from "shared";
 import type { GraphData } from "../hook";
 import type { LabelData } from "../label";
@@ -94,13 +95,9 @@ export interface DetailItemData {
   gitStatus?: "added" | "modified" | "deleted";
   declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   visible?: boolean;
-  ui?: {
-    renders?: Record<string, { x: number; y: number; radius?: number }>;
-    vars?: Record<string, { x: number; y: number; radius?: number }>;
-    isLayoutCalculated?: boolean;
-    x?: number;
-    y?: number;
-    radius?: number;
+  ui?: UIItemState & {
+    renders?: Record<string, UIItemState>;
+    vars?: Record<string, UIItemState>;
   };
 }
 

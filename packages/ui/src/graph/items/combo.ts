@@ -15,7 +15,7 @@ export class GraphCombo extends BaseNode {
     this.collapsedRadius = data.collapsedRadius ?? 20;
     this.expandedRadius = data.expandedRadius ?? 40;
     this.padding = data.padding ?? 10;
-    this.radius = this.collapsed ? this.collapsedRadius : this.expandedRadius;
+    this.radius = data.radius ?? (this.collapsed ? this.collapsedRadius : this.expandedRadius);
     this.child = data.child;
   }
 
@@ -191,7 +191,7 @@ export class GraphCombo extends BaseNode {
       for (const childCombo of Object.values(this.child.combos)) {
         const dist =
           Math.sqrt(childCombo.x * childCombo.x + childCombo.y * childCombo.y) +
-          childCombo.radius;
+          childCombo.expandedRadius;
         if (dist > maxR) maxR = dist;
       }
     }
