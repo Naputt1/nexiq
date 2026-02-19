@@ -201,7 +201,7 @@ export const RightSidebar = React.memo(function RightSidebar({
   return (
     <ResizablePanelGroup
       orientation="vertical"
-      className="h-full bg-background select-none z-40"
+      className="h-full bg-background z-40"
       defaultLayout={defaultLayout}
       onLayoutChanged={onLayoutChanged}
     >

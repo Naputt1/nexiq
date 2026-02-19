@@ -29,6 +29,7 @@ export abstract class BaseNode implements Renderable {
   color: string;
   highlighted: boolean = false;
   isLayoutCalculated: boolean = false;
+  displayName?: string;
 
   // From DetailItemData
   scope?: VariableScope;
@@ -72,6 +73,7 @@ export abstract class BaseNode implements Renderable {
     this.color = data.color ?? "blue";
     this.highlighted = data.highlighted ?? false;
     this.isLayoutCalculated = data.isLayoutCalculated ?? false;
+    this.displayName = data.displayName;
 
     this.scope = data.scope;
     this.loc = data.loc;

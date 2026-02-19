@@ -15,8 +15,11 @@ const init = async () => {
     });
 
     const { TanStackDevtools } = await import("@tanstack/react-devtools");
-    const { AppStatePluginComponent, GraphStatePluginComponent } =
-      await import("./devtools");
+    const {
+      AppStatePluginComponent,
+      GraphStatePluginComponent,
+      WorkerStatePluginComponent,
+    } = await import("./devtools");
 
     root.render(
       <StrictMode>
@@ -31,6 +34,10 @@ const init = async () => {
               {
                 name: "Graph State",
                 render: <GraphStatePluginComponent />,
+              },
+              {
+                name: "Worker Registry",
+                render: <WorkerStatePluginComponent />,
               },
               {
                 name: "Zustand Stores",

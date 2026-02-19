@@ -32,15 +32,57 @@ import { setupAutoSave, useAppStateStore } from "./hooks/use-app-state-store";
 import type { GraphViewType } from "../electron/types";
 import { useGitStore } from "./hooks/useGitStore";
 import { useConfigStore } from "./hooks/use-config-store";
-import { generateComponentGraphData, type GraphViewGenerator } from "./views";
+import {
+  getTasksForView,
+  type GraphViewGenerator,
+  type GraphViewResult,
+  type ViewWorkerResponse,
+} from "./views";
 import ViewWorker from "./views/view.worker?worker";
-import { type ViewWorkerResponse } from "./views/view.worker";
 import { Loader2 } from "lucide-react";
+import { useWorkerStore } from "./hooks/use-worker-store";
+import { getRegistry } from "./views/registry";
 
 import { extractUIState } from "./graph/utils/ui-state";
+import type { ViewWorkerRegistryResponse } from "./views/view.worker";
 
 const VIEW_GENERATORS: Record<GraphViewType, GraphViewGenerator> = {
-  component: generateComponentGraphData,
+  component: (data) => {
+    let res: GraphViewResult = {
+      nodes: [],
+      edges: [],
+      combos: [],
+      typeData: {},
+    };
+    for (const task of getTasksForView("component")) {
+      res = task.run(data, res);
+    }
+    return res;
+  },
+  file: (data) => {
+    let res: GraphViewResult = {
+      nodes: [],
+      edges: [],
+      combos: [],
+      typeData: {},
+    };
+    for (const task of getTasksForView("file")) {
+      res = task.run(data, res);
+    }
+    return res;
+  },
+  router: (data) => {
+    let res: GraphViewResult = {
+      nodes: [],
+      edges: [],
+      combos: [],
+      typeData: {},
+    };
+    for (const task of getTasksForView("router")) {
+      res = task.run(data, res);
+    }
+    return res;
+  },
 };
 
 interface ComponentGraphProps {
@@ -78,6 +120,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
   const [isGeneratingView, setIsGeneratingView] = useState(false);
   const workerRef = useRef<Worker | null>(null);
+  const setWorker = useWorkerStore((s) => s.setWorker);
+  const setRegistryState = useWorkerStore((s) => s.setRegistryState);
 
   // Persistence bridge for useDefaultLayout
   const storage = useMemo(
@@ -105,11 +149,53 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   });
 
   useEffect(() => {
-    workerRef.current = new ViewWorker();
-    return () => {
-      workerRef.current?.terminate();
+    const worker = new ViewWorker();
+    workerRef.current = worker;
+    setWorker(worker);
+
+    const handleMessage = (
+      e: MessageEvent<ViewWorkerResponse | ViewWorkerRegistryResponse>,
+    ) => {
+      if ("type" in e.data && e.data.type === "DEBUG_REGISTRY") {
+        const rendererRegistry = getRegistry();
+        const serializedRenderer: Record<
+          string,
+          { id: string; priority: number }[]
+        > = {};
+        for (const [view, tasks] of Object.entries(rendererRegistry)) {
+          serializedRenderer[view] = tasks.map((t) => ({
+            id: t.id,
+            priority: t.priority,
+          }));
+        }
+
+        setRegistryState({
+          registry: e.data.registry,
+          rendererRegistry: serializedRenderer,
+          lastUpdated: Date.now(),
+        });
+        return;
+      }
+
+      const {
+        nodes,
+        edges,
+        combos,
+        typeData: newTypeData,
+      } = (e.data as ViewWorkerResponse).result;
+      settypeData(newTypeData);
+      setGraphData({ nodes, edges, combos });
+      setIsGeneratingView(false);
     };
-  }, []);
+
+    worker.addEventListener("message", handleMessage);
+
+    return () => {
+      worker.removeEventListener("message", handleMessage);
+      worker.terminate();
+      setWorker(null);
+    };
+  }, [setWorker, setRegistryState]);
 
   const subPath = useMemo(() => {
     return selectedSubProject &&
@@ -201,17 +287,6 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
 
         setIsGeneratingView(true);
         if (workerRef.current) {
-          workerRef.current.onmessage = (e: MessageEvent<ViewWorkerResponse>) => {
-            const {
-              nodes,
-              edges,
-              combos,
-              typeData: newTypeData,
-            } = e.data.result;
-            settypeData(newTypeData);
-            setGraphData({ nodes, edges, combos });
-            setIsGeneratingView(false);
-          };
           workerRef.current.postMessage({ type: view, data: graphData });
         } else {
           // Fallback if worker not available
@@ -252,45 +327,52 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
     targetPath: selectedSubProject || projectPath,
   });
 
-  const highlightGitChanges = useCallback(async () => {
-    if (!graph || !rawGraphDataRef.current) return;
+  const highlightGitChanges = useCallback(
+    async (isGitTab: boolean) => {
+      if (!graph || !rawGraphDataRef.current) return;
 
-    try {
-      const combos = graph.getAllCombos();
-      const nodes = graph.getAllNodes();
+      try {
+        const combos = graph.getAllCombos();
+        const nodes = graph.getAllNodes();
 
-      const {
-        added = [],
-        modified = [],
-        deleted = [],
-      } = rawGraphDataRef.current.diff || {};
+        const {
+          added = [],
+          modified = [],
+          deleted = [],
+        } = rawGraphDataRef.current.diff || {};
 
-      graph.batch(() => {
-        const applyStatus = (item: GraphCombo | GraphNode) => {
-          if (added.includes(item.id)) {
-            item.gitStatus = "added";
-          } else if (modified.includes(item.id)) {
-            item.gitStatus = "modified";
-          } else if (deleted.includes(item.id)) {
-            item.gitStatus = "deleted";
-          } else {
-            item.gitStatus = undefined;
-          }
+        graph.batch(() => {
+          const applyStatus = (item: GraphCombo | GraphNode) => {
+            if (isGitTab) {
+              if (added.includes(item.id)) {
+                item.gitStatus = "added";
+              } else if (modified.includes(item.id)) {
+                item.gitStatus = "modified";
+              } else if (deleted.includes(item.id)) {
+                item.gitStatus = "deleted";
+              } else {
+                item.gitStatus = undefined;
+              }
+            } else {
+              item.gitStatus = undefined;
+            }
 
-          // Everything in the current graph should be visible
-          item.visible = true;
+            // Everything in the current graph should be visible
+            item.visible = true;
 
-          if ("expandedRadius" in item) graph.updateCombo(item as GraphCombo);
-          else graph.updateNode(item as GraphNode);
-        };
+            if ("expandedRadius" in item) graph.updateCombo(item as GraphCombo);
+            else graph.updateNode(item as GraphNode);
+          };
 
-        combos.forEach(applyStatus);
-        nodes.forEach(applyStatus);
-      });
-    } catch (e) {
-      console.error("Failed to highlight git changes", e);
-    }
-  }, [graph]);
+          combos.forEach(applyStatus);
+          nodes.forEach(applyStatus);
+        });
+      } catch (e) {
+        console.error("Failed to highlight git changes", e);
+      }
+    },
+    [graph],
+  );
 
   const goToNextMatch = useCallback(() => {
     if (matches.length === 0) return;
@@ -398,8 +480,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   );
 
   useEffect(() => {
-    highlightGitChanges();
-  }, [highlightGitChanges, status, selectedCommit]);
+    highlightGitChanges(activeTab === "git");
+  }, [highlightGitChanges, status, selectedCommit, activeTab]);
 
   useEffect(() => {
     window.reactMapGraph = graph;

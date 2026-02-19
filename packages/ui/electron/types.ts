@@ -25,7 +25,7 @@ export interface IpcEvents {
   "git-status-changed": void;
 }
 
-export type GraphViewType = "component";
+export type GraphViewType = "component" | "file" | "router";
 
 export interface AppStateData {
   selectedSubProject: string | null;

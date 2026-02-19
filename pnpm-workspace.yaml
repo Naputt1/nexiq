@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - packages/sample-project/*
+  - extensions/*
 
 ignoredBuiltDependencies:
   - "@swc/core"

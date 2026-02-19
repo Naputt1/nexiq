@@ -31,13 +31,16 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     new Set(["root"]),
   );
   const [search, setSearch] = useState("");
+  const [searchKeysOnly, setSearchKeysOnly] = useState(false);
+  const [localFilters, setLocalFilters] = useState<Record<string, string>>({});
+  const [activeSearchPaths, setActiveSearchPaths] = useState<Set<string>>(new Set());
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Initial expansion for first 2 levels
   useEffect(() => {
     if (expandedPaths.size <= 1 && (isObject(data) || Array.isArray(data))) {
       const initialExpanded = new Set(["root"]);
-      const entries = Object.entries(data as object);
+      const entries = Object.entries(data as Record<string, unknown>);
       entries.forEach(([key]) => {
         initialExpanded.add(`root.${key}`);
       });
@@ -58,32 +61,70 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     });
   };
 
-  const collapseAll = () => {
-    setExpandedPaths(new Set(["root"]));
+  const toggleLocalSearch = (id: string) => {
+    setActiveSearchPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        // Clear filter when closing search
+        setLocalFilters((f) => {
+          const { [id]: _, ...rest } = f;
+          return rest;
+        });
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
-  const flattenedData = useMemo(() => {
+  const collapseAll = () => {
+    setExpandedPaths(new Set(["root"]));
+    setLocalFilters({});
+    setActiveSearchPaths(new Set());
+  };
+
+  const { flattenedData } = useMemo(() => {
     const items: FlattenedItem[] = [];
+    const matchSet = new Set<string>();
+    const branchHasMatch = new Set<string>();
     const searchLower = search.toLowerCase();
 
-    const checkMatch = (val: unknown, key: string, depth = 0): boolean => {
-      if (!search || depth > 10) return false;
-      if (key.toLowerCase().includes(searchLower)) return true;
-      if (typeof val === "string" && val.toLowerCase().includes(searchLower))
-        return true;
-      if (typeof val === "number" && String(val).includes(searchLower))
-        return true;
+    if (!data) return { flattenedData: [] };
+
+    // Pass 1: Find all direct matches (for global search)
+    const findMatches = (val: unknown, key: string, path: string[]) => {
+      const id = path.join(".");
+      const keyMatch = key.toLowerCase().includes(searchLower);
+      const valueMatch =
+        !searchKeysOnly &&
+        (typeof val === "string" || typeof val === "number" || typeof val === "boolean") &&
+        String(val).toLowerCase().includes(searchLower);
+
+      if (search && (keyMatch || valueMatch)) {
+        matchSet.add(id);
+        // Mark all ancestors as having a match in branch
+        for (let i = 1; i <= path.length; i++) {
+          branchHasMatch.add(path.slice(0, i).join("."));
+        }
+      }
+
       if (isObject(val)) {
-        return Object.entries(val).some(([k, v]) =>
-          checkMatch(v, k, depth + 1),
-        );
+        Object.entries(val).forEach(([k, v]) => {
+          findMatches(v, k, [...path, k]);
+        });
+      } else if (Array.isArray(val)) {
+        val.forEach((v, i) => {
+          findMatches(v, String(i), [...path, String(i)]);
+        });
       }
-      if (Array.isArray(val)) {
-        return val.some((v, i) => checkMatch(v, String(i), depth + 1));
-      }
-      return false;
     };
 
+    if (search) {
+      findMatches(data, label || "root", ["root"]);
+    }
+
+    // Pass 2: Flatten based on expansion and search (global + local)
     const flatten = (
       val: unknown,
       key: string,
@@ -97,12 +138,10 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
       const isEmpty = canExpand
         ? isArray
           ? (val as unknown[]).length === 0
-          : Object.keys(val as object).length === 0
+          : Object.keys(val as Record<string, unknown>).length === 0
         : true;
 
-      // If searching, we auto-expand if there's a match inside
-      const hasMatchInside = search ? checkMatch(val, key) : false;
-      const isExpanded = expandedPaths.has(id) || (!!search && hasMatchInside);
+      const isExpanded = expandedPaths.has(id) || (!!search && branchHasMatch.has(id));
 
       const item: FlattenedItem = {
         id,
@@ -116,35 +155,33 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
         canExpand,
       };
 
-      const matchesSearch =
-        !search ||
-        key.toLowerCase().includes(searchLower) ||
-        (typeof val === "string" && val.toLowerCase().includes(searchLower)) ||
-        (typeof val === "number" && String(val).includes(searchLower));
-
-      // In search mode, we only show if it matches OR if it has a match inside (is a parent of a match)
-      if (search && !matchesSearch && !hasMatchInside) {
+      if (search && !matchSet.has(id) && !branchHasMatch.has(id)) {
         return;
       }
 
       items.push(item);
 
       if (canExpand && isExpanded && !isEmpty) {
+        const localFilter = localFilters[id]?.toLowerCase();
         if (isArray) {
           (val as unknown[]).forEach((v, i) => {
-            flatten(v, String(i), [...path, String(i)], level + 1);
+            if (!localFilter || String(i).includes(localFilter)) {
+              flatten(v, String(i), [...path, String(i)], level + 1);
+            }
           });
         } else {
           Object.entries(val as Record<string, unknown>).forEach(([k, v]) => {
-            flatten(v, k, [...path, k], level + 1);
+            if (!localFilter || k.toLowerCase().includes(localFilter)) {
+              flatten(v, k, [...path, k], level + 1);
+            }
           });
         }
       }
     };
 
     flatten(data, label || "root", ["root"], 0);
-    return items;
-  }, [data, label, expandedPaths, search]);
+    return { flattenedData: items, matchSet };
+  }, [data, label, expandedPaths, search, searchKeysOnly, localFilters]);
 
   const virtualizer = useVirtualizer({
     count: flattenedData.length,
@@ -175,28 +212,41 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-1 border-b border-zinc-800 flex items-center gap-2">
-        <input
-          className="bg-zinc-900 text-white border border-zinc-700 px-2 py-0.5 rounded text-xs w-full outline-none focus:border-blue-500"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button
-          onClick={collapseAll}
-          className="text-zinc-500 hover:text-white text-[10px] whitespace-nowrap px-1 border border-zinc-700 rounded hover:bg-zinc-800 h-5"
-          title="Collapse All"
-        >
-          Collapse All
-        </button>
-        {search && (
+      <div className="p-1 border-b border-zinc-800 flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <input
+            className="bg-zinc-900 text-white border border-zinc-700 px-2 py-0.5 rounded text-xs w-full outline-none focus:border-blue-500"
+            placeholder="Global Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           <button
-            onClick={() => setSearch("")}
-            className="text-zinc-500 hover:text-white text-xs"
+            onClick={collapseAll}
+            className="text-zinc-500 hover:text-white text-[10px] whitespace-nowrap px-1 border border-zinc-700 rounded hover:bg-zinc-800 h-5"
+            title="Collapse All"
           >
-            Clear
+            Collapse All
           </button>
-        )}
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="text-zinc-500 hover:text-white text-xs"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2 px-1">
+          <label className="flex items-center gap-1 text-[10px] text-zinc-500 cursor-pointer hover:text-zinc-300">
+            <input
+              type="checkbox"
+              checked={searchKeysOnly}
+              onChange={(e) => setSearchKeysOnly(e.target.checked)}
+              className="w-3 h-3 rounded border-zinc-700 bg-zinc-900"
+            />
+            Keys only
+          </label>
+        </div>
       </div>
       <div ref={parentRef} className="flex-1 overflow-auto">
         <div
@@ -209,6 +259,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
           {virtualizer.getVirtualItems().map((virtualItem) => {
             const item = flattenedData[virtualItem.index];
             const isEditing = editingPath && editingPath.join(".") === item.id;
+            const isLocalSearchActive = activeSearchPaths.has(item.id);
 
             return (
               <div
@@ -236,7 +287,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
                     className="text-blue-400 cursor-pointer"
                     onClick={() => item.canExpand && toggleExpand(item.id)}
                   >
-                    {item.key}:
+                    <HighlightedText text={item.key} highlight={search} />:
                   </span>
 
                   {isEditing ? (
@@ -264,15 +315,57 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
                         type={item.type}
                         isExpanded={item.isExpanded}
                         isEmpty={item.isEmpty}
+                        highlight={search}
                       />
-                      {!item.canExpand && onEdit && (
-                        <button
-                          onClick={() => handleEdit(item.path, item.value)}
-                          className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-white"
-                        >
-                          ✎
-                        </button>
-                      )}
+                      <div
+                        className={`flex items-center gap-1 transition-opacity ${
+                          search || isLocalSearchActive || localFilters[item.id]
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100"
+                        }`}
+                      >
+                        {!item.canExpand && onEdit && (
+                          <button
+                            onClick={() => handleEdit(item.path, item.value)}
+                            className="text-zinc-500 hover:text-white"
+                          >
+                            ✎
+                          </button>
+                        )}
+                        {item.canExpand && item.isExpanded && !item.isEmpty && (
+                          <>
+                            {isLocalSearchActive ? (
+                              <input
+                                className="bg-zinc-800 text-white border border-zinc-700 px-1 rounded h-4 text-[10px] outline-none focus:border-blue-500 w-24"
+                                placeholder="Filter keys..."
+                                value={localFilters[item.id] || ""}
+                                onChange={(e) =>
+                                  setLocalFilters((prev) => ({
+                                    ...prev,
+                                    [item.id]: e.target.value,
+                                  }))
+                                }
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            ) : null}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLocalSearch(item.id);
+                              }}
+                              className={`p-0.5 rounded hover:bg-zinc-700 ${
+                                isLocalSearchActive || localFilters[item.id]
+                                  ? "text-blue-400"
+                                  : "text-zinc-500"
+                              }`}
+                              title="Filter properties"
+                            >
+                              🔍
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -285,12 +378,34 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
   );
 };
 
+const HighlightedText: React.FC<{ text: string; highlight: string }> = ({
+  text,
+  highlight,
+}) => {
+  if (!highlight) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === highlight.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-500/50 text-white rounded-sm px-px">
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+};
+
 const ValueRenderer: React.FC<{
   value: unknown;
   type: FlattenedItem["type"];
   isExpanded: boolean;
   isEmpty: boolean;
-}> = ({ value, type, isExpanded, isEmpty }) => {
+  highlight: string;
+}> = ({ value, type, isExpanded, isEmpty, highlight }) => {
   if (type === "object") {
     return (
       <span className="text-zinc-400">
@@ -308,13 +423,25 @@ const ValueRenderer: React.FC<{
   }
 
   if (typeof value === "string")
-    return <span className="text-green-300">"{value}"</span>;
+    return (
+      <span className="text-green-300">
+        "<HighlightedText text={value} highlight={highlight} />"
+      </span>
+    );
   if (typeof value === "number")
-    return <span className="text-orange-300">{value}</span>;
+    return (
+      <span className="text-orange-300">
+        <HighlightedText text={String(value)} highlight={highlight} />
+      </span>
+    );
   if (typeof value === "boolean")
     return <span className="text-purple-300">{String(value)}</span>;
   if (value === null) return <span className="text-zinc-500">null</span>;
   if (value === undefined)
     return <span className="text-zinc-500">undefined</span>;
-  return <span className="text-zinc-300">{String(value)}</span>;
+  return (
+    <span className="text-zinc-300">
+      <HighlightedText text={String(value)} highlight={highlight} />
+    </span>
+  );
 };
