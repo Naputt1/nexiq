@@ -1,2 +1,3 @@
 export * from "./types";
-export * from "./componentView";
+export * from "./registry";
+export * from "./tasks/fileTask";

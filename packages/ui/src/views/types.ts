@@ -1,8 +1,13 @@
-import { type JsonData, type TypeDataDeclare } from "shared";
-import { type useGraphProps } from "../graph/hook";
+import { type JsonData } from "shared";
+import {
+  type GraphViewResult,
+  type GraphViewTask,
+} from "@react-map/extension-sdk";
 
-export interface GraphViewResult extends useGraphProps {
-  typeData: Record<string, TypeDataDeclare>;
-}
+export type { GraphViewResult, GraphViewTask };
+
+export type ViewWorkerResponse = {
+  result: GraphViewResult;
+};
 
 export type GraphViewGenerator = (data: JsonData) => GraphViewResult;

@@ -1359,7 +1359,6 @@ ipcMain.handle(
       }
 
       const statePath = path.join(dotDir, "state.json");
-      console.log("Saving state to:", statePath, state);
       fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
       return true;
     } catch (error) {

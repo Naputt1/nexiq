@@ -66,7 +66,7 @@ export interface PointData {
 export interface DetailItemData {
   id: string;
   name: VariableName;
-  fileName: string;
+  fileName?: string;
   pureFileName?: string;
   scope?: VariableScope;
   loc?: VariableLoc;
@@ -86,7 +86,8 @@ export interface DetailItemData {
     | "ref"
     | "prop"
     | "normal"
-    | "jsx";
+    | "jsx"
+    | (string & {});
   typeParams?: TypeDataParam[];
   extends?: string[];
   tag?: string;
@@ -95,6 +96,7 @@ export interface DetailItemData {
   gitStatus?: "added" | "modified" | "deleted";
   declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   visible?: boolean;
+  displayName?: string;
   ui?: UIItemState & {
     renders?: Record<string, UIItemState>;
     vars?: Record<string, UIItemState>;

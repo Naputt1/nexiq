@@ -36,6 +36,8 @@ export function ViewSwitcher({ className, isCollapsed }: { className?: string; i
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="component">Component View</SelectItem>
+          <SelectItem value="file">File View</SelectItem>
+          <SelectItem value="router">Router View</SelectItem>
         </SelectContent>
       </Select>
     </div>

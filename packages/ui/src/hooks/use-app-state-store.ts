@@ -216,7 +216,6 @@ export const setupAutoSave = (projectRoot: string) => {
       if (!state.isLoaded) return;
 
       const { saveState } = store.getState();
-      console.log("Saving state", state);
       debouncedSave(projectRoot, saveState);
     },
   );
