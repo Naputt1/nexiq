@@ -1499,6 +1499,40 @@ ipcMain.handle(
 ipcMain.handle(
   "read-state",
   async (_: IpcMainInvokeEvent, projectRoot: string) => {
+    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
+      return new Promise((resolve, reject) => {
+        const requestId = Math.random().toString(36).substring(7);
+        const timeout = setTimeout(() => {
+          backendWs!.removeEventListener("message", onMessage);
+          reject(new Error("Timeout waiting for backend state data"));
+        }, 5000);
+
+        const onMessage = (event: MessageEvent) => {
+          const {
+            type,
+            payload,
+            requestId: responseId,
+          } = JSON.parse(event.data.toString());
+          if (responseId !== requestId) return;
+
+          if (type === "state_data") {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            resolve(payload);
+          }
+        };
+
+        backendWs!.addEventListener("message", onMessage);
+        backendWs!.send(
+          JSON.stringify({
+            type: "read_state",
+            payload: { projectPath: projectRoot },
+            requestId,
+          }),
+        );
+      });
+    }
+
     const statePath = path.join(projectRoot, ".react-map", "state.json");
     if (fs.existsSync(statePath)) {
       try {
@@ -1514,6 +1548,16 @@ ipcMain.handle(
 ipcMain.handle(
   "save-state",
   async (_: IpcMainInvokeEvent, projectRoot: string, state: AppStateData) => {
+    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
+      backendWs.send(
+        JSON.stringify({
+          type: "save_state",
+          payload: { projectPath: projectRoot, state },
+        }),
+      );
+      return true;
+    }
+
     try {
       const dotDir = path.join(projectRoot, ".react-map");
       if (!fs.existsSync(dotDir)) {
@@ -1539,6 +1583,22 @@ ipcMain.handle(
     positions: UIStateMap,
     contextId?: string,
   ) => {
+    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
+      backendWs.send(
+        JSON.stringify({
+          type: "update_graph_position",
+          payload: {
+            projectPath: projectRoot,
+            subProject:
+              analysisPath === projectRoot ? undefined : analysisPath,
+            positions,
+            contextId,
+          },
+        }),
+      );
+      return true;
+    }
+    // ... local fallback logic ...
     const targetPath = analysisPath;
 
     // Ensure configRoot is correct: if analysisPath is not under projectRoot, use analysisPath as configRoot

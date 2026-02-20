@@ -159,6 +159,9 @@ importers:
       analyser:
         specifier: workspace:*
         version: link:../analyser
+      server:
+        specifier: workspace:*
+        version: link:../server
       shared:
         specifier: workspace:*
         version: link:../shared
