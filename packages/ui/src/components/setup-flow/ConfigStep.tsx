@@ -13,7 +13,7 @@ import {
 interface ConfigStepProps {
   path: string;
   status: ProjectStatus;
-  onConfirm: () => void;
+  onConfirm: (analysisPath?: string) => void;
   onBack: () => void;
 }
 
@@ -91,7 +91,7 @@ export function ConfigStep({
         projectPath,
       );
 
-      onConfirm();
+      onConfirm(analysisPath);
     } catch (error) {
       console.error("Failed to save config:", error);
     } finally {

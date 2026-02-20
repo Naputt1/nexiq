@@ -5,7 +5,7 @@ import type { ProjectStatus } from "./types";
 import { Button } from "../ui/button";
 
 interface SetupFlowProps {
-  onComplete: (path: string) => void;
+  onComplete: (path: string, analysisPath?: string) => void;
 }
 
 export function SetupFlow({ onComplete }: SetupFlowProps) {
@@ -25,9 +25,9 @@ export function SetupFlow({ onComplete }: SetupFlowProps) {
     }
   };
 
-  const handleConfigConfirm = () => {
+  const handleConfigConfirm = (analysisPath?: string) => {
     if (selectedPath) {
-      onComplete(selectedPath);
+      onComplete(selectedPath, analysisPath);
     }
   };
 

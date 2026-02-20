@@ -87,9 +87,10 @@ const VIEW_GENERATORS: Record<GraphViewType, GraphViewGenerator> = {
 
 interface ComponentGraphProps {
   projectPath: string;
+  subProject?: string;
 }
 
-const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
+const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
   const selectedSubProject = useAppStateStore((s) => s.selectedSubProject);
   const setSelectedSubProject = useAppStateStore(
     (s) => s.setSelectedSubProject,
@@ -223,7 +224,7 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
       return rendererRef.current.getZoomRange();
     }
     return { min: 0.1, max: 5 };
-  }, [graphData]); // Re-calculate when graph data changes
+  }, []); // Re-calculate when graph data changes
 
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -648,8 +649,8 @@ const ComponentGraph = ({ projectPath }: ComponentGraphProps) => {
   useEffect(() => {
     hasRestoredViewport.current = false; // Reset flag when project changes
     resetState();
-    loadState(projectPath);
-  }, [projectPath, loadState, resetState]);
+    loadState(projectPath, subProject);
+  }, [projectPath, subProject, loadState, resetState]);
 
   // load data whenever sub-project selection or selected commit changes
   useEffect(() => {

@@ -21,6 +21,78 @@ import * as watcher from "@parcel/watcher";
 import tmp from "tmp";
 import { simpleGit, type LogOptions } from "simple-git";
 import { analyzeProject } from "analyser";
+import { WebSocket, type MessageEvent } from "ws";
+import { spawn, ChildProcess } from "node:child_process";
+
+const BACKEND_PORT = 3030;
+let backendProcess: ChildProcess | null = null;
+let backendWs: WebSocket | null = null;
+
+async function startBackend() {
+  if (backendProcess) return;
+
+  const serverDist = path.join(
+    process.env.APP_ROOT!,
+    "..",
+    "server",
+    "dist",
+    "index.js",
+  );
+  console.log(`Starting backend from: ${serverDist}`);
+
+  backendProcess = spawn("node", [serverDist], {
+    stdio: ["inherit", "inherit", "inherit"],
+    env: {
+      ...process.env,
+      PORT: BACKEND_PORT.toString(),
+      NODE_ENV: VITE_DEV_SERVER_URL ? "development" : "production",
+    },
+  });
+
+  backendProcess.on("error", (err) => {
+    console.error("Failed to start backend process:", err);
+  });
+
+  backendProcess.on("exit", (code) => {
+    console.log(`Backend process exited with code ${code}`);
+    backendProcess = null;
+  });
+
+  // Wait a bit for the server to start
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  connectToBackend();
+}
+
+function connectToBackend() {
+  if (backendWs) return;
+
+  backendWs = new WebSocket(`ws://localhost:${BACKEND_PORT}`);
+
+  backendWs.on("open", () => {
+    console.log("Connected to shared backend");
+  });
+
+  backendWs.on("message", (data) => {
+    try {
+      JSON.parse(data.toString());
+      // Handle messages from backend (e.g., project_opened, graph_data)
+      // This will need to be integrated with the window management logic
+    } catch (e: unknown) {
+      console.error("Error handling backend message", e);
+    }
+  });
+
+  backendWs.on("error", (err) => {
+    console.warn("Backend connection error, retrying in 5s...", err.message);
+    backendWs = null;
+    setTimeout(connectToBackend, 5000);
+  });
+
+  backendWs.on("close", () => {
+    console.log("Backend connection closed");
+    backendWs = null;
+  });
+}
 
 import type {
   AppStateData,
@@ -113,7 +185,7 @@ async function startWatcher(projectPath: string) {
         );
         ignorePatterns = [...ignorePatterns, ...customIgnores];
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.warn("Failed to load config for watcher", e);
     }
   }
@@ -418,6 +490,10 @@ app.on("before-quit", async () => {
     await stopWatcher(projectPath);
   }
   updateOpenProjects();
+  if (backendProcess) {
+    backendProcess.kill();
+    backendProcess = null;
+  }
 });
 
 app.on("will-quit", async () => {
@@ -438,6 +514,7 @@ app.on("activate", () => {
 
 app.whenReady().then(() => {
   createMenu();
+  startBackend();
 
   if (process.platform === "darwin") {
     const dockMenu = Menu.buildFromTemplate([
@@ -554,7 +631,7 @@ ipcMain.handle(
           status.config = JSON.parse(
             fs.readFileSync(configPath, "utf-8"),
           ) as ReactMapConfig;
-        } catch (e) {
+        } catch (e: unknown) {
           console.error("Error reading config", e);
         }
       }
@@ -574,7 +651,7 @@ ipcMain.handle(
           if (doc && doc.packages && Array.isArray(doc.packages)) {
             workspacePatterns = doc.packages;
           }
-        } catch (e) {
+        } catch (e: unknown) {
           console.error("Error reading pnpm-workspace.yaml", e);
         }
       } else if (fs.existsSync(packageJsonPath)) {
@@ -635,7 +712,7 @@ ipcMain.handle(
           // DO NOT filter subprojects here anymore, so they show up in Settings
           // status.subProjects = subProjects.filter(...)
           status.subProjects = subProjects;
-        } catch (e) {
+        } catch (e: unknown) {
           console.error("Error resolving workspaces", e);
         }
       }
@@ -672,7 +749,7 @@ ipcMain.handle(
       if (fs.existsSync(configPath)) {
         try {
           oldConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        } catch (e) {
+        } catch (e: unknown) {
           console.error("Failed to read old config", e);
         }
       }
@@ -941,7 +1018,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
       try {
         const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
         ignorePatterns = config.ignorePatterns;
-      } catch (e) {
+      } catch (e: unknown) {
         console.warn("Failed to load config for analysis", e);
       }
     }
@@ -1052,7 +1129,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
         };
 
         traverseApply(graph);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Failed to merge positions", e);
       }
     }
@@ -1069,7 +1146,49 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
 ipcMain.handle(
   "analyze-project",
   async (_: IpcMainInvokeEvent, analysisPath: string, projectPath: string) => {
-    await performAnalysis(analysisPath, projectPath);
+    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
+      return new Promise((resolve, reject) => {
+        const requestId = Math.random().toString(36).substring(7);
+        const timeout = setTimeout(() => {
+          backendWs!.removeEventListener("message", onMessage);
+          reject(new Error("Timeout waiting for project analysis"));
+        }, 60000);
+
+        const onMessage = (event: MessageEvent) => {
+          const {
+            type,
+            payload,
+            requestId: responseId,
+          } = JSON.parse(event.data.toString());
+          if (responseId !== requestId) return;
+
+          if (type === "project_opened") {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            resolve(path.basename(analysisPath));
+          } else if (type === "error") {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            reject(new Error(payload.message || "Analysis failed"));
+          }
+        };
+
+        backendWs!.addEventListener("message", onMessage);
+        backendWs!.send(
+          JSON.stringify({
+            type: "open_project",
+            payload: {
+              projectPath,
+              subProject:
+                analysisPath === projectPath ? undefined : analysisPath,
+            },
+            requestId,
+          }),
+        );
+      });
+    } else {
+      await performAnalysis(analysisPath, projectPath);
+    }
     return path.basename(analysisPath);
   },
 );
@@ -1080,6 +1199,49 @@ ipcMain.handle(
     const targetPath = analysisPath || projectRoot;
     if (!targetPath) return null;
 
+    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
+      return new Promise((resolve, reject) => {
+        const requestId = Math.random().toString(36).substring(7);
+        const timeout = setTimeout(() => {
+          backendWs!.removeEventListener("message", onMessage);
+          reject(new Error("Timeout waiting for backend graph data"));
+        }, 60000);
+
+        const onMessage = (event: MessageEvent) => {
+          const {
+            type,
+            payload,
+            requestId: responseId,
+          } = JSON.parse(event.data.toString());
+          if (responseId !== requestId) return;
+
+          if (type === "graph_data") {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            resolve(payload);
+          } else if (type === "error") {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            reject(new Error(payload.message || "Unknown backend error"));
+          }
+        };
+
+        backendWs!.addEventListener("message", onMessage);
+        backendWs!.send(
+          JSON.stringify({
+            type: "get_graph_data",
+            payload: {
+              projectPath: projectRoot,
+              subProject:
+                analysisPath === projectRoot ? undefined : analysisPath,
+            },
+            requestId,
+          }),
+        );
+      });
+    }
+
+    // Fallback to local if backend is not available
     const name = path.basename(targetPath);
     const graphPath = path.join(
       projectRoot,
@@ -1088,7 +1250,7 @@ ipcMain.handle(
       `${name}.json`,
     );
 
-    console.log("Reading graph data from:", graphPath);
+    console.log("Reading graph data from (local fallback):", graphPath);
 
     if (fs.existsSync(graphPath)) {
       return JSON.parse(fs.readFileSync(graphPath, "utf-8"));
@@ -1162,7 +1324,7 @@ ipcMain.handle(
         try {
           const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
           ignorePatterns = config.ignorePatterns;
-        } catch (e) {
+        } catch (e: unknown) {
           console.warn("Failed to load config for git analysis", e);
         }
       }
@@ -1341,7 +1503,7 @@ ipcMain.handle(
     if (fs.existsSync(statePath)) {
       try {
         return JSON.parse(fs.readFileSync(statePath, "utf-8"));
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Error reading state.json", e);
       }
     }
@@ -1503,7 +1665,7 @@ ipcMain.handle(
 
       fs.writeFileSync(graphPath, JSON.stringify(graphData, null, 2));
       return true;
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to update graph positions", e);
       return false;
     }
@@ -1559,13 +1721,13 @@ ipcMain.handle(
               return `https://github.com/${owner}.png`;
             }
           }
-        } catch (e) {
+        } catch (e: unknown) {
           console.warn("Failed to get git remotes", e);
         }
       }
 
       return null;
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to get project icon", e);
       return null;
     }

@@ -80,10 +80,18 @@ export interface DetailSection {
   defaultOpen?: boolean;
 }
 
+export interface MCPTool {
+  name: string;
+  description: string;
+  inputSchema: any;
+  handler: (args: any) => Promise<any>;
+}
+
 export interface Extension {
   id: string;
   viewTasks?: Record<string, GraphViewTask[]>; // Mapping of GraphViewType to tasks
   detailSections?: DetailSection[];
+  mcpTools?: MCPTool[];
 }
 
 export * from "./tasks/componentTask.js";

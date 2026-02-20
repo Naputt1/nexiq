@@ -50,7 +50,10 @@ interface AppState {
   setRightSidebarHeight: (height: number) => void;
 
   // Persistence helpers
-  loadState: (projectRoot: string) => Promise<void>;
+  loadState: (
+    projectRoot: string,
+    overrideSubProject?: string | null,
+  ) => Promise<void>;
   saveState: (projectRoot: string) => Promise<void>;
   reset: () => void;
 }
@@ -120,12 +123,13 @@ export const useAppStateStore = create<AppState>()(
         },
       }),
 
-    loadState: async (projectRoot: string) => {
+    loadState: async (projectRoot: string, overrideSubProject?: string | null) => {
       set({ isLoaded: false });
       const state = await window.ipcRenderer.invoke("read-state", projectRoot);
       if (state) {
         set({
-          selectedSubProject: state.selectedSubProject || projectRoot,
+          selectedSubProject:
+            overrideSubProject || state.selectedSubProject || projectRoot,
           centeredItemId: state.centeredItemId || null,
           selectedId: state.selectedId || null,
           isSidebarOpen: state.isSidebarOpen ?? false,
@@ -145,6 +149,11 @@ export const useAppStateStore = create<AppState>()(
       } else {
         const { reset } = get();
         reset();
+        if (overrideSubProject) {
+          set({ selectedSubProject: overrideSubProject, isLoaded: true });
+        } else {
+          set({ selectedSubProject: projectRoot, isLoaded: true });
+        }
       }
     },
 
