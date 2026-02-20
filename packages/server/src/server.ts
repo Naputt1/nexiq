@@ -204,89 +204,11 @@ export class BackendServer {
       case "get_symbol_info": {
         const { projectPath, subProject, query } =
           args as unknown as GetSymbolInfoArgs;
-        const project = this.projectManager.getProject(projectPath, subProject);
-        if (!project || !project.graph) {
-          throw new Error(
-            "Project not open or graph not available. Call open_project first.",
-          );
-        }
-
-        const graph = project.graph;
-        const results: SymbolInfoResult[] = [];
-
-        // Find definitions
-        for (const [filePath, file] of Object.entries(graph.files)) {
-          for (const variable of Object.values(file.var)) {
-            const displayName = getDisplayName(variable.name);
-            if (displayName.toLowerCase().includes(query.toLowerCase())) {
-              results.push({
-                type: "definition",
-                kind: variable.kind,
-                name: displayName,
-                file: filePath,
-                loc: variable.loc,
-                props: "props" in variable ? variable.props : undefined,
-              });
-            }
-          }
-        }
-
-        // Find usages
-        for (const [filePath, file] of Object.entries(graph.files)) {
-          for (const variable of Object.values(file.var)) {
-            const containerName = getDisplayName(variable.name);
-
-            // Check renders (component calls)
-            if ("renders" in variable && variable.renders) {
-              for (const render of Object.values(variable.renders)) {
-                if (render.tag.toLowerCase().includes(query.toLowerCase())) {
-                  results.push({
-                    type: "usage",
-                    kind: "component-render",
-                    in: containerName,
-                    file: filePath,
-                    loc: render.loc,
-                  });
-                }
-              }
-            }
-
-            // Check direct usages in body (for other variables and hooks)
-            if ("var" in variable && variable.var) {
-              for (const v of Object.values(variable.var)) {
-                const varName = getDisplayName(v.name);
-
-                // Check if it's a hook call
-                if (
-                  v.type === "data" &&
-                  v.kind === "hook" &&
-                  "call" in v &&
-                  v.call.name.toLowerCase().includes(query.toLowerCase())
-                ) {
-                  results.push({
-                    type: "usage",
-                    kind: "hook-call",
-                    in: containerName,
-                    file: filePath,
-                    loc: v.loc,
-                  });
-                }
-
-                // Check if it's a regular variable matching the query
-                if (varName.toLowerCase().includes(query.toLowerCase())) {
-                  results.push({
-                    type: "definition",
-                    kind: "local-variable",
-                    name: varName,
-                    in: containerName,
-                    file: filePath,
-                    loc: v.loc,
-                  });
-                }
-              }
-            }
-          }
-        }
+        const results = await this.projectManager.findSymbol(
+          projectPath,
+          query,
+          subProject,
+        );
 
         return {
           content: [
@@ -394,6 +316,59 @@ export class BackendServer {
                 JSON.stringify({
                   type: "graph_data",
                   payload: project.graph,
+                  requestId,
+                }),
+              );
+              break;
+            }
+            case "update_graph_position": {
+              const { projectPath, subProject, positions, contextId } =
+                payload as {
+                  projectPath: string;
+                  subProject: string | undefined;
+                  positions: any;
+                  contextId?: string;
+                };
+              const success = await this.projectManager.updateGraphPosition(
+                projectPath,
+                subProject,
+                positions,
+                contextId,
+              );
+              ws.send(
+                JSON.stringify({
+                  type: "position_updated",
+                  payload: { success },
+                  requestId,
+                }),
+              );
+              break;
+            }
+            case "save_state": {
+              const { projectPath, state } = payload as {
+                projectPath: string;
+                state: any;
+              };
+              const success = await this.projectManager.saveAppState(
+                projectPath,
+                state,
+              );
+              ws.send(
+                JSON.stringify({
+                  type: "state_saved",
+                  payload: { success },
+                  requestId,
+                }),
+              );
+              break;
+            }
+            case "read_state": {
+              const { projectPath } = payload as { projectPath: string };
+              const state = await this.projectManager.readAppState(projectPath);
+              ws.send(
+                JSON.stringify({
+                  type: "state_data",
+                  payload: state,
                   requestId,
                 }),
               );

@@ -24,6 +24,9 @@ Transition `react-map` from a UI-focused visualization tool to an MCP-first (Mod
 - [x] Update `Extension` SDK to support `mcpTools`.
 - [x] Connect Electron UI to the shared backend via WebSocket.
 - [x] Add MCP tools to TanStack Router and Query extensions.
+- [x] **Unified Server Package**: Fully merged core logic into `packages/server` as a reusable library.
+- [x] **Enhanced Symbol Search**: Implemented robust cross-file definition and usage tracking in `get_symbol_info`.
+- [x] **State Synchronization**: UI node positions and app state are now synced and persisted by the shared backend.
 
 ## Next Steps
 
