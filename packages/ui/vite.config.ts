@@ -5,6 +5,7 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { builtinModules } from "node:module";
 import { devtools } from "@tanstack/devtools-vite";
+import istanbul from "vite-plugin-istanbul";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -12,6 +13,15 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     mode === "development" && devtools(),
+    process.env.VITE_COVERAGE === "true" &&
+      istanbul({
+        include: "src/**/*.{ts,tsx}",
+        exclude: ["node_modules", "test/**/*", "e2e/**/*"],
+        extension: [".ts", ".tsx"],
+        requireEnv: false,
+        checkProd: false,
+        forceBuildInstrument: true,
+      }),
     electron({
       main: {
         // Shortcut of `build.lib.entry`.
@@ -30,6 +40,7 @@ export default defineConfig(({ mode }) => ({
                 "js-yaml",
                 "simple-git",
                 "tmp",
+                "ws",
                 ...builtinModules,
                 ...builtinModules.map((m) => `node:${m}`),
               ],

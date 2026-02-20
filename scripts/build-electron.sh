@@ -10,9 +10,10 @@ rm -rf "$ROOT_DIR/out/ui"
 mkdir -p "$ROOT_DIR/out"
 
 echo "Building all packages..."
-# Build shared and analyser first
+# Build shared, analyser and server first
 pnpm --filter shared build
 pnpm --filter analyser build
+pnpm --filter server build
 
 echo "Building UI renderer and main..."
 pnpm --filter ui build:vite

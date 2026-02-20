@@ -22,6 +22,10 @@ function App() {
     searchParams.get("projectPath") ||
     new URLSearchParams(window.location.search).get("projectPath");
 
+  const urlSubProject =
+    searchParams.get("subProject") ||
+    new URLSearchParams(window.location.search).get("subProject");
+
   const isEmpty =
     searchParams.get("empty") === "true" ||
     new URLSearchParams(window.location.search).get("empty") === "true";
@@ -30,7 +34,10 @@ function App() {
     if (urlProjectPath) {
       setProjectRoot(urlProjectPath);
     }
-  }, [urlProjectPath, setProjectRoot]);
+    if (urlSubProject) {
+      useAppStateStore.getState().setSelectedSubProject(urlSubProject);
+    }
+  }, [urlProjectPath, urlSubProject, setProjectRoot]);
 
   // Use project root from URL if available, otherwise from store (if not explicitly empty)
   const projectRoot = urlProjectPath || (isEmpty ? null : storedProjectRoot);
@@ -44,7 +51,7 @@ function App() {
     }
   }, [projectRoot]);
 
-  const handleProjectComplete = async (path: string) => {
+  const handleProjectComplete = async (path: string, analysisPath?: string) => {
     // Save to main process first
     const wasFocusedElsewhere = await window.ipcRenderer.invoke(
       "set-last-project",
@@ -53,7 +60,11 @@ function App() {
     if (wasFocusedElsewhere) return;
 
     // Use hash-based navigation for compatibility with HashRouter
-    window.location.hash = `/?projectPath=${encodeURIComponent(path)}`;
+    let url = `/?projectPath=${encodeURIComponent(path)}`;
+    if (analysisPath && analysisPath !== path) {
+      url += `&subProject=${encodeURIComponent(analysisPath)}`;
+    }
+    window.location.hash = url;
   };
 
   if (!projectRoot) {
@@ -62,7 +73,15 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<ComponentGraph projectPath={projectRoot} />} />
+      <Route
+        path="/"
+        element={
+          <ComponentGraph
+            projectPath={projectRoot}
+            subProject={urlSubProject || undefined}
+          />
+        }
+      />
       <Route
         path="/project-settings"
         element={<ProjectSettings projectPath={projectRoot} />}

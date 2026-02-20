@@ -317,6 +317,7 @@ const VirtualTree = React.memo(
   }) => {
     const parentRef = useRef<HTMLDivElement>(null);
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
       count: flatTree.length,
       getScrollElement: () => parentRef.current,

@@ -1,6 +1,8 @@
 # react-map
 
-`react-map` is a tool designed to analyze React component structures and visualize their dependencies. It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored in a desktop application.
+`react-map` is a tool designed to analyze React component structures and visualize their dependencies. It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored via a **Model Context Protocol (MCP)** server or a desktop application.
+
+The project has pivoted towards an **MCP-first architecture**, where the core analysis and project management logic resides in a shared backend that serves both LLMs (via MCP) and human developers (via Electron).
 
 ## Project Structure
 
@@ -11,18 +13,24 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
   - Extracts component relationships, props (including destructuring and types), and hooks.
   - Generates a JSON graph output.
   - Supports caching for incremental analysis.
+- **`packages/mcp`**: The primary entry point for LLM-driven code exploration.
+  - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
+  - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
+- **`packages/server`**: A shared backend service that manages project analysis, file watching, and provides a WebSocket API for the UI.
 - **`packages/ui`**: An Electron-based desktop application for visualizing the component graph.
   - Built with React, Vite, and Tailwind CSS.
   - Uses `@antv/g6`, `Konva`, and `react-konva` for graph rendering and interactions.
-  - Integrates with the `analyser` package to display project data.
-- **`packages/shared`**: Common TypeScript types and utilities shared between the analyser and the UI.
-- **`packages/sample-project`**: A collection of sample React projects (`simple`, `complex`, `props`, `hook`, etc.) used for testing and snapshot verification.
+  - Connects to the shared backend to display real-time project data.
+- **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks, UI sections, or MCP tools.
+- **`packages/shared`**: Common TypeScript types and utilities shared across the monorepo.
+- **`packages/sample-project`**: A collection of sample React projects used for testing and snapshot verification.
 
 ## Core Technologies
 
 - **Language**: TypeScript
 - **Package Manager**: `pnpm`
 - **Source Analysis**: Babel (`@babel/parser`, `@babel/traverse`)
+- **Backend Communication**: Model Context Protocol (MCP), WebSockets (ws)
 - **Frontend**: React, React Router, Radix UI
 - **Styling**: Tailwind CSS
 - **Visualization**: Konva / React-Konva, AntV G6
@@ -99,6 +107,12 @@ From the project root:
 
 - ESLint is configured for both `analyser` and `ui` packages.
 - Follow existing patterns for Babel traversal and React component structure.
+
+### Testing & Coverage
+
+- **100% Coverage**: ALL backend packages (`analyser`, `server`, `mcp`, `shared`) MUST maintain 100% test coverage.
+- **Unit Tests**: Every new feature or tool handler must include corresponding unit tests in a `.test.ts` file.
+- **Verification**: Always run `pnpm test` (or the package-specific test command) to ensure all tests pass and coverage is maintained before submitting changes.
 
 ### TypeScript & Typing
 
