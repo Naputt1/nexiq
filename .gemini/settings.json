@@ -3,7 +3,7 @@
     "react-map-debug": {
       "command": "node",
       "args": [
-        "/Users/naputt/git/react-map/packages/mcp/dist/index.js"
+        "/Users/naputt/git/react-map/packages/server/dist/index.js"
       ]
     }
   }

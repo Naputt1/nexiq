@@ -25,10 +25,10 @@ export abstract class Variable<
   dependencies: Record<string, ComponentFileVarDependency>;
   parent?: Variable<"function">;
   loc: VariableLoc;
-  ui?: UIItemState & {
+  ui?: (UIItemState & {
     renders?: Record<string, UIItemState>;
     vars?: Record<string, UIItemState>;
-  };
+  }) | undefined;
 
   constructor(
     data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,

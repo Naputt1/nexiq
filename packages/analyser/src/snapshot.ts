@@ -23,7 +23,7 @@ const samples = args._[0]
       "cache-new",
     ];
 
-function main(sample: string) {
+export function runSnapshot(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
   const PUBLIC_FILE = "../ui/public/graph.json";
@@ -72,6 +72,8 @@ function main(sample: string) {
   console.log(`Graph written to ${OUT_FILE}`);
 }
 
-for (const sample of samples) {
-  main(sample);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  for (const sample of samples) {
+    runSnapshot(sample);
+  }
 }

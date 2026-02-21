@@ -34,5 +34,5 @@ Transition `react-map` from a UI-focused visualization tool to an MCP-first (Mod
 - [ ] **Enhanced Symbol Search**: Improve `get_symbol_info` to handle complex cross-file dependencies and re-exports more accurately.
 - [ ] **State Synchronization**: Sync UI state (like node positions or selected items) back to the backend so the MCP server can refer to the "current view".
 - [ ] **Multi-Project Management**: Improve the `ProjectManager` to handle multiple workspace projects concurrently and efficiently.
-- [ ] **Token Optimization**: Implement "partial graph" results for MCP to further reduce context window pressure.
+- [x] **Token Optimization**: Implemented `get_component_hierarchy` for surgical, depth-limited render tree retrieval.
 - [ ] **Documentation**: Document the custom `react.map.config.json` schema and how to write MCP extensions.

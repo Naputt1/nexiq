@@ -77,7 +77,7 @@ export default function VariableDeclarator(
     };
 
     const processPattern = (
-      pId: t.LVal,
+      pId: t.LVal | null,
       pParentId?: string,
       special?:
         | { type: "state"; extra: { setter: string | undefined } }
@@ -98,11 +98,12 @@ export default function VariableDeclarator(
             };
           },
     ): string | undefined => {
+      if (pId == null) return undefined;
       const pattern = getPattern(pId, pParentId);
       const nameKey = getVariableNameKey(pattern);
       const componentId = getDeterministicId(nameKey);
 
-      assert(pId.loc != null);
+      if (pId.loc == null) return undefined;
       const pLoc = {
         line: pId.loc.start.line,
         column: pId.loc.start.column,
@@ -536,21 +537,18 @@ export default function VariableDeclarator(
           let scope: VariableScope | undefined;
           const reactDeps: ReactDependency[] = [];
           if (init.arguments.length > 0) {
-            if (t.isArrowFunctionExpression(init.arguments[0])) {
-              assert(init.arguments[0].loc != null, "Function loc not found");
-
+            const func = init.arguments[0];
+            if ((t.isArrowFunctionExpression(func) || t.isFunctionExpression(func)) && func.loc) {
               scope = {
                 start: {
-                  line: init.arguments[0].loc.start.line,
-                  column: init.arguments[0].loc.start.column,
+                  line: func.loc.start.line,
+                  column: func.loc.start.column,
                 },
                 end: {
-                  line: init.arguments[0].loc.end.line,
-                  column: init.arguments[0].loc.end.column,
+                  line: func.loc.end.line,
+                  column: func.loc.end.column,
                 },
               };
-            } else {
-              debugger;
             }
           }
 
@@ -562,44 +560,38 @@ export default function VariableDeclarator(
                     id: "",
                     name: element.name,
                   });
-                } else {
-                  debugger;
                 }
               }
-            } else {
-              debugger;
             }
-          } else {
-            debugger;
           }
 
-          assert(scope != null, "Scope not found");
-          processPattern(
-            id as t.LVal,
-            patternPrefix,
-            {
-              type: "memo",
-              extra: { scope, reactDeps },
-            },
+          if (scope) {
+            processPattern(
+              id as t.LVal,
+              patternPrefix,
+              {
+                type: "memo",
+                extra: { scope, reactDeps },
+              },
             );
-          return;
+            return;
+          }
         } else if (init.callee.name === "useCallback") {
           const id = nodePath.node.id;
 
           let scope: VariableScope | undefined;
           const reactDeps: ReactDependency[] = [];
           if (init.arguments.length > 0) {
-            if (t.isArrowFunctionExpression(init.arguments[0])) {
-              assert(init.arguments[0].loc != null, "Function loc not found");
-
+            const func = init.arguments[0];
+            if ((t.isArrowFunctionExpression(func) || t.isFunctionExpression(func)) && func.loc) {
               scope = {
                 start: {
-                  line: init.arguments[0].loc.start.line,
-                  column: init.arguments[0].loc.start.column,
+                  line: func.loc.start.line,
+                  column: func.loc.start.column,
                 },
                 end: {
-                  line: init.arguments[0].loc.end.line,
-                  column: init.arguments[0].loc.end.column,
+                  line: func.loc.end.line,
+                  column: func.loc.end.column,
                 },
               };
             }
@@ -618,16 +610,17 @@ export default function VariableDeclarator(
             }
           }
 
-          assert(scope != null, "Scope not found");
-          processPattern(
-            id as t.LVal,
-            patternPrefix,
-            {
-              type: "callback",
-              extra: { scope, reactDeps },
-            },
+          if (scope) {
+            processPattern(
+              id as t.LVal,
+              patternPrefix,
+              {
+                type: "callback",
+                extra: { scope, reactDeps },
+              },
             );
-          return;
+            return;
+          }
         } else if (init.callee.name === "useRef") {
           const id = nodePath.node.id;
 

@@ -162,10 +162,10 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   parentId?: string | undefined;
   declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  ui?: UIItemState & {
+  ui?: (UIItemState & {
     renders?: Record<string, UIItemState>;
     vars?: Record<string, UIItemState>;
-  };
+  }) | undefined;
 }
 
 export interface ComponentFileVarBase<
