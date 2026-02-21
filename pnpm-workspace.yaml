@@ -3,6 +3,7 @@ packages:
   - packages/sample-project/*
   - extensions/*
   - benchmarks/viewer
+  - benchmarks/cli
 
 ignoredBuiltDependencies:
   - "@swc/core"

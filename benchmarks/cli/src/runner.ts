@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import fs from "fs";
@@ -6,33 +5,34 @@ import path from "path";
 import { get_encoding } from "tiktoken";
 import { z } from "zod";
 import OpenAI from "openai";
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: "../../.env" });
 
 // --- Types ---
 
-const ScenarioSchema = z.object({
+export const ScenarioSchema = z.object({
   id: z.string(),
   type: z.enum(["breadth", "depth", "complexity"]),
   prompt: z.string(),
   expected_answer_contains: z.array(z.string()),
 });
 
-const ProjectScenariosSchema = z.object({
+export const ProjectScenariosSchema = z.object({
   name: z.string(),
   root: z.string(),
   scenarios: z.array(ScenarioSchema),
 });
 
-type Scenario = z.infer<typeof ScenarioSchema>;
-type ProjectScenarios = z.infer<typeof ProjectScenariosSchema>;
+export type Scenario = z.infer<typeof ScenarioSchema>;
+export type ProjectScenarios = z.infer<typeof ProjectScenariosSchema>;
 
-interface ToolCall {
+export interface ToolCall {
   id: string;
   name: string;
   arguments: any;
 }
 
-interface BenchmarkStep {
+export interface BenchmarkStep {
   role: "user" | "assistant" | "tool" | "system";
   content?: string;
   toolCalls?: ToolCall[];
@@ -41,7 +41,7 @@ interface BenchmarkStep {
   tokens: number;
 }
 
-interface BenchmarkResult {
+export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
   approach: "baseline" | "react-map-cold" | "react-map-warm";
@@ -52,6 +52,28 @@ interface BenchmarkResult {
   toolCallsCount: number;
   latencyMs: number;
   steps: BenchmarkStep[];
+}
+
+export interface RunOptions {
+  projects: string[];
+  models: LlmClient[];
+  testTypes: ("single-prompt" | "planning")[];
+  approaches: ("baseline" | "react-map-cold" | "react-map-warm")[];
+  onProgress?: (update: ProgressUpdate) => void;
+}
+
+export interface ProgressUpdate {
+  type: 'start' | 'scenario-start' | 'iteration' | 'tool-call' | 'scenario-end' | 'end';
+  projectName?: string;
+  scenarioId?: string;
+  model?: string;
+  approach?: string;
+  testType?: string;
+  iteration?: number;
+  toolName?: string;
+  result?: BenchmarkResult;
+  totalScenarios?: number;
+  completedScenarios?: number;
 }
 
 // --- Tokenizer ---
@@ -78,7 +100,6 @@ export class McpRunner {
     );
 
     await this.client.connect(transport);
-    console.log("Connected to MCP server");
   }
 
   async stop() {
@@ -99,13 +120,13 @@ export class McpRunner {
 
 // --- LLM Client Interface ---
 
-interface LlmClient {
+export interface LlmClient {
   name: string;
   displayName: string;
   chat(messages: BenchmarkStep[], tools: any[]): Promise<{ content?: string; toolCalls?: ToolCall[] }>;
 }
 
-class OpenRouterClient implements LlmClient {
+export class OpenRouterClient implements LlmClient {
   private openai: OpenAI;
   constructor(public name: string, public displayName: string) {
     this.openai = new OpenAI({
@@ -172,7 +193,7 @@ class OpenRouterClient implements LlmClient {
 
 // --- Benchmark Runner ---
 
-class BenchmarkRunner {
+export class BenchmarkRunner {
   private results: BenchmarkResult[] = [];
 
   async runScenario(
@@ -181,10 +202,9 @@ class BenchmarkRunner {
     approach: "baseline" | "react-map-cold" | "react-map-warm",
     testType: "single-prompt" | "planning",
     llm: LlmClient,
-    mcp: McpRunner
+    mcp: McpRunner,
+    onProgress?: (update: ProgressUpdate) => void
   ): Promise<BenchmarkResult> {
-    console.log(`\n>>> Scenario ${scenario.id} (${project.name}) | Model: ${llm.displayName} | Approach: ${approach} | Type: ${testType}`);
-    
     const startTime = Date.now();
     let totalTokens = 0;
     let toolCallsCount = 0;
@@ -227,7 +247,6 @@ class BenchmarkRunner {
       steps.push(systemMsg);
       totalTokens += systemMsg.tokens;
     } else {
-       // For single-prompt, we can add context to the first user message or a system message
        const systemMsg: BenchmarkStep = {
           role: "system",
           content: pathContext,
@@ -251,7 +270,15 @@ class BenchmarkRunner {
 
     while (iterations < MAX_ITERATIONS) {
       iterations++;
-      console.log(`Iteration ${iterations}...`);
+      onProgress?.({
+        type: 'iteration',
+        iteration: iterations,
+        projectName: project.name,
+        scenarioId: scenario.id,
+        model: llm.displayName,
+        approach,
+        testType
+      });
 
       const response = await llm.chat(steps, availableTools);
       const assistantMessage: BenchmarkStep = {
@@ -266,7 +293,16 @@ class BenchmarkRunner {
       if (response.toolCalls && response.toolCalls.length > 0) {
         for (const tc of response.toolCalls) {
           toolCallsCount++;
-          console.log(`  Tool Call: ${tc.name}`);
+          onProgress?.({
+            type: 'tool-call',
+            toolName: tc.name,
+            projectName: project.name,
+            scenarioId: scenario.id,
+            model: llm.displayName,
+            approach,
+            testType
+          });
+          
           const toolArgs = { ...tc.arguments };
           if (!toolArgs.projectPath && approach !== "baseline" && tc.name.startsWith("get_")) {
              toolArgs.projectPath = path.resolve(project.root);
@@ -278,10 +314,10 @@ class BenchmarkRunner {
 
           const MAX_TOOL_TOKENS = 30000;
           if (toolTokens > MAX_TOOL_TOKENS) {
-            console.warn(`  Tool output too large (${toolTokens} tokens). Truncating...`);
-            // Truncate based on character count as a heuristic, then refine with tokenizer
             const truncatedContent = resultContent.slice(0, MAX_TOOL_TOKENS * 4); 
-            resultContent = `${truncatedContent}\n\n... [TRUNCATED DUE TO SIZE: ${toolTokens} tokens total] ...`;
+            resultContent = `${truncatedContent}
+
+... [TRUNCATED DUE TO SIZE: ${toolTokens} tokens total] ...`;
             toolTokens = countTokens(resultContent);
           }
 
@@ -296,7 +332,6 @@ class BenchmarkRunner {
           totalTokens += toolTokens;
         }
       } else if (response.content) {
-        console.log("Final answer received.");
         const answer = response.content.toLowerCase();
         success = scenario.expected_answer_contains.every(term => answer.includes(term.toLowerCase()));
         break;
@@ -321,50 +356,64 @@ class BenchmarkRunner {
     return result;
   }
 
-  saveResults() {
+  saveResults(): string {
     const timestamp = new Date().toISOString().replace(/:/g, "-");
-    const outFile = path.join("benchmarks/results", `run_${timestamp}.json`);
+    const outFile = path.join("../../benchmarks/results", `run_${timestamp}.json`);
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
     fs.writeFileSync(outFile, JSON.stringify(this.results, null, 2));
-    console.log(`\nResults saved to ${outFile}`);
+    return outFile;
   }
 }
 
-// --- Main ---
-
-async function main() {
+export async function runBenchmarks(options: RunOptions) {
   const runner = new BenchmarkRunner();
   const mcp = new McpRunner();
-  const serverPath = path.resolve("packages/server/dist/index.js");
+  const serverPath = path.resolve("../../packages/server/dist/index.js");
 
-  const projects = ["small", "mid", "large"];
-  
-  const models: LlmClient[] = [];
-  if (process.env.OPENROUTER_API_KEY) {
-    models.push(new OpenRouterClient("google/gemini-3-flash-preview", "Gemini 3 Flash Preview"));
-    models.push(new OpenRouterClient("anthropic/claude-sonnet-4.6", "Claude Sonnet 4.6"));
-    models.push(new OpenRouterClient("openai/gpt-5.2-codex", "GPT-5.2 Codex"));
-  } else {
-    console.error("OPENROUTER_API_KEY not found.");
-    return;
-  }
+  const totalScenariosCount = options.projects.length * 
+    options.models.length * 
+    options.testTypes.length * 
+    options.approaches.length; // This is a rough estimate as different projects have different number of scenarios
+
+  let completedScenarios = 0;
 
   try {
     await mcp.start(serverPath);
+    options.onProgress?.({ type: 'start' });
 
-    for (const tier of projects) {
-      const scenarioFile = path.join("benchmarks/scenarios", `${tier}.json`);
+    const sortedApproaches = [...options.approaches].sort((a, b) => {
+      const order = { 'baseline': 0, 'react-map-cold': 1, 'react-map-warm': 2 };
+      return order[a] - order[b];
+    });
+
+    for (const tier of options.projects) {
+      const scenarioFile = path.resolve(`../../benchmarks/scenarios/${tier}.json`);
       if (!fs.existsSync(scenarioFile)) continue;
       
       const projectData: ProjectScenarios = JSON.parse(fs.readFileSync(scenarioFile, "utf-8"));
 
       for (const scenario of projectData.scenarios) {
-        for (const model of models) {
-          for (const testType of ["single-prompt", "planning"] as const) {
-            for (const approach of ["baseline", "react-map-warm"] as const) {
+        for (const model of options.models) {
+          for (const testType of options.testTypes) {
+            for (const approach of sortedApproaches) {
                try {
-                  const result = await runner.runScenario(projectData, scenario, approach, testType, model, mcp);
-                  console.log(`  Result: ${result.success ? "SUCCESS" : "FAILED"}, Tokens: ${result.totalTokens}, Calls: ${result.toolCallsCount}`);
+                  options.onProgress?.({
+                    type: 'scenario-start',
+                    projectName: projectData.name,
+                    scenarioId: scenario.id,
+                    model: model.displayName,
+                    approach,
+                    testType
+                  });
+
+                  const result = await runner.runScenario(projectData, scenario, approach, testType, model, mcp, options.onProgress);
+                  
+                  completedScenarios++;
+                  options.onProgress?.({
+                    type: 'scenario-end',
+                    result,
+                    completedScenarios
+                  });
                } catch (e) {
                   console.error(`  Error running scenario: ${e}`);
                }
@@ -374,12 +423,10 @@ async function main() {
       }
     }
 
-    runner.saveResults();
+    const resultPath = runner.saveResults();
+    options.onProgress?.({ type: 'end' });
+    return resultPath;
   } finally {
     await mcp.stop();
   }
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
 }

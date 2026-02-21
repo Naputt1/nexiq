@@ -72,6 +72,12 @@ From the project root:
   ```
   *Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode.*
 
+- **Run Benchmarks**:
+  ```bash
+  pnpm benchmark
+  ```
+  This starts the interactive CLI tool for running benchmarks across different projects and models.
+
 - **Update Snapshots**:
   ```bash
   pnpm snapshot:analyze
