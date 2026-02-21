@@ -65,7 +65,7 @@ export class Scope {
     if (v) return v;
     if (recursive) {
       for (const value of this.variables.values()) {
-        if (isBaseFunctionVariable(value)) {
+        if (isBaseFunctionVariable(value) && value.var) {
           v = value.var.get(id, true);
           if (v) return v;
         }

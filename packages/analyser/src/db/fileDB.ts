@@ -321,7 +321,7 @@ export class File {
     memo: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    assert(component != null, "Component not found");
+    if (component == null) return "no-parent";
 
     const variable = component.addMemo(memo);
     this.scopes.add(variable);
@@ -335,7 +335,7 @@ export class File {
     callback: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    assert(component != null, "Component not found");
+    if (component == null) return "no-parent";
 
     const variable = component.addCallback(callback);
     this.scopes.add(variable);
@@ -718,8 +718,9 @@ export class File {
     ) {
       if (parentId) {
         const findParent = (
-          map: Record<string, ComponentInfoRender>,
+          map: Record<string, ComponentInfoRender> | undefined,
         ): ComponentInfoRender | undefined => {
+          if (!map) return undefined;
           if (map[parentId]) return map[parentId];
           for (const r of Object.values(map)) {
             const found = findParent(r.renders);
@@ -728,33 +729,34 @@ export class File {
           return undefined;
         };
 
-        const parent = findParent(variable.renders);
+        const parent = findParent((variable as any).renders);
         if (parent) {
           targetMap = parent.renders;
         }
       }
 
       if (!targetMap) {
-        targetMap = variable.renders;
+        targetMap = (variable as any).renders;
       }
 
-      targetMap[instanceId] = newRender;
+      if (targetMap) {
+        targetMap[instanceId] = newRender;
+      }
     }
 
-    return variable.id;
+    return (variable as any).id;
   }
 
   public addEffect(loc: VariableLoc, effect: Omit<EffectInfo, "id">) {
     const variable = this.getVariable(loc);
 
-    assert(variable != null, "Variable not found");
+    if (variable == null) return;
 
-    assert(
-      isHookVariable(variable) || isComponentVariable(variable),
-      "can't add hook to non-hook",
-    );
-
-    variable.addEffect(effect);
+    if (
+      isHookVariable(variable) || isComponentVariable(variable)
+    ) {
+      variable.addEffect(effect);
+    }
   }
 }
 
@@ -993,7 +995,9 @@ export class FileDB {
       if (importData) {
         if (this.has(importData.source)) {
           const file = this.get(importData.source);
-          return file.getExport(importData);
+          if (file) {
+            return file.getExport(importData);
+          }
         }
       }
     }

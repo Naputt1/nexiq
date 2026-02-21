@@ -15,7 +15,7 @@ const CACHE_FILE = args.cache || OUT_FILE;
 
 const CACHE = args.cache ?? true;
 
-function main() {
+export function main() {
   const packageJson = new PackageJson(SRC_DIR);
 
   const viteConfigPath = getViteConfig(SRC_DIR);
@@ -50,4 +50,6 @@ function main() {
   console.log(`Graph written to ${OUT_FILE}`);
 }
 
-main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}

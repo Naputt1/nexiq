@@ -339,7 +339,7 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    assert(component != null, "Component not found");
+    if (component == null) return "no-parent";
 
     return component.addState(state);
   }
@@ -351,7 +351,7 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    assert(component != null, "Component not found");
+    if (component == null) return "no-parent";
 
     const id = component.addCallHook(callHook);
 
@@ -396,7 +396,7 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    assert(component != null, "Component not found");
+    if (component == null) return "no-parent";
 
     return component.addRef(ref).id;
   }
@@ -465,7 +465,7 @@ export class ComponentDB {
     }
 
     const component = this.files.getHookInfoFromLoc(fileName, loc);
-    assert(component != null, "Component not found");
+    if (component == null) return;
 
     component.addHook(exportInfo.id);
   }
@@ -686,8 +686,8 @@ export class ComponentDB {
     }
 
     // Handle nested var iteration (Map or Record)
-    if (isBaseFunctionVariable(variable)) {
-      for (const innerVar of variable.var.values()) {
+    if (isBaseFunctionVariable(variable) && (variable as any).var) {
+      for (const innerVar of (variable as any).var.values()) {
         this._resolveDependency(
           innerVar,
           variable.kind == "component" ? variable.id : parent,

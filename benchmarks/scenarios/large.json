@@ -1,0 +1,25 @@
+{
+  "name": "Mattermost (Large)",
+  "root": "benchmarks/projects/large",
+  "scenarios": [
+    {
+      "id": "large-1",
+      "type": "breadth",
+      "prompt": "Find the definition of `PostList` and list every file where it is rendered.",
+      "target_component": "PostList",
+      "expected_answer_contains": [
+        "components/post_view/post_list/post_list.tsx"
+      ]
+    },
+    {
+      "id": "large-2",
+      "type": "depth",
+      "prompt": "Identify all props accepted by `PostList` and find exactly where the data for the `postListIds` prop originates in its parent component.",
+      "target_component": "PostList",
+      "target_prop": "postListIds",
+      "expected_answer_contains": [
+        "mapStateToProps"
+      ]
+    }
+  ]
+}

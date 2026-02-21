@@ -6,6 +6,10 @@ import type { JsonData, ComponentFileVar } from "shared";
 import type { Extension } from "@react-map/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { getDisplayName } from "shared";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+
+const execAsync = promisify(exec);
 
 export interface ProjectInfo {
   projectPath: string;
@@ -41,8 +45,13 @@ export class ProjectManager {
       ? path.resolve(projectPath, subProject)
       : projectPath;
     const cacheDir = path.join(analysisPath, ".react-map", "cache");
-    if (!fs.existsSync(cacheDir)) {
-      fs.mkdirSync(cacheDir, { recursive: true });
+    try {
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+      }
+    } catch (e) {
+      console.warn(`Failed to create cache directory at ${cacheDir}:`, e);
+      // Fallback to a temporary directory if project root is read-only
     }
 
     // Use a hash of the path to avoid collisions for projects with same basename
@@ -272,22 +281,44 @@ export class ProjectManager {
     }
 
     // 2. Find usages of the identified symbol
+    const resolvePath = (source: string, fromFile: string): string => {
+      if (source.startsWith(".") || source.startsWith("..")) {
+        const dir = path.dirname(fromFile);
+        const resolved = path.join(dir, source);
+        return path.normalize(resolved);
+      }
+      // Handle aliases if needed (we should ideally get these from the graph or config)
+      return source;
+    };
+
+    const isMatch = (importedSource: string, targetFile: string): boolean => {
+      const resolved = resolvePath(importedSource, targetFile);
+      // Strip extensions for comparison
+      const strip = (p: string) => p.replace(/\.(tsx|ts|jsx|js)$/, "");
+      return strip(resolved) === strip(targetFile);
+    };
+
     for (const [filePath, file] of Object.entries(graph.files)) {
       // Check if this file imports the symbol
       let isImported = filePath === targetDef.file;
       let localName = targetDef.name;
 
       if (!isImported) {
-        for (const imp of Object.values((file as any).import || {})) {
+        const imports = (file as any).import || {};
+        for (const imp of Object.values(imports)) {
           const i = imp as any;
-          // Resolve if it's the target symbol (direct name or aliased)
-          if (
-            i.importedName === targetDef.name ||
-            (i.type === "default" && i.source.includes(targetDef.file))
-          ) {
-            isImported = true;
-            localName = i.localName;
-            break;
+          const sourceMatches = i.source && (
+            i.source === targetDef.file || 
+            i.source === targetDef.file.replace(/\.(tsx|ts|jsx|js)$/, "") ||
+            isMatch(i.source, targetDef.file)
+          );
+
+          if (sourceMatches) {
+            if (i.type === "default" || i.importedName === targetDef.name) {
+              isImported = true;
+              localName = i.localName;
+              break;
+            }
           }
         }
       }
@@ -343,6 +374,179 @@ export class ProjectManager {
           }
         }
       }
+    }
+
+    return results;
+  }
+
+  async getComponentHierarchy(
+    projectPath: string,
+    componentName: string,
+    subProject?: string,
+    depth: number = 2,
+  ): Promise<any> {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) {
+      throw new Error("Project not open or graph not available.");
+    }
+
+    const graph = project.graph;
+    
+    // Find the starting component(s)
+    const startComponents: any[] = [];
+    for (const file of Object.values(graph.files)) {
+      for (const variable of Object.values((file as any).var)) {
+        if (getDisplayName((variable as any).name) === componentName) {
+          startComponents.push(variable);
+        }
+      }
+    }
+
+    if (startComponents.length === 0) {
+      return { error: `Component "${componentName}" not found.` };
+    }
+
+    const buildHierarchy = (comp: any, currentDepth: number, visited: Set<string>): any => {
+      if (currentDepth > depth || visited.has(comp.id)) {
+        return { id: comp.id, name: getDisplayName(comp.name), status: "depth-limit-or-circular" };
+      }
+      visited.add(comp.id);
+
+      const result: any = {
+        id: comp.id,
+        name: getDisplayName(comp.name),
+        renders: [],
+      };
+
+      if (comp.renders) {
+        for (const render of Object.values(comp.renders as Record<string, any>)) {
+          // Resolve render tag to a component if possible
+          let childComp: any = null;
+          // Search for component by ID or Name
+          for (const f of Object.values(graph.files)) {
+            const v = (f as any).var[render.id];
+            if (v) {
+              childComp = v;
+              break;
+            }
+          }
+
+          if (childComp) {
+            result.renders.push(buildHierarchy(childComp, currentDepth + 1, new Set(visited)));
+          } else {
+            result.renders.push({ name: render.tag, status: "unresolved" });
+          }
+        }
+      }
+
+      return result;
+    };
+
+    const findRendersOf = (name: string): any[] => {
+      const renderedBy: any[] = [];
+      for (const file of Object.values(graph.files)) {
+        for (const variable of Object.values((file as any).var)) {
+          const v = variable as any;
+          if (v.renders) {
+            for (const render of Object.values(v.renders as Record<string, any>)) {
+              if (render.tag === name) {
+                renderedBy.push({
+                  id: v.id,
+                  name: getDisplayName(v.name),
+                  file: v.file,
+                });
+                break;
+              }
+            }
+          }
+        }
+      }
+      return renderedBy;
+    };
+
+    return {
+      component: componentName,
+      hierarchies: startComponents.map(c => buildHierarchy(c, 0, new Set())),
+      renderedBy: findRendersOf(componentName),
+    };
+  }
+
+  async getSymbolLocation(
+    projectPath: string,
+    query: string,
+    subProject?: string,
+  ): Promise<any> {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) {
+      throw new Error("Project not open or graph not available.");
+    }
+
+    const results: any[] = [];
+    for (const [filePath, file] of Object.entries(project.graph.files)) {
+      for (const variable of Object.values(
+        file.var as Record<string, ComponentFileVar>,
+      )) {
+        const displayName = getDisplayName(variable.name);
+        if (displayName === query) {
+          results.push({
+            name: displayName,
+            file: filePath,
+            loc: variable.loc,
+            scope: (variable as any).scope,
+            kind: variable.kind,
+            type: variable.type,
+          });
+        }
+      }
+    }
+
+    return results;
+  }
+
+  async getSymbolContent(
+    projectPath: string,
+    query: string,
+    subProject?: string,
+  ): Promise<any> {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) {
+      throw new Error("Project not open or graph not available.");
+    }
+
+    const locations = await this.getSymbolLocation(projectPath, query, subProject);
+    if (locations.length === 0) {
+      return { error: `Symbol "${query}" not found.` };
+    }
+
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+
+    const results: any[] = [];
+    for (const locInfo of locations) {
+      const fullPath = path.resolve(analysisPath, locInfo.file.startsWith("/") ? locInfo.file.slice(1) : locInfo.file);
+      if (!fs.existsSync(fullPath)) {
+        results.push({ ...locInfo, error: "File not found on disk." });
+        continue;
+      }
+
+      const content = fs.readFileSync(fullPath, "utf-8");
+      const lines = content.split("\n");
+
+      let symbolContent = "";
+      if (locInfo.scope) {
+        const startLine = locInfo.scope.start.line - 1;
+        const endLine = locInfo.scope.end.line - 1;
+        symbolContent = lines.slice(startLine, endLine + 1).join("\n");
+      } else {
+        const line = locInfo.loc.line - 1;
+        symbolContent = lines[line] || "";
+      }
+
+      results.push({
+        ...locInfo,
+        content: symbolContent,
+      });
     }
 
     return results;
@@ -452,11 +656,203 @@ export class ProjectManager {
         }
       }
 
-      fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
+      this._saveCache(project);
       return true;
     } catch (e) {
       console.error("Failed to update graph positions", e);
       return false;
+    }
+  }
+
+  private _saveCache(project: ProjectInfo) {
+    const analysisPath = project.subProject
+      ? path.resolve(project.projectPath, project.subProject)
+      : project.projectPath;
+    const cacheDir = path.join(analysisPath, ".react-map", "cache");
+    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
+    const cacheFile = path.join(
+      cacheDir,
+      `${path.basename(analysisPath)}-${pathHash}.json`,
+    );
+    fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
+  }
+
+  async addLabel(projectPath: string, id: string, label: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) throw new Error("Project not open.");
+
+    if (!project.graph.labels) project.graph.labels = {};
+    if (!project.graph.labels[id]) project.graph.labels[id] = [];
+    if (!project.graph.labels[id].includes(label)) {
+      project.graph.labels[id].push(label);
+      this._saveCache(project);
+    }
+    return project.graph.labels[id];
+  }
+
+  async removeLabel(projectPath: string, id: string, label: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph || !project.graph.labels) return [];
+
+    if (project.graph.labels[id]) {
+      project.graph.labels[id] = project.graph.labels[id].filter(l => l !== label);
+      if (project.graph.labels[id].length === 0) delete project.graph.labels[id];
+      this._saveCache(project);
+    }
+    return project.graph.labels[id] || [];
+  }
+
+  async getLabels(projectPath: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    return project?.graph?.labels || {};
+  }
+
+  async findEntitiesByLabel(projectPath: string, label: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph || !project.graph.labels) return [];
+
+    const ids: string[] = [];
+    for (const [id, labels] of Object.entries(project.graph.labels)) {
+      if (labels.includes(label)) ids.push(id);
+    }
+    return ids;
+  }
+
+  async listDirectory(projectPath: string, dirPath: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) throw new Error("Project not open.");
+
+    const normalizedDir = dirPath.startsWith("/") ? dirPath : `/${dirPath}`;
+    const filesInDir = new Set<string>();
+    const subDirs = new Set<string>();
+
+    for (const filePath of Object.keys(project.graph.files)) {
+      if (filePath.startsWith(normalizedDir)) {
+        const relative = filePath.slice(normalizedDir.length).replace(/^\//, "");
+        const parts = relative.split("/");
+        if (parts.length === 1 && parts[0] !== "") {
+          filesInDir.add(parts[0]!);
+        } else if (parts.length > 1) {
+          subDirs.add(parts[0]!);
+        }
+      }
+    }
+
+    return {
+      directories: Array.from(subDirs).sort(),
+      files: Array.from(filesInDir).sort(),
+    };
+  }
+
+  async getFileOutline(projectPath: string, filePath: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) throw new Error("Project not open.");
+
+    const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
+    const file = project.graph.files[normalizedPath];
+    if (!file) throw new Error(`File not found: ${normalizedPath}`);
+
+    const outline = Object.values(file.var).map(v => {
+      const item: any = {
+        id: v.id,
+        name: getDisplayName(v.name),
+        kind: v.kind,
+        type: v.type,
+        line: v.loc.line,
+      };
+
+      if (v.type === "function") {
+        const rv = v as any;
+        if (rv.var) {
+          const internalVars = Object.values(rv.var as Record<string, ComponentFileVar>);
+          item.internal = internalVars.map(iv => ({
+            id: iv.id,
+            name: getDisplayName(iv.name),
+            kind: iv.kind,
+            type: iv.type,
+            line: iv.loc.line
+          }));
+        }
+        
+        if (v.kind === "component" || v.kind === "hook") {
+          item.renders = Object.values(rv.renders || {}).map((r: any) => ({ tag: r.tag, line: r.loc.line }));
+        }
+      }
+
+      return item;
+    });
+
+    return outline.sort((a, b) => a.line - b.line);
+  }
+
+  async readFile(projectPath: string, filePath: string, subProject?: string) {
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const fullPath = path.resolve(analysisPath, filePath.startsWith("/") ? filePath.slice(1) : filePath);
+    
+    if (!fs.existsSync(fullPath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    return fs.readFileSync(fullPath, "utf-8");
+  }
+
+  async grepSearch(projectPath: string, pattern: string, subProject?: string) {
+    const project = this.getProject(projectPath, subProject);
+    if (!project || !project.graph) throw new Error("Project not open or graph not available. Call open_project first.");
+
+    const results: any[] = [];
+    const regex = new RegExp(pattern, "i");
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+
+    for (const filePath of Object.keys(project.graph.files)) {
+      const fullPath = path.resolve(analysisPath, filePath.startsWith("/") ? filePath.slice(1) : filePath);
+      if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        const lines = content.split("\n");
+        lines.forEach((line, index) => {
+          if (regex.test(line)) {
+            results.push({
+              file: filePath,
+              line: index + 1,
+              content: line.trim(),
+            });
+          }
+        });
+      }
+      if (results.length > 100) break; // Limit results
+    }
+
+    return results;
+  }
+
+  async runShellCommand(projectPath: string, command: string, subProject?: string) {
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+
+    // Safety check: basic blacklist of dangerous commands
+    const dangerousCommands = ["rm -rf", "mkfs", "dd if=", "> /dev/", "shutdown", "reboot"];
+    if (dangerousCommands.some(c => command.includes(c))) {
+      throw new Error(`Command "${command}" is restricted for safety reasons.`);
+    }
+
+    try {
+      const { stdout, stderr } = await execAsync(command, { 
+        cwd: analysisPath,
+        timeout: 30000, // 30s timeout
+        maxBuffer: 1024 * 1024 // 1MB buffer
+      });
+      return { stdout, stderr };
+    } catch (e: any) {
+      return { 
+        error: e.message,
+        stdout: e.stdout,
+        stderr: e.stderr 
+      };
     }
   }
 
