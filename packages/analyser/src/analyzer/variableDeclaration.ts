@@ -11,7 +11,13 @@ import type {
   ReactDependency,
   VariableScope,
 } from "shared";
-import { isHook, returnJSX } from "../utils.js";
+import {
+  isHook,
+  returnJSX,
+  isForwardRefCall,
+  isForwardRefRefUsed,
+  isRefUsed,
+} from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
 import { getExpressionData, getType } from "./type/helper.js";
@@ -165,14 +171,20 @@ export default function VariableDeclarator(
         if (t.isIdentifier(pId)) {
           const name = pId.name;
 
-          if (
+          const isForwardRef =
             init &&
-            !(
-              init.type !== "ArrowFunctionExpression" &&
-              init.type !== "FunctionExpression"
-            ) &&
-            returnJSX(init)
-          ) {
+            t.isCallExpression(init) &&
+            isForwardRefCall(init, componentDB, fileName);
+          const innerFnPath = isForwardRef
+            ? (nodePath.get("init").get("arguments")[0] as traverse.NodePath<
+                t.ArrowFunctionExpression | t.FunctionExpression
+              >)
+            : (nodePath.get("init") as traverse.NodePath<
+                t.ArrowFunctionExpression | t.FunctionExpression
+              >);
+          const innerFn = innerFnPath?.node;
+
+          if (innerFn && returnJSX(innerFn)) {
             const parentPath = getParentPath(nodePath);
             const component: Omit<
               ComponentFileVarComponent,
@@ -182,13 +194,7 @@ export default function VariableDeclarator(
               type: "function",
               componentType: "Function",
               hooks: [],
-              props: getProps(
-                nodePath.get("init") as traverse.NodePath<
-                  t.ArrowFunctionExpression | t.FunctionExpression
-                >,
-                pId,
-                componentId,
-              ),
+              props: getProps(innerFnPath, pId, componentId),
               contexts: [],
               renders: {},
               dependencies: {},
@@ -197,6 +203,9 @@ export default function VariableDeclarator(
               loc,
               scope,
               parentId: pParentId,
+              forwardRef: isForwardRef
+                ? isForwardRefRefUsed(innerFnPath)
+                : isRefUsed(innerFnPath),
             };
 
             if (pId.typeAnnotation?.type === "TSTypeAnnotation") {

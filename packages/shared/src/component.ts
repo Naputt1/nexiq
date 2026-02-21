@@ -90,6 +90,7 @@ export interface ComponentInfo extends ReactFunctionInfoBase {
   componentType: "Function" | "Class";
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
+  forwardRef?: boolean;
 }
 
 export interface ComponentFileVarDependency {

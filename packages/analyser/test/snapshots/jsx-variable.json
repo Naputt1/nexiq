@@ -37,7 +37,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "3404fab2cf571981",
+          "hash": "37a9acd5e8f3d625",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -70,6 +70,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -126,7 +127,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "e7eda5e79d2f2aaf",
+          "hash": "f9f8d09c83ccd30f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -189,6 +190,7 @@
               "renders": {}
             }
           },
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -262,7 +264,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "4e65bb009c7ef033",
+          "hash": "d2eddd99026ee077",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -418,7 +420,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "9683e91bf95d2979",
+              "hash": "71c66fabfd91599d",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -451,6 +453,7 @@
               "componentType": "Function",
               "contexts": [],
               "renders": {},
+              "forwardRef": false,
               "propType": {
                 "type": "any"
               }
@@ -705,7 +708,8 @@
                 }
               }
             }
-          }
+          },
+          "forwardRef": false
         },
         "f34a4cecd7199dac": {
           "id": "f34a4cecd7199dac",

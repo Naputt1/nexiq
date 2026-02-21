@@ -86,7 +86,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "f48b0bcfadaefa74",
+          "hash": "c08de5c9dc3d7a78",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -110,7 +110,8 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "7c4c14f9d4f67b17": {
           "id": "7c4c14f9d4f67b17",
@@ -150,7 +151,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "6b0e5292799aca00",
+          "hash": "c48bc50f48b95be7",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -186,7 +187,8 @@
               },
               "renders": {}
             }
-          }
+          },
+          "forwardRef": false
         },
         "44b41e50e160ab16": {
           "id": "44b41e50e160ab16",
@@ -255,7 +257,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "874fa5959be7206a",
+          "hash": "f8bec02fd1c7338d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -279,7 +281,8 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "b2b9e62795a56f31": {
           "id": "b2b9e62795a56f31",
@@ -319,7 +322,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "685da438aa713b23",
+          "hash": "2ff4784c3f3217a0",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -367,7 +370,8 @@
               },
               "renders": {}
             }
-          }
+          },
+          "forwardRef": false
         },
         "ba26ea0b24868513": {
           "id": "ba26ea0b24868513",
@@ -782,10 +786,10 @@
             },
             "id": "4c2f6d2524e5214b"
           },
-          "kind": "normal",
-          "type": "data",
+          "kind": "component",
+          "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "505979e34332e62b",
+          "hash": "a04f474ae9c85b3e",
           "parentId": "forwardRef-7-13",
           "declarationKind": "const",
           "dependencies": {},
@@ -793,7 +797,33 @@
             "line": 7,
             "column": 13
           },
-          "renders": {}
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 7,
+              "column": 13
+            },
+            "end": {
+              "line": 7,
+              "column": 32
+            }
+          },
+          "states": [],
+          "props": [
+            {
+              "id": "b1730a6569775a23:prop:props",
+              "name": "props",
+              "type": "any",
+              "kind": "prop",
+              "hash": "c913f4018cd56103"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "renders": {},
+          "forwardRef": true
         },
         "72aeade579fb6b64": {
           "id": "72aeade579fb6b64",
@@ -995,7 +1025,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "58982d7d671b3c4c",
+          "hash": "38f4c057cb9c110d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1070,6 +1100,7 @@
               "renders": {}
             }
           },
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -1339,7 +1370,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "480c58de2a1c1032",
+          "hash": "3411bf22f43d1700",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1372,6 +1403,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -1450,7 +1482,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "beee0739059460b0",
+          "hash": "fd24cca89b0ed065",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1500,7 +1532,8 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "a1a74d4033512ef3": {
           "id": "a1a74d4033512ef3",
@@ -1628,7 +1661,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "aab5391374a205fd",
+          "hash": "b076aef3e92fbd40",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -1868,7 +1901,8 @@
                 }
               }
             }
-          }
+          },
+          "forwardRef": false
         },
         "bad0eec5239d481f": {
           "id": "bad0eec5239d481f",

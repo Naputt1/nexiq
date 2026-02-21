@@ -115,7 +115,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8ec6139b2246a698",
+          "hash": "b5939d65ec8adf7d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -393,6 +393,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "any"
           }

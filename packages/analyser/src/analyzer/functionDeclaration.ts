@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import { isHook, returnJSX } from "../utils.js";
+import { isHook, returnJSX, isRefUsed } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
 import { getPattern } from "./pattern.js";
@@ -81,6 +81,7 @@ export default function FunctionDeclaration(
           loc,
           scope,
           effects: {},
+          forwardRef: isRefUsed(nodePath),
         } as Omit<
           ComponentFileVarComponent,
           "id" | "kind" | "states" | "hash" | "file"
