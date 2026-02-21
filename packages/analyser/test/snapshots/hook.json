@@ -58,7 +58,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "32a78504d0619752",
+          "hash": "84f01f97339d549e",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -255,7 +255,8 @@
           },
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "531ac1f83523a7a6": {
           "id": "531ac1f83523a7a6",

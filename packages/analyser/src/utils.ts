@@ -1,5 +1,7 @@
-import type { NodePath, Node } from "@babel/traverse";
+import type { NodePath, Node, VisitNode, Scope } from "@babel/traverse";
+import * as t from "@babel/types";
 import path from "path";
+import type { ComponentDB } from "./db/componentDB.js";
 
 export function isHook(filePath: string) {
   return path.basename(filePath).startsWith("use");
@@ -50,6 +52,108 @@ export function returnJSX(node: Node): boolean {
   node.body.body.forEach(check);
 
   return hasJSX;
+}
+
+export function isRefUsed(
+  nodePath: NodePath<
+    t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression
+  >,
+): boolean {
+  const params = nodePath.node.params;
+  if (params.length === 0) return false;
+
+  const firstParam = params[0];
+  if (t.isObjectPattern(firstParam)) {
+    for (const prop of firstParam.properties) {
+      if (
+        t.isObjectProperty(prop) &&
+        t.isIdentifier(prop.key) &&
+        prop.key.name === "ref"
+      ) {
+        if (t.isIdentifier(prop.value)) {
+          const binding = nodePath.scope.getBinding(prop.value.name);
+          if (binding && binding.referenced) return true;
+        }
+      }
+    }
+  } else if (t.isIdentifier(firstParam)) {
+    const propsName = firstParam.name;
+    let found = false;
+    nodePath.traverse({
+      MemberExpression(p) {
+        if (
+          t.isIdentifier(p.node.object) &&
+          p.node.object.name === propsName &&
+          t.isIdentifier(p.node.property) &&
+          p.node.property.name === "ref"
+        ) {
+          found = true;
+          p.stop();
+        }
+      },
+    });
+    return found;
+  }
+  return false;
+}
+
+export function isForwardRefRefUsed(
+  nodePath: NodePath<
+    t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression
+  >,
+): boolean {
+  const params = nodePath.node.params;
+  if (params.length < 2) return false;
+
+  const secondParam = params[1];
+  if (t.isIdentifier(secondParam)) {
+    const binding = nodePath.scope.getBinding(secondParam.name);
+    return !!(binding && binding.referenced);
+  }
+  return false;
+}
+
+export function isForwardRefCall(
+  call: t.CallExpression,
+  componentDB: ComponentDB,
+  fileName: string,
+): boolean {
+  const callee = call.callee;
+  if (t.isIdentifier(callee)) {
+    const file = componentDB.getFile(fileName);
+    if (file) {
+      const comImport = file.import.get(callee.name);
+      if (comImport?.source === "react") {
+        if (comImport.type === "named" && comImport.importedName === "forwardRef") {
+          return true;
+        }
+        if (comImport.type === "default") {
+          // This would be strange for forwardRef, but possible if someone does `import forwardRef from 'react'`
+          return true;
+        }
+      }
+      // Handle aliased forwardRef via import tracking
+      for (const imp of file.import.values()) {
+        if (
+          imp.source === "react" &&
+          imp.importedName === "forwardRef" &&
+          imp.localName === callee.name
+        ) {
+          return true;
+        }
+      }
+    }
+  } else if (t.isMemberExpression(callee)) {
+    if (
+      t.isIdentifier(callee.object) &&
+      callee.object.name === "React" &&
+      t.isIdentifier(callee.property) &&
+      callee.property.name === "forwardRef"
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function containsJSX(nodePath: NodePath): boolean {

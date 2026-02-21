@@ -29,7 +29,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Other.tsx",
-          "hash": "ca9afea1a70f0b90",
+          "hash": "e6ba6318bd33bc2d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -62,6 +62,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -130,7 +131,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "ee8f7fe0e8c24135",
+          "hash": "22cbfd370b679a90",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -163,6 +164,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -360,7 +362,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "34486d88429908bb",
+          "hash": "170c4e316f8b51bf",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -687,7 +689,8 @@
               },
               "renders": {}
             }
-          }
+          },
+          "forwardRef": false
         },
         "88ae760ea8aa4e3d": {
           "id": "88ae760ea8aa4e3d",
@@ -1007,7 +1010,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "24f8dd1aa0794d8e",
+          "hash": "6036a998b223c3ed",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1040,6 +1043,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [
@@ -1096,7 +1100,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "611ef31831303a79",
+          "hash": "e10be2b9799980f9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1129,6 +1133,7 @@
           "componentType": "Function",
           "contexts": [],
           "renders": {},
+          "forwardRef": false,
           "propType": {
             "type": "type-literal",
             "members": [

@@ -21,6 +21,8 @@ import {
 import { 
   BarChart, 
   Bar, 
+  LineChart,
+  Line,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -102,7 +104,8 @@ export default function App() {
   const [results, setResults] = useState<BenchmarkResult[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'comparison' | 'timeline'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'comparison' | 'runs' | 'timeline'>('overview');
+  const [runMetric, setRunMetric] = useState<'tokens' | 'success' | 'latency'>('tokens');
   
   // Filters
   const [filters, setFilters] = useState({
@@ -117,9 +120,10 @@ export default function App() {
   const uniqueApproaches = useMemo(() => Array.from(new Set(results.map(r => r.approach))), [results]);
   const uniqueProjects = useMemo(() => Array.from(new Set(results.map(r => r.projectName))), [results]);
 
-  const addResults = useCallback((data: any) => {
+  const addResults = useCallback((data: any, fileName?: string) => {
     const newResults = Array.isArray(data) ? data : [data];
-    const runId = new Date().toISOString();
+    // Try to extract date from filename like run_2026-02-21T03-23-18.020Z.json
+    const runId = fileName?.replace(/^run_/, '').replace(/\.json$/, '') || new Date().toISOString();
     setResults(prev => [...prev, ...newResults.map(r => ({ ...r, runId }))]);
   }, []);
 
@@ -128,12 +132,12 @@ export default function App() {
     setIsDragging(false);
     
     Array.from(e.dataTransfer.files).forEach(file => {
-      if (file.type === "application/json") {
+      if (file.type === "application/json" || file.name.endsWith('.json')) {
         const reader = new FileReader();
         reader.onload = (event) => {
           try {
             const data = JSON.parse(event.target?.result as string);
-            addResults(data);
+            addResults(data, file.name);
           } catch (err) {
             alert("Invalid JSON file: " + file.name);
           }
@@ -149,7 +153,7 @@ export default function App() {
       reader.onload = (event) => {
         try {
           const data = JSON.parse(event.target?.result as string);
-          addResults(data);
+          addResults(data, file.name);
         } catch (err) {
           alert("Invalid JSON file: " + file.name);
         }
@@ -213,6 +217,42 @@ export default function App() {
       return entry;
     });
   }, [filteredResults]);
+
+  const runsData = useMemo(() => {
+    const runsMap = new Map<string, any>();
+    
+    filteredResults.forEach(r => {
+      const runId = r.runId || 'unknown';
+      if (!runsMap.has(runId)) {
+        runsMap.set(runId, { runId });
+      }
+      const run = runsMap.get(runId);
+      if (!run[r.model]) {
+        run[r.model] = { tokens: 0, count: 0, successCount: 0, latency: 0 };
+      }
+      run[r.model].tokens += r.totalTokens;
+      run[r.model].count += 1;
+      run[r.model].latency += r.latencyMs;
+      if (r.success) run[r.model].successCount += 1;
+    });
+
+    return Array.from(runsMap.values())
+      .map(r => {
+        const entry: any = { 
+          name: r.runId.substring(0, 19).replace('T', ' '),
+          fullRunId: r.runId 
+        };
+        uniqueModels.forEach(model => {
+          if (r[model]) {
+            entry[model] = Math.round(r[model].tokens / r[model].count);
+            entry[`${model}_success`] = (r[model].successCount / r[model].count) * 100;
+            entry[`${model}_latency`] = Math.round(r[model].latency / r[model].count);
+          }
+        });
+        return entry;
+      })
+      .sort((a, b) => a.fullRunId.localeCompare(b.fullRunId));
+  }, [filteredResults, uniqueModels]);
 
   const toggleFilter = (type: 'models' | 'approaches' | 'projects', value: string) => {
     setFilters(prev => {
@@ -436,6 +476,16 @@ export default function App() {
             Comparison Graph
           </button>
           <button 
+            onClick={() => setActiveTab('runs')}
+            className={cn(
+              "px-4 py-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all",
+              activeTab === 'runs' ? "border-blue-600 text-blue-600" : "border-transparent text-gray-400 hover:text-gray-600"
+            )}
+          >
+            <Clock className="h-4 w-4" />
+            Runs Comparison
+          </button>
+          <button 
             onClick={() => setActiveTab('timeline')}
             className={cn(
               "px-4 py-2 text-sm font-bold flex items-center gap-2 border-b-2 transition-all",
@@ -632,6 +682,117 @@ export default function App() {
                   })}
                 </div>
               </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Content: Runs Comparison */}
+        {activeTab === 'runs' && (
+          <div className="space-y-6">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-500" />
+                    Model Performance Trends Over Runs
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Chronological benchmark comparison</p>
+                </div>
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                  {(['tokens', 'success', 'latency'] as const).map(m => (
+                    <button
+                      key={m}
+                      onClick={() => setRunMetric(m)}
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all",
+                        runMetric === m ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+                      )}
+                    >
+                      {m === 'tokens' ? 'Avg Tokens' : m === 'success' ? 'Success Rate' : 'Avg Latency'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-[500px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={runsData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                      domain={runMetric === 'success' ? [0, 100] : ['auto', 'auto']}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ paddingTop: '0px', paddingBottom: '30px' }} />
+                    {uniqueModels.map((model, idx) => (
+                      <Line 
+                        key={model} 
+                        type="monotone" 
+                        dataKey={
+                          runMetric === 'tokens' ? model : 
+                          runMetric === 'success' ? `${model}_success` : 
+                          `${model}_latency`
+                        } 
+                        name={model}
+                        stroke={chartColors[idx % chartColors.length]} 
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: chartColors[idx % chartColors.length], strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from(new Set(filteredResults.map(r => r.runId)))
+                .filter((id): id is string => !!id)
+                .sort().reverse().map(runId => {
+                const resultsInRun = filteredResults.filter(r => r.runId === runId);
+                const successCount = resultsInRun.filter(r => r.success).length;
+                const sr = (successCount / resultsInRun.length) * 100;
+                return (
+                  <Card key={runId} className="p-4 bg-white hover:border-blue-200 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Run Date</h4>
+                        <p className="text-sm font-bold text-gray-900">{runId.substring(0, 19).replace('T', ' ')}</p>
+                      </div>
+                      <Badge variant={sr === 100 ? 'emerald' : sr > 0 ? 'amber' : 'rose'}>{sr.toFixed(0)}% SR</Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {uniqueModels.map(model => {
+                        const mRes = resultsInRun.filter(r => r.model === model);
+                        if (mRes.length === 0) return null;
+                        const mSr = (mRes.filter(r => r.success).length / mRes.length) * 100;
+                        return (
+                          <div key={model} className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-gray-600">{model}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-gray-400">{(mRes.reduce((a, b) => a + b.totalTokens, 0) / mRes.length).toLocaleString()} tkns</span>
+                              <span className={cn("font-black", mSr === 100 ? "text-emerald-500" : "text-amber-500")}>{mSr.toFixed(0)}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         )}

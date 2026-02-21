@@ -202,7 +202,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "c02ace08ded00139",
+          "hash": "c5feae1b387f8b70",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -307,7 +307,8 @@
               },
               "renders": {}
             }
-          }
+          },
+          "forwardRef": false
         },
         "cce6042b3712e3ff": {
           "id": "cce6042b3712e3ff",
@@ -533,7 +534,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "c748e22236cfebf4",
+          "hash": "baac65300912e920",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -740,7 +741,8 @@
               "parentId": "",
               "renders": {}
             }
-          }
+          },
+          "forwardRef": false
         },
         "1723b2f620aab079": {
           "id": "1723b2f620aab079",
@@ -1359,7 +1361,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "c2d79074b80c85b2",
+          "hash": "fca3aadb7a0a3ebe",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1383,7 +1385,8 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "36a6109d6b664f44": {
           "id": "36a6109d6b664f44",
@@ -1440,7 +1443,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "87858a6ac24b4213",
+          "hash": "950f0a8c7f248740",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -1463,7 +1466,8 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "renders": {}
+          "renders": {},
+          "forwardRef": false
         },
         "ad039bf45bf9b37c": {
           "id": "ad039bf45bf9b37c",

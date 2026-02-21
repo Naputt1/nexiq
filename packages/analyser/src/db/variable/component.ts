@@ -8,6 +8,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
   propType: TypeData | undefined;
   contexts: string[];
   renders: Record<string, ComponentInfoRender>;
+  forwardRef: boolean;
 
   constructor(
     options: Omit<
@@ -27,6 +28,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     this.propType = options.propType;
     this.contexts = options.contexts;
     this.renders = options.renders;
+    this.forwardRef = options.forwardRef ?? false;
   }
 
   public load(data: ComponentVariable) {
@@ -39,6 +41,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     // TODO: handle merge
     this.contexts = data.contexts;
     this.renders = data.renders;
+    this.forwardRef = data.forwardRef;
   }
 
   public getData(): ComponentFileVarComponent {
@@ -47,6 +50,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       componentType: this.componentType,
       contexts: this.contexts,
       renders: this.renders,
+      forwardRef: this.forwardRef,
     };
 
     if (this.propType) {
@@ -62,6 +66,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       componentType: this.componentType,
       contexts: this.contexts,
       renders: this.renders,
+      forwardRef: this.forwardRef,
     };
   }
 }
