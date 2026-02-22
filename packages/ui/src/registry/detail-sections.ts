@@ -1,7 +1,7 @@
 import type { DetailSection } from "@react-map/extension-sdk";
 import { BasicInfoSection } from "@/components/details-sections/BasicInfoSection";
 import { PropsSection } from "@/components/details-sections/PropsSection";
-import { RendersSection } from "@/components/details-sections/RendersSection";
+import { ChildrenSection } from "@/components/details-sections/ChildrenSection";
 import { HooksSection } from "@/components/details-sections/HooksSection";
 import { GitSection } from "@/components/details-sections/GitSection";
 
@@ -19,15 +19,16 @@ const registry: DetailSection[] = [
     title: "Props",
     priority: 10,
     component: PropsSection,
-    shouldShow: (item) => !!(item.propType || (item.props && item.props.length > 0)),
+    shouldShow: (item) =>
+      !!(item.propType || (item.props && item.props.length > 0)),
     defaultOpen: true,
   },
   {
-    id: "renders",
-    title: "Renders",
+    id: "children",
+    title: "Children",
     priority: 20,
-    component: RendersSection,
-    shouldShow: (item) => item.type === "component" && !!item.renders,
+    component: ChildrenSection,
+    shouldShow: (item) => item.type === "component" && !!item.children,
   },
   {
     id: "hooks",
@@ -42,7 +43,7 @@ const registry: DetailSection[] = [
     priority: 40,
     component: GitSection,
     shouldShow: (item) => !!item.gitStatus,
-  }
+  },
 ];
 
 /**

@@ -1056,9 +1056,9 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
               collapsed: item.ui.collapsed,
             });
 
-            // Collect renders and effects positions
-            if (item.ui.renders) {
-              for (const [id, pos] of Object.entries(item.ui.renders)) {
+            // Collect children and effects positions
+            if (item.ui.children) {
+              for (const [id, pos] of Object.entries(item.ui.children)) {
                 positionMap.set(id, pos);
               }
             }
@@ -1071,7 +1071,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
             }
           }
 
-          if ("var" in item && item.var) {
+          if (item.type === "function") {
             for (const v of Object.values(item.var)) {
               collectPos(v);
             }
@@ -1088,7 +1088,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
             Object.assign(item.ui, pos);
           }
 
-          // Apply to sub-items (renders, effects, virtual vars)
+          // Apply to sub-items (children, effects, virtual vars)
           const renderComboId = `${item.id}-render`;
           const renderPrefix = `${item.id}-render-`;
           const varPrefix = `${item.id}:`;
@@ -1102,8 +1102,8 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
               if (!item.ui) item.ui = { x: 0, y: 0 };
 
               if (id === renderComboId || id.startsWith(renderPrefix)) {
-                if (!item.ui.renders) item.ui.renders = {};
-                item.ui.renders[id] = subPos;
+                if (!item.ui.children) item.ui.children = {};
+                item.ui.children[id] = subPos;
               } else {
                 if (!item.ui.vars) item.ui.vars = {};
                 item.ui.vars[id] = subPos;
@@ -1111,7 +1111,7 @@ async function performAnalysis(analysisPath: string, projectPath: string) {
             }
           }
 
-          if ("var" in item && item.var) {
+          if (item.type === "function") {
             for (const v of Object.values(item.var)) {
               applyPos(v);
             }
@@ -1379,8 +1379,8 @@ ipcMain.handle(
             }
           }
 
-          if ("renders" in v && v.renders) {
-            for (const render of Object.values(v.renders)) {
+          if ("children" in v && v.children) {
+            for (const render of Object.values(v.children)) {
               map.set(render.id, "");
             }
           }
@@ -1589,8 +1589,7 @@ ipcMain.handle(
           type: "update_graph_position",
           payload: {
             projectPath: projectRoot,
-            subProject:
-              analysisPath === projectRoot ? undefined : analysisPath,
+            subProject: analysisPath === projectRoot ? undefined : analysisPath,
             positions,
             contextId,
           },
@@ -1665,7 +1664,7 @@ ipcMain.handle(
           }
         }
 
-        // Apply to sub-items (renders, effects, virtual vars)
+        // Apply to sub-items (children, effects, virtual vars)
         // We look for any keys in stateMap that are prefixed with this item's ID followed by a separator
         const renderComboId = `${item.id}-render`;
         const renderPrefix = `${item.id}-render-`;
@@ -1681,8 +1680,8 @@ ipcMain.handle(
 
             // Render/Effect nodes
             if (id === renderComboId || id.startsWith(renderPrefix)) {
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[id] = {
+              if (!item.ui.children) item.ui.children = {};
+              item.ui.children[id] = {
                 x: subState.x,
                 y: subState.y,
                 radius: subState.radius,
@@ -1710,7 +1709,7 @@ ipcMain.handle(
         }
 
         // Recurse into children
-        if ("var" in item && item.var) {
+        if (item.type === "function") {
           for (const v of Object.values(item.var)) {
             applyUIState(v, stateMap);
           }

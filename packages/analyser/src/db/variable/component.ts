@@ -1,4 +1,4 @@
-import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
+import type { ComponentFileVarComponent } from "shared";
 import type { TypeData } from "shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
@@ -7,7 +7,6 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
   componentType: ComponentFileVarComponent["componentType"];
   propType: TypeData | undefined;
   contexts: string[];
-  renders: Record<string, ComponentInfoRender>;
   forwardRef: boolean;
 
   constructor(
@@ -27,7 +26,6 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     this.componentType = options.componentType;
     this.propType = options.propType;
     this.contexts = options.contexts;
-    this.renders = options.renders;
     this.forwardRef = options.forwardRef ?? false;
   }
 
@@ -40,7 +38,6 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
 
     // TODO: handle merge
     this.contexts = data.contexts;
-    this.renders = data.renders;
     this.forwardRef = data.forwardRef;
   }
 
@@ -49,7 +46,6 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       ...this.getBaseData(),
       componentType: this.componentType,
       contexts: this.contexts,
-      renders: this.renders,
       forwardRef: this.forwardRef,
     };
 
@@ -65,7 +61,6 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       ...super.getDataInternal(),
       componentType: this.componentType,
       contexts: this.contexts,
-      renders: this.renders,
       forwardRef: this.forwardRef,
     };
   }

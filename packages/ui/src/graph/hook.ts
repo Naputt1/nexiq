@@ -595,18 +595,21 @@ export class GraphData {
       if (c.ui) {
         x = c.ui.x;
         y = c.ui.y;
-      } else if (parentCombo.ui?.renders?.[c.id]) {
-        x = parentCombo.ui.renders[c.id].x;
-        y = parentCombo.ui.renders[c.id].y;
+      } else if (parentCombo.ui?.children?.[c.id]) {
+        x = parentCombo.ui.children[c.id].x;
+        y = parentCombo.ui.children[c.id].y;
       }
 
       const scale = parentCombo.scale * SCALE_FACTOR;
 
-      const getDeepSavedUi = (id: string, parent: GraphCombo): UIItemState | undefined => {
+      const getDeepSavedUi = (
+        id: string,
+        parent: GraphCombo,
+      ): UIItemState | undefined => {
         if (c.ui) return c.ui;
         let current: GraphCombo | undefined = parent;
         while (current) {
-          if (current.ui?.renders?.[id]) return current.ui.renders[id];
+          if (current.ui?.children?.[id]) return current.ui.children[id];
           if (current.ui?.vars?.[id]) return current.ui.vars[id];
           current = current.parent;
         }
@@ -856,11 +859,14 @@ export class GraphData {
 
       const scale = parentCombo.scale * SCALE_FACTOR;
 
-      const getDeepSavedUi = (id: string, parent: GraphCombo): UIItemState | undefined => {
+      const getDeepSavedUi = (
+        id: string,
+        parent: GraphCombo,
+      ): UIItemState | undefined => {
         if (c.ui) return c.ui;
         let current: GraphCombo | undefined = parent;
         while (current) {
-          if (current.ui?.renders?.[id]) return current.ui.renders[id];
+          if (current.ui?.children?.[id]) return current.ui.children[id];
           if (current.ui?.vars?.[id]) return current.ui.vars[id];
           current = current.parent;
         }
@@ -870,7 +876,9 @@ export class GraphData {
       const savedUi = getDeepSavedUi(c.id, parentCombo);
 
       let collapsedRadius =
-        savedUi?.collapsedRadius ?? c.collapsedRadius ?? this.config.combo.minRadius;
+        savedUi?.collapsedRadius ??
+        c.collapsedRadius ??
+        this.config.combo.minRadius;
       if (!savedUi?.collapsedRadius && !savedUi?.radius) {
         collapsedRadius *= scale;
       }
@@ -888,9 +896,10 @@ export class GraphData {
       parentCombo.child.combos[c.id] = new GraphCombo({
         ...c,
         collapsed: savedUi?.collapsed ?? c.collapsed,
-        radius: (savedUi?.collapsed ?? c.collapsed)
-          ? (savedUi?.radius ?? collapsedRadius)
-          : (savedUi?.expandedRadius ?? expandedRadius),
+        radius:
+          (savedUi?.collapsed ?? c.collapsed)
+            ? (savedUi?.radius ?? collapsedRadius)
+            : (savedUi?.expandedRadius ?? expandedRadius),
         color: c.color ?? this.config.combo.color,
         collapsedRadius: savedUi?.collapsedRadius ?? collapsedRadius,
         expandedRadius: savedUi?.expandedRadius ?? expandedRadius,
@@ -950,9 +959,10 @@ export class GraphData {
           new GraphCombo({
             ...c,
             collapsed: c.ui?.collapsed ?? c.collapsed,
-            radius: (c.ui?.collapsed ?? c.collapsed)
-              ? (c.ui?.radius ?? collapsedRadius)
-              : (c.ui?.expandedRadius ?? expandedRadius),
+            radius:
+              (c.ui?.collapsed ?? c.collapsed)
+                ? (c.ui?.radius ?? collapsedRadius)
+                : (c.ui?.expandedRadius ?? expandedRadius),
             color: c.color ?? this.config.combo.color,
             collapsedRadius: c.ui?.collapsedRadius ?? collapsedRadius,
             expandedRadius: c.ui?.expandedRadius ?? expandedRadius,

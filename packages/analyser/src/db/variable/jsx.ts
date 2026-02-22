@@ -1,30 +1,34 @@
-import type { ComponentFileVarJSX, ComponentInfoRender, ComponentInfoRenderDependency } from "shared";
+import type {
+  ComponentFileVarJSX,
+  ComponentInfoRender,
+  ComponentInfoRenderDependency,
+} from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
 export class JSXVariable extends Variable<"jsx", "normal"> {
   tag: string;
   props: ComponentInfoRenderDependency[];
-  renders: Record<string, ComponentInfoRender>;
+  children: Record<string, ComponentInfoRender>;
+  srcId?: string | undefined;
 
   constructor(
-    options: Omit<
-      ComponentFileVarJSX,
-      "kind" | "type" | "hash" | "file"
-    >,
+    options: Omit<ComponentFileVarJSX, "kind" | "type" | "hash" | "file">,
     file: File,
   ) {
     super({ ...options, kind: "normal", type: "jsx" }, file);
     this.tag = options.tag;
     this.props = options.props;
-    this.renders = options.renders || {};
+    this.children = options.children || {};
+    this.srcId = options.srcId;
   }
 
   public load(data: JSXVariable) {
     super.load(data);
     this.tag = data.tag;
     this.props = data.props;
-    this.renders = data.renders;
+    this.children = data.children;
+    this.srcId = data.srcId;
   }
 
   public getData(): ComponentFileVarJSX {
@@ -34,7 +38,8 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
       kind: "normal",
       tag: this.tag,
       props: this.props,
-      renders: this.renders,
+      children: this.children,
+      srcId: this.srcId,
     };
   }
 
@@ -42,7 +47,8 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
     return {
       tag: this.tag,
       props: this.props,
-      renders: this.renders,
+      children: this.children,
+      srcId: this.srcId,
     };
   }
 }

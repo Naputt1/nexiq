@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.js";
 import { analyzeProject } from "./lib.js";
 import { PackageJson } from "./db/packageJson.js";
+import type { ComponentFileVar } from "shared";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -12,26 +13,33 @@ import * as snapshotCli from "./snapshot.js";
 
 describe("analyser coverage expansion", () => {
   const createTmpProject = (files: Record<string, string>) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-coverage-"));
-    
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "react-map-coverage-"),
+    );
+
     for (const [filePath, content] of Object.entries(files)) {
       const fullPath = path.join(tmpDir, filePath);
       fs.mkdirSync(path.dirname(fullPath), { recursive: true });
       fs.writeFileSync(fullPath, content);
     }
-    
+
     if (!files["package.json"]) {
-      fs.writeFileSync(path.join(tmpDir, "package.json"), JSON.stringify({ name: "test-coverage" }));
+      fs.writeFileSync(
+        path.join(tmpDir, "package.json"),
+        JSON.stringify({ name: "test-coverage" }),
+      );
     }
-    
+
     return tmpDir;
   };
 
   it("should cover analyzeProject and config loading", () => {
     const tmpDir = createTmpProject({
-      "react.map.config.json": JSON.stringify({ ignorePatterns: ["**/ignored.ts"] }),
+      "react.map.config.json": JSON.stringify({
+        ignorePatterns: ["**/ignored.ts"],
+      }),
       "src/App.tsx": "export const App = () => <div>Hello</div>;",
-      "src/ignored.ts": "export const Ignored = 1;"
+      "src/ignored.ts": "export const Ignored = 1;",
     });
 
     const graph = analyzeProject(tmpDir);
@@ -69,7 +77,7 @@ describe("analyser coverage expansion", () => {
         export function CompWithId() {
           return <div />;
         }
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
@@ -109,7 +117,7 @@ describe("analyser coverage expansion", () => {
           // Array pattern with hole for processPattern robustness
           const [, setter] = useState(0);
         }
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
@@ -135,7 +143,7 @@ describe("analyser coverage expansion", () => {
           const { "prop-name": p, [computed]: c } = {};
           const [first, ...rest] = [];
         }
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
@@ -152,7 +160,7 @@ describe("analyser coverage expansion", () => {
         
         // Unsupported types for lines 550+
         type U = keyof T | T[keyof T];
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
@@ -174,11 +182,16 @@ describe("analyser coverage expansion", () => {
         export default class extends React.Component {
           render() { return <div />; }
         }
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx", "src/Anon.tsx"], packageJson);
+    const graph = analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx", "src/Anon.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -195,7 +208,7 @@ describe("analyser coverage expansion", () => {
             return <div />;
           }
         }
-      `
+      `,
     });
 
     const packageJson = new PackageJson(tmpDir);
@@ -213,19 +226,83 @@ describe("analyser coverage expansion", () => {
 
   it("should cover cache loading types in fileDB", () => {
     const tmpDir = createTmpProject({
-      "src/App.tsx": "export const App = () => <div>Hello</div>;"
+      "src/App.tsx": "export const App = () => <div>Hello</div>;",
     });
-    
+
     const packageJson = new PackageJson(tmpDir);
-    const initialGraph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
-    
+    const initialGraph = analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
+
     const fileName = "/src/App.tsx";
     const file = initialGraph.files[fileName];
-    file.var["func-id"] = { id: "func-id", name: { type: "identifier", name: "f", loc: { line: 1, column: 1 }, id: "f" }, kind: "normal", type: "function", loc: { line: 1, column: 1 }, scope: { start: { line: 1, column: 1 }, end: { line: 1, column: 10 } }, var: {}, dependencies: {} } as any;
-    file.var["hook-id"] = { id: "hook-id", name: { type: "identifier", name: "useH", loc: { line: 2, column: 1 }, id: "useH" }, kind: "hook", type: "function", loc: { line: 2, column: 1 }, scope: { start: { line: 2, column: 1 }, end: { line: 2, column: 10 } }, var: {}, dependencies: {}, hooks: [], props: [], effects: {} } as any;
-    file.var["call-id"] = { id: "call-id", name: { type: "identifier", name: "data", loc: { line: 3, column: 1 }, id: "data" }, kind: "hook", type: "data", loc: { line: 3, column: 1 }, call: { id: "h", name: "useH" }, dependencies: {} } as any;
+    expect(file).toBeDefined();
+    if (!file) throw new Error("File not found");
 
-    const secondGraph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson, initialGraph);
+    file.var["func-id"] = {
+      id: "func-id",
+      name: {
+        type: "identifier",
+        name: "f",
+        loc: { line: 1, column: 1 },
+        id: "f",
+      },
+      kind: "normal",
+      type: "function",
+      file: fileName,
+      loc: { line: 1, column: 1 },
+      scope: { start: { line: 1, column: 1 }, end: { line: 1, column: 10 } },
+      var: {},
+      dependencies: {},
+      return: undefined,
+    } as ComponentFileVar;
+    file.var["hook-id"] = {
+      id: "hook-id",
+      name: {
+        type: "identifier",
+        name: "useH",
+        loc: { line: 2, column: 1 },
+        id: "useH",
+      },
+      kind: "hook",
+      type: "function",
+      file: fileName,
+      loc: { line: 2, column: 1 },
+      scope: { start: { line: 2, column: 1 }, end: { line: 2, column: 10 } },
+      var: {},
+      dependencies: {},
+      hooks: [],
+      props: [],
+      effects: {},
+      states: [],
+      return: undefined,
+    } as ComponentFileVar;
+    file.var["call-id"] = {
+      id: "call-id",
+      name: {
+        type: "identifier",
+        name: "data",
+        loc: { line: 3, column: 1 },
+        id: "data",
+      },
+      kind: "hook",
+      type: "data",
+      file: fileName,
+      loc: { line: 3, column: 1 },
+      call: { id: "h", name: "useH" },
+      dependencies: {},
+    } as ComponentFileVar;
+
+    const secondGraph = analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+      initialGraph,
+    );
     expect(secondGraph.files[fileName]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -239,10 +316,14 @@ describe("analyser coverage expansion", () => {
     // We already called them once, calling again with different mocks if possible
     try {
       analyzerCli.main();
-    } catch(e) {}
-    
+    } catch (_e) {
+      // Ignore errors during coverage run
+    }
+
     try {
       snapshotCli.runSnapshot("simple");
-    } catch(e) {}
+    } catch (_e) {
+      // Ignore errors during coverage run
+    }
   });
 });

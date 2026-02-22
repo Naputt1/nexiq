@@ -20,6 +20,7 @@ import type {
   VariableName,
   VarKind,
   ComponentInfoRender,
+  FunctionReturn,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -32,7 +33,6 @@ import type { Variable } from "./variable/variable.js";
 import {
   isComponentVariable,
   isBaseFunctionVariable,
-  isNormalVariable,
   isCallHookVariable,
   isJSXVariable,
 } from "./variable/type.js";
@@ -236,7 +236,7 @@ export class ComponentDB {
     fileName: string,
     variable: Omit<
       ComponentFileVarHook,
-      "id" | "kind" | "var" | "renders" | "states" | "hash" | "file"
+      "id" | "kind" | "var" | "children" | "states" | "hash" | "file"
     >,
     parentPath?: string[],
     declarationKind?:
@@ -271,11 +271,11 @@ export class ComponentDB {
     variable:
       | Omit<
           ComponentFileVarNormalFunction,
-          "id" | "kind" | "var" | "renders" | "file" | "hash"
+          "id" | "kind" | "var" | "children" | "file" | "hash"
         >
       | Omit<
           ComponentFileVarNormalData,
-          "id" | "kind" | "var" | "renders" | "file" | "hash"
+          "id" | "kind" | "var" | "children" | "file" | "hash"
         >,
     parentPath?: string[],
     kind?: VarKind,
@@ -481,6 +481,23 @@ export class ComponentDB {
     file.addEffect(loc, effect);
   }
 
+  public comSetReturn(
+    fileName: string,
+    loc: VariableLoc,
+    returnId: FunctionReturn,
+  ) {
+    const file = this.files.get(fileName);
+
+    if (typeof returnId === "string") {
+      const v = file.var.get(returnId, true);
+      if (v && isJSXVariable(v)) {
+        returnId = v.getData();
+      }
+    }
+
+    file.setReturn(loc, returnId);
+  }
+
   public getVariableID(name: string, fileName: string): string | null {
     const file = this.files.get(fileName);
     if (file == null) {
@@ -622,73 +639,116 @@ export class ComponentDB {
     visited.add(variable.id);
 
     const resolveRenders = (
-      renders: Record<string, ComponentInfoRender>,
+      children: Record<string, ComponentInfoRender>,
       pId?: string,
     ) => {
-      if (!renders) return;
-      for (const render of Object.values(renders)) {
-        if (!render.isDependency && pId != null) {
+      if (!children) return;
+      for (const render of Object.values(children)) {
+        const isTag =
+          (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
+          render.id === "Fragment";
+        if (!render.isDependency && pId != null && !isTag) {
           this.edges.push({
-            from: pId,
-            to: render.id,
+            from: render.id,
+            to: pId,
             label: "render",
           });
         }
-        resolveRenders(render.renders, pId);
+        resolveRenders(render.children, pId);
       }
     };
 
-    if (
-      variable.kind === "component" &&
-      isComponentVariable(variable) &&
-      variable.renders &&
-      typeof variable.renders === "object"
-    ) {
-      for (const render of Object.values(variable.renders)) {
-        if (render.isDependency) continue;
+    if (isComponentVariable(variable)) {
+      if (variable.return) {
+        let returnData = variable.return;
+        if (typeof returnData === "string") {
+          const v = this.files
+            .get(variable.file.path)
+            .var.get(returnData, true);
+          if (v && isJSXVariable(v)) {
+            returnData = v.getData();
+          }
+        }
 
-        this.edges.push({
-          from: render.id,
-          to: variable.id,
-          label: "render",
-        });
-        resolveRenders(render.renders, variable.id);
-      }
-    } else if (
-      isNormalVariable(variable) &&
-      variable.renders &&
-      typeof variable.renders === "object"
-    ) {
-      if (parent != null) {
-        for (const render of Object.values(variable.renders)) {
-          if (render.isDependency) continue;
+        if (typeof returnData !== "string" && returnData.type === "jsx") {
+          const returnVar = returnData;
+          const isTag =
+            (returnVar.srcId &&
+              returnVar.srcId[0] === returnVar.srcId[0]?.toLowerCase()) ||
+            returnVar.srcId === "Fragment";
+          if (returnVar.srcId && !isTag) {
+            this.edges.push({
+              from: returnVar.srcId,
+              to: variable.id,
+              label: "render",
+            });
+          }
+          resolveRenders(returnVar.children, variable.id);
+        } else if (
+          typeof returnData !== "string" &&
+          returnData.type === "ref"
+        ) {
+          const ref = returnData;
+          let refId: string | null = null;
+          if (ref.refType === "named") {
+            refId = this.getVariableID(ref.name, variable.file.path);
+          } else {
+            // TODO: handle qualified names
+          }
 
-          this.edges.push({
-            from: parent,
-            to: render.id,
-            label: "render",
-          });
-          resolveRenders(render.renders, parent);
+          if (refId) {
+            this.edges.push({
+              from: refId,
+              to: variable.id,
+              label: "render",
+            });
+
+            const targetVar = this.files
+              .get(variable.file.path)
+              .var.get(refId, true);
+            if (targetVar && isJSXVariable(targetVar)) {
+              resolveRenders(targetVar.children, variable.id);
+            }
+          }
         }
       }
-    } else if (
-      isJSXVariable(variable) &&
-      variable.renders &&
-      typeof variable.renders === "object"
-    ) {
+    } else if (isBaseFunctionVariable(variable) && variable.kind === "normal") {
+      if (variable.return) {
+        let returnData = variable.return;
+        if (typeof returnData === "string") {
+          const v = this.files
+            .get(variable.file.path)
+            .var.get(returnData, true);
+          if (v && isJSXVariable(v)) {
+            returnData = v.getData();
+          }
+        }
+
+        if (typeof returnData !== "string" && returnData.type === "jsx") {
+          const returnVar = returnData;
+          if (parent != null) {
+            this.edges.push({
+              from: parent,
+              to: returnVar.id,
+              label: "render",
+            });
+          }
+        }
+      }
+    } else if (isJSXVariable(variable)) {
       if (parent != null) {
         this.edges.push({
           from: parent,
           to: variable.id,
           label: "render",
         });
-        resolveRenders(variable.renders, parent);
+        resolveRenders(variable.children, parent);
       }
     }
 
     // Handle nested var iteration (Map or Record)
-    if (isBaseFunctionVariable(variable) && (variable as any).var) {
-      for (const innerVar of (variable as any).var.values()) {
+    if (isBaseFunctionVariable(variable)) {
+      for (const innerVar of variable.var.values()) {
         this._resolveDependency(
           innerVar,
           variable.kind == "component" ? variable.id : parent,
@@ -707,7 +767,7 @@ export class ComponentDB {
   }
 
   private getEdges(): DataEdge[] {
-    const edges: DataEdge[] = [];
+    const edges: DataEdge[] = [...this.edges];
 
     for (const file of this.files.getFiles()) {
       edges.push(...file.getEdges());
@@ -792,7 +852,6 @@ export class ComponentDB {
 
     while (this.resolveTasks.length > 0 && retries < maxRetries) {
       const currentTasks = [...this.resolveTasks];
-      const prevTaskCount = this.resolveTasks.length;
       this.resolveTasks = [];
 
       for (const task of currentTasks) {

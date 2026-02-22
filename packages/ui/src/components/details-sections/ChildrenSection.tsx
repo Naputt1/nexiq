@@ -1,11 +1,14 @@
 import React from "react";
-import type { DetailSectionProps, GraphNodeData } from "@react-map/extension-sdk";
+import type {
+  DetailSectionProps,
+  GraphNodeData,
+} from "@react-map/extension-sdk";
 import { getDisplayName, type ComponentInfoRenderDependency } from "shared";
 import { TypeRenderer } from "../type-renderer";
 import { useConfigStore } from "@/hooks/use-config-store";
 import { cn } from "@/lib/utils";
 
-export const RendersSection: React.FC<DetailSectionProps> = ({
+export const ChildrenSection: React.FC<DetailSectionProps> = ({
   item,
   selectedId,
   typeData,
@@ -13,14 +16,14 @@ export const RendersSection: React.FC<DetailSectionProps> = ({
 }) => {
   const { customColors } = useConfigStore();
 
-  if (item.type !== "component" || !item.renders) return null;
+  if (item.type !== "component" || !item.children) return null;
 
   return (
     <div className="space-y-4">
       {renderNodes.map((v: GraphNodeData) => {
-        const renders = item.renders;
+        const children = item.children;
         const renderId = v.id.slice((selectedId! + "-render-").length);
-        const render = renders?.[renderId];
+        const render = children?.[renderId];
 
         if (!render) return null;
 

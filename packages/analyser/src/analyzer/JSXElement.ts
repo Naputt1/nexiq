@@ -14,6 +14,32 @@ import {
 
 const generateFn: typeof generate.default = generate.default || generate;
 
+function getParentPath(nodePath: traverse.NodePath<t.Node>) {
+  const parentPath: string[] = [];
+  let path: traverse.NodePath<t.Node> = nodePath;
+  while (true) {
+    if (path.scope.block.type === "Program") {
+      break;
+    }
+
+    if (path.scope.block.type === "FunctionDeclaration") {
+      if (path.scope.block.id?.type === "Identifier") {
+        parentPath.push(path.scope.block.id.name);
+      }
+    } else if (path.scope.block.type === "ArrowFunctionExpression") {
+      if (path.scope.parentBlock.type == "VariableDeclarator") {
+        if (path.scope.parentBlock.id.type === "Identifier") {
+          parentPath.push(path.scope.parentBlock.id.name);
+        }
+      }
+    }
+
+    path = path.scope.parent.path;
+  }
+
+  return parentPath;
+}
+
 function getComponentLoc(nodePath: traverse.NodePath<t.Node>) {
   const parentStatement = nodePath.getStatementParent();
 
@@ -185,17 +211,6 @@ export default function JSXElement(
           }
         }
 
-        const hasDynamicProps = nodePath.node.openingElement.attributes.some(
-          (attr) =>
-            attr.type === "JSXSpreadAttribute" ||
-            (attr.type === "JSXAttribute" &&
-              attr.value?.type === "JSXExpressionContainer"),
-        );
-        const isCustom =
-          /^[A-Z]/.test(tag) ||
-          !!componentDB.getVariableID(tag, fileName) ||
-          tag === "Fragment";
-
         let existingVar = componentDB.getVariableFromLoc(fileName, loc);
         if (!existingVar) {
           const varPath = nodePath.findParent((p) => p.isVariableDeclarator());
@@ -225,20 +240,61 @@ export default function JSXElement(
             id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
           };
 
-          id = componentDB.addJSXVariable(fileName, {
-            name,
-            tag,
-            props: dependency,
-            loc,
-            dependencies: {},
-            renders: {},
-          });
+          const parentPath = getParentPath(nodePath);
+          id = componentDB.addJSXVariable(
+            fileName,
+            {
+              name,
+              tag,
+              props: dependency,
+              loc,
+              dependencies: {},
+              children: {},
+            },
+            parentPath,
+          );
         }
 
         componentDB.pushJSX(id);
 
-        const isNested = componentDB.getCurrentRenderInstance() != null;
-        const shouldAddRender = isCustom || hasDynamicProps || isNested;
+        const parentFunc = nodePath.getFunctionParent();
+        if (parentFunc) {
+          let funcLoc: { line: number; column: number } | undefined;
+          if (parentFunc.node.type === "FunctionDeclaration") {
+            if (parentFunc.node.id?.loc) {
+              funcLoc = {
+                line: parentFunc.node.id.loc.start.line,
+                column: parentFunc.node.id.loc.start.column,
+              };
+            }
+          } else if (
+            parentFunc.node.type === "ArrowFunctionExpression" ||
+            parentFunc.node.type === "FunctionExpression"
+          ) {
+            if (parentFunc.parentPath.isVariableDeclarator()) {
+              const fid = parentFunc.parentPath.node.id;
+              if (fid.loc) {
+                funcLoc = {
+                  line: fid.loc.start.line,
+                  column: fid.loc.start.column,
+                };
+              }
+            }
+          }
+
+          if (funcLoc) {
+            const body = parentFunc.node.body;
+            if (
+              body === nodePath.node ||
+              (body.type === "BlockStatement" &&
+                nodePath.parent.type === "ReturnStatement")
+            ) {
+              componentDB.comSetReturn(fileName, funcLoc, id);
+            }
+          }
+        }
+
+        const shouldAddRender = true; // Always add to capture structure
 
         if (shouldAddRender) {
           const compLoc = getComponentLoc(nodePath);
@@ -279,7 +335,9 @@ export default function JSXElement(
         const existingVar = componentDB.getVariableFromLoc(fileName, loc);
         if (existingVar && isJSXVariable(existingVar)) {
           componentDB.pushJSX(existingVar.id);
-          componentDB.pushRenderInstance(componentDB.getCurrentRenderInstance());
+          componentDB.pushRenderInstance(
+            componentDB.getCurrentRenderInstance(),
+          );
           return;
         }
 
@@ -291,16 +349,58 @@ export default function JSXElement(
           id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
         };
 
-        const id = componentDB.addJSXVariable(fileName, {
-          name,
-          tag,
-          props: [],
-          loc,
-          dependencies: {},
-          renders: {},
-        });
+        const parentPath = getParentPath(nodePath);
+        const id = componentDB.addJSXVariable(
+          fileName,
+          {
+            name,
+            tag,
+            props: [],
+            loc,
+            dependencies: {},
+            children: {},
+          },
+          parentPath,
+        );
 
         componentDB.pushJSX(id);
+
+        const parentFunc = nodePath.getFunctionParent();
+        if (parentFunc) {
+          let funcLoc: { line: number; column: number } | undefined;
+          if (parentFunc.node.type === "FunctionDeclaration") {
+            if (parentFunc.node.id?.loc) {
+              funcLoc = {
+                line: parentFunc.node.id.loc.start.line,
+                column: parentFunc.node.id.loc.start.column,
+              };
+            }
+          } else if (
+            parentFunc.node.type === "ArrowFunctionExpression" ||
+            parentFunc.node.type === "FunctionExpression"
+          ) {
+            if (parentFunc.parentPath.isVariableDeclarator()) {
+              const fid = parentFunc.parentPath.node.id;
+              if (fid.loc) {
+                funcLoc = {
+                  line: fid.loc.start.line,
+                  column: fid.loc.start.column,
+                };
+              }
+            }
+          }
+
+          if (funcLoc) {
+            const body = parentFunc.node.body;
+            if (
+              body === nodePath.node ||
+              (body.type === "BlockStatement" &&
+                nodePath.parent.type === "ReturnStatement")
+            ) {
+              componentDB.comSetReturn(fileName, funcLoc, id);
+            }
+          }
+        }
 
         const compLoc = getComponentLoc(nodePath);
         if (compLoc) {
@@ -340,7 +440,10 @@ export default function JSXElement(
               id: dep.valueId,
               name: dep.name,
             });
-          } else if (dep.value.type === "ref" && dep.value.refType === "named") {
+          } else if (
+            dep.value.type === "ref" &&
+            dep.value.refType === "named"
+          ) {
             const compLoc = getComponentLoc(nodePath);
             let isComponent = false;
             if (compLoc) {

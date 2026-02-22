@@ -21,14 +21,24 @@ export abstract class Variable<
   type: TType;
   kind: ComponentFileVarBase<TType, TKind>["kind"];
   parentId?: string | undefined;
-  declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined | "using" | "await using";
+  declarationKind?:
+    | "const"
+    | "let"
+    | "var"
+    | "using"
+    | "await using"
+    | undefined
+    | "using"
+    | "await using";
   dependencies: Record<string, ComponentFileVarDependency>;
   parent?: Variable<"function">;
   loc: VariableLoc;
-  ui?: (UIItemState & {
-    renders?: Record<string, UIItemState>;
-    vars?: Record<string, UIItemState>;
-  }) | undefined;
+  ui?:
+    | (UIItemState & {
+        children?: Record<string, UIItemState>;
+        vars?: Record<string, UIItemState>;
+      })
+    | undefined;
 
   constructor(
     data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,

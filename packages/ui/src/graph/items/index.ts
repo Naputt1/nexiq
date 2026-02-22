@@ -91,14 +91,20 @@ export interface DetailItemData {
   typeParams?: TypeDataParam[];
   extends?: string[];
   tag?: string;
-  renders?: Record<string, ComponentInfoRender>;
+  children?: Record<string, ComponentInfoRender>;
   hooks?: string[];
   gitStatus?: "added" | "modified" | "deleted";
-  declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
+  declarationKind?:
+    | "const"
+    | "let"
+    | "var"
+    | "using"
+    | "await using"
+    | undefined;
   visible?: boolean;
   displayName?: string;
   ui?: UIItemState & {
-    renders?: Record<string, UIItemState>;
+    children?: Record<string, UIItemState>;
     vars?: Record<string, UIItemState>;
   };
 }

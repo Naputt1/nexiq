@@ -99,20 +99,26 @@ export const componentTask: GraphViewTask = {
     };
 
     const addRenderNodes = (
-      renders: Record<string, ComponentInfoRender>,
+      children: Record<string, ComponentInfoRender>,
       ownerId: string,
       parentComboId: string,
       filePath: string,
       fileNamePrefix: string,
     ) => {
-      for (const render of Object.values(renders)) {
+      for (const render of Object.values(children)) {
         const v = findVariableById(render.id);
         const renderNodeId = `${ownerId}-render-${render.instanceId}`;
-        const vIsJSXWithRenders =
-          v?.type === "jsx" && v.renders && Object.keys(v.renders).length > 0;
+        
+        let vChildren: Record<string, ComponentInfoRender> | undefined;
+        if (v && v.type === "jsx") {
+          vChildren = v.children;
+        }
+
+        const vIsJSXWithChildren =
+          vChildren && Object.keys(vChildren).length > 0;
         const hasChildren =
-          (render.renders && Object.keys(render.renders).length > 0) ||
-          vIsJSXWithRenders;
+          (render.children && Object.keys(render.children).length > 0) ||
+          vIsJSXWithChildren;
 
         const commonData = {
           id: renderNodeId,
@@ -136,7 +142,7 @@ export const componentTask: GraphViewTask = {
           fileName: `${fileNamePrefix}:${render.loc.line}:${render.loc.column}`,
           pureFileName: filePath,
           loc: render.loc,
-          ui: graphData.files[filePath]?.var[ownerId]?.ui?.renders?.[
+          ui: graphData.files[filePath]?.var[ownerId]?.ui?.children?.[
             renderNodeId
           ],
           type: "render" as const,
@@ -167,9 +173,9 @@ export const componentTask: GraphViewTask = {
           });
         }
 
-        if (render.renders && Object.keys(render.renders).length > 0) {
+        if (render.children && Object.keys(render.children).length > 0) {
           addRenderNodes(
-            render.renders,
+            render.children,
             ownerId,
             hasChildren ? renderNodeId : parentComboId,
             filePath,
@@ -177,9 +183,9 @@ export const componentTask: GraphViewTask = {
           );
         }
 
-        if (vIsJSXWithRenders && v && v.type === "jsx") {
+        if (vChildren && vIsJSXWithChildren) {
           addRenderNodes(
-            v.renders,
+            vChildren,
             ownerId,
             renderNodeId,
             filePath,
@@ -199,6 +205,13 @@ export const componentTask: GraphViewTask = {
 
       const fileName = `${graphData.src}${filePath}`;
 
+      let variableChildren: Record<string, ComponentInfoRender> | undefined;
+      if (variable.kind === "component") {
+        if (variable.return && typeof variable.return !== "string" && variable.return.type === "jsx") {
+          variableChildren = variable.return.children;
+        }
+      }
+
       const combo: GraphComboData = {
         id: variable.id,
         collapsed: true,
@@ -214,7 +227,7 @@ export const componentTask: GraphViewTask = {
         ui: variable.ui,
         hooks: variable.hooks,
         collapsedRadius: variable.kind === "hook" && parentID ? 10 : undefined,
-        renders: variable.kind === "component" ? variable.renders : undefined,
+        children: variableChildren,
         raw: variable,
         displayName: getDisplayName(variable.name),
       };
@@ -242,11 +255,11 @@ export const componentTask: GraphViewTask = {
               color: "green",
               combo: parentComboId,
               fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                          pureFileName: filePath,
-                          ui: variable.ui?.renders?.[subPropsComboId],
-                          displayName: prop.name,
-                        };
-                          propCombos.push(subPropsCombo);
+              pureFileName: filePath,
+              ui: variable.ui?.children?.[subPropsComboId],
+              displayName: prop.name,
+            };
+            propCombos.push(subPropsCombo);
             addProps(prop.props, subPropsComboId);
           } else {
             const propNode: GraphNodeData = {
@@ -262,13 +275,13 @@ export const componentTask: GraphViewTask = {
               },
               type: "prop",
               color: "green",
-                          radius: 10,
-                          combo: parentComboId,
-                          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                          pureFileName: filePath,
-                          displayName: prop.name,
-                        };
-                          propNodes.push(propNode);
+              radius: 10,
+              combo: parentComboId,
+              fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+              pureFileName: filePath,
+              displayName: prop.name,
+            };
+            propNodes.push(propNode);
           }
         }
       };
@@ -356,12 +369,12 @@ export const componentTask: GraphViewTask = {
           label: { text: "props" },
           color: "green",
           combo: variable.id,
-                  fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                  pureFileName: filePath,
-                  ui: variable.ui?.renders?.[propsComboId],
-                  displayName: "props",
-                };
-                  combos.push(propsCombo);
+          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+          pureFileName: filePath,
+          ui: variable.ui?.children?.[propsComboId],
+          displayName: "props",
+        };
+        combos.push(propsCombo);
         combos.push(...propCombos);
         nodes.push(...propNodes);
       }
@@ -394,19 +407,26 @@ export const componentTask: GraphViewTask = {
             name = (obj as ComponentFileVar).name;
           }
 
-                    const nodeBase: GraphNodeData = {
-                      id: obj.id,
-                      name: name,
-                      combo: ("parentId" in obj ? obj.parentId : undefined) || variable.id,
-                      fileName: `${fileName}:${loc.line}:${loc.column}`,
-                      pureFileName: filePath,
-                      loc: loc as VariableLoc,
-                      ui: "ui" in obj ? (obj as ComponentFileVar).ui : undefined,
-                                  radius: 10,
-                                  raw: "kind" in obj && obj.kind !== "prop" && obj.kind !== "spread" && obj.kind !== "effect" ? obj as ComponentFileVar : undefined,
-                                  displayName: getDisplayName(name),
-                                };
-                      
+          const nodeBase: GraphNodeData = {
+            id: obj.id,
+            name: name,
+            combo:
+              ("parentId" in obj ? obj.parentId : undefined) || variable.id,
+            fileName: `${fileName}:${loc.line}:${loc.column}`,
+            pureFileName: filePath,
+            loc: loc as VariableLoc,
+            ui: "ui" in obj ? (obj as ComponentFileVar).ui : undefined,
+            radius: 10,
+            raw:
+              "kind" in obj &&
+              obj.kind !== "prop" &&
+              obj.kind !== "spread" &&
+              obj.kind !== "effect"
+                ? (obj as ComponentFileVar)
+                : undefined,
+            displayName: getDisplayName(name),
+          };
+
           const isPattern = name.type === "object" || name.type === "array";
 
           if ("kind" in obj) {
@@ -488,14 +508,14 @@ export const componentTask: GraphViewTask = {
           },
           label: { text: "render" },
           combo: variable.id,
-                  fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
-                  pureFileName: filePath,
-                  ui: variable.ui?.renders?.[renderComboId],
-                  displayName: "render",
-                });
-                  if (variable.renders) {
+          fileName: `${fileName}:${variable.loc.line}:${variable.loc.column}`,
+          pureFileName: filePath,
+          ui: variable.ui?.children?.[renderComboId],
+          displayName: "render",
+        });
+        if (variableChildren) {
           addRenderNodes(
-            variable.renders,
+            variableChildren,
             variable.id,
             renderComboId,
             filePath,
@@ -783,28 +803,30 @@ export const componentTask: GraphViewTask = {
               color: v.type === "jsx" ? "orange" : "blue",
               tag:
                 v.type === "jsx" ? (v as ComponentFileVarJSX).tag : undefined,
-              displayName: labelText,
-            };
-
-            const isJSXWithRenders =
-              v.type === "jsx" &&
-              v.renders &&
-              Object.keys(v.renders).length > 0;
-
-            if (isPattern || isJSXWithRenders) {
-              const varCombo: GraphComboData = {
-                ...commonVarData,
-                collapsed: true,
-              };
-              combos.push(varCombo);
-
-              if (v.type === "jsx" && v.renders) {
-                addRenderNodes(v.renders, v.id, v.id, filePath, fileName);
-              }
-            } else {
-              nodes.push(commonVarData);
-            }
-
+                          displayName: labelText,
+                        };
+              
+                        let vChildren: Record<string, ComponentInfoRender> | undefined;
+                        if (v.type === "jsx") {
+                          vChildren = v.children;
+                        }
+              
+                        const isJSXWithChildren =
+                          vChildren && Object.keys(vChildren).length > 0;
+              
+                        if (isPattern || isJSXWithChildren) {
+                          const varCombo: GraphComboData = {
+                            ...commonVarData,
+                            collapsed: true,
+                          };
+                          combos.push(varCombo);
+              
+                          if (vChildren) {
+                            addRenderNodes(vChildren, v.id, v.id, filePath, fileName);
+                          }
+                        } else {
+                          nodes.push(commonVarData);
+                        }
             if (v.type === "jsx") {
               const tagId = (v as ComponentFileVarJSX).tag;
               const targetV =
@@ -839,7 +861,7 @@ export const componentTask: GraphViewTask = {
             fileName: `${fileName}:${effect.loc.line}:${effect.loc.column}`,
             pureFileName: filePath,
             loc: effect.loc,
-            ui: variable.ui?.renders?.[effect.id],
+            ui: variable.ui?.children?.[effect.id],
             displayName: "effect",
           };
 

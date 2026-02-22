@@ -103,9 +103,7 @@ export class ProjectManager {
           loaded = await import(name);
         }
 
-        const extension = Object.values(
-          loaded as Record<string, unknown>,
-        ).find(
+        const extension = Object.values(loaded as Record<string, unknown>).find(
           (val: unknown) => val && typeof val === "object" && "id" in val,
         ) as Extension;
 
@@ -307,11 +305,11 @@ export class ProjectManager {
         const imports = (file as any).import || {};
         for (const imp of Object.values(imports)) {
           const i = imp as any;
-          const sourceMatches = i.source && (
-            i.source === targetDef.file || 
-            i.source === targetDef.file.replace(/\.(tsx|ts|jsx|js)$/, "") ||
-            isMatch(i.source, targetDef.file)
-          );
+          const sourceMatches =
+            i.source &&
+            (i.source === targetDef.file ||
+              i.source === targetDef.file.replace(/\.(tsx|ts|jsx|js)$/, "") ||
+              isMatch(i.source, targetDef.file));
 
           if (sourceMatches) {
             if (i.type === "default" || i.importedName === targetDef.name) {
@@ -327,9 +325,9 @@ export class ProjectManager {
         for (const variable of Object.values(
           (file as any).var as Record<string, ComponentFileVar>,
         )) {
-          // Check renders
-          if ((variable as any).renders) {
-            for (const render of Object.values((variable as any).renders)) {
+          // Check children
+          if ((variable as any).children) {
+            for (const render of Object.values((variable as any).children)) {
               if ((render as any).name === localName) {
                 results.push({
                   type: "usage",
@@ -391,7 +389,7 @@ export class ProjectManager {
     }
 
     const graph = project.graph;
-    
+
     // Find the starting component(s)
     const startComponents: any[] = [];
     for (const file of Object.values(graph.files)) {
@@ -406,20 +404,30 @@ export class ProjectManager {
       return { error: `Component "${componentName}" not found.` };
     }
 
-    const buildHierarchy = (comp: any, currentDepth: number, visited: Set<string>): any => {
+    const buildHierarchy = (
+      comp: any,
+      currentDepth: number,
+      visited: Set<string>,
+    ): any => {
       if (currentDepth > depth || visited.has(comp.id)) {
-        return { id: comp.id, name: getDisplayName(comp.name), status: "depth-limit-or-circular" };
+        return {
+          id: comp.id,
+          name: getDisplayName(comp.name),
+          status: "depth-limit-or-circular",
+        };
       }
       visited.add(comp.id);
 
       const result: any = {
         id: comp.id,
         name: getDisplayName(comp.name),
-        renders: [],
+        children: [],
       };
 
-      if (comp.renders) {
-        for (const render of Object.values(comp.renders as Record<string, any>)) {
+      if (comp.children) {
+        for (const render of Object.values(
+          comp.children as Record<string, any>,
+        )) {
           // Resolve render tag to a component if possible
           let childComp: any = null;
           // Search for component by ID or Name
@@ -432,9 +440,11 @@ export class ProjectManager {
           }
 
           if (childComp) {
-            result.renders.push(buildHierarchy(childComp, currentDepth + 1, new Set(visited)));
+            result.children.push(
+              buildHierarchy(childComp, currentDepth + 1, new Set(visited)),
+            );
           } else {
-            result.renders.push({ name: render.tag, status: "unresolved" });
+            result.children.push({ name: render.tag, status: "unresolved" });
           }
         }
       }
@@ -447,8 +457,10 @@ export class ProjectManager {
       for (const file of Object.values(graph.files)) {
         for (const variable of Object.values((file as any).var)) {
           const v = variable as any;
-          if (v.renders) {
-            for (const render of Object.values(v.renders as Record<string, any>)) {
+          if (v.children) {
+            for (const render of Object.values(
+              v.children as Record<string, any>,
+            )) {
               if (render.tag === name) {
                 renderedBy.push({
                   id: v.id,
@@ -466,7 +478,7 @@ export class ProjectManager {
 
     return {
       component: componentName,
-      hierarchies: startComponents.map(c => buildHierarchy(c, 0, new Set())),
+      hierarchies: startComponents.map((c) => buildHierarchy(c, 0, new Set())),
       renderedBy: findRendersOf(componentName),
     };
   }
@@ -513,7 +525,11 @@ export class ProjectManager {
       throw new Error("Project not open or graph not available.");
     }
 
-    const locations = await this.getSymbolLocation(projectPath, query, subProject);
+    const locations = await this.getSymbolLocation(
+      projectPath,
+      query,
+      subProject,
+    );
     if (locations.length === 0) {
       return { error: `Symbol "${query}" not found.` };
     }
@@ -524,7 +540,10 @@ export class ProjectManager {
 
     const results: any[] = [];
     for (const locInfo of locations) {
-      const fullPath = path.resolve(analysisPath, locInfo.file.startsWith("/") ? locInfo.file.slice(1) : locInfo.file);
+      const fullPath = path.resolve(
+        analysisPath,
+        locInfo.file.startsWith("/") ? locInfo.file.slice(1) : locInfo.file,
+      );
       if (!fs.existsSync(fullPath)) {
         results.push({ ...locInfo, error: "File not found on disk." });
         continue;
@@ -584,7 +603,8 @@ export class ProjectManager {
             item.ui.collapsedRadius = state.collapsedRadius;
           if (state.expandedRadius !== undefined)
             item.ui.expandedRadius = state.expandedRadius;
-          if (state.collapsed !== undefined) item.ui.collapsed = state.collapsed;
+          if (state.collapsed !== undefined)
+            item.ui.collapsed = state.collapsed;
 
           const isCombo =
             item.kind === "component" ||
@@ -616,8 +636,8 @@ export class ProjectManager {
             if (!item.ui) item.ui = { x: 0, y: 0 };
 
             if (id === renderComboId || id.startsWith(renderPrefix)) {
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[id] = {
+              if (!item.ui.children) item.ui.children = {};
+              item.ui.children[id] = {
                 x: s.x,
                 y: s.y,
                 radius: s.radius,
@@ -677,7 +697,12 @@ export class ProjectManager {
     fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
   }
 
-  async addLabel(projectPath: string, id: string, label: string, subProject?: string) {
+  async addLabel(
+    projectPath: string,
+    id: string,
+    label: string,
+    subProject?: string,
+  ) {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph) throw new Error("Project not open.");
 
@@ -690,13 +715,21 @@ export class ProjectManager {
     return project.graph.labels[id];
   }
 
-  async removeLabel(projectPath: string, id: string, label: string, subProject?: string) {
+  async removeLabel(
+    projectPath: string,
+    id: string,
+    label: string,
+    subProject?: string,
+  ) {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph || !project.graph.labels) return [];
 
     if (project.graph.labels[id]) {
-      project.graph.labels[id] = project.graph.labels[id].filter(l => l !== label);
-      if (project.graph.labels[id].length === 0) delete project.graph.labels[id];
+      project.graph.labels[id] = project.graph.labels[id].filter(
+        (l) => l !== label,
+      );
+      if (project.graph.labels[id].length === 0)
+        delete project.graph.labels[id];
       this._saveCache(project);
     }
     return project.graph.labels[id] || [];
@@ -707,7 +740,11 @@ export class ProjectManager {
     return project?.graph?.labels || {};
   }
 
-  async findEntitiesByLabel(projectPath: string, label: string, subProject?: string) {
+  async findEntitiesByLabel(
+    projectPath: string,
+    label: string,
+    subProject?: string,
+  ) {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph || !project.graph.labels) return [];
 
@@ -718,7 +755,11 @@ export class ProjectManager {
     return ids;
   }
 
-  async listDirectory(projectPath: string, dirPath: string, subProject?: string) {
+  async listDirectory(
+    projectPath: string,
+    dirPath: string,
+    subProject?: string,
+  ) {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph) throw new Error("Project not open.");
 
@@ -728,7 +769,9 @@ export class ProjectManager {
 
     for (const filePath of Object.keys(project.graph.files)) {
       if (filePath.startsWith(normalizedDir)) {
-        const relative = filePath.slice(normalizedDir.length).replace(/^\//, "");
+        const relative = filePath
+          .slice(normalizedDir.length)
+          .replace(/^\//, "");
         const parts = relative.split("/");
         if (parts.length === 1 && parts[0] !== "") {
           filesInDir.add(parts[0]!);
@@ -744,7 +787,11 @@ export class ProjectManager {
     };
   }
 
-  async getFileOutline(projectPath: string, filePath: string, subProject?: string) {
+  async getFileOutline(
+    projectPath: string,
+    filePath: string,
+    subProject?: string,
+  ) {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph) throw new Error("Project not open.");
 
@@ -752,7 +799,7 @@ export class ProjectManager {
     const file = project.graph.files[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
 
-    const outline = Object.values(file.var).map(v => {
+    const outline = Object.values(file.var).map((v) => {
       const item: any = {
         id: v.id,
         name: getDisplayName(v.name),
@@ -764,18 +811,23 @@ export class ProjectManager {
       if (v.type === "function") {
         const rv = v as any;
         if (rv.var) {
-          const internalVars = Object.values(rv.var as Record<string, ComponentFileVar>);
-          item.internal = internalVars.map(iv => ({
+          const internalVars = Object.values(
+            rv.var as Record<string, ComponentFileVar>,
+          );
+          item.internal = internalVars.map((iv) => ({
             id: iv.id,
             name: getDisplayName(iv.name),
             kind: iv.kind,
             type: iv.type,
-            line: iv.loc.line
+            line: iv.loc.line,
           }));
         }
-        
+
         if (v.kind === "component" || v.kind === "hook") {
-          item.renders = Object.values(rv.renders || {}).map((r: any) => ({ tag: r.tag, line: r.loc.line }));
+          item.children = Object.values(rv.children || {}).map((r: any) => ({
+            tag: r.tag,
+            line: r.loc.line,
+          }));
         }
       }
 
@@ -789,8 +841,11 @@ export class ProjectManager {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
-    const fullPath = path.resolve(analysisPath, filePath.startsWith("/") ? filePath.slice(1) : filePath);
-    
+    const fullPath = path.resolve(
+      analysisPath,
+      filePath.startsWith("/") ? filePath.slice(1) : filePath,
+    );
+
     if (!fs.existsSync(fullPath)) {
       throw new Error(`File not found: ${filePath}`);
     }
@@ -800,7 +855,10 @@ export class ProjectManager {
 
   async grepSearch(projectPath: string, pattern: string, subProject?: string) {
     const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph) throw new Error("Project not open or graph not available. Call open_project first.");
+    if (!project || !project.graph)
+      throw new Error(
+        "Project not open or graph not available. Call open_project first.",
+      );
 
     const results: any[] = [];
     const regex = new RegExp(pattern, "i");
@@ -809,7 +867,10 @@ export class ProjectManager {
       : projectPath;
 
     for (const filePath of Object.keys(project.graph.files)) {
-      const fullPath = path.resolve(analysisPath, filePath.startsWith("/") ? filePath.slice(1) : filePath);
+      const fullPath = path.resolve(
+        analysisPath,
+        filePath.startsWith("/") ? filePath.slice(1) : filePath,
+      );
       if (fs.existsSync(fullPath)) {
         const content = fs.readFileSync(fullPath, "utf-8");
         const lines = content.split("\n");
@@ -829,29 +890,40 @@ export class ProjectManager {
     return results;
   }
 
-  async runShellCommand(projectPath: string, command: string, subProject?: string) {
+  async runShellCommand(
+    projectPath: string,
+    command: string,
+    subProject?: string,
+  ) {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
 
     // Safety check: basic blacklist of dangerous commands
-    const dangerousCommands = ["rm -rf", "mkfs", "dd if=", "> /dev/", "shutdown", "reboot"];
-    if (dangerousCommands.some(c => command.includes(c))) {
+    const dangerousCommands = [
+      "rm -rf",
+      "mkfs",
+      "dd if=",
+      "> /dev/",
+      "shutdown",
+      "reboot",
+    ];
+    if (dangerousCommands.some((c) => command.includes(c))) {
       throw new Error(`Command "${command}" is restricted for safety reasons.`);
     }
 
     try {
-      const { stdout, stderr } = await execAsync(command, { 
+      const { stdout, stderr } = await execAsync(command, {
         cwd: analysisPath,
         timeout: 30000, // 30s timeout
-        maxBuffer: 1024 * 1024 // 1MB buffer
+        maxBuffer: 1024 * 1024, // 1MB buffer
       });
       return { stdout, stderr };
     } catch (e: any) {
-      return { 
+      return {
         error: e.message,
         stdout: e.stdout,
-        stderr: e.stderr 
+        stderr: e.stderr,
       };
     }
   }

@@ -13,6 +13,7 @@ import FunctionDeclaration from "./functionDeclaration.js";
 import VariableDeclarator from "./variableDeclaration.js";
 import JSXElement from "./JSXElement.js";
 import CallExpression from "./callExpression.js";
+import ReturnStatement from "./returnStatement.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 import type { JsonData } from "shared";
@@ -57,6 +58,7 @@ function analyzeFiles(
       ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
       FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
       VariableDeclarator: VariableDeclarator(componentDB, fileName),
+      ReturnStatement: ReturnStatement(componentDB, fileName),
       ...JSXElement(componentDB, fileName),
       CallExpression: CallExpression(componentDB, fileName),
 
