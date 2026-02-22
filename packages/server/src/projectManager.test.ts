@@ -74,7 +74,7 @@ describe("ProjectManager", () => {
 
     // Mock dynamic import
     vi.mock("@react-map/test-extension", () => ({
-      default: { id: "test-ext" }
+      default: { id: "test-ext" },
     }));
 
     await projectManager.openProject(projectPath);
@@ -99,7 +99,10 @@ describe("ProjectManager", () => {
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await projectManager.openProject(projectPath);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Failed to load extension"), expect.any(String));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to load extension"),
+      expect.any(String),
+    );
   });
 
   it("should handle extension fallback import", async () => {
@@ -138,7 +141,7 @@ describe("ProjectManager", () => {
     });
 
     await projectManager.openProject("/test/project");
-    
+
     // Trigger change
     const events = [{ path: "/test/project/src/NewComp.tsx", type: "update" }];
     await watcherCallback(null, events);
@@ -155,24 +158,35 @@ describe("ProjectManager", () => {
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await projectManager.openProject("/test/project");
-    
+
     await watcherCallback(new Error("Watcher failed"), []);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Watcher error"), expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Watcher error"),
+      expect.any(Error),
+    );
   });
 
   describe("Labeling", () => {
     const projectPath = "/test/project";
-    
+
     beforeEach(async () => {
-      (analyzeProject as any).mockReturnValue({ files: {}, edges: [], labels: {} });
+      (analyzeProject as any).mockReturnValue({
+        files: {},
+        edges: [],
+        labels: {},
+      });
       await projectManager.openProject(projectPath);
     });
 
     it("should add and persist labels", async () => {
-      const labels = await projectManager.addLabel(projectPath, "id1", "important");
+      const labels = await projectManager.addLabel(
+        projectPath,
+        "id1",
+        "important",
+      );
       expect(labels).toEqual(["important"]);
       expect(fs.writeFileSync).toHaveBeenCalled();
-      
+
       const allLabels = await projectManager.getLabels(projectPath);
       expect(allLabels["id1"]).toEqual(["important"]);
     });
@@ -180,26 +194,36 @@ describe("ProjectManager", () => {
     it("should remove labels", async () => {
       await projectManager.addLabel(projectPath, "id1", "tag1");
       await projectManager.addLabel(projectPath, "id1", "tag2");
-      
-      const labels = await projectManager.removeLabel(projectPath, "id1", "tag1");
+
+      const labels = await projectManager.removeLabel(
+        projectPath,
+        "id1",
+        "tag1",
+      );
       expect(labels).toEqual(["tag2"]);
-      
-      const found = await projectManager.findEntitiesByLabel(projectPath, "tag2");
+
+      const found = await projectManager.findEntitiesByLabel(
+        projectPath,
+        "tag2",
+      );
       expect(found).toContain("id1");
     });
 
     it("should find entities by label", async () => {
       await projectManager.addLabel(projectPath, "id1", "shared");
       await projectManager.addLabel(projectPath, "id2", "shared");
-      
-      const found = await projectManager.findEntitiesByLabel(projectPath, "shared");
+
+      const found = await projectManager.findEntitiesByLabel(
+        projectPath,
+        "shared",
+      );
       expect(found).toEqual(["id1", "id2"]);
     });
   });
 
   describe("Enhanced Navigation", () => {
     const projectPath = "/test/project";
-    
+
     beforeEach(async () => {
       const mockGraph = {
         files: {
@@ -211,16 +235,22 @@ describe("ProjectManager", () => {
                 kind: "component",
                 type: "function",
                 loc: { line: 10, column: 1 },
-                renders: { "r1": { tag: "div", loc: { line: 15, column: 5 } } },
+                children: { r1: { tag: "div", loc: { line: 15, column: 5 } } },
                 var: {
-                  "s1": { id: "s1", name: { type: "identifier", name: "count" }, kind: "state", type: "data", loc: { line: 11, column: 5 } }
-                }
-              }
-            }
+                  s1: {
+                    id: "s1",
+                    name: { type: "identifier", name: "count" },
+                    kind: "state",
+                    type: "data",
+                    loc: { line: 11, column: 5 },
+                  },
+                },
+              },
+            },
           },
-          "/src/utils/math.ts": { var: {} }
+          "/src/utils/math.ts": { var: {} },
         },
-        edges: []
+        edges: [],
       };
       (analyzeProject as any).mockReturnValue(mockGraph);
       await projectManager.openProject(projectPath);
@@ -231,32 +261,42 @@ describe("ProjectManager", () => {
       expect(result.directories).toEqual(["components", "utils"]);
       expect(result.files).toEqual([]);
 
-      const components = await projectManager.listDirectory(projectPath, "src/components");
+      const components = await projectManager.listDirectory(
+        projectPath,
+        "src/components",
+      );
       expect(components.files).toEqual(["Button.tsx"]);
     });
 
     it("should get file outline", async () => {
-      const outline = await projectManager.getFileOutline(projectPath, "src/components/Button.tsx");
+      const outline = await projectManager.getFileOutline(
+        projectPath,
+        "src/components/Button.tsx",
+      );
       expect(outline).toHaveLength(1);
       expect(outline[0].name).toBe("Button");
       expect(outline[0].internal).toHaveLength(1);
       expect(outline[0].internal[0].name).toBe("count");
-      expect(outline[0].renders).toHaveLength(1);
-      expect(outline[0].renders[0].tag).toBe("div");
+      expect(outline[0].children).toHaveLength(1);
+      expect(outline[0].children[0].tag).toBe("div");
     });
 
     it("should throw error if file not found for outline", async () => {
-      await expect(projectManager.getFileOutline(projectPath, "non-existent.tsx")).rejects.toThrow("File not found");
+      await expect(
+        projectManager.getFileOutline(projectPath, "non-existent.tsx"),
+      ).rejects.toThrow("File not found");
     });
 
     it("should throw error if project not open for listDirectory", async () => {
-      await expect(projectManager.listDirectory("/invalid", "src")).rejects.toThrow("Project not open");
+      await expect(
+        projectManager.listDirectory("/invalid", "src"),
+      ).rejects.toThrow("Project not open");
     });
   });
 
   describe("Symbol Location and Content", () => {
     const projectPath = "/test/project";
-    
+
     beforeEach(async () => {
       const mockGraph = {
         files: {
@@ -268,12 +308,15 @@ describe("ProjectManager", () => {
                 kind: "component",
                 type: "function",
                 loc: { line: 5, column: 1 },
-                scope: { start: { line: 5, column: 20 }, end: { line: 10, column: 1 } }
-              }
-            }
-          }
+                scope: {
+                  start: { line: 5, column: 20 },
+                  end: { line: 10, column: 1 },
+                },
+              },
+            },
+          },
         },
-        edges: []
+        edges: [],
       };
       (analyzeProject as any).mockReturnValue(mockGraph);
       await projectManager.openProject(projectPath);
@@ -287,7 +330,8 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol content", async () => {
-      const fileContent = "line1\nline2\nline3\nline4\nexport const App = () => {\n  return <div>App</div>\n}";
+      const fileContent =
+        "line1\nline2\nline3\nline4\nexport const App = () => {\n  return <div>App</div>\n}";
       (fs.existsSync as any).mockReturnValue(true);
       (fs.readFileSync as any).mockReturnValue(fileContent);
 
@@ -306,21 +350,25 @@ describe("ProjectManager", () => {
                 name: { type: "identifier", name: "App" },
                 kind: "component",
                 type: "function",
-                loc: { line: 1, column: 1 }
-              }
-            }
-          }
+                loc: { line: 1, column: 1 },
+              },
+            },
+          },
         },
-        edges: []
+        edges: [],
       };
       (analyzeProject as any).mockReturnValue(mockGraph);
       await projectManager.openProject(projectPath, subProject);
-      
+
       const fileContent = "export const App = () => {}";
       (fs.existsSync as any).mockReturnValue(true);
       (fs.readFileSync as any).mockReturnValue(fileContent);
 
-      const content = await projectManager.getSymbolContent(projectPath, "App", subProject);
+      const content = await projectManager.getSymbolContent(
+        projectPath,
+        "App",
+        subProject,
+      );
       expect(content[0].content).toContain("App");
     });
 
@@ -331,62 +379,95 @@ describe("ProjectManager", () => {
     });
 
     it("should return error if symbol not found for content", async () => {
-      const result = await projectManager.getSymbolContent(projectPath, "NonExistent");
+      const result = await projectManager.getSymbolContent(
+        projectPath,
+        "NonExistent",
+      );
       expect(result.error).toBeDefined();
     });
 
     it("should throw error if project not open", async () => {
-      await expect(projectManager.getSymbolLocation("/invalid", "App")).rejects.toThrow("Project not open");
+      await expect(
+        projectManager.getSymbolLocation("/invalid", "App"),
+      ).rejects.toThrow("Project not open");
     });
   });
 
   describe("Graph State", () => {
     const projectPath = "/test/project";
-    
+
     beforeEach(async () => {
-      (analyzeProject as any).mockReturnValue({ 
-        files: { 
-          "/src/App.tsx": { 
-            var: { 
-              "app": { 
-                id: "app", 
+      (analyzeProject as any).mockReturnValue({
+        files: {
+          "/src/App.tsx": {
+            var: {
+              app: {
+                id: "app",
                 name: { type: "identifier", name: "App" },
                 loc: { line: 1, column: 1 },
                 kind: "component",
-                ui: { x: 0, y: 0, renders: {} },
+                ui: { x: 0, y: 0, children: {} },
                 var: {
-                  "app:v1": { id: "app:v1", name: { type: "identifier", name: "v1" }, loc: { line: 2, column: 1 }, kind: "normal" }
-                }
-              } 
-            } 
-          } 
-        }, 
-        edges: [] 
+                  "app:v1": {
+                    id: "app:v1",
+                    name: { type: "identifier", name: "v1" },
+                    loc: { line: 2, column: 1 },
+                    kind: "normal",
+                  },
+                },
+              },
+            },
+          },
+        },
+        edges: [],
       });
       await projectManager.openProject(projectPath);
     });
 
     it("should update graph positions with contextId and sub-items", async () => {
-      const positions = { 
-        "app": { x: 100, y: 200, isLayoutCalculated: true },
+      const positions = {
+        app: { x: 100, y: 200, isLayoutCalculated: true },
         "app-render-1": { x: 50, y: 50 },
-        "app:v1": { x: 10, y: 10 }
+        "app:v1": { x: 10, y: 10 },
       };
-      await projectManager.updateGraphPosition(projectPath, undefined, positions, "app");
-      await projectManager.updateGraphPosition(projectPath, undefined, positions, "root");
-      await projectManager.updateGraphPosition(projectPath, undefined, positions, "app:v1"); // non-combo context
+      await projectManager.updateGraphPosition(
+        projectPath,
+        undefined,
+        positions,
+        "app",
+      );
+      await projectManager.updateGraphPosition(
+        projectPath,
+        undefined,
+        positions,
+        "root",
+      );
+      await projectManager.updateGraphPosition(
+        projectPath,
+        undefined,
+        positions,
+        "app:v1",
+      ); // non-combo context
       expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     it("should update positions in subproject", async () => {
       const subProject = "packages/app";
       await projectManager.openProject(projectPath, subProject);
-      const success = await projectManager.updateGraphPosition(projectPath, subProject, {});
+      const success = await projectManager.updateGraphPosition(
+        projectPath,
+        subProject,
+        {},
+      );
       expect(success).toBe(true);
     });
 
     it("should return false if project not found for updateGraphPosition", async () => {
-      const success = await projectManager.updateGraphPosition("/invalid", undefined, {});
+      const success = await projectManager.updateGraphPosition(
+        "/invalid",
+        undefined,
+        {},
+      );
       expect(success).toBe(false);
     });
 
@@ -400,10 +481,10 @@ describe("ProjectManager", () => {
       const state = { zoom: 1 };
       (fs.existsSync as any).mockReturnValue(true);
       (fs.readFileSync as any).mockReturnValue(JSON.stringify(state));
-      
+
       await projectManager.saveAppState(projectPath, state);
       expect(fs.writeFileSync).toHaveBeenCalled();
-      
+
       const readState = await projectManager.readAppState(projectPath);
       expect(readState).toEqual(state);
     });

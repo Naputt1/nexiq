@@ -10,7 +10,12 @@ import type {
 import Konva from "konva";
 import type { LabelData } from "../label";
 import type { GraphCombo } from "./combo";
-import type { BaseNodeData, GraphItemPosition, Renderable, RenderContext } from ".";
+import type {
+  BaseNodeData,
+  GraphItemPosition,
+  Renderable,
+  RenderContext,
+} from ".";
 
 export abstract class BaseNode implements Renderable {
   id: string;
@@ -50,10 +55,11 @@ export abstract class BaseNode implements Renderable {
     | "ref"
     | "prop"
     | "jsx"
-    | "normal";
+    | "normal"
+    | (string & {});
   typeParams?: TypeDataParam[];
   extends?: string[];
-  renders?: Record<string, ComponentInfoRender>;
+  children?: Record<string, ComponentInfoRender>;
   ui?: BaseNodeData["ui"];
 
   constructor(data: BaseNodeData) {
@@ -67,7 +73,7 @@ export abstract class BaseNode implements Renderable {
     this.visible = data.visible ?? true;
     this.combo = data.combo;
     this.name = data.name;
-    this.fileName = data.fileName;
+    this.fileName = data.fileName ?? "";
     this.pureFileName = data.pureFileName;
     this.label = data.label;
     this.color = data.color ?? "blue";
@@ -83,7 +89,7 @@ export abstract class BaseNode implements Renderable {
     this.type = data.type;
     this.typeParams = data.typeParams;
     this.extends = data.extends;
-    this.renders = data.renders;
+    this.children = data.children;
     this.ui = data.ui;
   }
 
@@ -94,13 +100,20 @@ export abstract class BaseNode implements Renderable {
 
   abstract getFillColor(context: RenderContext): string;
 
-  protected renderLabel(group: Konva.Group, offsetY: number, context: RenderContext) {
+  protected renderLabel(
+    group: Konva.Group,
+    offsetY: number,
+    context: RenderContext,
+  ) {
     if (!this.label) return;
- 
+
     const text = new Konva.Text({
       id: `label-${this.id}`,
       text: this.label.text,
-      fill: this.label.fill || context.customColors?.labelColor || (context.theme === "dark" ? "white" : "black"),
+      fill:
+        this.label.fill ||
+        context.customColors?.labelColor ||
+        (context.theme === "dark" ? "white" : "black"),
       fontSize: 12 * this.scale,
       align: "center",
       y: offsetY,
@@ -110,7 +123,12 @@ export abstract class BaseNode implements Renderable {
     group.add(text);
   }
 
-  protected renderGitStatus(group: Konva.Group, radius: number, indicatorSize: number = 4, context: RenderContext) {
+  protected renderGitStatus(
+    group: Konva.Group,
+    radius: number,
+    indicatorSize: number = 4,
+    context: RenderContext,
+  ) {
     if (!this.gitStatus) return;
 
     const statusColor =

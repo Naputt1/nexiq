@@ -30,15 +30,28 @@ describe("dependency resolution", () => {
       throw new Error("App should be a component");
 
     // Check Child render dependency
-    const childRender = Object.values(appVar.renders).find(
+    const returnVar = appVar.return;
+    expect(returnVar).toBeDefined();
+    if (
+      !returnVar ||
+      typeof returnVar === "string" ||
+      returnVar.type !== "jsx"
+    ) {
+      throw new Error("App return should be JSX");
+    }
+
+    const childRender = Object.values(returnVar.children).find(
       (r) => r.id.includes("Child") || r.id === "1eb5061ae05ec5e0",
     );
     expect(childRender).toBeDefined();
+    if (!childRender) throw new Error("Child render not found");
 
-    const dataDep = childRender!.dependencies.find((d) => d.name === "data");
+    const dataDep = childRender.dependencies.find((d) => d.name === "data");
     expect(dataDep).toBeDefined();
+    if (!dataDep || !dataDep.valueId) throw new Error("Data dependency or valueId not found");
+    
     // valueId should point to the 'name' identifier in useQuery destructuring
-    expect(dataDep!.valueId).toBeDefined();
+    expect(dataDep.valueId).toBeDefined();
 
     // Find the 'name' identifier ID in useQuery
     const useQueryCall = Object.values(appVar.var).find(
@@ -46,9 +59,10 @@ describe("dependency resolution", () => {
         v.kind === "hook" && v.type === "data" && v.call.name === "useQuery",
     );
     expect(useQueryCall).toBeDefined();
+    if (!useQueryCall) throw new Error("useQuery call not found");
 
     // The ID should be the full nested ID (new behavior)
-    expect(dataDep!.valueId).toContain(useQueryCall!.id);
-    expect(dataDep!.valueId).not.toBe(useQueryCall!.id);
+    expect(dataDep.valueId).toContain(useQueryCall.id);
+    expect(dataDep.valueId).not.toBe(useQueryCall.id);
   });
 });

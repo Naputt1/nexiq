@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
-import type { JsonData, TypeDataDeclare, ComponentFileVar } from "shared";
+import type {
+  JsonData,
+  TypeDataDeclare,
+  ComponentFileVar,
+  VariableName,
+} from "shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
-export type { JsonData, TypeDataDeclare, ComponentFileVar };
+export type { JsonData, TypeDataDeclare, ComponentFileVar, VariableName };
 
 export interface GraphItemPosition {
   x: number;
@@ -11,7 +16,7 @@ export interface GraphItemPosition {
 
 export interface GraphNodeData {
   id: string;
-  name: any;
+  name: VariableName | string;
   label?: { text: string; fill?: string };
   type?: string;
   fileName?: string;
@@ -25,7 +30,7 @@ export interface GraphNodeData {
   tag?: string;
   raw?: ComponentFileVar;
   displayName?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface GraphComboData extends GraphNodeData {
@@ -33,7 +38,7 @@ export interface GraphComboData extends GraphNodeData {
   collapsedRadius?: number;
   expandedRadius?: number;
   padding?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface GraphArrowData {
@@ -42,7 +47,7 @@ export interface GraphArrowData {
   target: string;
   label?: string;
   combo?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface useGraphProps {
@@ -64,7 +69,7 @@ export interface GraphViewTask {
 export interface DetailSectionProps {
   selectedId: string;
   item: GraphNodeData | GraphComboData;
-  graph: any; // GraphData instance
+  graph: unknown; // GraphData instance
   projectPath: string;
   typeData: Record<string, TypeDataDeclare>;
   onSelect?: (id: string) => void;
@@ -80,11 +85,17 @@ export interface DetailSection {
   defaultOpen?: boolean;
 }
 
+export interface MCPToolHandlerArgs {
+  projectPath: string;
+  projectManager: any; // We use any here to avoid dependency on server package
+  [key: string]: unknown;
+}
+
 export interface MCPTool {
   name: string;
   description: string;
-  inputSchema: any;
-  handler: (args: any) => Promise<any>;
+  inputSchema: Record<string, unknown>;
+  handler: (args: MCPToolHandlerArgs) => Promise<unknown>;
 }
 
 export interface Extension {

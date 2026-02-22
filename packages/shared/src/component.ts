@@ -48,7 +48,7 @@ export interface ComponentInfoRender extends ComponentLoc {
   parentId?: string | undefined;
   dependencies: ComponentInfoRenderDependency[];
   isDependency?: boolean | undefined;
-  renders: Record<string, ComponentInfoRender>;
+  children: Record<string, ComponentInfoRender>;
 }
 
 export interface EffectInfo extends ComponentLoc, ReactDependencies {
@@ -89,7 +89,6 @@ export interface HookInfo extends ReactFunctionInfoBase {}
 export interface ComponentInfo extends ReactFunctionInfoBase {
   componentType: "Function" | "Class";
   contexts: string[];
-  renders: Record<string, ComponentInfoRender>;
   forwardRef?: boolean;
 }
 
@@ -139,7 +138,12 @@ export type VariableNamePattern =
       loc: VariableLoc;
       id: string;
     }
-  | { type: "rest"; argument: VariableNamePattern; loc: VariableLoc; id: string };
+  | {
+      type: "rest";
+      argument: VariableNamePattern;
+      loc: VariableLoc;
+      id: string;
+    };
 
 export type VariableObjectProperty = {
   key: string;
@@ -161,12 +165,20 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   file: string;
   hash?: string | undefined;
   parentId?: string | undefined;
-  declarationKind?: "const" | "let" | "var" | "using" | "await using" | undefined;
+  declarationKind?:
+    | "const"
+    | "let"
+    | "var"
+    | "using"
+    | "await using"
+    | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  ui?: (UIItemState & {
-    renders?: Record<string, UIItemState>;
-    vars?: Record<string, UIItemState>;
-  }) | undefined;
+  ui?:
+    | (UIItemState & {
+        children?: Record<string, UIItemState>;
+        vars?: Record<string, UIItemState>;
+      })
+    | undefined;
 }
 
 export interface ComponentFileVarBase<
@@ -177,18 +189,22 @@ export interface ComponentFileVarBase<
   kind: TKind;
 }
 
+export type FunctionReturn = PropDataType | ComponentFileVarJSX | string;
+
 export interface ComponentFileVarBaseTypeFunction<
   TKind extends VarKind,
 > extends ComponentFileVarBase<"function", TKind> {
   type: "function";
   scope: VariableScope;
   var: Record<string, ComponentFileVar>;
+  return?: FunctionReturn | undefined;
 }
 
 export interface ComponentFileVarBaseTypeData<
   TKind extends VarKind,
 > extends ComponentFileVarBase<"data", TKind> {
   type: "data";
+  children?: Record<string, ComponentInfoRender>;
 }
 
 export type ComponentFileVarDependencyType<TKind extends VarKind> =
@@ -246,7 +262,6 @@ export type MemoFileVarHook = ComponentFileVarReactWithCallback<"memo"> &
 
 export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
   ComponentFileVarBase<TType, "normal"> & {
-    renders: Record<string, ComponentInfoRender>;
     kind: "normal";
   };
 
@@ -260,12 +275,15 @@ export type ComponentFileVarNormal =
   | ComponentFileVarNormalFunction
   | ComponentFileVarNormalData;
 
-export interface ComponentFileVarJSX
-  extends ComponentFileVarBase<"jsx", "normal"> {
+export interface ComponentFileVarJSX extends ComponentFileVarBase<
+  "jsx",
+  "normal"
+> {
   type: "jsx";
   tag: string;
   props: ComponentInfoRenderDependency[];
-  renders: Record<string, ComponentInfoRender>;
+  children: Record<string, ComponentInfoRender>;
+  srcId?: string | undefined;
 }
 
 export type ComponentFileVarFunction =

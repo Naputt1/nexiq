@@ -30,6 +30,8 @@ import type {
   VariableScope,
   VariableName,
   ComponentFileVarHook,
+  FunctionReturn,
+  ComponentFileVarJSX,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -39,7 +41,6 @@ import {
   isComponentVariable,
   isNormalVariable,
   isBaseFunctionVariable,
-  isDataVariable,
   isCallHookVariable,
   isJSXVariable,
 } from "./variable/type.js";
@@ -96,6 +97,9 @@ export class File {
   // key = loc.line + @ + loc.column val = variable
   private locIdsMap = new Map<string, Variable>();
 
+  // key = instanceId val = ComponentInfoRender
+  private renderInstanceMap = new Map<string, ComponentInfoRender>();
+
   // key = name val = typeData
   private tsTypesID = new Map<string, TypeDataDeclare>();
 
@@ -110,15 +114,28 @@ export class File {
     this.var = new Scope();
   }
 
+  private loadRender(render: ComponentInfoRender) {
+    this.renderInstanceMap.set(render.instanceId, render);
+    for (const child of Object.values(render.children)) {
+      this.loadRender(child);
+    }
+  }
+
   private loadVariable(variable: ComponentFileVar, scope: Scope = this.var) {
     let v: Variable | undefined;
     if (variable.type === "jsx") {
       v = new JSXVariable(variable, this);
+      for (const render of Object.values(variable.children || {})) {
+        this.loadRender(render);
+      }
     } else if (variable.kind === "normal") {
       if (variable.type === "function") {
         v = new FunctionVariable(variable, this);
       } else {
         v = new DataVariable(variable, this);
+        for (const render of Object.values(variable.children || {})) {
+          this.loadRender(render);
+        }
       }
     } else if (variable.kind === "component") {
       v = new ComponentVariable(variable, this);
@@ -349,25 +366,21 @@ export class File {
   ): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (variable.kind === "component" && variable.renders) {
-      for (const render of Object.values(variable.renders)) {
+    const resolveRenders = (
+      children: Record<string, ComponentInfoRender>,
+      toId: string,
+    ) => {
+      for (const render of Object.values(children)) {
         edges.push({
           from: render.id,
-          to: variable.id,
+          to: toId,
           label: "render",
         });
+        if (render.children) {
+          resolveRenders(render.children, toId);
+        }
       }
-    }
-
-    if (variable.hooks) {
-      for (const hookId of variable.hooks) {
-        edges.push({
-          from: variable.id,
-          to: hookId,
-          label: "hook",
-        });
-      }
-    }
+    };
 
     if (variable.var) {
       for (const v of Object.values(variable.var)) {
@@ -381,6 +394,20 @@ export class File {
             ),
           );
         } else {
+          if (v.type === "jsx") {
+            const jsx = v as ComponentFileVarJSX;
+            if (variable.kind === "component") {
+              edges.push({
+                from: jsx.srcId ?? jsx.tag,
+                to: variable.id,
+                label: "render",
+              });
+              if (jsx.children) {
+                resolveRenders(jsx.children, variable.id);
+              }
+            }
+          }
+
           if (v.kind == "hook" && v.type == "data") {
             const hookCall = v as ComponentFileVarCallHook;
             if (hookCall.call.id) {
@@ -410,15 +437,21 @@ export class File {
   private __getEdges(variable: ReactFunctionVariable): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (isComponentVariable(variable) && variable.renders) {
-      for (const render of Object.values(variable.renders)) {
+    const resolveRenders = (
+      children: Record<string, ComponentInfoRender>,
+      toId: string,
+    ) => {
+      for (const render of Object.values(children)) {
         edges.push({
           from: render.id,
-          to: variable.id,
+          to: toId,
           label: "render",
         });
+        if (render.children) {
+          resolveRenders(render.children, toId);
+        }
       }
-    }
+    };
 
     for (const hookId of variable.hooks) {
       edges.push({
@@ -432,6 +465,20 @@ export class File {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
       } else {
+        if (v.type === "jsx") {
+          const jsx = v as JSXVariable;
+          if (isComponentVariable(variable)) {
+            edges.push({
+              from: jsx.srcId ?? jsx.tag,
+              to: variable.id,
+              label: "render",
+            });
+            if (jsx.children) {
+              resolveRenders(jsx.children, variable.id);
+            }
+          }
+        }
+
         if (v && isCallHookVariable(v)) {
           edges.push({
             from: v.id,
@@ -698,6 +745,13 @@ export class File {
     if (!variable) return;
     this.getDependenciesIds(variable.id, dependencies);
 
+    if (loc) {
+      const jsxVar = this.getVariable(loc);
+      if (jsxVar && isJSXVariable(jsxVar)) {
+        jsxVar.srcId = srcId;
+      }
+    }
+
     const newRender: ComponentInfoRender = {
       id: srcId,
       instanceId,
@@ -706,37 +760,36 @@ export class File {
       isDependency,
       loc,
       parentId,
-      renders: {},
+      children: {},
     };
+
+    this.renderInstanceMap.set(instanceId, newRender);
 
     let targetMap: Record<string, ComponentInfoRender> | undefined;
 
     if (
-      isComponentVariable(variable) ||
       isJSXVariable(variable) ||
-      isNormalVariable(variable)
+      isNormalVariable(variable) ||
+      isComponentVariable(variable)
     ) {
       if (parentId) {
-        const findParent = (
-          map: Record<string, ComponentInfoRender> | undefined,
-        ): ComponentInfoRender | undefined => {
-          if (!map) return undefined;
-          if (map[parentId]) return map[parentId];
-          for (const r of Object.values(map)) {
-            const found = findParent(r.renders);
-            if (found) return found;
-          }
-          return undefined;
-        };
-
-        const parent = findParent((variable as any).renders);
+        const parent = this.renderInstanceMap.get(parentId);
         if (parent) {
-          targetMap = parent.renders;
+          targetMap = parent.children;
+
+          if (parent.loc) {
+            const parentJSX = this.getVariable(parent.loc);
+            if (parentJSX && isJSXVariable(parentJSX)) {
+              parentJSX.children[instanceId] = newRender;
+            }
+          }
         }
       }
 
       if (!targetMap) {
-        targetMap = (variable as any).renders;
+        if (isJSXVariable(variable) || isNormalVariable(variable)) {
+          targetMap = variable.children;
+        }
       }
 
       if (targetMap) {
@@ -744,7 +797,7 @@ export class File {
       }
     }
 
-    return (variable as any).id;
+    return variable.id;
   }
 
   public addEffect(loc: VariableLoc, effect: Omit<EffectInfo, "id">) {
@@ -752,10 +805,16 @@ export class File {
 
     if (variable == null) return;
 
-    if (
-      isHookVariable(variable) || isComponentVariable(variable)
-    ) {
+    if (isHookVariable(variable) || isComponentVariable(variable)) {
       variable.addEffect(effect);
+    }
+  }
+
+  public setReturn(loc: VariableLoc, returnId: FunctionReturn) {
+    const variable = this.getVariable(loc);
+
+    if (variable && isBaseFunctionVariable(variable)) {
+      variable.return = returnId;
     }
   }
 }

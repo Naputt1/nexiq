@@ -75,7 +75,6 @@ export default function FunctionDeclaration(
           hooks: [],
           props: getProps(nodePath, undefined, componentId),
           contexts: [],
-          renders: {},
           dependencies: {},
           var: {},
           loc,

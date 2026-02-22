@@ -115,7 +115,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "b5939d65ec8adf7d",
+          "hash": "37ef8a3a73ac88d3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -170,6 +170,40 @@
                 "column": 9
               },
               "setter": "setStateX"
+            },
+            "575944dc1a051d53": {
+              "id": "575944dc1a051d53",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@49:4",
+                "loc": {
+                  "line": 49,
+                  "column": 4
+                },
+                "id": "9ed988e627142d52"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {
+                "e6c632b61e964e1f": {
+                  "id": "e6c632b61e964e1f",
+                  "name": "a"
+                },
+                "eaf06c6480b2cd11": {
+                  "id": "eaf06c6480b2cd11",
+                  "name": "x"
+                }
+              },
+              "loc": {
+                "line": 49,
+                "column": 4
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
             }
           },
           "scope": {
@@ -181,6 +215,40 @@
               "line": 12,
               "column": 25
             }
+          },
+          "return": {
+            "id": "575944dc1a051d53",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@49:4",
+              "loc": {
+                "line": 49,
+                "column": 4
+              },
+              "id": "9ed988e627142d52"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/App.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {
+              "e6c632b61e964e1f": {
+                "id": "e6c632b61e964e1f",
+                "name": "a"
+              },
+              "eaf06c6480b2cd11": {
+                "id": "eaf06c6480b2cd11",
+                "name": "x"
+              }
+            },
+            "loc": {
+              "line": 49,
+              "column": 4
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
           },
           "states": [
             "475f220157c1b8f9:state:stateX"
@@ -392,47 +460,34 @@
           },
           "componentType": "Function",
           "contexts": [],
-          "renders": {},
           "forwardRef": false,
           "propType": {
             "type": "any"
           }
-        },
-        "575944dc1a051d53": {
-          "id": "575944dc1a051d53",
-          "name": {
-            "type": "identifier",
-            "name": "jsx@49:4",
-            "loc": {
-              "line": 49,
-              "column": 4
-            },
-            "id": "9ed988e627142d52"
-          },
-          "kind": "normal",
-          "type": "jsx",
-          "file": "/src/App.tsx",
-          "hash": "8032ea85ac847d3f",
-          "dependencies": {
-            "e6c632b61e964e1f": {
-              "id": "e6c632b61e964e1f",
-              "name": "a"
-            },
-            "eaf06c6480b2cd11": {
-              "id": "eaf06c6480b2cd11",
-              "name": "x"
-            }
-          },
-          "loc": {
-            "line": 49,
-            "column": 4
-          },
-          "tag": "div",
-          "props": [],
-          "renders": {}
         }
       }
     }
   },
-  "edges": []
+  "edges": [
+    {
+      "from": "475f220157c1b8f9",
+      "to": "575944dc1a051d53",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "475f220157c1b8f9",
+      "label": "render"
+    },
+    {
+      "from": "575944dc1a051d53",
+      "to": "e6c632b61e964e1f",
+      "label": "hook"
+    },
+    {
+      "from": "575944dc1a051d53",
+      "to": "eaf06c6480b2cd11",
+      "label": "hook"
+    }
+  ]
 }

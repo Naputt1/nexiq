@@ -381,9 +381,11 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public load(data: ReactFunctionVariable<TKind>) {
+  public load(data: BaseFunctionVariable<TKind>) {
     super.load(data);
-    this.syncSets();
+    if (data instanceof ReactFunctionVariable) {
+      this.syncSets();
+    }
   }
 
   protected getBaseData(): ComponentFileVarReactFunction<TKind> {
@@ -398,9 +400,7 @@ export abstract class ReactFunctionVariable<
 
   protected getDataInternal() {
     return {
-      name: this.name,
-      var: this.var.getData(),
-      scope: this.scope,
+      ...super.getDataInternal(),
       states: [...this.states],
       props: this.props,
       hooks: this.hooks,
