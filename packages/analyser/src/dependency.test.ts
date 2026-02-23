@@ -5,7 +5,7 @@ import { PackageJson } from "./db/packageJson.js";
 import path from "path";
 
 describe("dependency resolution", () => {
-  it("should resolve dependencies to specific destructured identifiers", () => {
+  it("should resolve dependencies to specific destructured identifiers", async () => {
     const projectPath = path.resolve(
       process.cwd(),
       "../sample-project/destructuring-hook",
@@ -14,7 +14,12 @@ describe("dependency resolution", () => {
     const viteConfigPath = getViteConfig(projectPath);
     const files = getFiles(projectPath);
 
-    const graph = analyzeFiles(projectPath, viteConfigPath, files, packageJson);
+    const graph = await analyzeFiles(
+      projectPath,
+      viteConfigPath,
+      files,
+      packageJson,
+    );
 
     const appFile = graph.files["/src/App.tsx"];
     expect(appFile).toBeDefined();

@@ -62,6 +62,7 @@
           "id": "cafb2fea281e67de"
         }
       },
+      "starExports": [],
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {}
@@ -93,6 +94,7 @@
         }
       },
       "export": {},
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -185,6 +187,7 @@
           "id": "8058275cdfd1a41c"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -567,6 +570,7 @@
           "id": "311c554b828f67a5"
         }
       },
+      "starExports": [],
       "defaultExport": "App",
       "tsTypes": {
         "7ed7fa9f9cff307f": {
@@ -2598,6 +2602,7 @@
           "id": "a6b739fa4a0a9b84"
         }
       },
+      "starExports": [],
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
@@ -2720,6 +2725,7 @@
           "id": "8c661cc89799b0d9"
         }
       },
+      "starExports": [],
       "defaultExport": "Test",
       "tsTypes": {},
       "var": {
@@ -2841,6 +2847,7 @@
           "id": "f33cc2344f0788c8"
         }
       },
+      "starExports": [],
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {
@@ -2916,6 +2923,7 @@
           "id": "194edf5b8ca4a536"
         }
       },
+      "starExports": [],
       "defaultExport": "anonymous",
       "tsTypes": {},
       "var": {
@@ -3054,6 +3062,16 @@
     {
       "from": "311c554b828f67a5",
       "to": "434f1e2491af7531",
+      "label": "render"
+    },
+    {
+      "from": "a6b739fa4a0a9b84",
+      "to": "211fe28b8334926e",
+      "label": "render"
+    },
+    {
+      "from": "8c661cc89799b0d9",
+      "to": "31516088f6afa588",
       "label": "render"
     },
     {

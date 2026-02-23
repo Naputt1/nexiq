@@ -33,7 +33,7 @@ describe("analyser coverage expansion", () => {
     return tmpDir;
   };
 
-  it("should cover analyzeProject and config loading", () => {
+  it("should cover analyzeProject and config loading", async () => {
     const tmpDir = createTmpProject({
       "react.map.config.json": JSON.stringify({
         ignorePatterns: ["**/ignored.ts"],
@@ -42,20 +42,20 @@ describe("analyser coverage expansion", () => {
       "src/ignored.ts": "export const Ignored = 1;",
     });
 
-    const graph = analyzeProject(tmpDir);
+    const graph = await analyzeProject(tmpDir);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     expect(graph.files["/src/ignored.ts"]).toBeUndefined();
 
     // Test with cache
     const cacheFile = path.join(tmpDir, "cache.json");
     fs.writeFileSync(cacheFile, JSON.stringify(graph));
-    const cachedGraph = analyzeProject(tmpDir, cacheFile);
+    const cachedGraph = await analyzeProject(tmpDir, cacheFile);
     expect(cachedGraph.files["/src/App.tsx"]).toBeDefined();
 
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover JSXElement edge cases (object props, spread, named functions)", () => {
+  it("should cover JSXElement edge cases (object props, spread, named functions)", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         import React from 'react';
@@ -81,12 +81,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover variableDeclaration edge cases", () => {
+  it("should cover variableDeclaration edge cases", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         import { useCallback, useRef, useEffect, useState } from 'react';
@@ -121,12 +121,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover propExtractor and pattern edge cases", () => {
+  it("should cover propExtractor and pattern edge cases", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         import React, { FC, FunctionComponent } from 'react';
@@ -147,12 +147,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover TS types in helper", () => {
+  it("should cover TS types in helper", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         type T = string | number | null | undefined | void | unknown | never | bigint;
@@ -164,12 +164,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover export declarations", () => {
+  it("should cover export declarations", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         export default class MyClass extends React.Component {
@@ -186,7 +186,7 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(
+    const graph = await analyzeFiles(
       tmpDir,
       null,
       ["src/App.tsx", "src/Anon.tsx"],
@@ -196,7 +196,7 @@ describe("analyser coverage expansion", () => {
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover utils edge cases", () => {
+  it("should cover utils edge cases", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         export const Cond = (p) => {
@@ -212,7 +212,7 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -224,13 +224,13 @@ describe("analyser coverage expansion", () => {
     expect(rrParser.routerType).toBe("react-router");
   });
 
-  it("should cover cache loading types in fileDB", () => {
+  it("should cover cache loading types in fileDB", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": "export const App = () => <div>Hello</div>;",
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const initialGraph = analyzeFiles(
+    const initialGraph = await analyzeFiles(
       tmpDir,
       null,
       ["src/App.tsx"],
@@ -298,7 +298,7 @@ describe("analyser coverage expansion", () => {
       dependencies: {},
     } as ComponentFileVar;
 
-    const secondGraph = analyzeFiles(
+    const secondGraph = await analyzeFiles(
       tmpDir,
       null,
       ["src/App.tsx"],

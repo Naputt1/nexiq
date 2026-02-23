@@ -6,7 +6,7 @@ import fs from "fs";
 import os from "os";
 
 describe("analyser robustness", () => {
-  it("should handle problematic React patterns without crashing", () => {
+  it("should handle problematic React patterns without crashing", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-test-"));
     const srcDir = path.join(tmpDir, "src");
     fs.mkdirSync(srcDir);
@@ -36,10 +36,13 @@ describe("analyser robustness", () => {
     `;
 
     fs.writeFileSync(path.join(srcDir, "App.tsx"), testFile);
-    fs.writeFileSync(path.join(tmpDir, "package.json"), JSON.stringify({ name: "test" }));
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "test" }),
+    );
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(
+    const graph = await analyzeFiles(
       tmpDir,
       null,
       ["src/App.tsx"],
@@ -54,8 +57,10 @@ describe("analyser robustness", () => {
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should handle circular dependencies without infinite loops", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-circular-"));
+  it("should handle circular dependencies without infinite loops", async () => {
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "react-map-circular-"),
+    );
     const srcDir = path.join(tmpDir, "src");
     fs.mkdirSync(srcDir);
 
@@ -70,10 +75,13 @@ describe("analyser robustness", () => {
 
     fs.writeFileSync(path.join(srcDir, "A.tsx"), fileA);
     fs.writeFileSync(path.join(srcDir, "B.tsx"), fileB);
-    fs.writeFileSync(path.join(tmpDir, "package.json"), JSON.stringify({ name: "test" }));
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "test" }),
+    );
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = analyzeFiles(
+    const graph = await analyzeFiles(
       tmpDir,
       null,
       ["src/A.tsx", "src/B.tsx"],

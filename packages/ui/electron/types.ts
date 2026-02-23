@@ -1,6 +1,20 @@
-import type { ReactMapConfig, SubProject, CustomColors } from "shared";
+import type {
+  ReactMapConfig,
+  SubProject,
+  CustomColors,
+  ProjectStatus,
+  AppStateData,
+  GraphViewType,
+} from "shared";
 
-export type { ReactMapConfig, SubProject, CustomColors };
+export type {
+  ReactMapConfig,
+  SubProject,
+  CustomColors,
+  ProjectStatus,
+  AppStateData,
+  GraphViewType,
+};
 
 export interface PnpmWorkspace {
   packages?: string[];
@@ -11,38 +25,12 @@ export interface PackageJson {
   workspaces?: string[] | { packages?: string[] };
 }
 
-export interface ProjectStatus {
-  hasConfig: boolean;
-  isMonorepo: boolean;
-  projectType: "vite" | "next" | "unknown";
-  config: ReactMapConfig | null;
-  subProjects: SubProject[];
-}
-
 export interface IpcEvents {
   "main-process-message": string;
   "reload-project": void;
   "git-status-changed": void;
 }
 
-export type GraphViewType = "component" | "file" | "router";
-
-export interface AppStateData {
-  selectedSubProject: string | null;
-  centeredItemId: string | null;
-  selectedId: string | null;
-  isSidebarOpen: boolean;
-  activeTab: "projects" | "git";
-  selectedCommit: string | null;
-  viewport?: { x: number; y: number; zoom: number } | null;
-  view?: GraphViewType;
-  sidebar: {
-    right: {
-      width?: number;
-      height?: number;
-    };
-  };
-}
 export interface GlobalSettings {
   theme: "dark" | "light";
   customColors?: CustomColors;

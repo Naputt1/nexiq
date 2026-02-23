@@ -1,16 +1,39 @@
 import fs from "node:fs";
 import path from "node:path";
+import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "analyser";
-import type { JsonData } from "shared";
+import {
+  type JsonData,
+  type ProjectStatus,
+  type GitStatus,
+  type GitCommit,
+  type GitFileDiff,
+  type ReactMapConfig,
+  type SubProject,
+  getDisplayName,
+  parseRawDiff,
+} from "shared";
 import type { Extension } from "@react-map/extension-sdk";
 import { pathToFileURL } from "node:url";
-import { getDisplayName } from "shared";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import Database from "better-sqlite3";
+import { simpleGit, type LogOptions } from "simple-git";
+import yaml from "js-yaml";
+import fg from "fast-glob";
+import tmp from "tmp";
 
 const execAsync = promisify(exec);
+
+export interface PnpmWorkspace {
+  packages?: string[];
+}
+
+export interface PackageJson {
+  name?: string;
+  workspaces?: string[] | { packages?: string[] };
+}
 
 export interface ProjectInfo {
   projectPath: string;
@@ -25,6 +48,7 @@ export interface ProjectInfo {
 export interface SymbolSearchResult {
   type: "definition" | "usage";
   kind?: string;
+  usage_kind?: string;
   name: string;
   file: string;
   loc: { line: number; column: number };
@@ -51,6 +75,7 @@ interface RenderRow {
   line: number;
   column: number;
   scope_symbol_id: string;
+  usage_kind: string;
   in_name?: string;
 }
 
@@ -68,6 +93,7 @@ export interface ComponentHierarchyNode {
 
 export class ProjectManager {
   private projects = new Map<string, ProjectInfo>();
+  private pendingProjects = new Map<string, Promise<ProjectInfo>>();
 
   async openProject(
     projectPath: string,
@@ -78,6 +104,29 @@ export class ProjectManager {
       return this.projects.get(key)!;
     }
 
+    if (this.pendingProjects.has(key)) {
+      console.error(`Project already opening: ${key}, returning pending promise`);
+      return this.pendingProjects.get(key)!;
+    }
+
+    const openPromise = (async () => {
+      try {
+        const result = await this._openProjectInternal(projectPath, subProject);
+        this.projects.set(key, result);
+        return result;
+      } finally {
+        this.pendingProjects.delete(key);
+      }
+    })();
+
+    this.pendingProjects.set(key, openPromise);
+    return openPromise;
+  }
+
+  private async _openProjectInternal(
+    projectPath: string,
+    subProject?: string,
+  ): Promise<ProjectInfo> {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
@@ -157,7 +206,7 @@ export class ProjectManager {
     }
 
     console.error(`Analyzing project: ${analysisPath}`);
-    const graph = analyzeProject(
+    const graph = await analyzeProject(
       analysisPath,
       cacheFile,
       ignorePatterns,
@@ -199,30 +248,32 @@ export class ProjectManager {
             console.error(
               `Changes detected in ${analysisPath}, re-analyzing...`,
             );
-            try {
-              projectInfo.graph = analyzeProject(
-                analysisPath,
-                cacheFile,
-                ignorePatterns,
-                projectInfo.sqlitePath,
-              );
-              fs.writeFileSync(
-                cacheFile,
-                JSON.stringify(projectInfo.graph, null, 2),
-              );
+            analyzeProject(
+              analysisPath,
+              cacheFile,
+              ignorePatterns,
+              projectInfo.sqlitePath,
+            )
+              .then((newGraph) => {
+                projectInfo.graph = newGraph;
+                fs.writeFileSync(
+                  cacheFile,
+                  JSON.stringify(projectInfo.graph, null, 2),
+                );
 
-              if (projectInfo.db) projectInfo.db.close();
-              projectInfo.db = new Database(projectInfo.sqlitePath);
+                if (projectInfo.db) projectInfo.db.close();
+                projectInfo.db = new Database(projectInfo.sqlitePath);
 
-              console.error(
-                `Project ${analysisPath} re-analyzed successfully.`,
-              );
-            } catch (reAnalyzeError: unknown) {
-              console.error(
-                `Re-analysis failed for ${analysisPath}:`,
-                reAnalyzeError,
-              );
-            }
+                console.error(
+                  `Project ${analysisPath} re-analyzed successfully.`,
+                );
+              })
+              .catch((reAnalyzeError) => {
+                console.error(
+                  `Re-analysis failed for ${analysisPath}:`,
+                  reAnalyzeError,
+                );
+              });
           }
         },
         {
@@ -248,7 +299,6 @@ export class ProjectManager {
       );
     }
 
-    this.projects.set(key, projectInfo);
     return projectInfo;
   }
 
@@ -319,7 +369,8 @@ export class ProjectManager {
       for (const usage of usages) {
         results.push({
           type: "usage",
-          kind: "render",
+          kind: usage.usage_kind === "render" ? "render" : "call",
+          usage_kind: usage.usage_kind,
           name: usage.tag,
           file: usage.file,
           loc: { line: usage.line, column: usage.column },
@@ -344,7 +395,8 @@ export class ProjectManager {
       for (const usage of externalUsages) {
         results.push({
           type: "usage",
-          kind: "render",
+          kind: usage.usage_kind === "render" ? "render" : "call",
+          usage_kind: usage.usage_kind,
           name: usage.tag,
           file: usage.file,
           loc: { line: usage.line, column: usage.column },
@@ -390,21 +442,20 @@ export class ProjectManager {
     if (!project || !project.graph)
       throw new Error("Project not open or graph not available.");
 
-    let regex: RegExp;
-    if (
-      pattern.includes("*") &&
-      !pattern.includes("/") &&
-      !pattern.includes("\\")
-    ) {
-      const escaped = pattern
-        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-        .replace(/\\\*/g, ".*");
-      regex = new RegExp(`^${escaped}$`, "i");
-    } else {
-      regex = new RegExp(pattern, "i");
+    const isGlob = /[*?[\]]/.test(pattern);
+    const files = Object.keys(project.graph.files);
+
+    if (isGlob) {
+      const results = files.filter(
+        (p) =>
+          minimatch(p, pattern, { dot: true, nocase: true }) ||
+          minimatch(path.basename(p), pattern, { dot: true, nocase: true }),
+      );
+      return results.sort();
     }
 
-    const results = Object.keys(project.graph.files).filter(
+    const regex = new RegExp(pattern, "i");
+    const results = files.filter(
       (p) => regex.test(p) || regex.test(path.basename(p)),
     );
     return results.sort();
@@ -876,6 +927,373 @@ export class ProjectManager {
       path.join(cacheDir, `${path.basename(analysisPath)}-${pathHash}.json`),
       JSON.stringify(project.graph, null, 2),
     );
+  }
+
+  async checkProjectStatus(directoryPath: string): Promise<ProjectStatus> {
+    const status: ProjectStatus = {
+      hasConfig: false,
+      isMonorepo: false,
+      projectType: "unknown",
+      config: null,
+      subProjects: [],
+    };
+
+    try {
+      const configPath = path.join(directoryPath, "react.map.config.json");
+      if (fs.existsSync(configPath)) {
+        status.hasConfig = true;
+        try {
+          status.config = JSON.parse(
+            fs.readFileSync(configPath, "utf-8"),
+          ) as ReactMapConfig;
+        } catch (e: unknown) {
+          console.error("Error reading config", e);
+        }
+      }
+
+      const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
+      const packageJsonPath = path.join(directoryPath, "package.json");
+
+      let workspacePatterns: string[] = [];
+
+      if (fs.existsSync(pnpmWorkspace)) {
+        status.isMonorepo = true;
+        try {
+          const doc = yaml.load(
+            fs.readFileSync(pnpmWorkspace, "utf-8"),
+          ) as PnpmWorkspace;
+          if (doc && doc.packages && Array.isArray(doc.packages)) {
+            workspacePatterns = doc.packages;
+          }
+        } catch (e: unknown) {
+          console.error("Error reading pnpm-workspace.yaml", e);
+        }
+      } else if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(
+            fs.readFileSync(packageJsonPath, "utf-8"),
+          ) as PackageJson;
+          if (pkg.workspaces) {
+            status.isMonorepo = true;
+            if (Array.isArray(pkg.workspaces)) {
+              workspacePatterns = pkg.workspaces;
+            } else if (
+              pkg.workspaces.packages &&
+              Array.isArray(pkg.workspaces.packages)
+            ) {
+              workspacePatterns = pkg.workspaces.packages;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (status.isMonorepo && workspacePatterns.length > 0) {
+        try {
+          const entries = await fg(
+            workspacePatterns.map((p) =>
+              p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
+            ),
+            {
+              cwd: directoryPath,
+              ignore: ["**/node_modules/**"],
+              absolute: true,
+            },
+          );
+
+          const subProjects: SubProject[] = [];
+          for (const entry of entries) {
+            try {
+              const pkg = JSON.parse(
+                fs.readFileSync(entry, "utf-8"),
+              ) as PackageJson;
+              subProjects.push({
+                name: pkg.name || path.basename(path.dirname(entry)),
+                path: path.dirname(entry),
+              });
+            } catch {
+              // ignore
+            }
+          }
+          status.subProjects = subProjects;
+        } catch (e: unknown) {
+          console.error("Error resolving workspaces", e);
+        }
+      }
+
+      if (
+        fs.existsSync(path.join(directoryPath, "vite.config.ts")) ||
+        fs.existsSync(path.join(directoryPath, "vite.config.js"))
+      ) {
+        status.projectType = "vite";
+      } else if (fs.existsSync(path.join(directoryPath, "next.config.js"))) {
+        status.projectType = "next";
+      }
+    } catch (error) {
+      console.error("Error checking project status:", error);
+    }
+
+    return status;
+  }
+
+  async saveProjectConfig(
+    directoryPath: string,
+    config: ReactMapConfig,
+  ): Promise<boolean> {
+    try {
+      const configPath = path.join(directoryPath, "react.map.config.json");
+      let oldConfig: ReactMapConfig | null = null;
+      if (fs.existsSync(configPath)) {
+        try {
+          oldConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        } catch (e: unknown) {
+          console.error("Failed to read old config", e);
+        }
+      }
+
+      const configContent = JSON.stringify(config, null, 2);
+      fs.writeFileSync(configPath, configContent);
+
+      const patternsChanged =
+        JSON.stringify(oldConfig?.ignorePatterns) !==
+        JSON.stringify(config.ignorePatterns);
+
+      if (patternsChanged) {
+        const cacheDir = path.join(directoryPath, ".react-map", "cache");
+        if (fs.existsSync(cacheDir)) {
+          const files = fs.readdirSync(cacheDir);
+          for (const file of files) {
+            if (file.endsWith(".json")) {
+              fs.unlinkSync(path.join(cacheDir, file));
+            }
+          }
+          console.log("Ignore patterns changed, cleared cache.");
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error saving config:", error);
+      return false;
+    }
+  }
+
+  async gitStatus(projectRoot: string): Promise<GitStatus> {
+    const git = simpleGit(projectRoot);
+    const status = await git.status();
+
+    return {
+      current: status.current,
+      tracking: status.tracking,
+      detached: status.detached,
+      files: status.files.map((f) => ({
+        path: f.path,
+        index: f.index,
+        working_dir: f.working_dir,
+      })),
+      staged: status.staged,
+    };
+  }
+
+  async gitLog(
+    projectRoot: string,
+    options: number | { limit?: number; path?: string } = 50,
+  ): Promise<GitCommit[]> {
+    const git = simpleGit(projectRoot);
+
+    let limit = 50;
+    let pathFilter: string | undefined;
+
+    if (typeof options === "number") {
+      limit = options;
+    } else {
+      limit = options.limit || 50;
+      pathFilter = options.path;
+    }
+
+    const logOptions: LogOptions = { maxCount: limit };
+    if (pathFilter) {
+      logOptions.file = pathFilter;
+    }
+
+    const log = await git.log(logOptions);
+
+    return log.all.map((commit) => ({
+      hash: commit.hash,
+      date: commit.date,
+      message: commit.message,
+      author_name: commit.author_name,
+      author_email: commit.author_email,
+    }));
+  }
+
+  async gitDiff(
+    projectRoot: string,
+    options: {
+      file?: string;
+      commit?: string;
+      baseCommit?: string;
+      staged?: boolean;
+    },
+  ): Promise<GitFileDiff[]> {
+    const git = simpleGit(projectRoot);
+
+    let rawDiff: string;
+    const sanitizedFile = options.file?.startsWith("/")
+      ? options.file.slice(1)
+      : options.file;
+
+    if (options.baseCommit && options.commit) {
+      const args: string[] = [options.baseCommit, options.commit];
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.diff(args);
+    } else if (options.commit && !options.staged) {
+      const args: string[] = [options.commit];
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.show(args);
+    } else {
+      const args: string[] = [];
+      if (options.staged) {
+        args.push("--staged");
+      }
+      if (sanitizedFile) {
+        args.push("--", sanitizedFile);
+      }
+      rawDiff = await git.diff(args);
+    }
+
+    return parseRawDiff(rawDiff, sanitizedFile);
+  }
+
+  async gitAnalyzeCommit(
+    projectRoot: string,
+    commitHash: string,
+    subPath?: string,
+  ): Promise<JsonData> {
+    const git = simpleGit(projectRoot);
+    const resolvedHash = await git.revparse([commitHash]);
+
+    const relativeSubPath = subPath
+      ? path.isAbsolute(subPath)
+        ? path.relative(projectRoot, subPath)
+        : subPath
+      : undefined;
+
+    const cacheKey = relativeSubPath
+      ? `${resolvedHash}-${relativeSubPath.replace(/[/\\]/g, "_")}`
+      : resolvedHash;
+    const commitCacheDir = path.join(
+      projectRoot,
+      ".react-map",
+      "cache",
+      "commits",
+    );
+    const cachePath = path.join(commitCacheDir, `${cacheKey}.json`);
+
+    if (fs.existsSync(cachePath)) {
+      return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+    }
+
+    if (!fs.existsSync(commitCacheDir)) {
+      fs.mkdirSync(commitCacheDir, { recursive: true });
+    }
+
+    const tempDir = tmp.dirSync({ unsafeCleanup: true });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        exec(
+          `git archive ${resolvedHash} | tar -x -C "${tempDir.name}"`,
+          { cwd: projectRoot },
+          (error) => {
+            if (error) reject(error);
+            else resolve();
+          },
+        );
+      });
+
+      const analysisPath = relativeSubPath
+        ? path.join(tempDir.name, relativeSubPath)
+        : tempDir.name;
+
+      const configPath = path.join(projectRoot, "react.map.config.json");
+      let ignorePatterns: string[] | undefined = undefined;
+      if (fs.existsSync(configPath)) {
+        try {
+          const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+          ignorePatterns = config.ignorePatterns;
+        } catch (e: unknown) {
+          console.warn("Failed to load config for git analysis", e);
+        }
+      }
+
+      const graph = await analyzeProject(
+        analysisPath,
+        undefined,
+        ignorePatterns,
+      );
+      fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
+      return graph;
+    } finally {
+      tempDir.removeCallback();
+    }
+  }
+
+  async getProjectIcon(projectRoot: string): Promise<string | null> {
+    try {
+      const localIcons = [
+        "favicon.ico",
+        "logo.svg",
+        "logo.png",
+        "vite.svg",
+        "public/favicon.ico",
+        "public/logo.svg",
+        "public/logo.png",
+        "public/vite.svg",
+      ];
+
+      for (const icon of localIcons) {
+        const iconPath = path.join(projectRoot, icon);
+        if (fs.existsSync(iconPath)) {
+          const buffer = fs.readFileSync(iconPath);
+          const ext = path.extname(icon).toLowerCase();
+          const mimeType =
+            ext === ".svg"
+              ? "image/svg+xml"
+              : ext === ".ico"
+                ? "image/x-icon"
+                : `image/${ext.slice(1)}`;
+          return `data:${mimeType};base64,${buffer.toString("base64")}`;
+        }
+      }
+
+      if (fs.existsSync(path.join(projectRoot, ".git"))) {
+        const git = simpleGit(projectRoot);
+        try {
+          const remotes = await git.getRemotes(true);
+          const origin = remotes.find((r) => r.name === "origin") || remotes[0];
+          if (origin && origin.refs.fetch) {
+            const url = origin.refs.fetch;
+            const match = url.match(/github\.com[/:]([^/]+)\//);
+            if (match && match[1]) {
+              const owner = match[1];
+              return `https://github.com/${owner}.png`;
+            }
+          }
+        } catch (e: unknown) {
+          console.warn("Failed to get git remotes", e);
+        }
+      }
+
+      return null;
+    } catch (e: unknown) {
+      console.error("Failed to get project icon", e);
+      return null;
+    }
   }
 
   async closeAll() {

@@ -32,6 +32,7 @@
           "id": "dcf492560ff097d3"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {
         "7f99636109ead299": {
@@ -239,6 +240,7 @@
           "id": "f51adcb408401731"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {
         "b57dbcb8576b004b": {
@@ -2445,6 +2447,7 @@
         }
       },
       "export": {},
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -2523,6 +2526,7 @@
           "id": "1259634e1eafe1c6"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -3006,6 +3010,7 @@
           "id": "311c554b828f67a5"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {

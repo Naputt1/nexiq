@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type {
   JsonData,
   TypeDataDeclare,
@@ -87,7 +86,7 @@ export interface DetailSection {
 
 export interface MCPToolHandlerArgs {
   projectPath: string;
-  projectManager: any; // We use any here to avoid dependency on server package
+  projectManager: unknown; // We use unknown here to avoid dependency on server package
   [key: string]: unknown;
 }
 

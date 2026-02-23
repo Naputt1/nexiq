@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 import pkg from "./package.json" with { type: "json" };
 
 export default defineConfig({
-  entry: ["src/analyzer.ts", "src/index.ts"],
+  entry: ["src/analyzer.ts", "src/index.ts", "src/worker.ts"],
   format: ["esm"],
   target: "node18",
   clean: true,
@@ -11,7 +11,7 @@ export default defineConfig({
   splitting: false,
   external: [
     "@node-rs/xxhash",
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.devDependencies || {}),
+    "better-sqlite3",
+    "shared",
   ],
 });

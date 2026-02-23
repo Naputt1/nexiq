@@ -20,11 +20,12 @@ const samples = args._[0]
       "destructuring-hook",
       "jsx-variable",
       "forward-ref",
+      "destructured-export",
       "cache",
       "cache-new",
     ];
 
-export function runSnapshot(sample: string) {
+export async function runSnapshot(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
   const PUBLIC_FILE = "../ui/public/graph.json";
@@ -52,7 +53,7 @@ export function runSnapshot(sample: string) {
     }
   }
 
-  const graph: SnapshotData = analyzeFiles(
+  const graph: SnapshotData = await analyzeFiles(
     SRC_DIR,
     viteConfigPath,
     files,
@@ -74,7 +75,9 @@ export function runSnapshot(sample: string) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  for (const sample of samples) {
-    runSnapshot(sample);
-  }
+  (async () => {
+    for (const sample of samples) {
+      await runSnapshot(sample);
+    }
+  })();
 }

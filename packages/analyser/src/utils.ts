@@ -1,4 +1,4 @@
-import type { NodePath, Node, VisitNode, Scope } from "@babel/traverse";
+import type { NodePath, Node } from "@babel/traverse";
 import * as t from "@babel/types";
 import path from "path";
 import type { ComponentDB } from "./db/componentDB.js";
@@ -124,7 +124,10 @@ export function isForwardRefCall(
     if (file) {
       const comImport = file.import.get(callee.name);
       if (comImport?.source === "react") {
-        if (comImport.type === "named" && comImport.importedName === "forwardRef") {
+        if (
+          comImport.type === "named" &&
+          comImport.importedName === "forwardRef"
+        ) {
           return true;
         }
         if (comImport.type === "default") {

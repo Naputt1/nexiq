@@ -41,6 +41,7 @@
         }
       },
       "export": {},
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -357,6 +358,7 @@
           "id": "4f0723afcf0b7560"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {

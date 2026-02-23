@@ -4,11 +4,13 @@ import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import { PackageJson } from "./db/packageJson.js";
 import path from "path";
 import fs from "fs";
+import os from "os";
 import type { SnapshotData } from "./types/test.js";
+import { SqliteDB } from "./db/sqlite.js";
 
 describe("analyser cache snapshots", () => {
   const projectName = "cache";
-  it(`should match snapshot for ${projectName}`, () => {
+  it(`should match snapshot for ${projectName}`, async () => {
     const projectPath = path.resolve(
       process.cwd(),
       `../sample-project/${projectName}`,
@@ -17,7 +19,7 @@ describe("analyser cache snapshots", () => {
     const viteConfigPath = getViteConfig(projectPath);
     const files = getFiles(projectPath);
 
-    const graph = analyzeFiles(projectPath, viteConfigPath, files, packageJson);
+    const graph = await analyzeFiles(projectPath, viteConfigPath, files, packageJson);
 
     const snapshotPath = path.resolve(
       process.cwd(),
@@ -41,7 +43,7 @@ describe("analyser cache snapshots", () => {
   });
 
   const projectNameNew = "cache-new";
-  it(`should match snapshot for ${projectNameNew}`, () => {
+  it(`should match snapshot for ${projectNameNew}`, async () => {
     const projectPath = path.resolve(
       process.cwd(),
       `../sample-project/${projectNameNew}`,
@@ -64,7 +66,7 @@ describe("analyser cache snapshots", () => {
       }
     }
 
-    const graph = analyzeFiles(
+    const graph = await analyzeFiles(
       projectPath,
       viteConfigPath,
       files,
@@ -91,5 +93,61 @@ describe("analyser cache snapshots", () => {
     }
 
     expect(result).toEqual(snapshotData);
+  });
+
+  it("should cache analysis results in SQLite", async () => {
+    const projectName = "simple";
+    const projectPath = path.resolve(
+      process.cwd(),
+      `../sample-project/${projectName}`,
+    );
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-sqlite-test-"));
+    const sqlitePath = path.join(tmpDir, "test.sqlite");
+    
+    // Copy sample project to tmp dir to avoid side effects
+    fs.cpSync(projectPath, tmpDir, { recursive: true });
+    
+    const packageJson = new PackageJson(tmpDir);
+    const viteConfigPath = getViteConfig(tmpDir);
+    const files = getFiles(tmpDir);
+
+    // 1. First run - should analyze and save to SQLite
+    const sqlite = new SqliteDB(sqlitePath);
+    const firstGraph = await analyzeFiles(
+      tmpDir,
+      viteConfigPath,
+      files,
+      packageJson,
+      undefined,
+      sqlite,
+    );
+    sqlite.close();
+
+    // Verify it saved something
+    const sqlite2 = new SqliteDB(sqlitePath);
+    const cachedFile = sqlite2.loadFileResults("/" + files[0]);
+    expect(cachedFile).toBeDefined();
+    sqlite2.close();
+
+    // 2. Second run - should load from SQLite and skip analysis
+    // We can verify this by checking if it still works even if we delete the source file 
+    // (Wait, analyzeFiles still checks if file exists on disk to calculate hash)
+    // So we'll just check if the output is the same.
+    const sqlite3 = new SqliteDB(sqlitePath);
+    const secondGraph = await analyzeFiles(
+      tmpDir,
+      viteConfigPath,
+      files,
+      packageJson,
+      undefined,
+      sqlite3,
+    );
+    sqlite3.close();
+
+    // Basic equality check (excluding src path)
+    expect(Object.keys(secondGraph.files)).toEqual(Object.keys(firstGraph.files));
+    
+    // Cleanup
+    fs.rmSync(tmpDir, { recursive: true });
   });
 });

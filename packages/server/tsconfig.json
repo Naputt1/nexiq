@@ -12,7 +12,9 @@
     "baseUrl": ".",
     "paths": {
       "analyser": ["../analyser/src/index.ts"],
-      "shared": ["../shared/src/index.ts"]
+      "analyser/*": ["../analyser/src/*"],
+      "shared": ["../shared/src/index.ts"],
+      "shared/*": ["../shared/src/*"]
     }
   }
 }

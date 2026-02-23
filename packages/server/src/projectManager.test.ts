@@ -46,7 +46,7 @@ describe("ProjectManager", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     projectManager = new ProjectManager();
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    vi.mocked(analyzeProject).mockReturnValue({
+    vi.mocked(analyzeProject).mockResolvedValue({
       src: "/test/project",
       files: {},
       edges: [],
@@ -242,7 +242,7 @@ describe("ProjectManager", () => {
     const projectPath = "/test/project";
 
     beforeEach(async () => {
-      vi.mocked(analyzeProject).mockReturnValue({
+      vi.mocked(analyzeProject).mockResolvedValue({
         src: projectPath,
         files: {},
         edges: [],
@@ -326,14 +326,14 @@ describe("ProjectManager", () => {
         },
         edges: [],
       };
-      vi.mocked(analyzeProject).mockReturnValue(
+      vi.mocked(analyzeProject).mockResolvedValue(
         mockGraph as unknown as JsonData,
       );
       await projectManager.openProject(projectPath);
     });
 
     it("should list directories and files", async () => {
-      vi.mocked(analyzeProject).mockReturnValue({
+      vi.mocked(analyzeProject).mockResolvedValue({
         src: projectPath,
         files: {
           "/src/components/Button.tsx": {
@@ -375,7 +375,7 @@ describe("ProjectManager", () => {
     });
 
     it("should get file outline", async () => {
-      vi.mocked(analyzeProject).mockReturnValue({
+      vi.mocked(analyzeProject).mockResolvedValue({
         src: projectPath,
         files: {
           "/src/components/Button.tsx": {
@@ -413,7 +413,7 @@ describe("ProjectManager", () => {
     });
 
     it("should get component hierarchy", async () => {
-      vi.mocked(analyzeProject).mockReturnValue({
+      vi.mocked(analyzeProject).mockResolvedValue({
         src: projectPath,
         files: {
           "/src/components/Button.tsx": {
@@ -548,7 +548,7 @@ describe("ProjectManager", () => {
         },
         edges: [],
       };
-      vi.mocked(analyzeProject).mockReturnValue(
+      vi.mocked(analyzeProject).mockResolvedValue(
         mockGraph as unknown as JsonData,
       );
       await projectManager.openProject(projectPath);
@@ -707,7 +707,7 @@ describe("ProjectManager", () => {
         },
         edges: [],
       };
-      vi.mocked(analyzeProject).mockReturnValue(
+      vi.mocked(analyzeProject).mockResolvedValue(
         mockGraph as unknown as JsonData,
       );
       await projectManager.openProject(projectPath);
@@ -846,7 +846,7 @@ describe("ProjectManager", () => {
     const projectPath = "/test/project";
 
     beforeEach(async () => {
-      vi.mocked(analyzeProject).mockReturnValue({
+      vi.mocked(analyzeProject).mockResolvedValue({
         src: projectPath,
         files: {
           "/src/App.tsx": {

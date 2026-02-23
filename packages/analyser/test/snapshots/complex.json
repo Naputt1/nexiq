@@ -33,6 +33,9 @@
           "id": "ddeaede563e8cb02"
         }
       },
+      "starExports": [
+        "/src/Hooks.ts"
+      ],
       "defaultExport": "MainNested",
       "tsTypes": {},
       "var": {}
@@ -69,6 +72,7 @@
           "id": "6826ec85ac9962e0"
         }
       },
+      "starExports": [],
       "defaultExport": "MainNested",
       "tsTypes": {},
       "var": {
@@ -758,6 +762,7 @@
           "id": "4f0723afcf0b7560"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -991,6 +996,7 @@
           "id": "8b20080379f3a04b"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -1282,6 +1288,7 @@
           "id": "1259634e1eafe1c6"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -1842,6 +1849,7 @@
           "id": "922ba1247fc0dd3d"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -2242,6 +2250,7 @@
           "id": "1554bc91c15f5c0b"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
