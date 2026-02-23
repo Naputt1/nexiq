@@ -123,37 +123,54 @@ export const useAppStateStore = create<AppState>()(
         },
       }),
 
-    loadState: async (projectRoot: string, overrideSubProject?: string | null) => {
+    loadState: async (
+      projectRoot: string,
+      overrideSubProject?: string | null,
+    ) => {
       set({ isLoaded: false });
-      const state = await window.ipcRenderer.invoke("read-state", projectRoot);
-      if (state) {
-        set({
-          selectedSubProject:
-            overrideSubProject || state.selectedSubProject || projectRoot,
-          centeredItemId: state.centeredItemId || null,
-          selectedId: state.selectedId || null,
-          isSidebarOpen: state.isSidebarOpen ?? false,
-          activeTab: state.activeTab || "projects",
-          selectedCommit: state.selectedCommit || null,
-          viewport: state.viewport || null,
-          view: state.view || "component",
-          isLoaded: true,
-          sidebar: {
-            right: {
-              width: state.sidebar.right.width || DEFAULT.SIDEBAR.RIGHT.WIDTH,
-              height:
-                state.sidebar.right.height || DEFAULT.SIDEBAR.RIGHT.HEIGHT,
+      try {
+        const state = await window.ipcRenderer.invoke(
+          "read-state",
+          projectRoot,
+        );
+        if (state) {
+          set({
+            selectedSubProject:
+              overrideSubProject || state.selectedSubProject || projectRoot,
+            centeredItemId: state.centeredItemId || null,
+            selectedId: state.selectedId || null,
+            isSidebarOpen: state.isSidebarOpen ?? false,
+            activeTab: state.activeTab || "projects",
+            selectedCommit: state.selectedCommit || null,
+            viewport: state.viewport || null,
+            view: state.view || "component",
+            isLoaded: true,
+            sidebar: {
+              right: {
+                width: state.sidebar.right.width || DEFAULT.SIDEBAR.RIGHT.WIDTH,
+                height:
+                  state.sidebar.right.height || DEFAULT.SIDEBAR.RIGHT.HEIGHT,
+              },
             },
-          },
-        });
-      } else {
+          });
+        } else {
+          const { reset } = get();
+          reset();
+          if (overrideSubProject) {
+            set({ selectedSubProject: overrideSubProject, isLoaded: true });
+          } else {
+            set({ selectedSubProject: projectRoot, isLoaded: true });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load app state from backend", e);
+        // Fallback to minimal working state
         const { reset } = get();
         reset();
-        if (overrideSubProject) {
-          set({ selectedSubProject: overrideSubProject, isLoaded: true });
-        } else {
-          set({ selectedSubProject: projectRoot, isLoaded: true });
-        }
+        set({
+          selectedSubProject: overrideSubProject || projectRoot,
+          isLoaded: true,
+        });
       }
     },
 

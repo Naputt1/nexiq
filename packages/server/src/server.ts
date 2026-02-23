@@ -924,6 +924,8 @@ export class BackendServer {
             const { type, payload, requestId } = data;
             currentRequestId = requestId;
 
+            console.error(`Received WebSocket message: ${type} (Request: ${requestId || "none"})`);
+
             switch (type) {
               case "open_project": {
                 const { projectPath, subProject } = payload as OpenProjectArgs;
