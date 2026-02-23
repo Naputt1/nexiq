@@ -34,6 +34,7 @@
           "id": "311c554b828f67a5"
         }
       },
+      "starExports": [],
       "defaultExport": "App",
       "tsTypes": {},
       "var": {

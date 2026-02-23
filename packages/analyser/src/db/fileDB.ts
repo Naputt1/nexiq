@@ -191,42 +191,40 @@ export class File {
     this.rawData = data;
     this.starExports = data.starExports || [];
 
-    if (changed) {
-      if (data.var) {
-        this.var.initPrevIds(data.var);
-      }
+    if (data.var) {
+      this.var.initPrevIds(data.var);
+    }
 
-      for (const variable of Object.values(data.var || {})) {
-        this.loadVariable(variable);
-      }
+    for (const variable of Object.values(data.var || {})) {
+      this.loadVariable(variable);
+    }
 
-      for (const importData of Object.values(data.import || {})) {
-        this.import.set(importData.localName, {
-          localName: importData.localName,
-          importedName: importData.importedName,
-          source: importData.source,
-          type: importData.type,
-          importKind: importData.importKind,
-        });
-      }
+    for (const importData of Object.values(data.import || {})) {
+      this.import.set(importData.localName, {
+        localName: importData.localName,
+        importedName: importData.importedName,
+        source: importData.source,
+        type: importData.type,
+        importKind: importData.importKind,
+      });
+    }
 
-      for (const exportData of Object.values(data.export || {})) {
-        this.export[exportData.name] = {
-          id: exportData.id,
-          name: exportData.name,
-          type: exportData.type,
-          exportKind: exportData.exportKind,
-        };
+    for (const exportData of Object.values(data.export || {})) {
+      this.export[exportData.name] = {
+        id: exportData.id,
+        name: exportData.name,
+        type: exportData.type,
+        exportKind: exportData.exportKind,
+      };
 
-        if (exportData.type === "default") {
-          this.defaultExport = exportData.name;
-        }
+      if (exportData.type === "default") {
+        this.defaultExport = exportData.name;
       }
+    }
 
-      for (const typeData of Object.values(data.tsTypes || {})) {
-        this.tsTypes.set(typeData.id, typeData);
-        this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
-      }
+    for (const typeData of Object.values(data.tsTypes || {})) {
+      this.tsTypes.set(typeData.id, typeData);
+      this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
     }
   }
 
@@ -593,9 +591,9 @@ export class File {
       v = this.var.get(parent, true);
     }
 
-    assert(v != null, "Parent variable not found");
     if (v == null) return;
     if (v.kind == "component") return;
+    assert(v != null, "Parent variable not found");
 
     v.dependencies[dependency.id] = dependency;
   }

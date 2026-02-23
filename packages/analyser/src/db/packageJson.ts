@@ -31,6 +31,10 @@ export class PackageJson {
     };
   }
 
+  public get rawData(): Record<string, unknown> {
+    return this.data as unknown as Record<string, unknown>;
+  }
+
   public isDependency(name: string): boolean {
     if (this.cache.has(name)) {
       return true;

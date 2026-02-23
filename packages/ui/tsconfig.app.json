@@ -29,9 +29,12 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "server": ["../server/src/index.ts"],
+      "analyser": ["../analyser/src/index.ts"],
+      "analyser/*": ["../analyser/src/*"],
+      "shared": ["../shared/src/index.ts"],
+      "shared/*": ["../shared/src/*"]
     }
   },
   "include": [

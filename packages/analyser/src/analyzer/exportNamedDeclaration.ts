@@ -3,6 +3,7 @@ import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import type { ComponentFileExport } from "shared";
 import assert from "assert";
+import { getPattern, getPatternIdentifiers } from "./pattern.js";
 
 export default function ExportNamedDeclaration(
   componentDB: ComponentDB,
@@ -38,9 +39,11 @@ export default function ExportNamedDeclaration(
         name = decl.id?.name;
       } else if (decl.type === "VariableDeclaration") {
         decl.declarations.forEach((declarator) => {
-          if (declarator.id.type === "Identifier") {
+          const pattern = getPattern(declarator.id);
+          const identifiers = getPatternIdentifiers(pattern);
+          for (const ident of identifiers) {
             componentDB.fileAddExport(fileName, {
-              name: declarator.id.name,
+              name: ident.name,
               type: "named",
               exportKind: "value",
             });

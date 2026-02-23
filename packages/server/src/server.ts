@@ -5,8 +5,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { ProjectManager } from "./projectManager.js";
-import { getDisplayName } from "shared";
-import { WebSocketServer } from "ws";
+import { getDisplayName, type BackendRequestMap, type BackendMessageType } from "shared";
+import { WebSocketServer, WebSocket } from "ws";
 
 export interface OpenProjectArgs {
   projectPath: string;
@@ -139,8 +139,8 @@ export type SymbolInfoResult =
     };
 
 interface WsMessage {
-  type: string;
-  payload: unknown;
+  type: BackendMessageType;
+  payload: any;
   requestId?: string;
 }
 
@@ -754,16 +754,20 @@ export class BackendServer {
         }
 
         const files = Object.entries(project.graph.files);
+        const totalFiles = files.length;
+        const MAX_FILES = 50;
+        const displayedFiles = files.slice(0, MAX_FILES);
+
         let fileSummary: {
           path: string;
           exports?: { name: string; kind: string }[];
         }[];
 
-        if (files.length > 100) {
-          // Large project: return only paths to save tokens
-          fileSummary = files.map(([path]) => ({ path }));
+        if (totalFiles > MAX_FILES) {
+          // Large project: return only paths for a subset to save tokens
+          fileSummary = displayedFiles.map(([path]) => ({ path }));
         } else {
-          fileSummary = files.map(([path, file]) => {
+          fileSummary = displayedFiles.map(([path, file]) => {
             return {
               path,
               exports: Object.values(file.var || {}).map((v) => ({
@@ -780,11 +784,12 @@ export class BackendServer {
               type: "text",
               text: JSON.stringify(
                 {
-                  totalFiles: files.length,
+                  totalFiles,
+                  displayedCount: fileSummary.length,
                   files: this.filterFields(fileSummary, fields),
                   hint:
-                    files.length > 100
-                      ? "Project is large. Use list_directory to explore specific folders or get_file_outline for symbol details."
+                    totalFiles > MAX_FILES
+                      ? `Project has ${totalFiles} files. Showing first ${MAX_FILES}. Use 'list_directory' to explore folders or 'find_files' to search for specific files.`
                       : undefined,
                 },
                 null,
@@ -1012,6 +1017,19 @@ export class BackendServer {
     return projectPath;
   }
 
+  private sendResponse<K extends BackendMessageType>(
+    ws: WebSocket,
+    type: string,
+    payload: BackendRequestMap[K]["response"],
+    requestId?: string,
+  ) {
+    ws.send(JSON.stringify({ type, payload, requestId }));
+  }
+
+  private sendError(ws: WebSocket, message: string, requestId?: string) {
+    ws.send(JSON.stringify({ type: "error", payload: { message }, requestId }));
+  }
+
   public startWebSocketServer() {
     try {
       this.wss = new WebSocketServer({ port: this.port });
@@ -1048,28 +1066,21 @@ export class BackendServer {
           let currentRequestId: string | undefined;
           try {
             const data = JSON.parse(message.toString()) as WsMessage;
-            const { type, payload, requestId } = data;
-            currentRequestId = requestId;
+            currentRequestId = data.requestId;
 
             console.error(
-              `Received WebSocket message: ${type} (Request: ${requestId || "none"})`,
+              `Received WebSocket message: ${data.type} (Request: ${data.requestId || "none"})`,
             );
 
-            switch (type) {
+            switch (data.type) {
               case "open_project": {
-                const { projectPath, subProject } = payload as OpenProjectArgs;
+                const { projectPath, subProject } = data.payload;
                 await this.projectManager.openProject(projectPath, subProject);
-                ws.send(
-                  JSON.stringify({
-                    type: "project_opened",
-                    payload: { projectPath, subProject },
-                    requestId,
-                  }),
-                );
+                this.sendResponse(ws, "project_opened", undefined, data.requestId);
                 break;
               }
               case "get_graph_data": {
-                const { projectPath, subProject } = payload as OpenProjectArgs;
+                const { projectPath, subProject } = data.payload;
                 let project = this.projectManager.getProject(
                   projectPath,
                   subProject,
@@ -1083,92 +1094,107 @@ export class BackendServer {
                     subProject,
                   );
                 }
-                ws.send(
-                  JSON.stringify({
-                    type: "graph_data",
-                    payload: project.graph,
-                    requestId,
-                  }),
-                );
+                this.sendResponse(ws, "graph_data", project.graph!, data.requestId);
                 break;
               }
               case "update_graph_position": {
-                const { projectPath, subProject, positions, contextId } =
-                  payload as {
-                    projectPath: string;
-                    subProject: string | undefined;
-                    positions: unknown;
-                    contextId?: string;
-                  };
+                const { projectPath, subProject, positions, contextId } = data.payload;
                 const success = await this.projectManager.updateGraphPosition(
                   projectPath,
                   subProject,
                   positions,
                   contextId,
                 );
-                ws.send(
-                  JSON.stringify({
-                    type: "position_updated",
-                    payload: { success },
-                    requestId,
-                  }),
-                );
+                this.sendResponse(ws, "position_updated", { success }, data.requestId);
                 break;
               }
               case "save_state": {
-                const { projectPath, state } = payload as {
-                  projectPath: string;
-                  state: unknown;
-                };
+                const { projectPath, state } = data.payload;
                 const success = await this.projectManager.saveAppState(
                   projectPath,
                   state,
                 );
-                ws.send(
-                  JSON.stringify({
-                    type: "state_saved",
-                    payload: { success },
-                    requestId,
-                  }),
-                );
+                this.sendResponse(ws, "state_saved", { success }, data.requestId);
                 break;
               }
               case "read_state": {
-                const { projectPath } = payload as { projectPath: string };
+                const { projectPath } = data.payload;
                 const state =
                   await this.projectManager.readAppState(projectPath);
-                ws.send(
-                  JSON.stringify({
-                    type: "state_data",
-                    payload: state,
-                    requestId,
-                  }),
+                this.sendResponse(ws, "state_data", state, data.requestId);
+                break;
+              }
+              case "check_project_status": {
+                const { projectPath } = data.payload;
+                const status =
+                  await this.projectManager.checkProjectStatus(projectPath);
+                this.sendResponse(ws, "project_status", status, data.requestId);
+                break;
+              }
+              case "save_project_config": {
+                const { projectPath, config } = data.payload;
+                const success = await this.projectManager.saveProjectConfig(
+                  projectPath,
+                  config,
                 );
+                this.sendResponse(ws, "config_saved", { success }, data.requestId);
+                break;
+              }
+              case "get_project_icon": {
+                const { projectPath } = data.payload;
+                const icon =
+                  await this.projectManager.getProjectIcon(projectPath);
+                this.sendResponse(ws, "project_icon", { icon }, data.requestId);
+                break;
+              }
+              case "git_status": {
+                const { projectPath } = data.payload;
+                const status = await this.projectManager.gitStatus(projectPath);
+                this.sendResponse(ws, "git_status_data", status, data.requestId);
+                break;
+              }
+              case "git_log": {
+                const { projectPath, options } = data.payload;
+                const log = await this.projectManager.gitLog(
+                  projectPath,
+                  options,
+                );
+                this.sendResponse(ws, "git_log_data", log, data.requestId);
+                break;
+              }
+              case "git_diff": {
+                const { projectPath, options } = data.payload;
+                const diff = await this.projectManager.gitDiff(
+                  projectPath,
+                  options,
+                );
+                this.sendResponse(ws, "git_diff_data", diff, data.requestId);
+                break;
+              }
+              case "git_analyze_commit": {
+                const { projectPath, commitHash, subPath } = data.payload;
+                const graph = await this.projectManager.gitAnalyzeCommit(
+                  projectPath,
+                  commitHash,
+                  subPath,
+                );
+                this.sendResponse(ws, "git_commit_graph", graph, data.requestId);
                 break;
               }
               case "call_tool": {
-                const { name, arguments: args } = payload as {
-                  name: string;
-                  arguments: Record<string, unknown>;
-                };
+                const { name, arguments: args } = data.payload;
                 const result = await this.handleCallTool(name, args);
                 ws.send(
                   JSON.stringify({
                     type: "tool_result",
                     payload: result,
-                    requestId,
+                    requestId: data.requestId,
                   }),
                 );
                 break;
               }
               default: {
-                ws.send(
-                  JSON.stringify({
-                    type: "error",
-                    payload: { message: `Unknown message type: ${type}` },
-                    requestId,
-                  }),
-                );
+                this.sendError(ws, `Unknown message type: ${data.type}`, data.requestId);
                 break;
               }
             }
@@ -1176,13 +1202,7 @@ export class BackendServer {
             const errorMessage =
               e instanceof Error ? e.message : "Unknown error";
             console.error("Error handling WebSocket message", e);
-            ws.send(
-              JSON.stringify({
-                type: "error",
-                payload: { message: errorMessage },
-                requestId: currentRequestId,
-              }),
-            );
+            this.sendError(ws, errorMessage, currentRequestId);
           }
         });
       });

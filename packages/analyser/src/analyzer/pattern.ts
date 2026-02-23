@@ -8,7 +8,7 @@ import { generateFn } from "../utils/babel.js";
 import { getDeterministicId } from "../utils/hash.js";
 
 export function getPattern(
-  node: t.LVal,
+  node: t.LVal | t.VoidPattern,
   parentPath?: string,
 ): VariableNamePattern {
   const getLoc = (n: t.Node) => {
@@ -96,6 +96,12 @@ export function getPattern(
       loc: getLoc(node),
       id: getDeterministicId(patternId),
     };
+  } else if (t.isVoidPattern(node)) {
+    return {
+      type: "void",
+      loc: getLoc(node),
+      id: getDeterministicId(parentPath || "void"),
+    };
   }
 
   // Fallback
@@ -110,10 +116,12 @@ export function getPattern(
 export function getPatternName(pattern: VariableNamePattern): string {
   if (pattern.type === "identifier") {
     return pattern.name;
-  }
-  if (pattern.type === "rest") {
+  } else if (pattern.type === "rest") {
     return `...${getPatternName(pattern.argument)}`;
+  } else if (pattern.type === "void") {
+    return "void";
   }
+
   return pattern.raw;
 }
 

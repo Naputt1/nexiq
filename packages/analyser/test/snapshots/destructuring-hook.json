@@ -12,6 +12,7 @@
           "id": "c615ed3735e71858"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -154,6 +155,7 @@
           "id": "8058275cdfd1a41c"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
@@ -335,6 +337,7 @@
           "id": "311c554b828f67a5"
         }
       },
+      "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {

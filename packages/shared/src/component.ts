@@ -143,6 +143,11 @@ export type VariableNamePattern =
       argument: VariableNamePattern;
       loc: VariableLoc;
       id: string;
+    }
+  | {
+      type: "void";
+      loc: VariableLoc;
+      id: string;
     };
 
 export type VariableObjectProperty = {

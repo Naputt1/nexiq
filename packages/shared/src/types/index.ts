@@ -1,9 +1,37 @@
 import type { ComponentLoc, VariableName } from "../component.js";
 import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
+import type { ReactMapConfig, SubProject } from "./config.js";
 export * from "./primitive.js";
 export * from "./object.js";
 export * from "./git.js";
 export * from "./config.js";
+
+export interface ProjectStatus {
+  hasConfig: boolean;
+  isMonorepo: boolean;
+  projectType: "vite" | "next" | "unknown";
+  config: ReactMapConfig | null;
+  subProjects: SubProject[];
+}
+
+export type GraphViewType = "component" | "file" | "router";
+
+export interface AppStateData {
+  selectedSubProject: string | null;
+  centeredItemId: string | null;
+  selectedId: string | null;
+  isSidebarOpen: boolean;
+  activeTab: "projects" | "git";
+  selectedCommit: string | null;
+  viewport?: { x: number; y: number; zoom: number } | null;
+  view?: GraphViewType;
+  sidebar: {
+    right: {
+      width?: number;
+      height?: number;
+    };
+  };
+}
 
 export interface TypeDataParam {
   name: string;
@@ -60,3 +88,5 @@ export interface UIItemState {
 }
 
 export type UIStateMap = Record<string, UIItemState>;
+
+export * from "./backend.js";

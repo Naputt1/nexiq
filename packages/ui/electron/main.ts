@@ -7,19 +7,13 @@ import {
   type MenuItemConstructorOptions,
   type IpcMainInvokeEvent,
 } from "electron";
-import fs from "node:fs";
 import { store } from "./store";
-import fg from "fast-glob";
-import yaml from "js-yaml";
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
 import os from "node:os";
 
-import tmp from "tmp";
-import { simpleGit, type LogOptions } from "simple-git";
-import { analyzeProject } from "analyser";
 import { WebSocket, type MessageEvent } from "ws";
 import { spawn, ChildProcess } from "node:child_process";
 
@@ -93,26 +87,62 @@ function connectToBackend() {
   });
 }
 
-import type {
-  AppStateData,
-  GlobalSettings,
-  PackageJson,
-  PnpmWorkspace,
-  ProjectStatus,
-  ReactMapConfig,
-  SubProject,
-} from "./types";
+async function requestBackend<K extends BackendMessageType>(
+  type: K,
+  payload: BackendRequestMap[K]["payload"],
+  timeoutMs: number = 30000,
+): Promise<BackendRequestMap[K]["response"]> {
+  if (!backendWs || backendWs.readyState !== WebSocket.OPEN) {
+    throw new Error("Backend not connected");
+  }
+
+  return new Promise((resolve, reject) => {
+    const requestId = Math.random().toString(36).substring(7);
+    const timeout = setTimeout(() => {
+      backendWs!.removeEventListener("message", onMessage);
+      reject(new Error(`Timeout waiting for backend response: ${type}`));
+    }, timeoutMs);
+
+    const onMessage = (event: MessageEvent) => {
+      try {
+        const {
+          type: responseType,
+          payload: responsePayload,
+          requestId: responseId,
+        } = JSON.parse(event.data.toString());
+        if (responseId !== requestId) return;
+
+        clearTimeout(timeout);
+        backendWs!.removeEventListener("message", onMessage);
+
+        if (responseType === "error") {
+          reject(new Error(responsePayload.message || "Unknown backend error"));
+        } else {
+          resolve(responsePayload);
+        }
+      } catch {
+        // Ignore parsing errors for other messages
+      }
+    };
+
+    backendWs!.addEventListener("message", onMessage);
+    backendWs!.send(JSON.stringify({ type, payload, requestId }));
+  });
+}
+
+import type { AppStateData, GlobalSettings } from "./types";
 import type {
   JsonData,
-  ComponentFileVar,
-  EffectInfo,
   GitStatus,
   GitCommit,
   GitFileDiff,
-  GitDiffHunk,
-  PropData,
   UIStateMap,
-  UIItemState,
+  PropData,
+  ComponentFileVar,
+  EffectInfo,
+  ReactMapConfig,
+  BackendRequestMap,
+  BackendMessageType,
 } from "shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -409,9 +439,7 @@ app.whenReady().then(() => {
   const openProjects = store.getOpenProjects();
   if (openProjects.length > 0) {
     openProjects.forEach((project) => {
-      if (project === "" || fs.existsSync(project)) {
-        createWindow(project || undefined);
-      }
+      createWindow(project || undefined);
     });
   } else {
     createWindow();
@@ -495,121 +523,9 @@ ipcMain.handle(
 ipcMain.handle(
   "check-project-status",
   async (_: IpcMainInvokeEvent, directoryPath: string) => {
-    const status: ProjectStatus = {
-      hasConfig: false,
-      isMonorepo: false,
-      projectType: "unknown",
-      config: null,
-      subProjects: [],
-    };
-
-    try {
-      const configPath = path.join(directoryPath, "react.map.config.json");
-      if (fs.existsSync(configPath)) {
-        status.hasConfig = true;
-        try {
-          status.config = JSON.parse(
-            fs.readFileSync(configPath, "utf-8"),
-          ) as ReactMapConfig;
-        } catch (e: unknown) {
-          console.error("Error reading config", e);
-        }
-      }
-
-      const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
-      // const lernaJson = path.join(directoryPath, "lerna.json"); // TODO: support lerna if needed
-      const packageJsonPath = path.join(directoryPath, "package.json");
-
-      let workspacePatterns: string[] = [];
-
-      if (fs.existsSync(pnpmWorkspace)) {
-        status.isMonorepo = true;
-        try {
-          const doc = yaml.load(
-            fs.readFileSync(pnpmWorkspace, "utf-8"),
-          ) as PnpmWorkspace;
-          if (doc && doc.packages && Array.isArray(doc.packages)) {
-            workspacePatterns = doc.packages;
-          }
-        } catch (e: unknown) {
-          console.error("Error reading pnpm-workspace.yaml", e);
-        }
-      } else if (fs.existsSync(packageJsonPath)) {
-        try {
-          const pkg = JSON.parse(
-            fs.readFileSync(packageJsonPath, "utf-8"),
-          ) as PackageJson;
-          if (pkg.workspaces) {
-            status.isMonorepo = true;
-            if (Array.isArray(pkg.workspaces)) {
-              workspacePatterns = pkg.workspaces;
-            } else if (
-              pkg.workspaces.packages &&
-              Array.isArray(pkg.workspaces.packages)
-            ) {
-              workspacePatterns = pkg.workspaces.packages;
-            }
-          }
-        } catch {
-          // ignore
-        }
-      }
-
-      if (status.isMonorepo && workspacePatterns.length > 0) {
-        // Resolve packages
-        try {
-          const entries = await fg(
-            workspacePatterns.map((p) =>
-              p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
-            ),
-            {
-              cwd: directoryPath,
-              ignore: ["**/node_modules/**"],
-              absolute: true,
-            },
-          );
-
-          const subProjects: SubProject[] = [];
-          for (const entry of entries) {
-            try {
-              const pkg = JSON.parse(
-                fs.readFileSync(entry, "utf-8"),
-              ) as PackageJson;
-              // We only care about packages that look like apps (vite/next) or have main/module?
-              // For now, list all.
-              subProjects.push({
-                name: pkg.name || path.basename(path.dirname(entry)),
-                path: path.dirname(entry),
-              });
-            } catch {
-              // ignore
-            }
-          }
-
-          // Discovery logic for subprojects...
-          // (Existing code for finding subprojects)
-
-          // DO NOT filter subprojects here anymore, so they show up in Settings
-          // status.subProjects = subProjects.filter(...)
-          status.subProjects = subProjects;
-        } catch (e: unknown) {
-          console.error("Error resolving workspaces", e);
-        }
-      }
-
-      if (
-        fs.existsSync(path.join(directoryPath, "vite.config.ts")) ||
-        fs.existsSync(path.join(directoryPath, "vite.config.js"))
-      ) {
-        status.projectType = "vite";
-      } else if (fs.existsSync(path.join(directoryPath, "next.config.js"))) {
-        status.projectType = "next";
-      }
-    } catch (error) {
-      console.error("Error checking project status:", error);
-    }
-
-    return status;
+    return requestBackend("check_project_status", {
+      projectPath: directoryPath,
+    });
   },
 );
 
@@ -622,45 +538,14 @@ ipcMain.handle(
       directoryPath,
     }: { config: ReactMapConfig; directoryPath: string },
   ) => {
-    try {
-      // Load existing config to check if ignorePatterns changed
-      const configPath = path.join(directoryPath, "react.map.config.json");
-      let oldConfig: ReactMapConfig | null = null;
-      if (fs.existsSync(configPath)) {
-        try {
-          oldConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        } catch (e: unknown) {
-          console.error("Failed to read old config", e);
-        }
-      }
-
-      const configContent = JSON.stringify(config, null, 2);
-      fs.writeFileSync(configPath, configContent);
+    const result = await requestBackend("save_project_config", {
+      projectPath: directoryPath,
+      config,
+    });
+    if (result.success) {
       store.addRecentProject(directoryPath);
-
-      // If ignorePatterns changed, clear the analysis cache to force re-analysis
-      const patternsChanged =
-        JSON.stringify(oldConfig?.ignorePatterns) !==
-        JSON.stringify(config.ignorePatterns);
-
-      if (patternsChanged) {
-        const cacheDir = path.join(directoryPath, ".react-map", "cache");
-        if (fs.existsSync(cacheDir)) {
-          const files = fs.readdirSync(cacheDir);
-          for (const file of files) {
-            if (file.endsWith(".json")) {
-              fs.unlinkSync(path.join(cacheDir, file));
-            }
-          }
-          console.log("Ignore patterns changed, cleared cache.");
-        }
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error saving config:", error);
-      return false;
     }
+    return result.success;
   },
 );
 
@@ -673,20 +558,9 @@ ipcMain.handle("set-project", (_: IpcMainInvokeEvent, _path: string) => {
 ipcMain.handle(
   "git-status",
   async (_: IpcMainInvokeEvent, projectRoot: string): Promise<GitStatus> => {
-    const git = simpleGit(projectRoot);
-    const status = await git.status();
-
-    return {
-      current: status.current,
-      tracking: status.tracking,
-      detached: status.detached,
-      files: status.files.map((f) => ({
-        path: f.path,
-        index: f.index,
-        working_dir: f.working_dir,
-      })),
-      staged: status.staged,
-    };
+    return requestBackend("git_status", {
+      projectPath: projectRoot,
+    });
   },
 );
 
@@ -697,48 +571,10 @@ ipcMain.handle(
     projectRoot: string,
     options: number | { limit?: number; path?: string } = 50,
   ): Promise<GitCommit[]> => {
-    const git = simpleGit(projectRoot);
-
-    let limit = 50;
-    let pathFilter: string | undefined;
-
-    if (typeof options === "number") {
-      limit = options;
-    } else {
-      limit = options.limit || 50;
-      pathFilter = options.path;
-    }
-
-    const logOptions: LogOptions = { maxCount: limit };
-    if (pathFilter) {
-      logOptions.file = pathFilter;
-    }
-
-    const log = await git.log(logOptions);
-
-    return log.all.map((commit) => ({
-      hash: commit.hash,
-      date: commit.date,
-      message: commit.message,
-      author_name: commit.author_name,
-      author_email: commit.author_email,
-    }));
-  },
-);
-
-ipcMain.handle(
-  "git-stage",
-  async (_: IpcMainInvokeEvent, projectRoot: string, files: string[]) => {
-    const git = simpleGit(projectRoot);
-    await git.add(files);
-  },
-);
-
-ipcMain.handle(
-  "git-unstage",
-  async (_: IpcMainInvokeEvent, projectRoot: string, files: string[]) => {
-    const git = simpleGit(projectRoot);
-    await git.reset(["HEAD", ...files]);
+    return requestBackend("git_log", {
+      projectPath: projectRoot,
+      options,
+    });
   },
 );
 
@@ -754,321 +590,20 @@ ipcMain.handle(
       staged?: boolean;
     },
   ): Promise<GitFileDiff[]> => {
-    const git = simpleGit(projectRoot);
-
-    let rawDiff: string;
-    const sanitizedFile = options.file?.startsWith("/")
-      ? options.file.slice(1)
-      : options.file;
-
-    if (options.baseCommit && options.commit) {
-      // Diff between two specific points
-      const args: string[] = [options.baseCommit, options.commit];
-      if (sanitizedFile) {
-        args.push("--", sanitizedFile);
-      }
-      rawDiff = await git.diff(args);
-    } else if (options.commit && !options.staged) {
-      // Use git show for specific commits to correctly handle root commits
-      const args: string[] = [options.commit];
-      if (sanitizedFile) {
-        args.push("--", sanitizedFile);
-      }
-      rawDiff = await git.show(args);
-    } else {
-      const args: string[] = [];
-      if (options.staged) {
-        args.push("--staged");
-      }
-      if (sanitizedFile) {
-        args.push("--", sanitizedFile);
-      }
-      rawDiff = await git.diff(args);
-    }
-
-    return parseRawDiff(rawDiff, sanitizedFile);
+    return requestBackend("git_diff", {
+      projectPath: projectRoot,
+      options,
+    });
   },
 );
-
-function parseRawDiff(rawDiff: string, filterFile?: string): GitFileDiff[] {
-  const files: GitFileDiff[] = [];
-  if (!rawDiff) return files;
-
-  const fileDiffs = rawDiff.split(/^diff --git /m).slice(1);
-
-  for (const fileDiff of fileDiffs) {
-    const lines = fileDiff.split("\n");
-    const header = lines[0];
-    const pathMatch = header.match(/a\/(.*) b\/(.*)/);
-    if (!pathMatch) continue;
-
-    const filePath = pathMatch[2];
-    if (filterFile && filePath !== filterFile) continue;
-
-    const hunks: GitDiffHunk[] = [];
-    let currentHunk: GitDiffHunk | null = null;
-
-    let oldLineNum = 0;
-    let newLineNum = 0;
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.startsWith("@@")) {
-        const hunkMatch = line.match(/@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@/);
-        if (hunkMatch) {
-          oldLineNum = parseInt(hunkMatch[1]);
-          newLineNum = parseInt(hunkMatch[3]);
-          currentHunk = {
-            content: line,
-            lines: [],
-            oldStart: oldLineNum,
-            oldLines: parseInt(hunkMatch[2] || "1"),
-            newStart: newLineNum,
-            newLines: parseInt(hunkMatch[4] || "1"),
-          };
-          hunks.push(currentHunk);
-        }
-      } else if (currentHunk) {
-        if (line.startsWith("+")) {
-          currentHunk.lines.push({
-            type: "added",
-            content: line.substring(1),
-            newLineNumber: newLineNum++,
-          });
-        } else if (line.startsWith("-")) {
-          currentHunk.lines.push({
-            type: "deleted",
-            content: line.substring(1),
-            oldLineNumber: oldLineNum++,
-          });
-        } else if (line.startsWith(" ")) {
-          currentHunk.lines.push({
-            type: "normal",
-            content: line.substring(1),
-            oldLineNumber: oldLineNum++,
-            newLineNumber: newLineNum++,
-          });
-        }
-      }
-    }
-
-    files.push({
-      path: filePath,
-      hunks,
-    });
-  }
-
-  return files;
-}
-
-async function performAnalysis(analysisPath: string, projectPath: string) {
-  const targetPath = analysisPath;
-
-  // Ensure configRoot is correct: if analysisPath is not under projectPath, use analysisPath as configRoot
-  let configRoot = projectPath || analysisPath;
-  if (projectPath && analysisPath !== projectPath) {
-    const relative = path.relative(projectPath, analysisPath);
-    const isUnder =
-      relative && !relative.startsWith("..") && !path.isAbsolute(relative);
-    if (!isUnder) {
-      configRoot = analysisPath;
-    }
-  }
-
-  const name = path.basename(targetPath);
-  const outputPath = path.join(
-    configRoot,
-    ".react-map",
-    "cache",
-    `${name}.json`,
-  );
-
-  // Ensure output dir exists
-  const outputDir = path.dirname(outputPath);
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
-  console.log("Running analysis on:", targetPath, "into:", outputPath);
-
-  try {
-    const configPath = path.join(configRoot, "react.map.config.json");
-    let ignorePatterns: string[] | undefined = undefined;
-    if (fs.existsSync(configPath)) {
-      try {
-        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        ignorePatterns = config.ignorePatterns;
-      } catch (e: unknown) {
-        console.warn("Failed to load config for analysis", e);
-      }
-    }
-
-    const graph = analyzeProject(targetPath, outputPath, ignorePatterns);
-
-    // Merge with existing position data if available
-    if (fs.existsSync(outputPath)) {
-      try {
-        const existingData = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
-
-        // Helper to recurse and map positions
-        const positionMap = new Map<string, UIItemState>();
-
-        // traverse existingData
-        const traverse = (container: JsonData | null) => {
-          if (!container) return;
-          const files = container.files || {};
-          for (const file of Object.values(files)) {
-            for (const variable of Object.values(file.var || {})) {
-              collectPos(variable);
-            }
-          }
-        };
-
-        const collectPos = (item: ComponentFileVar) => {
-          if (item.ui) {
-            positionMap.set(item.id, {
-              x: item.ui.x,
-              y: item.ui.y,
-              radius: item.ui.radius,
-              collapsedRadius: item.ui.collapsedRadius,
-              expandedRadius: item.ui.expandedRadius,
-              isLayoutCalculated: item.ui.isLayoutCalculated,
-              collapsed: item.ui.collapsed,
-            });
-
-            // Collect children and effects positions
-            if (item.ui.children) {
-              for (const [id, pos] of Object.entries(item.ui.children)) {
-                positionMap.set(id, pos);
-              }
-            }
-
-            // Collect virtual variables positions
-            if (item.ui.vars) {
-              for (const [id, pos] of Object.entries(item.ui.vars)) {
-                positionMap.set(id, pos);
-              }
-            }
-          }
-
-          if (item.type === "function") {
-            for (const v of Object.values(item.var)) {
-              collectPos(v);
-            }
-          }
-        };
-
-        traverse(existingData);
-
-        // Now apply to new graph
-        const applyPos = (item: ComponentFileVar) => {
-          const pos = positionMap.get(item.id);
-          if (pos) {
-            if (!item.ui) item.ui = { x: 0, y: 0 };
-            Object.assign(item.ui, pos);
-          }
-
-          // Apply to sub-items (children, effects, virtual vars)
-          const renderComboId = `${item.id}-render`;
-          const renderPrefix = `${item.id}-render-`;
-          const varPrefix = `${item.id}:`;
-
-          for (const [id, subPos] of positionMap.entries()) {
-            if (
-              id === renderComboId ||
-              id.startsWith(renderPrefix) ||
-              id.startsWith(varPrefix)
-            ) {
-              if (!item.ui) item.ui = { x: 0, y: 0 };
-
-              if (id === renderComboId || id.startsWith(renderPrefix)) {
-                if (!item.ui.children) item.ui.children = {};
-                item.ui.children[id] = subPos;
-              } else {
-                if (!item.ui.vars) item.ui.vars = {};
-                item.ui.vars[id] = subPos;
-              }
-            }
-          }
-
-          if (item.type === "function") {
-            for (const v of Object.values(item.var)) {
-              applyPos(v);
-            }
-          }
-        };
-
-        const traverseApply = (container: JsonData | null) => {
-          if (!container) return;
-          const files = container.files || {};
-          for (const file of Object.values(files)) {
-            for (const variable of Object.values(file.var || {})) {
-              applyPos(variable);
-            }
-          }
-        };
-
-        traverseApply(graph);
-      } catch (e: unknown) {
-        console.error("Failed to merge positions", e);
-      }
-    }
-
-    fs.writeFileSync(outputPath, JSON.stringify(graph, null, 2));
-    console.log("Analysis success, written to:", outputPath);
-    return graph;
-  } catch (error) {
-    console.error("Analysis failed:", error);
-    throw error;
-  }
-}
 
 ipcMain.handle(
   "analyze-project",
   async (_: IpcMainInvokeEvent, analysisPath: string, projectPath: string) => {
-    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
-      return new Promise((resolve, reject) => {
-        const requestId = Math.random().toString(36).substring(7);
-        const timeout = setTimeout(() => {
-          backendWs!.removeEventListener("message", onMessage);
-          reject(new Error("Timeout waiting for project analysis"));
-        }, 120000);
-
-        const onMessage = (event: MessageEvent) => {
-          const {
-            type,
-            payload,
-            requestId: responseId,
-          } = JSON.parse(event.data.toString());
-          if (responseId !== requestId) return;
-
-          if (type === "project_opened") {
-            clearTimeout(timeout);
-            backendWs!.removeEventListener("message", onMessage);
-            resolve(path.basename(analysisPath));
-          } else if (type === "error") {
-            clearTimeout(timeout);
-            backendWs!.removeEventListener("message", onMessage);
-            reject(new Error(payload.message || "Analysis failed"));
-          }
-        };
-
-        backendWs!.addEventListener("message", onMessage);
-        backendWs!.send(
-          JSON.stringify({
-            type: "open_project",
-            payload: {
-              projectPath,
-              subProject:
-                analysisPath === projectPath ? undefined : analysisPath,
-            },
-            requestId,
-          }),
-        );
-      });
-    } else {
-      await performAnalysis(analysisPath, projectPath);
-    }
+    await requestBackend("open_project", {
+      projectPath,
+      subProject: analysisPath === projectPath ? undefined : analysisPath,
+    });
     return path.basename(analysisPath);
   },
 );
@@ -1079,65 +614,10 @@ ipcMain.handle(
     const targetPath = analysisPath || projectRoot;
     if (!targetPath) return null;
 
-    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
-      return new Promise((resolve, reject) => {
-        const requestId = Math.random().toString(36).substring(7);
-        const timeout = setTimeout(() => {
-          backendWs!.removeEventListener("message", onMessage);
-          reject(new Error("Timeout waiting for backend graph data"));
-        }, 120000);
-
-        const onMessage = (event: MessageEvent) => {
-          const {
-            type,
-            payload,
-            requestId: responseId,
-          } = JSON.parse(event.data.toString());
-          if (responseId !== requestId) return;
-
-          if (type === "graph_data") {
-            clearTimeout(timeout);
-            backendWs!.removeEventListener("message", onMessage);
-            resolve(payload);
-          } else if (type === "error") {
-            clearTimeout(timeout);
-            backendWs!.removeEventListener("message", onMessage);
-            reject(new Error(payload.message || "Unknown backend error"));
-          }
-        };
-
-        backendWs!.addEventListener("message", onMessage);
-        backendWs!.send(
-          JSON.stringify({
-            type: "get_graph_data",
-            payload: {
-              projectPath: projectRoot,
-              subProject:
-                analysisPath === projectRoot ? undefined : analysisPath,
-            },
-            requestId,
-          }),
-        );
-      });
-    }
-
-    // Fallback to local if backend is not available
-    const name = path.basename(targetPath);
-    const graphPath = path.join(
-      projectRoot,
-      ".react-map",
-      "cache",
-      `${name}.json`,
-    );
-
-    console.log("Reading graph data from (local fallback):", graphPath);
-
-    if (fs.existsSync(graphPath)) {
-      return JSON.parse(fs.readFileSync(graphPath, "utf-8"));
-    }
-
-    // If file doesn't exist, trigger analysis
-    return performAnalysis(targetPath, projectRoot);
+    return requestBackend("get_graph_data", {
+      projectPath: projectRoot,
+      subProject: analysisPath === projectRoot ? undefined : analysisPath,
+    });
   },
 );
 
@@ -1149,72 +629,11 @@ ipcMain.handle(
     commitHash: string,
     subPath?: string,
   ): Promise<JsonData> => {
-    const git = simpleGit(projectRoot);
-
-    const resolvedHash = await git.revparse([commitHash]);
-
-    // Ensure subPath is relative for cache key
-    const relativeSubPath = subPath
-      ? path.isAbsolute(subPath)
-        ? path.relative(projectRoot, subPath)
-        : subPath
-      : undefined;
-
-    const cacheKey = relativeSubPath
-      ? `${resolvedHash}-${relativeSubPath.replace(/[/\\]/g, "_")}`
-      : resolvedHash;
-    const commitCacheDir = path.join(
-      projectRoot,
-      ".react-map",
-      "cache",
-      "commits",
-    );
-    const cachePath = path.join(commitCacheDir, `${cacheKey}.json`);
-
-    if (fs.existsSync(cachePath)) {
-      return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-    }
-
-    if (!fs.existsSync(commitCacheDir)) {
-      fs.mkdirSync(commitCacheDir, { recursive: true });
-    }
-
-    const tempDir = tmp.dirSync({ unsafeCleanup: true });
-    try {
-      // Use git archive to get a clean snapshot of the commit
-      await new Promise<void>((resolve, reject) => {
-        exec(
-          `git archive ${resolvedHash} | tar -x -C "${tempDir.name}"`,
-          { cwd: projectRoot },
-          (error) => {
-            if (error) reject(error);
-            else resolve();
-          },
-        );
-      });
-
-      const analysisPath = relativeSubPath
-        ? path.join(tempDir.name, relativeSubPath)
-        : tempDir.name;
-
-      // Load ignore patterns from the project root config to apply to Git analysis
-      const configPath = path.join(projectRoot, "react.map.config.json");
-      let ignorePatterns: string[] | undefined = undefined;
-      if (fs.existsSync(configPath)) {
-        try {
-          const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-          ignorePatterns = config.ignorePatterns;
-        } catch (e: unknown) {
-          console.warn("Failed to load config for git analysis", e);
-        }
-      }
-
-      const graph = analyzeProject(analysisPath, undefined, ignorePatterns);
-      fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
-      return graph;
-    } finally {
-      tempDir.removeCallback();
-    }
+    return requestBackend("git_analyze_commit", {
+      projectPath: projectRoot,
+      commitHash,
+      subPath,
+    });
   },
 );
 
@@ -1379,78 +798,17 @@ ipcMain.handle(
 ipcMain.handle(
   "read-state",
   async (_: IpcMainInvokeEvent, projectRoot: string) => {
-    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
-      return new Promise((resolve, reject) => {
-        const requestId = Math.random().toString(36).substring(7);
-        const timeout = setTimeout(() => {
-          backendWs!.removeEventListener("message", onMessage);
-          reject(new Error("Timeout waiting for backend state data"));
-        }, 15000);
-
-        const onMessage = (event: MessageEvent) => {
-          const {
-            type,
-            payload,
-            requestId: responseId,
-          } = JSON.parse(event.data.toString());
-          if (responseId !== requestId) return;
-
-          if (type === "state_data") {
-            clearTimeout(timeout);
-            backendWs!.removeEventListener("message", onMessage);
-            resolve(payload);
-          }
-        };
-
-        backendWs!.addEventListener("message", onMessage);
-        backendWs!.send(
-          JSON.stringify({
-            type: "read_state",
-            payload: { projectPath: projectRoot },
-            requestId,
-          }),
-        );
-      });
-    }
-
-    const statePath = path.join(projectRoot, ".react-map", "state.json");
-    if (fs.existsSync(statePath)) {
-      try {
-        return JSON.parse(fs.readFileSync(statePath, "utf-8"));
-      } catch (e: unknown) {
-        console.error("Error reading state.json", e);
-      }
-    }
-    return null;
+    return requestBackend("read_state", { projectPath: projectRoot });
   },
 );
 
 ipcMain.handle(
   "save-state",
   async (_: IpcMainInvokeEvent, projectRoot: string, state: AppStateData) => {
-    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
-      backendWs.send(
-        JSON.stringify({
-          type: "save_state",
-          payload: { projectPath: projectRoot, state },
-        }),
-      );
-      return true;
-    }
-
-    try {
-      const dotDir = path.join(projectRoot, ".react-map");
-      if (!fs.existsSync(dotDir)) {
-        fs.mkdirSync(dotDir, { recursive: true });
-      }
-
-      const statePath = path.join(dotDir, "state.json");
-      fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
-      return true;
-    } catch (error) {
-      console.error("Error saving state.json", error);
-      return false;
-    }
+    return requestBackend("save_state", {
+      projectPath: projectRoot,
+      state,
+    });
   },
 );
 
@@ -1463,151 +821,12 @@ ipcMain.handle(
     positions: UIStateMap,
     contextId?: string,
   ) => {
-    if (backendWs && backendWs.readyState === WebSocket.OPEN) {
-      backendWs.send(
-        JSON.stringify({
-          type: "update_graph_position",
-          payload: {
-            projectPath: projectRoot,
-            subProject: analysisPath === projectRoot ? undefined : analysisPath,
-            positions,
-            contextId,
-          },
-        }),
-      );
-      return true;
-    }
-    // ... local fallback logic ...
-    const targetPath = analysisPath;
-
-    // Ensure configRoot is correct: if analysisPath is not under projectRoot, use analysisPath as configRoot
-    let configRoot = projectRoot || analysisPath;
-    if (projectRoot && analysisPath !== projectRoot) {
-      const relative = path.relative(projectRoot, analysisPath);
-      const isUnder =
-        relative && !relative.startsWith("..") && !path.isAbsolute(relative);
-      if (!isUnder) {
-        configRoot = analysisPath;
-      }
-    }
-
-    const name = path.basename(targetPath);
-    const graphPath = path.join(
-      configRoot,
-      ".react-map",
-      "cache",
-      `${name}.json`,
-    );
-
-    if (!fs.existsSync(graphPath)) return false;
-
-    try {
-      const graphData = JSON.parse(
-        fs.readFileSync(graphPath, "utf-8"),
-      ) as JsonData;
-
-      const applyUIState = (item: ComponentFileVar, stateMap: UIStateMap) => {
-        const state = stateMap[item.id];
-        if (state) {
-          if (!item.ui) item.ui = { x: 0, y: 0 };
-          item.ui.x = state.x;
-          item.ui.y = state.y;
-
-          if (state.radius !== undefined) {
-            item.ui.radius = state.radius;
-          }
-          if (state.collapsedRadius !== undefined) {
-            item.ui.collapsedRadius = state.collapsedRadius;
-          }
-          if (state.expandedRadius !== undefined) {
-            item.ui.expandedRadius = state.expandedRadius;
-          }
-          if (state.collapsed !== undefined) {
-            item.ui.collapsed = state.collapsed;
-          }
-
-          const isCombo =
-            item.kind === "component" ||
-            (item.kind === "hook" && item.type === "function");
-
-          // Handle layout status
-          if (contextId && item.id === contextId) {
-            item.ui.isLayoutCalculated = true;
-          } else if (contextId === "root") {
-            if (!isCombo) item.ui.isLayoutCalculated = true;
-          } else if (contextId) {
-            // Child of a combo layout
-            if (!isCombo) item.ui.isLayoutCalculated = true;
-          } else if (state.isLayoutCalculated !== undefined) {
-            // Full save from UI: trust the UI state
-            item.ui.isLayoutCalculated = state.isLayoutCalculated;
-          }
-        }
-
-        // Apply to sub-items (children, effects, virtual vars)
-        // We look for any keys in stateMap that are prefixed with this item's ID followed by a separator
-        const renderComboId = `${item.id}-render`;
-        const renderPrefix = `${item.id}-render-`;
-        const varPrefix = `${item.id}:`;
-
-        for (const [id, subState] of Object.entries(stateMap)) {
-          if (
-            id === renderComboId ||
-            id.startsWith(renderPrefix) ||
-            id.startsWith(varPrefix)
-          ) {
-            if (!item.ui) item.ui = { x: 0, y: 0 };
-
-            // Render/Effect nodes
-            if (id === renderComboId || id.startsWith(renderPrefix)) {
-              if (!item.ui.children) item.ui.children = {};
-              item.ui.children[id] = {
-                x: subState.x,
-                y: subState.y,
-                radius: subState.radius,
-                collapsedRadius: subState.collapsedRadius,
-                expandedRadius: subState.expandedRadius,
-                isLayoutCalculated:
-                  contextId === id ? true : subState.isLayoutCalculated,
-                collapsed: subState.collapsed,
-              };
-            } else {
-              // Virtual variables (destructuring)
-              if (!item.ui.vars) item.ui.vars = {};
-              item.ui.vars[id] = {
-                x: subState.x,
-                y: subState.y,
-                radius: subState.radius,
-                collapsedRadius: subState.collapsedRadius,
-                expandedRadius: subState.expandedRadius,
-                isLayoutCalculated:
-                  contextId === id ? true : subState.isLayoutCalculated,
-                collapsed: subState.collapsed,
-              };
-            }
-          }
-        }
-
-        // Recurse into children
-        if (item.type === "function") {
-          for (const v of Object.values(item.var)) {
-            applyUIState(v, stateMap);
-          }
-        }
-      };
-
-      for (const file of Object.values(graphData.files)) {
-        for (const variable of Object.values(file.var)) {
-          applyUIState(variable, positions);
-        }
-      }
-
-      fs.writeFileSync(graphPath, JSON.stringify(graphData, null, 2));
-      return true;
-    } catch (e: unknown) {
-      console.error("Failed to update graph positions", e);
-      return false;
-    }
+    return requestBackend("update_graph_position", {
+      projectPath: projectRoot,
+      subProject: analysisPath === projectRoot ? undefined : analysisPath,
+      positions,
+      contextId,
+    });
   },
 );
 
@@ -1617,59 +836,9 @@ ipcMain.handle(
     _: IpcMainInvokeEvent,
     projectRoot: string,
   ): Promise<string | null> => {
-    try {
-      // 1. Check for local icons
-      const localIcons = [
-        "favicon.ico",
-        "logo.svg",
-        "logo.png",
-        "vite.svg",
-        "public/favicon.ico",
-        "public/logo.svg",
-        "public/logo.png",
-        "public/vite.svg",
-      ];
-
-      for (const icon of localIcons) {
-        const iconPath = path.join(projectRoot, icon);
-        if (fs.existsSync(iconPath)) {
-          const buffer = fs.readFileSync(iconPath);
-          const ext = path.extname(icon).toLowerCase();
-          const mimeType =
-            ext === ".svg"
-              ? "image/svg+xml"
-              : ext === ".ico"
-                ? "image/x-icon"
-                : `image/${ext.slice(1)}`;
-          return `data:${mimeType};base64,${buffer.toString("base64")}`;
-        }
-      }
-
-      // 2. Check for GitHub remote
-      if (fs.existsSync(path.join(projectRoot, ".git"))) {
-        const git = simpleGit(projectRoot);
-        try {
-          const remotes = await git.getRemotes(true);
-          const origin = remotes.find((r) => r.name === "origin") || remotes[0];
-          if (origin && origin.refs.fetch) {
-            const url = origin.refs.fetch;
-            // Match github.com/owner/repo or github.com:owner/repo
-            const match = url.match(/github\.com[/:]([^/]+)\//);
-            if (match && match[1]) {
-              const owner = match[1];
-              return `https://github.com/${owner}.png`;
-            }
-          }
-        } catch (e: unknown) {
-          console.warn("Failed to get git remotes", e);
-        }
-      }
-
-      return null;
-    } catch (e: unknown) {
-      console.error("Failed to get project icon", e);
-      return null;
-    }
+    return requestBackend("get_project_icon", {
+      projectPath: projectRoot,
+    });
   },
 );
 

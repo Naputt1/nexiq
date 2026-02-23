@@ -1,0 +1,242 @@
+{
+  "files": {
+    "/src/auth.tsx": {
+      "path": "/src/auth.tsx",
+      "hash": "221ad94017a0bf06",
+      "import": {},
+      "export": {
+        "useUser": {
+          "name": "useUser",
+          "type": "named",
+          "exportKind": "value",
+          "id": "b2d7ad170a22c6a4"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "bcb4ad80b9e65abc": {
+          "id": "bcb4ad80b9e65abc",
+          "name": {
+            "type": "object",
+            "properties": [
+              {
+                "key": "useUser",
+                "value": {
+                  "type": "identifier",
+                  "name": "useUser",
+                  "loc": {
+                    "line": 1,
+                    "column": 15
+                  },
+                  "id": "bf9fba8fcba32833"
+                },
+                "loc": {
+                  "line": 1,
+                  "column": 15
+                }
+              }
+            ],
+            "raw": "{\n  useUser\n}",
+            "loc": {
+              "line": 1,
+              "column": 13
+            },
+            "id": "a69f4c7afb51a7a7"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/auth.tsx",
+          "hash": "ea60d894d4787bcf",
+          "dependencies": {},
+          "loc": {
+            "line": 1,
+            "column": 13
+          },
+          "children": {}
+        }
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "16a0b13cd14b3ba",
+      "import": {
+        "useUser": {
+          "localName": "useUser",
+          "importedName": "useUser",
+          "source": "/src/auth.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "value",
+          "id": "311c554b828f67a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 1,
+              "column": 47
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "926b7328e623f61",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 1,
+            "column": 47
+          },
+          "var": {
+            "311c554b828f67a5:callhook:useUser:1:67": {
+              "id": "311c554b828f67a5:callhook:useUser:1:67",
+              "name": {
+                "type": "identifier",
+                "name": "user",
+                "loc": {
+                  "line": 1,
+                  "column": 67
+                },
+                "id": "9c60c4c08deaa373"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "f3f773149046095c",
+              "dependencies": {},
+              "loc": {
+                "line": 1,
+                "column": 67
+              },
+              "call": {
+                "id": "b2d7ad170a22c6a4",
+                "name": "useUser"
+              }
+            },
+            "b55fb8a9bac62dc": {
+              "id": "b55fb8a9bac62dc",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@1:92",
+                "loc": {
+                  "line": 1,
+                  "column": 92
+                },
+                "id": "bec410c4fc3db905"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 1,
+                "column": 92
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 47
+            },
+            "end": {
+              "line": 1,
+              "column": 50
+            }
+          },
+          "return": {
+            "id": "b55fb8a9bac62dc",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@1:92",
+              "loc": {
+                "line": 1,
+                "column": 92
+              },
+              "id": "bec410c4fc3db905"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/App.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
+            "loc": {
+              "line": 1,
+              "column": 92
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "fca038b58e463000": {
+              "id": "div",
+              "instanceId": "fca038b58e463000",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 1,
+                "column": 92
+              },
+              "children": {}
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [
+            "b2d7ad170a22c6a4"
+          ],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "311c554b828f67a5",
+      "to": "b55fb8a9bac62dc",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "b2d7ad170a22c6a4",
+      "label": "hook"
+    },
+    {
+      "from": "311c554b828f67a5:callhook:useUser:1:67",
+      "to": "b2d7ad170a22c6a4",
+      "label": "hook"
+    },
+    {
+      "from": "div",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    }
+  ]
+}

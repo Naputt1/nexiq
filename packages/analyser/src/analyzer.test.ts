@@ -7,10 +7,20 @@ import fs from "fs";
 import type { SnapshotData } from "./types/test.js";
 
 describe("analyser snapshots", () => {
-  const projects = ["simple", "complex", "props", "hook", "props-complex", "destructuring-hook", "jsx-variable", "forward-ref"];
+  const projects = [
+    "simple",
+    "complex",
+    "props",
+    "hook",
+    "props-complex",
+    "destructuring-hook",
+    "jsx-variable",
+    "forward-ref",
+    "destructured-export",
+  ];
 
   projects.forEach((projectName) => {
-    it(`should match snapshot for ${projectName}`, () => {
+    it(`should match snapshot for ${projectName}`, async () => {
       const projectPath = path.resolve(
         process.cwd(),
         `../sample-project/${projectName}`,
@@ -19,7 +29,7 @@ describe("analyser snapshots", () => {
       const viteConfigPath = getViteConfig(projectPath);
       const files = getFiles(projectPath);
 
-      const graph = analyzeFiles(
+      const graph = await analyzeFiles(
         projectPath,
         viteConfigPath,
         files,
@@ -51,14 +61,11 @@ describe("analyser snapshots", () => {
 
 describe("analyser ignore patterns", () => {
   it("should respect ignore patterns in getFiles", () => {
-    const projectPath = path.resolve(
-      process.cwd(),
-      "../sample-project/simple",
-    );
-    
+    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
+
     const allFiles = getFiles(projectPath);
     const ignoredFiles = getFiles(projectPath, ["**/App.tsx"]);
-    
+
     expect(allFiles.length).toBeGreaterThan(ignoredFiles.length);
     expect(allFiles).toContain("src/App.tsx");
     expect(ignoredFiles).not.toContain("src/App.tsx");
