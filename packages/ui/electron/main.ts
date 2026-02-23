@@ -16,7 +16,6 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { exec } from "node:child_process";
 import os from "node:os";
-import * as watcher from "@parcel/watcher";
 
 import tmp from "tmp";
 import { simpleGit, type LogOptions } from "simple-git";
@@ -118,17 +117,6 @@ import type {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function debounce<T extends (...args: never[]) => unknown>(
-  func: T,
-  wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -150,119 +138,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   : RENDERER_DIST;
 
 const windowProjects = new Map<number, string | null>();
-const projectWatchers = new Map<string, watcher.AsyncSubscription>();
 let isQuitting = false;
-
-async function stopWatcher(projectPath: string) {
-  const subscription = projectWatchers.get(projectPath);
-  if (subscription) {
-    await subscription.unsubscribe();
-    projectWatchers.delete(projectPath);
-    console.log(`Stopped watching: ${projectPath}`);
-  }
-}
-
-async function startWatcher(projectPath: string) {
-  if (projectWatchers.has(projectPath)) return;
-
-  const configPath = path.join(projectPath, "react.map.config.json");
-  let ignorePatterns: string[] = [
-    "node_modules",
-    ".git",
-    ".react-map",
-    "dist",
-    "build",
-    ".next",
-    ".vite",
-  ];
-  if (fs.existsSync(configPath)) {
-    try {
-      const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-      if (config.ignorePatterns) {
-        // @parcel/watcher ignores are slightly different, they work best with folder names or simple patterns
-        const customIgnores = config.ignorePatterns.map((p: string) =>
-          p.replace(/^\*\*\/|\/\*\*$/g, ""),
-        );
-        ignorePatterns = [...ignorePatterns, ...customIgnores];
-      }
-    } catch (e: unknown) {
-      console.warn("Failed to load config for watcher", e);
-    }
-  }
-
-  console.log(
-    `Starting watcher for ${projectPath} with ignores:`,
-    ignorePatterns,
-  );
-
-  const debouncedReload = debounce(() => {
-    console.log(`Changes detected in ${projectPath}, notifying windows...`);
-    for (const [windowId, p] of windowProjects.entries()) {
-      if (p === projectPath) {
-        const win = BrowserWindow.fromId(windowId);
-        if (win) {
-          win.webContents.send("reload-project");
-        }
-      }
-    }
-  }, 1000);
-
-  try {
-    const subscription = await watcher.subscribe(
-      projectPath,
-      (err, events) => {
-        if (err) {
-          console.error(`Watcher error for ${projectPath}:`, err);
-          return;
-        }
-
-        const hasRelevantChange = events.some((event) => {
-          const filePath = event.path;
-          return (
-            filePath.endsWith(".ts") ||
-            filePath.endsWith(".tsx") ||
-            filePath.endsWith(".js") ||
-            filePath.endsWith(".jsx")
-          );
-        });
-
-        if (hasRelevantChange) {
-          debouncedReload();
-        }
-      },
-      {
-        ignore: ignorePatterns,
-      },
-    );
-
-    projectWatchers.set(projectPath, subscription);
-    console.log(`Started watching: ${projectPath}`);
-  } catch (error) {
-    console.error(`Failed to start watcher for ${projectPath}:`, error);
-  }
-}
-
-async function updateOpenProjects() {
-  const projects = Array.from(windowProjects.values()).map((p) => p || "");
-  store.setOpenProjects(projects);
-
-  const globalConfig = store.getGlobalConfig();
-  const autoReload = globalConfig.autoReload;
-
-  // Manage watchers
-  const activeProjects = new Set(projects.filter(Boolean));
-  for (const projectPath of projectWatchers.keys()) {
-    if (!activeProjects.has(projectPath) || !autoReload) {
-      await stopWatcher(projectPath);
-    }
-  }
-
-  if (autoReload) {
-    for (const projectPath of activeProjects) {
-      await startWatcher(projectPath);
-    }
-  }
-}
 
 function createWindow(projectPath?: string, forceEmpty: boolean = false) {
   if (projectPath) {
@@ -287,12 +163,16 @@ function createWindow(projectPath?: string, forceEmpty: boolean = false) {
   window.maximize();
 
   windowProjects.set(window.id, projectPath || null);
-  updateOpenProjects();
+  store.setOpenProjects(
+    Array.from(windowProjects.values()).map((p) => p || ""),
+  );
 
   window.on("closed", () => {
     if (!isQuitting) {
       windowProjects.delete(window.id);
-      updateOpenProjects();
+      store.setOpenProjects(
+        Array.from(windowProjects.values()).map((p) => p || ""),
+      );
     }
   });
 
@@ -486,10 +366,9 @@ process.on("SIGTERM", () => {
 
 app.on("before-quit", async () => {
   isQuitting = true;
-  for (const projectPath of projectWatchers.keys()) {
-    await stopWatcher(projectPath);
-  }
-  updateOpenProjects();
+  store.setOpenProjects(
+    Array.from(windowProjects.values()).map((p) => p || ""),
+  );
   if (backendProcess) {
     backendProcess.kill();
     backendProcess = null;
@@ -498,10 +377,9 @@ app.on("before-quit", async () => {
 
 app.on("will-quit", async () => {
   isQuitting = true;
-  for (const projectPath of projectWatchers.keys()) {
-    await stopWatcher(projectPath);
-  }
-  updateOpenProjects();
+  store.setOpenProjects(
+    Array.from(windowProjects.values()).map((p) => p || ""),
+  );
 });
 
 app.on("activate", () => {
@@ -606,7 +484,9 @@ ipcMain.handle(
       } else {
         windowProjects.delete(window.id);
       }
-      updateOpenProjects();
+      store.setOpenProjects(
+        Array.from(windowProjects.values()).map((p) => p || ""),
+      );
     }
     return false;
   },
@@ -1152,7 +1032,7 @@ ipcMain.handle(
         const timeout = setTimeout(() => {
           backendWs!.removeEventListener("message", onMessage);
           reject(new Error("Timeout waiting for project analysis"));
-        }, 60000);
+        }, 120000);
 
         const onMessage = (event: MessageEvent) => {
           const {
@@ -1205,7 +1085,7 @@ ipcMain.handle(
         const timeout = setTimeout(() => {
           backendWs!.removeEventListener("message", onMessage);
           reject(new Error("Timeout waiting for backend graph data"));
-        }, 60000);
+        }, 120000);
 
         const onMessage = (event: MessageEvent) => {
           const {
@@ -1505,7 +1385,7 @@ ipcMain.handle(
         const timeout = setTimeout(() => {
           backendWs!.removeEventListener("message", onMessage);
           reject(new Error("Timeout waiting for backend state data"));
-        }, 5000);
+        }, 15000);
 
         const onMessage = (event: MessageEvent) => {
           const {
@@ -1801,7 +1681,6 @@ ipcMain.handle(
   "save-global-config",
   async (_: IpcMainInvokeEvent, config: GlobalSettings) => {
     store.saveGlobalConfig(config);
-    updateOpenProjects();
     return true;
   },
 );
