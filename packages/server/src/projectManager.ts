@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "analyser";
-import type { JsonData, ComponentFileVar } from "shared";
+import type { JsonData } from "shared";
 import type { Extension } from "@react-map/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { getDisplayName } from "shared";
@@ -28,8 +28,42 @@ export interface SymbolSearchResult {
   name: string;
   file: string;
   loc: { line: number; column: number };
-  props?: any[];
+  props?: unknown[];
   in?: string; // Context where it's used
+}
+
+interface SymbolRow {
+  id: string;
+  name: string;
+  file: string;
+  line: number;
+  column: number;
+  kind: string;
+  type: string;
+  props_json?: string;
+}
+
+interface RenderRow {
+  id: string;
+  symbol_id: string | null;
+  tag: string;
+  file: string;
+  line: number;
+  column: number;
+  scope_symbol_id: string;
+  in_name?: string;
+}
+
+interface TreeNode {
+  name: string;
+  children: TreeNode[];
+}
+
+export interface ComponentHierarchyNode {
+  id: string;
+  name: string;
+  children: (ComponentHierarchyNode | { name: string; status: string })[];
+  status?: string;
 }
 
 export class ProjectManager {
@@ -249,15 +283,15 @@ export class ProjectManager {
     const results: SymbolSearchResult[] = [];
 
     // 1. Find the symbol's definition(s)
-    let definitions: any[];
+    let definitions: SymbolRow[];
     if (strict) {
       definitions = project.db
         .prepare("SELECT * FROM symbols WHERE name = ?")
-        .all(query) as any[];
+        .all(query) as SymbolRow[];
     } else {
       definitions = project.db
         .prepare("SELECT * FROM symbols WHERE name = ? OR name LIKE ?")
-        .all(query, `%${query}%`) as any[];
+        .all(query, `%${query}%`) as SymbolRow[];
     }
 
     for (const def of definitions) {
@@ -267,7 +301,7 @@ export class ProjectManager {
         name: def.name,
         file: def.file,
         loc: { line: def.line, column: def.column },
-        props: JSON.parse(def.props_json || "[]"),
+        props: JSON.parse(def.props_json || "[]") as unknown[],
       });
 
       // 2. Find renders of this specific symbol ID or tag name
@@ -280,7 +314,7 @@ export class ProjectManager {
         WHERE r.symbol_id = ? OR r.tag = ?
       `,
         )
-        .all(def.id, def.name) as any[];
+        .all(def.id, def.name) as RenderRow[];
 
       for (const usage of usages) {
         results.push({
@@ -305,7 +339,7 @@ export class ProjectManager {
         WHERE r.tag = ?
       `,
         )
-        .all(query) as any[];
+        .all(query) as RenderRow[];
 
       for (const usage of externalUsages) {
         results.push({
@@ -328,8 +362,16 @@ export class ProjectManager {
     subProject?: string,
     summaryOnly: boolean = false,
     strict: boolean = true,
-  ): Promise<any> {
-    const results = await this.findSymbol(projectPath, query, subProject, strict);
+  ): Promise<
+    | SymbolSearchResult[]
+    | { query: string; totalUsages: number; files: Record<string, number> }
+  > {
+    const results = await this.findSymbol(
+      projectPath,
+      query,
+      subProject,
+      strict,
+    );
     const usages = results.filter((r) => r.type === "usage");
 
     if (summaryOnly) {
@@ -388,12 +430,12 @@ export class ProjectManager {
     projectPath: string,
     subProject?: string,
     maxDepth: number = 3,
-  ) {
+  ): Promise<TreeNode> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph)
       throw new Error("Project not open or graph not available.");
 
-    const root: any = { name: "/", children: [] };
+    const root: TreeNode = { name: "/", children: [] };
     const files = Object.keys(project.graph.files).sort();
 
     for (const filePath of files) {
@@ -401,7 +443,7 @@ export class ProjectManager {
       let current = root;
       for (let i = 0; i < Math.min(parts.length, maxDepth); i++) {
         const part = parts[i]!;
-        let node = current.children.find((c: any) => c.name === part);
+        let node = current.children.find((c) => c.name === part);
         if (!node) {
           node = { name: part, children: [] };
           current.children.push(node);
@@ -410,8 +452,8 @@ export class ProjectManager {
       }
     }
 
-    const sortNodes = (node: any) => {
-      node.children.sort((a: any, b: any) => a.name.localeCompare(b.name));
+    const sortNodes = (node: TreeNode) => {
+      node.children.sort((a, b) => a.name.localeCompare(b.name));
       for (const child of node.children) sortNodes(child);
     };
     sortNodes(root);
@@ -423,7 +465,14 @@ export class ProjectManager {
     componentName: string,
     subProject?: string,
     depth: number = 2,
-  ): Promise<any> {
+  ): Promise<
+    | {
+        component: string;
+        hierarchies: ComponentHierarchyNode[];
+        renderedBy: { id: string; name: string; file: string }[];
+      }
+    | { error: string }
+  > {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.db)
       throw new Error("Project not open or database not available.");
@@ -431,7 +480,7 @@ export class ProjectManager {
     // Find the starting component(s)
     const startComponents = project.db
       .prepare(`SELECT * FROM symbols WHERE name = ?`)
-      .all(componentName) as any[];
+      .all(componentName) as SymbolRow[];
 
     if (startComponents.length === 0) {
       return { error: `Component "${componentName}" not found.` };
@@ -441,14 +490,15 @@ export class ProjectManager {
       symbolId: string,
       currentDepth: number,
       visited: Set<string>,
-    ): any => {
+    ): ComponentHierarchyNode => {
       const sym = project
         .db!.prepare(`SELECT * FROM symbols WHERE id = ?`)
-        .get(symbolId) as any;
+        .get(symbolId) as SymbolRow | undefined;
       if (!sym || currentDepth > depth || visited.has(symbolId)) {
         return {
           id: symbolId,
           name: sym?.name || "unknown",
+          children: [],
           status: "limit-or-circular",
         };
       }
@@ -456,7 +506,7 @@ export class ProjectManager {
 
       const children = project
         .db!.prepare(`SELECT * FROM renders WHERE scope_symbol_id = ?`)
-        .all(symbolId) as any[];
+        .all(symbolId) as RenderRow[];
 
       return {
         id: sym.id,
@@ -483,7 +533,7 @@ export class ProjectManager {
       WHERE r.tag = ? OR r.symbol_id IN (SELECT id FROM symbols WHERE name = ?)
     `,
       )
-      .all(componentName, componentName) as any[];
+      .all(componentName, componentName) as SymbolRow[];
 
     return {
       component: componentName,
@@ -502,7 +552,16 @@ export class ProjectManager {
     projectPath: string,
     query: string,
     subProject?: string,
-  ): Promise<any> {
+  ): Promise<
+    {
+      id: string;
+      name: string;
+      file: string;
+      loc: { line: number; column: number };
+      kind: string;
+      type: string;
+    }[]
+  > {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.db)
       throw new Error("Project not open or database not available.");
@@ -511,7 +570,7 @@ export class ProjectManager {
       .prepare(
         `SELECT id, name, file, line, column, kind, type FROM symbols WHERE name = ?`,
       )
-      .all(query) as any[];
+      .all(query) as SymbolRow[];
     return symbols.map((s) => ({
       id: s.id,
       name: s.name,
@@ -526,7 +585,19 @@ export class ProjectManager {
     projectPath: string,
     query: string,
     subProject?: string,
-  ): Promise<any> {
+  ): Promise<
+    | {
+        id: string;
+        name: string;
+        file: string;
+        loc: { line: number; column: number };
+        kind: string;
+        type: string;
+        content?: string;
+        error?: string;
+      }[]
+    | { error: string }
+  > {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.db)
       throw new Error("Project not open or database not available.");
@@ -542,7 +613,16 @@ export class ProjectManager {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
-    const results: any[] = [];
+    const results: {
+      id: string;
+      name: string;
+      file: string;
+      loc: { line: number; column: number };
+      kind: string;
+      type: string;
+      content?: string;
+      error?: string;
+    }[] = [];
 
     for (const locInfo of locations) {
       const fullPath = path.resolve(
@@ -566,8 +646,8 @@ export class ProjectManager {
   async updateGraphPosition(
     projectPath: string,
     subProject: string | undefined,
-    positions: any,
-    contextId?: string,
+    _positions: unknown,
+    _contextId?: string,
   ): Promise<boolean> {
     // This still operates on the JSON graph for now as UI uses it
     const project = this.getProject(projectPath, subProject);
@@ -582,7 +662,7 @@ export class ProjectManager {
     id: string,
     label: string,
     subProject?: string,
-  ) {
+  ): Promise<string[]> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph) throw new Error("Project not open.");
     if (!project.graph.labels) project.graph.labels = {};
@@ -599,7 +679,7 @@ export class ProjectManager {
     id: string,
     label: string,
     subProject?: string,
-  ) {
+  ): Promise<string[]> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph || !project.graph.labels) return [];
     if (project.graph.labels[id]) {
@@ -613,7 +693,10 @@ export class ProjectManager {
     return project.graph.labels[id] || [];
   }
 
-  async getLabels(projectPath: string, subProject?: string) {
+  async getLabels(
+    projectPath: string,
+    subProject?: string,
+  ): Promise<Record<string, string[]>> {
     const project = this.getProject(projectPath, subProject);
     return project?.graph?.labels || {};
   }
@@ -622,11 +705,11 @@ export class ProjectManager {
     projectPath: string,
     label: string,
     subProject?: string,
-  ) {
+  ): Promise<string[]> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph || !project.graph.labels) return [];
     const ids: string[] = [];
-    for (const [id, labels] of Object.entries(project.graph.labels || {})) {
+    for (const [id, labels] of Object.entries(project.graph.labels)) {
       if (labels.includes(label)) ids.push(id);
     }
     return ids;
@@ -691,11 +774,15 @@ export class ProjectManager {
     return fs.readFileSync(fullPath, "utf-8");
   }
 
-  async grepSearch(projectPath: string, pattern: string, subProject?: string) {
+  async grepSearch(
+    projectPath: string,
+    pattern: string,
+    subProject?: string,
+  ): Promise<{ file: string; line: number; content: string }[]> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.graph)
       throw new Error("Project not open. Call open_project first.");
-    const results: any[] = [];
+    const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
@@ -726,7 +813,7 @@ export class ProjectManager {
     projectPath: string,
     command: string,
     subProject?: string,
-  ) {
+  ): Promise<{ stdout?: string; stderr?: string; error?: string }> {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
@@ -747,12 +834,13 @@ export class ProjectManager {
         maxBuffer: 1024 * 1024,
       });
       return { stdout, stderr };
-    } catch (e: any) {
-      return { error: e.message, stdout: e.stdout, stderr: e.stderr };
+    } catch (e: unknown) {
+      const err = e as { message: string; stdout?: string; stderr?: string };
+      return { error: err.message, stdout: err.stdout, stderr: err.stderr };
     }
   }
 
-  async saveAppState(projectPath: string, state: any): Promise<boolean> {
+  async saveAppState(projectPath: string, state: unknown): Promise<boolean> {
     try {
       const dotDir = path.join(projectPath, ".react-map");
       if (!fs.existsSync(dotDir)) fs.mkdirSync(dotDir, { recursive: true });
@@ -761,17 +849,19 @@ export class ProjectManager {
         JSON.stringify(state, null, 2),
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
 
-  async readAppState(projectPath: string): Promise<any> {
+  async readAppState(projectPath: string): Promise<unknown> {
     const statePath = path.join(projectPath, ".react-map", "state.json");
     if (fs.existsSync(statePath)) {
       try {
         return JSON.parse(fs.readFileSync(statePath, "utf-8"));
-      } catch (e) {}
+      } catch (_e) {
+        // Ignore parsing errors
+      }
     }
     return null;
   }
@@ -791,6 +881,7 @@ export class ProjectManager {
   async closeAll() {
     for (const project of this.projects.values()) {
       if (project.subscription) await project.subscription.unsubscribe();
+
       if (project.db) project.db.close();
     }
     this.projects.clear();

@@ -5,12 +5,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { ProjectManager } from "./projectManager.js";
-import {
-  getDisplayName,
-  type PropData,
-  type ComponentInfoRenderDependency,
-} from "shared";
-import { WebSocketServer, WebSocket } from "ws";
+import { getDisplayName } from "shared";
+import { WebSocketServer } from "ws";
 
 export interface OpenProjectArgs {
   projectPath: string;
@@ -21,11 +17,106 @@ export interface GetSymbolInfoArgs {
   projectPath: string;
   subProject?: string;
   query: string;
+  strict?: boolean;
+}
+
+export interface GetSymbolUsagesArgs {
+  projectPath: string;
+  subProject?: string;
+  query: string;
+  summaryOnly?: boolean;
+  strict?: boolean;
+}
+
+export interface FindFilesArgs {
+  projectPath: string;
+  subProject?: string;
+  pattern: string;
+}
+
+export interface GetFileImportsArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+}
+
+export interface GetProjectTreeArgs {
+  projectPath: string;
+  subProject?: string;
+  maxDepth?: number;
+}
+
+export interface GetComponentHierarchyArgs {
+  projectPath: string;
+  subProject?: string;
+  componentName: string;
+  depth?: number;
+}
+
+export interface GetSymbolLocationArgs {
+  projectPath: string;
+  subProject?: string;
+  query: string;
+}
+
+export interface GetSymbolContentArgs {
+  projectPath: string;
+  subProject?: string;
+  query: string;
+}
+
+export interface AddLabelArgs {
+  projectPath: string;
+  subProject?: string;
+  id: string;
+  label: string;
+}
+
+export interface ListLabelsArgs {
+  projectPath: string;
+  subProject?: string;
+}
+
+export interface SearchByLabelArgs {
+  projectPath: string;
+  subProject?: string;
+  label: string;
+}
+
+export interface ListDirectoryArgs {
+  projectPath: string;
+  subProject?: string;
+  dirPath: string;
+}
+
+export interface GetFileOutlineArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+}
+
+export interface ReadFileArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+}
+
+export interface GrepSearchArgs {
+  projectPath: string;
+  subProject?: string;
+  pattern: string;
+}
+
+export interface RunShellCommandArgs {
+  projectPath: string;
+  subProject?: string;
+  command: string;
 }
 
 export interface ListFilesArgs {
   projectPath: string;
   subProject?: string;
+  fields?: string[];
 }
 
 export type SymbolInfoResult =
@@ -35,16 +126,23 @@ export type SymbolInfoResult =
       name: string;
       file: string;
       loc: { line: number; column: number };
-      props?: PropData[] | ComponentInfoRenderDependency[];
+      props?: unknown[];
       in?: string;
     }
   | {
       type: "usage";
       kind: string;
+      name: string;
       in: string;
       file: string;
       loc: { line: number; column: number };
     };
+
+interface WsMessage {
+  type: string;
+  payload: unknown;
+  requestId?: string;
+}
 
 export class BackendServer {
   private mcpServer: Server;
@@ -488,7 +586,10 @@ export class BackendServer {
     this.mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
       try {
-        const result = await this.handleCallTool(name, (args as any) || {});
+        const result = await this.handleCallTool(
+          name,
+          (args as Record<string, unknown>) || {},
+        );
         return result;
       } catch (error: unknown) {
         const errorMessage =
@@ -537,7 +638,8 @@ export class BackendServer {
       }
 
       case "get_symbol_info": {
-        const { projectPath, subProject, query, strict } = args as any;
+        const { projectPath, subProject, query, strict } =
+          args as unknown as GetSymbolInfoArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findSymbol(
           resolvedPath,
@@ -558,7 +660,7 @@ export class BackendServer {
 
       case "get_symbol_usages": {
         const { projectPath, subProject, query, summaryOnly, strict } =
-          args as any;
+          args as unknown as GetSymbolUsagesArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findSymbolUsages(
           resolvedPath,
@@ -579,7 +681,8 @@ export class BackendServer {
       }
 
       case "find_files": {
-        const { projectPath, subProject, pattern } = args as any;
+        const { projectPath, subProject, pattern } =
+          args as unknown as FindFilesArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findFiles(
           resolvedPath,
@@ -598,7 +701,8 @@ export class BackendServer {
       }
 
       case "get_file_imports": {
-        const { projectPath, subProject, filePath } = args as any;
+        const { projectPath, subProject, filePath } =
+          args as unknown as GetFileImportsArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getFileImports(
           resolvedPath,
@@ -617,7 +721,8 @@ export class BackendServer {
       }
 
       case "get_project_tree": {
-        const { projectPath, subProject, maxDepth } = args as any;
+        const { projectPath, subProject, maxDepth } =
+          args as unknown as GetProjectTreeArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getProjectTree(
           resolvedPath,
@@ -649,7 +754,10 @@ export class BackendServer {
         }
 
         const files = Object.entries(project.graph.files);
-        let fileSummary: any[];
+        let fileSummary: {
+          path: string;
+          exports?: { name: string; kind: string }[];
+        }[];
 
         if (files.length > 100) {
           // Large project: return only paths to save tokens
@@ -688,7 +796,8 @@ export class BackendServer {
       }
 
       case "get_component_hierarchy": {
-        const { projectPath, subProject, componentName, depth } = args as any;
+        const { projectPath, subProject, componentName, depth } =
+          args as unknown as GetComponentHierarchyArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getComponentHierarchy(
           resolvedPath,
@@ -707,7 +816,8 @@ export class BackendServer {
       }
 
       case "get_symbol_location": {
-        const { projectPath, subProject, query } = args as any;
+        const { projectPath, subProject, query } =
+          args as unknown as GetSymbolLocationArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getSymbolLocation(
           resolvedPath,
@@ -725,7 +835,8 @@ export class BackendServer {
       }
 
       case "get_symbol_content": {
-        const { projectPath, subProject, query } = args as any;
+        const { projectPath, subProject, query } =
+          args as unknown as GetSymbolContentArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getSymbolContent(
           resolvedPath,
@@ -743,7 +854,8 @@ export class BackendServer {
       }
 
       case "add_label": {
-        const { projectPath, subProject, id, label } = args as any;
+        const { projectPath, subProject, id, label } =
+          args as unknown as AddLabelArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.addLabel(
           resolvedPath,
@@ -757,7 +869,7 @@ export class BackendServer {
       }
 
       case "list_labels": {
-        const { projectPath, subProject } = args as any;
+        const { projectPath, subProject } = args as unknown as ListLabelsArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getLabels(
           resolvedPath,
@@ -769,7 +881,8 @@ export class BackendServer {
       }
 
       case "search_by_label": {
-        const { projectPath, subProject, label } = args as any;
+        const { projectPath, subProject, label } =
+          args as unknown as SearchByLabelArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.findEntitiesByLabel(
           resolvedPath,
@@ -782,7 +895,8 @@ export class BackendServer {
       }
 
       case "list_directory": {
-        const { projectPath, subProject, dirPath } = args as any;
+        const { projectPath, subProject, dirPath } =
+          args as unknown as ListDirectoryArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.listDirectory(
           resolvedPath,
@@ -795,7 +909,8 @@ export class BackendServer {
       }
 
       case "get_file_outline": {
-        const { projectPath, subProject, filePath } = args as any;
+        const { projectPath, subProject, filePath } =
+          args as unknown as GetFileOutlineArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getFileOutline(
           resolvedPath,
@@ -813,7 +928,8 @@ export class BackendServer {
       }
 
       case "read_file": {
-        const { projectPath, subProject, filePath } = args as any;
+        const { projectPath, subProject, filePath } =
+          args as unknown as ReadFileArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.readFile(
           resolvedPath,
@@ -824,7 +940,8 @@ export class BackendServer {
       }
 
       case "grep_search": {
-        const { projectPath, subProject, pattern } = args as any;
+        const { projectPath, subProject, pattern } =
+          args as unknown as GrepSearchArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.grepSearch(
           resolvedPath,
@@ -837,7 +954,8 @@ export class BackendServer {
       }
 
       case "run_shell_command": {
-        const { projectPath, subProject, command } = args as any;
+        const { projectPath, subProject, command } =
+          args as unknown as RunShellCommandArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.runShellCommand(
           resolvedPath,
@@ -854,31 +972,41 @@ export class BackendServer {
     }
   }
 
-  private filterFields(data: any, fields?: string[]): any {
+  private filterFields<T>(data: T, fields?: string[]): T {
     if (!fields || !data) return data;
 
     if (Array.isArray(data)) {
-      return data.map((item) => this.filterFields(item, fields));
+      return data.map((item) =>
+        this.filterFields(item, fields),
+      ) as unknown as T;
     }
 
     if (typeof data !== "object") return data;
 
-    const filtered: any = {};
+    const filtered: Record<string, unknown> = {};
+    const obj = data as Record<string, unknown>;
     for (const field of fields) {
-      if (field in data) {
-        filtered[field] = data[field];
+      if (field in obj) {
+        filtered[field] = obj[field];
       }
     }
-    return filtered;
+    return filtered as unknown as T;
   }
 
-  private resolveProjectPath(projectPath: string, subProject?: string): string {
+  private resolveProjectPath(
+    projectPath: string,
+    _subProject?: string,
+  ): string {
     if (projectPath === "." || projectPath === "/" || !projectPath) {
-      const projects = (this.projectManager as any).projects;
+      const projects = (
+        this.projectManager as unknown as {
+          projects: Map<string, { projectPath: string }>;
+        }
+      ).projects;
       if (projects && projects.size > 0) {
         // Fallback to the first project in the map if a generic path is given
         const firstProject = projects.values().next().value;
-        return firstProject.projectPath;
+        return firstProject?.projectPath || projectPath;
       }
     }
     return projectPath;
@@ -889,8 +1017,11 @@ export class BackendServer {
       this.wss = new WebSocketServer({ port: this.port });
 
       this.wss.on("error", (error) => {
-        console.error(`WebSocket server error: ${error.message}`);
-        if ((error as any).code === "EADDRINUSE") {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error(`WebSocket server error: ${errorMessage}`);
+        const err = error as { code?: string };
+        if (err.code === "EADDRINUSE") {
           console.error(
             `Port ${this.port} is already in use. This instance will proceed without a WebSocket server.`,
           );
@@ -916,15 +1047,13 @@ export class BackendServer {
         ws.on("message", async (message) => {
           let currentRequestId: string | undefined;
           try {
-            const data = JSON.parse(message.toString()) as {
-              type: string;
-              payload: unknown;
-              requestId?: string;
-            };
+            const data = JSON.parse(message.toString()) as WsMessage;
             const { type, payload, requestId } = data;
             currentRequestId = requestId;
 
-            console.error(`Received WebSocket message: ${type} (Request: ${requestId || "none"})`);
+            console.error(
+              `Received WebSocket message: ${type} (Request: ${requestId || "none"})`,
+            );
 
             switch (type) {
               case "open_project": {
@@ -968,7 +1097,7 @@ export class BackendServer {
                   payload as {
                     projectPath: string;
                     subProject: string | undefined;
-                    positions: any;
+                    positions: unknown;
                     contextId?: string;
                   };
                 const success = await this.projectManager.updateGraphPosition(
@@ -989,7 +1118,7 @@ export class BackendServer {
               case "save_state": {
                 const { projectPath, state } = payload as {
                   projectPath: string;
-                  state: any;
+                  state: unknown;
                 };
                 const success = await this.projectManager.saveAppState(
                   projectPath,
@@ -1057,8 +1186,10 @@ export class BackendServer {
           }
         });
       });
-    } catch (error: any) {
-      console.error(`Failed to start WebSocket server: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error(`Failed to start WebSocket server: ${errorMessage}`);
     }
   }
 
