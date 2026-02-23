@@ -77,6 +77,7 @@ export default function FunctionDeclaration(
           contexts: [],
           dependencies: {},
           var: {},
+          children: {},
           loc,
           scope,
           effects: {},
@@ -98,6 +99,8 @@ export default function FunctionDeclaration(
           props: getProps(nodePath, undefined, componentId),
           effects: {},
           hooks: [],
+          children: {},
+          var: {},
         } as Omit<
           ComponentFileVarHook,
           "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
@@ -111,6 +114,8 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
+        children: {},
+        var: {},
       } as Omit<
         ComponentFileVarNormalFunction,
         "kind" | "file" | "id" | "var" | "components" | "hash"
@@ -130,6 +135,8 @@ export default function FunctionDeclaration(
             type: "function",
             loc,
             scope,
+            children: {},
+            var: {},
           } as Omit<
             ComponentFileVarNormalFunction,
             "kind" | "file" | "id" | "var" | "components" | "hash"

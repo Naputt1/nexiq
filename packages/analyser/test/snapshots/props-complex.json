@@ -38,13 +38,13 @@
           "name": "ComplexProps",
           "type": "named",
           "exportKind": "value",
-          "id": "475f220157c1b8f9"
+          "id": "c03f8e59d14c727c"
         }
       },
       "defaultExport": null,
       "tsTypes": {
-        "a962d7b45a0f56ae": {
-          "id": "a962d7b45a0f56ae",
+        "266c424aa179a4d6": {
+          "id": "266c424aa179a4d6",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -101,8 +101,8 @@
         }
       },
       "var": {
-        "475f220157c1b8f9": {
-          "id": "475f220157c1b8f9",
+        "c03f8e59d14c727c": {
+          "id": "c03f8e59d14c727c",
           "name": {
             "type": "identifier",
             "name": "ComplexProps",
@@ -115,7 +115,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "37ef8a3a73ac88d3",
+          "hash": "4f754af51d99495c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -123,8 +123,8 @@
             "column": 13
           },
           "var": {
-            "475f220157c1b8f9:ref:refX": {
-              "id": "475f220157c1b8f9:ref:refX",
+            "c03f8e59d14c727c:ref:refX": {
+              "id": "c03f8e59d14c727c:ref:refX",
               "name": {
                 "type": "identifier",
                 "name": "refX",
@@ -149,8 +149,8 @@
                 "name": "dfab3f6e914f770:prop:x"
               }
             },
-            "475f220157c1b8f9:state:stateX": {
-              "id": "475f220157c1b8f9:state:stateX",
+            "c03f8e59d14c727c:state:stateX": {
+              "id": "c03f8e59d14c727c:state:stateX",
               "name": {
                 "type": "identifier",
                 "name": "stateX",
@@ -171,8 +171,8 @@
               },
               "setter": "setStateX"
             },
-            "575944dc1a051d53": {
-              "id": "575944dc1a051d53",
+            "e09c3d5d651bb63e": {
+              "id": "e09c3d5d651bb63e",
               "name": {
                 "type": "identifier",
                 "name": "jsx@49:4",
@@ -217,7 +217,7 @@
             }
           },
           "return": {
-            "id": "575944dc1a051d53",
+            "id": "e09c3d5d651bb63e",
             "name": {
               "type": "identifier",
               "name": "jsx@49:4",
@@ -250,8 +250,22 @@
             "children": {},
             "srcId": "div"
           },
+          "children": {
+            "31a6c01d9836d24b": {
+              "id": "div",
+              "instanceId": "31a6c01d9836d24b",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 49,
+                "column": 4
+              },
+              "children": {}
+            }
+          },
           "states": [
-            "475f220157c1b8f9:state:stateX"
+            "c03f8e59d14c727c:state:stateX"
           ],
           "props": [
             {
@@ -301,8 +315,8 @@
           ],
           "hooks": [],
           "effects": {
-            "475f220157c1b8f9:effect:20:2": {
-              "id": "475f220157c1b8f9:effect:20:2",
+            "c03f8e59d14c727c:effect:20:2": {
+              "id": "c03f8e59d14c727c:effect:20:2",
               "scope": {
                 "start": {
                   "line": 20,
@@ -324,8 +338,8 @@
                 }
               ]
             },
-            "475f220157c1b8f9:effect:24:2": {
-              "id": "475f220157c1b8f9:effect:24:2",
+            "c03f8e59d14c727c:effect:24:2": {
+              "id": "c03f8e59d14c727c:effect:24:2",
               "scope": {
                 "start": {
                   "line": 24,
@@ -347,8 +361,8 @@
                 }
               ]
             },
-            "475f220157c1b8f9:effect:28:2": {
-              "id": "475f220157c1b8f9:effect:28:2",
+            "c03f8e59d14c727c:effect:28:2": {
+              "id": "c03f8e59d14c727c:effect:28:2",
               "scope": {
                 "start": {
                   "line": 28,
@@ -370,8 +384,8 @@
                 }
               ]
             },
-            "475f220157c1b8f9:effect:32:2": {
-              "id": "475f220157c1b8f9:effect:32:2",
+            "c03f8e59d14c727c:effect:32:2": {
+              "id": "c03f8e59d14c727c:effect:32:2",
               "scope": {
                 "start": {
                   "line": 32,
@@ -393,8 +407,8 @@
                 }
               ]
             },
-            "475f220157c1b8f9:effect:36:2": {
-              "id": "475f220157c1b8f9:effect:36:2",
+            "c03f8e59d14c727c:effect:36:2": {
+              "id": "c03f8e59d14c727c:effect:36:2",
               "scope": {
                 "start": {
                   "line": 36,
@@ -411,13 +425,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "475f220157c1b8f9:state:stateX",
+                  "id": "c03f8e59d14c727c:state:stateX",
                   "name": "stateX"
                 }
               ]
             },
-            "475f220157c1b8f9:effect:40:2": {
-              "id": "475f220157c1b8f9:effect:40:2",
+            "c03f8e59d14c727c:effect:40:2": {
+              "id": "c03f8e59d14c727c:effect:40:2",
               "scope": {
                 "start": {
                   "line": 40,
@@ -434,13 +448,13 @@
               },
               "reactDeps": [
                 {
-                  "id": "475f220157c1b8f9:ref:refX",
+                  "id": "c03f8e59d14c727c:ref:refX",
                   "name": "refX"
                 }
               ]
             },
-            "475f220157c1b8f9:effect:44:2": {
-              "id": "475f220157c1b8f9:effect:44:2",
+            "c03f8e59d14c727c:effect:44:2": {
+              "id": "c03f8e59d14c727c:effect:44:2",
               "scope": {
                 "start": {
                   "line": 44,
@@ -470,22 +484,22 @@
   },
   "edges": [
     {
-      "from": "475f220157c1b8f9",
-      "to": "575944dc1a051d53",
+      "from": "c03f8e59d14c727c",
+      "to": "e09c3d5d651bb63e",
       "label": "render"
     },
     {
       "from": "div",
-      "to": "475f220157c1b8f9",
+      "to": "c03f8e59d14c727c",
       "label": "render"
     },
     {
-      "from": "575944dc1a051d53",
+      "from": "e09c3d5d651bb63e",
       "to": "e6c632b61e964e1f",
       "label": "hook"
     },
     {
-      "from": "575944dc1a051d53",
+      "from": "e09c3d5d651bb63e",
       "to": "eaf06c6480b2cd11",
       "label": "hook"
     }

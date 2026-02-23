@@ -198,6 +198,7 @@ export interface ComponentFileVarBaseTypeFunction<
   scope: VariableScope;
   var: Record<string, ComponentFileVar>;
   return?: FunctionReturn | undefined;
+  children: Record<string, ComponentInfoRender>;
 }
 
 export interface ComponentFileVarBaseTypeData<
@@ -309,6 +310,7 @@ export type ComponentFile = {
   hash: string;
   import: Record<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
+  starExports: string[];
   defaultExport: string | null;
   tsTypes: Record<string, TypeDataDeclare>;
   var: Record<string, ComponentFileVar>;

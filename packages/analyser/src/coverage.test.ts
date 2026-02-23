@@ -257,6 +257,7 @@ describe("analyser coverage expansion", () => {
       scope: { start: { line: 1, column: 1 }, end: { line: 1, column: 10 } },
       var: {},
       dependencies: {},
+      children: {},
       return: undefined,
     } as ComponentFileVar;
     file.var["hook-id"] = {
@@ -278,6 +279,7 @@ describe("analyser coverage expansion", () => {
       props: [],
       effects: {},
       states: [],
+      children: {},
       return: undefined,
     } as ComponentFileVar;
     file.var["call-id"] = {

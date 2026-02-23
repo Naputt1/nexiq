@@ -197,7 +197,7 @@ export abstract class ReactFunctionVariable<
         this.resolveReactDefaultData(element);
       }
     } else if (defaultData.type === "literal-object") {
-      for (const prop of Object.values(defaultData.properties)) {
+      for (const prop of Object.values(defaultData.properties || {})) {
         this.resolveReactDefaultData(prop);
       }
     }
@@ -238,6 +238,7 @@ export abstract class ReactFunctionVariable<
       {
         id: id,
         dependencies: {},
+        children: {},
         ...memo,
       },
       this.file,
@@ -261,6 +262,7 @@ export abstract class ReactFunctionVariable<
       {
         id: id,
         dependencies: {},
+        children: {},
         ...callback,
       },
       this.file,
@@ -339,7 +341,7 @@ export abstract class ReactFunctionVariable<
         continue outer;
       }
 
-      const dependency = Object.values(this.dependencies).find(
+      const dependency = Object.values(this.dependencies || {}).find(
         (d) => d.name === dep.name,
       );
       if (dependency) {

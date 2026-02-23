@@ -3,6 +3,7 @@ import type {
   ComponentFileVarBaseTypeFunction,
   VarKind,
   FunctionReturn,
+  ComponentInfoRender,
 } from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
@@ -15,6 +16,7 @@ export abstract class BaseFunctionVariable<
   var: Scope;
   scope: VariableScope;
   return?: FunctionReturn | undefined;
+  children: Record<string, ComponentInfoRender>;
 
   constructor(
     options: Omit<
@@ -27,6 +29,7 @@ export abstract class BaseFunctionVariable<
     this.var = new Scope();
     this.scope = options.scope;
     this.return = options.return;
+    this.children = options.children || {};
   }
 
   public load(data: BaseFunctionVariable<TKind>) {
@@ -35,6 +38,7 @@ export abstract class BaseFunctionVariable<
     this.type = data.type;
     this.scope = data.scope;
     this.return = data.return;
+    this.children = data.children;
   }
 
   protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind> {
@@ -51,6 +55,7 @@ export abstract class BaseFunctionVariable<
       var: this.var.getData(),
       scope: this.scope,
       return: returnData,
+      children: this.children,
     };
   }
 
@@ -60,6 +65,7 @@ export abstract class BaseFunctionVariable<
       var: this.var.getData(),
       scope: this.scope,
       return: this.return,
+      children: this.children,
     };
   }
 }

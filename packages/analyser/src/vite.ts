@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { CallExpression, ObjectProperty } from "@babel/types";
@@ -80,4 +81,32 @@ export function getViteAliases(
   });
 
   return aliases;
+}
+
+export function getTsConfigAliases(dir: string): Record<string, string> {
+  const tsconfigPath = path.join(dir, "tsconfig.json");
+  if (!fs.existsSync(tsconfigPath)) {
+    return {};
+  }
+
+  try {
+    const code = fs.readFileSync(tsconfigPath, "utf-8");
+    // Simple JSON parse (might need to handle comments in real world)
+    const tsconfig = JSON.parse(code);
+    const paths = tsconfig?.compilerOptions?.paths;
+    if (!paths) return {};
+
+    const aliases: Record<string, string> = {};
+    for (const [key, value] of Object.entries(paths)) {
+      const aliasKey = key.replace("/*", "");
+      const replacement = (value as string[])[0]?.replace("/*", "");
+      if (aliasKey && replacement) {
+        aliases[aliasKey] = replacement;
+      }
+    }
+    return aliases;
+  } catch (e) {
+    console.warn("Failed to parse tsconfig.json", e);
+    return {};
+  }
 }

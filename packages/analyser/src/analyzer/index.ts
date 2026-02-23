@@ -1,6 +1,6 @@
 import { ComponentDB } from "../db/componentDB.js";
 import type { PackageJson } from "../db/packageJson.js";
-import { getViteAliases } from "../vite.js";
+import { getViteAliases, getTsConfigAliases } from "../vite.js";
 import fs from "fs";
 import path from "path";
 import { parseCode } from "./utils.js";
@@ -18,6 +18,7 @@ import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 import type { JsonData } from "shared";
 import { traverseFn } from "../utils/babel.js";
+import type { SqliteDB } from "../db/sqlite.js";
 
 function analyzeFiles(
   SRC_DIR: string,
@@ -25,11 +26,16 @@ function analyzeFiles(
   files: string[],
   packageJson: PackageJson,
   cacheData?: JsonData,
+  sqlite?: SqliteDB,
 ) {
   const componentDB = new ComponentDB({
     packageJson,
-    viteAliases: getViteAliases(viteConfigPath),
+    viteAliases: {
+      ...getViteAliases(viteConfigPath),
+      ...getTsConfigAliases(SRC_DIR),
+    },
     dir: SRC_DIR,
+    sqlite,
   });
 
   for (const fullfileName of files) {

@@ -17,25 +17,25 @@
           "name": "Test2",
           "type": "type",
           "exportKind": "type",
-          "id": "d8e6b73737ed336b"
+          "id": "7f99636109ead299"
         },
         "Test3": {
           "name": "Test3",
           "type": "type",
           "exportKind": "type",
-          "id": "8eb230baf04d154e"
+          "id": "6bec296411d9ed68"
         },
         "Child4": {
           "name": "Child4",
           "type": "type",
           "exportKind": "type",
-          "id": "e776935119c1d638"
+          "id": "dcf492560ff097d3"
         }
       },
       "defaultExport": null,
       "tsTypes": {
-        "d8e6b73737ed336b": {
-          "id": "d8e6b73737ed336b",
+        "7f99636109ead299": {
+          "id": "7f99636109ead299",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -57,8 +57,8 @@
             "column": 12
           }
         },
-        "8eb230baf04d154e": {
-          "id": "8eb230baf04d154e",
+        "6bec296411d9ed68": {
+          "id": "6bec296411d9ed68",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -134,8 +134,8 @@
             "column": 12
           }
         },
-        "e776935119c1d638": {
-          "id": "e776935119c1d638",
+        "dcf492560ff097d3": {
+          "id": "dcf492560ff097d3",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -212,37 +212,37 @@
           "name": "TypePropsVar",
           "type": "named",
           "exportKind": "value",
-          "id": "8138ea1421523344"
+          "id": "798772ab7346d97e"
         },
         "TypePropsVarFunction": {
           "name": "TypePropsVarFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "45d93b507f3cff36"
+          "id": "90e2b1081177c79d"
         },
         "TypePropsVarInline": {
           "name": "TypePropsVarInline",
           "type": "named",
           "exportKind": "value",
-          "id": "d7b08d33fffa91ec"
+          "id": "c6fb8be07af7c236"
         },
         "TypePropsVarInlineFunction": {
           "name": "TypePropsVarInlineFunction",
           "type": "named",
           "exportKind": "value",
-          "id": "307d2f98b6878b73"
+          "id": "80b1b60c7d127de5"
         },
         "TypePropsFunction": {
           "name": "TypePropsFunction",
           "type": "named",
           "exportKind": "component",
-          "id": "12bb1ce455bcb824"
+          "id": "f51adcb408401731"
         }
       },
       "defaultExport": null,
       "tsTypes": {
-        "9caecc2dc3595364": {
-          "id": "9caecc2dc3595364",
+        "b57dbcb8576b004b": {
+          "id": "b57dbcb8576b004b",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -261,8 +261,8 @@
             "column": 5
           }
         },
-        "b57b12c034f92fe5": {
-          "id": "b57b12c034f92fe5",
+        "e4bf78fed7667fe": {
+          "id": "e4bf78fed7667fe",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -334,12 +334,12 @@
               {
                 "type": "ref",
                 "refType": "named",
-                "name": "8eb230baf04d154e"
+                "name": "6bec296411d9ed68"
               },
               {
                 "type": "ref",
                 "refType": "named",
-                "name": "e776935119c1d638"
+                "name": "dcf492560ff097d3"
               }
             ]
           },
@@ -348,8 +348,8 @@
             "column": 5
           }
         },
-        "81d8a0a28c070c7": {
-          "id": "81d8a0a28c070c7",
+        "f7ced95f55e414b6": {
+          "id": "f7ced95f55e414b6",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -396,8 +396,8 @@
             "column": 5
           }
         },
-        "8a6e89ba852055ea": {
-          "id": "8a6e89ba852055ea",
+        "a35aba9b9c28985e": {
+          "id": "a35aba9b9c28985e",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -433,8 +433,8 @@
             "column": 10
           }
         },
-        "116661688627799b": {
-          "id": "116661688627799b",
+        "61e7cd474108d1a5": {
+          "id": "61e7cd474108d1a5",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -1056,7 +1056,7 @@
                     "constraint": {
                       "type": "ref",
                       "refType": "named",
-                      "name": "8a6e89ba852055ea"
+                      "name": "a35aba9b9c28985e"
                     },
                     "default": {
                       "type": "any"
@@ -1097,7 +1097,7 @@
             "column": 10
           },
           "extends": [
-            "8a6e89ba852055ea"
+            "a35aba9b9c28985e"
           ],
           "params": {
             "T": {
@@ -1105,7 +1105,7 @@
               "constraint": {
                 "type": "ref",
                 "refType": "named",
-                "name": "8a6e89ba852055ea"
+                "name": "a35aba9b9c28985e"
               },
               "default": {
                 "type": "any"
@@ -1122,8 +1122,8 @@
             }
           }
         },
-        "4cc327889e6992e4": {
-          "id": "4cc327889e6992e4",
+        "95df178b2f49947": {
+          "id": "95df178b2f49947",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1166,8 +1166,8 @@
             "column": 5
           }
         },
-        "5d6bcf4333f46aef": {
-          "id": "5d6bcf4333f46aef",
+        "a88ff2d9f69da604": {
+          "id": "a88ff2d9f69da604",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1205,8 +1205,8 @@
             "column": 5
           }
         },
-        "48cecb8b799b04de": {
-          "id": "48cecb8b799b04de",
+        "977873c45b021816": {
+          "id": "977873c45b021816",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1230,8 +1230,8 @@
             "column": 5
           }
         },
-        "5ef63a7f4d0c0777": {
-          "id": "5ef63a7f4d0c0777",
+        "51b85783ed340c13": {
+          "id": "51b85783ed340c13",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1258,8 +1258,8 @@
             "column": 5
           }
         },
-        "f71366eaab33b4c1": {
-          "id": "f71366eaab33b4c1",
+        "770c7cce8937ddc2": {
+          "id": "770c7cce8937ddc2",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1282,8 +1282,8 @@
             "column": 5
           }
         },
-        "bb96b0e950c6ddb4": {
-          "id": "bb96b0e950c6ddb4",
+        "d80331eb58c694f8": {
+          "id": "d80331eb58c694f8",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1307,8 +1307,8 @@
             "column": 5
           }
         },
-        "3323e65305301ed5": {
-          "id": "3323e65305301ed5",
+        "791834cc6835f78d": {
+          "id": "791834cc6835f78d",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1339,8 +1339,8 @@
             "column": 5
           }
         },
-        "67ab3156a7b11870": {
-          "id": "67ab3156a7b11870",
+        "448560a5731deb3b": {
+          "id": "448560a5731deb3b",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -1368,8 +1368,8 @@
             "column": 7
           }
         },
-        "df9069885e9ae51": {
-          "id": "df9069885e9ae51",
+        "e2c649b92ba9d565": {
+          "id": "e2c649b92ba9d565",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -1396,8 +1396,8 @@
         }
       },
       "var": {
-        "6a52b2c719c0f421": {
-          "id": "6a52b2c719c0f421",
+        "a9653880096e2e9e": {
+          "id": "a9653880096e2e9e",
           "name": {
             "type": "identifier",
             "name": "Test65",
@@ -1419,8 +1419,8 @@
           },
           "children": {}
         },
-        "8138ea1421523344": {
-          "id": "8138ea1421523344",
+        "798772ab7346d97e": {
+          "id": "798772ab7346d97e",
           "name": {
             "type": "identifier",
             "name": "TypePropsVar",
@@ -1433,7 +1433,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "cd987e7b9e571e9a",
+          "hash": "751c079b722e827",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1441,8 +1441,8 @@
             "column": 13
           },
           "var": {
-            "3297b7b0d8574328": {
-              "id": "3297b7b0d8574328",
+            "79394e5481368a60": {
+              "id": "79394e5481368a60",
               "name": {
                 "type": "identifier",
                 "name": "jsx@99:9",
@@ -1478,7 +1478,7 @@
             }
           },
           "return": {
-            "id": "3297b7b0d8574328",
+            "id": "79394e5481368a60",
             "name": {
               "type": "identifier",
               "name": "jsx@99:9",
@@ -1502,6 +1502,20 @@
             "children": {},
             "srcId": "div"
           },
+          "children": {
+            "81373ad94c58875b": {
+              "id": "div",
+              "instanceId": "81373ad94c58875b",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 99,
+                "column": 9
+              },
+              "children": {}
+            }
+          },
           "states": [],
           "props": [
             {
@@ -1520,11 +1534,11 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "b57b12c034f92fe5"
+            "name": "e4bf78fed7667fe"
           }
         },
-        "45d93b507f3cff36": {
-          "id": "45d93b507f3cff36",
+        "90e2b1081177c79d": {
+          "id": "90e2b1081177c79d",
           "name": {
             "type": "identifier",
             "name": "TypePropsVarFunction",
@@ -1537,7 +1551,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "a59c59784e1a7ec6",
+          "hash": "a82e1e9cfa1253b8",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1556,7 +1570,7 @@
             }
           },
           "return": {
-            "id": "4500183b586faeb0",
+            "id": "9940f4f1d42fd1ef",
             "name": {
               "type": "identifier",
               "name": "jsx@107:9",
@@ -1579,6 +1593,7 @@
             "props": [],
             "children": {}
           },
+          "children": {},
           "states": [],
           "props": [
             {
@@ -1611,11 +1626,11 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "116661688627799b"
+            "name": "61e7cd474108d1a5"
           }
         },
-        "4500183b586faeb0": {
-          "id": "4500183b586faeb0",
+        "9940f4f1d42fd1ef": {
+          "id": "9940f4f1d42fd1ef",
           "name": {
             "type": "identifier",
             "name": "jsx@107:9",
@@ -1638,8 +1653,8 @@
           "props": [],
           "children": {}
         },
-        "d7b08d33fffa91ec": {
-          "id": "d7b08d33fffa91ec",
+        "c6fb8be07af7c236": {
+          "id": "c6fb8be07af7c236",
           "name": {
             "type": "identifier",
             "name": "TypePropsVarInline",
@@ -1652,7 +1667,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "dcee231dd1560f55",
+          "hash": "af6d6a553d10b74c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1660,8 +1675,8 @@
             "column": 13
           },
           "var": {
-            "3e7b3bddfd75fcbe": {
-              "id": "3e7b3bddfd75fcbe",
+            "c4dfec0178753bab": {
+              "id": "c4dfec0178753bab",
               "name": {
                 "type": "identifier",
                 "name": "jsx@111:9",
@@ -1697,7 +1712,7 @@
             }
           },
           "return": {
-            "id": "3e7b3bddfd75fcbe",
+            "id": "c4dfec0178753bab",
             "name": {
               "type": "identifier",
               "name": "jsx@111:9",
@@ -1720,6 +1735,20 @@
             "props": [],
             "children": {},
             "srcId": "div"
+          },
+          "children": {
+            "ea9234f34f6d0d34": {
+              "id": "div",
+              "instanceId": "ea9234f34f6d0d34",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 111,
+                "column": 9
+              },
+              "children": {}
+            }
           },
           "states": [],
           "props": [
@@ -1746,11 +1775,11 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "8a6e89ba852055ea"
+            "name": "a35aba9b9c28985e"
           }
         },
-        "307d2f98b6878b73": {
-          "id": "307d2f98b6878b73",
+        "80b1b60c7d127de5": {
+          "id": "80b1b60c7d127de5",
           "name": {
             "type": "identifier",
             "name": "TypePropsVarInlineFunction",
@@ -1763,7 +1792,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "8d43c2a366d9c23b",
+          "hash": "c1bb1693a2fc3115",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1782,7 +1811,7 @@
             }
           },
           "return": {
-            "id": "fe35cb95145430fa",
+            "id": "918ef0981d4f09e2",
             "name": {
               "type": "identifier",
               "name": "jsx@116:4",
@@ -1797,12 +1826,12 @@
             "file": "/src/type.tsx",
             "hash": "bdc5f2c4316790b9",
             "dependencies": {
-              "ac8088d542282d4a": {
-                "id": "ac8088d542282d4a",
+              "7d030f0ccdfbdd22": {
+                "id": "7d030f0ccdfbdd22",
                 "name": "jsx@117:6"
               },
-              "23c62eef57ece3d8": {
-                "id": "23c62eef57ece3d8",
+              "cdefa43c352c036c": {
+                "id": "cdefa43c352c036c",
                 "name": "jsx@118:6"
               }
             },
@@ -1814,6 +1843,7 @@
             "props": [],
             "children": {}
           },
+          "children": {},
           "states": [],
           "props": [
             {
@@ -1839,11 +1869,11 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "81d8a0a28c070c7"
+            "name": "f7ced95f55e414b6"
           }
         },
-        "fe35cb95145430fa": {
-          "id": "fe35cb95145430fa",
+        "918ef0981d4f09e2": {
+          "id": "918ef0981d4f09e2",
           "name": {
             "type": "identifier",
             "name": "jsx@116:4",
@@ -1858,12 +1888,12 @@
           "file": "/src/type.tsx",
           "hash": "bdc5f2c4316790b9",
           "dependencies": {
-            "ac8088d542282d4a": {
-              "id": "ac8088d542282d4a",
+            "7d030f0ccdfbdd22": {
+              "id": "7d030f0ccdfbdd22",
               "name": "jsx@117:6"
             },
-            "23c62eef57ece3d8": {
-              "id": "23c62eef57ece3d8",
+            "cdefa43c352c036c": {
+              "id": "cdefa43c352c036c",
               "name": "jsx@118:6"
             }
           },
@@ -1875,8 +1905,8 @@
           "props": [],
           "children": {}
         },
-        "ac8088d542282d4a": {
-          "id": "ac8088d542282d4a",
+        "7d030f0ccdfbdd22": {
+          "id": "7d030f0ccdfbdd22",
           "name": {
             "type": "identifier",
             "name": "jsx@117:6",
@@ -1904,8 +1934,8 @@
           "props": [],
           "children": {}
         },
-        "23c62eef57ece3d8": {
-          "id": "23c62eef57ece3d8",
+        "cdefa43c352c036c": {
+          "id": "cdefa43c352c036c",
           "name": {
             "type": "identifier",
             "name": "jsx@118:6",
@@ -1920,8 +1950,8 @@
           "file": "/src/type.tsx",
           "hash": "817d0d14a6d5f02f",
           "dependencies": {
-            "b0428f53c3c46096": {
-              "id": "b0428f53c3c46096",
+            "b5a7b19a0b8e3afb": {
+              "id": "b5a7b19a0b8e3afb",
               "name": "jsx@120:10"
             }
           },
@@ -1933,8 +1963,8 @@
           "props": [],
           "children": {}
         },
-        "b0428f53c3c46096": {
-          "id": "b0428f53c3c46096",
+        "b5a7b19a0b8e3afb": {
+          "id": "b5a7b19a0b8e3afb",
           "name": {
             "type": "identifier",
             "name": "jsx@120:10",
@@ -1972,8 +2002,8 @@
           ],
           "children": {}
         },
-        "12bb1ce455bcb824": {
-          "id": "12bb1ce455bcb824",
+        "f51adcb408401731": {
+          "id": "f51adcb408401731",
           "name": {
             "type": "identifier",
             "name": "TypePropsFunction",
@@ -1986,15 +2016,15 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "77dace6e6ec27a37",
+          "hash": "2af74146a0ad1967",
           "dependencies": {},
           "loc": {
             "line": 127,
             "column": 16
           },
           "var": {
-            "999d4e3e365540be": {
-              "id": "999d4e3e365540be",
+            "5266b90ad0960d7a": {
+              "id": "5266b90ad0960d7a",
               "name": {
                 "type": "identifier",
                 "name": "jsx@129:4",
@@ -2009,12 +2039,12 @@
               "file": "/src/type.tsx",
               "hash": "32f35d5522f80aaa",
               "dependencies": {
-                "fb2aa535c3a3c86f": {
-                  "id": "fb2aa535c3a3c86f",
+                "7c87567ccdebe7c0": {
+                  "id": "7c87567ccdebe7c0",
                   "name": "jsx@130:6"
                 },
-                "2faf99e39fab5b88": {
-                  "id": "2faf99e39fab5b88",
+                "ec6b21da53b4136e": {
+                  "id": "ec6b21da53b4136e",
                   "name": "jsx@131:6"
                 }
               },
@@ -2078,8 +2108,8 @@
               },
               "srcId": "div"
             },
-            "fb2aa535c3a3c86f": {
-              "id": "fb2aa535c3a3c86f",
+            "7c87567ccdebe7c0": {
+              "id": "7c87567ccdebe7c0",
               "name": {
                 "type": "identifier",
                 "name": "jsx@130:6",
@@ -2108,8 +2138,8 @@
               "children": {},
               "srcId": "h1"
             },
-            "2faf99e39fab5b88": {
-              "id": "2faf99e39fab5b88",
+            "ec6b21da53b4136e": {
+              "id": "ec6b21da53b4136e",
               "name": {
                 "type": "identifier",
                 "name": "jsx@131:6",
@@ -2124,8 +2154,8 @@
               "file": "/src/type.tsx",
               "hash": "11a8bd1fb1c1a129",
               "dependencies": {
-                "f69c2b826620248f": {
-                  "id": "f69c2b826620248f",
+                "6ca55ce7850a464": {
+                  "id": "6ca55ce7850a464",
                   "name": "jsx@133:10"
                 }
               },
@@ -2162,8 +2192,8 @@
               },
               "srcId": "ul"
             },
-            "f69c2b826620248f": {
-              "id": "f69c2b826620248f",
+            "6ca55ce7850a464": {
+              "id": "6ca55ce7850a464",
               "name": {
                 "type": "identifier",
                 "name": "jsx@133:10",
@@ -2214,7 +2244,7 @@
             }
           },
           "return": {
-            "id": "999d4e3e365540be",
+            "id": "5266b90ad0960d7a",
             "name": {
               "type": "identifier",
               "name": "jsx@129:4",
@@ -2229,12 +2259,12 @@
             "file": "/src/type.tsx",
             "hash": "32f35d5522f80aaa",
             "dependencies": {
-              "fb2aa535c3a3c86f": {
-                "id": "fb2aa535c3a3c86f",
+              "7c87567ccdebe7c0": {
+                "id": "7c87567ccdebe7c0",
                 "name": "jsx@130:6"
               },
-              "2faf99e39fab5b88": {
-                "id": "2faf99e39fab5b88",
+              "ec6b21da53b4136e": {
+                "id": "ec6b21da53b4136e",
                 "name": "jsx@131:6"
               }
             },
@@ -2298,6 +2328,71 @@
             },
             "srcId": "div"
           },
+          "children": {
+            "7756d56afe362dbc": {
+              "id": "div",
+              "instanceId": "7756d56afe362dbc",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 129,
+                "column": 4
+              },
+              "children": {
+                "e49f0cca78542db5": {
+                  "id": "h1",
+                  "instanceId": "e49f0cca78542db5",
+                  "tag": "h1",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 130,
+                    "column": 6
+                  },
+                  "parentId": "7756d56afe362dbc",
+                  "children": {}
+                },
+                "ab2d7304166d1ca4": {
+                  "id": "ul",
+                  "instanceId": "ab2d7304166d1ca4",
+                  "tag": "ul",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 131,
+                    "column": 6
+                  },
+                  "parentId": "7756d56afe362dbc",
+                  "children": {
+                    "c3533f70d792a91e": {
+                      "id": "li",
+                      "instanceId": "c3533f70d792a91e",
+                      "tag": "li",
+                      "dependencies": [
+                        {
+                          "id": "bbea0d63a05165e3",
+                          "name": "key",
+                          "value": {
+                            "type": "ref",
+                            "refType": "named",
+                            "name": "item"
+                          }
+                        }
+                      ],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 133,
+                        "column": 10
+                      },
+                      "parentId": "ab2d7304166d1ca4",
+                      "children": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
           "states": [],
           "props": [
             {
@@ -2353,8 +2448,8 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "5d40439caddb84f4": {
-          "id": "5d40439caddb84f4",
+        "5453275af356e1ca": {
+          "id": "5453275af356e1ca",
           "name": {
             "type": "identifier",
             "name": "jsx@7:2",
@@ -2369,8 +2464,8 @@
           "file": "/src/main.tsx",
           "hash": "1bfcf58bf698b4e6",
           "dependencies": {
-            "68440d3db0f83d40": {
-              "id": "68440d3db0f83d40",
+            "d28ef55e6ceebff3": {
+              "id": "d28ef55e6ceebff3",
               "name": "jsx@8:4"
             }
           },
@@ -2382,8 +2477,8 @@
           "props": [],
           "children": {}
         },
-        "68440d3db0f83d40": {
-          "id": "68440d3db0f83d40",
+        "d28ef55e6ceebff3": {
+          "id": "d28ef55e6ceebff3",
           "name": {
             "type": "identifier",
             "name": "jsx@8:4",
@@ -2425,14 +2520,14 @@
           "name": "DestructuringProps",
           "type": "named",
           "exportKind": "value",
-          "id": "fc5afc13ded24662"
+          "id": "1259634e1eafe1c6"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "fc5afc13ded24662": {
-          "id": "fc5afc13ded24662",
+        "1259634e1eafe1c6": {
+          "id": "1259634e1eafe1c6",
           "name": {
             "type": "identifier",
             "name": "DestructuringProps",
@@ -2445,7 +2540,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "f748976b7c5263e3",
+          "hash": "a5f0bcc8df242d06",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2453,8 +2548,8 @@
             "column": 13
           },
           "var": {
-            "2b2bdf5334ef1587": {
-              "id": "2b2bdf5334ef1587",
+            "36a5eedc2c9a474f": {
+              "id": "36a5eedc2c9a474f",
               "name": {
                 "type": "identifier",
                 "name": "jsx@11:4",
@@ -2469,12 +2564,12 @@
               "file": "/src/Destructuring.tsx",
               "hash": "6ad187f5d7c32d89",
               "dependencies": {
-                "aad3024e086d54e4": {
-                  "id": "aad3024e086d54e4",
+                "19894f3b26c9eada": {
+                  "id": "19894f3b26c9eada",
                   "name": "jsx@12:6"
                 },
-                "fca3de61d96b2d55": {
-                  "id": "fca3de61d96b2d55",
+                "1667bf63d4d9490f": {
+                  "id": "1667bf63d4d9490f",
                   "name": "jsx@13:6"
                 }
               },
@@ -2538,8 +2633,8 @@
               },
               "srcId": "div"
             },
-            "aad3024e086d54e4": {
-              "id": "aad3024e086d54e4",
+            "19894f3b26c9eada": {
+              "id": "19894f3b26c9eada",
               "name": {
                 "type": "identifier",
                 "name": "jsx@12:6",
@@ -2568,8 +2663,8 @@
               "children": {},
               "srcId": "h1"
             },
-            "fca3de61d96b2d55": {
-              "id": "fca3de61d96b2d55",
+            "1667bf63d4d9490f": {
+              "id": "1667bf63d4d9490f",
               "name": {
                 "type": "identifier",
                 "name": "jsx@13:6",
@@ -2584,8 +2679,8 @@
               "file": "/src/Destructuring.tsx",
               "hash": "58ab594bfafaa1e7",
               "dependencies": {
-                "7ce19eba8ffe0cf7": {
-                  "id": "7ce19eba8ffe0cf7",
+                "141da6f026920c77": {
+                  "id": "141da6f026920c77",
                   "name": "jsx@15:10"
                 }
               },
@@ -2622,8 +2717,8 @@
               },
               "srcId": "ul"
             },
-            "7ce19eba8ffe0cf7": {
-              "id": "7ce19eba8ffe0cf7",
+            "141da6f026920c77": {
+              "id": "141da6f026920c77",
               "name": {
                 "type": "identifier",
                 "name": "jsx@15:10",
@@ -2674,7 +2769,7 @@
             }
           },
           "return": {
-            "id": "2b2bdf5334ef1587",
+            "id": "36a5eedc2c9a474f",
             "name": {
               "type": "identifier",
               "name": "jsx@11:4",
@@ -2689,12 +2784,12 @@
             "file": "/src/Destructuring.tsx",
             "hash": "6ad187f5d7c32d89",
             "dependencies": {
-              "aad3024e086d54e4": {
-                "id": "aad3024e086d54e4",
+              "19894f3b26c9eada": {
+                "id": "19894f3b26c9eada",
                 "name": "jsx@12:6"
               },
-              "fca3de61d96b2d55": {
-                "id": "fca3de61d96b2d55",
+              "1667bf63d4d9490f": {
+                "id": "1667bf63d4d9490f",
                 "name": "jsx@13:6"
               }
             },
@@ -2757,6 +2852,71 @@
               }
             },
             "srcId": "div"
+          },
+          "children": {
+            "72e3e3ab26c64a13": {
+              "id": "div",
+              "instanceId": "72e3e3ab26c64a13",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 11,
+                "column": 4
+              },
+              "children": {
+                "12fbddea3d437031": {
+                  "id": "h1",
+                  "instanceId": "12fbddea3d437031",
+                  "tag": "h1",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 12,
+                    "column": 6
+                  },
+                  "parentId": "72e3e3ab26c64a13",
+                  "children": {}
+                },
+                "5ddf8ceab055664e": {
+                  "id": "ul",
+                  "instanceId": "5ddf8ceab055664e",
+                  "tag": "ul",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 13,
+                    "column": 6
+                  },
+                  "parentId": "72e3e3ab26c64a13",
+                  "children": {
+                    "2f804de73b26b9af": {
+                      "id": "li",
+                      "instanceId": "2f804de73b26b9af",
+                      "tag": "li",
+                      "dependencies": [
+                        {
+                          "id": "bbea0d63a05165e3",
+                          "name": "key",
+                          "value": {
+                            "type": "ref",
+                            "refType": "named",
+                            "name": "item"
+                          }
+                        }
+                      ],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 15,
+                        "column": 10
+                      },
+                      "parentId": "5ddf8ceab055664e",
+                      "children": {}
+                    }
+                  }
+                }
+              }
+            }
           },
           "states": [],
           "props": [
@@ -2843,14 +3003,14 @@
           "name": "App",
           "type": "named",
           "exportKind": "component",
-          "id": "720e9756d239e21b"
+          "id": "311c554b828f67a5"
         }
       },
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "720e9756d239e21b": {
-          "id": "720e9756d239e21b",
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
           "name": {
             "type": "identifier",
             "name": "App",
@@ -2863,15 +3023,15 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "15cf149b202f7da4",
+          "hash": "531bd9a5ae207d97",
           "dependencies": {},
           "loc": {
             "line": 4,
             "column": 16
           },
           "var": {
-            "2072264802bd4b5f": {
-              "id": "2072264802bd4b5f",
+            "5fa4c0c2a96eddec": {
+              "id": "5fa4c0c2a96eddec",
               "name": {
                 "type": "identifier",
                 "name": "jsx@6:4",
@@ -2884,10 +3044,10 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "6775550f5c3713ed",
+              "hash": "52166825c0edd823",
               "dependencies": {
-                "dc5e7a6dd4694804": {
-                  "id": "dc5e7a6dd4694804",
+                "24b99651629c6aff": {
+                  "id": "24b99651629c6aff",
                   "name": "jsx@7:6"
                 }
               },
@@ -2899,7 +3059,7 @@
               "props": [],
               "children": {
                 "65c6d11f0aabf6aa": {
-                  "id": "fc5afc13ded24662",
+                  "id": "1259634e1eafe1c6",
                   "instanceId": "65c6d11f0aabf6aa",
                   "tag": "DestructuringProps",
                   "dependencies": [
@@ -2949,8 +3109,8 @@
               },
               "srcId": "div"
             },
-            "dc5e7a6dd4694804": {
-              "id": "dc5e7a6dd4694804",
+            "24b99651629c6aff": {
+              "id": "24b99651629c6aff",
               "name": {
                 "type": "identifier",
                 "name": "jsx@7:6",
@@ -2963,7 +3123,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "14ae92bd085d35ab",
+              "hash": "755adb0073f668b0",
               "dependencies": {},
               "loc": {
                 "line": 7,
@@ -3007,7 +3167,7 @@
                 }
               ],
               "children": {},
-              "srcId": "fc5afc13ded24662"
+              "srcId": "1259634e1eafe1c6"
             }
           },
           "scope": {
@@ -3021,7 +3181,7 @@
             }
           },
           "return": {
-            "id": "2072264802bd4b5f",
+            "id": "5fa4c0c2a96eddec",
             "name": {
               "type": "identifier",
               "name": "jsx@6:4",
@@ -3034,10 +3194,10 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/App.tsx",
-            "hash": "6775550f5c3713ed",
+            "hash": "52166825c0edd823",
             "dependencies": {
-              "dc5e7a6dd4694804": {
-                "id": "dc5e7a6dd4694804",
+              "24b99651629c6aff": {
+                "id": "24b99651629c6aff",
                 "name": "jsx@7:6"
               }
             },
@@ -3049,7 +3209,7 @@
             "props": [],
             "children": {
               "65c6d11f0aabf6aa": {
-                "id": "fc5afc13ded24662",
+                "id": "1259634e1eafe1c6",
                 "instanceId": "65c6d11f0aabf6aa",
                 "tag": "DestructuringProps",
                 "dependencies": [
@@ -3099,6 +3259,69 @@
             },
             "srcId": "div"
           },
+          "children": {
+            "7a5d1a93b9f18f59": {
+              "id": "div",
+              "instanceId": "7a5d1a93b9f18f59",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 6,
+                "column": 4
+              },
+              "children": {
+                "65c6d11f0aabf6aa": {
+                  "id": "1259634e1eafe1c6",
+                  "instanceId": "65c6d11f0aabf6aa",
+                  "tag": "DestructuringProps",
+                  "dependencies": [
+                    {
+                      "id": "96050a97f611a0d5",
+                      "name": "title",
+                      "value": {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "World"
+                        }
+                      }
+                    },
+                    {
+                      "id": "7afe194e60baa1f8",
+                      "name": "items",
+                      "value": {
+                        "type": "literal-array",
+                        "elements": [
+                          {
+                            "type": "literal-type",
+                            "literal": {
+                              "type": "string",
+                              "value": "a"
+                            }
+                          },
+                          {
+                            "type": "literal-type",
+                            "literal": {
+                              "type": "string",
+                              "value": "b"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 7,
+                    "column": 6
+                  },
+                  "parentId": "7a5d1a93b9f18f59",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "props": [],
           "hooks": [],
@@ -3112,223 +3335,223 @@
   },
   "edges": [
     {
-      "from": "8138ea1421523344",
-      "to": "3297b7b0d8574328",
+      "from": "798772ab7346d97e",
+      "to": "79394e5481368a60",
       "label": "render"
     },
     {
-      "from": "d7b08d33fffa91ec",
-      "to": "3e7b3bddfd75fcbe",
+      "from": "c6fb8be07af7c236",
+      "to": "c4dfec0178753bab",
       "label": "render"
     },
     {
-      "from": "12bb1ce455bcb824",
-      "to": "999d4e3e365540be",
+      "from": "f51adcb408401731",
+      "to": "5266b90ad0960d7a",
       "label": "render"
     },
     {
-      "from": "12bb1ce455bcb824",
-      "to": "fb2aa535c3a3c86f",
+      "from": "f51adcb408401731",
+      "to": "7c87567ccdebe7c0",
       "label": "render"
     },
     {
-      "from": "12bb1ce455bcb824",
-      "to": "2faf99e39fab5b88",
+      "from": "f51adcb408401731",
+      "to": "ec6b21da53b4136e",
       "label": "render"
     },
     {
-      "from": "12bb1ce455bcb824",
-      "to": "f69c2b826620248f",
+      "from": "f51adcb408401731",
+      "to": "6ca55ce7850a464",
       "label": "render"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "2b2bdf5334ef1587",
+      "from": "1259634e1eafe1c6",
+      "to": "36a5eedc2c9a474f",
       "label": "render"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "aad3024e086d54e4",
+      "from": "1259634e1eafe1c6",
+      "to": "19894f3b26c9eada",
       "label": "render"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "fca3de61d96b2d55",
+      "from": "1259634e1eafe1c6",
+      "to": "1667bf63d4d9490f",
       "label": "render"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "7ce19eba8ffe0cf7",
+      "from": "1259634e1eafe1c6",
+      "to": "141da6f026920c77",
       "label": "render"
     },
     {
-      "from": "720e9756d239e21b",
-      "to": "2072264802bd4b5f",
+      "from": "311c554b828f67a5",
+      "to": "5fa4c0c2a96eddec",
       "label": "render"
     },
     {
-      "from": "720e9756d239e21b",
-      "to": "dc5e7a6dd4694804",
-      "label": "render"
-    },
-    {
-      "from": "div",
-      "to": "8138ea1421523344",
+      "from": "311c554b828f67a5",
+      "to": "24b99651629c6aff",
       "label": "render"
     },
     {
       "from": "div",
-      "to": "d7b08d33fffa91ec",
+      "to": "798772ab7346d97e",
       "label": "render"
     },
     {
       "from": "div",
-      "to": "12bb1ce455bcb824",
+      "to": "c6fb8be07af7c236",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
       "from": "h1",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
       "from": "ul",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
       "from": "li",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
-      "from": "999d4e3e365540be",
-      "to": "fb2aa535c3a3c86f",
+      "from": "5266b90ad0960d7a",
+      "to": "7c87567ccdebe7c0",
       "label": "hook"
     },
     {
-      "from": "999d4e3e365540be",
-      "to": "2faf99e39fab5b88",
+      "from": "5266b90ad0960d7a",
+      "to": "ec6b21da53b4136e",
       "label": "hook"
     },
     {
       "from": "h1",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
-      "from": "fb2aa535c3a3c86f",
+      "from": "7c87567ccdebe7c0",
       "to": "96050a97f611a0d5",
       "label": "hook"
     },
     {
       "from": "ul",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
       "from": "li",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
-      "from": "2faf99e39fab5b88",
-      "to": "f69c2b826620248f",
+      "from": "ec6b21da53b4136e",
+      "to": "6ca55ce7850a464",
       "label": "hook"
     },
     {
       "from": "li",
-      "to": "12bb1ce455bcb824",
+      "to": "f51adcb408401731",
       "label": "render"
     },
     {
-      "from": "f69c2b826620248f",
+      "from": "6ca55ce7850a464",
       "to": "6ca8f7b0f03f9e41",
       "label": "hook"
     },
     {
       "from": "div",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
       "from": "h1",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
       "from": "ul",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
       "from": "li",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
-      "from": "2b2bdf5334ef1587",
-      "to": "aad3024e086d54e4",
+      "from": "36a5eedc2c9a474f",
+      "to": "19894f3b26c9eada",
       "label": "hook"
     },
     {
-      "from": "2b2bdf5334ef1587",
-      "to": "fca3de61d96b2d55",
+      "from": "36a5eedc2c9a474f",
+      "to": "1667bf63d4d9490f",
       "label": "hook"
     },
     {
       "from": "h1",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
-      "from": "aad3024e086d54e4",
+      "from": "19894f3b26c9eada",
       "to": "96050a97f611a0d5",
       "label": "hook"
     },
     {
       "from": "ul",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
       "from": "li",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
-      "from": "fca3de61d96b2d55",
-      "to": "7ce19eba8ffe0cf7",
+      "from": "1667bf63d4d9490f",
+      "to": "141da6f026920c77",
       "label": "hook"
     },
     {
       "from": "li",
-      "to": "fc5afc13ded24662",
+      "to": "1259634e1eafe1c6",
       "label": "render"
     },
     {
-      "from": "7ce19eba8ffe0cf7",
+      "from": "141da6f026920c77",
       "to": "6ca8f7b0f03f9e41",
       "label": "hook"
     },
     {
       "from": "div",
-      "to": "720e9756d239e21b",
+      "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "720e9756d239e21b",
+      "from": "1259634e1eafe1c6",
+      "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "2072264802bd4b5f",
-      "to": "dc5e7a6dd4694804",
+      "from": "5fa4c0c2a96eddec",
+      "to": "24b99651629c6aff",
       "label": "hook"
     },
     {
-      "from": "fc5afc13ded24662",
-      "to": "720e9756d239e21b",
+      "from": "1259634e1eafe1c6",
+      "to": "311c554b828f67a5",
       "label": "render"
     }
   ]
