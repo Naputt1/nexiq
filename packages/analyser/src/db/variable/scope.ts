@@ -18,7 +18,7 @@ export class Scope {
   ) {}
 
   public initPrevIds(vars: Record<string, ComponentFileVar>) {
-    for (const v of Object.values(vars)) {
+    for (const v of Object.values(vars || {})) {
       if (v.name && v.id) {
         const nameKey = getVariableNameKey(v.name);
         this.prevIds.set(nameKey, v.id);

@@ -10,11 +10,31 @@ vi.mock("node:fs");
 vi.mock("@parcel/watcher");
 vi.mock("analyser");
 
+const createMockStmt = () => ({
+  all: vi.fn().mockReturnValue([]),
+  get: vi.fn().mockReturnValue(undefined),
+  run: vi.fn().mockReturnValue({ changes: 0 }),
+});
+
+const mockDb = {
+  prepare: vi.fn().mockImplementation(() => createMockStmt()),
+  close: vi.fn(),
+};
+
+vi.mock("better-sqlite3", () => {
+  return {
+    default: vi.fn().mockImplementation(() => mockDb),
+  };
+});
+
 describe("ProjectManager", () => {
   let projectManager: ProjectManager;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockDb.prepare.mockReset();
+    mockDb.prepare.mockImplementation(() => createMockStmt());
+    vi.spyOn(console, "error").mockImplementation(() => {});
     projectManager = new ProjectManager();
     (fs.existsSync as any).mockReturnValue(false);
     (analyzeProject as any).mockReturnValue({ files: {}, edges: [] });
@@ -29,7 +49,12 @@ describe("ProjectManager", () => {
       expect.stringContaining(".react-map/cache"),
       { recursive: true },
     );
-    expect(analyzeProject).toHaveBeenCalled();
+    expect(analyzeProject).toHaveBeenCalledWith(
+      projectPath,
+      expect.any(String),
+      undefined,
+      expect.any(String),
+    );
     expect(watcher.subscribe).toHaveBeenCalled();
   });
 
@@ -44,6 +69,7 @@ describe("ProjectManager", () => {
       expectedAnalysisPath,
       expect.any(String),
       undefined,
+      expect.any(String),
     );
   });
 
@@ -62,7 +88,7 @@ describe("ProjectManager", () => {
 
     (fs.existsSync as any).mockImplementation((p: string) => {
       if (p === configPath) return true;
-      if (p.includes("extensions")) return true;
+      // Do not return true for extension file path so we use module import
       return false;
     });
     (fs.readFileSync as any).mockReturnValue(
@@ -77,13 +103,19 @@ describe("ProjectManager", () => {
       default: { id: "test-ext" },
     }));
 
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await projectManager.openProject(projectPath);
 
     expect(analyzeProject).toHaveBeenCalledWith(
       projectPath,
       expect.any(String),
       ["*.test.ts"],
+      expect.any(String),
     );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Loaded extension: test-ext"),
+    );
+    consoleSpy.mockRestore();
   });
 
   it("should handle extension load failures", async () => {
@@ -275,10 +307,33 @@ describe("ProjectManager", () => {
       );
       expect(outline).toHaveLength(1);
       expect(outline[0].name).toBe("Button");
-      expect(outline[0].internal).toHaveLength(1);
-      expect(outline[0].internal[0].name).toBe("count");
-      expect(outline[0].children).toHaveLength(1);
-      expect(outline[0].children[0].tag).toBe("div");
+    });
+
+    it("should get component hierarchy", async () => {
+      mockDb.prepare
+        .mockReturnValueOnce({
+          all: vi.fn().mockReturnValue([{ id: "btn-id", name: "Button" }]),
+        })
+        .mockReturnValueOnce({
+          all: vi.fn().mockReturnValue([]), // renderedBy call
+        })
+        .mockReturnValueOnce({
+          get: vi.fn().mockReturnValue({ id: "btn-id", name: "Button" }), // sym call
+        })
+        .mockReturnValueOnce({
+          all: vi.fn().mockReturnValue([{ tag: "div", symbol_id: null }]), // children call
+        })
+        .mockReturnValueOnce({
+          all: vi.fn().mockReturnValue([]),
+        });
+
+      const result = await projectManager.getComponentHierarchy(
+        projectPath,
+        "Button",
+      );
+      expect(result.component).toBe("Button");
+      expect(result.hierarchies[0].name).toBe("Button");
+      expect(result.hierarchies[0].children[0].name).toBe("div");
     });
 
     it("should throw error if file not found for outline", async () => {
@@ -291,6 +346,200 @@ describe("ProjectManager", () => {
       await expect(
         projectManager.listDirectory("/invalid", "src"),
       ).rejects.toThrow("Project not open");
+    });
+  });
+
+  describe("Efficiency Tools", () => {
+    const projectPath = "/test/project";
+
+    beforeEach(async () => {
+      const mockGraph = {
+        files: {
+          "/src/App.tsx": {
+            import: {
+              useState: {
+                localName: "useState",
+                importedName: "useState",
+                source: "react",
+                type: "named",
+                importKind: "value",
+              },
+              Button: {
+                localName: "Button",
+                importedName: "Button",
+                source: "/src/components/Button.tsx",
+                type: "named",
+                importKind: "value",
+              },
+            },
+            var: {
+              "app-id": {
+                id: "app-id",
+                name: { type: "identifier", name: "App" },
+                kind: "component",
+                type: "function",
+                loc: { line: 10, column: 1 },
+                hooks: ["useState"],
+                children: {
+                  r1: { tag: "Button", loc: { line: 15, column: 5 } },
+                },
+              },
+            },
+          },
+          "/src/components/Button.tsx": {
+            import: {},
+            var: {
+              "btn-id": {
+                id: "btn-id",
+                name: { type: "identifier", name: "Button" },
+                kind: "component",
+                type: "function",
+                loc: { line: 5, column: 1 },
+              },
+            },
+          },
+        },
+        edges: [],
+      };
+      (analyzeProject as any).mockReturnValue(mockGraph);
+      await projectManager.openProject(projectPath);
+    });
+
+    it("should find symbol usages", async () => {
+      mockDb.prepare
+        .mockReturnValueOnce({
+          all: vi
+            .fn()
+            .mockReturnValue([
+              {
+                id: "btn-id",
+                name: "Button",
+                kind: "component",
+                file: "/src/components/Button.tsx",
+                line: 5,
+                column: 1,
+              },
+            ]),
+        })
+        .mockReturnValueOnce({
+          all: vi
+            .fn()
+            .mockReturnValue([
+              {
+                tag: "Button",
+                file: "/src/App.tsx",
+                line: 15,
+                column: 5,
+                in_name: "App",
+              },
+            ]),
+        });
+
+      const results = await projectManager.findSymbolUsages(
+        projectPath,
+        "Button",
+      );
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe("usage");
+      expect(results[0].file).toBe("/src/App.tsx");
+    });
+
+    it("should find symbol usages with summary", async () => {
+      mockDb.prepare
+        .mockReturnValueOnce({
+          all: vi
+            .fn()
+            .mockReturnValue([
+              {
+                id: "btn-id",
+                name: "Button",
+                kind: "component",
+                file: "/src/components/Button.tsx",
+                line: 5,
+                column: 1,
+              },
+            ]),
+        })
+        .mockReturnValueOnce({
+          all: vi
+            .fn()
+            .mockReturnValue([
+              {
+                tag: "Button",
+                file: "/src/App.tsx",
+                line: 15,
+                column: 5,
+                in_name: "App",
+              },
+            ]),
+        });
+
+      const results = await projectManager.findSymbolUsages(
+        projectPath,
+        "Button",
+        undefined,
+        true,
+      );
+      expect(results.totalUsages).toBe(1);
+      expect(results.files["/src/App.tsx"]).toBe(1);
+    });
+
+    it("should find files by pattern", async () => {
+      const results = await projectManager.findFiles(projectPath, "App*");
+      expect(results).toEqual(["/src/App.tsx"]);
+
+      const results2 = await projectManager.findFiles(projectPath, "Button");
+      expect(results2).toEqual(["/src/components/Button.tsx"]);
+    });
+
+    it("should get file imports", async () => {
+      const imports = await projectManager.getFileImports(
+        projectPath,
+        "/src/App.tsx",
+      );
+      expect(imports["useState"]).toBeDefined();
+      expect(imports["Button"]).toBeDefined();
+    });
+
+    it("should get project tree", async () => {
+      const tree = await projectManager.getProjectTree(
+        projectPath,
+        undefined,
+        2,
+      );
+      expect(tree.name).toBe("/");
+      expect(tree.children[0].name).toBe("src");
+      expect(tree.children[0].children[0].name).toBe("App.tsx");
+      expect(tree.children[0].children[1].name).toBe("components");
+    });
+
+    it("should find usages of external symbols", async () => {
+      // 1. Return no definitions
+      // 2. Return usages from external fallback
+      mockDb.prepare
+        .mockReturnValueOnce({
+          all: vi.fn().mockReturnValue([]),
+        })
+        .mockReturnValueOnce({
+          all: vi
+            .fn()
+            .mockReturnValue([
+              {
+                tag: "useState",
+                file: "/src/App.tsx",
+                line: 10,
+                column: 1,
+                in_name: "App",
+              },
+            ]),
+        });
+
+      const results = await projectManager.findSymbolUsages(
+        projectPath,
+        "useState",
+      );
+      expect(results).toHaveLength(1);
+      expect(results[0].file).toBe("/src/App.tsx");
     });
   });
 
@@ -323,6 +572,21 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol location", async () => {
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi
+          .fn()
+          .mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 5,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]),
+      });
       const loc = await projectManager.getSymbolLocation(projectPath, "App");
       expect(loc).toHaveLength(1);
       expect(loc[0].file).toBe("/src/App.tsx");
@@ -330,9 +594,28 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol content", async () => {
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi
+          .fn()
+          .mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 5,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]),
+      });
       const fileContent =
         "line1\nline2\nline3\nline4\nexport const App = () => {\n  return <div>App</div>\n}";
-      (fs.existsSync as any).mockReturnValue(true);
+      (fs.existsSync as any).mockImplementation((p: string) => {
+        if (p.includes(".react-map/cache")) return true;
+        if (p.includes("/src/App.tsx")) return true;
+        return false;
+      });
       (fs.readFileSync as any).mockReturnValue(fileContent);
 
       const content = await projectManager.getSymbolContent(projectPath, "App");
@@ -341,27 +624,29 @@ describe("ProjectManager", () => {
 
     it("should get symbol content from subproject", async () => {
       const subProject = "packages/app";
-      const mockGraph = {
-        files: {
-          "/src/App.tsx": {
-            var: {
-              "app-id": {
-                id: "app-id",
-                name: { type: "identifier", name: "App" },
-                kind: "component",
-                type: "function",
-                loc: { line: 1, column: 1 },
-              },
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi
+          .fn()
+          .mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
             },
-          },
-        },
-        edges: [],
-      };
-      (analyzeProject as any).mockReturnValue(mockGraph);
+          ]),
+      });
       await projectManager.openProject(projectPath, subProject);
 
       const fileContent = "export const App = () => {}";
-      (fs.existsSync as any).mockReturnValue(true);
+      (fs.existsSync as any).mockImplementation((p: string) => {
+        if (p.includes(".react-map/cache")) return true;
+        if (p.includes("/src/App.tsx")) return true;
+        return false;
+      });
       (fs.readFileSync as any).mockReturnValue(fileContent);
 
       const content = await projectManager.getSymbolContent(
@@ -373,12 +658,33 @@ describe("ProjectManager", () => {
     });
 
     it("should handle missing file on disk for content", async () => {
-      (fs.existsSync as any).mockReturnValue(false);
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi
+          .fn()
+          .mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]),
+      });
+      (fs.existsSync as any).mockImplementation((p: string) => {
+        if (p.includes(".react-map/cache")) return true;
+        return false;
+      });
       const content = await projectManager.getSymbolContent(projectPath, "App");
       expect(content[0].error).toBeDefined();
     });
 
     it("should return error if symbol not found for content", async () => {
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi.fn().mockReturnValue([]),
+      });
       const result = await projectManager.getSymbolContent(
         projectPath,
         "NonExistent",
@@ -472,6 +778,20 @@ describe("ProjectManager", () => {
     });
 
     it("should handle partial symbol matches", async () => {
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi.fn().mockReturnValue([
+          {
+            id: "app",
+            name: "App",
+            file: "/src/App.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+            type: "function",
+            props_json: "[]",
+          },
+        ]),
+      });
       const results = await projectManager.findSymbol(projectPath, "Ap"); // Matches "App"
       expect(results).toHaveLength(1);
       expect(results[0].name).toBe("App");

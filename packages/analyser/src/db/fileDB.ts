@@ -86,6 +86,7 @@ export class File {
   hash: string;
   import: Map<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
+  starExports: string[];
   defaultExport: string | null;
   tsTypes: Map<string, TypeDataDeclare>;
   var: Scope;
@@ -109,6 +110,7 @@ export class File {
     this.hash = "";
     this.import = new Map();
     this.export = {};
+    this.starExports = [];
     this.defaultExport = null;
     this.tsTypes = new Map();
     this.var = new Scope();
@@ -116,7 +118,7 @@ export class File {
 
   private loadRender(render: ComponentInfoRender) {
     this.renderInstanceMap.set(render.instanceId, render);
-    for (const child of Object.values(render.children)) {
+    for (const child of Object.values(render.children || {})) {
       this.loadRender(child);
     }
   }
@@ -167,8 +169,8 @@ export class File {
     this.locIdsMap.set(this.getLocalId(v), v);
 
     if (variable.type === "function" && isBaseFunctionVariable(v)) {
-      v.var.initPrevIds(variable.var);
-      for (const childVar of Object.values(variable.var)) {
+      v.var.initPrevIds(variable.var || {});
+      for (const childVar of Object.values(variable.var || {})) {
         this.loadVariable(childVar, v.var);
       }
 
@@ -187,17 +189,18 @@ export class File {
     this.fingerPrint = data.fingerPrint;
     this.hash = data.hash;
     this.rawData = data;
+    this.starExports = data.starExports || [];
 
     if (changed) {
       if (data.var) {
         this.var.initPrevIds(data.var);
       }
 
-      for (const variable of Object.values(data.var)) {
+      for (const variable of Object.values(data.var || {})) {
         this.loadVariable(variable);
       }
 
-      for (const importData of Object.values(data.import)) {
+      for (const importData of Object.values(data.import || {})) {
         this.import.set(importData.localName, {
           localName: importData.localName,
           importedName: importData.importedName,
@@ -207,7 +210,7 @@ export class File {
         });
       }
 
-      for (const exportData of Object.values(data.export)) {
+      for (const exportData of Object.values(data.export || {})) {
         this.export[exportData.name] = {
           id: exportData.id,
           name: exportData.name,
@@ -220,7 +223,7 @@ export class File {
         }
       }
 
-      for (const typeData of Object.values(data.tsTypes)) {
+      for (const typeData of Object.values(data.tsTypes || {})) {
         this.tsTypes.set(typeData.id, typeData);
         this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
       }
@@ -249,7 +252,7 @@ export class File {
     let id = this.getVariableID(exportData.name);
     if (!id) {
       // Fallback to deterministic ID based on file and name
-      id = getDeterministicId(`${this.path}:${exportData.name}`);
+      id = getDeterministicId(this.path, exportData.name);
     }
 
     this.export[exportData.name] = { ...exportData, id };
@@ -260,16 +263,32 @@ export class File {
     return id;
   }
 
-  public getExport(varImport: ComponentFileImport): string | undefined {
+  public getExport(
+    varImport: ComponentFileImport,
+    db: FileDB,
+    visited: Set<string> = new Set(),
+  ): string | undefined {
+    if (visited.has(this.path)) return undefined;
+    visited.add(this.path);
+
     if (varImport.type === "default") {
       if (this.defaultExport != null) {
         return this.export[this.defaultExport]?.id;
       }
     }
 
-    for (const ex of Object.values(this.export)) {
+    for (const ex of Object.values(this.export || {})) {
       if (ex.name === varImport.importedName) {
         return ex.id;
+      }
+    }
+
+    // Recursively check star exports
+    for (const source of this.starExports || []) {
+      if (db.has(source)) {
+        const file = db.get(source);
+        const id = file.getExport(varImport, db, visited);
+        if (id) return id;
       }
     }
 
@@ -278,7 +297,7 @@ export class File {
 
   public getNewVarID(name: VariableName, scope: Scope): string {
     const nameKey = getVariableNameKey(name);
-    for (const ex of Object.values(this.export)) {
+    for (const ex of Object.values(this.export || {})) {
       if (ex.name === nameKey) {
         return ex.id;
       }
@@ -290,7 +309,7 @@ export class File {
     }
 
     // Fallback to deterministic ID based on file and name if no cache
-    return getDeterministicId(`${this.path}:${nameKey}`);
+    return getDeterministicId(this.path, nameKey);
   }
 
   public getLocalId(variable: Variable): string {
@@ -370,20 +389,20 @@ export class File {
       children: Record<string, ComponentInfoRender>,
       toId: string,
     ) => {
-      for (const render of Object.values(children)) {
+      for (const render of Object.values(children || {})) {
         edges.push({
           from: render.id,
           to: toId,
           label: "render",
         });
         if (render.children) {
-          resolveRenders(render.children, toId);
+          resolveRenders(render.children || {}, toId);
         }
       }
     };
 
     if (variable.var) {
-      for (const v of Object.values(variable.var)) {
+      for (const v of Object.values(variable.var || {})) {
         if (
           v.kind == "component" ||
           (v.kind == "hook" && v.type == "function")
@@ -403,7 +422,7 @@ export class File {
                 label: "render",
               });
               if (jsx.children) {
-                resolveRenders(jsx.children, variable.id);
+                resolveRenders(jsx.children || {}, variable.id);
               }
             }
           }
@@ -419,7 +438,7 @@ export class File {
             }
           }
           if (v.dependencies) {
-            for (const dep of Object.values(v.dependencies)) {
+            for (const dep of Object.values(v.dependencies || {})) {
               edges.push({
                 from: v.id,
                 to: dep.id,
@@ -441,19 +460,19 @@ export class File {
       children: Record<string, ComponentInfoRender>,
       toId: string,
     ) => {
-      for (const render of Object.values(children)) {
+      for (const render of Object.values(children || {})) {
         edges.push({
           from: render.id,
           to: toId,
           label: "render",
         });
         if (render.children) {
-          resolveRenders(render.children, toId);
+          resolveRenders(render.children || {}, toId);
         }
       }
     };
 
-    for (const hookId of variable.hooks) {
+    for (const hookId of variable.hooks || []) {
       edges.push({
         from: variable.id,
         to: hookId,
@@ -474,7 +493,7 @@ export class File {
               label: "render",
             });
             if (jsx.children) {
-              resolveRenders(jsx.children, variable.id);
+              resolveRenders(jsx.children || {}, variable.id);
             }
           }
         }
@@ -486,7 +505,7 @@ export class File {
             label: "hook",
           });
         }
-        for (const dep of Object.values(v.dependencies)) {
+        for (const dep of Object.values(v.dependencies || {})) {
           edges.push({
             from: v.id,
             to: dep.id,
@@ -502,7 +521,7 @@ export class File {
   public getEdges(): DataEdge[] {
     const edges: DataEdge[] = [];
     if (!this.init && this.rawData) {
-      for (const variable of Object.values(this.rawData.var)) {
+      for (const variable of Object.values(this.rawData.var || {})) {
         if (variable.kind == "component" || variable.kind == "hook") {
           edges.push(
             ...this.__getEdgesRaw(
@@ -556,6 +575,7 @@ export class File {
       hash: this.hash,
       import: Object.fromEntries(this.import),
       export: this.export,
+      starExports: this.starExports,
       defaultExport: this.defaultExport,
       tsTypes: Object.fromEntries(
         Object.entries(Object.fromEntries(this.tsTypes)),
@@ -770,7 +790,7 @@ export class File {
     if (
       isJSXVariable(variable) ||
       isNormalVariable(variable) ||
-      isComponentVariable(variable)
+      isBaseFunctionVariable(variable)
     ) {
       if (parentId) {
         const parent = this.renderInstanceMap.get(parentId);
@@ -779,7 +799,12 @@ export class File {
 
           if (parent.loc) {
             const parentJSX = this.getVariable(parent.loc);
-            if (parentJSX && isJSXVariable(parentJSX)) {
+            if (
+              parentJSX &&
+              (isJSXVariable(parentJSX) || isNormalVariable(parentJSX))
+            ) {
+              parentJSX.children[instanceId] = newRender;
+            } else if (parentJSX && isBaseFunctionVariable(parentJSX)) {
               parentJSX.children[instanceId] = newRender;
             }
           }
@@ -787,7 +812,11 @@ export class File {
       }
 
       if (!targetMap) {
-        if (isJSXVariable(variable) || isNormalVariable(variable)) {
+        if (
+          isJSXVariable(variable) ||
+          isNormalVariable(variable) ||
+          isBaseFunctionVariable(variable)
+        ) {
           targetMap = variable.children;
         }
       }
@@ -915,7 +944,7 @@ export class FileDB {
     }
 
     // Fallback to deterministic ID based on file and name
-    return getDeterministicId(`${fileName}:${localName}`);
+    return getDeterministicId(fileName, localName);
   }
 
   public getData(): JsonData["files"] {
@@ -934,6 +963,13 @@ export class FileDB {
     const file = this.get(fileName);
 
     return file.addExport(exportData);
+  }
+
+  public addStarExport(fileName: string, source: string) {
+    const file = this.get(fileName);
+    if (!file.starExports.includes(source)) {
+      file.starExports.push(source);
+    }
   }
 
   public getDefaultExport(fileName: string) {
@@ -1055,7 +1091,7 @@ export class FileDB {
         if (this.has(importData.source)) {
           const file = this.get(importData.source);
           if (file) {
-            return file.getExport(importData);
+            return file.getExport(importData, this);
           }
         }
       }
@@ -1243,7 +1279,7 @@ export class FileDB {
     let allResolved = true;
 
     if (typeDeclare.params) {
-      for (const param of Object.values(typeDeclare.params)) {
+      for (const param of Object.values(typeDeclare.params || {})) {
         params.add(param.name);
 
         if (param.constraint && param.constraint.type === "ref") {

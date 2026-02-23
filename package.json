@@ -21,21 +21,25 @@
   "pnpm": {
     "overrides": {
       "vite": "npm:rolldown-vite@7.2.2",
-      "react": "^19.2.4",
-      "react-dom": "^19.2.4",
-      "react-reconciler": "^0.31.0"
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1",
+      "react-reconciler": "^0.29.2",
+      "ink>react": "^18.3.1",
+      "ink-select-input>react": "^18.3.1",
+      "ink-spinner>react": "^18.3.1",
+      "ink-text-input>react": "^18.3.1",
+      "ink-big-text>react": "^18.3.1",
+      "ink-gradient>react": "^18.3.1"
     },
     "onlyBuiltDependencies": [
       "@node-rs/xxhash",
       "@parcel/watcher",
+      "better-sqlite3",
       "bson",
       "electron",
       "electron-winstaller",
       "esbuild"
-    ],
-    "patchedDependencies": {
-      "ink@5.2.1": "patches/ink@5.2.1.patch"
-    }
+    ]
   },
   "dependencies": {
     "tslib": "^2.8.1"

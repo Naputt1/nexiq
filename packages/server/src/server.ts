@@ -113,8 +113,128 @@ export class BackendServer {
                 type: "string",
                 description: "The name of the component or hook to find",
               },
+              strict: {
+                type: "boolean",
+                description:
+                  "If true, only return symbols that exactly match the query. Defaults to true.",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return (e.g., ['name', 'file']). Omit to return all fields.",
+              },
             },
             required: ["projectPath", "query"],
+          },
+        },
+        {
+          name: "get_symbol_usages",
+          description:
+            "Find all usages/call sites of a symbol (component or hook) across the project.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              query: {
+                type: "string",
+                description: "The name of the component or hook to find",
+              },
+              summaryOnly: {
+                type: "boolean",
+                description:
+                  "If true, returns only file paths and counts to save tokens",
+              },
+              strict: {
+                type: "boolean",
+                description:
+                  "If true, only return symbols that exactly match the query. Defaults to true.",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return (e.g., ['name', 'file']). Omit to return all fields.",
+              },
+            },
+            required: ["projectPath", "query"],
+          },
+        },
+        {
+          name: "find_files",
+          description:
+            "Search for files by name or pattern (glob or regex) across the project.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              pattern: {
+                type: "string",
+                description:
+                  "Pattern to match against file paths or basenames (e.g., 'App*', 'src/**/*.tsx', 'auth')",
+              },
+            },
+            required: ["projectPath", "pattern"],
+          },
+        },
+        {
+          name: "get_file_imports",
+          description:
+            "Get the list of imports for a specific file from the analysis data. More token-efficient than reading the full file.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              filePath: {
+                type: "string",
+                description: "Relative path from project root",
+              },
+            },
+            required: ["projectPath", "filePath"],
+          },
+        },
+        {
+          name: "get_project_tree",
+          description:
+            "Get a tree structure of the project directories and files up to a specified depth.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              maxDepth: {
+                type: "number",
+                description: "Maximum depth to traverse (default: 3)",
+              },
+            },
+            required: ["projectPath"],
           },
         },
         {
@@ -131,6 +251,12 @@ export class BackendServer {
               subProject: {
                 type: "string",
                 description: "Optional sub-project path",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return for each file (e.g., ['path']). Omit to return all fields.",
               },
             },
             required: ["projectPath"],
@@ -284,6 +410,12 @@ export class BackendServer {
                 type: "string",
                 description: "Relative path from project root",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return (e.g., ['name', 'line']). Omit to return all fields.",
+              },
             },
             required: ["projectPath", "filePath"],
           },
@@ -388,6 +520,8 @@ export class BackendServer {
       }
     }
 
+    const fields = args.fields as string[] | undefined;
+
     switch (name) {
       case "open_project": {
         const { projectPath, subProject } = args as unknown as OpenProjectArgs;
@@ -403,13 +537,92 @@ export class BackendServer {
       }
 
       case "get_symbol_info": {
-        const { projectPath, subProject, query } =
-          args as unknown as GetSymbolInfoArgs;
+        const { projectPath, subProject, query, strict } = args as any;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findSymbol(
           resolvedPath,
           query,
           subProject,
+          strict !== false, // Default to strict true
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
+            },
+          ],
+        };
+      }
+
+      case "get_symbol_usages": {
+        const { projectPath, subProject, query, summaryOnly, strict } =
+          args as any;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.findSymbolUsages(
+          resolvedPath,
+          query,
+          subProject,
+          summaryOnly,
+          strict !== false, // Default to strict true
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
+            },
+          ],
+        };
+      }
+
+      case "find_files": {
+        const { projectPath, subProject, pattern } = args as any;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.findFiles(
+          resolvedPath,
+          pattern,
+          subProject,
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(results, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "get_file_imports": {
+        const { projectPath, subProject, filePath } = args as any;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.getFileImports(
+          resolvedPath,
+          filePath,
+          subProject,
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(results, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "get_project_tree": {
+        const { projectPath, subProject, maxDepth } = args as any;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.getProjectTree(
+          resolvedPath,
+          subProject,
+          maxDepth,
         );
 
         return {
@@ -445,7 +658,7 @@ export class BackendServer {
           fileSummary = files.map(([path, file]) => {
             return {
               path,
-              exports: Object.values(file.var).map((v) => ({
+              exports: Object.values(file.var || {}).map((v) => ({
                 name: getDisplayName(v.name),
                 kind: v.kind,
               })),
@@ -460,7 +673,7 @@ export class BackendServer {
               text: JSON.stringify(
                 {
                   totalFiles: files.length,
-                  files: fileSummary,
+                  files: this.filterFields(fileSummary, fields),
                   hint:
                     files.length > 100
                       ? "Project is large. Use list_directory to explore specific folders or get_file_outline for symbol details."
@@ -487,7 +700,7 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(this.filterFields(result, fields), null, 2),
             },
           ],
         };
@@ -505,7 +718,7 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(this.filterFields(result, fields), null, 2),
             },
           ],
         };
@@ -523,7 +736,7 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(this.filterFields(result, fields), null, 2),
             },
           ],
         };
@@ -590,7 +803,12 @@ export class BackendServer {
           subProject,
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(this.filterFields(result, fields), null, 2),
+            },
+          ],
         };
       }
 
@@ -634,6 +852,24 @@ export class BackendServer {
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
+  }
+
+  private filterFields(data: any, fields?: string[]): any {
+    if (!fields || !data) return data;
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.filterFields(item, fields));
+    }
+
+    if (typeof data !== "object") return data;
+
+    const filtered: any = {};
+    for (const field of fields) {
+      if (field in data) {
+        filtered[field] = data[field];
+      }
+    }
+    return filtered;
   }
 
   private resolveProjectPath(projectPath: string, subProject?: string): string {

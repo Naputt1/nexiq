@@ -41,15 +41,16 @@ describe("dependency resolution", () => {
     }
 
     const childRender = Object.values(returnVar.children).find(
-      (r) => r.id.includes("Child") || r.id === "1eb5061ae05ec5e0",
+      (r) => r.tag === "Child",
     );
     expect(childRender).toBeDefined();
     if (!childRender) throw new Error("Child render not found");
 
     const dataDep = childRender.dependencies.find((d) => d.name === "data");
     expect(dataDep).toBeDefined();
-    if (!dataDep || !dataDep.valueId) throw new Error("Data dependency or valueId not found");
-    
+    if (!dataDep || !dataDep.valueId)
+      throw new Error("Data dependency or valueId not found");
+
     // valueId should point to the 'name' identifier in useQuery destructuring
     expect(dataDep.valueId).toBeDefined();
 

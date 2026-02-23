@@ -196,6 +196,7 @@ export default function VariableDeclarator(
             contexts: [],
             dependencies: {},
             var: {},
+            children: {},
             effects: {},
             loc,
             scope,
@@ -309,6 +310,8 @@ export default function VariableDeclarator(
                     ),
                     effects: {},
                     hooks: [],
+                    children: {},
+                    var: {},
                     parentId: pParentId,
                   } as Omit<
                     ComponentFileVarHook,
@@ -326,6 +329,8 @@ export default function VariableDeclarator(
                     dependencies: {},
                     loc,
                     scope,
+                    children: {},
+                    var: {},
                     parentId: pParentId,
                   } as Omit<
                     ComponentFileVarNormalFunction,
@@ -407,6 +412,8 @@ export default function VariableDeclarator(
                   type: "function",
                   loc,
                   scope,
+                  children: {},
+                  var: {},
                   parentId: pParentId,
                 } as Omit<
                   ComponentFileVarNormalFunction,

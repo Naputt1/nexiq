@@ -20,9 +20,14 @@ describe("BackendServer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockProjectManager = new ProjectManager() as any;
     (mockProjectManager.getAllExtensions as any).mockReturnValue([]);
     server = new BackendServer(mockProjectManager, 3030);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe("MCP Tool Handlers", () => {
@@ -30,9 +35,14 @@ describe("BackendServer", () => {
       const args = { projectPath: "/test" };
       const result = await server.handleCallTool("open_project", args);
 
-      expect(mockProjectManager.openProject).toHaveBeenCalledWith("/test", undefined);
+      expect(mockProjectManager.openProject).toHaveBeenCalledWith(
+        "/test",
+        undefined,
+      );
       expect(result).toEqual({
-        content: [{ type: "text", text: expect.stringContaining("successfully") }],
+        content: [
+          { type: "text", text: expect.stringContaining("successfully") },
+        ],
       });
     });
 
@@ -63,13 +73,18 @@ describe("BackendServer", () => {
         files: {
           "src/index.ts": {
             var: {
-              "v1": { name: { type: "identifier", name: "main" }, kind: "normal" },
+              v1: {
+                name: { type: "identifier", name: "main" },
+                kind: "normal",
+              },
             },
           },
         },
       };
 
-      (mockProjectManager.getProject as any).mockReturnValue({ graph: mockGraph });
+      (mockProjectManager.getProject as any).mockReturnValue({
+        graph: mockGraph,
+      });
 
       const args = { projectPath: "/test" };
       const result = await server.handleCallTool("list_files", args);
@@ -97,65 +112,190 @@ describe("BackendServer", () => {
 
     it("should handle list_files tool error when project not open", async () => {
       (mockProjectManager.getProject as any).mockReturnValue(null);
-      await expect(server.handleCallTool("list_files", { projectPath: "/p" })).rejects.toThrow("Project not open");
+      await expect(
+        server.handleCallTool("list_files", { projectPath: "/p" }),
+      ).rejects.toThrow("Project not open");
     });
 
     it("should handle labeling tools", async () => {
       (mockProjectManager.addLabel as any).mockResolvedValue(["tag1"]);
-      const addResult = await server.handleCallTool("add_label", { projectPath: "/p", id: "id1", label: "tag1" });
+      const addResult = await server.handleCallTool("add_label", {
+        projectPath: "/p",
+        id: "id1",
+        label: "tag1",
+      });
       expect(JSON.parse((addResult as any).content[0].text)).toEqual(["tag1"]);
 
-      (mockProjectManager.getLabels as any).mockResolvedValue({ "id1": ["tag1"] });
-      const listResult = await server.handleCallTool("list_labels", { projectPath: "/p" });
-      expect(JSON.parse((listResult as any).content[0].text)).toEqual({ "id1": ["tag1"] });
+      (mockProjectManager.getLabels as any).mockResolvedValue({
+        id1: ["tag1"],
+      });
+      const listResult = await server.handleCallTool("list_labels", {
+        projectPath: "/p",
+      });
+      expect(JSON.parse((listResult as any).content[0].text)).toEqual({
+        id1: ["tag1"],
+      });
 
-      (mockProjectManager.findEntitiesByLabel as any).mockResolvedValue(["id1"]);
-      const searchResult = await server.handleCallTool("search_by_label", { projectPath: "/p", label: "tag1" });
-      expect(JSON.parse((searchResult as any).content[0].text)).toEqual(["id1"]);
+      (mockProjectManager.findEntitiesByLabel as any).mockResolvedValue([
+        "id1",
+      ]);
+      const searchResult = await server.handleCallTool("search_by_label", {
+        projectPath: "/p",
+        label: "tag1",
+      });
+      expect(JSON.parse((searchResult as any).content[0].text)).toEqual([
+        "id1",
+      ]);
     });
 
     it("should handle enhanced navigation tools", async () => {
       const mockDir = { directories: ["d1"], files: ["f1"] };
       (mockProjectManager.listDirectory as any).mockResolvedValue(mockDir);
-      const dirResult = await server.handleCallTool("list_directory", { projectPath: "/p", dirPath: "src" });
+      const dirResult = await server.handleCallTool("list_directory", {
+        projectPath: "/p",
+        dirPath: "src",
+      });
       expect(JSON.parse((dirResult as any).content[0].text)).toEqual(mockDir);
 
       const mockOutline = [{ name: "Comp", line: 1 }];
       (mockProjectManager.getFileOutline as any).mockResolvedValue(mockOutline);
-      const outlineResult = await server.handleCallTool("get_file_outline", { projectPath: "/p", filePath: "f1" });
-      expect(JSON.parse((outlineResult as any).content[0].text)).toEqual(mockOutline);
+      const outlineResult = await server.handleCallTool("get_file_outline", {
+        projectPath: "/p",
+        filePath: "f1",
+      });
+      expect(JSON.parse((outlineResult as any).content[0].text)).toEqual(
+        mockOutline,
+      );
     });
 
     it("should handle symbol exploration tools", async () => {
       const mockLoc = [{ file: "f1", line: 1 }];
       (mockProjectManager.getSymbolLocation as any).mockResolvedValue(mockLoc);
-      const locResult = await server.handleCallTool("get_symbol_location", { projectPath: "/p", query: "S" });
+      const locResult = await server.handleCallTool("get_symbol_location", {
+        projectPath: "/p",
+        query: "S",
+      });
       expect(JSON.parse((locResult as any).content[0].text)).toEqual(mockLoc);
 
       const mockContent = [{ content: "code" }];
-      (mockProjectManager.getSymbolContent as any).mockResolvedValue(mockContent);
-      const contentResult = await server.handleCallTool("get_symbol_content", { projectPath: "/p", query: "S" });
-      expect(JSON.parse((contentResult as any).content[0].text)).toEqual(mockContent);
+      (mockProjectManager.getSymbolContent as any).mockResolvedValue(
+        mockContent,
+      );
+      const contentResult = await server.handleCallTool("get_symbol_content", {
+        projectPath: "/p",
+        query: "S",
+      });
+      expect(JSON.parse((contentResult as any).content[0].text)).toEqual(
+        mockContent,
+      );
+    });
+
+    it("should handle get_symbol_usages tool", async () => {
+      const mockResult = [{ type: "usage", name: "App", file: "src/main.tsx" }];
+      (mockProjectManager.findSymbolUsages as any).mockResolvedValue(
+        mockResult,
+      );
+      const result = await server.handleCallTool("get_symbol_usages", {
+        projectPath: "/p",
+        query: "App",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle find_files tool", async () => {
+      const mockResult = ["src/App.tsx"];
+      (mockProjectManager.findFiles as any).mockResolvedValue(mockResult);
+      const result = await server.handleCallTool("find_files", {
+        projectPath: "/p",
+        pattern: "App",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle get_file_imports tool", async () => {
+      const mockResult = { react: { localName: "React", source: "react" } };
+      (mockProjectManager.getFileImports as any).mockResolvedValue(mockResult);
+      const result = await server.handleCallTool("get_file_imports", {
+        projectPath: "/p",
+        filePath: "f1",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle get_project_tree tool", async () => {
+      const mockResult = { name: "/", children: [] };
+      (mockProjectManager.getProjectTree as any).mockResolvedValue(mockResult);
+      const result = await server.handleCallTool("get_project_tree", {
+        projectPath: "/p",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle get_component_hierarchy tool", async () => {
+      const mockResult = { component: "App", hierarchies: [] };
+      (mockProjectManager.getComponentHierarchy as any).mockResolvedValue(
+        mockResult,
+      );
+      const result = await server.handleCallTool("get_component_hierarchy", {
+        projectPath: "/p",
+        componentName: "App",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle run_shell_command tool", async () => {
+      const mockResult = { stdout: "ok", stderr: "" };
+      (mockProjectManager.runShellCommand as any).mockResolvedValue(mockResult);
+      const result = await server.handleCallTool("run_shell_command", {
+        projectPath: "/p",
+        command: "ls",
+      });
+      expect(JSON.parse((result as any).content[0].text)).toEqual(mockResult);
+    });
+
+    it("should handle list_files tool with large project", async () => {
+      const mockGraph = {
+        files: Object.fromEntries(
+          Array.from({ length: 101 }, (_, i) => [`f${i}.ts`, { var: {} }]),
+        ),
+      };
+      (mockProjectManager.getProject as any).mockReturnValue({
+        graph: mockGraph,
+      });
+      const result = await server.handleCallTool("list_files", {
+        projectPath: "/p",
+      });
+      const content = JSON.parse((result as any).content[0].text);
+      expect(content.totalFiles).toBe(101);
+      expect(content.files[0]).not.toHaveProperty("exports");
     });
 
     it("should return error if tool is unknown", async () => {
-      await expect(server.handleCallTool("unknown_tool", {})).rejects.toThrow("Unknown tool");
+      await expect(server.handleCallTool("unknown_tool", {})).rejects.toThrow(
+        "Unknown tool",
+      );
     });
 
     it("should handle list tools request", async () => {
-      const listToolsHandler = (server as any).mcpServer.setRequestHandler.mock.calls.find(
+      const listToolsHandler = (
+        server as any
+      ).mcpServer.setRequestHandler.mock.calls.find(
         (args: any) => args[0] === ListToolsRequestSchema,
       )[1];
       const result = await listToolsHandler();
       expect(result.tools).toBeDefined();
-      expect(result.tools.some((t: any) => t.name === "open_project")).toBe(true);
+      expect(result.tools.some((t: any) => t.name === "open_project")).toBe(
+        true,
+      );
     });
 
     it("should handle call tool request with error", async () => {
-      const callToolHandler = (server as any).mcpServer.setRequestHandler.mock.calls.find(
+      const callToolHandler = (
+        server as any
+      ).mcpServer.setRequestHandler.mock.calls.find(
         (args: any) => args[0] === CallToolRequestSchema,
       )[1];
-      
+
       const result = await callToolHandler({ params: { name: "unknown" } });
       expect(result.isError).toBe(true);
     });
@@ -163,17 +303,21 @@ describe("BackendServer", () => {
     it("should handle extension tools", async () => {
       const mockExt = {
         id: "ext1",
-        mcpTools: [{
-          name: "tool1",
-          description: "desc",
-          inputSchema: {},
-          handler: vi.fn().mockResolvedValue({ ok: true })
-        }]
+        mcpTools: [
+          {
+            name: "tool1",
+            description: "desc",
+            inputSchema: {},
+            handler: vi.fn().mockResolvedValue({ ok: true }),
+          },
+        ],
       };
       (mockProjectManager.getAllExtensions as any).mockReturnValue([mockExt]);
 
       // List tools
-      const listToolsHandler = (server as any).mcpServer.setRequestHandler.mock.calls.find(
+      const listToolsHandler = (
+        server as any
+      ).mcpServer.setRequestHandler.mock.calls.find(
         (args: any) => args[0] === ListToolsRequestSchema,
       )[1];
       const tools = await listToolsHandler();
@@ -196,13 +340,17 @@ describe("BackendServer", () => {
       };
       server.startWebSocketServer();
       const wssInstance = (WebSocketServer as any).mock.instances[0];
-      const connectionHandler = wssInstance.on.mock.calls.find((args: any) => args[0] === "connection")[1];
+      const connectionHandler = wssInstance.on.mock.calls.find(
+        (args: any) => args[0] === "connection",
+      )[1];
       connectionHandler(mockWs);
     });
 
     it("should handle open_project message", async () => {
-      const messageHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "message")[1];
-      
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "message",
+      )[1];
+
       const payload = {
         type: "open_project",
         payload: { projectPath: "/test" },
@@ -211,17 +359,28 @@ describe("BackendServer", () => {
 
       await messageHandler(JSON.stringify(payload));
 
-      expect(mockProjectManager.openProject).toHaveBeenCalledWith("/test", undefined);
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("project_opened"));
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("req-1"));
+      expect(mockProjectManager.openProject).toHaveBeenCalledWith(
+        "/test",
+        undefined,
+      );
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("project_opened"),
+      );
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("req-1"),
+      );
     });
 
     it("should handle get_graph_data message", async () => {
       const mockGraph = { files: {}, edges: [] };
-      (mockProjectManager.getProject as any).mockReturnValue({ graph: mockGraph });
+      (mockProjectManager.getProject as any).mockReturnValue({
+        graph: mockGraph,
+      });
 
-      const messageHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "message")[1];
-      
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "message",
+      )[1];
+
       const payload = {
         type: "get_graph_data",
         payload: { projectPath: "/test" },
@@ -230,14 +389,18 @@ describe("BackendServer", () => {
 
       await messageHandler(JSON.stringify(payload));
 
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("graph_data"));
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("graph_data"),
+      );
       const response = JSON.parse(mockWs.send.mock.calls[0][0]);
       expect(response.payload).toEqual(mockGraph);
     });
 
     it("should handle call_tool message", async () => {
-      const messageHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "message")[1];
-      
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "message",
+      )[1];
+
       const payload = {
         type: "call_tool",
         payload: { name: "open_project", arguments: { projectPath: "/test" } },
@@ -246,19 +409,29 @@ describe("BackendServer", () => {
 
       await messageHandler(JSON.stringify(payload));
 
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("tool_result"));
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("tool_result"),
+      );
     });
 
     it("should handle unknown message type", async () => {
-      const messageHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "message")[1];
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "message",
+      )[1];
       await messageHandler(JSON.stringify({ type: "unknown", payload: {} }));
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("Unknown message type"));
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("Unknown message type"),
+      );
     });
 
     it("should handle malformed JSON in websocket", async () => {
-      const messageHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "message")[1];
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "message",
+      )[1];
       await messageHandler("not-json");
-      expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("error"));
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("error"),
+      );
     });
   });
 
@@ -269,18 +442,24 @@ describe("BackendServer", () => {
 
       server.startWebSocketServer();
       const wssInstance = (WebSocketServer as any).mock.instances[0];
-      const connectionHandler = wssInstance.on.mock.calls.find((args: any) => args[0] === "connection")[1];
-      
+      const connectionHandler = wssInstance.on.mock.calls.find(
+        (args: any) => args[0] === "connection",
+      )[1];
+
       const mockWs = { on: vi.fn(), send: vi.fn() };
       connectionHandler(mockWs);
 
-      const closeHandler = mockWs.on.mock.calls.find((args: any) => args[0] === "close")![1];
+      const closeHandler = mockWs.on.mock.calls.find(
+        (args: any) => args[0] === "close",
+      )![1];
       closeHandler();
 
       // Countdown started
-      vi.advanceTimersByTime(10000);
-      
+      await vi.advanceTimersByTimeAsync(10000);
+
       expect(mockProjectManager.closeAll).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(0);
+      
       vi.useRealTimers();
     });
   });

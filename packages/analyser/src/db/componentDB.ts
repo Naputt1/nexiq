@@ -41,6 +41,7 @@ import { FunctionVariable } from "./variable/functionVariable.js";
 import { getDeterministicId } from "../utils/hash.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
+import { SqliteDB } from "./sqlite.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
@@ -91,11 +92,13 @@ export type ComponentDBOptions = {
   packageJson: PackageJson;
   viteAliases: Record<string, string>;
   dir: string;
+  sqlite: SqliteDB | undefined;
 };
 
 export class ComponentDB {
   private edges: DataEdge[];
   private files: FileDB;
+  public sqlite: SqliteDB | undefined;
 
   private resolveTasks: ComponentDBResolve[];
   private typesToResolve: Set<string>;
@@ -121,6 +124,7 @@ export class ComponentDB {
     this.viteAliases = options.viteAliases;
 
     this.dir = options.dir;
+    this.sqlite = options.sqlite;
   }
 
   public pushJSX(id: string) {
@@ -170,7 +174,7 @@ export class ComponentDB {
       fileName,
       new ComponentVariable(
         {
-          id: getDeterministicId(nameKey),
+          id: getDeterministicId(fileName, nameKey),
           ...component,
           states: [],
           declarationKind,
@@ -212,7 +216,7 @@ export class ComponentDB {
       fileName,
       new JSXVariable(
         {
-          id: getDeterministicId(nameKey),
+          id: getDeterministicId(fileName, nameKey),
           ...jsx,
           declarationKind,
         },
@@ -255,8 +259,9 @@ export class ComponentDB {
       fileName,
       new HookVariable(
         {
-          id: getDeterministicId(nameKey),
+          id: getDeterministicId(fileName, nameKey),
           ...variable,
+          children: {},
           states: [],
           declarationKind,
         },
@@ -295,8 +300,9 @@ export class ComponentDB {
     if (variable.type === "function") {
       v = new FunctionVariable(
         {
-          id: getDeterministicId(nameKey),
+          id: getDeterministicId(fileName, nameKey),
           ...variable,
+          children: {},
           declarationKind,
         },
         file,
@@ -310,7 +316,7 @@ export class ComponentDB {
 
       v = new DataVariable(
         {
-          id: getDeterministicId(nameKey),
+          id: getDeterministicId(fileName, nameKey),
           ...variable,
           kind,
           declarationKind,
@@ -432,7 +438,7 @@ export class ComponentDB {
 
     if (this.files.has(comImport.source)) {
       const file = this.files.get(comImport.source);
-      const id = file.getExport(comImport);
+      const id = file.getExport(comImport, this.files);
       if (id) {
         return { id, isDependency: false };
       }
@@ -487,13 +493,6 @@ export class ComponentDB {
     returnId: FunctionReturn,
   ) {
     const file = this.files.get(fileName);
-
-    if (typeof returnId === "string") {
-      const v = file.var.get(returnId, true);
-      if (v && isJSXVariable(v)) {
-        returnId = v.getData();
-      }
-    }
 
     file.setReturn(loc, returnId);
   }
@@ -607,6 +606,10 @@ export class ComponentDB {
     this.files.addExport(fileName, fileExport);
   }
 
+  public fileAddStarExport(fileName: string, source: string) {
+    this.files.addStarExport(fileName, source);
+  }
+
   public fileAddTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
     const typeDeclare = this.files.addTsTypes(fileName, type);
 
@@ -625,7 +628,7 @@ export class ComponentDB {
       return collection.values();
     }
     if (collection && typeof collection === "object") {
-      return Object.values(collection);
+      return Object.values(collection || {});
     }
     return [];
   }
@@ -643,7 +646,7 @@ export class ComponentDB {
       pId?: string,
     ) => {
       if (!children) return;
-      for (const render of Object.values(children)) {
+      for (const render of Object.values(children || {})) {
         const isTag =
           (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
           render.id === "Fragment";
