@@ -45,7 +45,6 @@
       "defaultExport": null,
       "tsTypes": {
         "266c424aa179a4d6": {
-          "id": "266c424aa179a4d6",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -98,7 +97,8 @@
           "loc": {
             "line": 3,
             "column": 10
-          }
+          },
+          "id": "266c424aa179a4d6"
         }
       },
       "var": {

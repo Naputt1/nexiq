@@ -17,6 +17,7 @@ import {
   isForwardRefCall,
   isForwardRefRefUsed,
   isRefUsed,
+  getReactHookInfo,
 } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
@@ -515,18 +516,19 @@ export default function VariableDeclarator(
 
       if (t.isCallExpression(init)) {
         const firstArgPath = nodePath.get("init").get("arguments")[0];
+        const hookInfo = getReactHookInfo(init, componentDB, fileName);
 
         if (
-          t.isIdentifier(init.callee) &&
-          (init.callee.name === "useState" || init.callee.name === "useReducer")
+          hookInfo?.isReact &&
+          (hookInfo.name === "useState" || hookInfo.name === "useReducer")
         ) {
           processPattern(nodePath, id, undefined, {
             type: "state",
             extra: { setter: undefined },
           });
         } else if (
-          t.isIdentifier(init.callee) &&
-          (init.callee.name === "useMemo" || init.callee.name === "useCallback")
+          hookInfo?.isReact &&
+          (hookInfo.name === "useMemo" || hookInfo.name === "useCallback")
         ) {
           let targetFnPath:
             | traverse.NodePath<
@@ -586,7 +588,7 @@ export default function VariableDeclarator(
             }
 
             const currentId = processPattern(nodePath, id, undefined, {
-              type: init.callee.name === "useMemo" ? "memo" : "callback",
+              type: hookInfo.name === "useMemo" ? "memo" : "callback",
               extra: { scope, reactDeps },
             });
 
@@ -596,7 +598,7 @@ export default function VariableDeclarator(
                 componentDB.addVariableDependency(fileName, currentId, dep);
               }
             }
-          } else if (init.callee.name === "useCallback") {
+          } else if (hookInfo.name === "useCallback") {
             // It's still a callback, even if we don't find a function implementation
             const dependencies = init.arguments[1];
             const reactDeps: ReactDependency[] = [];
@@ -622,10 +624,7 @@ export default function VariableDeclarator(
               },
             });
           }
-        } else if (
-          t.isIdentifier(init.callee) &&
-          init.callee.name === "useRef"
-        ) {
+        } else if (hookInfo?.isReact && hookInfo.name === "useRef") {
           const defaultData: PropDataType = (init.arguments[0] &&
             t.isExpression(init.arguments[0]) &&
             getExpressionData(init.arguments[0])) || { type: "null" };
@@ -634,13 +633,13 @@ export default function VariableDeclarator(
             type: "ref",
             extra: { defaultData },
           });
-        } else if (t.isIdentifier(init.callee) && isHook(init.callee.name)) {
+        } else if (hookInfo) {
           processPattern(nodePath, id, undefined, {
             type: "hook",
             extra: {
               call: {
-                id: getDeterministicId(init.callee.name),
-                name: init.callee.name,
+                id: getDeterministicId(hookInfo.name),
+                name: hookInfo.name,
               },
             },
           });

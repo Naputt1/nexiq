@@ -386,34 +386,6 @@
         }
       },
       "var": {
-        "98862de8769484fd": {
-          "id": "98862de8769484fd",
-          "name": {
-            "type": "identifier",
-            "name": "UserContext",
-            "loc": {
-              "line": 10,
-              "column": 13
-            },
-            "id": "6053b28664939d57"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/App.tsx",
-          "hash": "41d65e8a9f60a6bc",
-          "declarationKind": "const",
-          "dependencies": {
-            "d48f99698bb52d8": {
-              "id": "d48f99698bb52d8",
-              "name": "createContext"
-            }
-          },
-          "loc": {
-            "line": 10,
-            "column": 13
-          },
-          "children": {}
-        },
         "311c554b828f67a5": {
           "id": "311c554b828f67a5",
           "name": {

@@ -317,34 +317,6 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "de5badd01d3abc65": {
-          "id": "de5badd01d3abc65",
-          "name": {
-            "type": "identifier",
-            "name": "MyContext",
-            "loc": {
-              "line": 3,
-              "column": 6
-            },
-            "id": "85ba7bba42531287"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/App.tsx",
-          "hash": "d19be0b9f70be84f",
-          "declarationKind": "const",
-          "dependencies": {
-            "d48f99698bb52d8": {
-              "id": "d48f99698bb52d8",
-              "name": "createContext"
-            }
-          },
-          "loc": {
-            "line": 3,
-            "column": 6
-          },
-          "children": {}
-        },
         "2cc067693c6143ab": {
           "id": "2cc067693c6143ab",
           "name": {

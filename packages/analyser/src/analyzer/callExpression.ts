@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import { isHook } from "../utils.js";
+import { getReactHookInfo } from "../utils.js";
 import type { ReactDependency, VariableLoc, VariableScope } from "shared";
 import assert from "assert";
 import { generateFn } from "../utils/babel.js";
@@ -11,8 +11,8 @@ export default function CallExpression(
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.CallExpression> {
   return (nodePath) => {
-    const callee = nodePath.node.callee;
-    if (callee.type !== "Identifier") return;
+    const hookInfo = getReactHookInfo(nodePath.node, componentDB, fileName);
+    if (!hookInfo) return;
 
     assert(nodePath.node.loc?.start != null, "Function loc not found");
 
@@ -21,7 +21,6 @@ export default function CallExpression(
       column: nodePath.node.loc.start.column,
     };
 
-    const fn = callee.name;
     const parentFunc = nodePath.getFunctionParent();
     let compName: string | undefined;
     let loc: VariableLoc | undefined;
@@ -70,7 +69,7 @@ export default function CallExpression(
     //   components[compName].contexts.push(fn);
     // }
 
-    if (fn === "useEffect") {
+    if (hookInfo?.isReact && hookInfo.name === "useEffect") {
       const effect = nodePath.node.arguments[0];
       const dependencies = nodePath.node.arguments[1];
 
@@ -92,7 +91,7 @@ export default function CallExpression(
           };
         }
       } else {
-        debugger;
+        // debugger;
       }
 
       const reactDeps: ReactDependency[] = [];
@@ -116,8 +115,8 @@ export default function CallExpression(
       }
     }
 
-    if (compName && loc && isHook(fn)) {
-      componentDB.comAddHook(fn, callLoc, fileName, fn);
+    if (compName && loc && hookInfo) {
+      componentDB.comAddHook(hookInfo.name, callLoc, fileName, hookInfo.name);
     }
   };
 }
