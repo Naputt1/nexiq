@@ -31,7 +31,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -48,7 +51,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -65,7 +71,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -82,7 +91,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -99,7 +111,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -116,7 +131,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -133,7 +151,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -150,7 +171,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -167,7 +191,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -184,7 +211,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -201,7 +231,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -218,7 +251,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     }
   ]
 }
