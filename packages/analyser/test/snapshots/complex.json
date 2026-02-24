@@ -1228,34 +1228,6 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "7cb39a3350cd7439": {
-          "id": "7cb39a3350cd7439",
-          "name": {
-            "type": "identifier",
-            "name": "MemoizedComponent",
-            "loc": {
-              "line": 3,
-              "column": 13
-            },
-            "id": "9774cca0cd00f3f1"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "820722f17e2bc483",
-          "declarationKind": "const",
-          "dependencies": {
-            "4716edcf0db0eac9": {
-              "id": "4716edcf0db0eac9",
-              "name": "memo"
-            }
-          },
-          "loc": {
-            "line": 3,
-            "column": 13
-          },
-          "children": {}
-        },
         "6272a2db9d3159ee": {
           "id": "6272a2db9d3159ee",
           "name": {
@@ -1363,164 +1335,66 @@
             }
           }
         },
-        "66105c08a1f70b91": {
-          "id": "66105c08a1f70b91",
+        "76b357922373cbd1": {
+          "id": "76b357922373cbd1",
           "name": {
             "type": "identifier",
-            "name": "ForwardRefComponent",
+            "name": "anonymous@7:81",
             "loc": {
               "line": 7,
-              "column": 13
+              "column": 81
             },
-            "id": "b1730a6569775a23"
+            "id": ""
           },
-          "kind": "component",
+          "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "ed044064bec4d42b",
-          "declarationKind": "const",
+          "hash": "2439caded9aaf6dc",
           "dependencies": {},
           "loc": {
             "line": 7,
-            "column": 13
+            "column": 81
           },
           "var": {
-            "76b357922373cbd1": {
-              "id": "76b357922373cbd1",
+            "247f5cfd69d48323": {
+              "id": "247f5cfd69d48323",
               "name": {
                 "type": "identifier",
-                "name": "anonymous@7:81",
-                "loc": {
-                  "line": 7,
-                  "column": 81
-                },
-                "id": ""
-              },
-              "kind": "normal",
-              "type": "function",
-              "file": "/src/HocForwardRef.tsx",
-              "hash": "2439caded9aaf6dc",
-              "dependencies": {},
-              "loc": {
-                "line": 7,
-                "column": 81
-              },
-              "var": {
-                "247f5cfd69d48323": {
-                  "id": "247f5cfd69d48323",
-                  "name": {
-                    "type": "identifier",
-                    "name": "jsx@8:9",
-                    "loc": {
-                      "line": 8,
-                      "column": 9
-                    },
-                    "id": "ed682d93f58d1204"
-                  },
-                  "kind": "normal",
-                  "type": "jsx",
-                  "file": "/src/HocForwardRef.tsx",
-                  "hash": "c6dd83e40444178e",
-                  "dependencies": {
-                    "abce141911553a78": {
-                      "id": "abce141911553a78",
-                      "name": "ref"
-                    }
-                  },
-                  "loc": {
-                    "line": 8,
-                    "column": 9
-                  },
-                  "tag": "div",
-                  "props": [
-                    {
-                      "id": "abce141911553a78",
-                      "name": "ref",
-                      "value": {
-                        "type": "ref",
-                        "refType": "named",
-                        "name": "ref"
-                      }
-                    }
-                  ],
-                  "children": {},
-                  "srcId": "div"
-                }
-              },
-              "scope": {
-                "start": {
-                  "line": 7,
-                  "column": 81
-                },
-                "end": {
-                  "line": 9,
-                  "column": 1
-                }
-              },
-              "return": {
-                "id": "247f5cfd69d48323",
-                "name": {
-                  "type": "identifier",
-                  "name": "jsx@8:9",
-                  "loc": {
-                    "line": 8,
-                    "column": 9
-                  },
-                  "id": "ed682d93f58d1204"
-                },
-                "kind": "normal",
-                "type": "jsx",
-                "file": "/src/HocForwardRef.tsx",
-                "hash": "c6dd83e40444178e",
-                "dependencies": {
-                  "abce141911553a78": {
-                    "id": "abce141911553a78",
-                    "name": "ref"
-                  }
-                },
+                "name": "jsx@8:9",
                 "loc": {
                   "line": 8,
                   "column": 9
                 },
-                "tag": "div",
-                "props": [
-                  {
-                    "id": "abce141911553a78",
-                    "name": "ref",
-                    "value": {
-                      "type": "ref",
-                      "refType": "named",
-                      "name": "ref"
-                    }
-                  }
-                ],
-                "children": {},
-                "srcId": "div"
+                "id": "ed682d93f58d1204"
               },
-              "children": {
-                "41914920e3ccbb34": {
-                  "id": "div",
-                  "instanceId": "41914920e3ccbb34",
-                  "tag": "div",
-                  "dependencies": [
-                    {
-                      "id": "abce141911553a78",
-                      "name": "ref",
-                      "value": {
-                        "type": "ref",
-                        "refType": "named",
-                        "name": "ref"
-                      }
-                    }
-                  ],
-                  "isDependency": false,
-                  "loc": {
-                    "line": 8,
-                    "column": 9
-                  },
-                  "children": {}
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/HocForwardRef.tsx",
+              "hash": "c6dd83e40444178e",
+              "dependencies": {
+                "abce141911553a78": {
+                  "id": "abce141911553a78",
+                  "name": "ref"
                 }
-              }
+              },
+              "loc": {
+                "line": 8,
+                "column": 9
+              },
+              "tag": "div",
+              "props": [
+                {
+                  "id": "abce141911553a78",
+                  "name": "ref",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "ref"
+                  }
+                }
+              ],
+              "children": {},
+              "srcId": "div"
             }
           },
           "scope": {
@@ -1533,29 +1407,70 @@
               "column": 1
             }
           },
-          "children": {},
-          "states": [],
-          "props": [
-            {
-              "id": "66105c08a1f70b91:prop:props",
-              "name": "props",
-              "type": "any",
-              "kind": "prop",
-              "hash": "c913f4018cd56103"
+          "return": {
+            "id": "247f5cfd69d48323",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@8:9",
+              "loc": {
+                "line": 8,
+                "column": 9
+              },
+              "id": "ed682d93f58d1204"
             },
-            {
-              "id": "66105c08a1f70b91:prop:ref",
-              "name": "ref",
-              "type": "any",
-              "kind": "prop",
-              "hash": "e9ceb2c440128b84"
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/HocForwardRef.tsx",
+            "hash": "c6dd83e40444178e",
+            "dependencies": {
+              "abce141911553a78": {
+                "id": "abce141911553a78",
+                "name": "ref"
+              }
+            },
+            "loc": {
+              "line": 8,
+              "column": 9
+            },
+            "tag": "div",
+            "props": [
+              {
+                "id": "abce141911553a78",
+                "name": "ref",
+                "value": {
+                  "type": "ref",
+                  "refType": "named",
+                  "name": "ref"
+                }
+              }
+            ],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "41914920e3ccbb34": {
+              "id": "div",
+              "instanceId": "41914920e3ccbb34",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "abce141911553a78",
+                  "name": "ref",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "ref"
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 8,
+                "column": 9
+              },
+              "children": {}
             }
-          ],
-          "hooks": [],
-          "effects": {},
-          "componentType": "Function",
-          "contexts": [],
-          "forwardRef": true
+          }
         },
         "5b62cadc7d4120ac": {
           "id": "5b62cadc7d4120ac",
@@ -3521,34 +3436,6 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "f151b03626e3635f": {
-          "id": "f151b03626e3635f",
-          "name": {
-            "type": "identifier",
-            "name": "MyContext",
-            "loc": {
-              "line": 3,
-              "column": 13
-            },
-            "id": "85ba7bba42531287"
-          },
-          "kind": "normal",
-          "type": "data",
-          "file": "/src/Context.tsx",
-          "hash": "3b10bcd2a7925615",
-          "declarationKind": "const",
-          "dependencies": {
-            "d48f99698bb52d8": {
-              "id": "d48f99698bb52d8",
-              "name": "createContext"
-            }
-          },
-          "loc": {
-            "line": 3,
-            "column": 13
-          },
-          "children": {}
-        },
         "cf259be6f1cb800b": {
           "id": "cf259be6f1cb800b",
           "name": {
@@ -5015,16 +4902,6 @@
     {
       "from": "6826ec85ac9962e0",
       "to": "f2a0564c91943e3f",
-      "label": "render"
-    },
-    {
-      "from": "66105c08a1f70b91",
-      "to": "247f5cfd69d48323",
-      "label": "render"
-    },
-    {
-      "from": "66105c08a1f70b91",
-      "to": "247f5cfd69d48323",
       "label": "render"
     },
     {

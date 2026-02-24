@@ -3,8 +3,67 @@ import * as t from "@babel/types";
 import path from "path";
 import type { ComponentDB } from "./db/componentDB.js";
 
-export function isHook(filePath: string) {
-  return path.basename(filePath).startsWith("use");
+export function isHook(name: string) {
+  return name.startsWith("use");
+}
+
+export function getReactHookInfo(
+  call: t.CallExpression,
+  componentDB: ComponentDB,
+  fileName: string,
+): { name: string; isReact: boolean } | null {
+  const callee = call.callee;
+  const file = componentDB.getFile(fileName);
+  if (!file) return null;
+
+  if (t.isIdentifier(callee)) {
+    const localName = callee.name;
+    const comImport = file.import.get(localName);
+
+    if (comImport?.source === "react") {
+      if (comImport.type === "named") {
+        return {
+          name: comImport.importedName || localName,
+          isReact: true,
+        };
+      }
+      if (
+        (comImport.type === "default" || comImport.type === "namespace") &&
+        localName.startsWith("use")
+      ) {
+        return { name: localName, isReact: true };
+      }
+    }
+
+    if (localName.startsWith("use")) {
+      return { name: localName, isReact: false };
+    }
+  } else if (t.isMemberExpression(callee)) {
+    if (t.isIdentifier(callee.property)) {
+      const propName = callee.property.name;
+
+      if (t.isIdentifier(callee.object)) {
+        const objName = callee.object.name;
+        const comImport = file.import.get(objName);
+
+        if (comImport?.source === "react") {
+          if (comImport.type === "default" || comImport.type === "namespace") {
+            return { name: propName, isReact: true };
+          }
+        }
+
+        if (objName === "React") {
+          return { name: propName, isReact: true };
+        }
+      }
+
+      if (propName.startsWith("use")) {
+        return { name: propName, isReact: false };
+      }
+    }
+  }
+
+  return null;
 }
 
 export function returnJSX(node: Node): boolean {

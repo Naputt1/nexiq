@@ -36,7 +36,6 @@
       "defaultExport": null,
       "tsTypes": {
         "2a6fb9e029700a2d": {
-          "id": "2a6fb9e029700a2d",
           "type": "interface",
           "name": {
             "type": "identifier",
@@ -108,10 +107,10 @@
           "loc": {
             "line": 3,
             "column": 17
-          }
+          },
+          "id": "2a6fb9e029700a2d"
         },
         "16ac33881c31cf6a": {
-          "id": "16ac33881c31cf6a",
           "type": "type",
           "name": {
             "type": "identifier",
@@ -149,7 +148,8 @@
           "loc": {
             "line": 8,
             "column": 12
-          }
+          },
+          "id": "16ac33881c31cf6a"
         }
       },
       "var": {
