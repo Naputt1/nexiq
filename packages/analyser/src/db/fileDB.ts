@@ -4,7 +4,6 @@ import type {
   ComponentFileExport,
   ComponentFileImport,
   ComponentFileVar,
-  ComponentFileVarCallHook,
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
@@ -30,7 +29,9 @@ import type {
   VariableName,
   ComponentFileVarHook,
   FunctionReturn,
-  ComponentFileVarJSX,
+  VarKind,
+  TypeDataDeclareInterface,
+  TypeDataDeclareType,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -42,6 +43,7 @@ import {
   isBaseFunctionVariable,
   isCallHookVariable,
   isJSXVariable,
+  isReactFunctionVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import fs from "fs";
@@ -58,6 +60,7 @@ import { getVariableNameKey } from "../analyzer/pattern.js";
 
 import { Scope } from "./variable/scope.js";
 import { CallHookVariable } from "./variable/callHookVariable.js";
+import { BaseFunctionVariable } from "./variable/baseFunctionVariable.js";
 
 type TypeDataHandlerMap = {
   ref: TypeDataRef;
@@ -146,14 +149,12 @@ export class File {
       }
     } else if (variable.kind === "state") {
       v = new StateVariable(variable, this);
-    } else if (variable.kind == "memo") {
+    } else if (variable.kind === "memo") {
       v = new MemoVariable(variable, this);
-    } else if (variable.kind == "callback") {
+    } else if (variable.kind === "callback") {
       v = new CallbackVariable(variable, this);
     } else if (variable.kind === "ref") {
       v = new RefVariable(variable, this);
-    } else {
-      debugger;
     }
 
     assert(v != null, `Variable not found: ${variable.kind}`);
@@ -309,14 +310,13 @@ export class File {
   }
 
   public addVariable(variable: Variable): string {
-    const scope = this.var.findDeepestScope(variable.loc);
-
-    if (scope == null) {
-      debugger;
-      //TODO: handle parent not found
-      return "no parent";
+    const existing = this.getVariable(variable.loc);
+    if (existing && existing.kind === variable.kind) {
+      existing.load(variable);
+      return existing.id;
     }
 
+    const scope = this.var.findDeepestScope(variable.loc);
     const id = this.getNewVarID(variable.name, scope);
     variable.id = id;
 
@@ -342,7 +342,8 @@ export class File {
     memo: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    if (component == null) return "no-parent";
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     const variable = component.addMemo(memo);
     this.locIdsMap.set(this.getLocalId(variable), variable);
@@ -355,7 +356,8 @@ export class File {
     callback: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    if (component == null) return "no-parent";
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     const variable = component.addCallback(callback);
     this.locIdsMap.set(this.getLocalId(variable), variable);
@@ -387,17 +389,13 @@ export class File {
     if (variable.var) {
       for (const v of Object.values(variable.var || {})) {
         if (
-          v.kind == "component" ||
-          (v.kind == "hook" && v.type == "function")
+          v.type === "function" &&
+          (v.kind === "component" || v.kind === "hook")
         ) {
-          edges.push(
-            ...this.__getEdgesRaw(
-              v as ComponentFileVarComponent | ComponentFileVarHook,
-            ),
-          );
+          edges.push(...this.__getEdgesRaw(v));
         } else {
           if (v.type === "jsx") {
-            const jsx = v as ComponentFileVarJSX;
+            const jsx = v;
             if (variable.kind === "component") {
               edges.push({
                 from: jsx.srcId ?? jsx.tag,
@@ -410,8 +408,8 @@ export class File {
             }
           }
 
-          if (v.kind == "hook" && v.type == "data") {
-            const hookCall = v as ComponentFileVarCallHook;
+          if (v.kind === "hook" && v.type === "data") {
+            const hookCall = v;
             if (hookCall.call.id) {
               edges.push({
                 from: hookCall.id,
@@ -467,8 +465,8 @@ export class File {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
       } else {
-        if (v.type === "jsx") {
-          const jsx = v as JSXVariable;
+        if (isJSXVariable(v)) {
+          const jsx = v;
           if (isComponentVariable(variable)) {
             edges.push({
               from: jsx.srcId ?? jsx.tag,
@@ -505,12 +503,11 @@ export class File {
     const edges: DataEdge[] = [];
     if (!this.init && this.rawData) {
       for (const variable of Object.values(this.rawData.var || {})) {
-        if (variable.kind == "component" || variable.kind == "hook") {
-          edges.push(
-            ...this.__getEdgesRaw(
-              variable as ComponentFileVarComponent | ComponentFileVarHook,
-            ),
-          );
+        if (
+          variable.type === "function" &&
+          (variable.kind === "component" || variable.kind === "hook")
+        ) {
+          edges.push(...this.__getEdgesRaw(variable));
         }
       }
     } else {
@@ -537,15 +534,13 @@ export class File {
 
   public getHookInfoFromLoc(
     loc: VariableLoc,
-  ): ReactFunctionVariable | undefined {
+  ): BaseFunctionVariable<VarKind> | undefined {
     const exact = this.getVariable(loc);
-    if (exact && (isHookVariable(exact) || isComponentVariable(exact))) {
-      return exact as ReactFunctionVariable;
+    if (exact && isBaseFunctionVariable(exact)) {
+      return exact;
     }
 
-    return this.var.findDeepestVariable(loc) as
-      | ReactFunctionVariable
-      | undefined;
+    return this.var.findDeepestVariable(loc);
   }
 
   public getData(): ComponentFile {
@@ -559,9 +554,7 @@ export class File {
       export: this.export,
       starExports: this.starExports,
       defaultExport: this.defaultExport,
-      tsTypes: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.tsTypes)),
-      ),
+      tsTypes: Object.fromEntries(this.tsTypes),
       var: this.var.getData(),
     };
   }
@@ -575,9 +568,8 @@ export class File {
       v = this.var.get(parent, true);
     }
 
-    if (v == null) debugger;
     if (v == null) return;
-    if (v.kind == "component") return;
+    if (v.kind === "component") return;
     assert(v != null, "Parent variable not found");
 
     v.dependencies[dependency.id] = dependency;
@@ -690,10 +682,6 @@ export class File {
 
   public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
     const nameKey = getVariableNameKey(type.name);
-    if (!type.id) {
-      const id = this.getNewVarID(type.name, this.var); // Root scope
-      type.id = id;
-    }
 
     this.tsTypes.set(type.id, type);
     this.tsTypesID.set(nameKey, type);
@@ -896,7 +884,7 @@ export class FileDB {
 
   public getData(): JsonData["files"] {
     return Object.fromEntries(
-      Object.entries(Object.fromEntries(this.files)).map(([k, value]) => [
+      Array.from(this.files.entries()).map(([k, value]) => [
         k,
         value.getData(),
       ]),
@@ -980,7 +968,11 @@ export class FileDB {
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
     const file = this.get(fileName);
-    return file.getHookInfoFromLoc(loc);
+    const v = file.getHookInfoFromLoc(loc);
+    if (v && isReactFunctionVariable(v)) {
+      return v;
+    }
+    return undefined;
   }
 
   public getComponentFromLoc(
@@ -1019,7 +1011,7 @@ export class FileDB {
     file.addVariableDependency(parent, dependency);
   }
 
-  public getRefTypeId(name: string, file: File) {
+  public getRefTypeId(name: string, file: File): string | undefined {
     const varId = file.getVariableID(name);
     if (varId) return varId;
 
@@ -1039,6 +1031,8 @@ export class FileDB {
         }
       }
     }
+
+    return undefined;
   }
 
   private updateTypeDataLiteral(
@@ -1322,13 +1316,17 @@ export class FileDB {
     return allResolved;
   }
 
-  public addTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
+  public addTsTypes(
+    fileName: string,
+    type:
+      | Omit<TypeDataDeclareInterface, "id">
+      | Omit<TypeDataDeclareType, "id">,
+  ) {
     const file = this.get(fileName);
 
-    const typeDeclare = {
-      id: file.getNewVarID(type.name, file.var),
-      ...type,
-    } as TypeDataDeclare;
+    const id = file.getNewVarID(type.name, file.var);
+    const typeDeclare: TypeDataDeclare =
+      type.type === "interface" ? { ...type, id } : { ...type, id };
 
     this.resolveTsTypeID(typeDeclare, file);
 

@@ -14,6 +14,8 @@ import VariableDeclarator from "./variableDeclaration.js";
 import JSXElement from "./JSXElement.js";
 import CallExpression from "./callExpression.js";
 import ReturnStatement from "./returnStatement.js";
+import ArrowFunctionExpression from "./arrowFunctionExpression.js";
+import FunctionExpression from "./functionExpression.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
 import type { JsonData, ComponentFile } from "shared";
@@ -135,6 +137,8 @@ async function analyzeFiles(
         FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
         VariableDeclarator: VariableDeclarator(componentDB, fileName),
         ReturnStatement: ReturnStatement(componentDB, fileName),
+        ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),
+        FunctionExpression: FunctionExpression(componentDB, fileName),
         ...JSXElement(componentDB, fileName),
         CallExpression: CallExpression(componentDB, fileName),
         TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),

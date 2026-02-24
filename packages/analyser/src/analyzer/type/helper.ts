@@ -13,6 +13,7 @@ import type {
 import * as t from "@babel/types";
 import assert from "assert";
 import type { FuncParam, TypeDataParamFunction } from "shared";
+import { generateFn } from "../../utils/babel.js";
 
 function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
   const data: TypeDataParamFunction = {
@@ -639,6 +640,15 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         };
       }
       break;
+    }
+    case "BinaryExpression": {
+      return {
+        type: "literal-type",
+        literal: {
+          type: "string",
+          value: generateFn(expr).code,
+        },
+      };
     }
     case "ArrayExpression": {
       const elements: PropDataType[] = [];

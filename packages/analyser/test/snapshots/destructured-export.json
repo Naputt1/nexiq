@@ -55,6 +55,51 @@
             "column": 13
           },
           "children": {}
+        },
+        "5e2f756077b3eac1": {
+          "id": "5e2f756077b3eac1",
+          "name": {
+            "type": "identifier",
+            "name": "anonymous@1:38",
+            "loc": {
+              "line": 1,
+              "column": 38
+            },
+            "id": ""
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/auth.tsx",
+          "hash": "9f05e909c5e629ac",
+          "dependencies": {},
+          "loc": {
+            "line": 1,
+            "column": 38
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 38
+            },
+            "end": {
+              "line": 1,
+              "column": 63
+            }
+          },
+          "return": {
+            "type": "literal-object",
+            "properties": {
+              "role": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "admin"
+                }
+              }
+            }
+          },
+          "children": {}
         }
       }
     },

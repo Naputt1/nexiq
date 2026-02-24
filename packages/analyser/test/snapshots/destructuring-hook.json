@@ -333,7 +333,12 @@
           "file": "/src/App.tsx",
           "hash": "d19be0b9f70be84f",
           "declarationKind": "const",
-          "dependencies": {},
+          "dependencies": {
+            "d48f99698bb52d8": {
+              "id": "d48f99698bb52d8",
+              "name": "createContext"
+            }
+          },
           "loc": {
             "line": 3,
             "column": 6
@@ -354,13 +359,52 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "69abf3e82444ce85",
+          "hash": "f5823d573d96d9f1",
           "dependencies": {},
           "loc": {
             "line": 5,
             "column": 9
           },
-          "var": {},
+          "var": {
+            "ab44bbf4daf26f38": {
+              "id": "ab44bbf4daf26f38",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@6:14",
+                "loc": {
+                  "line": 6,
+                  "column": 14
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/App.tsx",
+              "hash": "3d0f54d842093ba7",
+              "dependencies": {},
+              "loc": {
+                "line": 6,
+                "column": 14
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 6,
+                  "column": 14
+                },
+                "end": {
+                  "line": 6,
+                  "column": 34
+                }
+              },
+              "return": {
+                "type": "ref",
+                "refType": "named",
+                "name": "key"
+              },
+              "children": {}
+            }
+          },
           "scope": {
             "start": {
               "line": 5,
