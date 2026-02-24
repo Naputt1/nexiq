@@ -12,32 +12,6 @@ import type {
 } from "shared";
 import { getDeterministicId } from "../utils/hash.js";
 
-function getParentPath(nodePath: traverse.NodePath<t.Node>) {
-  const parentPath: string[] = [];
-  let path: traverse.NodePath<t.Node> = nodePath;
-  while (true) {
-    if (path.scope.block.type === "Program") {
-      break;
-    }
-
-    if (path.scope.block.type === "FunctionDeclaration") {
-      if (path.scope.block.id?.type === "Identifier") {
-        parentPath.push(path.scope.block.id.name);
-      }
-    } else if (path.scope.block.type === "ArrowFunctionExpression") {
-      if (path.scope.parentBlock.type == "VariableDeclarator") {
-        if (path.scope.parentBlock.id.type === "Identifier") {
-          parentPath.push(path.scope.parentBlock.id.name);
-        }
-      }
-    }
-
-    path = path.scope.parent.path;
-  }
-
-  return parentPath;
-}
-
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
   fileName: string,
@@ -53,16 +27,18 @@ export default function FunctionDeclaration(
       column: nodePath.node.id.loc.start.column,
     };
 
-    const componentId = getDeterministicId(`${fileName}:${name}`);
+    const componentId = getDeterministicId(fileName, name);
+
+    assert(nodePath.node.loc != null, "Function loc not found");
 
     const scope = {
       start: {
-        line: nodePath.node.id.loc.start.line,
-        column: nodePath.node.id.loc.start.column,
+        line: nodePath.node.loc.start.line,
+        column: nodePath.node.loc.start.column,
       },
       end: {
-        line: nodePath.node.id.loc.end.line,
-        column: nodePath.node.id.loc.end.column,
+        line: nodePath.node.loc.end.line,
+        column: nodePath.node.loc.end.column,
       },
     };
 
@@ -125,24 +101,18 @@ export default function FunctionDeclaration(
         nodePath.scope.block.type === "FunctionDeclaration" &&
         nodePath.scope.block.id?.type === "Identifier"
       ) {
-        const parentPath = getParentPath(nodePath.scope.parent.path);
-
-        componentDB.addVariable(
-          fileName,
-          {
-            name: pattern,
-            dependencies: {},
-            type: "function",
-            loc,
-            scope,
-            children: {},
-            var: {},
-          } as Omit<
-            ComponentFileVarNormalFunction,
-            "kind" | "file" | "id" | "var" | "components" | "hash"
-          >,
-          parentPath,
-        );
+        componentDB.addVariable(fileName, {
+          name: pattern,
+          dependencies: {},
+          type: "function",
+          loc,
+          scope,
+          children: {},
+          var: {},
+        } as Omit<
+          ComponentFileVarNormalFunction,
+          "kind" | "file" | "id" | "var" | "components" | "hash"
+        >);
       }
     }
   };

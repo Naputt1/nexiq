@@ -1,6 +1,10 @@
-import type { ComponentFileVar } from "shared";
+import type { ComponentFileVar, VariableLoc, VariableScope } from "shared";
 import type { Variable } from "./variable.js";
-import { isBaseFunctionVariable } from "./type.js";
+import {
+  isBaseFunctionVariable,
+  isComponentVariable,
+  isHookVariable,
+} from "./type.js";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
@@ -16,6 +20,43 @@ export class Scope {
     public parent?: Scope,
     public owner?: Variable,
   ) {}
+
+  public static isLocInScope(loc: VariableLoc, scope: VariableScope): boolean {
+    if (loc.line < scope.start.line || loc.line > scope.end.line) return false;
+    if (loc.line === scope.start.line && loc.column < scope.start.column)
+      return false;
+    if (loc.line === scope.end.line && loc.column > scope.end.column)
+      return false;
+    return true;
+  }
+
+  public findDeepestScope(loc: VariableLoc): Scope {
+    for (const v of this.variables.values()) {
+      if (isBaseFunctionVariable(v)) {
+        if (v.scope && Scope.isLocInScope(loc, v.scope)) {
+          return v.var.findDeepestScope(loc);
+        }
+      }
+    }
+    return this;
+  }
+
+  public findDeepestVariable(loc: VariableLoc): Variable | undefined {
+    for (const v of this.variables.values()) {
+      if (isBaseFunctionVariable(v)) {
+        if (v.scope && Scope.isLocInScope(loc, v.scope)) {
+          const inner = v.var.findDeepestVariable(loc);
+          if (inner) return inner;
+
+          if (isComponentVariable(v) || isHookVariable(v)) {
+            return v;
+          }
+        }
+      }
+    }
+
+    return undefined;
+  }
 
   public initPrevIds(vars: Record<string, ComponentFileVar>) {
     for (const v of Object.values(vars || {})) {
@@ -80,20 +121,6 @@ export class Scope {
 
   public getIdByName(name: string): string | undefined {
     return this.nameToId.get(name);
-  }
-
-  public getByPath(path: string[]): Scope | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let current: Scope = this;
-    for (let i = path.length - 1; i >= 0; i--) {
-      const v = current.getByName(path[i]!);
-      if (v && isBaseFunctionVariable(v)) {
-        current = v.var;
-      } else {
-        return undefined;
-      }
-    }
-    return current;
   }
 
   public values() {

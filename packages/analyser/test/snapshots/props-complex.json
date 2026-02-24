@@ -2,7 +2,7 @@
   "files": {
     "/src/App.tsx": {
       "path": "/src/App.tsx",
-      "hash": "2f43f9bdc2740307",
+      "hash": "7df77c191cf1f52f",
       "import": {
         "React": {
           "localName": "React",
@@ -102,13 +102,36 @@
         }
       },
       "var": {
+        "dc80f04b65eb748d": {
+          "id": "dc80f04b65eb748d",
+          "name": {
+            "type": "identifier",
+            "name": "a",
+            "loc": {
+              "line": 12,
+              "column": 6
+            },
+            "id": "e6c632b61e964e1f"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/App.tsx",
+          "hash": "b0ff46fa2e6d74fa",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 12,
+            "column": 6
+          },
+          "children": {}
+        },
         "c03f8e59d14c727c": {
           "id": "c03f8e59d14c727c",
           "name": {
             "type": "identifier",
             "name": "ComplexProps",
             "loc": {
-              "line": 12,
+              "line": 14,
               "column": 13
             },
             "id": "dfab3f6e914f770"
@@ -116,11 +139,11 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "4f754af51d99495c",
+          "hash": "329613604d9309ec",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 12,
+            "line": 14,
             "column": 13
           },
           "var": {
@@ -130,58 +153,91 @@
                 "type": "identifier",
                 "name": "refX",
                 "loc": {
-                  "line": 17,
+                  "line": 25,
                   "column": 8
                 },
-                "id": "33dd827779de31d2"
+                "id": "b8e78fdf3a5c884e"
               },
               "kind": "ref",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "de0a84717d2f03e7",
+              "hash": "6034fa0b98023a5",
               "dependencies": {},
               "loc": {
-                "line": 17,
+                "line": 25,
                 "column": 8
               },
               "defaultData": {
                 "type": "ref",
                 "refType": "named",
-                "name": "dfab3f6e914f770:prop:x"
+                "name": "c03f8e59d14c727c:prop:x"
               }
             },
-            "c03f8e59d14c727c:state:stateX": {
-              "id": "c03f8e59d14c727c:state:stateX",
+            "c03f8e59d14c727c:state:[stateX, setStateX]": {
+              "id": "c03f8e59d14c727c:state:[stateX, setStateX]",
               "name": {
-                "type": "identifier",
-                "name": "stateX",
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "stateX",
+                      "loc": {
+                        "line": 26,
+                        "column": 9
+                      },
+                      "id": "3a2be848cadeb6e5"
+                    },
+                    "loc": {
+                      "line": 26,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setStateX",
+                      "loc": {
+                        "line": 26,
+                        "column": 17
+                      },
+                      "id": "4227da83256b8664"
+                    },
+                    "loc": {
+                      "line": 26,
+                      "column": 17
+                    }
+                  }
+                ],
+                "raw": "[stateX, setStateX]",
                 "loc": {
-                  "line": 18,
-                  "column": 9
+                  "line": 26,
+                  "column": 8
                 },
-                "id": "e27bd3272ae701c1"
+                "id": "65beeb58fc140d46"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "c5091ee0394e3492",
+              "hash": "33fcb492e26072c1",
               "dependencies": {},
               "loc": {
-                "line": 18,
-                "column": 9
-              },
-              "setter": "setStateX"
+                "line": 26,
+                "column": 8
+              }
             },
-            "e09c3d5d651bb63e": {
-              "id": "e09c3d5d651bb63e",
+            "486f8c03b42afb2f": {
+              "id": "486f8c03b42afb2f",
               "name": {
                 "type": "identifier",
-                "name": "jsx@49:4",
+                "name": "jsx@57:4",
                 "loc": {
-                  "line": 49,
+                  "line": 57,
                   "column": 4
                 },
-                "id": "9ed988e627142d52"
+                "id": "544dc0d968dfb374"
               },
               "kind": "normal",
               "type": "jsx",
@@ -198,7 +254,7 @@
                 }
               },
               "loc": {
-                "line": 49,
+                "line": 57,
                 "column": 4
               },
               "tag": "div",
@@ -209,24 +265,24 @@
           },
           "scope": {
             "start": {
-              "line": 12,
-              "column": 13
+              "line": 14,
+              "column": 28
             },
             "end": {
-              "line": 12,
-              "column": 25
+              "line": 61,
+              "column": 1
             }
           },
           "return": {
-            "id": "e09c3d5d651bb63e",
+            "id": "486f8c03b42afb2f",
             "name": {
               "type": "identifier",
-              "name": "jsx@49:4",
+              "name": "jsx@57:4",
               "loc": {
-                "line": 49,
+                "line": 57,
                 "column": 4
               },
-              "id": "9ed988e627142d52"
+              "id": "544dc0d968dfb374"
             },
             "kind": "normal",
             "type": "jsx",
@@ -243,7 +299,7 @@
               }
             },
             "loc": {
-              "line": 49,
+              "line": 57,
               "column": 4
             },
             "tag": "div",
@@ -252,52 +308,52 @@
             "srcId": "div"
           },
           "children": {
-            "31a6c01d9836d24b": {
+            "9be1ac48bcec2adc": {
               "id": "div",
-              "instanceId": "31a6c01d9836d24b",
+              "instanceId": "9be1ac48bcec2adc",
               "tag": "div",
               "dependencies": [],
               "isDependency": false,
               "loc": {
-                "line": 49,
+                "line": 57,
                 "column": 4
               },
               "children": {}
             }
           },
           "states": [
-            "c03f8e59d14c727c:state:stateX"
+            "c03f8e59d14c727c:state:[stateX, setStateX]"
           ],
           "props": [
             {
-              "id": "dfab3f6e914f770:prop:a",
+              "id": "c03f8e59d14c727c:prop:a",
               "name": "a",
               "type": "any",
               "kind": "prop",
               "hash": "7b4f711815f3c819"
             },
             {
-              "id": "dfab3f6e914f770:prop:b",
+              "id": "c03f8e59d14c727c:prop:b",
               "name": "b",
               "type": "any",
               "kind": "prop",
               "props": [
                 {
-                  "id": "dfab3f6e914f770:prop:x",
+                  "id": "c03f8e59d14c727c:prop:x",
                   "name": "x",
                   "type": "any",
                   "kind": "prop",
                   "hash": "d219a1297e37127d"
                 },
                 {
-                  "id": "dfab3f6e914f770:prop:rename",
+                  "id": "c03f8e59d14c727c:prop:rename",
                   "name": "rename",
                   "type": "any",
                   "kind": "prop",
                   "hash": "ae999b01b5fb9295"
                 },
                 {
-                  "id": "dfab3f6e914f770:prop:restInner",
+                  "id": "c03f8e59d14c727c:prop:restInner",
                   "name": "restInner",
                   "type": "any",
                   "kind": "spread",
@@ -307,7 +363,91 @@
               "hash": "a513527c2c02d974"
             },
             {
-              "id": "dfab3f6e914f770:prop:restOuter",
+              "id": "c03f8e59d14c727c:prop:defaultString",
+              "name": "defaultString",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "default"
+                }
+              },
+              "hash": "d2e4ce4f0ee2e4d1"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:defaultBool",
+              "name": "defaultBool",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              "hash": "b674965281eab9a1"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:defaultNumber",
+              "name": "defaultNumber",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "number",
+                  "value": 0
+                }
+              },
+              "hash": "d950bb762c84b4fa"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:defaultArray",
+              "name": "defaultArray",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "literal-array",
+                "elements": []
+              },
+              "hash": "18941f3d2ef20b20"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:defaultObject",
+              "name": "defaultObject",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "literal-object",
+                "properties": {
+                  "test": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "test"
+                    }
+                  }
+                }
+              },
+              "hash": "80c2132641adc243"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:defaultRef",
+              "name": "defaultRef",
+              "type": "any",
+              "kind": "prop",
+              "defaultValue": {
+                "type": "ref",
+                "refType": "named",
+                "name": "a"
+              },
+              "hash": "c0cfcf767e86b3b5"
+            },
+            {
+              "id": "c03f8e59d14c727c:prop:restOuter",
               "name": "restOuter",
               "type": "any",
               "kind": "spread",
@@ -316,52 +456,6 @@
           ],
           "hooks": [],
           "effects": {
-            "c03f8e59d14c727c:effect:20:2": {
-              "id": "c03f8e59d14c727c:effect:20:2",
-              "scope": {
-                "start": {
-                  "line": 20,
-                  "column": 18
-                },
-                "end": {
-                  "line": 22,
-                  "column": 3
-                }
-              },
-              "loc": {
-                "line": 20,
-                "column": 2
-              },
-              "reactDeps": [
-                {
-                  "id": "dfab3f6e914f770:prop:a",
-                  "name": "a"
-                }
-              ]
-            },
-            "c03f8e59d14c727c:effect:24:2": {
-              "id": "c03f8e59d14c727c:effect:24:2",
-              "scope": {
-                "start": {
-                  "line": 24,
-                  "column": 18
-                },
-                "end": {
-                  "line": 26,
-                  "column": 3
-                }
-              },
-              "loc": {
-                "line": 24,
-                "column": 2
-              },
-              "reactDeps": [
-                {
-                  "id": "dfab3f6e914f770:prop:x",
-                  "name": "x"
-                }
-              ]
-            },
             "c03f8e59d14c727c:effect:28:2": {
               "id": "c03f8e59d14c727c:effect:28:2",
               "scope": {
@@ -380,8 +474,8 @@
               },
               "reactDeps": [
                 {
-                  "id": "dfab3f6e914f770:prop:restInner",
-                  "name": "restInner"
+                  "id": "c03f8e59d14c727c:prop:a",
+                  "name": "a"
                 }
               ]
             },
@@ -403,8 +497,8 @@
               },
               "reactDeps": [
                 {
-                  "id": "dfab3f6e914f770:prop:restOuter",
-                  "name": "restOuter"
+                  "id": "c03f8e59d14c727c:prop:x",
+                  "name": "x"
                 }
               ]
             },
@@ -426,8 +520,8 @@
               },
               "reactDeps": [
                 {
-                  "id": "c03f8e59d14c727c:state:stateX",
-                  "name": "stateX"
+                  "id": "c03f8e59d14c727c:prop:restInner",
+                  "name": "restInner"
                 }
               ]
             },
@@ -449,8 +543,8 @@
               },
               "reactDeps": [
                 {
-                  "id": "c03f8e59d14c727c:ref:refX",
-                  "name": "refX"
+                  "id": "c03f8e59d14c727c:prop:restOuter",
+                  "name": "restOuter"
                 }
               ]
             },
@@ -470,15 +564,63 @@
                 "line": 44,
                 "column": 2
               },
-              "reactDeps": []
+              "reactDeps": [
+                {
+                  "id": "65beeb58fc140d46:3a2be848cadeb6e5",
+                  "name": "stateX"
+                }
+              ]
+            },
+            "c03f8e59d14c727c:effect:48:2": {
+              "id": "c03f8e59d14c727c:effect:48:2",
+              "scope": {
+                "start": {
+                  "line": 48,
+                  "column": 18
+                },
+                "end": {
+                  "line": 50,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 48,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "c03f8e59d14c727c:ref:refX",
+                  "name": "refX"
+                }
+              ]
+            },
+            "c03f8e59d14c727c:effect:52:2": {
+              "id": "c03f8e59d14c727c:effect:52:2",
+              "scope": {
+                "start": {
+                  "line": 52,
+                  "column": 18
+                },
+                "end": {
+                  "line": 54,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 52,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "c03f8e59d14c727c:ref:refX",
+                  "name": "refX.current"
+                }
+              ]
             }
           },
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false,
-          "propType": {
-            "type": "any"
-          }
+          "forwardRef": false
         }
       }
     }
@@ -486,7 +628,7 @@
   "edges": [
     {
       "from": "c03f8e59d14c727c",
-      "to": "e09c3d5d651bb63e",
+      "to": "486f8c03b42afb2f",
       "label": "render"
     },
     {
@@ -495,12 +637,12 @@
       "label": "render"
     },
     {
-      "from": "e09c3d5d651bb63e",
+      "from": "486f8c03b42afb2f",
       "to": "e6c632b61e964e1f",
       "label": "hook"
     },
     {
-      "from": "e09c3d5d651bb63e",
+      "from": "486f8c03b42afb2f",
       "to": "eaf06c6480b2cd11",
       "label": "hook"
     }

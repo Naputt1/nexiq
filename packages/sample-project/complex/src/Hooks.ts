@@ -16,3 +16,15 @@ export function useCustomHook(initialValue: number) {
 export const useOtherHook = () => {
   return "constant";
 };
+
+export function useClickOutsideRef(ref: any, handler: any = () => {}) {
+  useEffect(() => {
+    const onMouseDown = (event: any) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        handler(event);
+      }
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [ref, handler]);
+}

@@ -4,6 +4,7 @@ import type { ComponentDB } from "../db/componentDB.js";
 import { isHook } from "../utils.js";
 import type { ReactDependency, VariableLoc, VariableScope } from "shared";
 import assert from "assert";
+import { generateFn } from "../utils/babel.js";
 
 export default function CallExpression(
   componentDB: ComponentDB,
@@ -12,6 +13,13 @@ export default function CallExpression(
   return (nodePath) => {
     const callee = nodePath.node.callee;
     if (callee.type !== "Identifier") return;
+
+    assert(nodePath.node.loc?.start != null, "Function loc not found");
+
+    const callLoc = {
+      line: nodePath.node.loc.start.line,
+      column: nodePath.node.loc.start.column,
+    };
 
     const fn = callee.name;
     const parentFunc = nodePath.getFunctionParent();
@@ -68,13 +76,6 @@ export default function CallExpression(
 
       let scope: VariableScope | undefined;
 
-      assert(nodePath.node.loc?.start != null, "Function loc not found");
-
-      const effectLoc = {
-        line: nodePath.node.loc.start.line,
-        column: nodePath.node.loc.start.column,
-      };
-
       if (effect && effect.type == "ArrowFunctionExpression") {
         if (effect.body.type == "BlockStatement") {
           assert(effect.body.loc != null, "Function body loc not found");
@@ -97,29 +98,26 @@ export default function CallExpression(
       const reactDeps: ReactDependency[] = [];
       if (dependencies && dependencies.type == "ArrayExpression") {
         for (const element of dependencies.elements) {
-          if (element == null) continue;
+          if (element == null || !t.isExpression(element)) continue;
 
-          if (element.type == "Identifier") {
-            reactDeps.push({ id: "", name: element.name });
-          } else {
-            debugger;
-          }
+          const name = t.isIdentifier(element)
+            ? element.name
+            : generateFn(element).code;
+          reactDeps.push({ id: "", name });
         }
-      } else {
-        debugger;
       }
 
-      if (loc && scope) {
-        componentDB.comAddEffect(fileName, loc, {
+      if (scope) {
+        componentDB.comAddEffect(fileName, callLoc, {
           scope,
-          loc: effectLoc,
+          loc: callLoc,
           reactDeps,
         });
       }
     }
 
     if (compName && loc && isHook(fn)) {
-      componentDB.comAddHook(compName, loc, fileName, fn);
+      componentDB.comAddHook(fn, callLoc, fileName, fn);
     }
   };
 }

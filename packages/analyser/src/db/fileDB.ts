@@ -27,7 +27,6 @@ import type {
   TypeDataTypeBodyParathesis,
   TypeDataTypeBodyUnion,
   VariableLoc,
-  VariableScope,
   VariableName,
   ComponentFileVarHook,
   FunctionReturn,
@@ -90,8 +89,6 @@ export class File {
   defaultExport: string | null;
   tsTypes: Map<string, TypeDataDeclare>;
   var: Scope;
-
-  scopes = new Set<Variable<"function">>();
 
   private init: boolean = true;
 
@@ -162,9 +159,6 @@ export class File {
     assert(v != null, `Variable not found: ${variable.kind}`);
 
     scope.add(v);
-    if (isBaseFunctionVariable(v)) {
-      this.scopes.add(v);
-    }
 
     this.locIdsMap.set(this.getLocalId(v), v);
 
@@ -314,11 +308,8 @@ export class File {
     return `${variable.loc.line}@${variable.loc.column}`;
   }
 
-  public addVariable(variable: Variable, parentPath?: string[]): string {
-    const scope =
-      parentPath && parentPath.length > 0
-        ? this.var.getByPath(parentPath)
-        : this.var;
+  public addVariable(variable: Variable): string {
+    const scope = this.var.findDeepestScope(variable.loc);
 
     if (scope == null) {
       debugger;
@@ -337,10 +328,6 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
-    if (isBaseFunctionVariable(variable)) {
-      this.scopes.add(variable);
-    }
-
     if (isJSXVariable(variable)) {
       this.getDependenciesIds(variable.id, variable.props);
     }
@@ -358,7 +345,6 @@ export class File {
     if (component == null) return "no-parent";
 
     const variable = component.addMemo(memo);
-    this.scopes.add(variable);
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
     return variable.id;
@@ -372,7 +358,6 @@ export class File {
     if (component == null) return "no-parent";
 
     const variable = component.addCallback(callback);
-    this.scopes.add(variable);
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
     return variable.id;
@@ -553,15 +538,14 @@ export class File {
   public getHookInfoFromLoc(
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
-    const variable = this.getVariable(loc);
-    if (
-      variable &&
-      (isHookVariable(variable) || isComponentVariable(variable))
-    ) {
-      return variable;
+    const exact = this.getVariable(loc);
+    if (exact && (isHookVariable(exact) || isComponentVariable(exact))) {
+      return exact as ReactFunctionVariable;
     }
 
-    return undefined;
+    return this.var.findDeepestVariable(loc) as
+      | ReactFunctionVariable
+      | undefined;
   }
 
   public getData(): ComponentFile {
@@ -591,6 +575,7 @@ export class File {
       v = this.var.get(parent, true);
     }
 
+    if (v == null) debugger;
     if (v == null) return;
     if (v.kind == "component") return;
     assert(v != null, "Parent variable not found");
@@ -695,40 +680,6 @@ export class File {
     return null;
   }
 
-  public getScope(scope: VariableScope) {
-    for (const s of this.scopes) {
-      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
-
-      if (
-        s.scope?.start.line == scope.start.line &&
-        s.scope?.start.column == scope.start.column &&
-        s.scope?.end.line == scope.end.line &&
-        s.scope?.end.column == scope.end.column
-      ) {
-        return s;
-      }
-    }
-
-    return null;
-  }
-
-  public getScopeFromLoc(loc: VariableLoc) {
-    for (const s of this.scopes) {
-      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
-
-      if (
-        s.scope?.start.line == loc.line &&
-        s.scope?.start.column == loc.column &&
-        s.scope?.end.line == loc.line &&
-        s.scope?.end.column == loc.column
-      ) {
-        return s;
-      }
-    }
-
-    return null;
-  }
-
   public getTypeFromName(name: string) {
     return this.tsTypesID.get(name);
   }
@@ -749,7 +700,6 @@ export class File {
   }
 
   public addRender(
-    comLoc: string,
     srcId: string,
     instanceId: string,
     tag: string,
@@ -758,9 +708,8 @@ export class File {
     loc: VariableLoc,
     parentId?: string,
   ) {
-    const variable = this.locIdsMap.get(comLoc);
+    const variable = this.getHookInfoFromLoc(loc);
     if (variable == null) return;
-    if (!variable) return;
     this.getDependenciesIds(variable.id, dependencies);
 
     if (loc) {
@@ -828,7 +777,7 @@ export class File {
   }
 
   public addEffect(loc: VariableLoc, effect: Omit<EffectInfo, "id">) {
-    const variable = this.getVariable(loc);
+    const variable = this.getHookInfoFromLoc(loc);
 
     if (variable == null) return;
 
@@ -838,7 +787,7 @@ export class File {
   }
 
   public setReturn(loc: VariableLoc, returnId: FunctionReturn) {
-    const variable = this.getVariable(loc);
+    const variable = this.getHookInfoFromLoc(loc);
 
     if (variable && isBaseFunctionVariable(variable)) {
       variable.return = returnId;
@@ -975,15 +924,11 @@ export class FileDB {
     return file.defaultExport;
   }
 
-  public addVariable(
-    fileName: string,
-    variable: Variable,
-    parentPath?: string[],
-  ) {
+  public addVariable(fileName: string, variable: Variable) {
     // resolve propType
     const file = this.get(fileName);
 
-    return file.addVariable(variable, parentPath);
+    return file.addVariable(variable);
   }
 
   public addMemo(
@@ -1164,7 +1109,34 @@ export class FileDB {
     parenthesis: (db, td: TypeDataTypeBodyParathesis, file, params) =>
       db.updateTypeDataID(td.members, file, params),
     "type-literal": (db, td: TypeDataTypeBodyLiteral, file, params) =>
-      td.members.every((m) => db.updateTypeDataID(m.type, file, params)),
+      td.members.every((m) => {
+        if (m.signatureType === "method") {
+          for (const p of m.parameters) {
+            if (p.typeData && !db.updateTypeDataID(p.typeData, file, params)) {
+              return false;
+            }
+          }
+
+          for (const param of m.params) {
+            if (
+              param.constraint &&
+              !db.updateTypeDataID(param.constraint, file, params)
+            ) {
+              return false;
+            }
+            if (
+              param.default &&
+              !db.updateTypeDataID(param.default, file, params)
+            ) {
+              return false;
+            }
+          }
+
+          return db.updateTypeDataID(m.return, file, params);
+        }
+
+        return db.updateTypeDataID(m.type, file, params);
+      }),
     "literal-type": (
       db,
       td: { literal: TypeDataLiteralTypeLiteral },
@@ -1307,8 +1279,38 @@ export class FileDB {
       }
 
       for (const body of typeDeclare.body) {
-        if (!this.updateTypeDataID(body.type, file, params)) {
-          allResolved = false;
+        if (body.signatureType === "method") {
+          for (const p of body.parameters) {
+            if (
+              p.typeData &&
+              !this.updateTypeDataID(p.typeData, file, params)
+            ) {
+              allResolved = false;
+            }
+          }
+
+          for (const param of body.params) {
+            if (
+              param.constraint &&
+              !this.updateTypeDataID(param.constraint, file, params)
+            ) {
+              allResolved = false;
+            }
+            if (
+              param.default &&
+              !this.updateTypeDataID(param.default, file, params)
+            ) {
+              allResolved = false;
+            }
+          }
+
+          if (!this.updateTypeDataID(body.return, file, params)) {
+            allResolved = false;
+          }
+        } else {
+          if (!this.updateTypeDataID(body.type, file, params)) {
+            allResolved = false;
+          }
         }
       }
     } else if (typeDeclare.type === "type") {
@@ -1337,7 +1339,6 @@ export class FileDB {
 
   public addRender(
     fileName: string,
-    comLoc: string,
     srcId: string,
     instanceId: string,
     tag: string,
@@ -1349,7 +1350,6 @@ export class FileDB {
     const file = this.get(fileName);
 
     return file.addRender(
-      comLoc,
       srcId,
       instanceId,
       tag,

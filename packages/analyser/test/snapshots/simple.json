@@ -198,7 +198,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "6072fe7b8a820422",
+          "hash": "f9265b2960648924",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -234,11 +234,11 @@
           "scope": {
             "start": {
               "line": 3,
-              "column": 16
+              "column": 7
             },
             "end": {
-              "line": 3,
-              "column": 21
+              "line": 10,
+              "column": 1
             }
           },
           "return": {
@@ -283,7 +283,7 @@
           "states": [],
           "props": [
             {
-              "id": "c8f7739ce29d1ce0:prop:user",
+              "id": "8058275cdfd1a41c:prop:user",
               "name": "user",
               "type": "{\n  name: string;\n}",
               "kind": "prop",
@@ -423,54 +423,105 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "6dbdcf3f6c7994cf",
+          "hash": "1bc424f8da5c25e3",
           "dependencies": {},
           "loc": {
             "line": 12,
             "column": 9
           },
           "var": {
-            "311c554b828f67a5:state:count": {
-              "id": "311c554b828f67a5:state:count",
+            "311c554b828f67a5:state:[count, setCount]": {
+              "id": "311c554b828f67a5:state:[count, setCount]",
               "name": {
-                "type": "identifier",
-                "name": "count",
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "count",
+                      "loc": {
+                        "line": 13,
+                        "column": 9
+                      },
+                      "id": "10de422fa6270553"
+                    },
+                    "loc": {
+                      "line": 13,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setCount",
+                      "loc": {
+                        "line": 13,
+                        "column": 16
+                      },
+                      "id": "1647a9d2bdd5ecd"
+                    },
+                    "loc": {
+                      "line": 13,
+                      "column": 16
+                    }
+                  }
+                ],
+                "raw": "[count, setCount]",
                 "loc": {
                   "line": 13,
-                  "column": 9
+                  "column": 8
                 },
-                "id": "adc7e27a4dab499c"
+                "id": "65beeb58fc140d46"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "c4e3f79b6f80868a",
+              "hash": "39778e3c4556a814",
               "dependencies": {},
               "loc": {
                 "line": 13,
-                "column": 9
-              },
-              "setter": "setCount"
+                "column": 8
+              }
             },
-            "311c554b828f67a5:state:user": {
-              "id": "311c554b828f67a5:state:user",
+            "311c554b828f67a5:state:[user]": {
+              "id": "311c554b828f67a5:state:[user]",
               "name": {
-                "type": "identifier",
-                "name": "user",
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "user",
+                      "loc": {
+                        "line": 14,
+                        "column": 9
+                      },
+                      "id": "a17008bc68eae07d"
+                    },
+                    "loc": {
+                      "line": 14,
+                      "column": 9
+                    }
+                  }
+                ],
+                "raw": "[user]",
                 "loc": {
                   "line": 14,
-                  "column": 9
+                  "column": 8
                 },
-                "id": "e4b71564275c75e4"
+                "id": "65beeb58fc140d46"
               },
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "37db5747f82381bb",
+              "hash": "c16a125cd7604367",
               "dependencies": {},
               "loc": {
                 "line": 14,
-                "column": 9
+                "column": 8
               }
             },
             "cea4e20c8758f48c": {
@@ -1664,7 +1715,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "5dd702bca85c3db8",
+              "hash": "e37c502994166f75",
               "dependencies": {
                 "99e389d25c10af32": {
                   "id": "99e389d25c10af32",
@@ -1685,7 +1736,7 @@
                     "refType": "named",
                     "name": "user"
                   },
-                  "valueId": "e4b71564275c75e4"
+                  "valueId": "65beeb58fc140d46:a17008bc68eae07d"
                 }
               ],
               "children": {},
@@ -1695,11 +1746,11 @@
           "scope": {
             "start": {
               "line": 12,
-              "column": 9
+              "column": 0
             },
             "end": {
-              "line": 12,
-              "column": 12
+              "line": 43,
+              "column": 1
             }
           },
           "return": {
@@ -2364,7 +2415,7 @@
                     "refType": "named",
                     "name": "user"
                   },
-                  "valueId": "e4b71564275c75e4"
+                  "valueId": "65beeb58fc140d46:a17008bc68eae07d"
                 }
               ],
               "isDependency": false,
@@ -2377,8 +2428,8 @@
             }
           },
           "states": [
-            "311c554b828f67a5:state:count",
-            "311c554b828f67a5:state:user"
+            "311c554b828f67a5:state:[count, setCount]",
+            "311c554b828f67a5:state:[user]"
           ],
           "props": [],
           "hooks": [],
@@ -2419,7 +2470,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "ba46ec1685115686",
+          "hash": "3fbfbedd0f403ee3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2456,11 +2507,11 @@
           "scope": {
             "start": {
               "line": 1,
-              "column": 6
+              "column": 13
             },
             "end": {
-              "line": 1,
-              "column": 10
+              "line": 3,
+              "column": 1
             }
           },
           "return": {
@@ -2542,7 +2593,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "cf9e8006ad98171",
+          "hash": "46df097fffed6a34",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -2578,11 +2629,11 @@
           "scope": {
             "start": {
               "line": 1,
-              "column": 24
+              "column": 15
             },
             "end": {
-              "line": 1,
-              "column": 28
+              "line": 3,
+              "column": 1
             }
           },
           "return": {
@@ -2664,7 +2715,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "bbd807d22c7e9576",
+          "hash": "410c774473518105",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -2699,11 +2750,11 @@
           "scope": {
             "start": {
               "line": 1,
-              "column": 9
+              "column": 0
             },
             "end": {
-              "line": 1,
-              "column": 13
+              "line": 5,
+              "column": 1
             }
           },
           "children": {}

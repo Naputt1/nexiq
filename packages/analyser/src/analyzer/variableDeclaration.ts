@@ -25,33 +25,6 @@ import { getPattern, getVariableNameKey } from "./pattern.js";
 import { getDeterministicId } from "../utils/hash.js";
 import { getVariableComponentName } from "../variable.js";
 import { generateFn } from "../utils/babel.js";
-import { isJSXVariable } from "../db/variable/type.js";
-
-function getParentPath(nodePath: traverse.NodePath<t.VariableDeclarator>) {
-  const parentPath: string[] = [];
-  let path: traverse.NodePath<t.Node> = nodePath;
-  while (true) {
-    if (path.scope.block.type === "Program") {
-      break;
-    }
-
-    if (path.scope.block.type === "FunctionDeclaration") {
-      if (path.scope.block.id?.type === "Identifier") {
-        parentPath.push(path.scope.block.id.name);
-      }
-    } else if (path.scope.block.type === "ArrowFunctionExpression") {
-      if (path.scope.parentBlock.type == "VariableDeclarator") {
-        if (path.scope.parentBlock.id.type === "Identifier") {
-          parentPath.push(path.scope.parentBlock.id.name);
-        }
-      }
-    }
-
-    path = path.scope.parent.path;
-  }
-
-  return parentPath;
-}
 
 export default function VariableDeclarator(
   componentDB: ComponentDB,
@@ -72,13 +45,8 @@ export default function VariableDeclarator(
           extra: { scope: VariableScope; reactDeps: ReactDependency[] };
         }
       | { type: "ref"; extra: { defaultData: PropDataType } }
-      | {
-          type: "hook";
-          extra: {
-            dependencies: Record<string, ComponentFileVarDependency>;
-            call: { id: string; name: string };
-          };
-        },
+      | { type: "hook"; extra: { call: { id: string; name: string } } }
+      | null,
   ): string | undefined => {
     const init = nodePath.node.init;
     const declarationKind =
@@ -91,27 +59,15 @@ export default function VariableDeclarator(
       column: nodePath.node.id.loc!.start.column,
     };
 
-    const scope = {
-      start: {
-        line: nodePath.node.id.loc!.start.line,
-        column: nodePath.node.id.loc!.start.column,
-      },
-      end: {
-        line: nodePath.node.id.loc!.end.line,
-        column: nodePath.node.id.loc!.end.column,
-      },
-    };
+    const pLoc = pId?.loc
+      ? { line: pId.loc.start.line, column: pId.loc.start.column }
+      : loc;
 
-    if (pId == null) return undefined;
-    const pattern = getPattern(pId, pParentId);
-    const nameKey = getVariableNameKey(pattern);
-    const componentId = getDeterministicId(nameKey);
-
-    if (pId.loc == null) return undefined;
-    const pLoc = {
-      line: pId.loc.start.line,
-      column: pId.loc.start.column,
-    };
+    const pattern = getPattern(pId || nodePath.node.id);
+    const componentId = getDeterministicId(
+      fileName,
+      getVariableNameKey(pattern),
+    );
 
     let currentId: string | undefined;
 
@@ -120,7 +76,7 @@ export default function VariableDeclarator(
         const name = getVariableComponentName(nodePath);
 
         if (name) {
-          currentId = componentDB.comAddState(name.name, name.loc, fileName, {
+          currentId = componentDB.comAddState(name.name, pLoc, fileName, {
             name: pattern,
             loc: pLoc,
             ...special.extra,
@@ -129,7 +85,7 @@ export default function VariableDeclarator(
       } else if (special.type === "memo") {
         const parent = getVariableComponentName(nodePath);
         if (parent != null) {
-          currentId = componentDB.comAddMemo(parent.loc, fileName, {
+          currentId = componentDB.comAddMemo(pLoc, fileName, {
             name: pattern,
             loc: pLoc,
             ...special.extra,
@@ -138,7 +94,7 @@ export default function VariableDeclarator(
       } else if (special.type === "callback") {
         const parent = getVariableComponentName(nodePath);
         if (parent != null) {
-          currentId = componentDB.comAddCallback(parent.loc, fileName, {
+          currentId = componentDB.comAddCallback(pLoc, fileName, {
             name: pattern,
             loc: pLoc,
             ...special.extra,
@@ -147,7 +103,7 @@ export default function VariableDeclarator(
       } else if (special.type === "ref") {
         const parent = getVariableComponentName(nodePath);
         if (parent != null) {
-          currentId = componentDB.comAddRef(parent.loc, fileName, {
+          currentId = componentDB.comAddRef(pLoc, fileName, {
             name: pattern,
             loc: pLoc,
             ...special.extra,
@@ -156,9 +112,10 @@ export default function VariableDeclarator(
       } else if (special.type === "hook") {
         const parent = getVariableComponentName(nodePath);
         if (parent != null) {
-          currentId = componentDB.comAddCallHook(parent.loc, fileName, {
+          currentId = componentDB.comAddCallHook(pLoc, fileName, {
             name: pattern,
             loc: pLoc,
+            dependencies: {},
             ...special.extra,
           });
         }
@@ -183,7 +140,18 @@ export default function VariableDeclarator(
         const innerFn = innerFnPath?.node;
 
         if (innerFn && returnJSX(innerFn)) {
-          const parentPath = getParentPath(nodePath);
+          assert(innerFn.loc != null, "Function loc not found");
+          const scope = {
+            start: {
+              line: innerFn.loc.start.line,
+              column: innerFn.loc.start.column,
+            },
+            end: {
+              line: innerFn.loc.end.line,
+              column: innerFn.loc.end.column,
+            },
+          };
+
           const component: Omit<
             ComponentFileVarComponent,
             "id" | "kind" | "states" | "hash" | "file"
@@ -226,20 +194,8 @@ export default function VariableDeclarator(
               nodePath.node.init?.type === "ArrowFunctionExpression" ||
               nodePath.node.init?.type === "FunctionExpression"
             ) {
-              if (
-                (nodePath.node.init?.type === "ArrowFunctionExpression" ||
-                  nodePath.node.init?.type === "FunctionExpression") &&
-                nodePath.node.init.params.length > 0 &&
-                nodePath.node.init.params[0]!.type === "ObjectPattern" &&
-                nodePath.node.init.params[0]!.typeAnnotation
-              ) {
-                assert(
-                  nodePath.node.init.params[0]!.typeAnnotation.type ===
-                    "TSTypeAnnotation",
-                );
-                component.propType = getType(
-                  nodePath.node.init.params[0]!.typeAnnotation.typeAnnotation,
-                );
+              if (nodePath.node.init.typeParameters) {
+                // TODO: handle type parameters
               }
             }
           }
@@ -247,11 +203,10 @@ export default function VariableDeclarator(
           currentId = componentDB.addComponent(
             fileName,
             component,
-            parentPath,
             declarationKind,
           );
+          return currentId;
         } else if (init && init.type === "JSXElement") {
-          const parentPath = getParentPath(nodePath);
           const opening = init.openingElement.name;
           let tag = "";
           if (opening.type === "JSXIdentifier") {
@@ -265,151 +220,136 @@ export default function VariableDeclarator(
             {
               name: pattern,
               tag,
-              props: [], // Will be filled by JSXElement visitor
+              props: [],
               loc,
               dependencies: {},
               children: {},
             },
-            parentPath,
             declarationKind,
           );
-        } else {
-          if (nodePath.scope.block.type === "Program") {
-            if (
-              init?.type === "ArrowFunctionExpression" ||
-              init?.type === "FunctionExpression"
-            ) {
-              assert(init.body.loc != null, "Function body loc not found");
+        } else if (innerFn && isHook(name)) {
+          assert(innerFn.loc != null, "Function loc not found");
+          const scope = {
+            start: {
+              line: innerFn.loc.start.line,
+              column: innerFn.loc.start.column,
+            },
+            end: {
+              line: innerFn.loc.end.line,
+              column: innerFn.loc.end.column,
+            },
+          };
 
-              const scope = {
-                start: {
-                  line: init.body.loc.start.line,
-                  column: init.body.loc.start.column,
-                },
-                end: {
-                  line: init.body.loc.end.line,
-                  column: init.body.loc.end.column,
-                },
-              };
+          const hook: Omit<
+            ComponentFileVarHook,
+            "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
+          > = {
+            name: pattern,
+            type: "function",
+            dependencies: {},
+            loc,
+            scope,
+            props: getProps(innerFnPath, pId, componentId),
+            effects: {},
+            hooks: [],
+            children: {},
+            parentId: pParentId,
+          };
 
-              if (isHook(name)) {
-                currentId = componentDB.addHook(
-                  fileName,
-                  {
-                    name: pattern,
-                    type: "function",
-                    dependencies: {},
-                    loc,
-                    scope,
-                    props: getProps(
-                      nodePath.get("init") as traverse.NodePath<
-                        t.ArrowFunctionExpression | t.FunctionExpression
-                      >,
-                      pId,
-                      componentId,
-                    ),
-                    effects: {},
-                    hooks: [],
-                    children: {},
-                    var: {},
-                    parentId: pParentId,
-                  } as Omit<
-                    ComponentFileVarHook,
-                    "kind" | "id" | "var" | "states" | "hash" | "file"
-                  >,
-                  undefined,
-                  declarationKind,
-                );
-              } else {
-                currentId = componentDB.addVariable(
-                  fileName,
-                  {
-                    name: pattern,
-                    type: "function",
-                    dependencies: {},
-                    loc,
-                    scope,
-                    children: {},
-                    var: {},
-                    parentId: pParentId,
-                  } as Omit<
-                    ComponentFileVarNormalFunction,
-                    "kind" | "file" | "id" | "var" | "hash"
-                  >,
-                  undefined,
-                  undefined,
-                  declarationKind,
-                );
-              }
-            } else {
-              const dependencies: Record<string, ComponentFileVarDependency> =
-                {};
-              if (init?.type === "NewExpression") {
-                if (init.callee.type === "Identifier") {
-                  const id = getDeterministicId(init.callee.name);
-                  dependencies[id] = {
-                    id,
-                    name: init.callee.name,
-                  };
-                }
-              } else if (init?.type === "Identifier") {
-                const id = getDeterministicId(init.name);
-                dependencies[id] = {
-                  id,
-                  name: init.name,
-                };
-              }
+          currentId = componentDB.addHook(fileName, hook, declarationKind);
+          return currentId;
+        }
 
-              currentId = componentDB.addVariable(
+        if (nodePath.scope.block.type === "Program") {
+          if (
+            init?.type === "ArrowFunctionExpression" ||
+            init?.type === "FunctionExpression"
+          ) {
+            assert(init.body.loc != null, "Function body loc not found");
+
+            const scope = {
+              start: {
+                line: init.body.loc.start.line,
+                column: init.body.loc.start.column,
+              },
+              end: {
+                line: init.body.loc.end.line,
+                column: init.body.loc.end.column,
+              },
+            };
+
+            if (returnJSX(init)) {
+              currentId = componentDB.addComponent(
                 fileName,
                 {
                   name: pattern,
-                  type: "data",
-                  dependencies,
-                  loc,
-                  parentId: pParentId,
-                } as Omit<
-                  ComponentFileVarNormalData,
-                  "kind" | "file" | "id" | "var" | "hash"
-                >,
-                undefined,
-                "normal",
-                declarationKind,
-              );
-            }
-          } else if (init?.type === "ArrowFunctionExpression") {
-            if (
-              nodePath.scope.block.type === "FunctionDeclaration" &&
-              nodePath.scope.block.id?.type === "Identifier"
-            ) {
-              const parentPath = getParentPath(nodePath);
-
-              currentId = componentDB.addVariable(
-                fileName,
-                {
-                  name: pattern,
+                  type: "function",
+                  componentType: "Function",
+                  hooks: [],
+                  props: getProps(
+                    nodePath.get("init") as traverse.NodePath<
+                      t.ArrowFunctionExpression | t.FunctionExpression
+                    >,
+                    pId,
+                    componentId,
+                  ),
+                  contexts: [],
                   dependencies: {},
-                  type: "data",
+                  var: {},
+                  children: {},
                   loc,
+                  scope,
+                  effects: {},
+                  forwardRef: isRefUsed(
+                    nodePath.get("init") as traverse.NodePath<
+                      | t.FunctionDeclaration
+                      | t.ArrowFunctionExpression
+                      | t.FunctionExpression
+                    >,
+                  ),
                   parentId: pParentId,
                 } as Omit<
-                  ComponentFileVarNormalData,
-                  "kind" | "file" | "id" | "var" | "hash"
+                  ComponentFileVarComponent,
+                  "id" | "kind" | "states" | "hash" | "file"
                 >,
-                parentPath,
-                "normal",
                 declarationKind,
               );
             } else if (
-              nodePath.scope.block.type === "ArrowFunctionExpression"
+              isHook(pattern.type === "identifier" ? pattern.name : "")
             ) {
-              const parentPath = getParentPath(nodePath);
-              currentId = componentDB.addVariable(
+              currentId = componentDB.addHook(
                 fileName,
                 {
                   name: pattern,
                   dependencies: {},
                   type: "function",
+                  loc,
+                  scope,
+                  props: getProps(
+                    nodePath.get("init") as traverse.NodePath<
+                      t.ArrowFunctionExpression | t.FunctionExpression
+                    >,
+                    pId,
+                    componentId,
+                  ),
+                  effects: {},
+                  hooks: [],
+                  children: {},
+                  var: {},
+                  parentId: pParentId,
+                } as Omit<
+                  ComponentFileVarHook,
+                  "kind" | "id" | "var" | "states" | "hash" | "file"
+                >,
+                declarationKind,
+              );
+            } else {
+              currentId = componentDB.addVariable(
+                fileName,
+                {
+                  name: pattern,
+                  type: "function",
+                  dependencies: {},
                   loc,
                   scope,
                   children: {},
@@ -419,14 +359,49 @@ export default function VariableDeclarator(
                   ComponentFileVarNormalFunction,
                   "kind" | "file" | "id" | "var" | "hash"
                 >,
-                parentPath,
                 undefined,
                 declarationKind,
               );
             }
           } else {
-            // Normal data variable not in Program block
-            const parentPath = getParentPath(nodePath);
+            const dependencies: Record<string, ComponentFileVarDependency> = {};
+            if (init?.type === "NewExpression") {
+              if (init.callee.type === "Identifier") {
+                const id = getDeterministicId(init.callee.name);
+                dependencies[id] = {
+                  id,
+                  name: init.callee.name,
+                };
+              }
+            } else if (init?.type === "Identifier") {
+              const id = getDeterministicId(init.name);
+              dependencies[id] = {
+                id,
+                name: init.name,
+              };
+            }
+
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                type: "data",
+                dependencies,
+                loc,
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalData,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              "normal",
+              declarationKind,
+            );
+          }
+        } else if (init?.type === "ArrowFunctionExpression") {
+          if (
+            nodePath.scope.block.type === "FunctionDeclaration" &&
+            nodePath.scope.block.id?.type === "Identifier"
+          ) {
             currentId = componentDB.addVariable(
               fileName,
               {
@@ -439,15 +414,60 @@ export default function VariableDeclarator(
                 ComponentFileVarNormalData,
                 "kind" | "file" | "id" | "var" | "hash"
               >,
-              parentPath,
               "normal",
               declarationKind,
             );
+          } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {
+            assert(init.loc != null, "Function loc not found");
+            const scope = {
+              start: {
+                line: init.loc.start.line,
+                column: init.loc.start.column,
+              },
+              end: {
+                line: init.loc.end.line,
+                column: init.loc.end.column,
+              },
+            };
+
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies: {},
+                type: "function",
+                loc,
+                scope,
+                children: {},
+                var: {},
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalFunction,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              undefined,
+              declarationKind,
+            );
           }
+        } else {
+          // Normal data variable not in Program block
+          currentId = componentDB.addVariable(
+            fileName,
+            {
+              name: pattern,
+              dependencies: {},
+              type: "data",
+              loc,
+              parentId: pParentId,
+            } as Omit<
+              ComponentFileVarNormalData,
+              "kind" | "file" | "id" | "var" | "hash"
+            >,
+            "normal",
+            declarationKind,
+          );
         }
       } else if (t.isObjectPattern(pId) || t.isArrayPattern(pId)) {
-        const parentPath = getParentPath(nodePath);
-
         const dependencies: Record<string, ComponentFileVarDependency> = {};
         if (pParentId == null) {
           if (init?.type === "NewExpression") {
@@ -476,7 +496,6 @@ export default function VariableDeclarator(
             loc: pLoc,
             parentId: pParentId,
           },
-          parentPath,
           "normal",
         );
       }
@@ -488,262 +507,89 @@ export default function VariableDeclarator(
   return {
     enter(nodePath) {
       const id = nodePath.node.id;
+      if (id.type === "VoidPattern") return;
       const init = nodePath.node.init;
       assert(nodePath.node.id?.loc?.start != null);
-
-      const loc = {
-        line: nodePath.node.id.loc.start.line,
-        column: nodePath.node.id.loc.start.column,
-      };
 
       if (t.isCallExpression(init)) {
         const firstArgPath = nodePath.get("init").get("arguments")[0];
-        const calleeName = t.isIdentifier(init.callee)
-          ? init.callee.name
-          : "call";
-        const patternPrefix = `${calleeName}-${loc.line}-${loc.column}`;
 
         if (
-          (t.isArrowFunctionExpression(firstArgPath?.node) ||
-            t.isFunctionExpression(firstArgPath?.node)) &&
-          returnJSX(firstArgPath.node)
+          t.isIdentifier(init.callee) &&
+          (init.callee.name === "useState" || init.callee.name === "useReducer")
         ) {
-          if (id.type == "Identifier") {
-            processPattern(nodePath, id as t.LVal, patternPrefix, undefined);
-            return;
-          }
-        } else if (t.isIdentifier(init.callee)) {
-          if (init.callee.name === "useState") {
-            const id = nodePath.node.id;
+          processPattern(nodePath, id, undefined, {
+            type: "state",
+            extra: { setter: undefined },
+          });
+        } else if (
+          t.isIdentifier(init.callee) &&
+          (init.callee.name === "useMemo" || init.callee.name === "useCallback")
+        ) {
+          if (
+            firstArgPath &&
+            (firstArgPath.isArrowFunctionExpression() ||
+              firstArgPath.isFunctionExpression())
+          ) {
+            const body = firstArgPath.node.body;
+            assert(body.loc != null, "Function body loc not found");
 
-            let setterName: string | undefined;
-            if (t.isArrayPattern(id)) {
-              const [, setterVar] = id.elements;
-              if (t.isIdentifier(setterVar)) {
-                setterName = setterVar.name;
-              }
-            }
-
-            if (t.isArrayPattern(id) && id.elements.length > 0) {
-              processPattern(
-                nodePath,
-                id.elements[0] as t.LVal,
-                patternPrefix,
-                {
-                  type: "state",
-                  extra: { setter: setterName },
-                },
-              );
-              return;
-            }
-
-            processPattern(nodePath, id as t.LVal, patternPrefix, {
-              type: "state",
-              extra: { setter: setterName },
-            });
-            return;
-          } else if (init.callee.name === "useMemo") {
-            const id = nodePath.node.id;
-
-            let scope: VariableScope | undefined;
-            const reactDeps: ReactDependency[] = [];
-            if (init.arguments.length > 0) {
-              const func = init.arguments[0];
-              if (
-                (t.isArrowFunctionExpression(func) ||
-                  t.isFunctionExpression(func)) &&
-                func.loc
-              ) {
-                scope = {
-                  start: {
-                    line: func.loc.start.line,
-                    column: func.loc.start.column,
-                  },
-                  end: {
-                    line: func.loc.end.line,
-                    column: func.loc.end.column,
-                  },
-                };
-              }
-            }
-
-            if (init.arguments.length > 1) {
-              if (t.isArrayExpression(init.arguments[1])) {
-                for (const element of init.arguments[1].elements) {
-                  if (t.isIdentifier(element)) {
-                    reactDeps.push({
-                      id: "",
-                      name: element.name,
-                    });
-                  }
-                }
-              }
-            }
-
-            if (scope) {
-              processPattern(nodePath, id as t.LVal, patternPrefix, {
-                type: "memo",
-                extra: { scope, reactDeps },
-              });
-              return;
-            }
-          } else if (init.callee.name === "useCallback") {
-            const id = nodePath.node.id;
-
-            let scope: VariableScope | undefined;
-            const reactDeps: ReactDependency[] = [];
-            if (init.arguments.length > 0) {
-              const func = init.arguments[0];
-              if (
-                (t.isArrowFunctionExpression(func) ||
-                  t.isFunctionExpression(func)) &&
-                func.loc
-              ) {
-                scope = {
-                  start: {
-                    line: func.loc.start.line,
-                    column: func.loc.start.column,
-                  },
-                  end: {
-                    line: func.loc.end.line,
-                    column: func.loc.end.column,
-                  },
-                };
-              }
-            }
-
-            if (init.arguments.length > 1) {
-              if (t.isArrayExpression(init.arguments[1])) {
-                for (const element of init.arguments[1].elements) {
-                  if (t.isIdentifier(element)) {
-                    reactDeps.push({
-                      id: "",
-                      name: element.name,
-                    });
-                  }
-                }
-              }
-            }
-
-            if (scope) {
-              processPattern(nodePath, id as t.LVal, patternPrefix, {
-                type: "callback",
-                extra: { scope, reactDeps },
-              });
-              return;
-            }
-          } else if (init.callee.name === "useRef") {
-            const id = nodePath.node.id;
-
-            const defaultData =
-              init.arguments.length > 0 && t.isExpression(init.arguments[0])
-                ? (getExpressionData(init.arguments[0]) as PropDataType) || {
-                    type: "undefined",
-                  }
-                : ({ type: "undefined" } as PropDataType);
-
-            processPattern(nodePath, id as t.LVal, patternPrefix, {
-              type: "ref",
-              extra: { defaultData },
-            });
-            return;
-          } else if (isHook(init.callee.name)) {
-            const name = getVariableComponentName(nodePath);
-            if (name) {
-              componentDB.comAddHook(
-                name.name,
-                name.loc,
-                fileName,
-                init.callee.name,
-              );
-            }
-
-            //TODO: add dependencies
-            const dependencies: Record<string, ComponentFileVarDependency> = {};
-
-            const id = nodePath.node.id;
-            if (t.isArrayPattern(id) && id.elements.length > 0) {
-              processPattern(
-                nodePath,
-                id.elements[0] as t.LVal,
-                patternPrefix,
-                {
-                  type: "hook",
-                  extra: {
-                    dependencies,
-                    call: {
-                      id: getDeterministicId(init.callee.name),
-                      name: init.callee.name,
-                    },
-                  },
-                },
-              );
-              return;
-            }
-
-            processPattern(
-              nodePath,
-              nodePath.node.id as t.LVal,
-              patternPrefix,
-              {
-                type: "hook",
-                extra: {
-                  dependencies,
-                  call: {
-                    id: getDeterministicId(init.callee.name),
-                    name: init.callee.name,
-                  },
-                },
-              },
-            );
-            return;
-          }
-        }
-      }
-      processPattern(nodePath, id as t.LVal, undefined, undefined);
-    },
-    exit(nodePath) {
-      const init = nodePath.node.init;
-      assert(nodePath.node.id?.loc?.start != null);
-
-      const loc = {
-        line: nodePath.node.id.loc.start.line,
-        column: nodePath.node.id.loc.start.column,
-      };
-
-      const isForwardRef =
-        init &&
-        t.isCallExpression(init) &&
-        isForwardRefCall(init, componentDB, fileName);
-      const innerFnPath = isForwardRef
-        ? (nodePath.get("init").get("arguments")[0] as traverse.NodePath<
-            t.ArrowFunctionExpression | t.FunctionExpression
-          >)
-        : (nodePath.get("init") as traverse.NodePath<
-            t.ArrowFunctionExpression | t.FunctionExpression
-          >);
-      const innerFn = innerFnPath?.node;
-
-      if (innerFn && returnJSX(innerFn)) {
-        if (innerFn.body.type !== "BlockStatement") {
-          const body = innerFn.body;
-          if (t.isJSXElement(body) || t.isJSXFragment(body)) {
-            if (body.loc) {
-              const jsxVar = componentDB.getVariableFromLoc(fileName, {
+            const scope = {
+              start: {
                 line: body.loc.start.line,
                 column: body.loc.start.column,
-              });
-              if (jsxVar && isJSXVariable(jsxVar)) {
-                componentDB.comSetReturn(fileName, loc, jsxVar.id);
+              },
+              end: {
+                line: body.loc.end.line,
+                column: body.loc.end.column,
+              },
+            };
+
+            const dependencies = init.arguments[1];
+            const reactDeps: ReactDependency[] = [];
+            if (dependencies && dependencies.type == "ArrayExpression") {
+              for (const element of dependencies.elements) {
+                if (element == null || !t.isExpression(element)) continue;
+
+                const name = t.isIdentifier(element)
+                  ? element.name
+                  : generateFn(element).code;
+                reactDeps.push({ id: "", name });
               }
             }
-          } else if (t.isExpression(body)) {
-            const data = getExpressionData(body);
-            if (data) {
-              componentDB.comSetReturn(fileName, loc, data);
-            }
+
+            processPattern(nodePath, id, undefined, {
+              type: init.callee.name === "useMemo" ? "memo" : "callback",
+              extra: { scope, reactDeps },
+            });
           }
+        } else if (
+          t.isIdentifier(init.callee) &&
+          init.callee.name === "useRef"
+        ) {
+          const defaultData: PropDataType = (init.arguments[0] &&
+            t.isExpression(init.arguments[0]) &&
+            getExpressionData(init.arguments[0])) || { type: "null" };
+
+          processPattern(nodePath, id, undefined, {
+            type: "ref",
+            extra: { defaultData },
+          });
+        } else if (t.isIdentifier(init.callee) && isHook(init.callee.name)) {
+          processPattern(nodePath, id, undefined, {
+            type: "hook",
+            extra: {
+              call: {
+                id: getDeterministicId(init.callee.name),
+                name: init.callee.name,
+              },
+            },
+          });
+        } else {
+          processPattern(nodePath, id);
         }
+      } else {
+        processPattern(nodePath, id);
       }
     },
   };

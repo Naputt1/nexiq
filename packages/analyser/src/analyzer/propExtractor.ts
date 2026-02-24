@@ -1,14 +1,18 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import generate from "@babel/generator";
-import type { PropData } from "shared";
+import type { PropData, PropDataType } from "shared";
 import { getDeterministicId } from "../utils/hash.js";
+import { getExpressionData } from "./type/helper.js";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
 function getPropHash(prop: Omit<PropData, "id" | "hash">): string {
-  const { name, type, kind, props } = prop;
-  const base = `${name}:${type}:${kind}`;
+  const { name, type, kind, props, defaultValue } = prop;
+  let base = `${name}:${type}:${kind}`;
+  if (defaultValue) {
+    base += `:${JSON.stringify(defaultValue)}`;
+  }
   if (!props || props.length === 0) return getDeterministicId(base);
   return getDeterministicId(
     `${base}[${props.map((p) => getPropHash(p)).join(",")}]`,
@@ -86,16 +90,29 @@ function resolveType(
 function extractFromPattern(pattern: t.LVal, componentId?: string): PropData[] {
   const props: PropData[] = [];
 
+  if (t.isAssignmentPattern(pattern)) {
+    return extractFromPattern(pattern.left as t.LVal, componentId);
+  }
+
   if (t.isObjectPattern(pattern)) {
     for (const property of pattern.properties) {
       if (t.isObjectProperty(property)) {
         if (t.isIdentifier(property.key)) {
           const propName = property.key.name;
-          if (t.isIdentifier(property.value)) {
-            const propBase = {
-              name: property.value.name,
+          let value: t.LVal = property.value as t.LVal;
+          let defaultValue: PropDataType | undefined;
+
+          if (t.isAssignmentPattern(value)) {
+            defaultValue = getExpressionData(value.right) ?? undefined;
+            value = value.left;
+          }
+
+          if (t.isIdentifier(value)) {
+            const propBase: Omit<PropData, "id" | "hash"> = {
+              name: value.name,
               type: "any",
               kind: "prop" as const,
+              defaultValue,
             };
             props.push({
               id: componentId
@@ -104,16 +121,14 @@ function extractFromPattern(pattern: t.LVal, componentId?: string): PropData[] {
               ...propBase,
               hash: getPropHash(propBase),
             });
-          } else if (
-            t.isObjectPattern(property.value) ||
-            t.isArrayPattern(property.value)
-          ) {
-            const nestedProps = extractFromPattern(property.value, componentId);
-            const propBase = {
+          } else if (t.isObjectPattern(value) || t.isArrayPattern(value)) {
+            const nestedProps = extractFromPattern(value, componentId);
+            const propBase: Omit<PropData, "id" | "hash"> = {
               name: propName,
               type: "any",
               kind: "prop" as const,
               props: nestedProps,
+              defaultValue,
             };
             props.push({
               id: componentId
@@ -220,28 +235,48 @@ export function getProps(
     }
   }
 
-  // 2. Check inline type on function param
-  const propsParams = path.get("params")[0];
-  if (propsParams == null) return [];
+  // 2. Check inline type on function params
+  const props: PropData[] = [];
+  const params = path.get("params");
+  const paramsArray = Array.isArray(params) ? params : [];
 
-  if (propsParams.isIdentifier() || propsParams.isObjectPattern()) {
-    const typeAnnotation = propsParams.node.typeAnnotation;
-    if (t.isTSTypeAnnotation(typeAnnotation)) {
-      const resolved = resolveType(
-        typeAnnotation.typeAnnotation,
-        path.scope,
-        0,
-        componentId,
+  for (const propsParams of paramsArray) {
+    if (
+      propsParams.isIdentifier() ||
+      propsParams.isObjectPattern() ||
+      propsParams.isAssignmentPattern()
+    ) {
+      let node: t.LVal = propsParams.node as t.LVal;
+      if (t.isAssignmentPattern(node)) {
+        node = node.left;
+      }
+
+      if (
+        (t.isIdentifier(node) ||
+          t.isObjectPattern(node) ||
+          t.isArrayPattern(node) ||
+          t.isRestElement(node)) &&
+        node.typeAnnotation &&
+        t.isTSTypeAnnotation(node.typeAnnotation)
+      ) {
+        const resolved = resolveType(
+          node.typeAnnotation.typeAnnotation,
+          path.scope,
+          0,
+          componentId,
+        );
+        if (resolved.length > 0) {
+          props.push(...resolved);
+          continue;
+        }
+      }
+
+      // 3. Fallback: Destructured names with 'any'
+      props.push(
+        ...extractFromPattern(propsParams.node as t.LVal, componentId),
       );
-      if (resolved.length > 0) return resolved;
     }
   }
 
-  // 3. Fallback: Destructured names with 'any'
-  // (Only if we failed to solve types above)
-  if (propsParams.isObjectPattern() || propsParams.isIdentifier()) {
-    return extractFromPattern(propsParams.node as t.LVal, componentId);
-  }
-
-  return [];
+  return props;
 }

@@ -8,6 +8,7 @@ import type {
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
   VariableLoc,
+  ComponentInfoRender,
   ComponentFileVarHook,
   ComponentFileVarJSX,
   EffectInfo,
@@ -19,7 +20,6 @@ import type {
   RefData,
   VariableName,
   VarKind,
-  ComponentInfoRender,
   FunctionReturn,
 } from "shared";
 import { FileDB } from "./fileDB.js";
@@ -45,7 +45,6 @@ import { SqliteDB } from "./sqlite.js";
 
 type IResolveAddRender = {
   type: "comAddRender";
-  name: string;
   fileName: string;
   tag: string;
   dependency: ComponentInfoRenderDependency[];
@@ -157,7 +156,6 @@ export class ComponentDB {
       ComponentFileVarComponent,
       "id" | "kind" | "states" | "hash" | "file"
     >,
-    parentPath?: string[],
     declarationKind?:
       | "const"
       | "let"
@@ -182,7 +180,6 @@ export class ComponentDB {
         },
         file,
       ),
-      parentPath,
     );
 
     if (this.files.resolveComPropsTsTypeID(id, fileName)) {
@@ -199,7 +196,6 @@ export class ComponentDB {
   public addJSXVariable(
     fileName: string,
     jsx: Omit<ComponentFileVarJSX, "id" | "kind" | "type" | "hash" | "file">,
-    parentPath?: string[],
     declarationKind?:
       | "const"
       | "let"
@@ -222,7 +218,6 @@ export class ComponentDB {
         },
         file,
       ),
-      parentPath,
     );
 
     const currentJSX = this.getCurrentJSX();
@@ -242,7 +237,6 @@ export class ComponentDB {
       ComponentFileVarHook,
       "id" | "kind" | "var" | "children" | "states" | "hash" | "file"
     >,
-    parentPath?: string[],
     declarationKind?:
       | "const"
       | "let"
@@ -267,7 +261,6 @@ export class ComponentDB {
         },
         file,
       ),
-      parentPath,
     );
   }
 
@@ -282,7 +275,6 @@ export class ComponentDB {
           ComponentFileVarNormalData,
           "id" | "kind" | "var" | "children" | "file" | "hash"
         >,
-    parentPath?: string[],
     kind?: VarKind,
     declarationKind?:
       | "const"
@@ -327,7 +319,7 @@ export class ComponentDB {
 
     assert(v != null, "Variable not found");
 
-    return this.files.addVariable(fileName, v, parentPath);
+    return this.files.addVariable(fileName, v);
   }
 
   public addVariableDependency(
@@ -507,7 +499,6 @@ export class ComponentDB {
   }
 
   public comAddRender(
-    comLoc: string,
     fileName: string,
     tag: string,
     dependency: ComponentInfoRenderDependency[],
@@ -524,25 +515,11 @@ export class ComponentDB {
     } else if (tag === "Fragment") {
       srcId = "Fragment";
     } else {
-      const parts = comLoc.split("@");
-      if (parts.length === 2) {
-        const line = parseInt(parts[0]!);
-        const column = parseInt(parts[1]!);
-        if (!isNaN(line) && !isNaN(column)) {
-          const contextId = this.getVariableIDFromLoc(fileName, {
-            line,
-            column,
-          });
-          if (contextId) {
-            const file = this.files.get(fileName);
-            const variable = file.var.get(contextId, true);
-            if (variable && isBaseFunctionVariable(variable)) {
-              const resolvedId = variable.var.getIdByName(tag);
-              if (resolvedId) {
-                srcId = resolvedId;
-              }
-            }
-          }
+      const v = this.files.getHookInfoFromLoc(fileName, loc);
+      if (v && isBaseFunctionVariable(v)) {
+        const resolvedId = v.var.getIdByName(tag);
+        if (resolvedId) {
+          srcId = resolvedId;
         }
       }
 
@@ -559,7 +536,6 @@ export class ComponentDB {
 
         this.addResolveTask({
           type: "comAddRender",
-          name: comLoc,
           fileName: fileName,
           tag,
           dependency,
@@ -574,7 +550,6 @@ export class ComponentDB {
 
     this.files.addRender(
       fileName,
-      comLoc,
       srcId,
       instanceId,
       tag,
@@ -800,7 +775,6 @@ export class ComponentDB {
   } = {
     comAddRender: (db, task) => {
       db.comAddRender(
-        task.name,
         task.fileName,
         task.tag,
         task.dependency,
@@ -954,5 +928,9 @@ export class ComponentDB {
   public getVariableIDFromLoc(fileName: string, loc: VariableLoc) {
     const v = this.getVariableFromLoc(fileName, loc);
     return v?.id;
+  }
+
+  public getHookInfoFromLoc(fileName: string, loc: VariableLoc) {
+    return this.files.getHookInfoFromLoc(fileName, loc);
   }
 }

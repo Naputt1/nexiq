@@ -195,8 +195,7 @@ export interface TypeDataImport {
 }
 
 export interface TypeDataLiteralBodyBase {
-  signatureType: "property" | "index";
-  type: TypeData;
+  signatureType: "property" | "index" | "method";
 }
 
 export interface TypeDataLiteralBodyIndexPrarameter {
@@ -206,19 +205,32 @@ export interface TypeDataLiteralBodyIndexPrarameter {
 
 export interface TypeDataLiteralBodyIndex extends TypeDataLiteralBodyBase {
   signatureType: "index";
+  type: TypeData;
   parameter: TypeDataLiteralBodyIndexPrarameter;
 }
 
 export interface TypeDataLiteralBodyProperty extends TypeDataLiteralBodyBase {
   signatureType: "property";
+  type: TypeData;
   optional?: boolean;
   computed?: boolean;
   name: string;
 }
 
+export interface TypeDataLiteralBodyMethod extends TypeDataLiteralBodyBase {
+  signatureType: "method";
+  name: string;
+  optional?: boolean;
+  computed?: boolean;
+  params: TypeDataParamFunction[];
+  parameters: TypeDataFunctionParameter[];
+  return: TypeData;
+}
+
 export type TypeDataLiteralBody =
   | TypeDataLiteralBodyProperty
-  | TypeDataLiteralBodyIndex;
+  | TypeDataLiteralBodyIndex
+  | TypeDataLiteralBodyMethod;
 
 // object
 export interface TypeDataTypeBodyLiteral {

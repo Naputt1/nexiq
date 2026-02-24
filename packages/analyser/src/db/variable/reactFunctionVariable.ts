@@ -282,12 +282,18 @@ export abstract class ReactFunctionVariable<
 
   public resolveReactDependencies(reactDeps: ReactDependency[]) {
     outer: for (const dep of reactDeps) {
+      const baseName = dep.name.split(/[.[?]/)[0]!;
+
       for (const stateID of this.states) {
         const state = this.var.get(stateID);
         if (state == null || !isStateVariable(state)) continue;
 
         const stateNameKey = getVariableNameKey(state.name);
-        if (stateNameKey === dep.name || state.setter === dep.name) {
+        if (
+          stateNameKey === dep.name ||
+          stateNameKey === baseName ||
+          state.setter === dep.name
+        ) {
           dep.id = state.id;
           continue outer;
         }
@@ -298,7 +304,7 @@ export abstract class ReactFunctionVariable<
         if (memo == null || !isMemoVariable(memo)) continue;
 
         const memoNameKey = getVariableNameKey(memo.name);
-        if (memoNameKey === dep.name) {
+        if (memoNameKey === dep.name || memoNameKey === baseName) {
           dep.id = memo.id;
           continue outer;
         }
@@ -309,7 +315,7 @@ export abstract class ReactFunctionVariable<
         if (ref == null || !isRefVariable(ref)) continue;
 
         const refNameKey = getVariableNameKey(ref.name);
-        if (refNameKey === dep.name) {
+        if (refNameKey === dep.name || refNameKey === baseName) {
           dep.id = ref.id;
           continue outer;
         }
@@ -329,20 +335,22 @@ export abstract class ReactFunctionVariable<
         return undefined;
       };
 
-      const prop = findProp(this.props, dep.name);
+      const prop =
+        findProp(this.props, dep.name) || findProp(this.props, baseName);
       if (prop) {
         dep.id = prop.id;
         continue outer;
       }
 
-      const depId = this.var.getIdByName(dep.name);
+      const depId =
+        this.var.getIdByName(dep.name) || this.var.getIdByName(baseName);
       if (depId) {
         dep.id = depId;
         continue outer;
       }
 
       const dependency = Object.values(this.dependencies || {}).find(
-        (d) => d.name === dep.name,
+        (d) => d.name === dep.name || d.name === baseName,
       );
       if (dependency) {
         dep.id = dependency.id;

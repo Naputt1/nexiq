@@ -78,9 +78,14 @@ export class WorkerPool {
         console.error("Worker error without task:", err);
       }
 
-      // Recreate the worker to maintain pool size
-      this.spawnWorker();
-      this.nextTask();
+      // Avoid infinite loop if worker fails immediately
+      if (task) {
+        // Recreate the worker only if it was actually doing something, 
+        // or add a more sophisticated throttle.
+        // For now, if it failed without a task, it's likely a startup error.
+        this.spawnWorker();
+        this.nextTask();
+      }
     }
   }
 

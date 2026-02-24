@@ -68,6 +68,7 @@ export interface PropData {
   gitStatus?: "added" | "modified" | "deleted";
   file?: string;
   loc?: VariableLoc;
+  defaultValue?: PropDataType | undefined;
 }
 
 export interface ReactFunctionInfoBase {
