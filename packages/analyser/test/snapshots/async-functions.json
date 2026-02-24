@@ -1,0 +1,583 @@
+{
+  "files": {
+    "/index.tsx": {
+      "path": "/index.tsx",
+      "hash": "b2ba86c0ab87566f",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "useMemo": {
+          "localName": "useMemo",
+          "importedName": "useMemo",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useCallback": {
+          "localName": "useCallback",
+          "importedName": "useCallback",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "AsyncComponent": {
+          "name": "AsyncComponent",
+          "type": "named",
+          "exportKind": "component",
+          "id": "3a012224bc5a1fc6"
+        },
+        "useAsyncHook": {
+          "name": "useAsyncHook",
+          "type": "named",
+          "exportKind": "function",
+          "id": "392d90eb38cc43b0"
+        },
+        "asyncFn": {
+          "name": "asyncFn",
+          "type": "named",
+          "exportKind": "value",
+          "id": "e2505c1fe0d4f485"
+        },
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "value",
+          "id": "f708b44afe0a51a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "3a012224bc5a1fc6": {
+          "id": "3a012224bc5a1fc6",
+          "name": {
+            "type": "identifier",
+            "name": "AsyncComponent",
+            "loc": {
+              "line": 4,
+              "column": 22
+            },
+            "id": "67869fb238c51aab"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "20d52f82384432fa",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 22
+          },
+          "var": {
+            "488720750ab47188": {
+              "id": "488720750ab47188",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@5:9",
+                "loc": {
+                  "line": 5,
+                  "column": 9
+                },
+                "id": "5d5f68fbc2560c09"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 6,
+              "column": 1
+            }
+          },
+          "async": true,
+          "return": {
+            "id": "488720750ab47188",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@5:9",
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "id": "5d5f68fbc2560c09"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/index.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
+            "loc": {
+              "line": 5,
+              "column": 9
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "ca8cdcf6cdf8e769": {
+              "id": "div",
+              "instanceId": "ca8cdcf6cdf8e769",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "children": {}
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        },
+        "392d90eb38cc43b0": {
+          "id": "392d90eb38cc43b0",
+          "name": {
+            "type": "identifier",
+            "name": "useAsyncHook",
+            "loc": {
+              "line": 9,
+              "column": 22
+            },
+            "id": "75392b746e20a93f"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "11e52beef10d96af",
+          "dependencies": {},
+          "loc": {
+            "line": 9,
+            "column": 22
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 9,
+              "column": 7
+            },
+            "end": {
+              "line": 11,
+              "column": 1
+            }
+          },
+          "async": true,
+          "children": {},
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {}
+        },
+        "e2505c1fe0d4f485": {
+          "id": "e2505c1fe0d4f485",
+          "name": {
+            "type": "identifier",
+            "name": "asyncFn",
+            "loc": {
+              "line": 14,
+              "column": 13
+            },
+            "id": "65d9af2641b0a489"
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "1505ccd8f0a44bd0",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 14,
+            "column": 13
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 14,
+              "column": 35
+            },
+            "end": {
+              "line": 16,
+              "column": 1
+            }
+          },
+          "async": true,
+          "return": {
+            "type": "literal-type",
+            "literal": {
+              "type": "string",
+              "value": "hello"
+            }
+          },
+          "children": {}
+        },
+        "f708b44afe0a51a5": {
+          "id": "f708b44afe0a51a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 18,
+              "column": 13
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "4ef5fe6c97726a4f",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 18,
+            "column": 13
+          },
+          "var": {
+            "f708b44afe0a51a5:callback:handleAsync": {
+              "id": "f708b44afe0a51a5:callback:handleAsync",
+              "name": {
+                "type": "identifier",
+                "name": "handleAsync",
+                "loc": {
+                  "line": 20,
+                  "column": 8
+                },
+                "id": "e397bbc2ad5dcad6"
+              },
+              "kind": "callback",
+              "type": "function",
+              "file": "/index.tsx",
+              "hash": "5ff231e39317ecc1",
+              "dependencies": {},
+              "loc": {
+                "line": 20,
+                "column": 8
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 20,
+                  "column": 46
+                },
+                "end": {
+                  "line": 22,
+                  "column": 3
+                }
+              },
+              "async": true,
+              "children": {},
+              "reactDeps": []
+            },
+            "f708b44afe0a51a5:memo:asyncValue": {
+              "id": "f708b44afe0a51a5:memo:asyncValue",
+              "name": {
+                "type": "identifier",
+                "name": "asyncValue",
+                "loc": {
+                  "line": 25,
+                  "column": 8
+                },
+                "id": "95a3eeb2312ef7bc"
+              },
+              "kind": "memo",
+              "type": "function",
+              "file": "/index.tsx",
+              "hash": "89edc6ba39b5c659",
+              "dependencies": {},
+              "loc": {
+                "line": 25,
+                "column": 8
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 25,
+                  "column": 41
+                },
+                "end": {
+                  "line": 27,
+                  "column": 3
+                }
+              },
+              "async": true,
+              "children": {},
+              "reactDeps": []
+            },
+            "3f4cbd9f7c2f6867": {
+              "id": "3f4cbd9f7c2f6867",
+              "name": {
+                "type": "identifier",
+                "name": "localAsync",
+                "loc": {
+                  "line": 30,
+                  "column": 17
+                },
+                "id": "e8612c944bfb0765"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/index.tsx",
+              "hash": "8c34b4dd01ec70b5",
+              "dependencies": {},
+              "loc": {
+                "line": 30,
+                "column": 17
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 30,
+                  "column": 2
+                },
+                "end": {
+                  "line": 32,
+                  "column": 3
+                }
+              },
+              "async": true,
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "number",
+                  "value": 1
+                }
+              },
+              "children": {}
+            },
+            "ccebff9beb262ca9": {
+              "id": "ccebff9beb262ca9",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@35:4",
+                "loc": {
+                  "line": 35,
+                  "column": 4
+                },
+                "id": "79cd1a8633a0e4ab"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "2a35523c9faf405b",
+              "dependencies": {
+                "5c94816a24672f50": {
+                  "id": "5c94816a24672f50",
+                  "name": "jsx@36:6"
+                }
+              },
+              "loc": {
+                "line": 35,
+                "column": 4
+              },
+              "tag": "div",
+              "props": [],
+              "children": {
+                "9e0c0e22b77680b4": {
+                  "id": "3a012224bc5a1fc6",
+                  "instanceId": "9e0c0e22b77680b4",
+                  "tag": "AsyncComponent",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 36,
+                    "column": 6
+                  },
+                  "parentId": "e986972aebebf2f",
+                  "children": {}
+                }
+              },
+              "srcId": "div"
+            },
+            "5c94816a24672f50": {
+              "id": "5c94816a24672f50",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@36:6",
+                "loc": {
+                  "line": 36,
+                  "column": 6
+                },
+                "id": "f3738261e2475a7b"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "1438b0aab9f00c42",
+              "dependencies": {},
+              "loc": {
+                "line": 36,
+                "column": 6
+              },
+              "tag": "AsyncComponent",
+              "props": [],
+              "children": {},
+              "srcId": "3a012224bc5a1fc6"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 18,
+              "column": 19
+            },
+            "end": {
+              "line": 39,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": {
+            "id": "ccebff9beb262ca9",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@35:4",
+              "loc": {
+                "line": 35,
+                "column": 4
+              },
+              "id": "79cd1a8633a0e4ab"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/index.tsx",
+            "hash": "2a35523c9faf405b",
+            "dependencies": {
+              "5c94816a24672f50": {
+                "id": "5c94816a24672f50",
+                "name": "jsx@36:6"
+              }
+            },
+            "loc": {
+              "line": 35,
+              "column": 4
+            },
+            "tag": "div",
+            "props": [],
+            "children": {
+              "9e0c0e22b77680b4": {
+                "id": "3a012224bc5a1fc6",
+                "instanceId": "9e0c0e22b77680b4",
+                "tag": "AsyncComponent",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 36,
+                  "column": 6
+                },
+                "parentId": "e986972aebebf2f",
+                "children": {}
+              }
+            },
+            "srcId": "div"
+          },
+          "children": {
+            "e986972aebebf2f": {
+              "id": "div",
+              "instanceId": "e986972aebebf2f",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 35,
+                "column": 4
+              },
+              "children": {
+                "9e0c0e22b77680b4": {
+                  "id": "3a012224bc5a1fc6",
+                  "instanceId": "9e0c0e22b77680b4",
+                  "tag": "AsyncComponent",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 36,
+                    "column": 6
+                  },
+                  "parentId": "e986972aebebf2f",
+                  "children": {}
+                }
+              }
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "3a012224bc5a1fc6",
+      "to": "488720750ab47188",
+      "label": "render"
+    },
+    {
+      "from": "f708b44afe0a51a5",
+      "to": "ccebff9beb262ca9",
+      "label": "render"
+    },
+    {
+      "from": "f708b44afe0a51a5",
+      "to": "5c94816a24672f50",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "3a012224bc5a1fc6",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "f708b44afe0a51a5",
+      "label": "render"
+    },
+    {
+      "from": "3a012224bc5a1fc6",
+      "to": "f708b44afe0a51a5",
+      "label": "render"
+    },
+    {
+      "from": "ccebff9beb262ca9",
+      "to": "5c94816a24672f50",
+      "label": "hook"
+    },
+    {
+      "from": "3a012224bc5a1fc6",
+      "to": "f708b44afe0a51a5",
+      "label": "render"
+    }
+  ]
+}

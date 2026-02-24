@@ -69,11 +69,19 @@ export default function VariableDeclarator(
       | { type: "state"; extra: { setter: string | undefined } }
       | {
           type: "memo";
-          extra: { scope: VariableScope; reactDeps: ReactDependency[] };
+          extra: {
+            scope: VariableScope;
+            async?: boolean;
+            reactDeps: ReactDependency[];
+          };
         }
       | {
           type: "callback";
-          extra: { scope: VariableScope; reactDeps: ReactDependency[] };
+          extra: {
+            scope: VariableScope;
+            async?: boolean;
+            reactDeps: ReactDependency[];
+          };
         }
       | { type: "ref"; extra: { defaultData: PropDataType } }
       | { type: "hook"; extra: { call: { id: string; name: string } } }
@@ -200,6 +208,7 @@ export default function VariableDeclarator(
             effects: {},
             loc,
             scope,
+            async: innerFn.async,
             parentId: pParentId,
             forwardRef: isForwardRef
               ? isForwardRefRefUsed(innerFnPath)
@@ -283,6 +292,7 @@ export default function VariableDeclarator(
             dependencies: {},
             loc,
             scope,
+            async: innerFn.async,
             props: getProps(innerFnPath, pId, componentId),
             effects: {},
             hooks: [],
@@ -333,6 +343,7 @@ export default function VariableDeclarator(
                   children: {},
                   loc,
                   scope,
+                  async: init.async,
                   effects: {},
                   forwardRef: isRefUsed(
                     nodePath.get("init") as traverse.NodePath<
@@ -359,6 +370,7 @@ export default function VariableDeclarator(
                   type: "function",
                   loc,
                   scope,
+                  async: init.async,
                   props: getProps(
                     nodePath.get("init") as traverse.NodePath<
                       t.ArrowFunctionExpression | t.FunctionExpression
@@ -386,6 +398,7 @@ export default function VariableDeclarator(
                   dependencies: {},
                   loc,
                   scope,
+                  async: init.async,
                   children: {},
                   var: {},
                   parentId: pParentId,
@@ -457,6 +470,7 @@ export default function VariableDeclarator(
                 type: "function",
                 loc,
                 scope,
+                async: init.async,
                 children: {},
                 var: {},
                 parentId: pParentId,
@@ -589,7 +603,7 @@ export default function VariableDeclarator(
 
             const currentId = processPattern(nodePath, id, undefined, {
               type: hookInfo.name === "useMemo" ? "memo" : "callback",
-              extra: { scope, reactDeps },
+              extra: { scope, reactDeps, async: targetFnPath.node.async },
             });
 
             if (currentId && firstArgPath && firstArgPath.isCallExpression()) {

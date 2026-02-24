@@ -38,7 +38,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "89946cd4475f87c3",
+          "hash": "85d28f44e8120e07",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -87,6 +87,7 @@
               "column": 60
             }
           },
+          "async": false,
           "return": {
             "id": "f379b833bcd5437b",
             "name": {
@@ -161,7 +162,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "defe7a7717fb2fe3",
+          "hash": "1eaa6d342a0f96ab",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -220,6 +221,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "4a65ce9f6f2ace79",
             "name": {
@@ -321,7 +323,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "3569c40a9d3747e6",
+          "hash": "5902aab211089db6",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -476,7 +478,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "ea9e7f4d5ab312c5",
+              "hash": "62d0804552c4ed55",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -525,6 +527,7 @@
                   "column": 67
                 }
               },
+              "async": false,
               "return": {
                 "id": "bef988ba87ad52b4",
                 "name": {
@@ -1214,6 +1217,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "71ebfad76923d940",
             "name": {

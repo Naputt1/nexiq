@@ -139,7 +139,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "329613604d9309ec",
+          "hash": "2840950bc112d2df",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -273,6 +273,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "486f8c03b42afb2f",
             "name": {

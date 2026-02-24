@@ -15,6 +15,7 @@ export abstract class BaseFunctionVariable<
 > extends Variable<"function", TKind> {
   var: Scope;
   scope: VariableScope;
+  async?: boolean | undefined;
   return?: FunctionReturn | undefined;
   children: Record<string, ComponentInfoRender>;
 
@@ -28,6 +29,7 @@ export abstract class BaseFunctionVariable<
     super({ ...options, type: "function" }, file);
     this.var = new Scope();
     this.scope = options.scope;
+    this.async = options.async;
     this.return = options.return;
     this.children = options.children || {};
   }
@@ -37,6 +39,7 @@ export abstract class BaseFunctionVariable<
 
     this.type = data.type;
     this.scope = data.scope;
+    this.async = data.async;
     this.return = data.return;
     this.children = data.children;
   }
@@ -54,6 +57,7 @@ export abstract class BaseFunctionVariable<
       ...super.getBaseData(),
       var: this.var.getData(),
       scope: this.scope,
+      async: this.async,
       return: returnData,
       children: this.children,
     };
@@ -64,6 +68,7 @@ export abstract class BaseFunctionVariable<
       name: this.name,
       var: this.var.getData(),
       scope: this.scope,
+      async: this.async,
       return: this.return,
       children: this.children,
     };

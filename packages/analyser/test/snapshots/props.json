@@ -1435,7 +1435,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "de4a8d4124ea635c",
+          "hash": "9b983b54650424f3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1479,6 +1479,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "79394e5481368a60",
             "name": {
@@ -1553,7 +1554,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "d684e64a4278a9e5",
+          "hash": "db467d3f2070d8a4",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1597,6 +1598,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "9940f4f1d42fd1ef",
             "name": {
@@ -1685,7 +1687,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "b977d81c2b55c04",
+          "hash": "8da99eaaf54759ce",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1729,6 +1731,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "c4dfec0178753bab",
             "name": {
@@ -1805,7 +1808,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "4478e20d26f39446",
+          "hash": "a03ebef703bf1d9c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2107,6 +2110,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "918ef0981d4f09e2",
             "name": {
@@ -2294,7 +2298,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "173e06e7f373b3e",
+          "hash": "375aeaa6a4354f3f",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2595,6 +2599,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "5266b90ad0960d7a",
             "name": {
@@ -2894,7 +2899,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "9bb2be3c030a46ba",
+          "hash": "ea62beecd9d1313b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3196,6 +3201,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "36a5eedc2c9a474f",
             "name": {
@@ -3430,7 +3436,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ba6d8c10277458",
+          "hash": "5ba8b0368a41ae3e",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -3587,6 +3593,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "5fa4c0c2a96eddec",
             "name": {

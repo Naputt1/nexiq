@@ -1,5 +1,5 @@
 {
-  "name": "props-complex",
+  "name": "sample-destructured-export",
   "private": true,
   "version": "0.0.0",
   "type": "module",
