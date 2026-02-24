@@ -144,3 +144,5 @@ graph.json
 .react-map/
 react.map.config.json
 git-demo
+benchmarks/projects/*
+scripts/benchmarks

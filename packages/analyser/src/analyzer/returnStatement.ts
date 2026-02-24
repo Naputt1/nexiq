@@ -13,34 +13,10 @@ export default function ReturnStatement(
       const arg = nodePath.node.argument;
       if (!arg) return;
 
-      const parentFunc = nodePath.getFunctionParent();
-      if (!parentFunc) return;
-
-      let loc: { line: number; column: number } | undefined;
-
-      if (parentFunc.node.type === "FunctionDeclaration") {
-        if (parentFunc.node.id?.loc) {
-          loc = {
-            line: parentFunc.node.id.loc.start.line,
-            column: parentFunc.node.id.loc.start.column,
-          };
-        }
-      } else if (
-        parentFunc.node.type === "ArrowFunctionExpression" ||
-        parentFunc.node.type === "FunctionExpression"
-      ) {
-        if (parentFunc.parentPath.isVariableDeclarator()) {
-          const id = parentFunc.parentPath.node.id;
-          if (id.loc) {
-            loc = {
-              line: id.loc.start.line,
-              column: id.loc.start.column,
-            };
-          }
-        }
-      }
-
-      if (!loc) return;
+      const loc = {
+        line: nodePath.node.loc!.start.line,
+        column: nodePath.node.loc!.start.column,
+      };
 
       if (t.isJSXElement(arg) || t.isJSXFragment(arg)) {
         if (arg.loc) {
@@ -50,6 +26,19 @@ export default function ReturnStatement(
           });
           if (jsxVar && isJSXVariable(jsxVar)) {
             componentDB.comSetReturn(fileName, loc, jsxVar.id);
+          }
+        }
+      } else if (
+        t.isArrowFunctionExpression(arg) ||
+        t.isFunctionExpression(arg)
+      ) {
+        if (arg.loc) {
+          const id = componentDB.getVariableIDFromLoc(fileName, {
+            line: arg.loc.start.line,
+            column: arg.loc.start.column,
+          });
+          if (id) {
+            componentDB.comSetReturn(fileName, loc, id);
           }
         }
       } else if (t.isExpression(arg)) {

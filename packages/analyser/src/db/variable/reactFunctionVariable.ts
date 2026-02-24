@@ -13,7 +13,12 @@ import type {
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 import { StateVariable } from "./stateVariable.js";
-import { isMemoVariable, isRefVariable, isStateVariable } from "./type.js";
+import {
+  isCallbackVariable,
+  isMemoVariable,
+  isRefVariable,
+  isStateVariable,
+} from "./type.js";
 import { MemoVariable } from "./memo.js";
 import { CallbackVariable } from "./callbackVariable.js";
 import { RefVariable } from "./refVariable.js";
@@ -25,6 +30,7 @@ export abstract class ReactFunctionVariable<
 > extends BaseFunctionVariable<TKind> {
   states: Set<string> = new Set();
   memos: Set<string> = new Set();
+  callbacks: Set<string> = new Set();
   refs: Set<string> = new Set();
   props: PropData[];
   hooks: string[];
@@ -269,7 +275,7 @@ export abstract class ReactFunctionVariable<
     );
 
     this.var.add(callbackVariable);
-    this.memos.add(id); // Reuse memos set for now or add callbacks set
+    this.callbacks.add(id);
 
     return callbackVariable;
   }
@@ -306,6 +312,17 @@ export abstract class ReactFunctionVariable<
         const memoNameKey = getVariableNameKey(memo.name);
         if (memoNameKey === dep.name || memoNameKey === baseName) {
           dep.id = memo.id;
+          continue outer;
+        }
+      }
+
+      for (const callbackID of this.callbacks) {
+        const callback = this.var.get(callbackID);
+        if (callback == null || !isCallbackVariable(callback)) continue;
+
+        const callbackNameKey = getVariableNameKey(callback.name);
+        if (callbackNameKey === dep.name || callbackNameKey === baseName) {
+          dep.id = callback.id;
           continue outer;
         }
       }
@@ -374,6 +391,7 @@ export abstract class ReactFunctionVariable<
   public syncSets() {
     this.states.clear();
     this.memos.clear();
+    this.callbacks.clear();
     this.refs.clear();
     this.stateCache = {};
     this.refCache = {};
@@ -384,6 +402,8 @@ export abstract class ReactFunctionVariable<
         this.stateCache[getVariableNameKey(variable.name)] = variable.id;
       } else if (isMemoVariable(variable)) {
         this.memos.add(variable.id);
+      } else if (isCallbackVariable(variable)) {
+        this.callbacks.add(variable.id);
       } else if (isRefVariable(variable)) {
         this.refs.add(variable.id);
         this.refCache[getVariableNameKey(variable.name)] = variable.id;

@@ -30,6 +30,36 @@ export default function VariableDeclarator(
   componentDB: ComponentDB,
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.VariableDeclarator> {
+  const extractDependencies = (
+    init: t.Expression | null | undefined,
+  ): Record<string, ComponentFileVarDependency> => {
+    const dependencies: Record<string, ComponentFileVarDependency> = {};
+    if (init?.type === "NewExpression") {
+      if (init.callee.type === "Identifier") {
+        const id = getDeterministicId(init.callee.name);
+        dependencies[id] = {
+          id,
+          name: init.callee.name,
+        };
+      }
+    } else if (init?.type === "Identifier") {
+      const id = getDeterministicId(init.name);
+      dependencies[id] = {
+        id,
+        name: init.name,
+      };
+    } else if (init?.type === "CallExpression") {
+      if (init.callee.type === "Identifier") {
+        const id = getDeterministicId(init.callee.name);
+        dependencies[id] = {
+          id,
+          name: init.callee.name,
+        };
+      }
+    }
+    return dependencies;
+  };
+
   const processPattern = (
     nodePath: traverse.NodePath<t.VariableDeclarator>,
     pId: t.LVal | null,
@@ -140,6 +170,7 @@ export default function VariableDeclarator(
         const innerFn = innerFnPath?.node;
 
         if (innerFn && returnJSX(innerFn)) {
+          // ... (existing JSX component handling)
           assert(innerFn.loc != null, "Function loc not found");
           const scope = {
             start: {
@@ -207,6 +238,7 @@ export default function VariableDeclarator(
           );
           return currentId;
         } else if (init && init.type === "JSXElement") {
+          // ... (existing JSX variable handling)
           const opening = init.openingElement.name;
           let tag = "";
           if (opening.type === "JSXIdentifier") {
@@ -228,6 +260,7 @@ export default function VariableDeclarator(
             declarationKind,
           );
         } else if (innerFn && isHook(name)) {
+          // ... (existing Hook handling)
           assert(innerFn.loc != null, "Function loc not found");
           const scope = {
             start: {
@@ -364,22 +397,7 @@ export default function VariableDeclarator(
               );
             }
           } else {
-            const dependencies: Record<string, ComponentFileVarDependency> = {};
-            if (init?.type === "NewExpression") {
-              if (init.callee.type === "Identifier") {
-                const id = getDeterministicId(init.callee.name);
-                dependencies[id] = {
-                  id,
-                  name: init.callee.name,
-                };
-              }
-            } else if (init?.type === "Identifier") {
-              const id = getDeterministicId(init.name);
-              dependencies[id] = {
-                id,
-                name: init.name,
-              };
-            }
+            const dependencies = extractDependencies(init);
 
             currentId = componentDB.addVariable(
               fileName,
@@ -451,11 +469,12 @@ export default function VariableDeclarator(
           }
         } else {
           // Normal data variable not in Program block
+          const dependencies = extractDependencies(init);
           currentId = componentDB.addVariable(
             fileName,
             {
               name: pattern,
-              dependencies: {},
+              dependencies,
               type: "data",
               loc,
               parentId: pParentId,
@@ -468,24 +487,7 @@ export default function VariableDeclarator(
           );
         }
       } else if (t.isObjectPattern(pId) || t.isArrayPattern(pId)) {
-        const dependencies: Record<string, ComponentFileVarDependency> = {};
-        if (pParentId == null) {
-          if (init?.type === "NewExpression") {
-            if (init.callee.type === "Identifier") {
-              const id = getDeterministicId(init.callee.name);
-              dependencies[id] = {
-                id,
-                name: init.callee.name,
-              };
-            }
-          } else if (init?.type === "Identifier") {
-            const id = getDeterministicId(init.name);
-            dependencies[id] = {
-              id,
-              name: init.name,
-            };
-          }
-        }
+        const dependencies = extractDependencies(init);
 
         currentId = componentDB.addVariable(
           fileName,
@@ -526,12 +528,37 @@ export default function VariableDeclarator(
           t.isIdentifier(init.callee) &&
           (init.callee.name === "useMemo" || init.callee.name === "useCallback")
         ) {
+          let targetFnPath:
+            | traverse.NodePath<
+                t.ArrowFunctionExpression | t.FunctionExpression
+              >
+            | undefined;
+
           if (
             firstArgPath &&
             (firstArgPath.isArrowFunctionExpression() ||
               firstArgPath.isFunctionExpression())
           ) {
-            const body = firstArgPath.node.body;
+            targetFnPath = firstArgPath as traverse.NodePath<
+              t.ArrowFunctionExpression | t.FunctionExpression
+            >;
+          } else if (firstArgPath && firstArgPath.isCallExpression()) {
+            const args = firstArgPath.get("arguments");
+            for (const arg of args) {
+              if (
+                arg.isArrowFunctionExpression() ||
+                arg.isFunctionExpression()
+              ) {
+                targetFnPath = arg as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >;
+                break;
+              }
+            }
+          }
+
+          if (targetFnPath) {
+            const body = targetFnPath.node.body;
             assert(body.loc != null, "Function body loc not found");
 
             const scope = {
@@ -558,9 +585,41 @@ export default function VariableDeclarator(
               }
             }
 
-            processPattern(nodePath, id, undefined, {
+            const currentId = processPattern(nodePath, id, undefined, {
               type: init.callee.name === "useMemo" ? "memo" : "callback",
               extra: { scope, reactDeps },
+            });
+
+            if (currentId && firstArgPath && firstArgPath.isCallExpression()) {
+              const extraDeps = extractDependencies(firstArgPath.node);
+              for (const dep of Object.values(extraDeps)) {
+                componentDB.addVariableDependency(fileName, currentId, dep);
+              }
+            }
+          } else if (init.callee.name === "useCallback") {
+            // It's still a callback, even if we don't find a function implementation
+            const dependencies = init.arguments[1];
+            const reactDeps: ReactDependency[] = [];
+            if (dependencies && dependencies.type == "ArrayExpression") {
+              for (const element of dependencies.elements) {
+                if (element == null || !t.isExpression(element)) continue;
+
+                const name = t.isIdentifier(element)
+                  ? element.name
+                  : generateFn(element).code;
+                reactDeps.push({ id: "", name });
+              }
+            }
+
+            processPattern(nodePath, id, undefined, {
+              type: "callback",
+              extra: {
+                scope: {
+                  start: { line: 0, column: 0 },
+                  end: { line: 0, column: 0 },
+                },
+                reactDeps,
+              },
             });
           }
         } else if (

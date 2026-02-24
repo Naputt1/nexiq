@@ -27,6 +27,6 @@ export default function TSTypeAliasDeclaration(
       name: pattern,
       body: getType(nodePath.node.typeAnnotation),
       loc,
-    } as TypeDataDeclareType);
+    });
   };
 }

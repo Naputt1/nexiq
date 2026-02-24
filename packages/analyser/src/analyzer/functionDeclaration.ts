@@ -97,23 +97,18 @@ export default function FunctionDeclaration(
         "kind" | "file" | "id" | "var" | "components" | "hash"
       >);
     } else {
-      if (
-        nodePath.scope.block.type === "FunctionDeclaration" &&
-        nodePath.scope.block.id?.type === "Identifier"
-      ) {
-        componentDB.addVariable(fileName, {
-          name: pattern,
-          dependencies: {},
-          type: "function",
-          loc,
-          scope,
-          children: {},
-          var: {},
-        } as Omit<
-          ComponentFileVarNormalFunction,
-          "kind" | "file" | "id" | "var" | "components" | "hash"
-        >);
-      }
+      componentDB.addVariable(fileName, {
+        name: pattern,
+        dependencies: {},
+        type: "function",
+        loc,
+        scope,
+        children: {},
+        var: {},
+      } as Omit<
+        ComponentFileVarNormalFunction,
+        "kind" | "file" | "id" | "var" | "components" | "hash"
+      >);
     }
   };
 }

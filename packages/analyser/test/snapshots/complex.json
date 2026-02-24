@@ -786,7 +786,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "62680741babf0ef6",
+          "hash": "6e240f58918134f3",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -862,7 +862,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "c0691e5ea53940c1",
+              "hash": "2825041692247a82",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -877,6 +877,13 @@
                 "end": {
                   "line": 6,
                   "column": 41
+                }
+              },
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "value * 2"
                 }
               },
               "children": {},
@@ -1001,13 +1008,46 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "106e0dcd025aa38c",
+          "hash": "c0e81a4889ceff93",
           "dependencies": {},
           "loc": {
             "line": 20,
             "column": 16
           },
           "var": {
+            "107d82f8ae23e36a": {
+              "id": "107d82f8ae23e36a",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@20:60",
+                "loc": {
+                  "line": 20,
+                  "column": 60
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/Hooks.ts",
+              "hash": "65c10ae4b726e6a7",
+              "dependencies": {},
+              "loc": {
+                "line": 20,
+                "column": 60
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 20,
+                  "column": 60
+                },
+                "end": {
+                  "line": 20,
+                  "column": 68
+                }
+              },
+              "children": {}
+            },
             "8ceb6354f84f126b": {
               "id": "8ceb6354f84f126b",
               "name": {
@@ -1041,6 +1081,39 @@
                 }
               },
               "children": {}
+            },
+            "3dec785468be745e": {
+              "id": "3dec785468be745e",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@28:11",
+                "loc": {
+                  "line": 28,
+                  "column": 11
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/Hooks.ts",
+              "hash": "43998637b146a170",
+              "dependencies": {},
+              "loc": {
+                "line": 28,
+                "column": 11
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 28,
+                  "column": 11
+                },
+                "end": {
+                  "line": 28,
+                  "column": 71
+                }
+              },
+              "children": {}
             }
           },
           "scope": {
@@ -1053,6 +1126,7 @@
               "column": 1
             }
           },
+          "return": "3dec785468be745e",
           "children": {},
           "states": [],
           "props": [
@@ -1170,41 +1244,124 @@
           "file": "/src/HocForwardRef.tsx",
           "hash": "820722f17e2bc483",
           "declarationKind": "const",
-          "dependencies": {},
+          "dependencies": {
+            "4716edcf0db0eac9": {
+              "id": "4716edcf0db0eac9",
+              "name": "memo"
+            }
+          },
           "loc": {
             "line": 3,
             "column": 13
           },
           "children": {}
         },
-        "d4a8299cd2018f84": {
-          "id": "d4a8299cd2018f84",
+        "6272a2db9d3159ee": {
+          "id": "6272a2db9d3159ee",
           "name": {
             "type": "identifier",
-            "name": "jsx@4:9",
+            "name": "anonymous@3:38",
+            "loc": {
+              "line": 3,
+              "column": 38
+            },
+            "id": ""
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "hash": "afc3f5acbdefc19b",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 38
+          },
+          "var": {
+            "d4a8299cd2018f84": {
+              "id": "d4a8299cd2018f84",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@4:9",
+                "loc": {
+                  "line": 4,
+                  "column": 9
+                },
+                "id": "68dfa29149b70d19"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/HocForwardRef.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {
+                "c354ecdc24a77d5": {
+                  "id": "c354ecdc24a77d5",
+                  "name": "name"
+                }
+              },
+              "loc": {
+                "line": 4,
+                "column": 9
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 38
+            },
+            "end": {
+              "line": 5,
+              "column": 1
+            }
+          },
+          "return": {
+            "id": "d4a8299cd2018f84",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@4:9",
+              "loc": {
+                "line": 4,
+                "column": 9
+              },
+              "id": "68dfa29149b70d19"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/HocForwardRef.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {
+              "c354ecdc24a77d5": {
+                "id": "c354ecdc24a77d5",
+                "name": "name"
+              }
+            },
             "loc": {
               "line": 4,
               "column": 9
             },
-            "id": "68dfa29149b70d19"
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
           },
-          "kind": "normal",
-          "type": "jsx",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "bdc5f2c4316790b9",
-          "dependencies": {
-            "c354ecdc24a77d5": {
-              "id": "c354ecdc24a77d5",
-              "name": "name"
+          "children": {
+            "94909db41c43c232": {
+              "id": "div",
+              "instanceId": "94909db41c43c232",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 4,
+                "column": 9
+              },
+              "children": {}
             }
-          },
-          "loc": {
-            "line": 4,
-            "column": 9
-          },
-          "tag": "div",
-          "props": [],
-          "children": {}
+          }
         },
         "66105c08a1f70b91": {
           "id": "66105c08a1f70b91",
@@ -1220,7 +1377,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "e2ee3ecc58ed045b",
+          "hash": "ed044064bec4d42b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1228,45 +1385,142 @@
             "column": 13
           },
           "var": {
-            "247f5cfd69d48323": {
-              "id": "247f5cfd69d48323",
+            "76b357922373cbd1": {
+              "id": "76b357922373cbd1",
               "name": {
                 "type": "identifier",
-                "name": "jsx@8:9",
+                "name": "anonymous@7:81",
+                "loc": {
+                  "line": 7,
+                  "column": 81
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/HocForwardRef.tsx",
+              "hash": "2439caded9aaf6dc",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 81
+              },
+              "var": {
+                "247f5cfd69d48323": {
+                  "id": "247f5cfd69d48323",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@8:9",
+                    "loc": {
+                      "line": 8,
+                      "column": 9
+                    },
+                    "id": "ed682d93f58d1204"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/HocForwardRef.tsx",
+                  "hash": "c6dd83e40444178e",
+                  "dependencies": {
+                    "abce141911553a78": {
+                      "id": "abce141911553a78",
+                      "name": "ref"
+                    }
+                  },
+                  "loc": {
+                    "line": 8,
+                    "column": 9
+                  },
+                  "tag": "div",
+                  "props": [
+                    {
+                      "id": "abce141911553a78",
+                      "name": "ref",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "ref"
+                      }
+                    }
+                  ],
+                  "children": {},
+                  "srcId": "div"
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 7,
+                  "column": 81
+                },
+                "end": {
+                  "line": 9,
+                  "column": 1
+                }
+              },
+              "return": {
+                "id": "247f5cfd69d48323",
+                "name": {
+                  "type": "identifier",
+                  "name": "jsx@8:9",
+                  "loc": {
+                    "line": 8,
+                    "column": 9
+                  },
+                  "id": "ed682d93f58d1204"
+                },
+                "kind": "normal",
+                "type": "jsx",
+                "file": "/src/HocForwardRef.tsx",
+                "hash": "c6dd83e40444178e",
+                "dependencies": {
+                  "abce141911553a78": {
+                    "id": "abce141911553a78",
+                    "name": "ref"
+                  }
+                },
                 "loc": {
                   "line": 8,
                   "column": 9
                 },
-                "id": "ed682d93f58d1204"
-              },
-              "kind": "normal",
-              "type": "jsx",
-              "file": "/src/HocForwardRef.tsx",
-              "hash": "c6dd83e40444178e",
-              "dependencies": {
-                "abce141911553a78": {
-                  "id": "abce141911553a78",
-                  "name": "ref"
-                }
-              },
-              "loc": {
-                "line": 8,
-                "column": 9
-              },
-              "tag": "div",
-              "props": [
-                {
-                  "id": "abce141911553a78",
-                  "name": "ref",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "ref"
+                "tag": "div",
+                "props": [
+                  {
+                    "id": "abce141911553a78",
+                    "name": "ref",
+                    "value": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "ref"
+                    }
                   }
+                ],
+                "children": {},
+                "srcId": "div"
+              },
+              "children": {
+                "41914920e3ccbb34": {
+                  "id": "div",
+                  "instanceId": "41914920e3ccbb34",
+                  "tag": "div",
+                  "dependencies": [
+                    {
+                      "id": "abce141911553a78",
+                      "name": "ref",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "ref"
+                      }
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 8,
+                    "column": 9
+                  },
+                  "children": {}
                 }
-              ],
-              "children": {},
-              "srcId": "div"
+              }
             }
           },
           "scope": {
@@ -1279,30 +1533,7 @@
               "column": 1
             }
           },
-          "children": {
-            "41914920e3ccbb34": {
-              "id": "div",
-              "instanceId": "41914920e3ccbb34",
-              "tag": "div",
-              "dependencies": [
-                {
-                  "id": "abce141911553a78",
-                  "name": "ref",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "ref"
-                  }
-                }
-              ],
-              "isDependency": false,
-              "loc": {
-                "line": 8,
-                "column": 9
-              },
-              "children": {}
-            }
-          },
+          "children": {},
           "states": [],
           "props": [
             {
@@ -1340,7 +1571,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "af160c8fe9ea9738",
+          "hash": "21be143ad2e8dab8",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1348,38 +1579,106 @@
             "column": 6
           },
           "var": {
-            "42cb19ddd5ea0300": {
-              "id": "42cb19ddd5ea0300",
+            "6b68fed1532b6f05": {
+              "id": "6b68fed1532b6f05",
               "name": {
                 "type": "identifier",
-                "name": "jsx@14:11",
+                "name": "anonymous@12:9",
+                "loc": {
+                  "line": 12,
+                  "column": 9
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/HocForwardRef.tsx",
+              "hash": "c7df62c4e8786306",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 9
+              },
+              "var": {
+                "42cb19ddd5ea0300": {
+                  "id": "42cb19ddd5ea0300",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@14:11",
+                    "loc": {
+                      "line": 14,
+                      "column": 11
+                    },
+                    "id": "807a3ae90c938b1f"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/HocForwardRef.tsx",
+                  "hash": "4011576a65d983f6",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 14,
+                    "column": 11
+                  },
+                  "tag": "Wrapped",
+                  "props": [
+                    {
+                      "id": "77e9e4a1556d5f7e",
+                      "name": "...",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "props"
+                      }
+                    }
+                  ],
+                  "children": {}
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 12,
+                  "column": 9
+                },
+                "end": {
+                  "line": 15,
+                  "column": 3
+                }
+              },
+              "return": {
+                "id": "42cb19ddd5ea0300",
+                "name": {
+                  "type": "identifier",
+                  "name": "jsx@14:11",
+                  "loc": {
+                    "line": 14,
+                    "column": 11
+                  },
+                  "id": "807a3ae90c938b1f"
+                },
+                "kind": "normal",
+                "type": "jsx",
+                "file": "/src/HocForwardRef.tsx",
+                "hash": "4011576a65d983f6",
+                "dependencies": {},
                 "loc": {
                   "line": 14,
                   "column": 11
                 },
-                "id": "807a3ae90c938b1f"
-              },
-              "kind": "normal",
-              "type": "jsx",
-              "file": "/src/HocForwardRef.tsx",
-              "hash": "4011576a65d983f6",
-              "dependencies": {},
-              "loc": {
-                "line": 14,
-                "column": 11
-              },
-              "tag": "Wrapped",
-              "props": [
-                {
-                  "id": "77e9e4a1556d5f7e",
-                  "name": "...",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "props"
+                "tag": "Wrapped",
+                "props": [
+                  {
+                    "id": "77e9e4a1556d5f7e",
+                    "name": "...",
+                    "value": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "props"
+                    }
                   }
-                }
-              ],
+                ],
+                "children": {}
+              },
               "children": {}
             }
           },
@@ -1393,6 +1692,7 @@
               "column": 1
             }
           },
+          "return": "6b68fed1532b6f05",
           "children": {}
         },
         "8b20080379f3a04b": {
@@ -1411,36 +1711,114 @@
           "file": "/src/HocForwardRef.tsx",
           "hash": "5dc74c515382cb22",
           "declarationKind": "const",
-          "dependencies": {},
+          "dependencies": {
+            "738a200726547e84": {
+              "id": "738a200726547e84",
+              "name": "withLogging"
+            }
+          },
           "loc": {
             "line": 18,
             "column": 13
           },
           "children": {}
         },
-        "960a42af71306bce": {
-          "id": "960a42af71306bce",
+        "93fc570c17202318": {
+          "id": "93fc570c17202318",
           "name": {
             "type": "identifier",
-            "name": "jsx@18:50",
+            "name": "anonymous@18:44",
+            "loc": {
+              "line": 18,
+              "column": 44
+            },
+            "id": ""
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "hash": "81be00daf8ec804a",
+          "dependencies": {},
+          "loc": {
+            "line": 18,
+            "column": 44
+          },
+          "var": {
+            "960a42af71306bce": {
+              "id": "960a42af71306bce",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@18:50",
+                "loc": {
+                  "line": 18,
+                  "column": 50
+                },
+                "id": "45ede0627ee475b0"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/HocForwardRef.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 50
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 18,
+              "column": 44
+            },
+            "end": {
+              "line": 18,
+              "column": 68
+            }
+          },
+          "return": {
+            "id": "960a42af71306bce",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@18:50",
+              "loc": {
+                "line": 18,
+                "column": 50
+              },
+              "id": "45ede0627ee475b0"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/HocForwardRef.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
             "loc": {
               "line": 18,
               "column": 50
             },
-            "id": "45ede0627ee475b0"
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
           },
-          "kind": "normal",
-          "type": "jsx",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "bdc5f2c4316790b9",
-          "dependencies": {},
-          "loc": {
-            "line": 18,
-            "column": 50
-          },
-          "tag": "div",
-          "props": [],
-          "children": {}
+          "children": {
+            "c4ee89101abd45df": {
+              "id": "div",
+              "instanceId": "c4ee89101abd45df",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 18,
+                "column": 50
+              },
+              "children": {}
+            }
+          }
         }
       }
     },
@@ -1489,7 +1867,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "d30c71e0e21ed316",
+          "hash": "521884feecf4131f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1683,45 +2061,119 @@
               },
               "srcId": "ul"
             },
-            "2830dd3194c842db": {
-              "id": "2830dd3194c842db",
+            "c301c21551e0c042": {
+              "id": "c301c21551e0c042",
               "name": {
                 "type": "identifier",
-                "name": "jsx@9:27",
+                "name": "anonymous@9:19",
+                "loc": {
+                  "line": 9,
+                  "column": 19
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/Destructuring.tsx",
+              "hash": "d3899121267063ee",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 19
+              },
+              "var": {
+                "2830dd3194c842db": {
+                  "id": "2830dd3194c842db",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@9:27",
+                    "loc": {
+                      "line": 9,
+                      "column": 27
+                    },
+                    "id": "d29668ca692d4a63"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/Destructuring.tsx",
+                  "hash": "556b8b2f587857df",
+                  "dependencies": {
+                    "6ca8f7b0f03f9e41": {
+                      "id": "6ca8f7b0f03f9e41",
+                      "name": "item"
+                    }
+                  },
+                  "loc": {
+                    "line": 9,
+                    "column": 27
+                  },
+                  "tag": "li",
+                  "props": [
+                    {
+                      "id": "bbea0d63a05165e3",
+                      "name": "key",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "item"
+                      }
+                    }
+                  ],
+                  "children": {},
+                  "srcId": "li"
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 9,
+                  "column": 19
+                },
+                "end": {
+                  "line": 9,
+                  "column": 53
+                }
+              },
+              "return": {
+                "id": "2830dd3194c842db",
+                "name": {
+                  "type": "identifier",
+                  "name": "jsx@9:27",
+                  "loc": {
+                    "line": 9,
+                    "column": 27
+                  },
+                  "id": "d29668ca692d4a63"
+                },
+                "kind": "normal",
+                "type": "jsx",
+                "file": "/src/Destructuring.tsx",
+                "hash": "556b8b2f587857df",
+                "dependencies": {
+                  "6ca8f7b0f03f9e41": {
+                    "id": "6ca8f7b0f03f9e41",
+                    "name": "item"
+                  }
+                },
                 "loc": {
                   "line": 9,
                   "column": 27
                 },
-                "id": "d29668ca692d4a63"
-              },
-              "kind": "normal",
-              "type": "jsx",
-              "file": "/src/Destructuring.tsx",
-              "hash": "556b8b2f587857df",
-              "dependencies": {
-                "6ca8f7b0f03f9e41": {
-                  "id": "6ca8f7b0f03f9e41",
-                  "name": "item"
-                }
-              },
-              "loc": {
-                "line": 9,
-                "column": 27
-              },
-              "tag": "li",
-              "props": [
-                {
-                  "id": "bbea0d63a05165e3",
-                  "name": "key",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "item"
+                "tag": "li",
+                "props": [
+                  {
+                    "id": "bbea0d63a05165e3",
+                    "name": "key",
+                    "value": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "item"
+                    }
                   }
-                }
-              ],
-              "children": {},
-              "srcId": "li"
+                ],
+                "children": {},
+                "srcId": "li"
+              },
+              "children": {}
             },
             "e80d302618701e37": {
               "id": "e80d302618701e37",
@@ -3085,7 +3537,12 @@
           "file": "/src/Context.tsx",
           "hash": "3b10bcd2a7925615",
           "declarationKind": "const",
-          "dependencies": {},
+          "dependencies": {
+            "d48f99698bb52d8": {
+              "id": "d48f99698bb52d8",
+              "name": "createContext"
+            }
+          },
           "loc": {
             "line": 3,
             "column": 13
@@ -3467,7 +3924,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "8a084ec14dc3458e",
+          "hash": "b75b809f39912dae",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -4042,6 +4499,39 @@
               ],
               "children": {},
               "srcId": "button"
+            },
+            "bf5de679c8d0dc2e": {
+              "id": "bf5de679c8d0dc2e",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@20:23",
+                "loc": {
+                  "line": 20,
+                  "column": 23
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/ComplexApp.tsx",
+              "hash": "de3fcb544da2ef46",
+              "dependencies": {},
+              "loc": {
+                "line": 20,
+                "column": 23
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 20,
+                  "column": 23
+                },
+                "end": {
+                  "line": 20,
+                  "column": 44
+                }
+              },
+              "children": {}
             }
           },
           "scope": {
@@ -4533,6 +5023,11 @@
       "label": "render"
     },
     {
+      "from": "66105c08a1f70b91",
+      "to": "247f5cfd69d48323",
+      "label": "render"
+    },
+    {
       "from": "1259634e1eafe1c6",
       "to": "313fed1bd88fac5e",
       "label": "render"
@@ -4545,6 +5040,11 @@
     {
       "from": "1259634e1eafe1c6",
       "to": "d13454937baa9377",
+      "label": "render"
+    },
+    {
+      "from": "1259634e1eafe1c6",
+      "to": "2830dd3194c842db",
       "label": "render"
     },
     {
@@ -4719,16 +5219,6 @@
     },
     {
       "from": "div",
-      "to": "66105c08a1f70b91",
-      "label": "render"
-    },
-    {
-      "from": "247f5cfd69d48323",
-      "to": "abce141911553a78",
-      "label": "hook"
-    },
-    {
-      "from": "div",
       "to": "1259634e1eafe1c6",
       "label": "render"
     },
@@ -4790,16 +5280,6 @@
     {
       "from": "d13454937baa9377",
       "to": "2830dd3194c842db",
-      "label": "hook"
-    },
-    {
-      "from": "li",
-      "to": "1259634e1eafe1c6",
-      "label": "render"
-    },
-    {
-      "from": "2830dd3194c842db",
-      "to": "6ca8f7b0f03f9e41",
       "label": "hook"
     },
     {

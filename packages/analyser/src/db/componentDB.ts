@@ -12,7 +12,8 @@ import type {
   ComponentFileVarHook,
   ComponentFileVarJSX,
   EffectInfo,
-  TypeDataDeclare,
+  TypeDataDeclareInterface,
+  TypeDataDeclareType,
   ComponentFile,
   ComponentFileVarNormalFunction,
   ComponentFileVarNormalData,
@@ -35,6 +36,7 @@ import {
   isBaseFunctionVariable,
   isCallHookVariable,
   isJSXVariable,
+  isReactFunctionVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
@@ -300,11 +302,7 @@ export class ComponentDB {
         file,
       );
     } else if (variable.type === "data") {
-      // assert(kind != null);
-      if (kind == null) {
-        debugger;
-        return;
-      }
+      assert(kind != null, "kind must be defined for data variable");
 
       v = new DataVariable(
         {
@@ -338,7 +336,8 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    if (component == null) return "no-parent";
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     return component.addState(state);
   }
@@ -350,7 +349,8 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    if (component == null) return "no-parent";
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     const id = component.addCallHook(callHook);
 
@@ -395,7 +395,8 @@ export class ComponentDB {
   ) {
     const component = this.files.getHookInfoFromLoc(fileName, loc);
 
-    if (component == null) return "no-parent";
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     return component.addRef(ref).id;
   }
@@ -464,7 +465,7 @@ export class ComponentDB {
     }
 
     const component = this.files.getHookInfoFromLoc(fileName, loc);
-    if (component == null) return;
+    if (component == null || !isReactFunctionVariable(component)) return;
 
     component.addHook(exportInfo.id);
   }
@@ -585,7 +586,12 @@ export class ComponentDB {
     this.files.addStarExport(fileName, source);
   }
 
-  public fileAddTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
+  public fileAddTsTypes(
+    fileName: string,
+    type:
+      | Omit<TypeDataDeclareInterface, "id">
+      | Omit<TypeDataDeclareType, "id">,
+  ) {
     const typeDeclare = this.files.addTsTypes(fileName, type);
 
     const file = this.files.get(fileName);
@@ -787,7 +793,7 @@ export class ComponentDB {
     },
     comResolveCallHook: (db, task) => {
       const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
-      if (component) {
+      if (component && isReactFunctionVariable(component)) {
         const exportInfo = db._getExportId(task.fileName, task.hook);
         let hookId: string | null = null;
         if (exportInfo) {

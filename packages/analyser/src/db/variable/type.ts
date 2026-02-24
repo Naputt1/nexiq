@@ -3,12 +3,14 @@ import type { Variable } from "./variable.js";
 import type { DataVariable } from "./dataVariable.js";
 import type { HookVariable } from "./hook.js";
 import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
+import type { ReactFunctionVariable } from "./reactFunctionVariable.js";
 import type { VarKind, VarType } from "shared";
 import type { StateVariable } from "./stateVariable.js";
 import type { MemoVariable } from "./memo.js";
 import type { RefVariable } from "./refVariable.js";
 import type { CallHookVariable } from "./callHookVariable.js";
 import type { JSXVariable } from "./jsx.js";
+import { CallbackVariable } from "./callbackVariable.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
   return v.kind === "component" && v.type === "function";
@@ -24,6 +26,12 @@ export function isHookVariable(v: Variable): v is HookVariable {
 
 export function isCallHookVariable(v: Variable): v is CallHookVariable {
   return v.kind === "hook" && v.type === "data";
+}
+
+export function isReactFunctionVariable(
+  v: Variable,
+): v is ReactFunctionVariable {
+  return isComponentVariable(v) || isHookVariable(v);
 }
 
 export function isNormalVariable(v: Variable): v is DataVariable {
@@ -46,6 +54,10 @@ export function isStateVariable(v: Variable): v is StateVariable {
 
 export function isMemoVariable(v: Variable): v is MemoVariable {
   return v.type === "function" && v.kind === "memo";
+}
+
+export function isCallbackVariable(v: Variable): v is CallbackVariable {
+  return v.type === "function" && v.kind === "callback";
 }
 
 export function isRefVariable(v: Variable): v is RefVariable {

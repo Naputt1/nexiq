@@ -1,14 +1,16 @@
-import type { ComponentFileVar, VariableLoc, VariableScope } from "shared";
+import type {
+  ComponentFileVar,
+  VariableLoc,
+  VariableScope,
+  VarKind,
+} from "shared";
 import type { Variable } from "./variable.js";
-import {
-  isBaseFunctionVariable,
-  isComponentVariable,
-  isHookVariable,
-} from "./type.js";
+import { isBaseFunctionVariable } from "./type.js";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
 } from "../../analyzer/pattern.js";
+import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
 
 export class Scope {
   private variables = new Map<string, Variable>();
@@ -41,16 +43,16 @@ export class Scope {
     return this;
   }
 
-  public findDeepestVariable(loc: VariableLoc): Variable | undefined {
+  public findDeepestVariable(
+    loc: VariableLoc,
+  ): BaseFunctionVariable<VarKind> | undefined {
     for (const v of this.variables.values()) {
       if (isBaseFunctionVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
           const inner = v.var.findDeepestVariable(loc);
           if (inner) return inner;
 
-          if (isComponentVariable(v) || isHookVariable(v)) {
-            return v;
-          }
+          return v;
         }
       }
     }
