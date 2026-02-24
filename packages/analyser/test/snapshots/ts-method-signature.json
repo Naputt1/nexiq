@@ -1,0 +1,276 @@
+{
+  "files": {
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "2f2f40e381cb156a",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "MyInterface": {
+          "name": "MyInterface",
+          "type": "type",
+          "exportKind": "type",
+          "id": "2a6fb9e029700a2d"
+        },
+        "MyType": {
+          "name": "MyType",
+          "type": "type",
+          "exportKind": "type",
+          "id": "16ac33881c31cf6a"
+        },
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "value",
+          "id": "311c554b828f67a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {
+        "2a6fb9e029700a2d": {
+          "id": "2a6fb9e029700a2d",
+          "type": "interface",
+          "name": {
+            "type": "identifier",
+            "name": "MyInterface",
+            "loc": {
+              "line": 3,
+              "column": 17
+            },
+            "id": "5ecd9a6e8140d3a6"
+          },
+          "body": [
+            {
+              "signatureType": "method",
+              "name": "myMethod",
+              "params": [],
+              "parameters": [
+                {
+                  "param": {
+                    "type": "named",
+                    "name": "a"
+                  },
+                  "typeData": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "param": {
+                    "type": "named",
+                    "name": "b"
+                  },
+                  "typeData": {
+                    "type": "number"
+                  },
+                  "optional": true
+                }
+              ],
+              "return": {
+                "type": "void"
+              }
+            },
+            {
+              "signatureType": "method",
+              "name": "anotherMethod",
+              "params": [
+                {
+                  "name": "T"
+                }
+              ],
+              "parameters": [
+                {
+                  "param": {
+                    "type": "named",
+                    "name": "x"
+                  },
+                  "typeData": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "T"
+                  }
+                }
+              ],
+              "return": {
+                "type": "ref",
+                "refType": "named",
+                "name": "T"
+              }
+            }
+          ],
+          "loc": {
+            "line": 3,
+            "column": 17
+          }
+        },
+        "16ac33881c31cf6a": {
+          "id": "16ac33881c31cf6a",
+          "type": "type",
+          "name": {
+            "type": "identifier",
+            "name": "MyType",
+            "loc": {
+              "line": 8,
+              "column": 12
+            },
+            "id": "fb908aa2fd4a3598"
+          },
+          "body": {
+            "type": "type-literal",
+            "members": [
+              {
+                "signatureType": "method",
+                "name": "inlineMethod",
+                "params": [],
+                "parameters": [
+                  {
+                    "param": {
+                      "type": "named",
+                      "name": "p"
+                    },
+                    "typeData": {
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "return": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "loc": {
+            "line": 8,
+            "column": 12
+          }
+        }
+      },
+      "var": {
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 12,
+              "column": 13
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "64918c441fe22993",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 12,
+            "column": 13
+          },
+          "var": {
+            "ac19971c890d320a": {
+              "id": "ac19971c890d320a",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@13:9",
+                "loc": {
+                  "line": 13,
+                  "column": 9
+                },
+                "id": "ad37c4ad8f35976c"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 13,
+                "column": 9
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 12,
+              "column": 19
+            },
+            "end": {
+              "line": 14,
+              "column": 1
+            }
+          },
+          "return": {
+            "id": "ac19971c890d320a",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@13:9",
+              "loc": {
+                "line": 13,
+                "column": 9
+              },
+              "id": "ad37c4ad8f35976c"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/App.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
+            "loc": {
+              "line": 13,
+              "column": 9
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "de52e0c1bddf2ba7": {
+              "id": "div",
+              "instanceId": "de52e0c1bddf2ba7",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 13,
+                "column": 9
+              },
+              "children": {}
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "311c554b828f67a5",
+      "to": "ac19971c890d320a",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ const samples = args._[0]
       "jsx-variable",
       "forward-ref",
       "destructured-export",
+      "ts-method-signature",
       "cache",
       "cache-new",
     ];
@@ -59,6 +60,8 @@ export async function runSnapshot(sample: string) {
     files,
     packageJson,
     cacheData,
+    undefined,
+    1,
   );
   delete graph.src;
   for (const file of Object.values(graph.files)) {

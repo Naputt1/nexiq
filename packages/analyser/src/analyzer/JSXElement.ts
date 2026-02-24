@@ -14,87 +14,6 @@ import {
 
 const generateFn: typeof generate.default = generate.default || generate;
 
-function getParentPath(nodePath: traverse.NodePath<t.Node>) {
-  const parentPath: string[] = [];
-  let path: traverse.NodePath<t.Node> = nodePath;
-  while (true) {
-    if (path.scope.block.type === "Program") {
-      break;
-    }
-
-    if (path.scope.block.type === "FunctionDeclaration") {
-      if (path.scope.block.id?.type === "Identifier") {
-        parentPath.push(path.scope.block.id.name);
-      }
-    } else if (path.scope.block.type === "ArrowFunctionExpression") {
-      if (path.scope.parentBlock.type == "VariableDeclarator") {
-        if (path.scope.parentBlock.id.type === "Identifier") {
-          parentPath.push(path.scope.parentBlock.id.name);
-        }
-      }
-    }
-
-    path = path.scope.parent.path;
-  }
-
-  return parentPath;
-}
-
-function getComponentLoc(nodePath: traverse.NodePath<t.Node>) {
-  const parentStatement = nodePath.getStatementParent();
-
-  if (parentStatement?.node?.loc?.start.line != null) {
-    if (
-      parentStatement?.node.type == "VariableDeclaration" &&
-      parentStatement?.node.declarations.length != 0
-    ) {
-      return `${parentStatement?.node.declarations[0]?.id?.loc?.start.line}@${parentStatement?.node.declarations[0]?.id?.loc?.start.column}`;
-    } else if (parentStatement?.node.type == "ReturnStatement") {
-      if (parentStatement.parentPath.type === "BlockStatement") {
-        if (
-          parentStatement.parentPath.parent.type === "FunctionDeclaration" &&
-          parentStatement.parentPath.parent.id?.loc != null
-        ) {
-          return `${parentStatement.parentPath.parent.id.loc.start.line}@${parentStatement.parentPath.parent.id.loc.start.column}`;
-        } else if (
-          parentStatement.parentPath.parent.type == "ArrowFunctionExpression"
-        ) {
-          if (
-            parentStatement.parentPath.parentPath?.type ===
-            "ArrowFunctionExpression"
-          ) {
-            if (
-              parentStatement.parentPath.parentPath.parent.type ===
-              "VariableDeclarator"
-            ) {
-              return `${parentStatement.parentPath.parentPath.parent.id.loc?.start.line}@${parentStatement.parentPath.parentPath.parent.id.loc?.start.column}`;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  const parentFunc = nodePath.getFunctionParent();
-  if (parentFunc != null) {
-    if (parentFunc?.node.type === "ArrowFunctionExpression") {
-      if (
-        parentFunc?.parent.type === "VariableDeclarator" &&
-        parentFunc.parent.id.loc != null
-      ) {
-        return `${parentFunc.parent.id.loc.start.line}@${parentFunc.parent.id.loc.start.column}`;
-      }
-    } else if (
-      parentFunc?.node.type === "FunctionDeclaration" &&
-      parentFunc.node.id?.loc != null
-    ) {
-      return `${parentFunc.node.id.loc.start.line}@${parentFunc.node.id.loc.start.column}`;
-    }
-  }
-
-  return null;
-}
-
 function extractDependencies(
   expr: t.Expression,
   name: string,
@@ -240,19 +159,14 @@ export default function JSXElement(
             id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
           };
 
-          const parentPath = getParentPath(nodePath);
-          id = componentDB.addJSXVariable(
-            fileName,
-            {
-              name,
-              tag,
-              props: dependency,
-              loc,
-              dependencies: {},
-              children: {},
-            },
-            parentPath,
-          );
+          id = componentDB.addJSXVariable(fileName, {
+            name,
+            tag,
+            props: dependency,
+            loc,
+            dependencies: {},
+            children: {},
+          });
         }
 
         componentDB.pushJSX(id);
@@ -297,22 +211,14 @@ export default function JSXElement(
         const shouldAddRender = true; // Always add to capture structure
 
         if (shouldAddRender) {
-          const compLoc = getComponentLoc(nodePath);
-          if (compLoc) {
-            const instanceId = componentDB.comAddRender(
-              compLoc,
-              fileName,
-              tag,
-              dependency,
-              loc,
-              componentDB.getCurrentRenderInstance(),
-            );
-            componentDB.pushRenderInstance(instanceId);
-          } else {
-            componentDB.pushRenderInstance(
-              componentDB.getCurrentRenderInstance(),
-            );
-          }
+          const instanceId = componentDB.comAddRender(
+            fileName,
+            tag,
+            dependency,
+            loc,
+            componentDB.getCurrentRenderInstance(),
+          );
+          componentDB.pushRenderInstance(instanceId);
         } else {
           componentDB.pushRenderInstance(
             componentDB.getCurrentRenderInstance(),
@@ -349,19 +255,14 @@ export default function JSXElement(
           id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
         };
 
-        const parentPath = getParentPath(nodePath);
-        const id = componentDB.addJSXVariable(
-          fileName,
-          {
-            name,
-            tag,
-            props: [],
-            loc,
-            dependencies: {},
-            children: {},
-          },
-          parentPath,
-        );
+        const id = componentDB.addJSXVariable(fileName, {
+          name,
+          tag,
+          props: [],
+          loc,
+          dependencies: {},
+          children: {},
+        });
 
         componentDB.pushJSX(id);
 
@@ -402,22 +303,14 @@ export default function JSXElement(
           }
         }
 
-        const compLoc = getComponentLoc(nodePath);
-        if (compLoc) {
-          const instanceId = componentDB.comAddRender(
-            compLoc,
-            fileName,
-            tag,
-            [],
-            loc,
-            componentDB.getCurrentRenderInstance(),
-          );
-          componentDB.pushRenderInstance(instanceId);
-        } else {
-          componentDB.pushRenderInstance(
-            componentDB.getCurrentRenderInstance(),
-          );
-        }
+        const instanceId = componentDB.comAddRender(
+          fileName,
+          tag,
+          [],
+          loc,
+          componentDB.getCurrentRenderInstance(),
+        );
+        componentDB.pushRenderInstance(instanceId);
       },
       exit() {
         componentDB.popJSX();
@@ -444,37 +337,31 @@ export default function JSXElement(
             dep.value.type === "ref" &&
             dep.value.refType === "named"
           ) {
-            const compLoc = getComponentLoc(nodePath);
+            const loc = {
+              line: nodePath.node.loc?.start.line || 0,
+              column: nodePath.node.loc?.start.column || 0,
+            };
+            const v = componentDB.getHookInfoFromLoc(fileName, loc);
             let isComponent = false;
-            if (compLoc) {
-              const parts = compLoc.split("@");
-              const line = parseInt(parts[0]!);
-              const column = parseInt(parts[1]!);
-              const varId = componentDB.getVariableIDFromLoc(fileName, {
-                line,
-                column,
-              });
+            const varId = v?.id;
 
-              if (varId) {
-                const file = componentDB.getFile(fileName);
-                const v = file.var.get(varId, true);
-                if (v && isBaseFunctionVariable(v)) {
-                  const targetVar = v.var.getByName(dep.value.name);
-                  if (
-                    targetVar &&
-                    (isJSXVariable(targetVar) || isComponentVariable(targetVar))
-                  ) {
-                    isComponent = true;
-                  }
+            if (varId) {
+              if (v && isBaseFunctionVariable(v)) {
+                const targetVar = v.var.getByName(dep.value.name);
+                if (
+                  targetVar &&
+                  (isJSXVariable(targetVar) || isComponentVariable(targetVar))
+                ) {
+                  isComponent = true;
                 }
               }
             }
 
             if (!isComponent) {
-              const varId = componentDB.getVariableID(dep.value.name, fileName);
-              if (varId) {
+              const resId = componentDB.getVariableID(dep.value.name, fileName);
+              if (resId) {
                 const file = componentDB.getFile(fileName);
-                const v = file.var.get(varId, true);
+                const v = file.var.get(resId, true);
                 if (v && (isJSXVariable(v) || isComponentVariable(v))) {
                   isComponent = true;
                 }
@@ -482,20 +369,16 @@ export default function JSXElement(
             }
 
             if (isComponent) {
-              if (compLoc) {
-                const loc = nodePath.node.loc?.start || { line: 0, column: 0 };
-                componentDB.comAddRender(
-                  compLoc,
-                  fileName,
-                  dep.value.name,
-                  [],
-                  {
-                    line: loc.line,
-                    column: loc.column,
-                  },
-                  componentDB.getCurrentRenderInstance(),
-                );
-              }
+              componentDB.comAddRender(
+                fileName,
+                dep.value.name,
+                [],
+                {
+                  line: loc.line,
+                  column: loc.column,
+                },
+                componentDB.getCurrentRenderInstance(),
+              );
             }
 
             const id = getDeterministicId(dep.value.name);

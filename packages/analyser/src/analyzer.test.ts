@@ -17,6 +17,7 @@ describe("analyser snapshots", () => {
     "jsx-variable",
     "forward-ref",
     "destructured-export",
+    "ts-method-signature",
   ];
 
   projects.forEach((projectName) => {

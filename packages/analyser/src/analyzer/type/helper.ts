@@ -5,6 +5,7 @@ import type {
   TypeDataFunctionParameter,
   TypeDataImport,
   TypeDataLiteralBody,
+  TypeDataLiteralBodyMethod,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
@@ -246,6 +247,53 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
         type: getType(member.parameters[0]!.typeAnnotation.typeAnnotation),
       },
     };
+  } else if (member.type === "TSMethodSignature") {
+    if (member.key.type !== "Identifier") {
+      return null;
+    }
+
+    const body: TypeDataLiteralBodyMethod = {
+      signatureType: "method",
+      name: member.key.name,
+      params: [],
+      parameters: [],
+      return: member.typeAnnotation
+        ? getType(member.typeAnnotation.typeAnnotation)
+        : { type: "void" },
+    };
+
+    if (member.optional) {
+      body.optional = true;
+    }
+
+    if (member.computed) {
+      body.computed = true;
+    }
+
+    if (member.typeParameters) {
+      for (const param of member.typeParameters.params) {
+        body.params.push(getTypeParameter(param));
+      }
+    }
+
+    for (const param of member.parameters) {
+      const parameter: TypeDataFunctionParameter = {
+        param: getFuncParam(param),
+      };
+
+      if (param.typeAnnotation) {
+        assert(t.isTSTypeAnnotation(param.typeAnnotation));
+        parameter.typeData = getType(param.typeAnnotation);
+      }
+
+      if ("optional" in param && param.optional) {
+        parameter.optional = true;
+      }
+
+      body.parameters.push(parameter);
+    }
+
+    return body;
   }
 
   return null;
@@ -367,50 +415,9 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       };
 
       for (const member of tsType.members) {
-        if (member.type === "TSPropertySignature") {
-          // TODO: handle other type
-          if (
-            member.key.type != "Identifier" ||
-            member.typeAnnotation?.type != "TSTypeAnnotation"
-          )
-            continue;
-          assert(member.key.type == "Identifier");
-          assert(member.typeAnnotation?.type == "TSTypeAnnotation");
-
-          const body: TypeDataLiteralBody = {
-            signatureType: "property",
-            name: member.key.name,
-            type: getType(member.typeAnnotation.typeAnnotation),
-          };
-
-          if (member.optional) {
-            body.optional = true;
-          }
-
-          if (member.computed) {
-            body.computed = true;
-          }
-
-          typeData.members.push(body);
-        } else if (member.type === "TSIndexSignature") {
-          assert(member.typeAnnotation?.type == "TSTypeAnnotation");
-          assert(member.parameters.length == 1);
-          assert(
-            member.parameters[0]!.typeAnnotation?.type == "TSTypeAnnotation",
-          );
-
-          typeData.members.push({
-            signatureType: "index",
-            type: getType(member.typeAnnotation.typeAnnotation),
-            parameter: {
-              name: member.parameters[0]!.name,
-              type: getType(
-                member.parameters[0]!.typeAnnotation.typeAnnotation,
-              ),
-            },
-          });
-        } else {
-          debugger;
+        const memberData = getMember(member);
+        if (memberData) {
+          typeData.members.push(memberData);
         }
       }
 

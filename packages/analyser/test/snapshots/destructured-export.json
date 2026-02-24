@@ -2,7 +2,7 @@
   "files": {
     "/src/auth.tsx": {
       "path": "/src/auth.tsx",
-      "hash": "221ad94017a0bf06",
+      "hash": "bd42752a86e8eb2c",
       "import": {},
       "export": {
         "useUser": {
@@ -60,7 +60,7 @@
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
-      "hash": "16a0b13cd14b3ba",
+      "hash": "ed5da6989c871bf6",
       "import": {
         "useUser": {
           "localName": "useUser",
@@ -88,57 +88,57 @@
             "type": "identifier",
             "name": "App",
             "loc": {
-              "line": 1,
-              "column": 47
+              "line": 3,
+              "column": 13
             },
             "id": "ce7286aa30b0e33b"
           },
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "926b7328e623f61",
+          "hash": "51f6684404a5fbf7",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 1,
-            "column": 47
+            "line": 3,
+            "column": 13
           },
           "var": {
-            "311c554b828f67a5:callhook:useUser:1:67": {
-              "id": "311c554b828f67a5:callhook:useUser:1:67",
+            "311c554b828f67a5:callhook:useUser:4:8": {
+              "id": "311c554b828f67a5:callhook:useUser:4:8",
               "name": {
                 "type": "identifier",
                 "name": "user",
                 "loc": {
-                  "line": 1,
-                  "column": 67
+                  "line": 4,
+                  "column": 8
                 },
-                "id": "9c60c4c08deaa373"
+                "id": "99e389d25c10af32"
               },
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "f3f773149046095c",
+              "hash": "1caf227aa1ea83e5",
               "dependencies": {},
               "loc": {
-                "line": 1,
-                "column": 67
+                "line": 4,
+                "column": 8
               },
               "call": {
                 "id": "b2d7ad170a22c6a4",
                 "name": "useUser"
               }
             },
-            "b55fb8a9bac62dc": {
-              "id": "b55fb8a9bac62dc",
+            "7cc97a23e626856d": {
+              "id": "7cc97a23e626856d",
               "name": {
                 "type": "identifier",
-                "name": "jsx@1:92",
+                "name": "jsx@5:9",
                 "loc": {
-                  "line": 1,
-                  "column": 92
+                  "line": 5,
+                  "column": 9
                 },
-                "id": "bec410c4fc3db905"
+                "id": "5d5f68fbc2560c09"
               },
               "kind": "normal",
               "type": "jsx",
@@ -146,8 +146,8 @@
               "hash": "2b619d8dd97d4218",
               "dependencies": {},
               "loc": {
-                "line": 1,
-                "column": 92
+                "line": 5,
+                "column": 9
               },
               "tag": "div",
               "props": [],
@@ -157,24 +157,24 @@
           },
           "scope": {
             "start": {
-              "line": 1,
-              "column": 47
+              "line": 3,
+              "column": 19
             },
             "end": {
-              "line": 1,
-              "column": 50
+              "line": 6,
+              "column": 1
             }
           },
           "return": {
-            "id": "b55fb8a9bac62dc",
+            "id": "7cc97a23e626856d",
             "name": {
               "type": "identifier",
-              "name": "jsx@1:92",
+              "name": "jsx@5:9",
               "loc": {
-                "line": 1,
-                "column": 92
+                "line": 5,
+                "column": 9
               },
-              "id": "bec410c4fc3db905"
+              "id": "5d5f68fbc2560c09"
             },
             "kind": "normal",
             "type": "jsx",
@@ -182,8 +182,8 @@
             "hash": "2b619d8dd97d4218",
             "dependencies": {},
             "loc": {
-              "line": 1,
-              "column": 92
+              "line": 5,
+              "column": 9
             },
             "tag": "div",
             "props": [],
@@ -191,15 +191,15 @@
             "srcId": "div"
           },
           "children": {
-            "fca038b58e463000": {
+            "ca8cdcf6cdf8e769": {
               "id": "div",
-              "instanceId": "fca038b58e463000",
+              "instanceId": "ca8cdcf6cdf8e769",
               "tag": "div",
               "dependencies": [],
               "isDependency": false,
               "loc": {
-                "line": 1,
-                "column": 92
+                "line": 5,
+                "column": 9
               },
               "children": {}
             }
@@ -220,7 +220,7 @@
   "edges": [
     {
       "from": "311c554b828f67a5",
-      "to": "b55fb8a9bac62dc",
+      "to": "7cc97a23e626856d",
       "label": "render"
     },
     {
@@ -229,7 +229,7 @@
       "label": "hook"
     },
     {
-      "from": "311c554b828f67a5:callhook:useUser:1:67",
+      "from": "311c554b828f67a5:callhook:useUser:4:8",
       "to": "b2d7ad170a22c6a4",
       "label": "hook"
     },

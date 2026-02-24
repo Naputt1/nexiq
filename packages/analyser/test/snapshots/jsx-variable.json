@@ -38,7 +38,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "e89f1f64ef94e165",
+          "hash": "89946cd4475f87c3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -80,11 +80,11 @@
           "scope": {
             "start": {
               "line": 3,
-              "column": 6
+              "column": 14
             },
             "end": {
               "line": 3,
-              "column": 11
+              "column": 60
             }
           },
           "return": {
@@ -134,7 +134,7 @@
           "states": [],
           "props": [
             {
-              "id": "ad470f3d3d72162a:prop:prop",
+              "id": "94b6fcbf54cdfaec:prop:prop",
               "name": "prop",
               "type": "any",
               "kind": "prop",
@@ -145,19 +145,7 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false,
-          "propType": {
-            "type": "type-literal",
-            "members": [
-              {
-                "signatureType": "property",
-                "name": "prop",
-                "type": {
-                  "type": "any"
-                }
-              }
-            ]
-          }
+          "forwardRef": false
         },
         "7c128c607822e129": {
           "id": "7c128c607822e129",
@@ -173,7 +161,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "1bcc4f1eafab7340",
+          "hash": "defe7a7717fb2fe3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -225,11 +213,11 @@
           "scope": {
             "start": {
               "line": 4,
-              "column": 6
+              "column": 15
             },
             "end": {
-              "line": 4,
-              "column": 12
+              "line": 6,
+              "column": 1
             }
           },
           "return": {
@@ -299,14 +287,14 @@
           "states": [],
           "props": [
             {
-              "id": "d3ca264457c9ed70:prop:children",
+              "id": "7c128c607822e129:prop:children",
               "name": "children",
               "type": "any",
               "kind": "prop",
               "hash": "ff601f5e72cf1428"
             },
             {
-              "id": "d3ca264457c9ed70:prop:prop",
+              "id": "7c128c607822e129:prop:prop",
               "name": "prop",
               "type": "any",
               "kind": "prop",
@@ -317,26 +305,7 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false,
-          "propType": {
-            "type": "type-literal",
-            "members": [
-              {
-                "signatureType": "property",
-                "name": "children",
-                "type": {
-                  "type": "any"
-                }
-              },
-              {
-                "signatureType": "property",
-                "name": "prop",
-                "type": {
-                  "type": "any"
-                }
-              }
-            ]
-          }
+          "forwardRef": false
         },
         "311c554b828f67a5": {
           "id": "311c554b828f67a5",
@@ -352,7 +321,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "349d9d0fd91c3297",
+          "hash": "f1dcf497f823efe4",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -443,8 +412,30 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "850e718e31e20420",
+              "hash": "f716e04d266beba6",
               "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 8
+              },
+              "children": {}
+            },
+            "1076ea2026161c64": {
+              "id": "1076ea2026161c64",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:12",
+                "loc": {
+                  "line": 12,
+                  "column": 12
+                },
+                "id": "24d236687014d02f"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "d78af0e713f6b12d",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -453,7 +444,7 @@
               },
               "loc": {
                 "line": 12,
-                "column": 8
+                "column": 12
               },
               "tag": "Child",
               "props": [
@@ -468,31 +459,8 @@
                   "valueId": "eaf06c6480b2cd11"
                 }
               ],
-              "children": {
-                "6662fdc3cd79077b": {
-                  "id": "94b6fcbf54cdfaec",
-                  "instanceId": "6662fdc3cd79077b",
-                  "tag": "Child",
-                  "dependencies": [
-                    {
-                      "id": "ac88443768512709",
-                      "name": "prop",
-                      "value": {
-                        "type": "ref",
-                        "refType": "named",
-                        "name": "x"
-                      },
-                      "valueId": "eaf06c6480b2cd11"
-                    }
-                  ],
-                  "isDependency": false,
-                  "loc": {
-                    "line": 12,
-                    "column": 12
-                  },
-                  "children": {}
-                }
-              }
+              "children": {},
+              "srcId": "94b6fcbf54cdfaec"
             },
             "c499dc217e5afa37": {
               "id": "c499dc217e5afa37",
@@ -508,7 +476,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "c3baa0ee82aca075",
+              "hash": "ea9e7f4d5ab312c5",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -550,11 +518,11 @@
               "scope": {
                 "start": {
                   "line": 14,
-                  "column": 8
+                  "column": 21
                 },
                 "end": {
                   "line": 14,
-                  "column": 18
+                  "column": 67
                 }
               },
               "return": {
@@ -604,7 +572,7 @@
               "states": [],
               "props": [
                 {
-                  "id": "e4a8ef36d16c4eb8:prop:children",
+                  "id": "c499dc217e5afa37:prop:children",
                   "name": "children",
                   "type": "any",
                   "kind": "prop",
@@ -615,10 +583,7 @@
               "effects": {},
               "componentType": "Function",
               "contexts": [],
-              "forwardRef": false,
-              "propType": {
-                "type": "any"
-              }
+              "forwardRef": false
             },
             "5558f68a9e93a311": {
               "id": "5558f68a9e93a311",
@@ -634,8 +599,30 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "d6888058080133e1",
+              "hash": "f716e04d266beba6",
               "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 15,
+                "column": 8
+              },
+              "children": {}
+            },
+            "3c494cbacd69a670": {
+              "id": "3c494cbacd69a670",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@16:4",
+                "loc": {
+                  "line": 16,
+                  "column": 4
+                },
+                "id": "dc619f9ca83defe9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "64ee477b1ba6dc9a",
               "dependencies": {
                 "74e04b4116fbb4f2": {
                   "id": "74e04b4116fbb4f2",
@@ -643,8 +630,8 @@
                 }
               },
               "loc": {
-                "line": 15,
-                "column": 8
+                "line": 16,
+                "column": 4
               },
               "tag": "CustomForm",
               "props": [],
@@ -671,10 +658,11 @@
                     "line": 17,
                     "column": 6
                   },
-                  "parentId": "",
+                  "parentId": "ffab9c0a996affa9",
                   "children": {}
                 }
-              }
+              },
+              "srcId": "e4a8ef36d16c4eb8"
             },
             "74e04b4116fbb4f2": {
               "id": "74e04b4116fbb4f2",
@@ -727,7 +715,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "c5279e3e2aabb62",
+              "hash": "35e64fedc85a0064",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -806,34 +794,7 @@
                         "column": 8
                       },
                       "parentId": "45111d1c90277a1",
-                      "children": {
-                        "537429e7b6753b4": {
-                          "id": "f7042be43fb80714",
-                          "instanceId": "537429e7b6753b4",
-                          "tag": "v",
-                          "dependencies": [],
-                          "isDependency": false,
-                          "loc": {
-                            "line": 25,
-                            "column": 10
-                          },
-                          "parentId": "2d0d3bcd71638cd6",
-                          "children": {}
-                        },
-                        "91d718e155814183": {
-                          "id": "a5952880e9bb8442",
-                          "instanceId": "91d718e155814183",
-                          "tag": "form",
-                          "dependencies": [],
-                          "isDependency": false,
-                          "loc": {
-                            "line": 26,
-                            "column": 10
-                          },
-                          "parentId": "2d0d3bcd71638cd6",
-                          "children": {}
-                        }
-                      }
+                      "children": {}
                     }
                   }
                 },
@@ -929,7 +890,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "4dcb73c4605233ff",
+              "hash": "5fd3aeade4ebdb6e",
               "dependencies": {
                 "bd489cb67c07a9cd": {
                   "id": "bd489cb67c07a9cd",
@@ -977,34 +938,7 @@
                     "column": 8
                   },
                   "parentId": "45111d1c90277a1",
-                  "children": {
-                    "537429e7b6753b4": {
-                      "id": "f7042be43fb80714",
-                      "instanceId": "537429e7b6753b4",
-                      "tag": "v",
-                      "dependencies": [],
-                      "isDependency": false,
-                      "loc": {
-                        "line": 25,
-                        "column": 10
-                      },
-                      "parentId": "2d0d3bcd71638cd6",
-                      "children": {}
-                    },
-                    "91d718e155814183": {
-                      "id": "a5952880e9bb8442",
-                      "instanceId": "91d718e155814183",
-                      "tag": "form",
-                      "dependencies": [],
-                      "isDependency": false,
-                      "loc": {
-                        "line": 26,
-                        "column": 10
-                      },
-                      "parentId": "2d0d3bcd71638cd6",
-                      "children": {}
-                    }
-                  }
+                  "children": {}
                 }
               },
               "srcId": "div"
@@ -1023,7 +957,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "e383e51e7d82a48e",
+              "hash": "719f3f133a9717f0",
               "dependencies": {
                 "272b57e6d7c0a9e5": {
                   "id": "272b57e6d7c0a9e5",
@@ -1055,34 +989,7 @@
                   "valueId": "272b57e6d7c0a9e5"
                 }
               ],
-              "children": {
-                "537429e7b6753b4": {
-                  "id": "f7042be43fb80714",
-                  "instanceId": "537429e7b6753b4",
-                  "tag": "v",
-                  "dependencies": [],
-                  "isDependency": false,
-                  "loc": {
-                    "line": 25,
-                    "column": 10
-                  },
-                  "parentId": "2d0d3bcd71638cd6",
-                  "children": {}
-                },
-                "91d718e155814183": {
-                  "id": "a5952880e9bb8442",
-                  "instanceId": "91d718e155814183",
-                  "tag": "form",
-                  "dependencies": [],
-                  "isDependency": false,
-                  "loc": {
-                    "line": 26,
-                    "column": 10
-                  },
-                  "parentId": "2d0d3bcd71638cd6",
-                  "children": {}
-                }
-              },
+              "children": {},
               "srcId": "div"
             },
             "f4497d729cd6f52": {
@@ -1309,11 +1216,11 @@
           "scope": {
             "start": {
               "line": 8,
-              "column": 13
+              "column": 19
             },
             "end": {
-              "line": 8,
-              "column": 16
+              "line": 36,
+              "column": 1
             }
           },
           "return": {
@@ -1330,7 +1237,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/App.tsx",
-            "hash": "c5279e3e2aabb62",
+            "hash": "35e64fedc85a0064",
             "dependencies": {
               "eaf06c6480b2cd11": {
                 "id": "eaf06c6480b2cd11",
@@ -1409,34 +1316,7 @@
                       "column": 8
                     },
                     "parentId": "45111d1c90277a1",
-                    "children": {
-                      "537429e7b6753b4": {
-                        "id": "f7042be43fb80714",
-                        "instanceId": "537429e7b6753b4",
-                        "tag": "v",
-                        "dependencies": [],
-                        "isDependency": false,
-                        "loc": {
-                          "line": 25,
-                          "column": 10
-                        },
-                        "parentId": "2d0d3bcd71638cd6",
-                        "children": {}
-                      },
-                      "91d718e155814183": {
-                        "id": "a5952880e9bb8442",
-                        "instanceId": "91d718e155814183",
-                        "tag": "form",
-                        "dependencies": [],
-                        "isDependency": false,
-                        "loc": {
-                          "line": 26,
-                          "column": 10
-                        },
-                        "parentId": "2d0d3bcd71638cd6",
-                        "children": {}
-                      }
-                    }
+                    "children": {}
                   }
                 }
               },
@@ -1519,6 +1399,67 @@
             "srcId": "div"
           },
           "children": {
+            "6662fdc3cd79077b": {
+              "id": "94b6fcbf54cdfaec",
+              "instanceId": "6662fdc3cd79077b",
+              "tag": "Child",
+              "dependencies": [
+                {
+                  "id": "ac88443768512709",
+                  "name": "prop",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "x"
+                  },
+                  "valueId": "eaf06c6480b2cd11"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 12,
+                "column": 12
+              },
+              "children": {}
+            },
+            "ffab9c0a996affa9": {
+              "id": "e4a8ef36d16c4eb8",
+              "instanceId": "ffab9c0a996affa9",
+              "tag": "CustomForm",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 16,
+                "column": 4
+              },
+              "children": {
+                "8aa9a970039ad2f": {
+                  "id": "input",
+                  "instanceId": "8aa9a970039ad2f",
+                  "tag": "input",
+                  "dependencies": [
+                    {
+                      "id": "4703abfdcb310e86",
+                      "name": "type",
+                      "value": {
+                        "type": "literal-type",
+                        "literal": {
+                          "type": "string",
+                          "value": "text"
+                        }
+                      }
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 17,
+                    "column": 6
+                  },
+                  "parentId": "ffab9c0a996affa9",
+                  "children": {}
+                }
+              }
+            },
             "796aca4cf65364ff": {
               "id": "div",
               "instanceId": "796aca4cf65364ff",
@@ -1587,34 +1528,7 @@
                         "column": 8
                       },
                       "parentId": "45111d1c90277a1",
-                      "children": {
-                        "537429e7b6753b4": {
-                          "id": "f7042be43fb80714",
-                          "instanceId": "537429e7b6753b4",
-                          "tag": "v",
-                          "dependencies": [],
-                          "isDependency": false,
-                          "loc": {
-                            "line": 25,
-                            "column": 10
-                          },
-                          "parentId": "2d0d3bcd71638cd6",
-                          "children": {}
-                        },
-                        "91d718e155814183": {
-                          "id": "a5952880e9bb8442",
-                          "instanceId": "91d718e155814183",
-                          "tag": "form",
-                          "dependencies": [],
-                          "isDependency": false,
-                          "loc": {
-                            "line": 26,
-                            "column": 10
-                          },
-                          "parentId": "2d0d3bcd71638cd6",
-                          "children": {}
-                        }
-                      }
+                      "children": {}
                     }
                   }
                 },
@@ -1720,7 +1634,7 @@
     },
     {
       "from": "311c554b828f67a5",
-      "to": "69a7d87f8dc552ec",
+      "to": "1076ea2026161c64",
       "label": "render"
     },
     {
@@ -1730,7 +1644,7 @@
     },
     {
       "from": "311c554b828f67a5",
-      "to": "5558f68a9e93a311",
+      "to": "3c494cbacd69a670",
       "label": "render"
     },
     {
@@ -1789,17 +1703,12 @@
       "label": "hook"
     },
     {
-      "from": "Child",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "94b6fcbf54cdfaec",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "69a7d87f8dc552ec",
+      "from": "1076ea2026161c64",
       "to": "eaf06c6480b2cd11",
       "label": "hook"
     },
@@ -1814,7 +1723,7 @@
       "label": "hook"
     },
     {
-      "from": "CustomForm",
+      "from": "e4a8ef36d16c4eb8",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1824,7 +1733,7 @@
       "label": "render"
     },
     {
-      "from": "5558f68a9e93a311",
+      "from": "3c494cbacd69a670",
       "to": "74e04b4116fbb4f2",
       "label": "hook"
     },
@@ -1845,16 +1754,6 @@
     },
     {
       "from": "div",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "f7042be43fb80714",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "a5952880e9bb8442",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1899,32 +1798,12 @@
       "label": "render"
     },
     {
-      "from": "f7042be43fb80714",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "a5952880e9bb8442",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "877366475b16a1ae",
       "to": "bd489cb67c07a9cd",
       "label": "hook"
     },
     {
       "from": "div",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "f7042be43fb80714",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "a5952880e9bb8442",
       "to": "311c554b828f67a5",
       "label": "render"
     },
