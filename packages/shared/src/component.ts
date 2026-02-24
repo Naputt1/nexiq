@@ -31,6 +31,7 @@ export interface RefData extends ComponentLoc {
 export interface Memo extends ComponentLoc, ReactDependencies {
   id: string;
   scope: VariableScope;
+  async?: boolean | undefined;
   parentId?: string | undefined;
 }
 
@@ -202,6 +203,7 @@ export interface ComponentFileVarBaseTypeFunction<
 > extends ComponentFileVarBase<"function", TKind> {
   type: "function";
   scope: VariableScope;
+  async?: boolean | undefined;
   var: Record<string, ComponentFileVar>;
   return?: FunctionReturn | undefined;
   children: Record<string, ComponentInfoRender>;

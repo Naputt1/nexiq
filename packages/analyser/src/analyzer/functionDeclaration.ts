@@ -56,6 +56,7 @@ export default function FunctionDeclaration(
           children: {},
           loc,
           scope,
+          async: nodePath.node.async,
           effects: {},
           forwardRef: isRefUsed(nodePath),
         } as Omit<
@@ -72,6 +73,7 @@ export default function FunctionDeclaration(
           type: "function",
           loc,
           scope,
+          async: nodePath.node.async,
           props: getProps(nodePath, undefined, componentId),
           effects: {},
           hooks: [],
@@ -90,6 +92,7 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
+        async: nodePath.node.async,
         children: {},
         var: {},
       } as Omit<
@@ -103,6 +106,7 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
+        async: nodePath.node.async,
         children: {},
         var: {},
       } as Omit<

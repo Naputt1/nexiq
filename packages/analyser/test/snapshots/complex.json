@@ -90,7 +90,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "c20719e78a0edc99",
+          "hash": "31381fc7bd9a9df1",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -134,6 +134,7 @@
               "column": 51
             }
           },
+          "async": false,
           "return": {
             "id": "26136f5804b6901b",
             "name": {
@@ -195,7 +196,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "97768d4be6395ac2",
+          "hash": "daf11e54a0b2198e",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -282,6 +283,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "796f37dba6b84419",
             "name": {
@@ -376,7 +378,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "3952dd1f1bcb430d",
+          "hash": "1af4381e36710fc5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -420,6 +422,7 @@
               "column": 53
             }
           },
+          "async": false,
           "return": {
             "id": "a7b9fc12e7e41d0c",
             "name": {
@@ -481,7 +484,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "2e17f59d2ceecdee",
+          "hash": "e6b64194deaffc5a",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -610,6 +613,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "cc0a940c1558f66d",
             "name": {
@@ -786,7 +790,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "6e240f58918134f3",
+          "hash": "8673feda44e2cc7f",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -862,7 +866,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "2825041692247a82",
+              "hash": "afc69e7b2a05a0bf",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -879,6 +883,7 @@
                   "column": 41
                 }
               },
+              "async": false,
               "return": {
                 "type": "literal-type",
                 "literal": {
@@ -905,6 +910,7 @@
               "column": 1
             }
           },
+          "async": false,
           "children": {},
           "states": [
             "7a755d146a3ba89a:state:[value, setValue]"
@@ -963,7 +969,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "b51789fcebc0831f",
+          "hash": "916e2916e59d0952",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -981,6 +987,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "type": "literal-type",
             "literal": {
@@ -1008,7 +1015,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "c0e81a4889ceff93",
+          "hash": "fd07427daac02d6c",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -1062,7 +1069,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "452790e0a1b5a21d",
+              "hash": "c5ef121585be93f1",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1080,6 +1087,7 @@
                   "column": 5
                 }
               },
+              "async": false,
               "children": {}
             },
             "3dec785468be745e": {
@@ -1126,6 +1134,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": "3dec785468be745e",
           "children": {},
           "states": [],
@@ -1486,7 +1495,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "21be143ad2e8dab8",
+          "hash": "10de6619391a6699",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1607,6 +1616,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": "6b68fed1532b6f05",
           "children": {}
         },
@@ -1782,7 +1792,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "521884feecf4131f",
+          "hash": "175a724b3928c665",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2126,6 +2136,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "313fed1bd88fac5e",
             "name": {
@@ -2389,7 +2400,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "f07aea0cb5ffaaf7",
+          "hash": "924ef0ab81347152",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2433,6 +2444,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "cd87d60113592f1d",
             "name": {
@@ -2494,7 +2506,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "300ecf83e708e880",
+          "hash": "d134d7462878671d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2582,6 +2594,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "38764704e54e6ec",
             "name": {
@@ -2676,7 +2689,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "34c5c2887a5b5d6e",
+          "hash": "691abdfca532d17d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2764,6 +2777,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "4204fadde14c6717",
             "name": {
@@ -2858,7 +2872,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "e4fab2e7bfb2a25f",
+          "hash": "47bf1c3777b2564a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2975,6 +2989,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "220501f851971291",
             "name": {
@@ -3073,7 +3088,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "e2aee429249210d4",
+          "hash": "a37c387b04df762",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3091,6 +3106,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "type": "literal-type",
             "literal": {
@@ -3118,7 +3134,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "31e509a92438cf48",
+          "hash": "458c824ba1aed3ed",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3136,6 +3152,7 @@
               "column": 1
             }
           },
+          "async": false,
           "children": {},
           "states": [],
           "props": [],
@@ -3156,7 +3173,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "a8b25e8bc71c9894",
+          "hash": "41aee30c1046ab3d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3174,6 +3191,7 @@
               "column": 1
             }
           },
+          "async": false,
           "children": {},
           "states": [],
           "props": [],
@@ -3194,7 +3212,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "314c13157e680661",
+          "hash": "b737231cbb79e84c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3298,6 +3316,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "27b1cf33c59e6e3c",
             "name": {
@@ -3450,7 +3469,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "bb438d2a5fe10d28",
+          "hash": "d5a78c87f0da810a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3515,6 +3534,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "e555085f4ac5ea34",
             "name": {
@@ -3592,7 +3612,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "ea91f034490bcc20",
+          "hash": "fa3d8a5888b232d7",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3661,6 +3681,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "2d33d3680b996928",
             "name": {
@@ -3811,7 +3832,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "b75b809f39912dae",
+          "hash": "ca6504cae8a7f1c6",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -4431,6 +4452,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "e21e54955829da11",
             "name": {

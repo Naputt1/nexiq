@@ -560,7 +560,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8fea9a0df4281f26",
+          "hash": "a85398cca9d3ec81",
           "dependencies": {},
           "loc": {
             "line": 24,
@@ -622,6 +622,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "d6c02b6150bf6c44",
             "name": {
@@ -727,7 +728,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "c3dfb8d564f4855d",
+          "hash": "3d495d65bf4820c0",
           "dependencies": {},
           "loc": {
             "line": 29,
@@ -775,6 +776,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "cd2cc90375345d8b",
             "name": {
@@ -856,7 +858,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ebb91157f36e326",
+          "hash": "3196e757a4b91710",
           "dependencies": {},
           "loc": {
             "line": 34,
@@ -912,6 +914,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "7a07c7cac2ab7b2e",
             "name": {
@@ -1007,7 +1010,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "43e93fd8c4785a18",
+          "hash": "da066b9914da0396",
           "dependencies": {},
           "loc": {
             "line": 39,
@@ -1050,6 +1053,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "afc755d49a623f32",
             "name": {
@@ -1119,7 +1123,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "74e2aeb15c3d25",
+          "hash": "fc3a373d73ac9fdc",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1182,6 +1186,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "75049e2594091b2c",
             "name": {
@@ -1287,7 +1292,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "805328a257f36366",
+          "hash": "8620e6ca6e5d4a39",
           "dependencies": {},
           "loc": {
             "line": 48,
@@ -1654,6 +1659,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "6f2076d4d74a0cc7",
             "name": {

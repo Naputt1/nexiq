@@ -205,7 +205,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "343f8c0573fac468",
+          "hash": "c19e170695073bb8",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -479,6 +479,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "bbecac8a3e469c0f",
             "name": {
@@ -725,7 +726,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "dd42ebe5303b109f",
+          "hash": "be48c40237150ec0",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -2129,6 +2130,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "cea4e20c8758f48c",
             "name": {
@@ -2829,7 +2831,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "3fbfbedd0f403ee3",
+          "hash": "89f6b2be8aa4af76",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2873,6 +2875,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "211fe28b8334926e",
             "name": {
@@ -2952,7 +2955,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "46df097fffed6a34",
+          "hash": "cc3f963ce1b4f605",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -2995,6 +2998,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": {
             "id": "31516088f6afa588",
             "name": {
@@ -3074,7 +3078,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "eddce0e477f43382",
+          "hash": "b4035ba1bd4caa6a",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -3189,6 +3193,7 @@
               "column": 1
             }
           },
+          "async": false,
           "return": "75b12a5a7c7edf89",
           "children": {}
         }

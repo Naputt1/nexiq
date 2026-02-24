@@ -24,6 +24,7 @@ const samples = args._[0]
       "ts-method-signature",
       "cache",
       "cache-new",
+      "async-functions",
     ];
 
 export async function runSnapshot(sample: string) {
