@@ -76,6 +76,7 @@ export interface ReactFunctionInfoBase {
   states: string[];
   hooks: string[];
   props: PropData[];
+  propName?: string | undefined;
   propType?: TypeData;
   effects: Record<string, EffectInfo>;
 }

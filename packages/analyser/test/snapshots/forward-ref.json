@@ -858,7 +858,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "3196e757a4b91710",
+          "hash": "590873e04cdf5705",
           "dependencies": {},
           "loc": {
             "line": 34,
@@ -990,6 +990,7 @@
               "hash": "c913f4018cd56103"
             }
           ],
+          "propName": "props",
           "hooks": [],
           "effects": {},
           "componentType": "Function",
@@ -1010,7 +1011,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "da066b9914da0396",
+          "hash": "29c3de94a7a51f52",
           "dependencies": {},
           "loc": {
             "line": 39,
@@ -1103,6 +1104,7 @@
               "hash": "c913f4018cd56103"
             }
           ],
+          "propName": "props",
           "hooks": [],
           "effects": {},
           "componentType": "Function",

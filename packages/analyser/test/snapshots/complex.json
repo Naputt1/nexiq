@@ -790,7 +790,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "8673feda44e2cc7f",
+          "hash": "828a91017d078179",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -924,6 +924,7 @@
               "hash": "9f760feb8a0dfe2e"
             }
           ],
+          "propName": "initialValue",
           "hooks": [],
           "effects": {
             "7a755d146a3ba89a:effect:8:2": {
@@ -1015,7 +1016,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "fd07427daac02d6c",
+          "hash": "531facef32a6da40",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -1154,6 +1155,7 @@
               "hash": "ccdee2445dd6b143"
             }
           ],
+          "propName": "ref",
           "hooks": [],
           "effects": {
             "79cf30df8bf873d3:effect:21:2": {

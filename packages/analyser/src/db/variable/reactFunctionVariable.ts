@@ -33,6 +33,7 @@ export abstract class ReactFunctionVariable<
   callbacks: Set<string> = new Set();
   refs: Set<string> = new Set();
   props: PropData[];
+  propName?: string | undefined;
   hooks: string[];
   effects: Record<string, EffectInfo>;
 
@@ -49,6 +50,7 @@ export abstract class ReactFunctionVariable<
     super(options, file);
 
     this.props = options.props;
+    this.propName = options.propName;
     this.effects = options.effects;
     this.hooks = options.hooks;
     if (options.states) {
@@ -353,7 +355,11 @@ export abstract class ReactFunctionVariable<
       };
 
       const prop =
-        findProp(this.props, dep.name) || findProp(this.props, baseName);
+        findProp(this.props, dep.name) ||
+        findProp(this.props, baseName) ||
+        (this.propName && dep.name.startsWith(this.propName + ".")
+          ? findProp(this.props, dep.name.slice(this.propName.length + 1))
+          : undefined);
       if (prop) {
         dep.id = prop.id;
         continue outer;
@@ -425,6 +431,7 @@ export abstract class ReactFunctionVariable<
   public load(data: BaseFunctionVariable<TKind>) {
     super.load(data);
     if (data instanceof ReactFunctionVariable) {
+      this.propName = data.propName;
       this.syncSets();
     }
   }
@@ -434,6 +441,7 @@ export abstract class ReactFunctionVariable<
       ...super.getBaseData(),
       states: [...this.states],
       props: this.props,
+      propName: this.propName,
       hooks: this.hooks,
       effects: this.effects,
     };
@@ -444,6 +452,7 @@ export abstract class ReactFunctionVariable<
       ...super.getDataInternal(),
       states: [...this.states],
       props: this.props,
+      propName: this.propName,
       hooks: this.hooks,
       effects: this.effects,
     };

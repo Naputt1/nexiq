@@ -178,7 +178,6 @@ export class ComponentDB {
           ...component,
           states: [],
           declarationKind,
-          forwardRef: component.forwardRef ?? false,
         },
         file,
       ),

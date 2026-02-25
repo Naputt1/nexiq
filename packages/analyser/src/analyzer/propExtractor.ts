@@ -186,7 +186,9 @@ export function getProps(
   >,
   variableDeclaratorId?: t.Identifier,
   componentId?: string,
-): PropData[] {
+): { props: PropData[]; propName?: string | undefined } {
+  let propName: string | undefined;
+
   // 1. Check React.FC<Props> on the variable declarator (if provided)
   if (variableDeclaratorId) {
     const id = variableDeclaratorId;
@@ -229,7 +231,14 @@ export function getProps(
             0,
             componentId,
           );
-          if (resolved.length > 0) return resolved;
+          if (resolved.length > 0) {
+            const params = path.get("params");
+            const firstParam = params[0];
+            if (firstParam && firstParam.isIdentifier()) {
+              propName = firstParam.node.name;
+            }
+            return { props: resolved, propName };
+          }
         }
       }
     }
@@ -240,12 +249,16 @@ export function getProps(
   const params = path.get("params");
   const paramsArray = Array.isArray(params) ? params : [];
 
-  for (const propsParams of paramsArray) {
+  for (const [index, propsParams] of paramsArray.entries()) {
     if (
       propsParams.isIdentifier() ||
       propsParams.isObjectPattern() ||
       propsParams.isAssignmentPattern()
     ) {
+      if (index === 0 && propsParams.isIdentifier()) {
+        propName = propsParams.node.name;
+      }
+
       let node: t.LVal = propsParams.node as t.LVal;
       if (t.isAssignmentPattern(node)) {
         node = node.left;
@@ -278,5 +291,5 @@ export function getProps(
     }
   }
 
-  return props;
+  return { props, propName };
 }

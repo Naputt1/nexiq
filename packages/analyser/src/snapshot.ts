@@ -26,6 +26,7 @@ const samples = args._[0]
       "cache-new",
       "async-functions",
       "destructuring-dependency",
+      "props-dot-dependency",
     ];
 
 export async function runSnapshot(sample: string) {
