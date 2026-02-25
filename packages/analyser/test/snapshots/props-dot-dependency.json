@@ -2,7 +2,7 @@
   "files": {
     "/index.tsx": {
       "path": "/index.tsx",
-      "hash": "39321dc935ecef9f",
+      "hash": "f7768887b13db1c9",
       "import": {
         "React": {
           "localName": "React",
@@ -52,7 +52,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "15575c22a36a6b07",
+          "hash": "4e5eadce01308633",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -70,14 +70,14 @@
                       "type": "identifier",
                       "name": "expanding",
                       "loc": {
-                        "line": 4,
-                        "column": 11
+                        "line": 7,
+                        "column": 9
                       },
                       "id": "8f362851d6468323"
                     },
                     "loc": {
-                      "line": 4,
-                      "column": 11
+                      "line": 7,
+                      "column": 9
                     }
                   },
                   {
@@ -86,32 +86,32 @@
                       "type": "identifier",
                       "name": "setExpanding",
                       "loc": {
-                        "line": 4,
-                        "column": 22
+                        "line": 7,
+                        "column": 20
                       },
                       "id": "c37c880036b5a510"
                     },
                     "loc": {
-                      "line": 4,
-                      "column": 22
+                      "line": 7,
+                      "column": 20
                     }
                   }
                 ],
                 "raw": "[expanding, setExpanding]",
                 "loc": {
-                  "line": 4,
-                  "column": 10
+                  "line": 7,
+                  "column": 8
                 },
                 "id": "65beeb58fc140d46"
               },
               "kind": "state",
               "type": "data",
               "file": "/index.tsx",
-              "hash": "1352ddf7b59a0b70",
+              "hash": "6f3edb13d657a9f3",
               "dependencies": {},
               "loc": {
-                "line": 4,
-                "column": 10
+                "line": 7,
+                "column": 8
               }
             },
             "d3a4c6ed6b965219:state:[expanded, setExpanded]": {
@@ -125,14 +125,14 @@
                       "type": "identifier",
                       "name": "expanded",
                       "loc": {
-                        "line": 5,
-                        "column": 11
+                        "line": 8,
+                        "column": 9
                       },
                       "id": "1e3a8fdd3788da37"
                     },
                     "loc": {
-                      "line": 5,
-                      "column": 11
+                      "line": 8,
+                      "column": 9
                     }
                   },
                   {
@@ -141,44 +141,44 @@
                       "type": "identifier",
                       "name": "setExpanded",
                       "loc": {
-                        "line": 5,
-                        "column": 21
+                        "line": 8,
+                        "column": 19
                       },
                       "id": "126f78be5531ae2"
                     },
                     "loc": {
-                      "line": 5,
-                      "column": 21
+                      "line": 8,
+                      "column": 19
                     }
                   }
                 ],
                 "raw": "[expanded, setExpanded]",
                 "loc": {
-                  "line": 5,
-                  "column": 10
+                  "line": 8,
+                  "column": 8
                 },
                 "id": "65beeb58fc140d46"
               },
               "kind": "state",
               "type": "data",
               "file": "/index.tsx",
-              "hash": "b5ff4b70214ec377",
+              "hash": "dab28af1ed8e8567",
               "dependencies": {},
               "loc": {
-                "line": 5,
-                "column": 10
+                "line": 8,
+                "column": 8
               }
             },
-            "cb8f98ea89eed68a": {
-              "id": "cb8f98ea89eed68a",
+            "23e8ac41bdcd4b3d": {
+              "id": "23e8ac41bdcd4b3d",
               "name": {
                 "type": "identifier",
-                "name": "jsx@15:8",
+                "name": "jsx@18:4",
                 "loc": {
-                  "line": 15,
-                  "column": 8
+                  "line": 18,
+                  "column": 4
                 },
-                "id": "7939a5edad68ccde"
+                "id": "5be092f6edc27045"
               },
               "kind": "normal",
               "type": "jsx",
@@ -186,8 +186,8 @@
               "hash": "2b619d8dd97d4218",
               "dependencies": {},
               "loc": {
-                "line": 15,
-                "column": 8
+                "line": 18,
+                "column": 4
               },
               "tag": "div",
               "props": [],
@@ -201,21 +201,21 @@
               "column": 15
             },
             "end": {
-              "line": 20,
+              "line": 23,
               "column": 1
             }
           },
           "async": false,
           "return": {
-            "id": "cb8f98ea89eed68a",
+            "id": "23e8ac41bdcd4b3d",
             "name": {
               "type": "identifier",
-              "name": "jsx@15:8",
+              "name": "jsx@18:4",
               "loc": {
-                "line": 15,
-                "column": 8
+                "line": 18,
+                "column": 4
               },
-              "id": "7939a5edad68ccde"
+              "id": "5be092f6edc27045"
             },
             "kind": "normal",
             "type": "jsx",
@@ -223,8 +223,8 @@
             "hash": "2b619d8dd97d4218",
             "dependencies": {},
             "loc": {
-              "line": 15,
-              "column": 8
+              "line": 18,
+              "column": 4
             },
             "tag": "div",
             "props": [],
@@ -232,15 +232,15 @@
             "srcId": "div"
           },
           "children": {
-            "df26b8956855c5ac": {
+            "5f0e31d008fbd978": {
               "id": "div",
-              "instanceId": "df26b8956855c5ac",
+              "instanceId": "5f0e31d008fbd978",
               "tag": "div",
               "dependencies": [],
               "isDependency": false,
               "loc": {
-                "line": 15,
-                "column": 8
+                "line": 18,
+                "column": 4
               },
               "children": {}
             }
@@ -268,21 +268,21 @@
           "propName": "props",
           "hooks": [],
           "effects": {
-            "d3a4c6ed6b965219:effect:7:4": {
-              "id": "d3a4c6ed6b965219:effect:7:4",
+            "d3a4c6ed6b965219:effect:10:2": {
+              "id": "d3a4c6ed6b965219:effect:10:2",
               "scope": {
                 "start": {
-                  "line": 7,
-                  "column": 20
+                  "line": 10,
+                  "column": 18
                 },
                 "end": {
-                  "line": 12,
-                  "column": 5
+                  "line": 15,
+                  "column": 3
                 }
               },
               "loc": {
-                "line": 7,
-                "column": 4
+                "line": 10,
+                "column": 2
               },
               "reactDeps": [
                 {
@@ -302,7 +302,7 @@
   "edges": [
     {
       "from": "d3a4c6ed6b965219",
-      "to": "cb8f98ea89eed68a",
+      "to": "23e8ac41bdcd4b3d",
       "label": "render"
     },
     {
@@ -310,5 +310,6 @@
       "to": "d3a4c6ed6b965219",
       "label": "render"
     }
-  ]
+  ],
+  "resolve": []
 }

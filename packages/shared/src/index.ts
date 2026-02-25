@@ -24,6 +24,7 @@ export type JsonData = {
   files: Record<string, ComponentFile>;
   labels?: Record<string, string[]>;
   diff?: AnalyzedDiff;
+  resolve: any[];
 };
 
 export interface BenchmarkToolCall {
