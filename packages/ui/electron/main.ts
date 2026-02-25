@@ -98,6 +98,8 @@ async function requestBackend<K extends BackendMessageType>(
 
   return new Promise((resolve, reject) => {
     const requestId = Math.random().toString(36).substring(7);
+    const chunksMap = new Map<string, string[]>();
+
     const timeout = setTimeout(() => {
       backendWs!.removeEventListener("message", onMessage);
       reject(new Error(`Timeout waiting for backend response: ${type}`));
@@ -111,6 +113,31 @@ async function requestBackend<K extends BackendMessageType>(
           requestId: responseId,
         } = JSON.parse(event.data.toString());
         if (responseId !== requestId) return;
+
+        if (responseType === "chunked_response") {
+          const { chunk, index, total } = responsePayload;
+          let chunks = chunksMap.get(requestId);
+          if (!chunks) {
+            chunks = new Array(total);
+            chunksMap.set(requestId, chunks);
+          }
+          chunks[index] = chunk;
+
+          // Check if all chunks received
+          const receivedCount = chunks.filter((c) => c !== undefined).length;
+          if (receivedCount === total) {
+            clearTimeout(timeout);
+            backendWs!.removeEventListener("message", onMessage);
+            const fullData = chunks.join("");
+            chunksMap.delete(requestId);
+            try {
+              resolve(JSON.parse(fullData));
+            } catch (e) {
+              reject(new Error(`Failed to parse reassembled JSON: ${e}`));
+            }
+          }
+          return;
+        }
 
         clearTimeout(timeout);
         backendWs!.removeEventListener("message", onMessage);

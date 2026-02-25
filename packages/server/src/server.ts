@@ -5,7 +5,11 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { ProjectManager } from "./projectManager.js";
-import { getDisplayName, type BackendRequestMap, type BackendMessageType } from "shared";
+import {
+  getDisplayName,
+  type BackendRequestMap,
+  type BackendMessageType,
+} from "shared";
 import { WebSocketServer, WebSocket } from "ws";
 
 export interface OpenProjectArgs {
@@ -1026,13 +1030,49 @@ export class BackendServer {
     ws.send(JSON.stringify({ type, payload, requestId }));
   }
 
+  private sendChunkedResponse<K extends BackendMessageType>(
+    ws: WebSocket,
+    type: string,
+    payload: BackendRequestMap[K]["response"],
+    requestId?: string,
+  ) {
+    const data = JSON.stringify(payload);
+    const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
+
+    if (data.length <= CHUNK_SIZE) {
+      this.sendResponse(ws, type, payload, requestId);
+      return;
+    }
+
+    const totalChunks = Math.ceil(data.length / CHUNK_SIZE);
+    for (let i = 0; i < totalChunks; i++) {
+      const chunk = data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      ws.send(
+        JSON.stringify({
+          type: "chunked_response",
+          payload: {
+            chunk,
+            index: i,
+            total: totalChunks,
+            originalType: type,
+          },
+          requestId,
+        }),
+      );
+    }
+  }
+
   private sendError(ws: WebSocket, message: string, requestId?: string) {
     ws.send(JSON.stringify({ type: "error", payload: { message }, requestId }));
   }
 
   public startWebSocketServer() {
     try {
-      this.wss = new WebSocketServer({ port: this.port });
+      this.wss = new WebSocketServer({
+        port: this.port,
+        maxPayload: 100 * 1024 * 1024, // 100MB
+        perMessageDeflate: true,
+      });
 
       this.wss.on("error", (error) => {
         const errorMessage =
@@ -1076,7 +1116,12 @@ export class BackendServer {
               case "open_project": {
                 const { projectPath, subProject } = data.payload;
                 await this.projectManager.openProject(projectPath, subProject);
-                this.sendResponse(ws, "project_opened", undefined, data.requestId);
+                this.sendResponse(
+                  ws,
+                  "project_opened",
+                  undefined,
+                  data.requestId,
+                );
                 break;
               }
               case "get_graph_data": {
@@ -1094,18 +1139,29 @@ export class BackendServer {
                     subProject,
                   );
                 }
-                this.sendResponse(ws, "graph_data", project.graph!, data.requestId);
+                this.sendChunkedResponse(
+                  ws,
+                  "get_graph_data",
+                  project.graph!,
+                  data.requestId,
+                );
                 break;
               }
               case "update_graph_position": {
-                const { projectPath, subProject, positions, contextId } = data.payload;
+                const { projectPath, subProject, positions, contextId } =
+                  data.payload;
                 const success = await this.projectManager.updateGraphPosition(
                   projectPath,
                   subProject,
                   positions,
                   contextId,
                 );
-                this.sendResponse(ws, "position_updated", { success }, data.requestId);
+                this.sendResponse(
+                  ws,
+                  "position_updated",
+                  { success },
+                  data.requestId,
+                );
                 break;
               }
               case "save_state": {
@@ -1114,7 +1170,12 @@ export class BackendServer {
                   projectPath,
                   state,
                 );
-                this.sendResponse(ws, "state_saved", { success }, data.requestId);
+                this.sendResponse(
+                  ws,
+                  "state_saved",
+                  { success },
+                  data.requestId,
+                );
                 break;
               }
               case "read_state": {
@@ -1137,7 +1198,12 @@ export class BackendServer {
                   projectPath,
                   config,
                 );
-                this.sendResponse(ws, "config_saved", { success }, data.requestId);
+                this.sendResponse(
+                  ws,
+                  "config_saved",
+                  { success },
+                  data.requestId,
+                );
                 break;
               }
               case "get_project_icon": {
@@ -1150,7 +1216,12 @@ export class BackendServer {
               case "git_status": {
                 const { projectPath } = data.payload;
                 const status = await this.projectManager.gitStatus(projectPath);
-                this.sendResponse(ws, "git_status_data", status, data.requestId);
+                this.sendResponse(
+                  ws,
+                  "git_status_data",
+                  status,
+                  data.requestId,
+                );
                 break;
               }
               case "git_log": {
@@ -1178,7 +1249,12 @@ export class BackendServer {
                   commitHash,
                   subPath,
                 );
-                this.sendResponse(ws, "git_commit_graph", graph, data.requestId);
+                this.sendChunkedResponse(
+                  ws,
+                  "git_analyze_commit",
+                  graph,
+                  data.requestId,
+                );
                 break;
               }
               case "call_tool": {
@@ -1193,8 +1269,16 @@ export class BackendServer {
                 );
                 break;
               }
+              case "chunked_response": {
+                // Server receiving a chunked response from client is not supported
+                break;
+              }
               default: {
-                this.sendError(ws, `Unknown message type: ${data.type}`, data.requestId);
+                this.sendError(
+                  ws,
+                  `Unknown message type: ${data.type}`,
+                  data.requestId,
+                );
                 break;
               }
             }

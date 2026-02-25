@@ -67,6 +67,15 @@ export interface BackendRequestMap {
     payload: { name: string; arguments: Record<string, unknown> };
     response: any;
   };
+  chunked_response: {
+    payload: {
+      chunk: string;
+      index: number;
+      total: number;
+      originalType: string;
+    };
+    response: void;
+  };
 }
 
 export type BackendMessageType = keyof BackendRequestMap;

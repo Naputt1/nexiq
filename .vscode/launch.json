@@ -199,6 +199,46 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "mid",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./benchmarks/projects/mid",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "large",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./benchmarks/projects/large",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "react-map",
       "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [
