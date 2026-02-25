@@ -65,6 +65,15 @@ describe("BackendServer", () => {
       const args = { projectPath: "/test", query: "App" };
       const result = await server.handleCallTool("get_symbol_info", args);
 
+      expect(mockProjectManager.findSymbol).toHaveBeenCalledWith(
+        "/test",
+        "App",
+        undefined,
+        true,
+        false,
+        false,
+      );
+
       const content = JSON.parse(
         (result as { content: { text: string }[] }).content[0].text,
       ) as SymbolInfoResult[];

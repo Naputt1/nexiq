@@ -104,16 +104,18 @@ export class SqliteDB {
       CREATE INDEX IF NOT EXISTS idx_relations_kind ON relations (kind);
 
       -- Backward compatibility views
-      CREATE VIEW IF NOT EXISTS symbols AS
+      DROP VIEW IF EXISTS symbols;
+      CREATE VIEW symbols AS
       SELECT id, name, (SELECT path FROM files WHERE id = file_id) as file, line, column, kind, type, 
              JSON_EXTRACT(data_json, '$.props') as props_json,
              JSON_EXTRACT(data_json, '$.return') as return_json
       FROM entities
       WHERE kind NOT IN ('render-instance', 'import', 'export', 'type');
 
-      CREATE VIEW IF NOT EXISTS renders AS
+      DROP VIEW IF EXISTS renders;
+      CREATE VIEW renders AS
       -- JSX Renders
-      SELECT e.id as instance_id, 
+      SELECT e.id as id, 
              JSON_EXTRACT(e.data_json, '$.srcId') as symbol_id, 
              e.name as tag, 
              (SELECT path FROM files WHERE id = e.file_id) as file, 
@@ -124,7 +126,7 @@ export class SqliteDB {
       WHERE e.kind = 'render-instance'
       UNION ALL
       -- Hook Calls and other relations
-      SELECT r.from_id as instance_id,
+      SELECT r.from_id as id,
              r.to_id as symbol_id,
              (SELECT name FROM entities WHERE id = r.to_id) as tag,
              (SELECT path FROM files WHERE id = (SELECT file_id FROM entities WHERE id = r.from_id)) as file,
