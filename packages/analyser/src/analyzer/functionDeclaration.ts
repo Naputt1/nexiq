@@ -44,12 +44,14 @@ export default function FunctionDeclaration(
 
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
+        const { props, propName } = getProps(nodePath, undefined, componentId);
         componentDB.addComponent(fileName, {
           name: pattern,
           type: "function",
           componentType: "Function",
           hooks: [],
-          props: getProps(nodePath, undefined, componentId),
+          props,
+          propName,
           contexts: [],
           dependencies: {},
           var: {},
@@ -67,6 +69,7 @@ export default function FunctionDeclaration(
       }
 
       if (isHook(name)) {
+        const { props, propName } = getProps(nodePath, undefined, componentId);
         componentDB.addHook(fileName, {
           name: pattern,
           dependencies: {},
@@ -74,7 +77,8 @@ export default function FunctionDeclaration(
           loc,
           scope,
           async: nodePath.node.async,
-          props: getProps(nodePath, undefined, componentId),
+          props,
+          propName,
           effects: {},
           hooks: [],
           children: {},

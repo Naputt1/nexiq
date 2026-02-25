@@ -192,6 +192,7 @@ export default function VariableDeclarator(
             },
           };
 
+          const { props, propName } = getProps(innerFnPath, pId, componentId);
           const component: Omit<
             ComponentFileVarComponent,
             "id" | "kind" | "states" | "hash" | "file"
@@ -200,7 +201,8 @@ export default function VariableDeclarator(
             type: "function",
             componentType: "Function",
             hooks: [],
-            props: getProps(innerFnPath, pId, componentId),
+            props,
+            propName,
             contexts: [],
             dependencies: {},
             var: {},
@@ -283,6 +285,7 @@ export default function VariableDeclarator(
             },
           };
 
+          const { props, propName } = getProps(innerFnPath, pId, componentId);
           const hook: Omit<
             ComponentFileVarHook,
             "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
@@ -293,7 +296,8 @@ export default function VariableDeclarator(
             loc,
             scope,
             async: innerFn.async,
-            props: getProps(innerFnPath, pId, componentId),
+            props,
+            propName,
             effects: {},
             hooks: [],
             children: {},
@@ -323,6 +327,13 @@ export default function VariableDeclarator(
             };
 
             if (returnJSX(init)) {
+              const { props, propName } = getProps(
+                nodePath.get("init") as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >,
+                pId,
+                componentId,
+              );
               currentId = componentDB.addComponent(
                 fileName,
                 {
@@ -330,13 +341,8 @@ export default function VariableDeclarator(
                   type: "function",
                   componentType: "Function",
                   hooks: [],
-                  props: getProps(
-                    nodePath.get("init") as traverse.NodePath<
-                      t.ArrowFunctionExpression | t.FunctionExpression
-                    >,
-                    pId,
-                    componentId,
-                  ),
+                  props,
+                  propName,
                   contexts: [],
                   dependencies: {},
                   var: {},
@@ -362,6 +368,13 @@ export default function VariableDeclarator(
             } else if (
               isHook(pattern.type === "identifier" ? pattern.name : "")
             ) {
+              const { props, propName } = getProps(
+                nodePath.get("init") as traverse.NodePath<
+                  t.ArrowFunctionExpression | t.FunctionExpression
+                >,
+                pId,
+                componentId,
+              );
               currentId = componentDB.addHook(
                 fileName,
                 {
@@ -371,13 +384,8 @@ export default function VariableDeclarator(
                   loc,
                   scope,
                   async: init.async,
-                  props: getProps(
-                    nodePath.get("init") as traverse.NodePath<
-                      t.ArrowFunctionExpression | t.FunctionExpression
-                    >,
-                    pId,
-                    componentId,
-                  ),
+                  props,
+                  propName,
                   effects: {},
                   hooks: [],
                   children: {},
