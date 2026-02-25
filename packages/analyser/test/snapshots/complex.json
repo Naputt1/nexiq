@@ -196,7 +196,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "daf11e54a0b2198e",
+          "hash": "2952199941ac1ee9",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -217,7 +217,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Nested.tsx",
-              "hash": "ea3871669147089f",
+              "hash": "ea3b350861eadff2",
               "dependencies": {
                 "3a50e9f202cab7c2": {
                   "id": "3a50e9f202cab7c2",
@@ -232,7 +232,7 @@
               "props": [],
               "children": {
                 "2cf57cecdebc36d8": {
-                  "id": "a32b256a44b5089f",
+                  "id": "f3e2b8bb45918c2c",
                   "instanceId": "2cf57cecdebc36d8",
                   "tag": "SubComponentA",
                   "dependencies": [],
@@ -261,7 +261,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Nested.tsx",
-              "hash": "173bfbf3d6d63e11",
+              "hash": "35da50911958616e",
               "dependencies": {},
               "loc": {
                 "line": 8,
@@ -270,7 +270,7 @@
               "tag": "SubComponentA",
               "props": [],
               "children": {},
-              "srcId": "a32b256a44b5089f"
+              "srcId": "f3e2b8bb45918c2c"
             }
           },
           "scope": {
@@ -298,7 +298,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/Nested.tsx",
-            "hash": "ea3871669147089f",
+            "hash": "ea3b350861eadff2",
             "dependencies": {
               "3a50e9f202cab7c2": {
                 "id": "3a50e9f202cab7c2",
@@ -313,7 +313,7 @@
             "props": [],
             "children": {
               "2cf57cecdebc36d8": {
-                "id": "a32b256a44b5089f",
+                "id": "f3e2b8bb45918c2c",
                 "instanceId": "2cf57cecdebc36d8",
                 "tag": "SubComponentA",
                 "dependencies": [],
@@ -341,7 +341,7 @@
               },
               "children": {
                 "2cf57cecdebc36d8": {
-                  "id": "a32b256a44b5089f",
+                  "id": "f3e2b8bb45918c2c",
                   "instanceId": "2cf57cecdebc36d8",
                   "tag": "SubComponentA",
                   "dependencies": [],
@@ -484,7 +484,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "e6b64194deaffc5a",
+          "hash": "fa8b1a714814ec2",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -505,7 +505,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Nested.tsx",
-              "hash": "72f01b0f4d06726a",
+              "hash": "8aca71dccf34fd54",
               "dependencies": {
                 "298ca28793771e94": {
                   "id": "298ca28793771e94",
@@ -524,7 +524,7 @@
               "props": [],
               "children": {
                 "c9151a73a477fe7f": {
-                  "id": "a19fd7017beb07a8",
+                  "id": "b70072a47e3ec01d",
                   "instanceId": "c9151a73a477fe7f",
                   "tag": "SubComponentB",
                   "dependencies": [],
@@ -537,7 +537,7 @@
                   "children": {}
                 },
                 "cbcc254a70b0ef32": {
-                  "id": "c933ac8b20ff268e",
+                  "id": "d0a2066979b348e0",
                   "instanceId": "cbcc254a70b0ef32",
                   "tag": "InternalComponent",
                   "dependencies": [],
@@ -566,7 +566,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Nested.tsx",
-              "hash": "f19dd9f7318ba8ea",
+              "hash": "39302a96074b14e4",
               "dependencies": {},
               "loc": {
                 "line": 19,
@@ -575,7 +575,7 @@
               "tag": "SubComponentB",
               "props": [],
               "children": {},
-              "srcId": "a19fd7017beb07a8"
+              "srcId": "b70072a47e3ec01d"
             },
             "f2a0564c91943e3f": {
               "id": "f2a0564c91943e3f",
@@ -591,7 +591,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Nested.tsx",
-              "hash": "b450565aa0f67d97",
+              "hash": "23c7f3521db0bc32",
               "dependencies": {},
               "loc": {
                 "line": 20,
@@ -600,7 +600,7 @@
               "tag": "InternalComponent",
               "props": [],
               "children": {},
-              "srcId": "c933ac8b20ff268e"
+              "srcId": "d0a2066979b348e0"
             }
           },
           "scope": {
@@ -628,7 +628,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/Nested.tsx",
-            "hash": "72f01b0f4d06726a",
+            "hash": "8aca71dccf34fd54",
             "dependencies": {
               "298ca28793771e94": {
                 "id": "298ca28793771e94",
@@ -647,7 +647,7 @@
             "props": [],
             "children": {
               "c9151a73a477fe7f": {
-                "id": "a19fd7017beb07a8",
+                "id": "b70072a47e3ec01d",
                 "instanceId": "c9151a73a477fe7f",
                 "tag": "SubComponentB",
                 "dependencies": [],
@@ -660,7 +660,7 @@
                 "children": {}
               },
               "cbcc254a70b0ef32": {
-                "id": "c933ac8b20ff268e",
+                "id": "d0a2066979b348e0",
                 "instanceId": "cbcc254a70b0ef32",
                 "tag": "InternalComponent",
                 "dependencies": [],
@@ -688,7 +688,7 @@
               },
               "children": {
                 "c9151a73a477fe7f": {
-                  "id": "a19fd7017beb07a8",
+                  "id": "b70072a47e3ec01d",
                   "instanceId": "c9151a73a477fe7f",
                   "tag": "SubComponentB",
                   "dependencies": [],
@@ -701,7 +701,7 @@
                   "children": {}
                 },
                 "cbcc254a70b0ef32": {
-                  "id": "c933ac8b20ff268e",
+                  "id": "d0a2066979b348e0",
                   "instanceId": "cbcc254a70b0ef32",
                   "tag": "InternalComponent",
                   "dependencies": [],
@@ -2506,7 +2506,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "d134d7462878671d",
+          "hash": "1f237973135b1ff8",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2528,7 +2528,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "233422dcaa251fdc",
+              "hash": "8080c851f28f75ca",
               "dependencies": {
                 "1658a0018d5849c8": {
                   "id": "1658a0018d5849c8",
@@ -2543,7 +2543,7 @@
               "props": [],
               "children": {
                 "33991ae6b29457e7": {
-                  "id": "b995f1131187f14d",
+                  "id": "19587669c214dc20",
                   "instanceId": "33991ae6b29457e7",
                   "tag": "DeepLevel3",
                   "dependencies": [],
@@ -2572,7 +2572,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "eb70e192c815f44f",
+              "hash": "877f6ea189960f4",
               "dependencies": {},
               "loc": {
                 "line": 11,
@@ -2581,7 +2581,7 @@
               "tag": "DeepLevel3",
               "props": [],
               "children": {},
-              "srcId": "b995f1131187f14d"
+              "srcId": "19587669c214dc20"
             }
           },
           "scope": {
@@ -2609,7 +2609,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/Deep.tsx",
-            "hash": "233422dcaa251fdc",
+            "hash": "8080c851f28f75ca",
             "dependencies": {
               "1658a0018d5849c8": {
                 "id": "1658a0018d5849c8",
@@ -2624,7 +2624,7 @@
             "props": [],
             "children": {
               "33991ae6b29457e7": {
-                "id": "b995f1131187f14d",
+                "id": "19587669c214dc20",
                 "instanceId": "33991ae6b29457e7",
                 "tag": "DeepLevel3",
                 "dependencies": [],
@@ -2652,7 +2652,7 @@
               },
               "children": {
                 "33991ae6b29457e7": {
-                  "id": "b995f1131187f14d",
+                  "id": "19587669c214dc20",
                   "instanceId": "33991ae6b29457e7",
                   "tag": "DeepLevel3",
                   "dependencies": [],
@@ -2689,7 +2689,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "691abdfca532d17d",
+          "hash": "f8a457161a7757e9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2711,7 +2711,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "f486e33dc3ff6e3c",
+              "hash": "4870319957277268",
               "dependencies": {
                 "638d9057bd6d9bf3": {
                   "id": "638d9057bd6d9bf3",
@@ -2726,7 +2726,7 @@
               "props": [],
               "children": {
                 "87b50626f61c06dd": {
-                  "id": "e38009d8920a967c",
+                  "id": "1a55a8d36e16f5a7",
                   "instanceId": "87b50626f61c06dd",
                   "tag": "DeepLevel2",
                   "dependencies": [],
@@ -2755,7 +2755,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "1e1e2c9a379cea5d",
+              "hash": "7fe03c2b46f8e095",
               "dependencies": {},
               "loc": {
                 "line": 20,
@@ -2764,7 +2764,7 @@
               "tag": "DeepLevel2",
               "props": [],
               "children": {},
-              "srcId": "e38009d8920a967c"
+              "srcId": "1a55a8d36e16f5a7"
             }
           },
           "scope": {
@@ -2792,7 +2792,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/Deep.tsx",
-            "hash": "f486e33dc3ff6e3c",
+            "hash": "4870319957277268",
             "dependencies": {
               "638d9057bd6d9bf3": {
                 "id": "638d9057bd6d9bf3",
@@ -2807,7 +2807,7 @@
             "props": [],
             "children": {
               "87b50626f61c06dd": {
-                "id": "e38009d8920a967c",
+                "id": "1a55a8d36e16f5a7",
                 "instanceId": "87b50626f61c06dd",
                 "tag": "DeepLevel2",
                 "dependencies": [],
@@ -2835,7 +2835,7 @@
               },
               "children": {
                 "87b50626f61c06dd": {
-                  "id": "e38009d8920a967c",
+                  "id": "1a55a8d36e16f5a7",
                   "instanceId": "87b50626f61c06dd",
                   "tag": "DeepLevel2",
                   "dependencies": [],
@@ -2872,7 +2872,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "47bf1c3777b2564a",
+          "hash": "860eccb27144a62d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2919,7 +2919,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "60afcd87024ea66b",
+              "hash": "2bc63016c29fc8ad",
               "dependencies": {
                 "2ceef350b508989a": {
                   "id": "2ceef350b508989a",
@@ -2938,7 +2938,7 @@
               "props": [],
               "children": {
                 "329d7e975891d39": {
-                  "id": "c9b0f178ddc8d164",
+                  "id": "e3d2284d26bc94ec",
                   "instanceId": "329d7e975891d39",
                   "tag": "DeepLevel1",
                   "dependencies": [],
@@ -2967,7 +2967,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Deep.tsx",
-              "hash": "9d33cbb278c6f7c4",
+              "hash": "7f9e2dc7305033e4",
               "dependencies": {},
               "loc": {
                 "line": 29,
@@ -2976,7 +2976,7 @@
               "tag": "DeepLevel1",
               "props": [],
               "children": {},
-              "srcId": "c9b0f178ddc8d164"
+              "srcId": "e3d2284d26bc94ec"
             }
           },
           "scope": {
@@ -3004,7 +3004,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/Deep.tsx",
-            "hash": "60afcd87024ea66b",
+            "hash": "2bc63016c29fc8ad",
             "dependencies": {
               "2ceef350b508989a": {
                 "id": "2ceef350b508989a",
@@ -3023,7 +3023,7 @@
             "props": [],
             "children": {
               "329d7e975891d39": {
-                "id": "c9b0f178ddc8d164",
+                "id": "e3d2284d26bc94ec",
                 "instanceId": "329d7e975891d39",
                 "tag": "DeepLevel1",
                 "dependencies": [],
@@ -3051,7 +3051,7 @@
               },
               "children": {
                 "329d7e975891d39": {
-                  "id": "c9b0f178ddc8d164",
+                  "id": "e3d2284d26bc94ec",
                   "instanceId": "329d7e975891d39",
                   "tag": "DeepLevel1",
                   "dependencies": [],
@@ -5062,7 +5062,7 @@
       "label": "render"
     },
     {
-      "from": "a32b256a44b5089f",
+      "from": "f3e2b8bb45918c2c",
       "to": "a19fd7017beb07a8",
       "label": "render"
     },
@@ -5072,7 +5072,7 @@
       "label": "hook"
     },
     {
-      "from": "a32b256a44b5089f",
+      "from": "f3e2b8bb45918c2c",
       "to": "a19fd7017beb07a8",
       "label": "render"
     },
@@ -5087,12 +5087,12 @@
       "label": "render"
     },
     {
-      "from": "a19fd7017beb07a8",
+      "from": "b70072a47e3ec01d",
       "to": "6826ec85ac9962e0",
       "label": "render"
     },
     {
-      "from": "c933ac8b20ff268e",
+      "from": "d0a2066979b348e0",
       "to": "6826ec85ac9962e0",
       "label": "render"
     },
@@ -5107,12 +5107,12 @@
       "label": "hook"
     },
     {
-      "from": "a19fd7017beb07a8",
+      "from": "b70072a47e3ec01d",
       "to": "6826ec85ac9962e0",
       "label": "render"
     },
     {
-      "from": "c933ac8b20ff268e",
+      "from": "d0a2066979b348e0",
       "to": "6826ec85ac9962e0",
       "label": "render"
     },
@@ -5197,7 +5197,7 @@
       "label": "render"
     },
     {
-      "from": "b995f1131187f14d",
+      "from": "19587669c214dc20",
       "to": "e38009d8920a967c",
       "label": "render"
     },
@@ -5207,7 +5207,7 @@
       "label": "hook"
     },
     {
-      "from": "b995f1131187f14d",
+      "from": "19587669c214dc20",
       "to": "e38009d8920a967c",
       "label": "render"
     },
@@ -5217,7 +5217,7 @@
       "label": "render"
     },
     {
-      "from": "e38009d8920a967c",
+      "from": "1a55a8d36e16f5a7",
       "to": "c9b0f178ddc8d164",
       "label": "render"
     },
@@ -5227,7 +5227,7 @@
       "label": "hook"
     },
     {
-      "from": "e38009d8920a967c",
+      "from": "1a55a8d36e16f5a7",
       "to": "c9b0f178ddc8d164",
       "label": "render"
     },
@@ -5242,7 +5242,7 @@
       "label": "render"
     },
     {
-      "from": "c9b0f178ddc8d164",
+      "from": "e3d2284d26bc94ec",
       "to": "5a51946d93053e40",
       "label": "render"
     },
@@ -5257,7 +5257,7 @@
       "label": "hook"
     },
     {
-      "from": "c9b0f178ddc8d164",
+      "from": "e3d2284d26bc94ec",
       "to": "5a51946d93053e40",
       "label": "render"
     },

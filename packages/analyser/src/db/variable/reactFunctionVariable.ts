@@ -374,7 +374,12 @@ export abstract class ReactFunctionVariable<
         continue outer;
       }
 
-      if (process.env.DEBUG || process.env.FULL_DEBUG || process.env.VITEST) {
+      if (
+        process.env.DEBUG ||
+        process.env.FULL_DEBUG ||
+        process.env.VITEST ||
+        process.env.SNAPSHOT
+      ) {
         if (this.file.import.has(dep.name) || this.file.import.has(baseName)) {
           continue outer;
         }

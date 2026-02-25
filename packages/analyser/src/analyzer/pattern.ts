@@ -96,6 +96,8 @@ export function getPattern(
       loc: getLoc(node),
       id: getDeterministicId(patternId),
     };
+  } else if (t.isAssignmentPattern(node)) {
+    return getPattern(node.left as t.LVal, parentPath);
   } else if (t.isVoidPattern(node)) {
     return {
       type: "void",
