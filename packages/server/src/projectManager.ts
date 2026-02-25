@@ -325,6 +325,8 @@ export class ProjectManager {
     query: string,
     subProject?: string,
     strict: boolean = true,
+    includeProps: boolean = false,
+    includeUsages: boolean = false,
   ): Promise<SymbolSearchResult[]> {
     const project = this.getProject(projectPath, subProject);
     if (!project || !project.db)
@@ -345,42 +347,52 @@ export class ProjectManager {
     }
 
     for (const def of definitions) {
-      results.push({
+      const definition: SymbolSearchResult = {
         type: "definition",
         kind: def.kind,
         name: def.name,
         file: def.file,
         loc: { line: def.line, column: def.column },
-        props: JSON.parse(def.props_json || "[]") as unknown[],
-      });
+      };
 
-      // 2. Find renders of this specific symbol ID or tag name
-      const usages = project.db
-        .prepare(
-          `
-        SELECT r.*, s.name as in_name 
-        FROM renders r 
-        LEFT JOIN symbols s ON r.scope_symbol_id = s.id 
-        WHERE r.symbol_id = ? OR r.tag = ?
-      `,
-        )
-        .all(def.id, def.name) as RenderRow[];
+      if (includeProps) {
+        definition.props = JSON.parse(def.props_json || "[]") as unknown[];
+      }
 
-      for (const usage of usages) {
-        results.push({
-          type: "usage",
-          kind: usage.usage_kind === "render" ? "render" : "call",
-          usage_kind: usage.usage_kind,
-          name: usage.tag,
-          file: usage.file,
-          loc: { line: usage.line, column: usage.column },
-          in: usage.in_name || "unknown",
-        });
+      results.push(definition);
+
+      if (includeUsages) {
+        // 2. Find renders of this specific symbol ID or tag name
+        const usages = project.db
+          .prepare(
+            `
+          SELECT r.*, s.name as in_name 
+          FROM renders r 
+          LEFT JOIN symbols s ON r.scope_symbol_id = s.id 
+          WHERE r.symbol_id = ? OR r.tag = ?
+        `,
+          )
+          .all(def.id, def.name) as RenderRow[];
+
+        for (const usage of usages) {
+          results.push({
+            type: "usage",
+            kind: usage.usage_kind === "render" ? "render" : "call",
+            usage_kind: usage.usage_kind,
+            name: usage.tag,
+            file: usage.file,
+            loc: { line: usage.line, column: usage.column },
+            in: usage.in_name || "unknown",
+          });
+        }
       }
     }
 
     // 3. Fallback for external symbols (tags not defined in this project)
-    if (results.filter((r) => r.type === "usage").length === 0) {
+    if (
+      includeUsages &&
+      results.filter((r) => r.type === "usage").length === 0
+    ) {
       const externalUsages = project.db
         .prepare(
           `
@@ -423,6 +435,8 @@ export class ProjectManager {
       query,
       subProject,
       strict,
+      true, // includeProps
+      true, // includeUsages
     );
     const usages = results.filter((r) => r.type === "usage");
 

@@ -22,6 +22,8 @@ export interface GetSymbolInfoArgs {
   subProject?: string;
   query: string;
   strict?: boolean;
+  props?: boolean;
+  usages?: boolean;
 }
 
 export interface GetSymbolUsagesArgs {
@@ -219,6 +221,14 @@ export class BackendServer {
                 type: "boolean",
                 description:
                   "If true, only return symbols that exactly match the query. Defaults to true.",
+              },
+              props: {
+                type: "boolean",
+                description: "If true, include props in the definition. Defaults to false.",
+              },
+              usages: {
+                type: "boolean",
+                description: "If true, include usages across the project. Defaults to false.",
               },
               fields: {
                 type: "array",
@@ -642,7 +652,7 @@ export class BackendServer {
       }
 
       case "get_symbol_info": {
-        const { projectPath, subProject, query, strict } =
+        const { projectPath, subProject, query, strict, props, usages } =
           args as unknown as GetSymbolInfoArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findSymbol(
@@ -650,6 +660,8 @@ export class BackendServer {
           query,
           subProject,
           strict !== false, // Default to strict true
+          props === true, // Default to false
+          usages === true, // Default to false
         );
 
         return {
