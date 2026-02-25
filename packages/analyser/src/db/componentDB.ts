@@ -764,7 +764,7 @@ export class ComponentDB {
       src: path.resolve(this.dir),
       files: this.files.getData(),
       edges: this.getEdges(),
-      // resolve: this.resolveTasks,
+      resolve: this.resolveTasks,
     };
   }
 
@@ -860,9 +860,10 @@ export class ComponentDB {
           taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
         },
       );
+      debugger;
     }
 
-    this.resolveTasks = [];
+    // this.resolveTasks = [];
     this.isResolve = false;
   }
 
