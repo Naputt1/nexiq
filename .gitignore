@@ -142,7 +142,22 @@ vite.config.ts.timestamp-*
 
 graph.json
 .react-map/
+**/node_modules/
+**/dist/
+**/out/
 react.map.config.json
 git-demo
-benchmarks/projects/*
-scripts/benchmarks
+benchmarks/projects/
+scripts/benchmarks/
+packages/sample-project/git-demo/
+packages/analyser/out/
+packages/ui/out/
+packages/ui/dist/
+packages/ui/dist-electron/
+packages/ui/release/
+packages/ui/public/graph.json
+packages/analyser/coverage/
+packages/server/coverage/
+packages/ui/e2e/coverage/
+packages/ui/test-results/
+server_error*.log
