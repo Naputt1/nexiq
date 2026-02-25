@@ -1292,7 +1292,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8620e6ca6e5d4a39",
+          "hash": "f939de0681ce3ed1",
           "dependencies": {},
           "loc": {
             "line": 48,
@@ -1313,7 +1313,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "9fa12ec2462d1208",
+              "hash": "2c55c7333ea92f73",
               "dependencies": {
                 "b4354701b2d6f8b5": {
                   "id": "b4354701b2d6f8b5",
@@ -1360,7 +1360,7 @@
               "props": [],
               "children": {
                 "f92d556816f2b73c": {
-                  "id": "4edc61540312037c",
+                  "id": "c5e9d8abc25a5121",
                   "instanceId": "f92d556816f2b73c",
                   "tag": "React19RefComp",
                   "dependencies": [],
@@ -1373,7 +1373,7 @@
                   "children": {}
                 },
                 "f756a460d17a5438": {
-                  "id": "ece0672ae0e61a82",
+                  "id": "f3715bd247fffdae",
                   "instanceId": "f756a460d17a5438",
                   "tag": "React19NoRefComp",
                   "dependencies": [],
@@ -1386,7 +1386,7 @@
                   "children": {}
                 },
                 "73f7c2d618d2d1d7": {
-                  "id": "bd328fe4ccc7b9ff",
+                  "id": "54a7a07b808f1f18",
                   "instanceId": "73f7c2d618d2d1d7",
                   "tag": "React19RefParamComp",
                   "dependencies": [],
@@ -1399,7 +1399,7 @@
                   "children": {}
                 },
                 "63f9e20bd06f1c0c": {
-                  "id": "53e4459536037cef",
+                  "id": "f2afb17c809e3637",
                   "instanceId": "63f9e20bd06f1c0c",
                   "tag": "React19NoRefParamComp",
                   "dependencies": [],
@@ -1412,7 +1412,7 @@
                   "children": {}
                 },
                 "1f0a0f6fe0acebaf": {
-                  "id": "cad70c54d7b2cf4a",
+                  "id": "54280bd7240562f3",
                   "instanceId": "1f0a0f6fe0acebaf",
                   "tag": "ArrowRefComp",
                   "dependencies": [],
@@ -1537,7 +1537,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "d25323e693205e58",
+              "hash": "4acc0204fe84f111",
               "dependencies": {},
               "loc": {
                 "line": 55,
@@ -1546,7 +1546,7 @@
               "tag": "React19RefComp",
               "props": [],
               "children": {},
-              "srcId": "4edc61540312037c"
+              "srcId": "c5e9d8abc25a5121"
             },
             "10d09939f888e179": {
               "id": "10d09939f888e179",
@@ -1562,7 +1562,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "8c76475a4e8d2d53",
+              "hash": "96ada6379ccab95f",
               "dependencies": {},
               "loc": {
                 "line": 56,
@@ -1571,7 +1571,7 @@
               "tag": "React19NoRefComp",
               "props": [],
               "children": {},
-              "srcId": "ece0672ae0e61a82"
+              "srcId": "f3715bd247fffdae"
             },
             "d7bb4bdc680b7683": {
               "id": "d7bb4bdc680b7683",
@@ -1587,7 +1587,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "87c9f995762d4414",
+              "hash": "ce6ea62bda5e61d9",
               "dependencies": {},
               "loc": {
                 "line": 57,
@@ -1596,7 +1596,7 @@
               "tag": "React19RefParamComp",
               "props": [],
               "children": {},
-              "srcId": "bd328fe4ccc7b9ff"
+              "srcId": "54a7a07b808f1f18"
             },
             "62de5644c8fa335c": {
               "id": "62de5644c8fa335c",
@@ -1612,7 +1612,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "1485d4a83f02935b",
+              "hash": "5392e347aa5bc8a",
               "dependencies": {},
               "loc": {
                 "line": 58,
@@ -1621,7 +1621,7 @@
               "tag": "React19NoRefParamComp",
               "props": [],
               "children": {},
-              "srcId": "53e4459536037cef"
+              "srcId": "f2afb17c809e3637"
             },
             "fd5ee76b566789c9": {
               "id": "fd5ee76b566789c9",
@@ -1637,7 +1637,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "2e955df40c4bcbce",
+              "hash": "49995d20020b232b",
               "dependencies": {},
               "loc": {
                 "line": 59,
@@ -1646,7 +1646,7 @@
               "tag": "ArrowRefComp",
               "props": [],
               "children": {},
-              "srcId": "cad70c54d7b2cf4a"
+              "srcId": "54280bd7240562f3"
             }
           },
           "scope": {
@@ -1674,7 +1674,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/App.tsx",
-            "hash": "9fa12ec2462d1208",
+            "hash": "2c55c7333ea92f73",
             "dependencies": {
               "b4354701b2d6f8b5": {
                 "id": "b4354701b2d6f8b5",
@@ -1721,7 +1721,7 @@
             "props": [],
             "children": {
               "f92d556816f2b73c": {
-                "id": "4edc61540312037c",
+                "id": "c5e9d8abc25a5121",
                 "instanceId": "f92d556816f2b73c",
                 "tag": "React19RefComp",
                 "dependencies": [],
@@ -1734,7 +1734,7 @@
                 "children": {}
               },
               "f756a460d17a5438": {
-                "id": "ece0672ae0e61a82",
+                "id": "f3715bd247fffdae",
                 "instanceId": "f756a460d17a5438",
                 "tag": "React19NoRefComp",
                 "dependencies": [],
@@ -1747,7 +1747,7 @@
                 "children": {}
               },
               "73f7c2d618d2d1d7": {
-                "id": "bd328fe4ccc7b9ff",
+                "id": "54a7a07b808f1f18",
                 "instanceId": "73f7c2d618d2d1d7",
                 "tag": "React19RefParamComp",
                 "dependencies": [],
@@ -1760,7 +1760,7 @@
                 "children": {}
               },
               "63f9e20bd06f1c0c": {
-                "id": "53e4459536037cef",
+                "id": "f2afb17c809e3637",
                 "instanceId": "63f9e20bd06f1c0c",
                 "tag": "React19NoRefParamComp",
                 "dependencies": [],
@@ -1773,7 +1773,7 @@
                 "children": {}
               },
               "1f0a0f6fe0acebaf": {
-                "id": "cad70c54d7b2cf4a",
+                "id": "54280bd7240562f3",
                 "instanceId": "1f0a0f6fe0acebaf",
                 "tag": "ArrowRefComp",
                 "dependencies": [],
@@ -1801,7 +1801,7 @@
               },
               "children": {
                 "f92d556816f2b73c": {
-                  "id": "4edc61540312037c",
+                  "id": "c5e9d8abc25a5121",
                   "instanceId": "f92d556816f2b73c",
                   "tag": "React19RefComp",
                   "dependencies": [],
@@ -1814,7 +1814,7 @@
                   "children": {}
                 },
                 "f756a460d17a5438": {
-                  "id": "ece0672ae0e61a82",
+                  "id": "f3715bd247fffdae",
                   "instanceId": "f756a460d17a5438",
                   "tag": "React19NoRefComp",
                   "dependencies": [],
@@ -1827,7 +1827,7 @@
                   "children": {}
                 },
                 "73f7c2d618d2d1d7": {
-                  "id": "bd328fe4ccc7b9ff",
+                  "id": "54a7a07b808f1f18",
                   "instanceId": "73f7c2d618d2d1d7",
                   "tag": "React19RefParamComp",
                   "dependencies": [],
@@ -1840,7 +1840,7 @@
                   "children": {}
                 },
                 "63f9e20bd06f1c0c": {
-                  "id": "53e4459536037cef",
+                  "id": "f2afb17c809e3637",
                   "instanceId": "63f9e20bd06f1c0c",
                   "tag": "React19NoRefParamComp",
                   "dependencies": [],
@@ -1853,7 +1853,7 @@
                   "children": {}
                 },
                 "1f0a0f6fe0acebaf": {
-                  "id": "cad70c54d7b2cf4a",
+                  "id": "54280bd7240562f3",
                   "instanceId": "1f0a0f6fe0acebaf",
                   "tag": "ArrowRefComp",
                   "dependencies": [],
@@ -2011,27 +2011,27 @@
       "label": "render"
     },
     {
-      "from": "4edc61540312037c",
+      "from": "c5e9d8abc25a5121",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "ece0672ae0e61a82",
+      "from": "f3715bd247fffdae",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "bd328fe4ccc7b9ff",
+      "from": "54a7a07b808f1f18",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "53e4459536037cef",
+      "from": "f2afb17c809e3637",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "cad70c54d7b2cf4a",
+      "from": "54280bd7240562f3",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -2101,27 +2101,27 @@
       "label": "render"
     },
     {
-      "from": "4edc61540312037c",
+      "from": "c5e9d8abc25a5121",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "ece0672ae0e61a82",
+      "from": "f3715bd247fffdae",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "bd328fe4ccc7b9ff",
+      "from": "54a7a07b808f1f18",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "53e4459536037cef",
+      "from": "f2afb17c809e3637",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "cad70c54d7b2cf4a",
+      "from": "54280bd7240562f3",
       "to": "311c554b828f67a5",
       "label": "render"
     }

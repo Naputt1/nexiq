@@ -255,7 +255,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "4ef5fe6c97726a4f",
+          "hash": "4cee5f77d67818ef",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -388,7 +388,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "2a35523c9faf405b",
+              "hash": "7492e54a45d188f6",
               "dependencies": {
                 "5c94816a24672f50": {
                   "id": "5c94816a24672f50",
@@ -403,7 +403,7 @@
               "props": [],
               "children": {
                 "9e0c0e22b77680b4": {
-                  "id": "3a012224bc5a1fc6",
+                  "id": "67869fb238c51aab",
                   "instanceId": "9e0c0e22b77680b4",
                   "tag": "AsyncComponent",
                   "dependencies": [],
@@ -432,7 +432,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "1438b0aab9f00c42",
+              "hash": "9f0fa1ec7103c4fd",
               "dependencies": {},
               "loc": {
                 "line": 36,
@@ -441,7 +441,7 @@
               "tag": "AsyncComponent",
               "props": [],
               "children": {},
-              "srcId": "3a012224bc5a1fc6"
+              "srcId": "67869fb238c51aab"
             }
           },
           "scope": {
@@ -469,7 +469,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/index.tsx",
-            "hash": "2a35523c9faf405b",
+            "hash": "7492e54a45d188f6",
             "dependencies": {
               "5c94816a24672f50": {
                 "id": "5c94816a24672f50",
@@ -484,7 +484,7 @@
             "props": [],
             "children": {
               "9e0c0e22b77680b4": {
-                "id": "3a012224bc5a1fc6",
+                "id": "67869fb238c51aab",
                 "instanceId": "9e0c0e22b77680b4",
                 "tag": "AsyncComponent",
                 "dependencies": [],
@@ -512,7 +512,7 @@
               },
               "children": {
                 "9e0c0e22b77680b4": {
-                  "id": "3a012224bc5a1fc6",
+                  "id": "67869fb238c51aab",
                   "instanceId": "9e0c0e22b77680b4",
                   "tag": "AsyncComponent",
                   "dependencies": [],
@@ -565,7 +565,7 @@
       "label": "render"
     },
     {
-      "from": "3a012224bc5a1fc6",
+      "from": "67869fb238c51aab",
       "to": "f708b44afe0a51a5",
       "label": "render"
     },
@@ -575,7 +575,7 @@
       "label": "hook"
     },
     {
-      "from": "3a012224bc5a1fc6",
+      "from": "67869fb238c51aab",
       "to": "f708b44afe0a51a5",
       "label": "render"
     }

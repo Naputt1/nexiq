@@ -1,0 +1,484 @@
+{
+  "files": {
+    "/index.tsx": {
+      "path": "/index.tsx",
+      "hash": "e9da7839e6048d61",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "useCallback": {
+          "localName": "useCallback",
+          "importedName": "useCallback",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "ThreadView": {
+          "name": "ThreadView",
+          "type": "named",
+          "exportKind": "value",
+          "id": "ba1bf171ca67c6dd"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "b3b83d0e8e708509": {
+          "id": "b3b83d0e8e708509",
+          "name": {
+            "type": "identifier",
+            "name": "useSelector",
+            "loc": {
+              "line": 4,
+              "column": 6
+            },
+            "id": "ef23948d6f30e03e"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "3e0e724e355a570f",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 6
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 20
+            },
+            "end": {
+              "line": 12,
+              "column": 2
+            }
+          },
+          "async": false,
+          "return": {
+            "type": "literal-object",
+            "properties": {
+              "participants": {
+                "type": "literal-array",
+                "elements": []
+              },
+              "reply_count": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "number",
+                  "value": 0
+                }
+              },
+              "is_following": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "boolean",
+                  "value": true
+                }
+              },
+              "post": {
+                "type": "literal-object",
+                "properties": {
+                  "channel_id": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "children": {},
+          "states": [],
+          "props": [
+            {
+              "id": "b3b83d0e8e708509:prop:fn",
+              "name": "fn",
+              "type": "any",
+              "kind": "prop",
+              "hash": "e52b884c9876efdb"
+            }
+          ],
+          "hooks": [],
+          "effects": {}
+        },
+        "ba1bf171ca67c6dd": {
+          "id": "ba1bf171ca67c6dd",
+          "name": {
+            "type": "identifier",
+            "name": "ThreadView",
+            "loc": {
+              "line": 14,
+              "column": 13
+            },
+            "id": "6853e374ebf1a9c7"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "9081a6736db4c337",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 14,
+            "column": 13
+          },
+          "var": {
+            "ba1bf171ca67c6dd:callhook:useSelector:15:10": {
+              "id": "ba1bf171ca67c6dd:callhook:useSelector:15:10",
+              "name": {
+                "type": "identifier",
+                "name": "thread",
+                "loc": {
+                  "line": 15,
+                  "column": 10
+                },
+                "id": "27f5be35fc906e3d"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/index.tsx",
+              "hash": "94bd9e62e78d478e",
+              "dependencies": {},
+              "loc": {
+                "line": 15,
+                "column": 10
+              },
+              "call": {
+                "id": "b3b83d0e8e708509",
+                "name": "useSelector"
+              }
+            },
+            "c6d497a75c43750a": {
+              "id": "c6d497a75c43750a",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@15:31",
+                "loc": {
+                  "line": 15,
+                  "column": 31
+                },
+                "id": ""
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/index.tsx",
+              "hash": "7bcf10a626053aa",
+              "dependencies": {},
+              "loc": {
+                "line": 15,
+                "column": 31
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 15,
+                  "column": 31
+                },
+                "end": {
+                  "line": 15,
+                  "column": 59
+                }
+              },
+              "return": {
+                "type": "ref",
+                "refType": "qualified",
+                "names": [
+                  "state",
+                  "thread"
+                ]
+              },
+              "children": {}
+            },
+            "1981986fd63b9d23": {
+              "id": "1981986fd63b9d23",
+              "name": {
+                "type": "object",
+                "properties": [
+                  {
+                    "key": "is_following",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isFollowing",
+                      "loc": {
+                        "line": 17,
+                        "column": 22
+                      },
+                      "id": "841e96e73f3a4bc0"
+                    },
+                    "loc": {
+                      "line": 17,
+                      "column": 8
+                    }
+                  },
+                  {
+                    "key": "post",
+                    "value": {
+                      "type": "object",
+                      "properties": [
+                        {
+                          "key": "channel_id",
+                          "value": {
+                            "type": "identifier",
+                            "name": "channelId",
+                            "loc": {
+                              "line": 19,
+                              "column": 24
+                            },
+                            "id": "5cb21731d0f2a56e"
+                          },
+                          "loc": {
+                            "line": 19,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "raw": "{\n  channel_id: channelId\n}",
+                      "loc": {
+                        "line": 18,
+                        "column": 14
+                      },
+                      "id": "cd657974cfc180fe"
+                    },
+                    "loc": {
+                      "line": 18,
+                      "column": 8
+                    }
+                  }
+                ],
+                "raw": "{\n  is_following: isFollowing = false,\n  post: {\n    channel_id: channelId\n  }\n}",
+                "loc": {
+                  "line": 16,
+                  "column": 10
+                },
+                "id": "a69f4c7afb51a7a7"
+              },
+              "kind": "normal",
+              "type": "data",
+              "file": "/index.tsx",
+              "hash": "fff194bdc5cdad86",
+              "dependencies": {
+                "27f5be35fc906e3d": {
+                  "id": "27f5be35fc906e3d",
+                  "name": "thread"
+                }
+              },
+              "loc": {
+                "line": 16,
+                "column": 10
+              },
+              "children": {}
+            },
+            "ba1bf171ca67c6dd:callback:handleFollowing": {
+              "id": "ba1bf171ca67c6dd:callback:handleFollowing",
+              "name": {
+                "type": "identifier",
+                "name": "handleFollowing",
+                "loc": {
+                  "line": 23,
+                  "column": 10
+                },
+                "id": "9ac06b202649e60f"
+              },
+              "kind": "callback",
+              "type": "function",
+              "file": "/index.tsx",
+              "hash": "403b14e50570a2a",
+              "dependencies": {},
+              "loc": {
+                "line": 23,
+                "column": 10
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 23,
+                  "column": 52
+                },
+                "end": {
+                  "line": 25,
+                  "column": 5
+                }
+              },
+              "async": false,
+              "children": {},
+              "reactDeps": [
+                {
+                  "id": "a69f4c7afb51a7a7:841e96e73f3a4bc0",
+                  "name": "isFollowing"
+                },
+                {
+                  "id": "a69f4c7afb51a7a7:cd657974cfc180fe:5cb21731d0f2a56e",
+                  "name": "channelId"
+                }
+              ]
+            },
+            "2812d8569b78a1f7": {
+              "id": "2812d8569b78a1f7",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@28:8",
+                "loc": {
+                  "line": 28,
+                  "column": 8
+                },
+                "id": "c80abda34ef0305a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "eec2b091be9afffd",
+              "dependencies": {
+                "9ac06b202649e60f": {
+                  "id": "9ac06b202649e60f",
+                  "name": "handleFollowing"
+                }
+              },
+              "loc": {
+                "line": 28,
+                "column": 8
+              },
+              "tag": "div",
+              "props": [
+                {
+                  "id": "e67a7184a83a3fcb",
+                  "name": "onClick",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "handleFollowing"
+                  },
+                  "valueId": "9ac06b202649e60f"
+                }
+              ],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 14,
+              "column": 26
+            },
+            "end": {
+              "line": 32,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": {
+            "id": "2812d8569b78a1f7",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@28:8",
+              "loc": {
+                "line": 28,
+                "column": 8
+              },
+              "id": "c80abda34ef0305a"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/index.tsx",
+            "hash": "eec2b091be9afffd",
+            "dependencies": {
+              "9ac06b202649e60f": {
+                "id": "9ac06b202649e60f",
+                "name": "handleFollowing"
+              }
+            },
+            "loc": {
+              "line": 28,
+              "column": 8
+            },
+            "tag": "div",
+            "props": [
+              {
+                "id": "e67a7184a83a3fcb",
+                "name": "onClick",
+                "value": {
+                  "type": "ref",
+                  "refType": "named",
+                  "name": "handleFollowing"
+                },
+                "valueId": "9ac06b202649e60f"
+              }
+            ],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "8d79f6bf9ea5cbef": {
+              "id": "div",
+              "instanceId": "8d79f6bf9ea5cbef",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "e67a7184a83a3fcb",
+                  "name": "onClick",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "handleFollowing"
+                  },
+                  "valueId": "9ac06b202649e60f"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 28,
+                "column": 8
+              },
+              "children": {}
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "ba1bf171ca67c6dd",
+      "to": "2812d8569b78a1f7",
+      "label": "render"
+    },
+    {
+      "from": "ba1bf171ca67c6dd:callhook:useSelector:15:10",
+      "to": "b3b83d0e8e708509",
+      "label": "hook"
+    },
+    {
+      "from": "1981986fd63b9d23",
+      "to": "27f5be35fc906e3d",
+      "label": "hook"
+    },
+    {
+      "from": "div",
+      "to": "ba1bf171ca67c6dd",
+      "label": "render"
+    },
+    {
+      "from": "2812d8569b78a1f7",
+      "to": "9ac06b202649e60f",
+      "label": "hook"
+    }
+  ]
+}

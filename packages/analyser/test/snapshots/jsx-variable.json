@@ -323,7 +323,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "5902aab211089db6",
+          "hash": "b75076990657c078",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -437,7 +437,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "d78af0e713f6b12d",
+              "hash": "48868f8ca93abfd",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -462,7 +462,7 @@
                 }
               ],
               "children": {},
-              "srcId": "94b6fcbf54cdfaec"
+              "srcId": "ad470f3d3d72162a"
             },
             "c499dc217e5afa37": {
               "id": "c499dc217e5afa37",
@@ -718,7 +718,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "35e64fedc85a0064",
+              "hash": "f68b388a5e66846e",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -802,7 +802,7 @@
                   }
                 },
                 "f2405d1e83860577": {
-                  "id": "7c128c607822e129",
+                  "id": "d3ca264457c9ed70",
                   "instanceId": "f2405d1e83860577",
                   "tag": "Child2",
                   "dependencies": [
@@ -1009,7 +1009,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "7ad7f92c959f4b22",
+              "hash": "dbb029293d9bc261",
               "dependencies": {
                 "272b57e6d7c0a9e5": {
                   "id": "272b57e6d7c0a9e5",
@@ -1089,7 +1089,7 @@
                   }
                 }
               },
-              "srcId": "7c128c607822e129"
+              "srcId": "d3ca264457c9ed70"
             },
             "8ba0dfec046efc7d": {
               "id": "8ba0dfec046efc7d",
@@ -1232,7 +1232,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/App.tsx",
-            "hash": "35e64fedc85a0064",
+            "hash": "f68b388a5e66846e",
             "dependencies": {
               "eaf06c6480b2cd11": {
                 "id": "eaf06c6480b2cd11",
@@ -1316,7 +1316,7 @@
                 }
               },
               "f2405d1e83860577": {
-                "id": "7c128c607822e129",
+                "id": "d3ca264457c9ed70",
                 "instanceId": "f2405d1e83860577",
                 "tag": "Child2",
                 "dependencies": [
@@ -1395,7 +1395,7 @@
           },
           "children": {
             "6662fdc3cd79077b": {
-              "id": "94b6fcbf54cdfaec",
+              "id": "ad470f3d3d72162a",
               "instanceId": "6662fdc3cd79077b",
               "tag": "Child",
               "dependencies": [
@@ -1528,7 +1528,7 @@
                   }
                 },
                 "f2405d1e83860577": {
-                  "id": "7c128c607822e129",
+                  "id": "d3ca264457c9ed70",
                   "instanceId": "f2405d1e83860577",
                   "tag": "Child2",
                   "dependencies": [
@@ -1698,7 +1698,7 @@
       "label": "hook"
     },
     {
-      "from": "94b6fcbf54cdfaec",
+      "from": "ad470f3d3d72162a",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1753,7 +1753,7 @@
       "label": "render"
     },
     {
-      "from": "7c128c607822e129",
+      "from": "d3ca264457c9ed70",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1818,7 +1818,7 @@
       "label": "hook"
     },
     {
-      "from": "7c128c607822e129",
+      "from": "d3ca264457c9ed70",
       "to": "311c554b828f67a5",
       "label": "render"
     },

@@ -118,11 +118,15 @@ export class Scope {
   }
 
   public getByName(name: string): Variable | undefined {
-    return this.nameToVariable.get(name);
+    const v = this.nameToVariable.get(name);
+    if (v) return v;
+    return this.parent?.getByName(name);
   }
 
   public getIdByName(name: string): string | undefined {
-    return this.nameToId.get(name);
+    const id = this.nameToId.get(name);
+    if (id) return id;
+    return this.parent?.getIdByName(name);
   }
 
   public values() {
