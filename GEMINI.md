@@ -13,7 +13,7 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
   - Extracts component relationships, props (including destructuring and types), and hooks.
   - Generates a JSON graph output.
   - Supports caching for incremental analysis.
-- **`packages/mcp`**: The primary entry point for LLM-driven code exploration.
+- **`packages/server`**: The primary entry point for LLM-driven code exploration.
   - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
   - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
 - **`packages/server`**: A shared backend service that manages project analysis, file watching, and provides a WebSocket API for the UI.
@@ -50,32 +50,41 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
 From the project root:
 
 - **Install Dependencies**:
+
   ```bash
   pnpm install
   ```
 
 - **Run UI in Development Mode**:
+
   ```bash
   pnpm dev:ui
   ```
+
   This starts the Vite dev server for the Electron app.
 
 - **Run Analyser on Samples**:
+
   ```bash
   pnpm --filter=analyser dev
   ```
+
   This builds the analyser in watch mode and runs it against the `sample-project`.
 
 - **Run Tests**:
+
   ```bash
   pnpm test:analyze
   ```
-  *Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode.*
+
+  _Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode._
 
 - **Run Benchmarks**:
+
   ```bash
   pnpm benchmark
   ```
+
   This starts the interactive CLI tool for running benchmarks across different projects and models.
 
 - **Update Snapshots**:

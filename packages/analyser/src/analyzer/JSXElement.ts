@@ -216,6 +216,7 @@ export default function JSXElement(
             tag,
             dependency,
             loc,
+            "jsx",
             componentDB.getCurrentRenderInstance(),
           );
           componentDB.pushRenderInstance(instanceId);
@@ -308,6 +309,7 @@ export default function JSXElement(
           tag,
           [],
           loc,
+          "jsx",
           componentDB.getCurrentRenderInstance(),
         );
         componentDB.pushRenderInstance(instanceId);
@@ -377,6 +379,7 @@ export default function JSXElement(
                   line: loc.line,
                   column: loc.column,
                 },
+                "jsx",
                 componentDB.getCurrentRenderInstance(),
               );
             }
@@ -389,6 +392,91 @@ export default function JSXElement(
           }
         }
       }
+    },
+    ConditionalExpression: {
+      enter(nodePath: traverse.NodePath<t.ConditionalExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        assert(nodePath.node.loc?.start != null);
+        const loc = {
+          line: nodePath.node.loc.start.line,
+          column: nodePath.node.loc.start.column,
+        };
+        const id = componentDB.comAddRender(
+          fileName,
+          "Ternary",
+          [],
+          loc,
+          "ternary",
+          componentDB.getCurrentRenderInstance(),
+        );
+        componentDB.pushRenderInstance(id);
+      },
+      exit(nodePath: traverse.NodePath<t.ConditionalExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        componentDB.popRenderInstance();
+      },
+    },
+    LogicalExpression: {
+      enter(nodePath: traverse.NodePath<t.LogicalExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        assert(nodePath.node.loc?.start != null);
+        const loc = {
+          line: nodePath.node.loc.start.line,
+          column: nodePath.node.loc.start.column,
+        };
+        const id = componentDB.comAddRender(
+          fileName,
+          nodePath.node.operator === "&&" ? "ShortCircuit" : "Logical",
+          [],
+          loc,
+          "expression",
+          componentDB.getCurrentRenderInstance(),
+        );
+        componentDB.pushRenderInstance(id);
+      },
+      exit(nodePath: traverse.NodePath<t.LogicalExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        componentDB.popRenderInstance();
+      },
+    },
+    CallExpression: {
+      enter(nodePath: traverse.NodePath<t.CallExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        // Check if it's a map (loop)
+        let isMap = false;
+        if (
+          t.isMemberExpression(nodePath.node.callee) &&
+          t.isIdentifier(nodePath.node.callee.property, { name: "map" })
+        ) {
+          isMap = true;
+        }
+
+        if (!isMap) return;
+
+        assert(nodePath.node.loc?.start != null);
+        const loc = {
+          line: nodePath.node.loc.start.line,
+          column: nodePath.node.loc.start.column,
+        };
+        const id = componentDB.comAddRender(
+          fileName,
+          "Loop",
+          [],
+          loc,
+          "loop",
+          componentDB.getCurrentRenderInstance(),
+        );
+        componentDB.pushRenderInstance(id);
+      },
+      exit(nodePath: traverse.NodePath<t.CallExpression>) {
+        if (!nodePath.parentPath.isJSXExpressionContainer()) return;
+        if (
+          t.isMemberExpression(nodePath.node.callee) &&
+          t.isIdentifier(nodePath.node.callee.property, { name: "map" })
+        ) {
+          componentDB.popRenderInstance();
+        }
+      },
     },
   };
 }

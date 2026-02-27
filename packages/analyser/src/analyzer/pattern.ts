@@ -132,28 +132,64 @@ export function getVariableNameKey(name: VariableNamePattern): string {
   return getPatternName(name);
 }
 
-export function getPatternIdentifiers(
-  pattern: VariableNamePattern,
-  baseId?: string,
-): { name: string; id: string }[] {
-  const ids: { name: string; id: string }[] = [];
+export type PatternIdentifierResult = {
+  name: string;
+  id: string;
+  path: string[];
+  isAlias: boolean;
+  hasDefault: boolean;
+};
 
-  const traverse = (p: VariableNamePattern, parentId?: string) => {
-    const currentId = parentId ? `${parentId}:${p.id}` : p.id;
+export function getPatternIdentifiers(
+  pattern: VariableNamePattern | string,
+  baseId?: string,
+): PatternIdentifierResult[] {
+  if (typeof pattern === "string") {
+    return [
+      {
+        id: baseId || getDeterministicId(pattern),
+        name: pattern,
+        path: [],
+        isAlias: false,
+        hasDefault: false,
+      },
+    ];
+  }
+  const ids: PatternIdentifierResult[] = [];
+
+  const traverse = (
+    p: VariableNamePattern,
+    parentId?: string,
+    currentPath: string[] = [],
+    hasDefault: boolean = false,
+  ) => {
+    let currentId: string;
+    if (currentPath.length === 0 && parentId) {
+      currentId = parentId;
+    } else {
+      currentId = parentId ? `${parentId}:${p.id}` : p.id;
+    }
+
     if (p.type === "identifier") {
-      ids.push({ name: p.name, id: currentId });
+      ids.push({
+        name: p.name,
+        id: currentId,
+        path: currentPath,
+        isAlias: currentPath.length > 0,
+        hasDefault,
+      });
     } else if (p.type === "object") {
       for (const prop of p.properties) {
-        traverse(prop.value, currentId);
+        traverse(prop.value, currentId, [...currentPath, prop.key]);
       }
     } else if (p.type === "array") {
-      for (const el of p.elements) {
+      for (const [i, el] of p.elements.entries()) {
         if (el) {
-          traverse(el.value, currentId);
+          traverse(el.value, currentId, [...currentPath, i.toString()]);
         }
       }
     } else if (p.type === "rest") {
-      traverse(p.argument, currentId);
+      traverse(p.argument, currentId, [...currentPath, "rest"]);
     }
   };
 

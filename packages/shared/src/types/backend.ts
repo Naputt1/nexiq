@@ -27,11 +27,22 @@ export interface BackendRequestMap {
     response: GitStatus;
   };
   git_log: {
-    payload: { projectPath: string; options: any };
+    payload: {
+      projectPath: string;
+      options: number | { limit?: number; path?: string };
+    };
     response: GitCommit[];
   };
   git_diff: {
-    payload: { projectPath: string; options: any };
+    payload: {
+      projectPath: string;
+      options: {
+        file?: string;
+        commit?: string;
+        baseCommit?: string;
+        staged?: boolean;
+      };
+    };
     response: GitFileDiff[];
   };
   git_analyze_commit: {
@@ -65,7 +76,7 @@ export interface BackendRequestMap {
   };
   call_tool: {
     payload: { name: string; arguments: Record<string, unknown> };
-    response: any;
+    response: unknown;
   };
   chunked_response: {
     payload: {

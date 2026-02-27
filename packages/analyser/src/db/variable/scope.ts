@@ -80,12 +80,8 @@ export class Scope {
     this.nameToId.set(nameKey, v.id);
 
     // Register all identifiers in the pattern
-    // If it's a hook call data, we want identifiers to point to their specific nested IDs
-    const isHookCall = v.kind === "hook" && v.type === "data";
-    const identifiers = getPatternIdentifiers(
-      v.name,
-      isHookCall ? v.id : undefined,
-    );
+    // We want identifiers to point to their specific nested IDs anchored to the variable ID
+    const identifiers = getPatternIdentifiers(v.name, v.id);
 
     for (const id of identifiers) {
       this.nameToVariable.set(id.name, v);
@@ -93,7 +89,7 @@ export class Scope {
     }
 
     if (this.owner && isBaseFunctionVariable(this.owner)) {
-      v.parent = this.owner;
+      v.parent = this.owner as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
     if (isBaseFunctionVariable(v)) {
       if (v.var) {

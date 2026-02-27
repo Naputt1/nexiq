@@ -22,6 +22,7 @@ import type {
   VariableName,
   VarKind,
   FunctionReturn,
+  ComponentDBResolve,
 } from "shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -40,54 +41,11 @@ import {
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import { FunctionVariable } from "./variable/functionVariable.js";
+import { ClassVariable } from "./variable/classVariable.js";
 import { getDeterministicId } from "../utils/hash.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
 import { SqliteDB } from "./sqlite.js";
-
-type IResolveAddRender = {
-  type: "comAddRender";
-  fileName: string;
-  tag: string;
-  dependency: ComponentInfoRenderDependency[];
-  loc: VariableLoc;
-  parentId?: string | undefined;
-};
-
-type IResolveAddHook = {
-  type: "comAddHook";
-  name: string;
-  fileName: string;
-  hook: string;
-  loc: VariableLoc;
-};
-
-type IResolveCallHook = {
-  type: "comResolveCallHook";
-  fileName: string;
-  loc: VariableLoc;
-  id: string;
-  hook: string;
-};
-
-type IResolveTsType = {
-  type: "tsType";
-  fileName: string;
-  id: string;
-};
-
-type IResolveComPropsTsType = {
-  type: "comPropsTsType";
-  fileName: string;
-  id: string;
-};
-
-type ComponentDBResolve =
-  | IResolveAddRender
-  | IResolveAddHook
-  | IResolveCallHook
-  | IResolveTsType
-  | IResolveComPropsTsType;
 
 export type ComponentDBOptions = {
   packageJson: PackageJson;
@@ -294,7 +252,17 @@ export class ComponentDB {
       v = new FunctionVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...variable,
+          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+          children: {},
+          declarationKind,
+        },
+        file,
+      );
+    } else if (((variable as any).type as string) === "class") { // eslint-disable-line @typescript-eslint/no-explicit-any
+      v = new ClassVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
           children: {},
           declarationKind,
         },
@@ -306,7 +274,7 @@ export class ComponentDB {
       v = new DataVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...variable,
+          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
           kind,
           declarationKind,
         },
@@ -467,6 +435,16 @@ export class ComponentDB {
     if (component == null || !isReactFunctionVariable(component)) return;
 
     component.addHook(exportInfo.id);
+
+    // Also add as a render so it's searchable as a usage
+    this.comAddRender(
+      fileName,
+      hook,
+      [],
+      loc,
+      "hook",
+      this.getCurrentRenderInstance(),
+    );
   }
 
   public comAddEffect(
@@ -503,6 +481,7 @@ export class ComponentDB {
     tag: string,
     dependency: ComponentInfoRenderDependency[],
     loc: VariableLoc,
+    kind: ComponentInfoRender["kind"] = "jsx",
     parentId?: string,
   ) {
     let srcId = "";
@@ -556,6 +535,7 @@ export class ComponentDB {
       dependency,
       isDependency,
       loc,
+      kind,
       parentId,
     );
 
@@ -627,6 +607,7 @@ export class ComponentDB {
     ) => {
       if (!children) return;
       for (const render of Object.values(children || {})) {
+        if (!render) continue;
         const isTag =
           (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
           render.id === "Fragment";
@@ -784,6 +765,7 @@ export class ComponentDB {
         task.tag,
         task.dependency,
         task.loc,
+        task.kind,
         task.parentId,
       );
     },
@@ -860,7 +842,8 @@ export class ComponentDB {
           taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
         },
       );
-      debugger;
+      
+      // debugger;
     }
 
     // this.resolveTasks = [];

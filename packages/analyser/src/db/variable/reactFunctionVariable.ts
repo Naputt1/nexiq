@@ -9,9 +9,11 @@ import type {
   RefData,
   TypeDataRef,
   VariableName,
+  VarType,
 } from "shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
+import { Variable } from "./variable.js";
 import { StateVariable } from "./stateVariable.js";
 import {
   isCallbackVariable,
@@ -27,7 +29,8 @@ import { CallHookVariable } from "./callHookVariable.js";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
-> extends BaseFunctionVariable<TKind> {
+  TType extends VarType = "function",
+> extends BaseFunctionVariable<TKind, TType> {
   states: Set<string> = new Set();
   memos: Set<string> = new Set();
   callbacks: Set<string> = new Set();
@@ -42,8 +45,8 @@ export abstract class ReactFunctionVariable<
 
   constructor(
     options: Omit<
-      ComponentFileVarReactFunction<TKind>,
-      "var" | "components" | "type" | "hash" | "file"
+      ComponentFileVarReactFunction<TKind, TType>,
+      "var" | "components" | "hash" | "file"
     >,
     file: File,
   ) {
@@ -391,7 +394,8 @@ export abstract class ReactFunctionVariable<
         }
       }
 
-      debugger;
+      
+      // debugger;
     }
   }
 
@@ -428,7 +432,7 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public load(data: BaseFunctionVariable<TKind>) {
+  public load(data: Variable<TType, TKind>) {
     super.load(data);
     if (data instanceof ReactFunctionVariable) {
       this.propName = data.propName;
@@ -436,7 +440,7 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  protected getBaseData(): ComponentFileVarReactFunction<TKind> {
+  protected getBaseData(): ComponentFileVarReactFunction<TKind, TType> {
     return {
       ...super.getBaseData(),
       states: [...this.states],

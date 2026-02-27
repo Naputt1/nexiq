@@ -46,7 +46,6 @@ export interface ProjectInfo {
 }
 
 export interface SymbolSearchResult {
-  type: "definition" | "usage";
   kind?: string;
   usage_kind?: string;
   name: string;
@@ -54,6 +53,12 @@ export interface SymbolSearchResult {
   loc: { line: number; column: number };
   props?: unknown[];
   in?: string; // Context where it's used
+  usages?: SymbolSearchResult[]; // Grouped usages
+}
+
+export interface SymbolInfo {
+  definitions: SymbolSearchResult[];
+  externalUsages?: SymbolSearchResult[];
 }
 
 interface SymbolRow {
@@ -64,7 +69,10 @@ interface SymbolRow {
   column: number;
   kind: string;
   type: string;
-  props_json?: string;
+  path?: string;
+  is_alias?: number;
+  has_default?: number;
+  data_json?: string;
 }
 
 interface RenderRow {
@@ -74,8 +82,9 @@ interface RenderRow {
   file: string;
   line: number;
   column: number;
-  scope_symbol_id: string;
-  usage_kind: string;
+  parent_entity_id: string;
+  kind: string;
+  render_index: number;
   in_name?: string;
 }
 
@@ -105,7 +114,9 @@ export class ProjectManager {
     }
 
     if (this.pendingProjects.has(key)) {
-      console.error(`Project already opening: ${key}, returning pending promise`);
+      console.error(
+        `Project already opening: ${key}, returning pending promise`,
+      );
       return this.pendingProjects.get(key)!;
     }
 
@@ -302,6 +313,10 @@ export class ProjectManager {
     return projectInfo;
   }
 
+  getOpenProjectPaths(): string[] {
+    return Array.from(this.projects.values()).map((p) => p.projectPath);
+  }
+
   getProject(
     projectPath: string,
     subProject?: string,
@@ -327,58 +342,95 @@ export class ProjectManager {
     strict: boolean = true,
     includeProps: boolean = false,
     includeUsages: boolean = false,
-  ): Promise<SymbolSearchResult[]> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.db)
-      throw new Error("Project not open or database not available.");
+    exclude?: string[],
+  ): Promise<SymbolInfo> {
+    const project = await this.openProject(projectPath, subProject);
 
-    const results: SymbolSearchResult[] = [];
+    const definitions_results: SymbolSearchResult[] = [];
+    const externalUsages: SymbolSearchResult[] = [];
+
+    const isExcluded = (filePath: string) => {
+      if (!exclude || exclude.length === 0) return false;
+      return exclude.some(
+        (pattern) =>
+          minimatch(filePath, pattern, { dot: true, nocase: true }) ||
+          minimatch(path.basename(filePath), pattern, {
+            dot: true,
+            nocase: true,
+          }),
+      );
+    };
 
     // 1. Find the symbol's definition(s)
     let definitions: SymbolRow[];
     if (strict) {
-      definitions = project.db
-        .prepare("SELECT * FROM symbols WHERE name = ?")
+      definitions = project
+        .db!.prepare(
+          `
+          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.data_json 
+          FROM symbols s
+          JOIN entities e ON s.entity_id = e.id
+          JOIN scopes sc ON e.scope_id = sc.id
+          JOIN files f ON sc.file_id = f.id
+          WHERE s.name = ? and e.kind != 'import'
+        `,
+        )
         .all(query) as SymbolRow[];
     } else {
-      definitions = project.db
-        .prepare("SELECT * FROM symbols WHERE name = ? OR name LIKE ?")
+      definitions = project
+        .db!.prepare(
+          `
+          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.data_json 
+          FROM symbols s
+          JOIN entities e ON s.entity_id = e.id
+          JOIN scopes sc ON e.scope_id = sc.id
+          JOIN files f ON sc.file_id = f.id
+          WHERE (s.name = ? OR s.name LIKE ?) and e.kind != 'import'
+        `,
+        )
         .all(query, `%${query}%`) as SymbolRow[];
     }
 
     for (const def of definitions) {
+      if (isExcluded(def.file)) continue;
+
       const definition: SymbolSearchResult = {
-        type: "definition",
         kind: def.kind,
         name: def.name,
         file: def.file,
         loc: { line: def.line, column: def.column },
       };
 
-      if (includeProps) {
-        definition.props = JSON.parse(def.props_json || "[]") as unknown[];
+      if (includeProps && def.data_json) {
+        try {
+          const data = JSON.parse(def.data_json);
+          definition.props = data.props || [];
+        } catch {
+          definition.props = [];
+        }
       }
 
-      results.push(definition);
-
       if (includeUsages) {
+        definition.usages = [];
         // 2. Find renders of this specific symbol ID or tag name
-        const usages = project.db
-          .prepare(
+        const usages = project
+          .db!.prepare(
             `
-          SELECT r.*, s.name as in_name 
-          FROM renders r 
-          LEFT JOIN symbols s ON r.scope_symbol_id = s.id 
+          SELECT r.*, f.path as file, s.name as in_name 
+          FROM renders r
+          JOIN files f ON r.file_id = f.id
+          LEFT JOIN entities e ON r.parent_entity_id = e.id
+          LEFT JOIN symbols s ON s.entity_id = e.id
           WHERE r.symbol_id = ? OR r.tag = ?
         `,
           )
           .all(def.id, def.name) as RenderRow[];
 
         for (const usage of usages) {
-          results.push({
-            type: "usage",
-            kind: usage.usage_kind === "render" ? "render" : "call",
-            usage_kind: usage.usage_kind,
+          if (isExcluded(usage.file)) continue;
+
+          definition.usages.push({
+            kind: usage.kind === "jsx" ? "render" : "call",
             name: usage.tag,
             file: usage.file,
             loc: { line: usage.line, column: usage.column },
@@ -386,29 +438,30 @@ export class ProjectManager {
           });
         }
       }
+
+      definitions_results.push(definition);
     }
 
     // 3. Fallback for external symbols (tags not defined in this project)
-    if (
-      includeUsages &&
-      results.filter((r) => r.type === "usage").length === 0
-    ) {
-      const externalUsages = project.db
-        .prepare(
+    if (includeUsages && definitions_results.length === 0) {
+      const results = project
+        .db!.prepare(
           `
-        SELECT r.*, s.name as in_name 
+        SELECT r.*, f.path as file, s.name as in_name 
         FROM renders r 
-        LEFT JOIN symbols s ON r.scope_symbol_id = s.id 
+        JOIN files f ON r.file_id = f.id
+        LEFT JOIN entities e ON r.parent_entity_id = e.id
+        LEFT JOIN symbols s ON s.entity_id = e.id
         WHERE r.tag = ?
       `,
         )
         .all(query) as RenderRow[];
 
-      for (const usage of externalUsages) {
-        results.push({
-          type: "usage",
-          kind: usage.usage_kind === "render" ? "render" : "call",
-          usage_kind: usage.usage_kind,
+      for (const usage of results) {
+        if (isExcluded(usage.file)) continue;
+
+        externalUsages.push({
+          kind: usage.kind === "jsx" ? "render" : "call",
           name: usage.tag,
           file: usage.file,
           loc: { line: usage.line, column: usage.column },
@@ -417,47 +470,100 @@ export class ProjectManager {
       }
     }
 
-    return results;
+    return { definitions: definitions_results, externalUsages };
   }
 
-  async findSymbolUsages(
+  async getSymbolUsagesWithContext(
     projectPath: string,
     query: string,
     subProject?: string,
-    summaryOnly: boolean = false,
     strict: boolean = true,
-  ): Promise<
-    | SymbolSearchResult[]
-    | { query: string; totalUsages: number; files: Record<string, number> }
-  > {
-    const results = await this.findSymbol(
+    contextLines: number = 2,
+    exclude?: string[],
+  ) {
+    const symbolInfo = await this.findSymbol(
       projectPath,
       query,
       subProject,
       strict,
-      true, // includeProps
-      true, // includeUsages
+      false,
+      true,
+      exclude,
     );
-    const usages = results.filter((r) => r.type === "usage");
 
-    if (summaryOnly) {
-      const summary: Record<string, number> = {};
-      for (const u of usages) {
-        summary[u.file] = (summary[u.file] || 0) + 1;
-      }
-      return { query, totalUsages: usages.length, files: summary };
+    const allUsages: SymbolSearchResult[] = [];
+    symbolInfo.definitions.forEach((def) => {
+      if (def.usages) allUsages.push(...def.usages);
+    });
+    if (symbolInfo.externalUsages) {
+      allUsages.push(...symbolInfo.externalUsages);
     }
 
-    return usages;
+    const fileCache = new Map<string, string[]>();
+    const results = [];
+
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+
+    for (const usage of allUsages) {
+      const fullPath = path.resolve(
+        analysisPath,
+        usage.file.startsWith("/") ? usage.file.slice(1) : usage.file,
+      );
+
+      if (!fs.existsSync(fullPath)) continue;
+
+      let lines = fileCache.get(fullPath);
+      if (!lines) {
+        lines = fs.readFileSync(fullPath, "utf-8").split("\n");
+        fileCache.set(fullPath, lines);
+      }
+
+      const lineIdx = usage.loc.line - 1;
+      const start = Math.max(0, lineIdx - contextLines);
+      const end = Math.min(lines.length - 1, lineIdx + contextLines);
+      const context = lines.slice(start, end + 1);
+
+      results.push({
+        file: usage.file,
+        line: usage.loc.line,
+        column: usage.loc.column,
+        in: usage.in,
+        kind: usage.kind,
+        context,
+      });
+    }
+
+    return results;
+  }
+
+  async getPropDefinitions(
+    projectPath: string,
+    query: string,
+    subProject?: string,
+  ) {
+    const symbolInfo = await this.findSymbol(
+      projectPath,
+      query,
+      subProject,
+      true, // strict
+      true, // includeProps
+      false, // includeUsages
+    );
+
+    return symbolInfo.definitions.map((def) => ({
+      name: def.name,
+      file: def.file,
+      props: def.props || [],
+    }));
   }
 
   async findFiles(projectPath: string, pattern: string, subProject?: string) {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph)
-      throw new Error("Project not open or graph not available.");
+    const project = await this.openProject(projectPath, subProject);
 
     const isGlob = /[*?[\]]/.test(pattern);
-    const files = Object.keys(project.graph.files);
+    const files = Object.keys(project.graph!.files);
 
     if (isGlob) {
       const results = files.filter(
@@ -480,12 +586,10 @@ export class ProjectManager {
     filePath: string,
     subProject?: string,
   ) {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph)
-      throw new Error("Project not open or graph not available.");
+    const project = await this.openProject(projectPath, subProject);
 
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph.files[normalizedPath];
+    const file = project.graph!.files[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
 
     return file.import;
@@ -496,12 +600,10 @@ export class ProjectManager {
     subProject?: string,
     maxDepth: number = 3,
   ): Promise<TreeNode> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph)
-      throw new Error("Project not open or graph not available.");
+    const project = await this.openProject(projectPath, subProject);
 
     const root: TreeNode = { name: "/", children: [] };
-    const files = Object.keys(project.graph.files).sort();
+    const files = Object.keys(project.graph!.files).sort();
 
     for (const filePath of files) {
       const parts = filePath.split("/").filter(Boolean);
@@ -538,13 +640,20 @@ export class ProjectManager {
       }
     | { error: string }
   > {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.db)
-      throw new Error("Project not open or database not available.");
+    const project = await this.openProject(projectPath, subProject);
 
     // Find the starting component(s)
-    const startComponents = project.db
-      .prepare(`SELECT * FROM symbols WHERE name = ?`)
+    const startComponents = project
+      .db!.prepare(
+        `
+        SELECT s.*, f.path as file, e.line, e.column, e.kind, e.type
+        FROM symbols s
+        JOIN entities e ON s.entity_id = e.id
+        JOIN scopes sc ON e.scope_id = sc.id
+        JOIN files f ON sc.file_id = f.id
+        WHERE s.name = ?
+      `,
+      )
       .all(componentName) as SymbolRow[];
 
     if (startComponents.length === 0) {
@@ -570,7 +679,9 @@ export class ProjectManager {
       visited.add(symbolId);
 
       const children = project
-        .db!.prepare(`SELECT * FROM renders WHERE scope_symbol_id = ?`)
+        .db!.prepare(
+          `SELECT r.*, f.path as file FROM renders r JOIN files f ON r.file_id = f.id WHERE parent_entity_id = (SELECT entity_id FROM symbols WHERE id = ?)`,
+        )
         .all(symbolId) as RenderRow[];
 
       return {
@@ -584,17 +695,25 @@ export class ProjectManager {
               new Set(visited),
             );
           }
-          return { name: c.tag, status: "unresolved" };
+          return {
+            name: c.tag,
+            status: "unresolved",
+            kind: c.kind,
+            index: c.render_index,
+          };
         }),
       };
     };
 
-    const renderedBy = project.db
-      .prepare(
+    const renderedBy = project
+      .db!.prepare(
         `
-      SELECT DISTINCT s.id, s.name, s.file 
+      SELECT DISTINCT s.id, s.name, f.path as file 
       FROM symbols s
-      JOIN renders r ON r.scope_symbol_id = s.id
+      JOIN entities e ON s.entity_id = e.id
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      JOIN renders r ON r.parent_entity_id = e.id
       WHERE r.tag = ? OR r.symbol_id IN (SELECT id FROM symbols WHERE name = ?)
     `,
       )
@@ -627,13 +746,18 @@ export class ProjectManager {
       type: string;
     }[]
   > {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.db)
-      throw new Error("Project not open or database not available.");
+    const project = await this.openProject(projectPath, subProject);
 
-    const symbols = project.db
-      .prepare(
-        `SELECT id, name, file, line, column, kind, type FROM symbols WHERE name = ?`,
+    const symbols = project
+      .db!.prepare(
+        `
+        SELECT s.id, s.name, f.path as file, e.line, e.column, e.kind, e.type 
+        FROM symbols s
+        JOIN entities e ON s.entity_id = e.id
+        JOIN scopes sc ON e.scope_id = sc.id
+        JOIN files f ON sc.file_id = f.id
+        WHERE s.name = ?
+        `,
       )
       .all(query) as SymbolRow[];
     return symbols.map((s) => ({
@@ -663,10 +787,6 @@ export class ProjectManager {
       }[]
     | { error: string }
   > {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.db)
-      throw new Error("Project not open or database not available.");
-
     const locations = await this.getSymbolLocation(
       projectPath,
       query,
@@ -715,8 +835,8 @@ export class ProjectManager {
     _contextId?: string,
   ): Promise<boolean> {
     // This still operates on the JSON graph for now as UI uses it
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph) return false;
+    const project = await this.openProject(projectPath, subProject);
+    if (!project.graph) return false;
 
     // ... (rest of the existing position update logic is kept in implementation)
     return true;
@@ -728,15 +848,15 @@ export class ProjectManager {
     label: string,
     subProject?: string,
   ): Promise<string[]> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph) throw new Error("Project not open.");
-    if (!project.graph.labels) project.graph.labels = {};
-    if (!project.graph.labels[id]) project.graph.labels[id] = [];
-    if (!project.graph.labels[id].includes(label)) {
-      project.graph.labels[id].push(label);
+    const project = await this.openProject(projectPath, subProject);
+    const graph = project.graph!;
+    if (!graph.labels) graph.labels = {};
+    if (!graph.labels[id]) graph.labels[id] = [];
+    if (!graph.labels[id].includes(label)) {
+      graph.labels[id].push(label);
       this._saveCache(project);
     }
-    return project.graph.labels[id];
+    return graph.labels[id];
   }
 
   async removeLabel(
@@ -745,8 +865,8 @@ export class ProjectManager {
     label: string,
     subProject?: string,
   ): Promise<string[]> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph || !project.graph.labels) return [];
+    const project = await this.openProject(projectPath, subProject);
+    if (!project.graph || !project.graph.labels) return [];
     if (project.graph.labels[id]) {
       project.graph.labels[id] = project.graph.labels[id].filter(
         (l) => l !== label,
@@ -762,8 +882,8 @@ export class ProjectManager {
     projectPath: string,
     subProject?: string,
   ): Promise<Record<string, string[]>> {
-    const project = this.getProject(projectPath, subProject);
-    return project?.graph?.labels || {};
+    const project = await this.openProject(projectPath, subProject);
+    return project.graph?.labels || {};
   }
 
   async findEntitiesByLabel(
@@ -771,8 +891,8 @@ export class ProjectManager {
     label: string,
     subProject?: string,
   ): Promise<string[]> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph || !project.graph.labels) return [];
+    const project = await this.openProject(projectPath, subProject);
+    if (!project.graph || !project.graph.labels) return [];
     const ids: string[] = [];
     for (const [id, labels] of Object.entries(project.graph.labels)) {
       if (labels.includes(label)) ids.push(id);
@@ -785,12 +905,11 @@ export class ProjectManager {
     dirPath: string,
     subProject?: string,
   ) {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph) throw new Error("Project not open.");
+    const project = await this.openProject(projectPath, subProject);
     const normalizedDir = dirPath.startsWith("/") ? dirPath : `/${dirPath}`;
     const filesInDir = new Set<string>();
     const subDirs = new Set<string>();
-    for (const filePath of Object.keys(project.graph.files)) {
+    for (const filePath of Object.keys(project.graph!.files)) {
       if (filePath.startsWith(normalizedDir)) {
         const relative = filePath
           .slice(normalizedDir.length)
@@ -811,10 +930,9 @@ export class ProjectManager {
     filePath: string,
     subProject?: string,
   ) {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph) throw new Error("Project not open.");
+    const project = await this.openProject(projectPath, subProject);
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph.files[normalizedPath];
+    const file = project.graph!.files[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
     const outline = Object.values(file.var || {}).map((v) => ({
       id: v.id,
@@ -843,16 +961,30 @@ export class ProjectManager {
     projectPath: string,
     pattern: string,
     subProject?: string,
+    exclude?: string[],
   ): Promise<{ file: string; line: number; content: string }[]> {
-    const project = this.getProject(projectPath, subProject);
-    if (!project || !project.graph)
-      throw new Error("Project not open. Call open_project first.");
+    const project = await this.openProject(projectPath, subProject);
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
-    for (const filePath of Object.keys(project.graph.files)) {
+
+    const isExcluded = (filePath: string) => {
+      if (!exclude || exclude.length === 0) return false;
+      return exclude.some(
+        (pattern) =>
+          minimatch(filePath, pattern, { dot: true, nocase: true }) ||
+          minimatch(path.basename(filePath), pattern, {
+            dot: true,
+            nocase: true,
+          }),
+      );
+    };
+
+    for (const filePath of Object.keys(project.graph!.files)) {
+      if (isExcluded(filePath)) continue;
+
       const fullPath = path.resolve(
         analysisPath,
         filePath.startsWith("/") ? filePath.slice(1) : filePath,

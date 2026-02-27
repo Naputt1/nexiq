@@ -167,7 +167,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8f55a34f75833c6b",
+          "hash": "451e6c7943b0192c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -248,6 +248,8 @@
                 "line": 13,
                 "column": 9
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },

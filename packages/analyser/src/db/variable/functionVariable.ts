@@ -13,7 +13,7 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
     >,
     file: File,
   ) {
-    super({ ...options, kind: "normal" }, file);
+    super({ ...options, kind: "normal", type: "function" }, file);
   }
 
   public load(data: FunctionVariable) {

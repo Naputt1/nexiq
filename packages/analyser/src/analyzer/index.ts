@@ -11,6 +11,7 @@ import ExportDefaultDeclaration from "./exportDefaultDeclaration.js";
 import ExportAllDeclaration from "./exportAllDeclaration.js";
 import FunctionDeclaration from "./functionDeclaration.js";
 import VariableDeclarator from "./variableDeclaration.js";
+import ClassDeclaration from "./classDeclaration.js";
 import JSXElement from "./JSXElement.js";
 import CallExpression from "./callExpression.js";
 import ReturnStatement from "./returnStatement.js";
@@ -55,15 +56,19 @@ async function analyzeFiles(
 
   // 1. Identify files to analyze vs load from cache
   for (const fullfileName of files) {
-    const fileName = "/" + fullfileName;
-    let fileCache: ComponentFile | undefined = cacheData?.files?.[fileName];
+    // The cache stores file paths with a leading slash, but componentDB and sqlite
+    // expect paths without it (relative to SRC_DIR).
+    // We'll use fullfileName (without leading slash) for componentDB and sqlite,
+    // and fileNameWithSlash for cache lookup.
+    const fileNameWithSlash = "/" + fullfileName;
+    let fileCache: ComponentFile | undefined = cacheData?.files?.[fileNameWithSlash];
 
     if (!fileCache && sqlite) {
       fileCache = sqlite.loadFileResults(fullfileName);
     }
 
+    // componentDB.addFile expects the path without a leading slash
     if (!componentDB.addFile(fullfileName, fileCache)) {
-      // Unchanged, addFile already loaded it from cache if provided
       continue;
     }
 
@@ -135,6 +140,8 @@ async function analyzeFiles(
           fileName,
         ),
         FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
+        ClassDeclaration: ClassDeclaration(componentDB, fileName),
+        ClassExpression: ClassDeclaration(componentDB, fileName),
         VariableDeclarator: VariableDeclarator(componentDB, fileName),
         ReturnStatement: ReturnStatement(componentDB, fileName),
         ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),

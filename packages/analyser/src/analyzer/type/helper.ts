@@ -79,7 +79,8 @@ function getFuncParam(
             name: property.argument.name,
           });
         } else {
-          debugger;
+          
+          // debugger;
         }
       }
 
@@ -197,7 +198,8 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
   } else if (tsType.left.type === "TSQualifiedName") {
     id.push(...getQualifiedName(tsType.left));
   } else {
-    debugger;
+    
+    // debugger;
   }
 
   if (tsType.right.type === "Identifier") {
@@ -362,7 +364,8 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        debugger;
+        
+        // debugger;
         assert(false, "invlid type reference");
       }
 

@@ -9,7 +9,7 @@
           "name": "useUser",
           "type": "named",
           "exportKind": "value",
-          "id": "b2d7ad170a22c6a4"
+          "id": "bcb4ad80b9e65abc"
         }
       },
       "starExports": [],
@@ -141,7 +141,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "444a6774d3336e38",
+          "hash": "dc9252fda7b33da3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -163,14 +163,14 @@
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "1caf227aa1ea83e5",
+              "hash": "320930bcc3a41283",
               "dependencies": {},
               "loc": {
                 "line": 4,
                 "column": 8
               },
               "call": {
-                "id": "b2d7ad170a22c6a4",
+                "id": "bcb4ad80b9e65abc",
                 "name": "useUser"
               }
             },
@@ -237,6 +237,20 @@
             "srcId": "div"
           },
           "children": {
+            "7b6a8c51fba318ad": {
+              "id": "bcb4ad80b9e65abc",
+              "instanceId": "7b6a8c51fba318ad",
+              "tag": "useUser",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 4,
+                "column": 15
+              },
+              "renderIndex": 0,
+              "kind": "hook",
+              "children": {}
+            },
             "ca8cdcf6cdf8e769": {
               "id": "div",
               "instanceId": "ca8cdcf6cdf8e769",
@@ -247,13 +261,15 @@
                 "line": 5,
                 "column": 9
               },
+              "renderIndex": 1,
+              "kind": "jsx",
               "children": {}
             }
           },
           "states": [],
           "props": [],
           "hooks": [
-            "b2d7ad170a22c6a4"
+            "bcb4ad80b9e65abc"
           ],
           "effects": {},
           "componentType": "Function",
@@ -271,12 +287,12 @@
     },
     {
       "from": "311c554b828f67a5",
-      "to": "b2d7ad170a22c6a4",
+      "to": "bcb4ad80b9e65abc",
       "label": "hook"
     },
     {
       "from": "311c554b828f67a5:callhook:useUser:4:8",
-      "to": "b2d7ad170a22c6a4",
+      "to": "bcb4ad80b9e65abc",
       "label": "hook"
     },
     {

@@ -17,9 +17,19 @@ export default function ArrowFunctionExpression(
           t.isIdentifier(callee) &&
           (callee.name === "useCallback" ||
             callee.name === "useMemo" ||
-            callee.name === "useEffect")
+            callee.name === "useEffect" ||
+            callee.name === "forwardRef")
         ) {
           return;
+        }
+
+        if (t.isMemberExpression(callee)) {
+          if (
+            t.isIdentifier(callee.property) &&
+            callee.property.name === "forwardRef"
+          ) {
+            return;
+          }
         }
 
         // Handle wrapped calls like useCallback(debounce(() => ...))

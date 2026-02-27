@@ -3,7 +3,9 @@ import type { TypeData } from "shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
-export class ComponentVariable extends ReactFunctionVariable<"component"> {
+export class ComponentVariable<
+  TType extends "function" | "class" = "function" | "class",
+> extends ReactFunctionVariable<"component", TType> {
   componentType: ComponentFileVarComponent["componentType"];
   propType: TypeData | undefined;
   contexts: string[];
@@ -12,13 +14,13 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
   constructor(
     options: Omit<
       ComponentFileVarComponent,
-      "kind" | "var" | "components" | "type" | "hash" | "file"
+      "kind" | "var" | "components" | "hash" | "file"
     >,
     file: File,
   ) {
     super(
       {
-        ...options,
+        ...(options as any), // eslint-disable-line @typescript-eslint/no-explicit-any
         kind: "component",
       },
       file,
@@ -29,7 +31,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     this.forwardRef = options.forwardRef ?? false;
   }
 
-  public load(data: ComponentVariable) {
+  public load(data: ComponentVariable<TType>) {
     super.load(data);
 
     this.kind = "component";
@@ -47,7 +49,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       componentType: this.componentType,
       contexts: this.contexts,
       forwardRef: this.forwardRef,
-    };
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     if (this.propType) {
       data.propType = this.propType;
