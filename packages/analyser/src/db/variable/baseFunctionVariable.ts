@@ -4,6 +4,7 @@ import type {
   VarKind,
   FunctionReturn,
   ComponentInfoRender,
+  VarType,
 } from "shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
@@ -12,7 +13,8 @@ import { isJSXVariable } from "./type.js";
 
 export abstract class BaseFunctionVariable<
   TKind extends VarKind,
-> extends Variable<"function", TKind> {
+  TType extends VarType = VarType,
+> extends Variable<TType, TKind> {
   var: Scope;
   scope: VariableScope;
   async?: boolean | undefined;
@@ -21,12 +23,12 @@ export abstract class BaseFunctionVariable<
 
   constructor(
     options: Omit<
-      ComponentFileVarBaseTypeFunction<TKind>,
-      "var" | "components" | "type" | "file" | "hash"
+      ComponentFileVarBaseTypeFunction<TKind, TType>,
+      "var" | "components" | "file" | "hash"
     >,
     file: File,
   ) {
-    super({ ...options, type: "function" }, file);
+    super(options, file);
     this.var = new Scope();
     this.scope = options.scope;
     this.async = options.async;
@@ -34,17 +36,19 @@ export abstract class BaseFunctionVariable<
     this.children = options.children || {};
   }
 
-  public load(data: BaseFunctionVariable<TKind>) {
+  public load(data: Variable<TType, TKind>) {
     super.load(data);
 
-    this.type = data.type;
-    this.scope = data.scope;
-    this.async = data.async;
-    this.return = data.return;
-    this.children = data.children;
+    if (data instanceof BaseFunctionVariable) {
+      this.type = data.type;
+      this.scope = data.scope;
+      this.async = data.async;
+      this.return = data.return;
+      this.children = data.children;
+    }
   }
 
-  protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind> {
+  protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind, TType> {
     let returnData = this.return;
     if (typeof returnData === "string") {
       const v = this.file.var.get(returnData, true);
@@ -55,6 +59,7 @@ export abstract class BaseFunctionVariable<
 
     return {
       ...super.getBaseData(),
+      type: this.type,
       var: this.var.getData(),
       scope: this.scope,
       async: this.async,

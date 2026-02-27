@@ -1,6 +1,5 @@
 import type { NodePath, Node } from "@babel/traverse";
 import * as t from "@babel/types";
-import path from "path";
 import type { ComponentDB } from "./db/componentDB.js";
 
 export function isHook(name: string) {
@@ -21,17 +20,12 @@ export function getReactHookInfo(
     const comImport = file.import.get(localName);
 
     if (comImport?.source === "react") {
-      if (comImport.type === "named") {
+      const importedName = comImport.type === "named" ? comImport.importedName : localName;
+      if (importedName?.startsWith("use") || localName.startsWith("use")) {
         return {
-          name: comImport.importedName || localName,
+          name: importedName || localName,
           isReact: true,
         };
-      }
-      if (
-        (comImport.type === "default" || comImport.type === "namespace") &&
-        localName.startsWith("use")
-      ) {
-        return { name: localName, isReact: true };
       }
     }
 
@@ -47,12 +41,15 @@ export function getReactHookInfo(
         const comImport = file.import.get(objName);
 
         if (comImport?.source === "react") {
-          if (comImport.type === "default" || comImport.type === "namespace") {
+          if (
+            (comImport.type === "default" || comImport.type === "namespace") &&
+            propName.startsWith("use")
+          ) {
             return { name: propName, isReact: true };
           }
         }
 
-        if (objName === "React") {
+        if (objName === "React" && propName.startsWith("use")) {
           return { name: propName, isReact: true };
         }
       }
@@ -70,12 +67,31 @@ export function returnJSX(node: Node): boolean {
   if (
     node.type != "FunctionDeclaration" &&
     node.type != "ArrowFunctionExpression" &&
-    node.type != "FunctionExpression"
+    node.type != "FunctionExpression" &&
+    node.type != "ClassMethod" &&
+    node.type != "ObjectMethod"
   ) {
     return false;
   }
 
-  if (node.body.type === "JSXElement" || node.body.type === "JSXFragment") {
+  const isJSX = (n: Node | null | undefined): boolean => {
+    if (!n) return false;
+    if (n.type === "JSXElement" || n.type === "JSXFragment") {
+      return true;
+    }
+    if (n.type === "ParenthesizedExpression") {
+      return isJSX(n.expression);
+    }
+    if (n.type === "ConditionalExpression") {
+      return isJSX(n.consequent) || isJSX(n.alternate);
+    }
+    if (n.type === "LogicalExpression") {
+      return isJSX(n.right);
+    }
+    return false;
+  };
+
+  if (isJSX(node.body as Node)) {
     return true;
   }
 
@@ -88,10 +104,7 @@ export function returnJSX(node: Node): boolean {
   const check = (n: Node) => {
     if (hasJSX) return;
     if (n.type === "ReturnStatement") {
-      if (
-        n.argument?.type === "JSXElement" ||
-        n.argument?.type === "JSXFragment"
-      ) {
+      if (isJSX(n.argument)) {
         hasJSX = true;
       }
     }
@@ -110,7 +123,8 @@ export function returnJSX(node: Node): boolean {
 
   node.body.body.forEach(check);
 
-  return hasJSX;
+  const res = hasJSX;
+  return res;
 }
 
 export function isRefUsed(
@@ -178,9 +192,11 @@ export function isForwardRefCall(
   fileName: string,
 ): boolean {
   const callee = call.callee;
-  if (t.isIdentifier(callee)) {
-    const file = componentDB.getFile(fileName);
-    if (file) {
+  const file = componentDB.getFile(fileName);
+  if (!file) return false;
+
+  const res = (function () {
+    if (t.isIdentifier(callee)) {
       const comImport = file.import.get(callee.name);
       if (comImport?.source === "react") {
         if (
@@ -204,18 +220,34 @@ export function isForwardRefCall(
           return true;
         }
       }
+    } else if (t.isMemberExpression(callee)) {
+      if (
+        t.isIdentifier(callee.property) &&
+        callee.property.name === "forwardRef"
+      ) {
+        if (t.isIdentifier(callee.object)) {
+          const objName = callee.object.name;
+          const comImport = file.import.get(objName);
+
+          if (comImport?.source === "react") {
+            if (
+              comImport.type === "default" ||
+              comImport.type === "namespace"
+            ) {
+              return true;
+            }
+          }
+
+          if (objName === "React") {
+            return true;
+          }
+        }
+      }
     }
-  } else if (t.isMemberExpression(callee)) {
-    if (
-      t.isIdentifier(callee.object) &&
-      callee.object.name === "React" &&
-      t.isIdentifier(callee.property) &&
-      callee.property.name === "forwardRef"
-    ) {
-      return true;
-    }
-  }
-  return false;
+    return false;
+  })();
+
+  return res;
 }
 
 export function containsJSX(nodePath: NodePath): boolean {

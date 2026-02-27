@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   ProjectManager,
   type ComponentHierarchyNode,
-  type SymbolSearchResult,
 } from "./projectManager.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -488,10 +487,15 @@ describe("ProjectManager", () => {
       ).rejects.toThrow("File not found");
     });
 
-    it("should throw error if project not open for listDirectory", async () => {
-      await expect(
-        projectManager.listDirectory("/invalid", "src"),
-      ).rejects.toThrow("Project not open");
+    it("should open project automatically for listDirectory", async () => {
+      const result = await projectManager.listDirectory("/new-project", "src");
+      expect(result).toBeDefined();
+      expect(analyzeProject).toHaveBeenCalledWith(
+        "/new-project",
+        expect.any(String),
+        undefined,
+        expect.any(String),
+      );
     });
   });
 
@@ -554,77 +558,6 @@ describe("ProjectManager", () => {
       await projectManager.openProject(projectPath);
     });
 
-    it("should find symbol usages", async () => {
-      mockDb.prepare
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            {
-              id: "btn-id",
-              name: "Button",
-              kind: "component",
-              file: "/src/components/Button.tsx",
-              line: 1,
-              column: 1,
-            },
-          ]),
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            {
-              tag: "Button",
-              file: "/src/App.tsx",
-              line: 15,
-              column: 5,
-              in_name: "App",
-            },
-          ]),
-        } as unknown as Database.Statement);
-
-      const results = (await projectManager.findSymbolUsages(
-        projectPath,
-        "Button",
-      )) as SymbolSearchResult[];
-      expect(results).toHaveLength(1);
-      expect(results[0].type).toBe("usage");
-      expect(results[0].file).toBe("/src/App.tsx");
-    });
-
-    it("should find symbol usages with summary", async () => {
-      mockDb.prepare
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            {
-              id: "btn-id",
-              name: "Button",
-              kind: "component",
-              file: "/src/components/Button.tsx",
-              line: 1,
-              column: 1,
-            },
-          ]),
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            {
-              tag: "Button",
-              file: "/src/App.tsx",
-              line: 15,
-              column: 5,
-              in_name: "App",
-            },
-          ]),
-        } as unknown as Database.Statement);
-
-      const results = (await projectManager.findSymbolUsages(
-        projectPath,
-        "Button",
-        undefined,
-        true,
-      )) as { totalUsages: number; files: Record<string, number> };
-      expect(results.totalUsages).toBe(1);
-      expect(results.files["/src/App.tsx"]).toBe(1);
-    });
-
     it("should find files by pattern", async () => {
       const results = await projectManager.findFiles(projectPath, "App*");
       expect(results).toEqual(["/src/App.tsx"]);
@@ -652,33 +585,6 @@ describe("ProjectManager", () => {
       expect(tree.children[0].name).toBe("src");
       expect(tree.children[0].children[0].name).toBe("App.tsx");
       expect(tree.children[0].children[1].name).toBe("components");
-    });
-
-    it("should find usages of external symbols", async () => {
-      // 1. Return no definitions
-      // 2. Return usages from external fallback
-      mockDb.prepare
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([]),
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            {
-              tag: "useState",
-              file: "/src/App.tsx",
-              line: 10,
-              column: 1,
-              in_name: "App",
-            },
-          ]),
-        } as unknown as Database.Statement);
-
-      const results = (await projectManager.findSymbolUsages(
-        projectPath,
-        "useState",
-      )) as SymbolSearchResult[];
-      expect(results).toHaveLength(1);
-      expect(results[0].file).toBe("/src/App.tsx");
     });
   });
 
@@ -835,10 +741,18 @@ describe("ProjectManager", () => {
       expect(result.error).toBeDefined();
     });
 
-    it("should throw error if project not open", async () => {
-      await expect(
-        projectManager.getSymbolLocation("/invalid", "App"),
-      ).rejects.toThrow("Project not open");
+    it("should open project automatically for getSymbolLocation", async () => {
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi.fn().mockReturnValue([]),
+      } as unknown as Database.Statement);
+      const loc = await projectManager.getSymbolLocation("/new-project", "App");
+      expect(loc).toEqual([]);
+      expect(analyzeProject).toHaveBeenCalledWith(
+        "/new-project",
+        expect.any(String),
+        undefined,
+        expect.any(String),
+      );
     });
   });
 
@@ -912,13 +826,13 @@ describe("ProjectManager", () => {
       expect(success).toBe(true);
     });
 
-    it("should return false if project not found for updateGraphPosition", async () => {
+    it("should open project automatically for updateGraphPosition", async () => {
       const success = await projectManager.updateGraphPosition(
-        "/invalid",
+        "/new-project",
         undefined,
         {},
       );
-      expect(success).toBe(false);
+      expect(success).toBe(true);
     });
 
     it("should handle partial symbol matches", async () => {
@@ -942,8 +856,9 @@ describe("ProjectManager", () => {
         undefined,
         false,
       ); // Matches "App"
-      expect(results).toHaveLength(1);
-      expect(results[0].name).toBe("App");
+      expect(results.definitions).toHaveLength(1);
+      expect(results.definitions[0].name).toBe("App");
+      expect(results.externalUsages).toHaveLength(0);
     });
 
     it("should save and read app state", async () => {

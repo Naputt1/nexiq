@@ -10,7 +10,7 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
     >,
     file: File,
   ) {
-    super({ ...options, kind: "hook" }, file);
+    super({ ...options, kind: "hook", type: "function" }, file);
   }
 
   public load(data: HookVariable) {

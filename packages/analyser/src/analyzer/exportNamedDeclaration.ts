@@ -9,9 +9,10 @@ export default function ExportNamedDeclaration(
   componentDB: ComponentDB,
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ExportNamedDeclaration> {
-  return (nodePath) => {
-    const decl = nodePath.node.declaration;
-    if (decl) {
+  return {
+    exit(nodePath) {
+      const decl = nodePath.node.declaration;
+      if (decl) {
       let name: string | undefined;
 
       let exportType: ComponentFileExport["type"] = "named";
@@ -86,5 +87,6 @@ export default function ExportNamedDeclaration(
         exportKind: "value",
       });
     }
-  };
+  },
+};
 }

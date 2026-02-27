@@ -139,7 +139,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "2840950bc112d2df",
+          "hash": "7ceb485fb8e24499",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -319,6 +319,8 @@
                 "line": 57,
                 "column": 4
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -567,7 +569,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:3a2be848cadeb6e5",
+                  "id": "c03f8e59d14c727c:state:[stateX, setStateX]:3a2be848cadeb6e5",
                   "name": "stateX"
                 }
               ]

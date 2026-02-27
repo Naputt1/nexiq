@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "pattern": "post_list/index.ts*",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

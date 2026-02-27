@@ -50,19 +50,66 @@ describe("BackendServer", () => {
     });
 
     it("should handle get_symbol_info tool", async () => {
-      const mockResult: SymbolInfoResult[] = [
-        {
-          type: "definition",
-          kind: "component",
-          name: "App",
-          file: "src/App.tsx",
-          loc: { line: 1, column: 1 },
-        },
-      ];
+      const mockResult = {
+        definitions: [
+          {
+            type: "definition" as const,
+            kind: "component",
+            name: "App",
+            file: "src/App.tsx",
+            loc: { line: 1, column: 1 },
+            usages: [],
+          },
+        ],
+        externalUsages: [],
+      };
 
       vi.mocked(mockProjectManager.findSymbol).mockResolvedValue(mockResult);
 
-      const args = { projectPath: "/test", query: "App" };
+      const args = { projectPath: "/test", query: "App", usages: true };
+      const result = await server.handleCallTool("get_symbol_info", args);
+
+      expect(mockProjectManager.findSymbol).toHaveBeenCalledWith(
+        "/test",
+        "App",
+        undefined,
+        true,
+        false,
+        true,
+        expect.arrayContaining(["**/node_modules/**"]),
+      );
+
+      const content = JSON.parse(
+        (result as { content: { text: string }[] }).content[0].text,
+      ) as {
+        definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
+        externalUsages: SymbolInfoResult[];
+      };
+      expect(content.definitions).toHaveLength(1);
+      expect(content.definitions[0].name).toBe("App");
+      expect(content.definitions[0].type).toBe("definition");
+      expect(content.definitions[0].usages).toHaveLength(0);
+      expect(content.externalUsages).toHaveLength(0);
+    });
+
+    it("should handle get_symbol_info tool with loc: false", async () => {
+      const mockResult = {
+        definitions: [
+          {
+            type: "definition" as const,
+            kind: "component",
+            name: "App",
+            file: "src/App.tsx",
+            loc: { line: 1, column: 1 },
+            usages: [],
+          },
+        ],
+        externalUsages: [],
+      };
+
+      vi.mocked(mockProjectManager.findSymbol).mockResolvedValue(mockResult);
+
+      const args = { projectPath: "/test", query: "App", loc: false };
       const result = await server.handleCallTool("get_symbol_info", args);
 
       expect(mockProjectManager.findSymbol).toHaveBeenCalledWith(
@@ -72,14 +119,75 @@ describe("BackendServer", () => {
         true,
         false,
         false,
+        expect.any(Array),
       );
 
       const content = JSON.parse(
         (result as { content: { text: string }[] }).content[0].text,
-      ) as SymbolInfoResult[];
-      expect(content).toHaveLength(1);
-      expect(content[0].name).toBe("App");
-      expect(content[0].type).toBe("definition");
+      ) as {
+        definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
+        externalUsages: SymbolInfoResult[];
+      };
+      expect(content.definitions[0].loc).toBeUndefined();
+    });
+
+    it("should handle get_symbol_info tool with nested and external usages", async () => {
+      const mockResult = {
+        definitions: [
+          {
+            kind: "component",
+            name: "Button",
+            file: "src/components/Button.tsx",
+            loc: { line: 1, column: 1 },
+            usages: [
+              {
+                kind: "render",
+                name: "Button",
+                file: "src/App.tsx",
+                loc: { line: 10, column: 5 },
+                in: "App",
+              },
+            ],
+          },
+        ],
+        externalUsages: [
+          {
+            kind: "render",
+            name: "ExternalComponent",
+            file: "src/External.tsx",
+            loc: { line: 5, column: 1 },
+            in: "Unknown",
+          },
+        ],
+      };
+
+      vi.mocked(mockProjectManager.findSymbol).mockResolvedValue(mockResult);
+
+      const args = { projectPath: "/test", query: "Button", usages: true };
+      const result = await server.handleCallTool("get_symbol_info", args);
+
+      expect(mockProjectManager.findSymbol).toHaveBeenCalledWith(
+        "/test",
+        "Button",
+        undefined,
+        true,
+        false,
+        true,
+        expect.any(Array),
+      );
+
+      const content = JSON.parse(
+        (result as { content: { text: string }[] }).content[0].text,
+      ) as {
+        definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
+        externalUsages: SymbolInfoResult[];
+      };
+
+      expect(content.definitions).toHaveLength(1);
+      expect(content.definitions[0].usages).toHaveLength(1);
+      expect(content.definitions[0].usages![0].name).toBe("Button");
+      expect(content.externalUsages).toHaveLength(1);
+      expect(content.externalUsages[0].name).toBe("ExternalComponent");
     });
 
     it("should handle list_files tool", async () => {
@@ -98,7 +206,7 @@ describe("BackendServer", () => {
         },
       };
 
-      vi.mocked(mockProjectManager.getProject).mockReturnValue({
+      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
         projectPath: "/test",
         extensions: [],
         sqlitePath: "test.sqlite",
@@ -135,11 +243,23 @@ describe("BackendServer", () => {
       ).toEqual(mockResult);
     });
 
-    it("should handle list_files tool error when project not open", async () => {
-      vi.mocked(mockProjectManager.getProject).mockReturnValue(undefined);
-      await expect(
-        server.handleCallTool("list_files", { projectPath: "/p" }),
-      ).rejects.toThrow("Project not open");
+    it("should open project automatically for list_files tool", async () => {
+      const mockGraph = { files: {} };
+      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
+        projectPath: "/p",
+        extensions: [],
+        sqlitePath: "test.sqlite",
+        graph: mockGraph as unknown as JsonData,
+      });
+
+      const result = await server.handleCallTool("list_files", {
+        projectPath: "/p",
+      });
+      expect(result).toBeDefined();
+      expect(mockProjectManager.openProject).toHaveBeenCalledWith(
+        "/p",
+        undefined,
+      );
     });
 
     it("should handle labeling tools", async () => {
@@ -269,29 +389,6 @@ describe("BackendServer", () => {
       ).toEqual(mockContent);
     });
 
-    it("should handle get_symbol_usages tool", async () => {
-      const mockResult: SymbolInfoResult[] = [
-        {
-          type: "usage",
-          name: "App",
-          file: "src/main.tsx",
-          kind: "render",
-          loc: { line: 1, column: 1 },
-          in: "main",
-        },
-      ];
-      vi.mocked(mockProjectManager.findSymbolUsages).mockResolvedValue(
-        mockResult,
-      );
-      const result = await server.handleCallTool("get_symbol_usages", {
-        projectPath: "/p",
-        query: "App",
-      });
-      expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
-      ).toEqual(mockResult);
-    });
-
     it("should handle find_files tool", async () => {
       const mockResult = ["src/App.tsx"];
       vi.mocked(mockProjectManager.findFiles).mockResolvedValue(mockResult);
@@ -373,7 +470,7 @@ describe("BackendServer", () => {
           Array.from({ length: 101 }, (_, i) => [`f${i}.ts`, { var: {} }]),
         ),
       };
-      vi.mocked(mockProjectManager.getProject).mockReturnValue({
+      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
         projectPath: "/p",
         extensions: [],
         sqlitePath: "test.sqlite",
@@ -509,7 +606,7 @@ describe("BackendServer", () => {
 
     it("should handle get_graph_data message", async () => {
       const mockGraph = { files: {}, edges: [] };
-      vi.mocked(mockProjectManager.getProject).mockReturnValue({
+      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
         projectPath: "/test",
         extensions: [],
         sqlitePath: "test.sqlite",

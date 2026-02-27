@@ -49,6 +49,8 @@ export interface ComponentInfoRender extends ComponentLoc {
   parentId?: string | undefined;
   dependencies: ComponentInfoRenderDependency[];
   isDependency?: boolean | undefined;
+  renderIndex: number;
+  kind: "jsx" | "ternary" | "loop" | "expression" | "hook" | "call";
   children: Record<string, ComponentInfoRender>;
 }
 
@@ -114,7 +116,7 @@ export interface VariableScope {
   end: VariableLoc;
 }
 
-export type VarType = "function" | "data" | "jsx";
+export type VarType = "function" | "data" | "jsx" | "class";
 
 export type ReactFunctionVar = "component" | "hook";
 export type ReactStateVar = "state" | "ref";
@@ -201,8 +203,9 @@ export type FunctionReturn = PropDataType | ComponentFileVarJSX | string;
 
 export interface ComponentFileVarBaseTypeFunction<
   TKind extends VarKind,
-> extends ComponentFileVarBase<"function", TKind> {
-  type: "function";
+  TType extends VarType = "function",
+> extends ComponentFileVarBase<TType, TKind> {
+  type: TType;
   scope: VariableScope;
   async?: boolean | undefined;
   var: Record<string, ComponentFileVar>;
@@ -212,8 +215,9 @@ export interface ComponentFileVarBaseTypeFunction<
 
 export interface ComponentFileVarBaseTypeData<
   TKind extends VarKind,
-> extends ComponentFileVarBase<"data", TKind> {
-  type: "data";
+  TType extends VarType = "data",
+> extends ComponentFileVarBase<TType, TKind> {
+  type: TType;
   children?: Record<string, ComponentInfoRender>;
 }
 
@@ -226,8 +230,10 @@ export type ComponentFileVarReact<
   TKind extends ReactVarKind,
 > = ComponentFileVarBase<TType, TKind>;
 
-export type ComponentFileVarReactFunction<TKind extends ReactVarKind> =
-  ComponentFileVarBaseTypeFunction<TKind> & ReactFunctionInfoBase;
+export type ComponentFileVarReactFunction<
+  TKind extends ReactVarKind,
+  TType extends VarType = "function",
+> = ComponentFileVarBaseTypeFunction<TKind, TType> & ReactFunctionInfoBase;
 
 export type ReactDependency = {
   id: string;
@@ -238,11 +244,13 @@ export type ReactDependencies = {
   reactDeps: ReactDependency[];
 };
 
-export type ComponentFileVarReactWithCallback<TKind extends ReactVarKind> =
-  ComponentFileVarBaseTypeFunction<TKind> & ReactDependencies;
+export type ComponentFileVarReactWithCallback<
+  TKind extends ReactVarKind,
+  TType extends VarType = "function",
+> = ComponentFileVarBaseTypeFunction<TKind, TType> & ReactDependencies;
 
 export type ComponentFileVarComponent =
-  ComponentFileVarReactFunction<"component"> &
+  ComponentFileVarReactFunction<"component", "function" | "class"> &
     ComponentInfo & {
       kind: "component";
     };
@@ -259,7 +267,7 @@ export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {
   defaultData: PropDataType;
 };
 
-export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook"> &
+export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook", "function"> &
   HookInfo & {
     kind: "hook";
   };
@@ -276,7 +284,7 @@ export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
   };
 
 export type ComponentFileVarNormalFunction =
-  ComponentFileVarNormalBase<"function"> &
+  ComponentFileVarNormalBase<"function" | "class"> &
     ComponentFileVarBaseTypeFunction<"normal">;
 export type ComponentFileVarNormalData = ComponentFileVarNormalBase<"data"> &
   ComponentFileVarBaseTypeData<"normal">;
@@ -312,6 +320,51 @@ export type ComponentFileVar =
   | MemoFileVarHook
   | ComponentFileVarFunction
   | ComponentFileVarJSX;
+
+export type IResolveAddRender = {
+  type: "comAddRender";
+  fileName: string;
+  tag: string;
+  dependency: ComponentInfoRenderDependency[];
+  loc: VariableLoc;
+  kind?: ComponentInfoRender["kind"] | undefined;
+  parentId?: string | undefined;
+};
+
+export type IResolveAddHook = {
+  type: "comAddHook";
+  name: string;
+  fileName: string;
+  hook: string;
+  loc: VariableLoc;
+};
+
+export type IResolveCallHook = {
+  type: "comResolveCallHook";
+  fileName: string;
+  loc: VariableLoc;
+  id: string;
+  hook: string;
+};
+
+export type IResolveTsType = {
+  type: "tsType";
+  fileName: string;
+  id: string;
+};
+
+export type IResolveComPropsTsType = {
+  type: "comPropsTsType";
+  fileName: string;
+  id: string;
+};
+
+export type ComponentDBResolve =
+  | IResolveAddRender
+  | IResolveAddHook
+  | IResolveCallHook
+  | IResolveTsType
+  | IResolveComPropsTsType;
 
 export type ComponentFile = {
   path: string;

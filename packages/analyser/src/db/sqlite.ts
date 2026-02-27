@@ -4,9 +4,14 @@ import fs from "node:fs";
 import type {
   ComponentFile,
   ComponentFileVar,
+  ComponentFileVarJSX,
   ComponentInfoRender,
+  VariableName,
 } from "shared";
-import { getPatternIdentifiers } from "../analyzer/pattern.js";
+import {
+  getVariableNameKey,
+  getPatternIdentifiers,
+} from "../analyzer/pattern.js";
 
 export interface AnalyzedFileResult {
   file: ComponentFile;
@@ -23,7 +28,7 @@ interface FileRow {
 
 interface EntityRow {
   id: string;
-  file_id: number;
+  scope_id: string;
   kind: string;
   name: string;
   type: string | null;
@@ -44,6 +49,29 @@ interface RelationRow {
   data_json: string | null;
 }
 
+interface RenderRow {
+  id: string;
+  file_id: number;
+  parent_entity_id: string;
+  parent_render_id: string | null;
+  render_index: number;
+  tag: string;
+  symbol_id: string | null;
+  line: number | null;
+  column: number | null;
+  kind: string;
+  data_json: string | null;
+}
+
+interface ExportRow {
+  id: number;
+  scope_id: string;
+  entity_id: string | null;
+  symbol_id: string | null;
+  name: string;
+  is_default: number;
+}
+
 export class SqliteDB {
   public db: Database.Database;
 
@@ -61,6 +89,37 @@ export class SqliteDB {
   }
 
   private initSchema() {
+    // Check schema version to force updates
+    const versionRow = this.db.prepare("PRAGMA user_version").get() as {
+      user_version: number;
+    };
+    const currentVersion = versionRow.user_version;
+    const targetVersion = 3;
+
+    if (currentVersion < targetVersion) {
+      // Force recreation of affected tables to apply new schema/FK changes
+      this.db.exec(`
+        DROP TABLE IF EXISTS relations;
+        DROP TABLE IF EXISTS exports;
+        DROP TABLE IF EXISTS renders;
+        DROP TABLE IF EXISTS symbols;
+        DROP TABLE IF EXISTS scopes;
+        DROP TABLE IF EXISTS entities;
+        PRAGMA user_version = ${targetVersion};
+      `);
+    }
+
+    // Drop old views if they exist (they conflict with the new tables)
+    const viewNames = ["symbols", "renders"];
+    for (const name of viewNames) {
+      const info = this.db
+        .prepare("SELECT type FROM sqlite_master WHERE name = ?")
+        .get(name) as { type: string } | undefined;
+      if (info && info.type === "view") {
+        this.db.exec(`DROP VIEW ${name}`);
+      }
+    }
+
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,21 +132,68 @@ export class SqliteDB {
 
       CREATE TABLE IF NOT EXISTS entities (
         id TEXT PRIMARY KEY,
-        file_id INTEGER NOT NULL,
-        kind TEXT NOT NULL,
-        name TEXT NOT NULL,
-        type TEXT,
+        scope_id TEXT NOT NULL,
+        kind TEXT NOT NULL, -- 'component', 'hook', 'function', 'class', 'variable', 'import', 'jsx', etc.
+        name TEXT, -- The raw name or pattern
+        type TEXT, -- 'function', 'data', 'jsx'
         line INTEGER,
         column INTEGER,
         end_line INTEGER,
         end_column INTEGER,
-        declaration_kind TEXT,
+        declaration_kind TEXT, -- 'const', 'let', 'var'
+        data_json TEXT,
+        FOREIGN KEY (scope_id) REFERENCES scopes (id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS scopes (
+        id TEXT PRIMARY KEY,
+        file_id INTEGER NOT NULL,
+        parent_id TEXT, -- parent scope
+        kind TEXT NOT NULL, -- 'module', 'block'
+        entity_id TEXT, -- the entity that owns this scope (if kind is 'block')
+        data_json TEXT, -- e.g. return variable info
+        FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS symbols (
+        id TEXT PRIMARY KEY,
+        entity_id TEXT NOT NULL, -- the declaration that produced this symbol
+        scope_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        path TEXT, -- JSON path if destructured, e.g. "['test1']"
+        is_alias BOOLEAN DEFAULT 0,
+        has_default BOOLEAN DEFAULT 0,
+        data_json TEXT,
+        FOREIGN KEY (scope_id) REFERENCES scopes (id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS renders (
+        id TEXT PRIMARY KEY,
+        file_id INTEGER NOT NULL,
+        parent_entity_id TEXT NOT NULL, -- referenced entity (e.g. the component or function where this is used)
+        parent_render_id TEXT, -- hierarchy within JSX
+        render_index INTEGER NOT NULL,
+        tag TEXT NOT NULL,
+        symbol_id TEXT, -- reference to the symbol (if it's a component/hook)
+        line INTEGER,
+        column INTEGER,
+        kind TEXT NOT NULL, -- 'jsx', 'ternary', 'loop', etc.
         data_json TEXT,
         FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS exports (
+        id TEXT PRIMARY KEY,
+        scope_id TEXT NOT NULL, -- module scope
+        symbol_id TEXT, -- the symbol being exported
+        entity_id TEXT, -- for anonymous exports
+        name TEXT, -- export name
+        is_default BOOLEAN DEFAULT 0,
+        FOREIGN KEY (scope_id) REFERENCES scopes (id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS relations (
-        from_id TEXT NOT NULL,
+        from_id TEXT NOT NULL, -- Can be symbol_id or entity_id depending on context
         to_id TEXT NOT NULL,
         kind TEXT NOT NULL,
         line INTEGER,
@@ -96,45 +202,15 @@ export class SqliteDB {
         PRIMARY KEY (from_id, to_id, kind, line, column)
       );
 
-      CREATE INDEX IF NOT EXISTS idx_entities_file ON entities (file_id);
-      CREATE INDEX IF NOT EXISTS idx_entities_kind ON entities (kind);
-      CREATE INDEX IF NOT EXISTS idx_entities_name ON entities (name);
+      CREATE INDEX IF NOT EXISTS idx_entities_scope ON entities (scope_id);
+      CREATE INDEX IF NOT EXISTS idx_scopes_file ON scopes (file_id);
+      CREATE INDEX IF NOT EXISTS idx_symbols_scope ON symbols (scope_id);
+      CREATE INDEX IF NOT EXISTS idx_symbols_entity ON symbols (entity_id);
+      CREATE INDEX IF NOT EXISTS idx_renders_parent ON renders (parent_entity_id);
+      CREATE INDEX IF NOT EXISTS idx_renders_hierarchy ON renders (parent_render_id);
+      CREATE INDEX IF NOT EXISTS idx_exports_scope ON exports (scope_id);
       CREATE INDEX IF NOT EXISTS idx_relations_from ON relations (from_id);
       CREATE INDEX IF NOT EXISTS idx_relations_to ON relations (to_id);
-      CREATE INDEX IF NOT EXISTS idx_relations_kind ON relations (kind);
-
-      -- Backward compatibility views
-      DROP VIEW IF EXISTS symbols;
-      CREATE VIEW symbols AS
-      SELECT id, name, (SELECT path FROM files WHERE id = file_id) as file, line, column, kind, type, 
-             JSON_EXTRACT(data_json, '$.props') as props_json,
-             JSON_EXTRACT(data_json, '$.return') as return_json
-      FROM entities
-      WHERE kind NOT IN ('render-instance', 'import', 'export', 'type');
-
-      DROP VIEW IF EXISTS renders;
-      CREATE VIEW renders AS
-      -- JSX Renders
-      SELECT e.id as id, 
-             JSON_EXTRACT(e.data_json, '$.srcId') as symbol_id, 
-             e.name as tag, 
-             (SELECT path FROM files WHERE id = e.file_id) as file, 
-             e.line, e.column,
-             (SELECT from_id FROM relations WHERE to_id = e.id AND kind = 'renders') as scope_symbol_id,
-             'render' as usage_kind
-      FROM entities e
-      WHERE e.kind = 'render-instance'
-      UNION ALL
-      -- Hook Calls and other relations
-      SELECT r.from_id as id,
-             r.to_id as symbol_id,
-             (SELECT name FROM entities WHERE id = r.to_id) as tag,
-             (SELECT path FROM files WHERE id = (SELECT file_id FROM entities WHERE id = r.from_id)) as file,
-             r.line, r.column,
-             (SELECT from_id FROM relations WHERE to_id = r.from_id AND kind = 'parent-child') as scope_symbol_id,
-             r.kind as usage_kind
-      FROM relations r
-      WHERE r.kind IN ('hook', 'calls', 'hook-call');
     `);
   }
 
@@ -146,9 +222,9 @@ export class SqliteDB {
 
   private insertEntity(data: {
     id: string;
-    file_id: number;
+    scope_id: string;
     kind: string;
-    name: unknown;
+    name: VariableName | string;
     type?: string | null;
     line?: number | null | undefined;
     column?: number | null | undefined;
@@ -159,15 +235,15 @@ export class SqliteDB {
   }) {
     const stmt = this.db.prepare(`
       INSERT OR REPLACE INTO entities 
-      (id, file_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
-      VALUES (@id, @file_id, @kind, @name, @type, @line, @column, @end_line, @end_column, @declaration_kind, @data_json)
+      (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
+      VALUES (@id, @scope_id, @kind, @name, @type, @line, @column, @end_line, @end_column, @declaration_kind, @data_json)
     `);
 
     const nameStr =
-      typeof data.name === "string" ? data.name : JSON.stringify(data.name);
+      typeof data.name === "string" ? data.name : getVariableNameKey(data.name);
     const params = {
       id: data.id,
-      file_id: data.file_id,
+      scope_id: data.scope_id,
       kind: data.kind,
       name: nameStr,
       type: data.type || null,
@@ -180,6 +256,108 @@ export class SqliteDB {
     };
 
     stmt.run(params);
+  }
+
+  private insertScope(data: {
+    id: string;
+    file_id: number;
+    parent_id?: string | null;
+    kind: "module" | "block";
+    entity_id?: string | null;
+    data_json?: string | null;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO scopes (id, file_id, parent_id, kind, entity_id, data_json)
+      VALUES (@id, @file_id, @parent_id, @kind, @entity_id, @data_json)
+    `);
+    stmt.run({
+      id: data.id,
+      file_id: data.file_id,
+      parent_id: data.parent_id || null,
+      kind: data.kind,
+      entity_id: data.entity_id || null,
+      data_json: data.data_json || null,
+    });
+  }
+
+  private insertSymbol(data: {
+    id: string;
+    entity_id: string;
+    scope_id: string;
+    name: string;
+    path?: string | null;
+    is_alias?: boolean;
+    has_default?: boolean;
+    data_json?: string | null;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
+      VALUES (@id, @entity_id, @scope_id, @name, @path, @is_alias, @has_default, @data_json)
+    `);
+    stmt.run({
+      id: data.id,
+      entity_id: data.entity_id,
+      scope_id: data.scope_id,
+      name: data.name,
+      path: data.path || null,
+      is_alias: data.is_alias ? 1 : 0,
+      has_default: data.has_default ? 1 : 0,
+      data_json: data.data_json || null,
+    });
+  }
+
+  private insertRender(data: {
+    id: string;
+    file_id: number;
+    parent_entity_id: string;
+    parent_render_id?: string | null;
+    render_index: number;
+    tag: string;
+    symbol_id?: string | null;
+    line?: number | null;
+    column?: number | null;
+    kind: string;
+    data_json?: string | null;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO renders (id, file_id, parent_entity_id, parent_render_id, render_index, tag, symbol_id, line, column, kind, data_json)
+      VALUES (@id, @file_id, @parent_entity_id, @parent_render_id, @render_index, @tag, @symbol_id, @line, @column, @kind, @data_json)
+    `);
+    stmt.run({
+      id: data.id,
+      file_id: data.file_id,
+      parent_entity_id: data.parent_entity_id,
+      parent_render_id: data.parent_render_id || null,
+      render_index: data.render_index,
+      tag: data.tag || "unknown",
+      symbol_id: data.symbol_id || null,
+      line: data.line ?? null,
+      column: data.column ?? null,
+      kind: data.kind,
+      data_json: data.data_json || null,
+    });
+  }
+
+  private insertExport(data: {
+    id: string;
+    scope_id: string;
+    symbol_id?: string | null;
+    entity_id?: string | null;
+    name?: string | null;
+    is_default?: boolean;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO exports (id, scope_id, symbol_id, entity_id, name, is_default)
+      VALUES (@id, @scope_id, @symbol_id, @entity_id, @name, @is_default)
+    `);
+    stmt.run({
+      id: data.id,
+      scope_id: data.scope_id,
+      symbol_id: data.symbol_id || null,
+      entity_id: data.entity_id || null,
+      name: data.name || null,
+      is_default: data.is_default ? 1 : 0,
+    });
   }
 
   public deleteFile(filePath: string) {
@@ -211,62 +389,99 @@ export class SqliteDB {
       if (!file) return;
       const fileId = file.id;
 
+      // Clean up old data for this file
       this.db
         .prepare(
-          `
-        DELETE FROM relations WHERE from_id IN (SELECT id FROM entities WHERE file_id = ?)
-        OR to_id IN (SELECT id FROM entities WHERE file_id = ?)
-      `,
+          "DELETE FROM relations WHERE from_id IN (SELECT e.id FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?)",
         )
-        .run(fileId, fileId);
-      this.db.prepare("DELETE FROM entities WHERE file_id = ?").run(fileId);
+        .run(fileId);
+      this.db
+        .prepare(
+          "DELETE FROM exports WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
+        )
+        .run(fileId);
+      this.db.prepare("DELETE FROM renders WHERE file_id = ?").run(fileId);
+      this.db
+        .prepare(
+          "DELETE FROM symbols WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
+        )
+        .run(fileId);
+      this.db.prepare("DELETE FROM scopes WHERE file_id = ?").run(fileId);
 
-      // 2. Insert Imports as entities and relations
+      // 2. Create module scope
+      const moduleScopeId = `scope:module:${data.path}`;
+      this.insertScope({
+        id: moduleScopeId,
+        file_id: fileId,
+        kind: "module",
+      });
+
+      // 3. Insert Imports as entities and symbols
       for (const imp of Object.values(data.import)) {
-        const impId = `import:${data.path}:${imp.localName}`;
+        const impId = `entity:import:${data.path}:${imp.localName}`;
         this.insertEntity({
           id: impId,
-          file_id: fileId,
+          scope_id: moduleScopeId,
           kind: "import",
           name: imp.localName,
-          type: imp.type,
+          type: "data",
           data_json: JSON.stringify(imp),
         });
-      }
 
-      // 3. Insert Exports as entities and relations
-      for (const exp of Object.values(data.export)) {
-        this.insertEntity({
-          id: exp.id,
-          file_id: fileId,
-          kind: "export",
-          name: exp.name,
-          type: exp.type,
-          data_json: JSON.stringify(exp),
+        this.insertSymbol({
+          id: `symbol:import:${data.path}:${imp.localName}`,
+          entity_id: impId,
+          scope_id: moduleScopeId,
+          name: imp.localName,
+          is_alias: imp.localName !== imp.importedName,
         });
       }
 
-      // 4. Insert TS Types as entities
-      for (const type of Object.values(data.tsTypes)) {
-        this.insertEntity({
-          id: type.id,
+      // 4. Helper for recursive variable and render insertion
+      const insertRender = (
+        render: ComponentInfoRender,
+        parentEntityId: string,
+        currentScopeId: string,
+        parentRenderId?: string,
+      ) => {
+        this.insertRender({
+          id: render.instanceId,
           file_id: fileId,
-          kind: "type",
-          name: type.name,
-          line: type.loc.line,
-          column: type.loc.column,
-          data_json: JSON.stringify(type),
+          parent_entity_id: parentEntityId,
+          parent_render_id: parentRenderId || null,
+          render_index: render.renderIndex,
+          tag: render.tag,
+          symbol_id: render.id,
+          line: render.loc.line,
+          column: render.loc.column,
+          kind: render.kind,
+          data_json: JSON.stringify({
+            dependencies: render.dependencies,
+            isDependency: render.isDependency,
+          }),
         });
-      }
 
-      // 5. Insert Variables (recursive)
-      const insertVariable = (v: ComponentFileVar, parentId?: string) => {
-        const nameStr =
-          typeof v.name === "string" ? v.name : JSON.stringify(v.name);
+        for (const child of Object.values(render.children || {})) {
+          insertRender(
+            child,
+            parentEntityId,
+            currentScopeId,
+            render.instanceId,
+          );
+        }
+      };
+
+      const insertVariable = (
+        v: ComponentFileVar,
+        currentScopeId: string,
+        parentEntityId?: string,
+      ) => {
+        const nameStr = getVariableNameKey(v.name);
         const scope = "scope" in v ? v.scope : undefined;
+
         this.insertEntity({
           id: v.id,
-          file_id: fileId,
+          scope_id: currentScopeId,
           kind: v.kind,
           name: nameStr,
           type: v.type,
@@ -278,118 +493,114 @@ export class SqliteDB {
           data_json: JSON.stringify(this.getVariableMetadata(v)),
         });
 
-        // Index individual identifiers if name is a pattern
-        if (typeof v.name !== "string") {
-          const identifiers = getPatternIdentifiers(v.name);
-          for (const ident of identifiers) {
-            if (ident.id !== v.id) {
-              this.insertEntity({
-                id: ident.id,
-                file_id: fileId,
-                kind: v.kind, // Use same kind (component, hook, etc)
-                name: ident.name,
-                type: v.type,
-                line: v.loc.line,
-                column: v.loc.column,
-                end_line: scope?.end?.line,
-                end_column: scope?.end?.column,
-                declaration_kind: v.declarationKind,
-                data_json: JSON.stringify({
-                  ...this.getVariableMetadata(v),
-                  isAlias: true,
-                  aliasFor: v.id,
-                }),
-              });
+        // Index all names in the pattern as symbols
+        const identifiers = getPatternIdentifiers(v.name, v.id);
+        for (const ident of identifiers) {
+          this.insertSymbol({
+            id: ident.id,
+            entity_id: v.id,
+            scope_id: currentScopeId,
+            name: ident.name,
+            path: ident.path.length > 0 ? JSON.stringify(ident.path) : null,
+            is_alias: ident.isAlias,
+            has_default: ident.hasDefault,
+          });
+        }
+
+        if (parentEntityId) {
+          this.db
+            .prepare(
+              "INSERT OR REPLACE INTO relations (from_id, to_id, kind) VALUES (?, ?, ?)",
+            )
+            .run(parentEntityId, v.id, "parent-child");
+        }
+
+        // If it's a function/jsx, it has its own scope
+        if (
+          (v.type === "function" || v.type === "jsx") &&
+          ("var" in v || "children" in v)
+        ) {
+          const newScopeId = `scope:block:${v.id}`;
+          this.insertScope({
+            id: newScopeId,
+            file_id: fileId,
+            parent_id: currentScopeId,
+            kind: "block",
+            entity_id: v.id,
+          });
+
+          if (v.type === "jsx") {
+            const jsx = v as ComponentFileVarJSX;
+            this.insertRender({
+              id: v.id,
+              file_id: fileId,
+              parent_entity_id: parentEntityId || v.id,
+              render_index: 0,
+              tag: jsx.tag || "unknown",
+              symbol_id: jsx.srcId || null,
+              line: v.loc.line,
+              column: v.loc.column,
+              kind: "jsx",
+              data_json: JSON.stringify({
+                dependencies: v.dependencies,
+                props: jsx.props,
+              }),
+            });
+          }
+
+          if ("var" in v) {
+            for (const childVar of Object.values(v.var || {})) {
+              insertVariable(childVar, newScopeId, v.id);
+            }
+          }
+
+          if ("children" in v) {
+            for (const render of Object.values(v.children || {})) {
+              insertRender(render, v.id, newScopeId);
             }
           }
         }
-
-        if (parentId) {
-          this.db
-            .prepare(
-              `
-            INSERT OR REPLACE INTO relations (from_id, to_id, kind)
-            VALUES (?, ?, ?)
-          `,
-            )
-            .run(parentId, v.id, "parent-child");
-        }
-
-        // Recursively insert nested variables (scopes)
-        if (v.type === "function" && "var" in v && v.var) {
-          for (const childVar of Object.values(v.var)) {
-            insertVariable(childVar as ComponentFileVar, v.id);
-          }
-        }
-
-        // Insert renders for this variable
-        if ("children" in v && v.children) {
-          for (const render of Object.values(v.children)) {
-            insertRender(render as ComponentInfoRender, v.id);
-          }
-        }
       };
 
-      const insertRender = (
-        r: ComponentInfoRender,
-        scopeId: string,
-        parentInstanceId?: string,
-      ) => {
-        this.insertEntity({
-          id: r.instanceId,
-          file_id: fileId,
-          kind: "render-instance",
-          name: r.tag,
-          line: r.loc.line,
-          column: r.loc.column,
-          data_json: JSON.stringify({
-            dependencies: r.dependencies,
-            isDependency: r.isDependency,
-            srcId: r.id,
-          }),
-        });
-
-        // Relation from scope to render
-        this.db
-          .prepare(
-            `
-          INSERT OR REPLACE INTO relations (from_id, to_id, kind, line, column)
-          VALUES (?, ?, ?, ?, ?)
-        `,
-          )
-          .run(scopeId, r.instanceId, "renders", r.loc.line, r.loc.column);
-
-        // Relation from parent render to child render
-        if (parentInstanceId) {
-          this.db
-            .prepare(
-              `
-            INSERT OR REPLACE INTO relations (from_id, to_id, kind)
-            VALUES (?, ?, ?)
-          `,
-            )
-            .run(parentInstanceId, r.instanceId, "parent-child");
-        }
-
-        // Relation to the source component if known (srcId)
-        if (r.id) {
-          this.db
-            .prepare(
-              `
-            INSERT OR IGNORE INTO relations (from_id, to_id, kind)
-            VALUES (?, ?, ?)
-          `,
-            )
-            .run(r.instanceId, r.id, "calls");
-        }
-
-        for (const child of Object.values(r.children || {})) {
-          insertRender(child, scopeId, r.instanceId);
-        }
-      };
-
+      // 5. Insert Variables (recursive)
       for (const v of Object.values(data.var)) {
-        insertVariable(v);
+        insertVariable(v, moduleScopeId);
+      }
+
+      // 6. Insert Exports
+      for (const exp of Object.values(data.export)) {
+        // Find if this export refers to a symbol we just added
+        let symbolId: string | undefined;
+        let entityId: string | undefined = exp.id;
+
+        if (exp.type === "named") {
+          // Typically points to a variable in the same file
+          const varId = `entity:${data.path}:${exp.name}`;
+          entityId = varId;
+          symbolId = `symbol:${data.path}:${exp.name}`;
+        }
+
+        this.insertExport({
+          id: `export:${data.path}:${exp.name}`,
+          scope_id: moduleScopeId,
+          entity_id: entityId ?? null,
+          symbol_id: symbolId ?? null,
+          name: exp.name,
+          is_default: exp.type === "default",
+        });
+      }
+
+      // 7. Insert TS Types
+      for (const type of Object.values(data.tsTypes)) {
+        this.insertEntity({
+          id: type.id,
+          scope_id: moduleScopeId,
+          kind: "type",
+          name: type.name,
+          line: type.loc.line,
+          column: type.loc.column,
+          data_json: JSON.stringify(type),
+        });
       }
     });
 
@@ -415,17 +626,18 @@ export class SqliteDB {
 
     const fileId = fileRow.id;
     const entities = this.db
-      .prepare("SELECT * FROM entities WHERE file_id = ?")
-      .all(fileId) as EntityRow[];
-    const relations = this.db
       .prepare(
-        `
-      SELECT r.* FROM relations r 
-      JOIN entities e ON r.from_id = e.id 
-      WHERE e.file_id = ?
-    `,
+        "SELECT e.* FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?",
       )
-      .all(fileId) as RelationRow[];
+      .all(fileId) as EntityRow[];
+    const renders = this.db
+      .prepare("SELECT * FROM renders WHERE file_id = ? ORDER BY render_index")
+      .all(fileId) as RenderRow[];
+    const exports_ = this.db
+      .prepare(
+        "SELECT e.* FROM exports e JOIN scopes sc ON e.scope_id = sc.id WHERE sc.file_id = ?",
+      )
+      .all(fileId) as ExportRow[];
 
     const result: ComponentFile = {
       path: fileRow.path,
@@ -440,18 +652,21 @@ export class SqliteDB {
     };
 
     const entityMap = new Map<string, EntityRow>();
-    for (const e of entities) {
-      entityMap.set(e.id, e);
-    }
+    for (const e of entities) entityMap.set(e.id, e);
 
     // Reconstruct imports
     for (const e of entities.filter((e) => e.kind === "import")) {
-      result.import[e.name] = JSON.parse(e.data_json || "{}");
+      result.import[e.name!] = JSON.parse(e.data_json || "{}");
     }
 
     // Reconstruct exports
-    for (const e of entities.filter((e) => e.kind === "export")) {
-      result.export[e.name] = JSON.parse(e.data_json || "{}");
+    for (const exp of exports_) {
+      result.export[exp.name] = {
+        id: exp.entity_id || (exp.symbol_id ? exp.symbol_id : ""),
+        name: exp.name,
+        type: exp.is_default ? "default" : "named",
+        exportKind: "value", // Default, could be refined
+      };
     }
 
     // Reconstruct TS types
@@ -460,114 +675,97 @@ export class SqliteDB {
     }
 
     // Reconstruct Variables and Renders
-    const variables = entities.filter(
-      (e) => !["import", "export", "type", "render-instance"].includes(e.kind),
-    );
-    const renders = entities.filter((e) => e.kind === "render-instance");
-
     const varMap = new Map<string, ComponentFileVar>();
 
     // First pass: Create variable objects
-    for (const v of variables) {
-      const metadata = JSON.parse(v.data_json || "{}");
-      const varObj = {
-        id: v.id,
-        kind: v.kind,
-        name:
-          v.name.startsWith("{") || v.name.startsWith("[")
-            ? JSON.parse(v.name)
-            : v.name,
-        type: v.type,
-        loc: { line: v.line || 0, column: v.column || 0 },
-        ...metadata,
-      } as ComponentFileVar;
+    for (const e of entities) {
+      if (["import", "type"].includes(e.kind)) continue;
 
-      if (v.type === "function") {
-        const funcVar = varObj as Extract<
-          ComponentFileVar,
-          { type: "function" }
-        >;
-        funcVar.var = {};
-        funcVar.children = {};
-        funcVar.scope = {
-          start: { line: v.line || 0, column: v.column || 0 },
-          end: { line: v.end_line || 0, column: v.end_column || 0 },
+      const metadata = JSON.parse(e.data_json || "{}");
+      const varObj = {
+        id: e.id,
+        kind: e.kind,
+        name:
+          e.name && (e.name.startsWith("{") || e.name.startsWith("["))
+            ? JSON.parse(e.name)
+            : e.name,
+        type: e.type,
+        loc: { line: e.line || 0, column: e.column || 0 },
+        ...metadata,
+      };
+
+      if (e.type === "function") {
+        varObj.var = {};
+        varObj.children = {};
+        varObj.scope = {
+          start: { line: e.line || 0, column: e.column || 0 },
+          end: { line: e.end_line || 0, column: e.end_column || 0 },
         };
-      } else if (v.type === "jsx") {
-        const jsxVar = varObj as Extract<ComponentFileVar, { type: "jsx" }>;
-        jsxVar.children = {};
+      } else if (e.type === "jsx") {
+        varObj.children = {};
       }
 
-      varMap.set(v.id, varObj);
+      varMap.set(e.id, varObj);
     }
 
-    // Second pass: Establish parent-child for variables
-    for (const rel of relations.filter((r) => r.kind === "parent-child")) {
+    // Connect hierarchy
+    const relations = this.db
+      .prepare(
+        `
+      SELECT r.* FROM relations r 
+      JOIN entities e ON r.from_id = e.id 
+      JOIN scopes s ON e.scope_id = s.id
+      WHERE s.file_id = ? AND r.kind = 'parent-child'
+    `,
+      )
+      .all(fileId) as RelationRow[];
+
+    for (const rel of relations) {
       const parent = varMap.get(rel.from_id);
       const child = varMap.get(rel.to_id);
-      if (
-        parent &&
-        child &&
-        parent.type === "function" &&
-        "var" in parent &&
-        parent.var
-      ) {
+      if (parent && child && parent.type === "function" && parent.var) {
         parent.var[child.id] = child;
       }
     }
 
-    // Root variables (those without a parent-child relation where they are the child)
-    const childIds = new Set(
-      relations.filter((r) => r.kind === "parent-child").map((r) => r.to_id),
-    );
+    // Root variables
+    const childIds = new Set(relations.map((r) => r.to_id));
     for (const [id, v] of varMap.entries()) {
       if (!childIds.has(id)) {
         result.var[id] = v;
       }
     }
 
-    // Reconstruct renders
+    // Reconstruct renders hierarchy
     const renderMap = new Map<string, ComponentInfoRender>();
     for (const r of renders) {
       const data = JSON.parse(r.data_json || "{}");
       const renderObj: ComponentInfoRender = {
         instanceId: r.id,
-        tag: r.name,
-        id: data.srcId,
+        tag: r.tag,
+        id: r.symbol_id || r.tag,
         loc: { line: r.line || 0, column: r.column || 0 },
         dependencies: data.dependencies || [],
         isDependency: data.isDependency,
+        renderIndex: r.render_index,
+        kind: r.kind as ComponentInfoRender["kind"],
         children: {},
       };
       renderMap.set(r.id, renderObj);
     }
 
-    // Establish render hierarchy
-    for (const rel of relations.filter((r) => r.kind === "parent-child")) {
-      const parent = renderMap.get(rel.from_id);
-      const child = renderMap.get(rel.to_id);
-      if (parent && child) {
-        parent.children[child.instanceId] = child;
-      }
-    }
-
-    // Attach root renders to variables/scopes
-    for (const rel of relations.filter((r) => r.kind === "renders")) {
-      const scope = varMap.get(rel.from_id);
-      const render = renderMap.get(rel.to_id);
-      if (scope && render) {
-        // Only attach if it's a top-level render for this scope
-        const isChildRender = relations.some(
-          (r) => r.kind === "parent-child" && r.to_id === render.instanceId,
-        );
-        if (!isChildRender) {
-          if (
-            (scope.type === "function" || scope.type === "jsx") &&
-            "children" in scope &&
-            scope.children
-          ) {
-            scope.children[render.instanceId] = render;
-          }
+    for (const r of renders) {
+      if (r.parent_render_id) {
+        const parent = renderMap.get(r.parent_render_id);
+        const child = renderMap.get(r.id);
+        if (parent && child) {
+          parent.children[child.instanceId] = child;
+        }
+      } else {
+        const parentEntity = varMap.get(r.parent_entity_id);
+        const render = renderMap.get(r.id);
+        if (parentEntity && render && "children" in parentEntity && parentEntity.children) {
+          parentEntity.children[render.instanceId] = render;
         }
       }
     }

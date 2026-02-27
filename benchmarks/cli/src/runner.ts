@@ -2,6 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { get_encoding } from "tiktoken";
 import { z } from "zod";
 import OpenAI from "openai";
@@ -216,13 +217,22 @@ export class SnapshotManager {
   private baseDir: string;
 
   constructor(runTimestamp: string) {
-    this.baseDir = path.join("../../benchmarks/snapshots", runTimestamp);
+    this.baseDir = "../../benchmarks/snapshots";
   }
 
-  save(scenarioId: string, approach: string, toolName: string, callCount: number, data: any) {
-    const dir = path.join(this.baseDir, scenarioId, approach);
+  save(toolName: string, args: any, data: any) {
+    const dir = path.join(this.baseDir, toolName);
     fs.mkdirSync(dir, { recursive: true });
-    const file = path.join(dir, `${toolName}_${callCount}.json`);
+
+    // Create a deterministic hash of name + arguments
+    const hashInput = JSON.stringify(args);
+    const hash = crypto
+      .createHash("sha256")
+      .update(hashInput)
+      .digest("hex")
+      .slice(0, 16);
+
+    const file = path.join(dir, `${hash}.json`);
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
   }
 }
@@ -372,11 +382,20 @@ export class BenchmarkRunner {
           }
 
           const result = await mcp.callTool(tc.name, toolArgs);
-          
+
           // Snapshot tool result (only for react-map specialized tools)
-          const genericTools = ["list_directory", "read_file", "grep_search", "run_shell_command", "open_project"];
+          const genericTools = [
+            "list_directory",
+            "read_file",
+            "grep_search",
+            "run_shell_command",
+            "open_project",
+          ];
           if (!genericTools.includes(tc.name)) {
-            this.snapshots.save(scenario.id, approach, tc.name, toolCallsCount, { arguments: toolArgs, result });
+            this.snapshots.save(tc.name, toolArgs, {
+              arguments: toolArgs,
+              result,
+            });
           }
 
           let resultContent = JSON.stringify(result);

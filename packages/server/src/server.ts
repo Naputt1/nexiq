@@ -4,13 +4,19 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { ProjectManager } from "./projectManager.js";
+import {
+  ProjectManager,
+  SymbolInfo,
+  type SymbolSearchResult,
+} from "./projectManager.js";
 import {
   getDisplayName,
   type BackendRequestMap,
   type BackendMessageType,
 } from "shared";
 import { WebSocketServer, WebSocket } from "ws";
+import { minimatch } from "minimatch";
+import path from "node:path";
 
 export interface OpenProjectArgs {
   projectPath: string;
@@ -24,14 +30,17 @@ export interface GetSymbolInfoArgs {
   strict?: boolean;
   props?: boolean;
   usages?: boolean;
+  loc?: boolean;
+  exclude?: string[];
 }
 
-export interface GetSymbolUsagesArgs {
+export interface GetSymbolUsagesWithContextArgs {
   projectPath: string;
   subProject?: string;
   query: string;
-  summaryOnly?: boolean;
   strict?: boolean;
+  contextLines?: number;
+  exclude?: string[];
 }
 
 export interface FindFilesArgs {
@@ -111,6 +120,7 @@ export interface GrepSearchArgs {
   projectPath: string;
   subProject?: string;
   pattern: string;
+  exclude?: string[];
 }
 
 export interface RunShellCommandArgs {
@@ -123,6 +133,7 @@ export interface ListFilesArgs {
   projectPath: string;
   subProject?: string;
   fields?: string[];
+  exclude?: string[];
 }
 
 export type SymbolInfoResult =
@@ -144,11 +155,24 @@ export type SymbolInfoResult =
       loc: { line: number; column: number };
     };
 
-interface WsMessage {
-  type: BackendMessageType;
-  payload: any;
-  requestId?: string;
-}
+type WsMessage = {
+  [K in BackendMessageType]: {
+    type: K;
+    payload: BackendRequestMap[K]["payload"];
+    requestId?: string;
+  };
+}[BackendMessageType];
+
+const DEFAULT_EXCLUDES = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/test/**",
+  "**/__tests__/**",
+  "**/*.test.*",
+  "**/__snapshots__/**",
+  "**/.react-map/**",
+];
 
 export class BackendServer {
   private mcpServer: Server;
@@ -224,26 +248,33 @@ export class BackendServer {
               },
               props: {
                 type: "boolean",
-                description: "If true, include props in the definition. Defaults to false.",
+                description:
+                  "If true, include props in the definition. Defaults to false.",
               },
               usages: {
                 type: "boolean",
-                description: "If true, include usages across the project. Defaults to false.",
+                description:
+                  "If true, include usages across the project. Defaults to false.",
               },
-              fields: {
+              loc: {
+                type: "boolean",
+                description:
+                  "If true, include location information (line, column). Defaults to false.",
+              },
+              exclude: {
                 type: "array",
                 items: { type: "string" },
                 description:
-                  "Optional list of fields to return (e.g., ['name', 'file']). Omit to return all fields.",
+                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
               },
             },
             required: ["projectPath", "query"],
           },
         },
         {
-          name: "get_symbol_usages",
+          name: "get_symbol_usages_with_context",
           description:
-            "Find all usages/call sites of a symbol (component or hook) across the project.",
+            "Find all usages of a symbol and return them with a few lines of surrounding code context. Highly token-efficient for understanding how a symbol is used.",
           inputSchema: {
             type: "object",
             properties: {
@@ -259,24 +290,47 @@ export class BackendServer {
                 type: "string",
                 description: "The name of the component or hook to find",
               },
-              summaryOnly: {
-                type: "boolean",
-                description:
-                  "If true, returns only file paths and counts to save tokens",
-              },
               strict: {
                 type: "boolean",
                 description:
                   "If true, only return symbols that exactly match the query. Defaults to true.",
               },
-              fields: {
+              contextLines: {
+                type: "number",
+                description:
+                  "Number of context lines to show around the match. Defaults to 2.",
+              },
+              exclude: {
                 type: "array",
                 items: { type: "string" },
                 description:
-                  "Optional list of fields to return (e.g., ['name', 'file']). Omit to return all fields.",
+                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
               },
             },
             required: ["projectPath", "query"],
+          },
+        },
+        {
+          name: "get_prop_definitions",
+          description:
+            "Get the prop definitions for a component. Returns a clean summary of props (name, type, required, documentation).",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              componentName: {
+                type: "string",
+                description: "The name of the component",
+              },
+            },
+            required: ["projectPath", "componentName"],
           },
         },
         {
@@ -369,6 +423,12 @@ export class BackendServer {
                 items: { type: "string" },
                 description:
                   "Optional list of fields to return for each file (e.g., ['path']). Omit to return all fields.",
+              },
+              exclude: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
               },
             },
             required: ["projectPath"],
@@ -560,6 +620,12 @@ export class BackendServer {
                 type: "string",
                 description: "Regex pattern to search for",
               },
+              exclude: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
+              },
             },
             required: ["projectPath", "pattern"],
           },
@@ -650,52 +716,115 @@ export class BackendServer {
           ],
         };
       }
-
       case "get_symbol_info": {
-        const { projectPath, subProject, query, strict, props, usages } =
-          args as unknown as GetSymbolInfoArgs;
+        const {
+          projectPath,
+          subProject,
+          query,
+          strict,
+          props,
+          usages,
+          loc,
+          exclude,
+        } = args as unknown as GetSymbolInfoArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+
+        const includeUsage = usages === true; // Default to false
+
         const results = await this.projectManager.findSymbol(
           resolvedPath,
           query,
           subProject,
           strict !== false, // Default to strict true
           props === true, // Default to false
-          usages === true, // Default to false
+          includeUsage,
+          exclude || DEFAULT_EXCLUDES,
         );
+
+        const includeLoc = loc === true;
+
+        const processItem = (item: SymbolSearchResult) => {
+          const processed = { ...item };
+          if (!includeLoc) {
+            delete (processed as Partial<SymbolSearchResult>).loc;
+          }
+          if (processed.usages) {
+            processed.usages = processed.usages.map((u) => processItem(u));
+          }
+
+          return processed;
+        };
+
+        const result: SymbolInfo = {
+          definitions: results.definitions.map((d) => processItem(d)),
+        };
+
+        if (includeUsage) {
+          result.externalUsages = (results.externalUsages ?? []).map((u) =>
+            processItem(u),
+          );
+        }
 
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };
       }
-
-      case "get_symbol_usages": {
-        const { projectPath, subProject, query, summaryOnly, strict } =
-          args as unknown as GetSymbolUsagesArgs;
+      case "get_symbol_usages_with_context": {
+        const {
+          projectPath,
+          subProject,
+          query,
+          strict,
+          contextLines,
+          exclude,
+        } = args as unknown as GetSymbolUsagesWithContextArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
-        const results = await this.projectManager.findSymbolUsages(
+        const results = await this.projectManager.getSymbolUsagesWithContext(
           resolvedPath,
           query,
           subProject,
-          summaryOnly,
-          strict !== false, // Default to strict true
+          strict !== false,
+          contextLines ?? 2,
+          exclude || DEFAULT_EXCLUDES,
         );
 
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
+              text: JSON.stringify(results, null, 2),
             },
           ],
         };
       }
+      case "get_prop_definitions": {
+        const { projectPath, subProject, componentName } =
+          args as unknown as {
+            projectPath: string;
+            subProject?: string;
+            componentName: string;
+          };
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.getPropDefinitions(
+          resolvedPath,
+          componentName,
+          subProject,
+        );
 
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(results, null, 2),
+            },
+          ],
+        };
+      }
       case "find_files": {
         const { projectPath, subProject, pattern } =
           args as unknown as FindFilesArgs;
@@ -757,19 +886,29 @@ export class BackendServer {
       }
 
       case "list_files": {
-        const { projectPath, subProject } = args as unknown as ListFilesArgs;
+        const { projectPath, subProject, exclude } =
+          args as unknown as ListFilesArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
-        const project = this.projectManager.getProject(
+        const project = await this.projectManager.openProject(
           resolvedPath,
           subProject,
         );
-        if (!project || !project.graph) {
-          throw new Error(
-            "Project not open or graph not available. Call open_project first.",
-          );
-        }
 
-        const files = Object.entries(project.graph.files);
+        const excludePatterns = exclude || DEFAULT_EXCLUDES;
+        const isExcluded = (filePath: string) => {
+          return excludePatterns.some(
+            (pattern) =>
+              minimatch(filePath, pattern, { dot: true, nocase: true }) ||
+              minimatch(path.basename(filePath), pattern, {
+                dot: true,
+                nocase: true,
+              }),
+          );
+        };
+
+        const files = Object.entries(project.graph!.files).filter(
+          ([path]) => !isExcluded(path),
+        );
         const totalFiles = files.length;
         const MAX_FILES = 50;
         const displayedFiles = files.slice(0, MAX_FILES);
@@ -961,13 +1100,14 @@ export class BackendServer {
       }
 
       case "grep_search": {
-        const { projectPath, subProject, pattern } =
+        const { projectPath, subProject, pattern, exclude } =
           args as unknown as GrepSearchArgs;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.grepSearch(
           resolvedPath,
           pattern,
           subProject,
+          exclude || DEFAULT_EXCLUDES,
         );
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -1019,15 +1159,10 @@ export class BackendServer {
     _subProject?: string,
   ): string {
     if (projectPath === "." || projectPath === "/" || !projectPath) {
-      const projects = (
-        this.projectManager as unknown as {
-          projects: Map<string, { projectPath: string }>;
-        }
-      ).projects;
-      if (projects && projects.size > 0) {
+      const projects = this.projectManager.getOpenProjectPaths();
+      if (projects.length > 0) {
         // Fallback to the first project in the map if a generic path is given
-        const firstProject = projects.values().next().value;
-        return firstProject?.projectPath || projectPath;
+        return projects[0];
       }
     }
     return projectPath;
@@ -1138,19 +1273,10 @@ export class BackendServer {
               }
               case "get_graph_data": {
                 const { projectPath, subProject } = data.payload;
-                let project = this.projectManager.getProject(
+                const project = await this.projectManager.openProject(
                   projectPath,
                   subProject,
                 );
-                if (!project) {
-                  console.error(
-                    `Project not in cache, opening: ${subProject || projectPath}`,
-                  );
-                  project = await this.projectManager.openProject(
-                    projectPath,
-                    subProject,
-                  );
-                }
                 this.sendChunkedResponse(
                   ws,
                   "get_graph_data",
@@ -1286,10 +1412,14 @@ export class BackendServer {
                 break;
               }
               default: {
+                const unknownData = data as unknown as {
+                  type: string;
+                  requestId?: string;
+                };
                 this.sendError(
                   ws,
-                  `Unknown message type: ${data.type}`,
-                  data.requestId,
+                  `Unknown message type: ${unknownData.type}`,
+                  unknownData.requestId,
                 );
                 break;
               }

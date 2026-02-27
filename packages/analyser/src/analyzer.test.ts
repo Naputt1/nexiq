@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.js";
+import { analyzeProject } from "./index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import { PackageJson } from "./db/packageJson.js";
 import path from "path";
@@ -70,5 +71,39 @@ describe("analyser ignore patterns", () => {
     expect(allFiles.length).toBeGreaterThan(ignoredFiles.length);
     expect(allFiles).toContain("src/App.tsx");
     expect(ignoredFiles).not.toContain("src/App.tsx");
+  });
+});
+
+describe("analyser class components", () => {
+  it("should identify class components", async () => {
+    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
+    
+    // We'll mock a file with a class component
+    const fileName = "ClassComp.tsx";
+    const code = `
+      import React from 'react';
+      export default class ClassComp extends React.Component {
+        render() {
+          return <div>Class Component</div>;
+        }
+      }
+    `;
+    
+    // Create a temporary file
+    const filePath = path.resolve(projectPath, fileName);
+    fs.writeFileSync(filePath, code);
+    
+    try {
+      const result = await analyzeProject(projectPath);
+      const file = result.files["/ClassComp.tsx"];
+      
+      expect(file).toBeDefined();
+      const comp = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'ClassComp');
+      expect(comp).toBeDefined();
+      expect(comp?.kind).toBe('component');
+      expect(comp?.type).toBe('class');
+    } finally {
+      fs.unlinkSync(filePath);
+    }
   });
 });

@@ -128,7 +128,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "e65b65d7fba82ef6",
+          "hash": "ed296c2824af0767",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -295,7 +295,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "90826dd8974be141",
+              "hash": "5cca800b090aa464",
               "dependencies": {},
               "loc": {
                 "line": 21,
@@ -316,11 +316,11 @@
               "children": {},
               "reactDeps": [
                 {
-                  "id": "a69f4c7afb51a7a7:841e96e73f3a4bc0",
+                  "id": "1981986fd63b9d23:841e96e73f3a4bc0",
                   "name": "isFollowing"
                 },
                 {
-                  "id": "a69f4c7afb51a7a7:cd657974cfc180fe:5cb21731d0f2a56e",
+                  "id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
                   "name": "channelId"
                 }
               ]
@@ -339,7 +339,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "eec2b091be9afffd",
+              "hash": "4a714924b2a2fd3b",
               "dependencies": {
                 "9ac06b202649e60f": {
                   "id": "9ac06b202649e60f",
@@ -360,7 +360,7 @@
                     "refType": "named",
                     "name": "handleFollowing"
                   },
-                  "valueId": "9ac06b202649e60f"
+                  "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
                 }
               ],
               "children": {},
@@ -392,7 +392,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/index.tsx",
-            "hash": "eec2b091be9afffd",
+            "hash": "4a714924b2a2fd3b",
             "dependencies": {
               "9ac06b202649e60f": {
                 "id": "9ac06b202649e60f",
@@ -413,7 +413,7 @@
                   "refType": "named",
                   "name": "handleFollowing"
                 },
-                "valueId": "9ac06b202649e60f"
+                "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
               }
             ],
             "children": {},
@@ -433,7 +433,7 @@
                     "refType": "named",
                     "name": "handleFollowing"
                   },
-                  "valueId": "9ac06b202649e60f"
+                  "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
                 }
               ],
               "isDependency": false,
@@ -441,6 +441,8 @@
                 "line": 28,
                 "column": 9
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },

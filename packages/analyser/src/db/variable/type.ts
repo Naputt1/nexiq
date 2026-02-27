@@ -13,7 +13,7 @@ import type { JSXVariable } from "./jsx.js";
 import { CallbackVariable } from "./callbackVariable.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.kind === "component" && v.type === "function";
+  return v.kind === "component" && (v.type === "function" || v.type === "class");
 }
 
 export function isJSXVariable(v: Variable): v is JSXVariable {
@@ -41,7 +41,7 @@ export function isNormalVariable(v: Variable): v is DataVariable {
 export function isBaseFunctionVariable<TKind extends VarKind>(
   v: Variable<VarType, TKind>,
 ): v is BaseFunctionVariable<TKind> {
-  return v.type === "function";
+  return v.type === "function" || v.type === "class";
 }
 
 export function isDataVariable(v: Variable): v is DataVariable {

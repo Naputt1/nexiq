@@ -3,6 +3,7 @@ import type {
   ComponentFileVar,
   PropData,
   EffectInfo,
+  ComponentDBResolve,
 } from "./component.js";
 
 export type DataEdge = {
@@ -24,13 +25,13 @@ export type JsonData = {
   files: Record<string, ComponentFile>;
   labels?: Record<string, string[]>;
   diff?: AnalyzedDiff;
-  resolve: any[];
+  resolve: ComponentDBResolve[];
 };
 
 export interface BenchmarkToolCall {
   id: string;
   name: string;
-  arguments: any;
+  arguments: Record<string, unknown>;
 }
 
 export interface BenchmarkStep {

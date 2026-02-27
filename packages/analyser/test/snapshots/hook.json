@@ -73,7 +73,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "581e1f571fa618df",
+          "hash": "4ba721e08f50082c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -824,6 +824,8 @@
                 "line": 36,
                 "column": 4
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -854,7 +856,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:6f3ecad2a72e4cbf",
+                  "id": "65338fa51b33f878:state:[s1, setS1]:6f3ecad2a72e4cbf",
                   "name": "s1"
                 }
               ]
@@ -877,7 +879,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:8012e9b35bccd1e8",
+                  "id": "65338fa51b33f878:state:[s2, setS2]:8012e9b35bccd1e8",
                   "name": "s2"
                 }
               ]
@@ -1039,7 +1041,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "886d708872ac9d77",
+          "hash": "f35494ab0226727f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1203,7 +1205,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/effectt.tsx",
-              "hash": "11ae6ec63719a7e2",
+              "hash": "f2761eb57e67c54b",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -1231,7 +1233,7 @@
               "children": {},
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:29d89519f557177e",
+                  "id": "66289b593d160656:state:[state, setState]:29d89519f557177e",
                   "name": "state"
                 }
               ]
@@ -1389,6 +1391,22 @@
                 "line": 19,
                 "column": 9
               },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            },
+            "9cf4e663476f60a6": {
+              "id": "7a755d146a3ba89a",
+              "instanceId": "9cf4e663476f60a6",
+              "tag": "useCustomHook",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 7,
+                "column": 30
+              },
+              "renderIndex": 1,
+              "kind": "hook",
               "children": {}
             }
           },
@@ -1418,7 +1436,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:29d89519f557177e",
+                  "id": "66289b593d160656:state:[state, setState]:29d89519f557177e",
                   "name": "state"
                 },
                 {
@@ -1449,7 +1467,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "66289b593d160656:callhook:useCustomHook:7:8:65beeb58fc140d46:3c46d2c08f8174c3",
+                  "id": "66289b593d160656:callhook:useCustomHook:7:8:3c46d2c08f8174c3",
                   "name": "state2"
                 }
               ]
@@ -1512,7 +1530,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "14b7151f185093cc",
+          "hash": "a29ba63c26f104e2",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1589,7 +1607,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/src/callback.tsx",
-              "hash": "2f2fbed596fedbc3",
+              "hash": "f419ca5cf33dd32e",
               "dependencies": {},
               "loc": {
                 "line": 7,
@@ -1652,7 +1670,7 @@
               "children": {},
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:10de422fa6270553",
+                  "id": "89091d73d3a537b1:state:[count, setCount]:10de422fa6270553",
                   "name": "count"
                 }
               ]
@@ -1837,6 +1855,8 @@
                 "line": 14,
                 "column": 4
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -2018,7 +2038,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "907a2fafff4805f7",
+          "hash": "8fab577d7dc5f388",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2118,7 +2138,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/src/callback.tsx",
-              "hash": "8e57f5490549ebd9",
+              "hash": "295ef524a90cd5a2",
               "dependencies": {
                 "a0d88febff80e8ff": {
                   "id": "a0d88febff80e8ff",
@@ -2168,7 +2188,7 @@
               "children": {},
               "reactDeps": [
                 {
-                  "id": "6d2917365bc4e783",
+                  "id": "2fbf3e1dc861668f",
                   "name": "actions.searchProfiles"
                 }
               ]
@@ -2325,6 +2345,8 @@
                 "line": 38,
                 "column": 9
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -2391,7 +2413,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "9e354e2846c3df4f",
+          "hash": "6d228bfb61d53c44",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2499,7 +2521,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "65beeb58fc140d46:fb7a7292c24a9964",
+                  "id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
                   "name": "value"
                 }
               ]

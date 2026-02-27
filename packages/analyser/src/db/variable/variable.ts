@@ -31,7 +31,7 @@ export abstract class Variable<
     | "using"
     | "await using";
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Variable<"function">;
+  parent?: Variable<"function" | "class">;
   loc: VariableLoc;
   ui?:
     | (UIItemState & {

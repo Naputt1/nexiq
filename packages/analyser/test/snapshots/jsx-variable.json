@@ -38,7 +38,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "85d28f44e8120e07",
+          "hash": "efb3695d944a50f7",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -129,6 +129,8 @@
                 "line": 3,
                 "column": 43
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -162,7 +164,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "1eaa6d342a0f96ab",
+          "hash": "cdf52a182373da8e",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -283,6 +285,8 @@
                 "line": 5,
                 "column": 2
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             }
           },
@@ -323,7 +327,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "b75076990657c078",
+          "hash": "c3119414f55f63ff",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -437,7 +441,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "48868f8ca93abfd",
+              "hash": "fac1986f2d69c48f",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -458,11 +462,11 @@
                     "refType": "named",
                     "name": "x"
                   },
-                  "valueId": "eaf06c6480b2cd11"
+                  "valueId": "8c693c9c0c2fe891"
                 }
               ],
               "children": {},
-              "srcId": "ad470f3d3d72162a"
+              "srcId": "94b6fcbf54cdfaec"
             },
             "c499dc217e5afa37": {
               "id": "c499dc217e5afa37",
@@ -478,7 +482,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "62d0804552c4ed55",
+              "hash": "4e03a2b99f445466",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -569,6 +573,8 @@
                     "line": 14,
                     "column": 44
                   },
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {}
                 }
               },
@@ -625,7 +631,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "64ee477b1ba6dc9a",
+              "hash": "ca65f25f9077461",
               "dependencies": {
                 "74e04b4116fbb4f2": {
                   "id": "74e04b4116fbb4f2",
@@ -662,10 +668,12 @@
                     "column": 6
                   },
                   "parentId": "ffab9c0a996affa9",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {}
                 }
               },
-              "srcId": "e4a8ef36d16c4eb8"
+              "srcId": "c499dc217e5afa37"
             },
             "74e04b4116fbb4f2": {
               "id": "74e04b4116fbb4f2",
@@ -718,7 +726,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "f68b388a5e66846e",
+              "hash": "f2e43ed2aca6897c",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -747,7 +755,7 @@
                     "refType": "named",
                     "name": "x"
                   },
-                  "valueId": "eaf06c6480b2cd11"
+                  "valueId": "8c693c9c0c2fe891"
                 }
               ],
               "children": {
@@ -774,6 +782,8 @@
                     "column": 6
                   },
                   "parentId": "796aca4cf65364ff",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {
                     "2d0d3bcd71638cd6": {
                       "id": "div",
@@ -788,7 +798,7 @@
                             "refType": "named",
                             "name": "y"
                           },
-                          "valueId": "272b57e6d7c0a9e5"
+                          "valueId": "8193523605bdc018"
                         }
                       ],
                       "isDependency": false,
@@ -797,12 +807,14 @@
                         "column": 8
                       },
                       "parentId": "45111d1c90277a1",
+                      "renderIndex": 0,
+                      "kind": "jsx",
                       "children": {}
                     }
                   }
                 },
                 "f2405d1e83860577": {
-                  "id": "d3ca264457c9ed70",
+                  "id": "7c128c607822e129",
                   "instanceId": "f2405d1e83860577",
                   "tag": "Child2",
                   "dependencies": [
@@ -814,7 +826,7 @@
                         "refType": "named",
                         "name": "y"
                       },
-                      "valueId": "272b57e6d7c0a9e5"
+                      "valueId": "8193523605bdc018"
                     }
                   ],
                   "isDependency": false,
@@ -823,6 +835,8 @@
                     "column": 6
                   },
                   "parentId": "796aca4cf65364ff",
+                  "renderIndex": 1,
+                  "kind": "jsx",
                   "children": {
                     "e3883a2e8eb32905": {
                       "id": "Fragment",
@@ -835,6 +849,8 @@
                         "column": 8
                       },
                       "parentId": "f2405d1e83860577",
+                      "renderIndex": 0,
+                      "kind": "jsx",
                       "children": {
                         "6341bee8d3b151b": {
                           "id": "span",
@@ -870,6 +886,8 @@
                             "column": 10
                           },
                           "parentId": "e3883a2e8eb32905",
+                          "renderIndex": 0,
+                          "kind": "jsx",
                           "children": {}
                         }
                       }
@@ -893,7 +911,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "5fd3aeade4ebdb6e",
+              "hash": "1067a2c40d3f5023",
               "dependencies": {
                 "bd489cb67c07a9cd": {
                   "id": "bd489cb67c07a9cd",
@@ -932,7 +950,7 @@
                         "refType": "named",
                         "name": "y"
                       },
-                      "valueId": "272b57e6d7c0a9e5"
+                      "valueId": "8193523605bdc018"
                     }
                   ],
                   "isDependency": false,
@@ -941,6 +959,8 @@
                     "column": 8
                   },
                   "parentId": "45111d1c90277a1",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {}
                 }
               },
@@ -960,7 +980,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "719f3f133a9717f0",
+              "hash": "5d43d582c1137d35",
               "dependencies": {
                 "272b57e6d7c0a9e5": {
                   "id": "272b57e6d7c0a9e5",
@@ -989,7 +1009,7 @@
                     "refType": "named",
                     "name": "y"
                   },
-                  "valueId": "272b57e6d7c0a9e5"
+                  "valueId": "8193523605bdc018"
                 }
               ],
               "children": {},
@@ -1009,7 +1029,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "dbb029293d9bc261",
+              "hash": "32423aa123f0add4",
               "dependencies": {
                 "272b57e6d7c0a9e5": {
                   "id": "272b57e6d7c0a9e5",
@@ -1034,7 +1054,7 @@
                     "refType": "named",
                     "name": "y"
                   },
-                  "valueId": "272b57e6d7c0a9e5"
+                  "valueId": "8193523605bdc018"
                 }
               ],
               "children": {
@@ -1049,6 +1069,8 @@
                     "column": 8
                   },
                   "parentId": "f2405d1e83860577",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {
                     "6341bee8d3b151b": {
                       "id": "span",
@@ -1084,12 +1106,14 @@
                         "column": 10
                       },
                       "parentId": "e3883a2e8eb32905",
+                      "renderIndex": 0,
+                      "kind": "jsx",
                       "children": {}
                     }
                   }
                 }
               },
-              "srcId": "d3ca264457c9ed70"
+              "srcId": "7c128c607822e129"
             },
             "8ba0dfec046efc7d": {
               "id": "8ba0dfec046efc7d",
@@ -1105,7 +1129,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "53ceb65e6e8d3d5d",
+              "hash": "2648392eb9fc39b3",
               "dependencies": {
                 "7a63dceff672863b": {
                   "id": "7a63dceff672863b",
@@ -1153,6 +1177,8 @@
                     "column": 10
                   },
                   "parentId": "e3883a2e8eb32905",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {}
                 }
               },
@@ -1232,7 +1258,7 @@
             "kind": "normal",
             "type": "jsx",
             "file": "/src/App.tsx",
-            "hash": "f68b388a5e66846e",
+            "hash": "f2e43ed2aca6897c",
             "dependencies": {
               "eaf06c6480b2cd11": {
                 "id": "eaf06c6480b2cd11",
@@ -1261,7 +1287,7 @@
                   "refType": "named",
                   "name": "x"
                 },
-                "valueId": "eaf06c6480b2cd11"
+                "valueId": "8c693c9c0c2fe891"
               }
             ],
             "children": {
@@ -1288,6 +1314,8 @@
                   "column": 6
                 },
                 "parentId": "796aca4cf65364ff",
+                "renderIndex": 0,
+                "kind": "jsx",
                 "children": {
                   "2d0d3bcd71638cd6": {
                     "id": "div",
@@ -1302,7 +1330,7 @@
                           "refType": "named",
                           "name": "y"
                         },
-                        "valueId": "272b57e6d7c0a9e5"
+                        "valueId": "8193523605bdc018"
                       }
                     ],
                     "isDependency": false,
@@ -1311,12 +1339,14 @@
                       "column": 8
                     },
                     "parentId": "45111d1c90277a1",
+                    "renderIndex": 0,
+                    "kind": "jsx",
                     "children": {}
                   }
                 }
               },
               "f2405d1e83860577": {
-                "id": "d3ca264457c9ed70",
+                "id": "7c128c607822e129",
                 "instanceId": "f2405d1e83860577",
                 "tag": "Child2",
                 "dependencies": [
@@ -1328,7 +1358,7 @@
                       "refType": "named",
                       "name": "y"
                     },
-                    "valueId": "272b57e6d7c0a9e5"
+                    "valueId": "8193523605bdc018"
                   }
                 ],
                 "isDependency": false,
@@ -1337,6 +1367,8 @@
                   "column": 6
                 },
                 "parentId": "796aca4cf65364ff",
+                "renderIndex": 1,
+                "kind": "jsx",
                 "children": {
                   "e3883a2e8eb32905": {
                     "id": "Fragment",
@@ -1349,6 +1381,8 @@
                       "column": 8
                     },
                     "parentId": "f2405d1e83860577",
+                    "renderIndex": 0,
+                    "kind": "jsx",
                     "children": {
                       "6341bee8d3b151b": {
                         "id": "span",
@@ -1384,6 +1418,8 @@
                           "column": 10
                         },
                         "parentId": "e3883a2e8eb32905",
+                        "renderIndex": 0,
+                        "kind": "jsx",
                         "children": {}
                       }
                     }
@@ -1395,7 +1431,7 @@
           },
           "children": {
             "6662fdc3cd79077b": {
-              "id": "ad470f3d3d72162a",
+              "id": "94b6fcbf54cdfaec",
               "instanceId": "6662fdc3cd79077b",
               "tag": "Child",
               "dependencies": [
@@ -1407,7 +1443,7 @@
                     "refType": "named",
                     "name": "x"
                   },
-                  "valueId": "eaf06c6480b2cd11"
+                  "valueId": "8c693c9c0c2fe891"
                 }
               ],
               "isDependency": false,
@@ -1415,10 +1451,12 @@
                 "line": 12,
                 "column": 12
               },
+              "renderIndex": 0,
+              "kind": "jsx",
               "children": {}
             },
             "ffab9c0a996affa9": {
-              "id": "e4a8ef36d16c4eb8",
+              "id": "c499dc217e5afa37",
               "instanceId": "ffab9c0a996affa9",
               "tag": "CustomForm",
               "dependencies": [],
@@ -1427,6 +1465,8 @@
                 "line": 16,
                 "column": 4
               },
+              "renderIndex": 1,
+              "kind": "jsx",
               "children": {
                 "8aa9a970039ad2f": {
                   "id": "input",
@@ -1451,6 +1491,8 @@
                     "column": 6
                   },
                   "parentId": "ffab9c0a996affa9",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {}
                 }
               }
@@ -1468,7 +1510,7 @@
                     "refType": "named",
                     "name": "x"
                   },
-                  "valueId": "eaf06c6480b2cd11"
+                  "valueId": "8c693c9c0c2fe891"
                 }
               ],
               "isDependency": false,
@@ -1476,6 +1518,8 @@
                 "line": 22,
                 "column": 4
               },
+              "renderIndex": 2,
+              "kind": "jsx",
               "children": {
                 "45111d1c90277a1": {
                   "id": "div",
@@ -1500,6 +1544,8 @@
                     "column": 6
                   },
                   "parentId": "796aca4cf65364ff",
+                  "renderIndex": 0,
+                  "kind": "jsx",
                   "children": {
                     "2d0d3bcd71638cd6": {
                       "id": "div",
@@ -1514,7 +1560,7 @@
                             "refType": "named",
                             "name": "y"
                           },
-                          "valueId": "272b57e6d7c0a9e5"
+                          "valueId": "8193523605bdc018"
                         }
                       ],
                       "isDependency": false,
@@ -1523,12 +1569,14 @@
                         "column": 8
                       },
                       "parentId": "45111d1c90277a1",
+                      "renderIndex": 0,
+                      "kind": "jsx",
                       "children": {}
                     }
                   }
                 },
                 "f2405d1e83860577": {
-                  "id": "d3ca264457c9ed70",
+                  "id": "7c128c607822e129",
                   "instanceId": "f2405d1e83860577",
                   "tag": "Child2",
                   "dependencies": [
@@ -1540,7 +1588,7 @@
                         "refType": "named",
                         "name": "y"
                       },
-                      "valueId": "272b57e6d7c0a9e5"
+                      "valueId": "8193523605bdc018"
                     }
                   ],
                   "isDependency": false,
@@ -1549,6 +1597,8 @@
                     "column": 6
                   },
                   "parentId": "796aca4cf65364ff",
+                  "renderIndex": 1,
+                  "kind": "jsx",
                   "children": {
                     "e3883a2e8eb32905": {
                       "id": "Fragment",
@@ -1561,6 +1611,8 @@
                         "column": 8
                       },
                       "parentId": "f2405d1e83860577",
+                      "renderIndex": 0,
+                      "kind": "jsx",
                       "children": {
                         "6341bee8d3b151b": {
                           "id": "span",
@@ -1596,6 +1648,8 @@
                             "column": 10
                           },
                           "parentId": "e3883a2e8eb32905",
+                          "renderIndex": 0,
+                          "kind": "jsx",
                           "children": {}
                         }
                       }
@@ -1698,7 +1752,7 @@
       "label": "hook"
     },
     {
-      "from": "ad470f3d3d72162a",
+      "from": "94b6fcbf54cdfaec",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1718,7 +1772,7 @@
       "label": "hook"
     },
     {
-      "from": "e4a8ef36d16c4eb8",
+      "from": "c499dc217e5afa37",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1753,7 +1807,7 @@
       "label": "render"
     },
     {
-      "from": "d3ca264457c9ed70",
+      "from": "7c128c607822e129",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -1818,7 +1872,7 @@
       "label": "hook"
     },
     {
-      "from": "d3ca264457c9ed70",
+      "from": "7c128c607822e129",
       "to": "311c554b828f67a5",
       "label": "render"
     },

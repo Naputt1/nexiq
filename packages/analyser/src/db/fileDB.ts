@@ -32,6 +32,7 @@ import type {
   VarKind,
   TypeDataDeclareInterface,
   TypeDataDeclareType,
+  ReactFunctionVar,
 } from "shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -375,13 +376,14 @@ export class File {
       toId: string,
     ) => {
       for (const render of Object.values(children || {})) {
+        if (!render) continue;
         edges.push({
           from: render.id,
           to: toId,
           label: "render",
         });
         if (render.children) {
-          resolveRenders(render.children || {}, toId);
+          resolveRenders(render.children, toId);
         }
       }
     };
@@ -403,7 +405,7 @@ export class File {
                 label: "render",
               });
               if (jsx.children) {
-                resolveRenders(jsx.children || {}, variable.id);
+                resolveRenders(jsx.children, variable.id);
               }
             }
           }
@@ -434,7 +436,9 @@ export class File {
     return edges;
   }
 
-  private __getEdges(variable: ReactFunctionVariable): DataEdge[] {
+  private __getEdges(
+    variable: ReactFunctionVariable<ReactFunctionVar, "function" | "class">,
+  ): DataEdge[] {
     const edges: DataEdge[] = [];
 
     const resolveRenders = (
@@ -442,13 +446,14 @@ export class File {
       toId: string,
     ) => {
       for (const render of Object.values(children || {})) {
+        if (!render) continue;
         edges.push({
           from: render.id,
           to: toId,
           label: "render",
         });
         if (render.children) {
-          resolveRenders(render.children || {}, toId);
+          resolveRenders(render.children, toId);
         }
       }
     };
@@ -474,7 +479,7 @@ export class File {
               label: "render",
             });
             if (jsx.children) {
-              resolveRenders(jsx.children || {}, variable.id);
+              resolveRenders(jsx.children, variable.id);
             }
           }
         }
@@ -694,6 +699,7 @@ export class File {
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    kind: ComponentInfoRender["kind"],
     parentId?: string,
   ) {
     const variable = this.getHookInfoFromLoc(loc);
@@ -707,6 +713,28 @@ export class File {
       }
     }
 
+    let targetMap: Record<string, ComponentInfoRender> | undefined;
+    let renderIndex = 0;
+
+    if (parentId) {
+      const parent = this.renderInstanceMap.get(parentId);
+      if (parent) {
+        targetMap = parent.children;
+        renderIndex = Object.keys(parent.children).length;
+      }
+    }
+
+    if (!targetMap) {
+      if (
+        isJSXVariable(variable) ||
+        isNormalVariable(variable) ||
+        isBaseFunctionVariable(variable)
+      ) {
+        targetMap = variable.children;
+        renderIndex = Object.keys(variable.children || {}).length;
+      }
+    }
+
     const newRender: ComponentInfoRender = {
       id: srcId,
       instanceId,
@@ -715,49 +743,29 @@ export class File {
       isDependency,
       loc,
       parentId,
+      renderIndex,
+      kind,
       children: {},
     };
 
     this.renderInstanceMap.set(instanceId, newRender);
 
-    let targetMap: Record<string, ComponentInfoRender> | undefined;
+    if (targetMap) {
+      targetMap[instanceId] = newRender;
 
-    if (
-      isJSXVariable(variable) ||
-      isNormalVariable(variable) ||
-      isBaseFunctionVariable(variable)
-    ) {
       if (parentId) {
         const parent = this.renderInstanceMap.get(parentId);
-        if (parent) {
-          targetMap = parent.children;
-
-          if (parent.loc) {
-            const parentJSX = this.getVariable(parent.loc);
-            if (
-              parentJSX &&
-              (isJSXVariable(parentJSX) || isNormalVariable(parentJSX))
-            ) {
-              parentJSX.children[instanceId] = newRender;
-            } else if (parentJSX && isBaseFunctionVariable(parentJSX)) {
-              parentJSX.children[instanceId] = newRender;
-            }
+        if (parent && parent.loc) {
+          const parentVar = this.getVariable(parent.loc);
+          if (
+            parentVar &&
+            (isJSXVariable(parentVar) ||
+              isNormalVariable(parentVar) ||
+              isBaseFunctionVariable(parentVar))
+          ) {
+            parentVar.children[instanceId] = newRender;
           }
         }
-      }
-
-      if (!targetMap) {
-        if (
-          isJSXVariable(variable) ||
-          isNormalVariable(variable) ||
-          isBaseFunctionVariable(variable)
-        ) {
-          targetMap = variable.children;
-        }
-      }
-
-      if (targetMap) {
-        targetMap[instanceId] = newRender;
       }
     }
 
@@ -815,9 +823,17 @@ export class FileDB {
       );
 
       if (cache) {
-        return file.hash !== cache.hash;
+        const res = file.hash !== cache.hash;
+        console.log(
+          "isFileChanged (cache exists):",
+          filename,
+          "changed =",
+          res,
+        );
+        return res;
       }
 
+      console.log("isFileChanged (no cache):", filename, "returning true");
       return true;
     } catch (e) {
       console.error(e);
@@ -830,6 +846,7 @@ export class FileDB {
     file.path = "/" + filename;
 
     const changed = this.isFileChanged(filename, file, cache);
+    console.log("FileDB add:", filename, "changed =", changed);
     if (!changed) {
       assert(cache != null, "Cache must be defined");
 
@@ -874,12 +891,24 @@ export class FileDB {
     if (Object.hasOwn(file.export, localName)) {
       return (
         file.export[localName]?.id ??
-        getDeterministicId(`${fileName}:${localName}`)
+        this.getVariableID(fileName, localName) ??
+        getDeterministicId(fileName, localName)
       );
     }
 
-    // Fallback to deterministic ID based on file and name
-    return getDeterministicId(fileName, localName);
+    return (
+      this.getVariableID(fileName, localName) ??
+      getDeterministicId(fileName, localName)
+    );
+  }
+
+  public getVariableID(fileName: string, name: string): string | null {
+    const file = this.files.get(fileName);
+    if (file == null) {
+      return null;
+    }
+
+    return file.getVariableID(name);
   }
 
   public getData(): JsonData["files"] {
@@ -1343,6 +1372,7 @@ export class FileDB {
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    kind: ComponentInfoRender["kind"],
     parentId?: string,
   ) {
     const file = this.get(fileName);
@@ -1354,6 +1384,7 @@ export class FileDB {
       dependencies,
       isDependency,
       loc,
+      kind,
       parentId,
     );
   }
