@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "getRecentPostsChunkInChannel"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"e83a656944564152\",\n    \"name\": \"getRecentPostsChunkInChannel\",\n    \"file\": \"/packages/mattermost-redux/src/selectors/entities/posts.ts\",\n    \"loc\": {\n      \"line\": 571,\n      \"column\": 16\n    },\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"content\": \"export function getRecentPostsChunkInChannel(state: GlobalState, channelId: Channel['id']): PostOrderBlock | null | undefined {\"\n  },\n  {\n    \"id\": \"symbol:import:/components/post_view/post_list/index.tsx:getRecentPostsChunkInChannel\",\n    \"name\": \"getRecentPostsChunkInChannel\",\n    \"file\": \"/components/post_view/post_list/index.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

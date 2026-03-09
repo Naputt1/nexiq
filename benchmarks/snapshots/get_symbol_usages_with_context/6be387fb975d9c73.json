@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "LoginForm"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/app/routes/auth/login.tsx\",\n    \"line\": 14,\n    \"column\": 6,\n    \"in\": \"LoginRoute\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  return (\",\n      \"    <AuthLayout title=\\\"Log in to your account\\\">\",\n      \"      <LoginForm\",\n      \"        onSuccess={() => {\",\n      \"          navigate(\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

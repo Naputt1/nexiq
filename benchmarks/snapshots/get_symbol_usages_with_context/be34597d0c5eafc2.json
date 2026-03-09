@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "GenericModal.Header",
+    "strict": false,
+    "contextLines": 5
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 293,\n    \"column\": 24,\n    \"in\": \"jsx@293:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                    <div\",\n      \"                        onKeyDown={this.onEnterKeyDown}\",\n      \"                        tabIndex={this.props.tabIndex || 0}\",\n      \"                        className='GenericModal__wrapper-enter-key-press-catcher'\",\n      \"                    >\",\n      \"                        <GenericModal.Header\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            modalHeaderText={this.props.modalHeaderText}\",\n      \"                            headerButton={this.props.headerButton}\",\n      \"                        />\",\n      \"                        <GenericModal.Body\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

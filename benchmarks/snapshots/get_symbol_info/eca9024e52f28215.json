@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "useNotifications"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"hook\",\n      \"name\": \"useNotifications\",\n      \"file\": \"/src/components/ui/notifications/notifications-store.ts\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

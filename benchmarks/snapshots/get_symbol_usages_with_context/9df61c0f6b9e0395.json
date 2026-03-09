@@ -1,0 +1,20 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "PostList",
+    "strict": true,
+    "contextLines": 5,
+    "exclude": [
+      "**/*.test.*",
+      "**/*.spec.*"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/components/post_view/post_view.tsx\",\n    \"line\": 95,\n    \"column\": 16,\n    \"in\": \"jsx@95:16\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"        return (\",\n      \"            <div\",\n      \"                id='post-list'\",\n      \"                role='main'\",\n      \"            >\",\n      \"                <PostList\",\n      \"                    unreadChunkTimeStamp={this.state.unreadChunkTimeStamp}\",\n      \"                    channelId={this.props.channelId}\",\n      \"                    changeUnreadChunkTimeStamp={this.changeUnreadChunkTimeStamp}\",\n      \"                    shouldStartFromBottomWhenUnread={this.state.shouldStartFromBottomWhenUnread}\",\n      \"                    toggleShouldStartFromBottomWhenUnread={this.toggleShouldStartFromBottomWhenUnread}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

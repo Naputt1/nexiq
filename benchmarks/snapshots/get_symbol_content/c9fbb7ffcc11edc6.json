@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "Authorization",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"10ff2a2c4f0fe6c0\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/lib/authorization.tsx\",\n    \"loc\": {\n      \"line\": 63,\n      \"column\": 13\n    },\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"content\": \"export const Authorization = ({\"\n  },\n  {\n    \"id\": \"symbol:import:/src/lib/__tests__/authorization.test.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/lib/__tests__/authorization.test.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"symbol:import:/src/features/discussions/components/update-discussion.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/features/discussions/components/update-discussion.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"symbol:import:/src/features/discussions/components/delete-discussion.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/features/discussions/components/delete-discussion.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"symbol:import:/src/features/discussions/components/create-discussion.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/features/discussions/components/create-discussion.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"symbol:import:/src/features/comments/components/comments-list.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/features/comments/components/comments-list.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"symbol:import:/src/app/routes/app/users.tsx:Authorization\",\n    \"name\": \"Authorization\",\n    \"file\": \"/src/app/routes/app/users.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

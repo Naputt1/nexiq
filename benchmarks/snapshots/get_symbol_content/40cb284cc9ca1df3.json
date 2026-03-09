@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "DashboardLayout",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"e36c9810ab0b200e\",\n    \"name\": \"DashboardLayout\",\n    \"file\": \"/src/components/layouts/dashboard-layout.tsx\",\n    \"loc\": {\n      \"line\": 79,\n      \"column\": 16\n    },\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"content\": \"export function DashboardLayout({ children }: { children: React.ReactNode }) {\"\n  },\n  {\n    \"id\": \"symbol:import:/src/app/routes/app/root.tsx:DashboardLayout\",\n    \"name\": \"DashboardLayout\",\n    \"file\": \"/src/app/routes/app/root.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

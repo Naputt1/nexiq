@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "filePath": "/components/post_view/post_view.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"34d3f42c7d07d010\",\n    \"name\": \"shouldStartFromBottomWhenUnread\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 30\n  },\n  {\n    \"id\": \"c1b786ed0e6684c8\",\n    \"name\": \"jsx@84:16\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 84\n  },\n  {\n    \"id\": \"e8bfdb4c94bc9141\",\n    \"name\": \"jsx@85:20\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 85\n  },\n  {\n    \"id\": \"23861a8bdf17413e\",\n    \"name\": \"jsx@91:12\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 91\n  },\n  {\n    \"id\": \"7c3989c946c1cf58\",\n    \"name\": \"jsx@95:16\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 95\n  }\n]"
+      }
+    ]
+  }
+}

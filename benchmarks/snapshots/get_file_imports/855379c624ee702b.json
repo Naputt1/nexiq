@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "filePath": "src/components/Header.js"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": null,\n    \"source\": \"react\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"Link\": {\n    \"localName\": \"Link\",\n    \"importedName\": \"Link\",\n    \"source\": \"react-router-dom\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "componentName": "Header"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"component\": \"Header\",\n  \"hierarchies\": [\n    {\n      \"id\": \"symbol:import:/src/components/App.js:Header\",\n      \"name\": \"Header\",\n      \"children\": []\n    }\n  ],\n  \"renderedBy\": [\n    {\n      \"id\": \"474fb71a9452ddc2\",\n      \"name\": \"jsx@55:10\",\n      \"file\": \"/src/components/App.js\"\n    },\n    {\n      \"id\": \"62a0a0f8c1930089\",\n      \"name\": \"jsx@75:8\",\n      \"file\": \"/src/components/App.js\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

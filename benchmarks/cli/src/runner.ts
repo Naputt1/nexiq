@@ -7,15 +7,27 @@ import { get_encoding } from "tiktoken";
 import { z } from "zod";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-dotenv.config({ path: "../../.env" });
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_ROOT = path.resolve(__dirname, "../../..");
+
+dotenv.config({ path: path.join(REPO_ROOT, ".env") });
+
+// --- Types ---
 
 // --- Types ---
 
 export const ScenarioSchema = z.object({
   id: z.string(),
-  type: z.enum(["breadth", "depth", "complexity"]),
+  type: z.enum(["breadth", "depth", "complexity", "coding"]),
   prompt: z.string(),
-  expected_answer_contains: z.array(z.string()),
+  expected_answer_contains: z.array(z.string()).optional(),
+  verification_command: z.string().optional(),
+  cleanup_command: z.string().optional(),
+  isolation: z.boolean().optional(),
+  max_iterations: z.number().optional(),
 });
 
 export const ProjectScenariosSchema = z.object({
@@ -46,20 +58,26 @@ export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
   approach: "baseline" | "react-map-cold" | "react-map-warm";
-  testType: "single-prompt" | "planning";
+  testType: "single-prompt" | "planning" | "coding";
   model: string;
   success: boolean;
   totalTokens: number;
   toolCallsCount: number;
   latencyMs: number;
+  verificationOutput?: {
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+  };
   steps: BenchmarkStep[];
 }
 
 export interface RunOptions {
-  projects: string[];
+  projects: string[]; // Tier names (small, mid, large, coding)
   models: LlmClient[];
-  testTypes: ("single-prompt" | "planning")[];
+  testTypes: ("single-prompt" | "planning" | "coding")[];
   approaches: ("baseline" | "react-map-cold" | "react-map-warm")[];
+  concurrency?: number;
   onProgress?: (update: ProgressUpdate) => void;
 }
 
@@ -81,6 +99,7 @@ export interface ProgressUpdate {
   result?: BenchmarkResult;
   totalScenarios?: number;
   completedScenarios?: number;
+  activeScenarios?: number;
 }
 
 // --- Tokenizer ---
@@ -94,9 +113,11 @@ function countTokens(text: string | undefined): number {
 
 export class McpRunner {
   private client: Client | null = null;
+  private transport: StdioClientTransport | null = null;
+  public id: string = crypto.randomBytes(4).toString("hex");
 
   async start(serverPath: string, args: string[] = []) {
-    const transport = new StdioClientTransport({
+    this.transport = new StdioClientTransport({
       command: "node",
       args: [serverPath, ...args],
     });
@@ -106,11 +127,12 @@ export class McpRunner {
       { capabilities: {} },
     );
 
-    await this.client.connect(transport);
+    await this.client.connect(this.transport);
   }
 
   async stop() {
     if (this.client) await this.client.close();
+    if (this.transport) await this.transport.close();
   }
 
   async callTool(name: string, args: any) {
@@ -122,6 +144,47 @@ export class McpRunner {
     if (!this.client) throw new Error("Client not started");
     const result = await this.client.listTools();
     return result.tools;
+  }
+}
+
+export class RunnerPool {
+  private pool: McpRunner[] = [];
+  private available: McpRunner[] = [];
+  private waiting: ((runner: McpRunner) => void)[] = [];
+
+  constructor(private size: number) {}
+
+  async init(serverPath: string) {
+    for (let i = 0; i < this.size; i++) {
+      const runner = new McpRunner();
+      await runner.start(serverPath);
+      this.pool.push(runner);
+      this.available.push(runner);
+    }
+  }
+
+  async acquire(): Promise<McpRunner> {
+    if (this.available.length > 0) {
+      return this.available.pop()!;
+    }
+    return new Promise((resolve) => {
+      this.waiting.push(resolve);
+    });
+  }
+
+  release(runner: McpRunner) {
+    if (this.waiting.length > 0) {
+      const resolve = this.waiting.shift()!;
+      resolve(runner);
+    } else {
+      this.available.push(runner);
+    }
+  }
+
+  async stop() {
+    for (const runner of this.pool) {
+      await runner.stop();
+    }
   }
 }
 
@@ -178,36 +241,41 @@ export class OpenRouterClient implements LlmClient {
       return { role: m.role as any, content: m.content || "" };
     });
 
-    const response = await (this.openai.chat.completions.create as any)({
-      model: this.name,
-      messages: formattedMessages,
-      tools: tools.map((t) => ({
-        type: "function",
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.inputSchema,
-        },
-      })),
-      transforms: ["middle-out"],
-    });
-
-    const message = response.choices[0]!.message;
-    const toolCalls = message.tool_calls
-      ?.filter((tc: any) => tc.type === "function")
-      .map((tc: any) => {
-        const tool = tc as any;
-        return {
-          id: tool.id,
-          name: tool.function.name,
-          arguments: JSON.parse(tool.function.arguments),
-        };
+    try {
+      const response = await (this.openai.chat.completions.create as any)({
+        model: this.name,
+        messages: formattedMessages,
+        tools: tools.length > 0 ? tools.map((t) => ({
+          type: "function",
+          function: {
+            name: t.name,
+            description: t.description,
+            parameters: t.inputSchema,
+          },
+        })) : undefined,
+        transforms: ["middle-out"],
       });
 
-    return {
-      content: message.content || undefined,
-      toolCalls,
-    };
+      const message = response.choices[0]!.message;
+      const toolCalls = message.tool_calls
+        ?.filter((tc: any) => tc.type === "function")
+        .map((tc: any) => {
+          const tool = tc as any;
+          return {
+            id: tool.id,
+            name: tool.function.name,
+            arguments: JSON.parse(tool.function.arguments),
+          };
+        });
+
+      return {
+        content: message.content || undefined,
+        toolCalls,
+      };
+    } catch (e: any) {
+      console.error("LLM Chat API Error:", e.message);
+      throw e;
+    }
   }
 }
 
@@ -216,7 +284,7 @@ export class OpenRouterClient implements LlmClient {
 export class SnapshotManager {
   private baseDir: string;
 
-  constructor(runTimestamp: string) {
+  constructor() {
     this.baseDir = "../../benchmarks/snapshots";
   }
 
@@ -237,21 +305,21 @@ export class SnapshotManager {
   }
 }
 
-// --- Benchmark Runner ---
+// --- Benchmark Runner Pool Orchestrator ---
 
 export class BenchmarkRunner {
   private results: BenchmarkResult[] = [];
   private snapshots: SnapshotManager;
 
-  constructor(runTimestamp: string) {
-    this.snapshots = new SnapshotManager(runTimestamp);
+  constructor() {
+    this.snapshots = new SnapshotManager();
   }
 
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
     approach: "baseline" | "react-map-cold" | "react-map-warm",
-    testType: "single-prompt" | "planning",
+    testType: "single-prompt" | "planning" | "coding",
     llm: LlmClient,
     mcp: McpRunner,
     onProgress?: (update: ProgressUpdate) => void,
@@ -260,9 +328,10 @@ export class BenchmarkRunner {
     let totalTokens = 0;
     let toolCallsCount = 0;
     const steps: BenchmarkStep[] = [];
+    let verificationOutput: BenchmarkResult["verificationOutput"];
 
-    // Resolve relative to repo root (which is two levels up from benchmarks/cli)
-    const absoluteRoot = path.resolve("../../", project.root);
+    // Resolve relative to repo root
+    const absoluteRoot = path.resolve(REPO_ROOT, project.root);
 
     // Pre-scenario setup
     if (approach === "react-map-cold") {
@@ -295,7 +364,8 @@ export class BenchmarkRunner {
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.
     To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.
-    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.`;
+    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.
+    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.`;
 
     // Interaction setup based on testType
     if (testType === "planning") {
@@ -306,6 +376,20 @@ export class BenchmarkRunner {
         1. Explore the project structure and source code using the available tools. 
         2. Create a detailed, step-by-step plan for how you will find the required information. 
         3. Execute your plan meticulously and provide the final answer.`,
+        tokens: 0,
+      };
+      systemMsg.tokens = countTokens(systemMsg.content);
+      steps.push(systemMsg);
+      totalTokens += systemMsg.tokens;
+    } else if (testType === "coding") {
+      const systemMsg: BenchmarkStep = {
+        role: "system",
+        content: `You are an expert software engineer tasked with completing this coding task: "${scenario.prompt}". 
+        ${pathContext}
+        1. Understand the requirements and explore the codebase.
+        2. Implement the changes requested.
+        3. Verify your work using any available testing tools if applicable.
+        4. Once you are finished, provide a summary of the changes made.`,
         tokens: 0,
       };
       systemMsg.tokens = countTokens(systemMsg.content);
@@ -330,7 +414,7 @@ export class BenchmarkRunner {
     totalTokens += steps[steps.length - 1].tokens;
 
     let iterations = 0;
-    const MAX_ITERATIONS = 10;
+    const MAX_ITERATIONS = scenario.max_iterations || 15;
     let success = false;
 
     while (iterations < MAX_ITERATIONS) {
@@ -373,10 +457,11 @@ export class BenchmarkRunner {
           });
 
           const toolArgs = { ...tc.arguments };
+          // Inject projectPath if missing and it's a specialized tool
           if (
             !toolArgs.projectPath &&
             approach !== "baseline" &&
-            tc.name.startsWith("get_")
+            (tc.name.startsWith("get_") || tc.name.startsWith("list_"))
           ) {
             toolArgs.projectPath = absoluteRoot;
           }
@@ -407,9 +492,7 @@ export class BenchmarkRunner {
               0,
               MAX_TOOL_TOKENS * 4,
             );
-            resultContent = `${truncatedContent}
-
-... [TRUNCATED DUE TO SIZE: ${toolTokens} tokens total] ...`;
+            resultContent = `${truncatedContent}\n\n... [TRUNCATED DUE TO SIZE: ${toolTokens} tokens total] ...`;
             toolTokens = countTokens(resultContent);
           }
 
@@ -424,11 +507,26 @@ export class BenchmarkRunner {
           totalTokens += toolTokens;
         }
       } else if (response.content) {
-        success = await this.evaluateSuccess(llm, scenario, response.content);
+        // Evaluate completion
+        if (testType === "coding" && scenario.verification_command) {
+          const verifyResult = await this.verifyCodingTask(absoluteRoot, scenario.verification_command, mcp);
+          success = verifyResult.success;
+          verificationOutput = verifyResult.output;
+        } else {
+          success = await this.evaluateSuccess(llm, scenario, response.content);
+        }
         break;
       } else {
         break;
       }
+    }
+
+    // Cleanup
+    if (scenario.cleanup_command) {
+      await mcp.callTool("run_shell_command", {
+        command: scenario.cleanup_command,
+        cwd: absoluteRoot,
+      });
     }
 
     const result: BenchmarkResult = {
@@ -442,9 +540,46 @@ export class BenchmarkRunner {
       toolCallsCount,
       latencyMs: Date.now() - startTime,
       steps,
+      verificationOutput,
     };
     this.results.push(result);
     return result;
+  }
+
+  private async verifyCodingTask(projectRoot: string, command: string, mcp: McpRunner): Promise<{ success: boolean; output?: { stdout: string; stderr: string; exitCode: number } }> {
+    try {
+      const response: any = await mcp.callTool("run_shell_command", {
+        command,
+        projectPath: projectRoot,
+      });
+      
+      const content = response.content?.[0];
+      if (content?.type === "text") {
+        try {
+          const result = JSON.parse(content.text);
+          if (result.exitCode !== 0) {
+            console.error(`Verification command failed with exit code ${result.exitCode}`);
+            if (result.stdout) console.error(`STDOUT: ${result.stdout}`);
+            if (result.stderr) console.error(`STDERR: ${result.stderr}`);
+          }
+          return { 
+            success: result.exitCode === 0, 
+            output: { 
+              stdout: result.stdout || "", 
+              stderr: result.stderr || "", 
+              exitCode: result.exitCode 
+            } 
+          };
+        } catch (e) {
+          console.error("Failed to parse verification result:", e, content.text);
+          return { success: false };
+        }
+      }
+      return { success: false };
+    } catch (e) {
+      console.error("Verification command failed:", e);
+      return { success: false };
+    }
   }
 
   private async evaluateSuccess(
@@ -452,6 +587,11 @@ export class BenchmarkRunner {
     scenario: Scenario,
     response: string,
   ): Promise<boolean> {
+    if (!scenario.expected_answer_contains) {
+        // If no expectation, check if llm thinks it succeeded
+        return true; 
+    }
+
     const evalPrompt = `
 You are an objective evaluator for a software engineering benchmark.
 A model was asked: "${scenario.prompt}"
@@ -496,7 +636,8 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
 
   saveResults(timestamp: string): string {
     const outFile = path.join(
-      "../../benchmarks/results",
+      REPO_ROOT,
+      "benchmarks/results",
       `run_${timestamp}.json`,
     );
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
@@ -507,80 +648,158 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
 
 export async function runBenchmarks(options: RunOptions) {
   const timestamp = new Date().toISOString().replace(/:/g, "-");
-  const runner = new BenchmarkRunner(timestamp);
-  const mcp = new McpRunner();
-  const serverPath = path.resolve("../../packages/server/dist/index.js");
+  const orchestrator = new BenchmarkRunner();
+  const serverPath = path.resolve(REPO_ROOT, "packages/server/dist/index.js");
+  const concurrency = options.concurrency || 3;
+  const pool = new RunnerPool(concurrency);
 
-  const totalScenariosCount =
-    options.projects.length *
-    options.models.length *
-    options.testTypes.length *
-    options.approaches.length; // This is a rough estimate as different projects have different number of scenarios
+  const tasks: { 
+    project: ProjectScenarios; 
+    scenario: Scenario; 
+    model: LlmClient; 
+    approach: "baseline" | "react-map-cold" | "react-map-warm"; 
+    testType: "single-prompt" | "planning" | "coding" 
+  }[] = [];
 
-  let completedScenarios = 0;
+  for (const tier of options.projects) {
+    const scenarioFile = path.resolve(REPO_ROOT, `benchmarks/scenarios/${tier}.json`);
+    if (!fs.existsSync(scenarioFile)) {
+        console.warn(`Scenario file not found: ${scenarioFile}`);
+        continue;
+    }
 
-  try {
-    await mcp.start(serverPath);
-    options.onProgress?.({ type: "start" });
+    const projectData: ProjectScenarios = JSON.parse(fs.readFileSync(scenarioFile, "utf-8"));
 
-    const sortedApproaches = [...options.approaches].sort((a, b) => {
-      const order = { baseline: 0, "react-map-cold": 1, "react-map-warm": 2 };
-      return order[a] - order[b];
-    });
+    for (const scenario of projectData.scenarios) {
+      for (const model of options.models) {
+        const scenarioTestTypes = (scenario.type === 'coding') ? ["coding"] : options.testTypes;
 
-    for (const tier of options.projects) {
-      const scenarioFile = path.resolve(
-        `../../benchmarks/scenarios/${tier}.json`,
-      );
-      if (!fs.existsSync(scenarioFile)) continue;
-
-      const projectData: ProjectScenarios = JSON.parse(
-        fs.readFileSync(scenarioFile, "utf-8"),
-      );
-
-      for (const scenario of projectData.scenarios) {
-        for (const model of options.models) {
-          for (const testType of options.testTypes) {
-            for (const approach of sortedApproaches) {
-              try {
-                options.onProgress?.({
-                  type: "scenario-start",
-                  projectName: projectData.name,
-                  scenarioId: scenario.id,
-                  model: model.displayName,
-                  approach,
-                  testType,
-                });
-
-                const result = await runner.runScenario(
-                  projectData,
-                  scenario,
-                  approach,
-                  testType,
-                  model,
-                  mcp,
-                  options.onProgress,
-                );
-
-                completedScenarios++;
-                options.onProgress?.({
-                  type: "scenario-end",
-                  result,
-                  completedScenarios,
-                });
-              } catch (e) {
-                console.error(`  Error running scenario: ${e}`);
-              }
-            }
-          }
+        for (const testType of scenarioTestTypes) {
+           for (const approach of options.approaches) {
+             tasks.push({ project: projectData, scenario, model, approach, testType: testType as any });
+           }
         }
       }
     }
-
-    const resultPath = runner.saveResults(timestamp);
-    options.onProgress?.({ type: "end" });
-    return resultPath;
-  } finally {
-    await mcp.stop();
   }
+
+  options.onProgress?.({ type: "start", totalScenarios: tasks.length });
+
+  let completedScenarios = 0;
+  let activeScenarios = 0;
+
+  await pool.init(serverPath);
+
+  const runTask = async (task: typeof tasks[0]) => {
+    activeScenarios++;
+    options.onProgress?.({
+      type: "scenario-start",
+      projectName: task.project.name,
+      scenarioId: task.scenario.id,
+      model: task.model.displayName,
+      approach: task.approach,
+      testType: task.testType,
+      activeScenarios,
+    });
+
+    const mcp = await pool.acquire();
+    try {
+      const result = await orchestrator.runScenario(
+        task.project,
+        task.scenario,
+        task.approach,
+        task.testType,
+        task.model,
+        mcp,
+        options.onProgress,
+      );
+
+      completedScenarios++;
+      activeScenarios--;
+      options.onProgress?.({
+        type: "scenario-end",
+        result,
+        completedScenarios,
+        activeScenarios,
+      });
+    } catch (e) {
+      console.error(`Error running scenario ${task.scenario.id}:`, e);
+      activeScenarios--;
+      completedScenarios++; // Still mark as completed to avoid hanging UI
+      options.onProgress?.({
+          type: "scenario-end",
+          completedScenarios,
+          activeScenarios,
+      });
+    } finally {
+      pool.release(mcp);
+    }
+  };
+
+  // Process tasks with concurrency limit and directory isolation
+  const activeRoots = new Map<string, number>(); // root -> number of active tasks
+  const activeIsolatedRoots = new Set<string>(); // roots used by isolated tasks
+  const promisePool = new Set<Promise<any>>();
+  const queue = [...tasks];
+
+  while (queue.length > 0 || promisePool.size > 0) {
+    // Try to start new tasks up to concurrency
+    let taskStarted = false;
+    while (promisePool.size < concurrency && queue.length > 0) {
+      // Find a task that can run given current active roots
+      const taskIndex = queue.findIndex(t => {
+        const root = t.project.root;
+        if (t.scenario.isolation) {
+          // Isolated task needs root to be completely free
+          return (activeRoots.get(root) || 0) === 0;
+        } else {
+          // Non-isolated task needs root to not be used by an isolated task
+          return !activeIsolatedRoots.has(root);
+        }
+      });
+
+      if (taskIndex === -1) break; // No task can start right now (waiting for roots to clear)
+
+      const task = queue.splice(taskIndex, 1)[0];
+      const root = task.project.root;
+      
+      // Mark root as in use
+      activeRoots.set(root, (activeRoots.get(root) || 0) + 1);
+      if (task.scenario.isolation) {
+        activeIsolatedRoots.add(root);
+      }
+
+      const p: Promise<any> = runTask(task).then(() => {
+        // Cleanup root usage
+        const count = activeRoots.get(root) || 0;
+        if (count <= 1) {
+          activeRoots.delete(root);
+        } else {
+          activeRoots.set(root, count - 1);
+        }
+
+        if (task.scenario.isolation) {
+          activeIsolatedRoots.delete(root);
+        }
+        promisePool.delete(p);
+      });
+      
+      promisePool.add(p);
+      taskStarted = true;
+    }
+
+    if (promisePool.size > 0) {
+      // Wait for at least one task to finish before trying to schedule more
+      await Promise.race(promisePool);
+    } else if (queue.length > 0 && !taskStarted) {
+      // This shouldn't happen if the logic is correct, but avoid infinite loop
+      console.error("Scheduler stuck: some tasks in queue but none can start and none are running.");
+      break;
+    }
+  }
+
+  const resultPath = orchestrator.saveResults(timestamp);
+  await pool.stop();
+  options.onProgress?.({ type: "end" });
+  return resultPath;
 }

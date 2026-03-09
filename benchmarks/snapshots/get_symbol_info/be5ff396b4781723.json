@@ -8,7 +8,7 @@
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"LoginForm\",\n      \"file\": \"/src/features/auth/components/login-form.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/__tests__/login-form.test.tsx\",\n          \"in\": \"jsx@16:18\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/app/routes/auth/login.tsx\",\n          \"in\": \"LoginRoute\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"LoginForm\",\n      \"file\": \"/src/features/auth/components/login-form.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/app/routes/auth/login.tsx\",\n          \"in\": \"LoginRoute\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
       }
     ]
   }

@@ -161,3 +161,9 @@ packages/server/coverage/
 packages/ui/e2e/coverage/
 packages/ui/test-results/
 server_error*.log
+
+benchmarks/snapshots/write_file/
+benchmarks/snapshots/replace_file_content/
+benchmarks/snapshots/run_shell_command/
+benchmarks/snapshots/multi_replace_file_content/
+benchmarks/snapshots/find_files/

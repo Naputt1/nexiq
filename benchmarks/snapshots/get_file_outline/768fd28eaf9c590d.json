@@ -1,0 +1,19 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "filePath": "packages/components/src/generic_modal/generic_modal.tsx",
+    "fields": [
+      "name",
+      "type",
+      "line"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"ModalHeader\",\n    \"type\": \"function\",\n    \"line\": 17\n  },\n  {\n    \"name\": \"ModalBody\",\n    \"type\": \"function\",\n    \"line\": 46\n  },\n  {\n    \"name\": \"ModalFooter\",\n    \"type\": \"function\",\n    \"line\": 87\n  },\n  {\n    \"name\": \"confirmButton\",\n    \"type\": \"data\",\n    \"line\": 219\n  },\n  {\n    \"name\": \"isConfirmOrDeleteClassName\",\n    \"type\": \"data\",\n    \"line\": 221\n  },\n  {\n    \"name\": \"confirmButtonText\",\n    \"type\": \"jsx\",\n    \"line\": 222\n  },\n  {\n    \"name\": \"jsx@223:16\",\n    \"type\": \"jsx\",\n    \"line\": 223\n  },\n  {\n    \"name\": \"jsx@233:16\",\n    \"type\": \"jsx\",\n    \"line\": 233\n  },\n  {\n    \"name\": \"cancelButton\",\n    \"type\": \"data\",\n    \"line\": 246\n  },\n  {\n    \"name\": \"cancelButtonText\",\n    \"type\": \"jsx\",\n    \"line\": 248\n  },\n  {\n    \"name\": \"jsx@249:16\",\n    \"type\": \"jsx\",\n    \"line\": 249\n  },\n  {\n    \"name\": \"jsx@259:16\",\n    \"type\": \"jsx\",\n    \"line\": 259\n  },\n  {\n    \"name\": \"isFocusTrapActive\",\n    \"type\": \"data\",\n    \"line\": 269\n  },\n  {\n    \"name\": \"jsx@272:12\",\n    \"type\": \"jsx\",\n    \"line\": 272\n  },\n  {\n    \"name\": \"jsx@289:16\",\n    \"type\": \"jsx\",\n    \"line\": 289\n  },\n  {\n    \"name\": \"jsx@290:20\",\n    \"type\": \"jsx\",\n    \"line\": 290\n  },\n  {\n    \"name\": \"jsx@295:24\",\n    \"type\": \"jsx\",\n    \"line\": 295\n  },\n  {\n    \"name\": \"jsx@300:24\",\n    \"type\": \"jsx\",\n    \"line\": 300\n  },\n  {\n    \"name\": \"jsx@308:24\",\n    \"type\": \"jsx\",\n    \"line\": 308\n  }\n]"
+      }
+    ]
+  }
+}

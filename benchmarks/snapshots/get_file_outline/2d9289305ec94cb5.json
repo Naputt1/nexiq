@@ -1,0 +1,18 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/features/auth/hooks/use-login-form.ts",
+    "fields": [
+      "name",
+      "line"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"useLoginForm\",\n    \"line\": 8\n  }\n]"
+      }
+    ]
+  }
+}

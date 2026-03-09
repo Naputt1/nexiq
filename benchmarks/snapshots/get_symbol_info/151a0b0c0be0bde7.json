@@ -1,0 +1,17 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "PostList",
+    "strict": false,
+    "props": true,
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"normal\",\n      \"name\": \"PostListRowListIds\",\n      \"file\": \"/utils/constants.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"makePreparePostIdsForPostList\",\n      \"file\": \"/packages/mattermost-redux/src/utils/post_list.ts\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListOfMessages\",\n      \"file\": \"/e2e/cypress/tests/support/task_commands.ts\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListOfMessages\",\n      \"file\": \"/e2e/cypress/tests/plugins/index.js\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListOfMessages\",\n      \"file\": \"/e2e/cypress/tests/integration/scroll/helpers.js\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListIds\",\n      \"file\": \"/components/toast_wrapper/toast_wrapper.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"preparePostIdsForPostList\",\n      \"file\": \"/components/toast_wrapper/index.ts\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListStyle\",\n      \"file\": \"/components/post_view/post_list_virtualized/post_list_virtualized.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListNode\",\n      \"file\": \"/components/post_view/post_list_virtualized/post_list_virtualized.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postlistScrollHeight\",\n      \"file\": \"/components/post_view/post_list_virtualized/post_list_virtualized.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"postListIds\",\n      \"file\": \"/components/post_view/post_list_virtualized/post_list_virtualized.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"newPostListIds\",\n      \"file\": \"/components/post_view/post_list_virtualized/post_list_virtualized.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"preparePostIdsForPostList\",\n      \"file\": \"/components/post_view/post_list/index.tsx\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"loadCustomStatusEmojisForPostList\",\n      \"file\": \"/actions/emoji_actions.js\",\n      \"props\": [],\n      \"usages\": []\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"scrollPostListToBottom\",\n      \"file\": \"/actions/views/channel.ts\",\n      \"props\": [],\n      \"usages\": []\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

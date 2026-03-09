@@ -7,7 +7,7 @@
     "content": [
       {
         "type": "text",
-        "text": "[\n  {\n    \"id\": \"df9da7513c533ee\",\n    \"name\": \"LoginForm\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 12\n  }\n]"
+        "text": "[\n  {\n    \"id\": \"df9da7513c533ee\",\n    \"name\": \"LoginForm\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 16\n  }\n]"
       }
     ]
   }

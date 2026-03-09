@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "subProject": "src/features/auth",
+    "maxDepth": 2,
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"name\": \"/\",\n  \"children\": [\n    {\n      \"name\": \"components\",\n      \"children\": [\n        {\n          \"name\": \"__tests__\",\n          \"children\": []\n        },\n        {\n          \"name\": \"form-input.tsx\",\n          \"children\": []\n        },\n        {\n          \"name\": \"login-form.tsx\",\n          \"children\": []\n        },\n        {\n          \"name\": \"register-form.tsx\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"name\": \"hooks\",\n      \"children\": [\n        {\n          \"name\": \"use-login-form.ts\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

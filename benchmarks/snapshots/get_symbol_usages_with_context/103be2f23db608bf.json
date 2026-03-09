@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalHeader",
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 295,\n    \"column\": 24,\n    \"in\": \"jsx@295:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                        className='GenericModal__wrapper-enter-key-press-catcher'\",\n      \"                    >\",\n      \"                        <ModalHeader\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            modalHeaderText={this.props.modalHeaderText}\"\n    ]\n  },\n  {\n    \"file\": \"/components/generic_modal.tsx\",\n    \"line\": 308,\n    \"column\": 24,\n    \"in\": \"jsx@308:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                        className='GenericModal__wrapper-enter-key-press-catcher'\",\n      \"                    >\",\n      \"                        <ModalHeader\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            modalHeaderText={this.props.modalHeaderText}\"\n    ]\n  },\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 295,\n    \"column\": 24,\n    \"in\": \"jsx@295:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                        className='GenericModal__wrapper-enter-key-press-catcher'\",\n      \"                    >\",\n      \"                        <ModalHeader\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            modalHeaderText={this.props.modalHeaderText}\"\n    ]\n  },\n  {\n    \"file\": \"/components/generic_modal.tsx\",\n    \"line\": 308,\n    \"column\": 24,\n    \"in\": \"jsx@308:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                        className='GenericModal__wrapper-enter-key-press-catcher'\",\n      \"                    >\",\n      \"                        <ModalHeader\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            modalHeaderText={this.props.modalHeaderText}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

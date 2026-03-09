@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "InputField",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

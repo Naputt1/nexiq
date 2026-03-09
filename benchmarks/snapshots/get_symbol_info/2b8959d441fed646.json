@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "RegisterForm"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"RegisterForm\",\n      \"file\": \"/src/features/auth/components/register-form.tsx\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

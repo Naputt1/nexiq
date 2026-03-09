@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "Button",
+    "strict": false,
+    "loc": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"ref\",\n      \"name\": \"cancelButtonRef\",\n      \"file\": \"/src/components/ui/dialog/dialog.stories.tsx\",\n      \"loc\": {\n        \"line\": 19,\n        \"column\": 8\n      }\n    },\n    {\n      \"kind\": \"ref\",\n      \"name\": \"cancelButtonRef\",\n      \"file\": \"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\",\n      \"loc\": {\n        \"line\": 37,\n        \"column\": 8\n      }\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"buttonVariants\",\n      \"file\": \"/src/components/ui/button/types.ts\",\n      \"loc\": {\n        \"line\": 4,\n        \"column\": 13\n      }\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"button\",\n      \"file\": \"/e2e/tests/button-size.spec.ts\",\n      \"loc\": {\n        \"line\": 8,\n        \"column\": 8\n      }\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"buttonVariants\",\n      \"file\": \"/src/components/ui/button/button.tsx\",\n      \"loc\": {\n        \"line\": 9,\n        \"column\": 6\n      }\n    },\n    {\n      \"kind\": \"component\",\n      \"name\": \"Button\",\n      \"file\": \"/src/components/ui/button/button.tsx\",\n      \"loc\": {\n        \"line\": 46,\n        \"column\": 6\n      }\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

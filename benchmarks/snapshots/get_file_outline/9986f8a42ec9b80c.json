@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "src/lib/auth.tsx",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"243c3d783231df7e\",\n    \"name\": \"getUser\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 13\n  },\n  {\n    \"id\": \"8c7561ce29f53a51\",\n    \"name\": \"logout\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 19\n  },\n  {\n    \"id\": \"a20d895d5d9f1396\",\n    \"name\": \"loginInputSchema\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 23\n  },\n  {\n    \"id\": \"fa74b9dff0dca3cb\",\n    \"name\": \"loginWithEmailAndPassword\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 29\n  },\n  {\n    \"id\": \"927ed4ab3430023d\",\n    \"name\": \"registerInputSchema\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 33\n  },\n  {\n    \"id\": \"54ef7e559817e037\",\n    \"name\": \"registerWithEmailAndPassword\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 56\n  },\n  {\n    \"id\": \"dcfdafaf0e5271b4\",\n    \"name\": \"authConfig\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 62\n  },\n  {\n    \"id\": \"d52394b0c3e155ae\",\n    \"name\": \"response\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 69\n  },\n  {\n    \"id\": \"a08167afba23bb44\",\n    \"name\": \"{\\n  useUser,\\n  useLogin,\\n  useLogout,\\n  useRegister,\\n  AuthLoader\\n}\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 75\n  },\n  {\n    \"id\": \"232e9f480974c339\",\n    \"name\": \"ProtectedRoute\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 78\n  }\n]"
+      }
+    ]
+  }
+}

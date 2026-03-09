@@ -22,9 +22,10 @@ Tasks will be performed across three project tiers to measure how token savings 
 
 ### Target Models
 The benchmark will be executed using the latest versions of:
-- **OpenAI**: GPT-4o
-- **Anthropic**: Claude 3.5 Sonnet
-- **Google**: Gemini 1.5 Pro / Flash
+- **OpenAI**: GPT-5.2 Codex
+- **Anthropic**: Claude 4.6 Sonnet / 4.5 Haiku
+- **Google**: Gemini 3 Flash Preview
+- **DeepSeek**: DeepSeek v3.2
 - **Meta (Optional)**: Llama 3.1 405B (via Groq/OpenRouter)
 
 ### Scenarios

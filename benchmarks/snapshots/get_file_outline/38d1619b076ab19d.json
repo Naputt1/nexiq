@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/components/ui/button/button.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"a89b800bda7a2eaf\",\n    \"name\": \"buttonVariants\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 9\n  },\n  {\n    \"id\": \"9b04df0652d807ec\",\n    \"name\": \"Button\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 46\n  }\n]"
+      }
+    ]
+  }
+}
