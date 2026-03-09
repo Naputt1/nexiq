@@ -1010,7 +1010,7 @@ export class ProjectManager {
     projectPath: string,
     command: string,
     subProject?: string,
-  ): Promise<{ stdout?: string; stderr?: string; error?: string }> {
+  ): Promise<{ stdout?: string; stderr?: string; error?: string; exitCode: number }> {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
@@ -1030,10 +1030,10 @@ export class ProjectManager {
         timeout: 30000,
         maxBuffer: 1024 * 1024,
       });
-      return { stdout, stderr };
+      return { stdout, stderr, exitCode: 0 };
     } catch (e: unknown) {
-      const err = e as { message: string; stdout?: string; stderr?: string };
-      return { error: err.message, stdout: err.stdout, stderr: err.stderr };
+      const err = e as { message: string; stdout?: string; stderr?: string; code?: number };
+      return { error: err.message, stdout: err.stdout, stderr: err.stderr, exitCode: err.code ?? 1 };
     }
   }
 
@@ -1439,6 +1439,83 @@ export class ProjectManager {
     } catch (e: unknown) {
       console.error("Failed to get project icon", e);
       return null;
+    }
+  }
+
+  async writeFile(
+    projectRoot: string,
+    filePath: string,
+    content: string,
+  ): Promise<boolean> {
+    const absolutePath = path.resolve(projectRoot, filePath);
+    if (!absolutePath.startsWith(path.resolve(projectRoot))) {
+      throw new Error("Path is outside of project root");
+    }
+
+    try {
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(absolutePath, content, "utf-8");
+      return true;
+    } catch (error) {
+      console.error(`Error writing file ${filePath}:`, error);
+      return false;
+    }
+  }
+
+  async replaceFileContent(
+    projectRoot: string,
+    filePath: string,
+    oldString: string,
+    newString: string,
+  ): Promise<boolean> {
+    const absolutePath = path.resolve(projectRoot, filePath);
+    if (!absolutePath.startsWith(path.resolve(projectRoot))) {
+      throw new Error("Path is outside of project root");
+    }
+
+    try {
+      if (!fs.existsSync(absolutePath)) {
+        throw new Error(`File not found: ${filePath}`);
+      }
+      const content = fs.readFileSync(absolutePath, "utf-8");
+      if (!content.includes(oldString)) {
+        throw new Error(`Old string not found in ${filePath}`);
+      }
+      const newContent = content.replace(oldString, newString);
+      fs.writeFileSync(absolutePath, newContent, "utf-8");
+      return true;
+    } catch (error) {
+      console.error(`Error replacing content in ${filePath}:`, error);
+      throw error;
+    }
+  }
+
+  async multiReplaceFileContent(
+    projectRoot: string,
+    filePath: string,
+    replacements: { oldString: string; newString: string }[],
+  ): Promise<boolean> {
+    const absolutePath = path.resolve(projectRoot, filePath);
+    if (!absolutePath.startsWith(path.resolve(projectRoot))) {
+      throw new Error("Path is outside of project root");
+    }
+
+    try {
+      if (!fs.existsSync(absolutePath)) {
+        throw new Error(`File not found: ${filePath}`);
+      }
+      let content = fs.readFileSync(absolutePath, "utf-8");
+      for (const { oldString, newString } of replacements) {
+        if (!content.includes(oldString)) {
+          throw new Error(`Old string not found in ${filePath}`);
+        }
+        content = content.replace(oldString, newString);
+      }
+      fs.writeFileSync(absolutePath, content, "utf-8");
+      return true;
+    } catch (error) {
+      console.error(`Error in multi-replace for ${filePath}:`, error);
+      throw error;
     }
   }
 

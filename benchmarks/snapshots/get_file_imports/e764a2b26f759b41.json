@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "/components/post_view/post_view.tsx",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": null,\n    \"source\": \"react\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"LoadingScreen\": {\n    \"localName\": \"LoadingScreen\",\n    \"importedName\": null,\n    \"source\": \"components/loading_screen\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"Preferences\": {\n    \"localName\": \"Preferences\",\n    \"importedName\": \"Preferences\",\n    \"source\": \"utils/constants\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"PostList\": {\n    \"localName\": \"PostList\",\n    \"importedName\": null,\n    \"source\": \"/components/post_view/post_list/index.tsx\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

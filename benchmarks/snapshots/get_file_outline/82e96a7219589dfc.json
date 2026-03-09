@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "components/post_view/post_list/post_list.tsx",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"1d768ec31b6d5799\",\n    \"name\": \"MAX_NUMBER_OF_AUTO_RETRIES\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 16\n  },\n  {\n    \"id\": \"557737a8faf03655\",\n    \"name\": \"MAX_EXTRA_PAGES_LOADED\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 17\n  },\n  {\n    \"id\": \"212bb536f0ec7cba\",\n    \"name\": \"markAndMeasureChannelSwitchEnd\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 21\n  },\n  {\n    \"id\": \"f920ae63e9d8778e\",\n    \"name\": \"{\\n  focusedPostId,\\n  isFirstLoad,\\n  latestPostTimeStamp,\\n  isPrefetchingInProcess,\\n  actions\\n}\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 219\n  },\n  {\n    \"id\": \"40b4e5d2744450e5\",\n    \"name\": \"{\\n  error\\n}\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 245\n  },\n  {\n    \"id\": \"2d1317a652d164e2\",\n    \"name\": \"oldestPostId\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 334\n  },\n  {\n    \"id\": \"9b99284ec33edc88\",\n    \"name\": \"latestPostId\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 349\n  },\n  {\n    \"id\": \"499986b35265485f\",\n    \"name\": \"jsx@357:16\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 357\n  },\n  {\n    \"id\": \"190f1194738ba383\",\n    \"name\": \"jsx@362:12\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 362\n  },\n  {\n    \"id\": \"f45322c5fb2d3d6a\",\n    \"name\": \"jsx@366:16\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 366\n  },\n  {\n    \"id\": \"88938f13be4d9012\",\n    \"name\": \"jsx@367:20\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 367\n  },\n  {\n    \"id\": \"1eab730cb596ea9f\",\n    \"name\": \"jsx@371:24\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 371\n  }\n]"
+      }
+    ]
+  }
+}

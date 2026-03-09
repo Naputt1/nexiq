@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "Header",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [],\n  \"externalUsages\": [\n    {\n      \"kind\": \"render\",\n      \"name\": \"Header\",\n      \"file\": \"/src/components/App.js\",\n      \"in\": \"jsx@55:10\"\n    },\n    {\n      \"kind\": \"render\",\n      \"name\": \"Header\",\n      \"file\": \"/src/components/App.js\",\n      \"in\": \"jsx@75:8\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

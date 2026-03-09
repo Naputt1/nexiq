@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "",
+    "query": "FocusTrap",
+    "strict": true,
+    "props": false,
+    "usages": true,
+    "loc": true,
+    "exclude": [
+      "**/node_modules/**",
+      ".git/**",
+      ".react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"FocusTrap\",\n      \"file\": \"/packages/components/src/focus_trap/index.tsx\",\n      \"loc\": {\n        \"line\": 12,\n        \"column\": 13\n      },\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"FocusTrap\",\n          \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n          \"loc\": {\n            \"line\": 289,\n            \"column\": 16\n          },\n          \"in\": \"jsx@289:16\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

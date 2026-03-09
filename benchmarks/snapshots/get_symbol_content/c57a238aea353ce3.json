@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "ButtonProps"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"symbol:import:/src/components/ui/table/pagination.tsx:ButtonProps\",\n    \"name\": \"ButtonProps\",\n    \"file\": \"/src/components/ui/table/pagination.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

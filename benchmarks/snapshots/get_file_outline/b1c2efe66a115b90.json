@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "filePath": "src/components/ArticleList.js"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"bbc11d24863e63b5\",\n    \"name\": \"ArticleList\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 5\n  }\n]"
+      }
+    ]
+  }
+}

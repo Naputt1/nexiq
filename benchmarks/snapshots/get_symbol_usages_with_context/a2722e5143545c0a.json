@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalBody"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 276,\n    \"column\": 24,\n    \"in\": \"jsx@276:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                            headerButton={this.props.headerButton}\",\n      \"                        />\",\n      \"                        <ModalBody\",\n      \"                            compassDesign={this.props.compassDesign}\",\n      \"                            errorText={this.props.errorText}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

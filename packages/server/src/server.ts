@@ -32,6 +32,7 @@ export interface GetSymbolInfoArgs {
   usages?: boolean;
   loc?: boolean;
   exclude?: string[];
+  fields?: string[];
 }
 
 export interface GetSymbolUsagesWithContextArgs {
@@ -41,24 +42,28 @@ export interface GetSymbolUsagesWithContextArgs {
   strict?: boolean;
   contextLines?: number;
   exclude?: string[];
+  fields?: string[];
 }
 
 export interface FindFilesArgs {
   projectPath: string;
   subProject?: string;
   pattern: string;
+  fields?: string[];
 }
 
 export interface GetFileImportsArgs {
   projectPath: string;
   subProject?: string;
   filePath: string;
+  fields?: string[];
 }
 
 export interface GetProjectTreeArgs {
   projectPath: string;
   subProject?: string;
   maxDepth?: number;
+  fields?: string[];
 }
 
 export interface GetComponentHierarchyArgs {
@@ -66,18 +71,21 @@ export interface GetComponentHierarchyArgs {
   subProject?: string;
   componentName: string;
   depth?: number;
+  fields?: string[];
 }
 
 export interface GetSymbolLocationArgs {
   projectPath: string;
   subProject?: string;
   query: string;
+  fields?: string[];
 }
 
 export interface GetSymbolContentArgs {
   projectPath: string;
   subProject?: string;
   query: string;
+  fields?: string[];
 }
 
 export interface AddLabelArgs {
@@ -108,6 +116,7 @@ export interface GetFileOutlineArgs {
   projectPath: string;
   subProject?: string;
   filePath: string;
+  fields?: string[];
 }
 
 export interface ReadFileArgs {
@@ -135,6 +144,74 @@ export interface ListFilesArgs {
   fields?: string[];
   exclude?: string[];
 }
+
+export interface GetPropDefinitionsArgs {
+  projectPath: string;
+  subProject?: string;
+  componentName: string;
+  fields?: string[];
+}
+
+export interface WriteFileArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+  content: string;
+}
+
+export interface ReplaceFileContentArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+  oldString: string;
+  newString: string;
+}
+
+export interface MultiReplaceFileContentArgs {
+  projectPath: string;
+  subProject?: string;
+  filePath: string;
+  replacements: { oldString: string; newString: string }[];
+}
+
+export interface ToolArgsMap {
+  open_project: OpenProjectArgs;
+  get_symbol_info: GetSymbolInfoArgs;
+  get_symbol_usages_with_context: GetSymbolUsagesWithContextArgs;
+  get_prop_definitions: GetPropDefinitionsArgs;
+  find_files: FindFilesArgs;
+  get_file_imports: GetFileImportsArgs;
+  get_project_tree: GetProjectTreeArgs;
+  list_files: ListFilesArgs;
+  get_component_hierarchy: GetComponentHierarchyArgs;
+  get_symbol_location: GetSymbolLocationArgs;
+  get_symbol_content: GetSymbolContentArgs;
+  add_label: AddLabelArgs;
+  list_labels: ListLabelsArgs;
+  search_by_label: SearchByLabelArgs;
+  list_directory: ListDirectoryArgs;
+  get_file_outline: GetFileOutlineArgs;
+  read_file: ReadFileArgs;
+  grep_search: GrepSearchArgs;
+  run_shell_command: RunShellCommandArgs;
+  write_file: WriteFileArgs;
+  replace_file_content: ReplaceFileContentArgs;
+  multi_replace_file_content: MultiReplaceFileContentArgs;
+}
+
+type KnownToolCall = {
+  [K in keyof ToolArgsMap]: {
+    name: K;
+    args: ToolArgsMap[K];
+  };
+}[keyof ToolArgsMap];
+
+type UnknownToolCall = {
+  name: Exclude<string, keyof ToolArgsMap>;
+  args: Record<string, unknown>;
+};
+
+type ToolCall = KnownToolCall | UnknownToolCall;
 
 export type SymbolInfoResult =
   | {
@@ -267,6 +344,12 @@ export class BackendServer {
                 description:
                   "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return (e.g., ['definitions']). Omit to return all fields.",
+              },
             },
             required: ["projectPath", "query"],
           },
@@ -306,6 +389,12 @@ export class BackendServer {
                 description:
                   "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
             },
             required: ["projectPath", "query"],
           },
@@ -328,6 +417,12 @@ export class BackendServer {
               componentName: {
                 type: "string",
                 description: "The name of the component",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
               },
             },
             required: ["projectPath", "componentName"],
@@ -353,6 +448,12 @@ export class BackendServer {
                 description:
                   "Pattern to match against file paths or basenames (e.g., 'App*', 'src/**/*.tsx', 'auth')",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
             },
             required: ["projectPath", "pattern"],
           },
@@ -376,6 +477,12 @@ export class BackendServer {
                 type: "string",
                 description: "Relative path from project root",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
             },
             required: ["projectPath", "filePath"],
           },
@@ -398,6 +505,12 @@ export class BackendServer {
               maxDepth: {
                 type: "number",
                 description: "Maximum depth to traverse (default: 3)",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
               },
             },
             required: ["projectPath"],
@@ -458,6 +571,12 @@ export class BackendServer {
                 description:
                   "How many levels up and down to traverse (default: 2)",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
             },
             required: ["projectPath", "componentName"],
           },
@@ -481,6 +600,12 @@ export class BackendServer {
                 type: "string",
                 description: "The name of the symbol to find",
               },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
             },
             required: ["projectPath", "query"],
           },
@@ -502,6 +627,12 @@ export class BackendServer {
               query: {
                 type: "string",
                 description: "The name of the symbol to find",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
               },
             },
             required: ["projectPath", "query"],
@@ -647,6 +778,69 @@ export class BackendServer {
             required: ["projectPath", "command"],
           },
         },
+        {
+          name: "write_file",
+          description:
+            "Write content to a file. Useful for creating or overwriting files.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              filePath: {
+                type: "string",
+                description: "Relative path from project root",
+              },
+              content: { type: "string" },
+            },
+            required: ["projectPath", "filePath", "content"],
+          },
+        },
+        {
+          name: "replace_file_content",
+          description: "Replace a string in a file with another string.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              filePath: {
+                type: "string",
+                description: "Relative path from project root",
+              },
+              oldString: { type: "string" },
+              newString: { type: "string" },
+            },
+            required: ["projectPath", "filePath", "oldString", "newString"],
+          },
+        },
+        {
+          name: "multi_replace_file_content",
+          description: "Perform multiple string replacements in a single file.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              filePath: {
+                type: "string",
+                description: "Relative path from project root",
+              },
+              replacements: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    oldString: { type: "string" },
+                    newString: { type: "string" },
+                  },
+                  required: ["oldString", "newString"],
+                },
+              },
+            },
+            required: ["projectPath", "filePath", "replacements"],
+          },
+        },
       ];
 
       const extensions = this.projectManager.getAllExtensions();
@@ -666,10 +860,10 @@ export class BackendServer {
     this.mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
       try {
-        const result = await this.handleCallTool(
-          name,
-          (args as Record<string, unknown>) || {},
-        );
+        const result = await this.handleCallTool({
+          name: name as keyof ToolArgsMap,
+          args: args as unknown as ToolArgsMap[keyof ToolArgsMap],
+        } as ToolCall);
         return result;
       } catch (error: unknown) {
         const errorMessage =
@@ -682,16 +876,16 @@ export class BackendServer {
     });
   }
 
-  public async handleCallTool(name: string, args: Record<string, unknown>) {
+  public async handleCallTool(tollCall: ToolCall) {
     // Handle extension tools
     const extensions = this.projectManager.getAllExtensions();
     for (const ext of extensions) {
-      if (name.startsWith(`${ext.id}_`)) {
-        const toolName = name.replace(`${ext.id}_`, "");
+      if (tollCall.name.startsWith(`${ext.id}_`)) {
+        const toolName = tollCall.name.replace(`${ext.id}_`, "");
         const tool = (ext.mcpTools || []).find((t) => t.name === toolName);
         if (tool) {
           const result = await tool.handler({
-            ...args,
+            ...tollCall.args,
             projectManager: this.projectManager,
           });
           return {
@@ -701,11 +895,13 @@ export class BackendServer {
       }
     }
 
-    const fields = args.fields as string[] | undefined;
+    return await this.handleKnownTollCall(tollCall as KnownToolCall);
+  }
 
-    switch (name) {
+  private async handleKnownTollCall(knownCall: KnownToolCall) {
+    switch (knownCall.name) {
       case "open_project": {
-        const { projectPath, subProject } = args as unknown as OpenProjectArgs;
+        const { projectPath, subProject } = knownCall.args;
         await this.projectManager.openProject(projectPath, subProject);
         return {
           content: [
@@ -726,7 +922,8 @@ export class BackendServer {
           usages,
           loc,
           exclude,
-        } = args as unknown as GetSymbolInfoArgs;
+          fields,
+        } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
 
         const includeUsage = usages === true; // Default to false
@@ -769,7 +966,7 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(result, null, 2),
+              text: JSON.stringify(this.filterFields(result, fields), null, 2),
             },
           ],
         };
@@ -782,7 +979,8 @@ export class BackendServer {
           strict,
           contextLines,
           exclude,
-        } = args as unknown as GetSymbolUsagesWithContextArgs;
+          fields,
+        } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getSymbolUsagesWithContext(
           resolvedPath,
@@ -797,18 +995,14 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(results, null, 2),
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
             },
           ],
         };
       }
       case "get_prop_definitions": {
-        const { projectPath, subProject, componentName } =
-          args as unknown as {
-            projectPath: string;
-            subProject?: string;
-            componentName: string;
-          };
+        const { projectPath, subProject, componentName, fields } =
+          knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getPropDefinitions(
           resolvedPath,
@@ -820,14 +1014,13 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(results, null, 2),
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
             },
           ],
         };
       }
       case "find_files": {
-        const { projectPath, subProject, pattern } =
-          args as unknown as FindFilesArgs;
+        const { projectPath, subProject, pattern, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.findFiles(
           resolvedPath,
@@ -839,15 +1032,14 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(results, null, 2),
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
             },
           ],
         };
       }
 
       case "get_file_imports": {
-        const { projectPath, subProject, filePath } =
-          args as unknown as GetFileImportsArgs;
+        const { projectPath, subProject, filePath, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getFileImports(
           resolvedPath,
@@ -859,15 +1051,14 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(results, null, 2),
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
             },
           ],
         };
       }
 
       case "get_project_tree": {
-        const { projectPath, subProject, maxDepth } =
-          args as unknown as GetProjectTreeArgs;
+        const { projectPath, subProject, maxDepth, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getProjectTree(
           resolvedPath,
@@ -879,15 +1070,14 @@ export class BackendServer {
           content: [
             {
               type: "text",
-              text: JSON.stringify(results, null, 2),
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
             },
           ],
         };
       }
 
       case "list_files": {
-        const { projectPath, subProject, exclude } =
-          args as unknown as ListFilesArgs;
+        const { projectPath, subProject, exclude, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const project = await this.projectManager.openProject(
           resolvedPath,
@@ -956,8 +1146,8 @@ export class BackendServer {
       }
 
       case "get_component_hierarchy": {
-        const { projectPath, subProject, componentName, depth } =
-          args as unknown as GetComponentHierarchyArgs;
+        const { projectPath, subProject, componentName, depth, fields } =
+          knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getComponentHierarchy(
           resolvedPath,
@@ -976,8 +1166,7 @@ export class BackendServer {
       }
 
       case "get_symbol_location": {
-        const { projectPath, subProject, query } =
-          args as unknown as GetSymbolLocationArgs;
+        const { projectPath, subProject, query, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getSymbolLocation(
           resolvedPath,
@@ -995,8 +1184,7 @@ export class BackendServer {
       }
 
       case "get_symbol_content": {
-        const { projectPath, subProject, query } =
-          args as unknown as GetSymbolContentArgs;
+        const { projectPath, subProject, query, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getSymbolContent(
           resolvedPath,
@@ -1014,8 +1202,7 @@ export class BackendServer {
       }
 
       case "add_label": {
-        const { projectPath, subProject, id, label } =
-          args as unknown as AddLabelArgs;
+        const { projectPath, subProject, id, label } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.addLabel(
           resolvedPath,
@@ -1029,7 +1216,7 @@ export class BackendServer {
       }
 
       case "list_labels": {
-        const { projectPath, subProject } = args as unknown as ListLabelsArgs;
+        const { projectPath, subProject } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getLabels(
           resolvedPath,
@@ -1041,8 +1228,7 @@ export class BackendServer {
       }
 
       case "search_by_label": {
-        const { projectPath, subProject, label } =
-          args as unknown as SearchByLabelArgs;
+        const { projectPath, subProject, label } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.findEntitiesByLabel(
           resolvedPath,
@@ -1055,8 +1241,7 @@ export class BackendServer {
       }
 
       case "list_directory": {
-        const { projectPath, subProject, dirPath } =
-          args as unknown as ListDirectoryArgs;
+        const { projectPath, subProject, dirPath } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.listDirectory(
           resolvedPath,
@@ -1069,8 +1254,7 @@ export class BackendServer {
       }
 
       case "get_file_outline": {
-        const { projectPath, subProject, filePath } =
-          args as unknown as GetFileOutlineArgs;
+        const { projectPath, subProject, filePath, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getFileOutline(
           resolvedPath,
@@ -1088,8 +1272,7 @@ export class BackendServer {
       }
 
       case "read_file": {
-        const { projectPath, subProject, filePath } =
-          args as unknown as ReadFileArgs;
+        const { projectPath, subProject, filePath } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.readFile(
           resolvedPath,
@@ -1100,8 +1283,7 @@ export class BackendServer {
       }
 
       case "grep_search": {
-        const { projectPath, subProject, pattern, exclude } =
-          args as unknown as GrepSearchArgs;
+        const { projectPath, subProject, pattern, exclude } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.grepSearch(
           resolvedPath,
@@ -1115,8 +1297,7 @@ export class BackendServer {
       }
 
       case "run_shell_command": {
-        const { projectPath, subProject, command } =
-          args as unknown as RunShellCommandArgs;
+        const { projectPath, subProject, command } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.runShellCommand(
           resolvedPath,
@@ -1128,8 +1309,52 @@ export class BackendServer {
         };
       }
 
+      case "write_file": {
+        const { projectPath, subProject, filePath, content } = knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const success = await this.projectManager.writeFile(
+          resolvedPath,
+          filePath,
+          content,
+        );
+        return {
+          content: [{ type: "text", text: JSON.stringify({ success }) }],
+        };
+      }
+
+      case "replace_file_content": {
+        const { projectPath, subProject, filePath, oldString, newString } =
+          knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const success = await this.projectManager.replaceFileContent(
+          resolvedPath,
+          filePath,
+          oldString,
+          newString,
+        );
+        return {
+          content: [{ type: "text", text: JSON.stringify({ success }) }],
+        };
+      }
+
+      case "multi_replace_file_content": {
+        const { projectPath, subProject, filePath, replacements } =
+          knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const success = await this.projectManager.multiReplaceFileContent(
+          resolvedPath,
+          filePath,
+          replacements,
+        );
+        return {
+          content: [{ type: "text", text: JSON.stringify({ success }) }],
+        };
+      }
+
       default:
-        throw new Error(`Unknown tool: ${name}`);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        throw new Error(`Unknown tool: ${knownCall.name}`);
     }
   }
 
@@ -1397,7 +1622,10 @@ export class BackendServer {
               }
               case "call_tool": {
                 const { name, arguments: args } = data.payload;
-                const result = await this.handleCallTool(name, args);
+                const result = await this.handleCallTool({
+                  name: name as keyof ToolArgsMap,
+                  args: args as unknown as ToolArgsMap[keyof ToolArgsMap],
+                } as ToolCall);
                 ws.send(
                   JSON.stringify({
                     type: "tool_result",

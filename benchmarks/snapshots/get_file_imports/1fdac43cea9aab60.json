@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/app/routes/app/root.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"Outlet\": {\n    \"localName\": \"Outlet\",\n    \"importedName\": \"Outlet\",\n    \"source\": \"react-router\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"DashboardLayout\": {\n    \"localName\": \"DashboardLayout\",\n    \"importedName\": \"DashboardLayout\",\n    \"source\": \"/src/components/layouts/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

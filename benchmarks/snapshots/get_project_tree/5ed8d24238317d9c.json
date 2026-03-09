@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "maxDepth": 2
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"name\": \"/\",\n  \"children\": [\n    {\n      \"name\": \"__mocks__\",\n      \"children\": [\n        {\n          \"name\": \"zustand.ts\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"name\": \"e2e\",\n      \"children\": [\n        {\n          \"name\": \"tests\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"name\": \"mock-server.ts\",\n      \"children\": []\n    },\n    {\n      \"name\": \"playwright.config.ts\",\n      \"children\": []\n    },\n    {\n      \"name\": \"src\",\n      \"children\": [\n        {\n          \"name\": \"app\",\n          \"children\": []\n        },\n        {\n          \"name\": \"components\",\n          \"children\": []\n        },\n        {\n          \"name\": \"config\",\n          \"children\": []\n        },\n        {\n          \"name\": \"features\",\n          \"children\": []\n        },\n        {\n          \"name\": \"hooks\",\n          \"children\": []\n        },\n        {\n          \"name\": \"lib\",\n          \"children\": []\n        },\n        {\n          \"name\": \"main.tsx\",\n          \"children\": []\n        },\n        {\n          \"name\": \"testing\",\n          \"children\": []\n        },\n        {\n          \"name\": \"types\",\n          \"children\": []\n        },\n        {\n          \"name\": \"utils\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

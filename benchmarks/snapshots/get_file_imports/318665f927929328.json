@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "filePath": "src/components/Profile.js"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"ArticleList\": {\n    \"localName\": \"ArticleList\",\n    \"importedName\": null,\n    \"source\": \"/src/components/ArticleList.js\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": null,\n    \"source\": \"react\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"Link\": {\n    \"localName\": \"Link\",\n    \"importedName\": \"Link\",\n    \"source\": \"react-router-dom\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"agent\": {\n    \"localName\": \"agent\",\n    \"importedName\": null,\n    \"source\": \"/src/agent.js\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"connect\": {\n    \"localName\": \"connect\",\n    \"importedName\": \"connect\",\n    \"source\": \"react-redux\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"FOLLOW_USER\": {\n    \"localName\": \"FOLLOW_USER\",\n    \"importedName\": \"FOLLOW_USER\",\n    \"source\": \"/src/constants/actionTypes.js\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"UNFOLLOW_USER\": {\n    \"localName\": \"UNFOLLOW_USER\",\n    \"importedName\": \"UNFOLLOW_USER\",\n    \"source\": \"/src/constants/actionTypes.js\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"PROFILE_PAGE_LOADED\": {\n    \"localName\": \"PROFILE_PAGE_LOADED\",\n    \"importedName\": \"PROFILE_PAGE_LOADED\",\n    \"source\": \"/src/constants/actionTypes.js\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"PROFILE_PAGE_UNLOADED\": {\n    \"localName\": \"PROFILE_PAGE_UNLOADED\",\n    \"importedName\": \"PROFILE_PAGE_UNLOADED\",\n    \"source\": \"/src/constants/actionTypes.js\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

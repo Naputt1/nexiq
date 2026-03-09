@@ -150,13 +150,15 @@ interface BenchmarkResult {
   totalTokens: number;
   toolCallsCount: number;
   latencyMs: number;
+  verificationOutput?: {
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+  };
   steps: any[];
   runId?: string;
   uniqueId: string; // Internal ID for comparison
 }
-
-// --- Run Detection ---
-const runFiles = import.meta.glob("../../results/*.json", { query: "?url" });
 
 // --- Main App ---
 
@@ -221,9 +223,11 @@ export default function App() {
   const addResults = useCallback((data: any, fileName: string) => {
     const newResults = Array.isArray(data) ? data : [data];
     const runId = fileName
-      .replace(/^.*run_/, "")
+      .split("/")
+      .pop()
+      ?.replace(/^run_/, "")
       .replace(/\.json$/, "")
-      .replace(/\?url$/, "");
+      .replace(/\?url$/, "") || "";
 
     setResults((prev) => {
       // Avoid duplicate runs
@@ -258,23 +262,34 @@ export default function App() {
     setLoadedRunFiles((prev) => new Set([...prev, fileName]));
   }, []);
 
-  // Auto-detect runs on mount
+  // Auto-detect runs on mount and poll for new ones
   useEffect(() => {
-    const files = Object.keys(runFiles);
-    setDetectedRunFiles(files.sort().reverse());
+    const fetchRuns = async () => {
+      try {
+        const response = await fetch('/api/results');
+        const files: string[] = await response.json();
+        setDetectedRunFiles(files.sort().reverse());
+        
+        // Auto-load the latest run if nothing is loaded yet
+        if (files.length > 0 && loadedRunFiles.size === 0) {
+            loadRun(files[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch runs:", err);
+      }
+    };
 
-    // Auto-load the latest run
-    if (files.length > 0) {
-      loadRun(files[0]);
-    }
-  }, []);
+    fetchRuns();
+    const interval = setInterval(fetchRuns, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [loadedRunFiles.size]);
 
   const loadRun = async (fileKey: string) => {
     if (loadedRunFiles.has(fileKey)) return;
     setIsLoading(true);
     try {
-      const module: any = await runFiles[fileKey]();
-      const response = await fetch(module.default);
+      // If it's a relative path from API, we can fetch it directly
+      const response = await fetch(fileKey);
       const data = await response.json();
       addResults(data, fileKey);
     } catch (err) {
@@ -288,7 +303,10 @@ export default function App() {
     setResults((prev) => prev.filter((r) => r.runId !== runId));
     setLoadedRunFiles((prev) => {
       const next = new Set(prev);
-      const fileKey = Array.from(prev).find((k) => k.includes(runId));
+      const fileKey = Array.from(prev).find((k) => {
+        const id = k.split("/").pop()?.replace(/^run_/, "").replace(/\.json$/, "").replace(/\?url$/, "") || "";
+        return id === runId;
+      });
       if (fileKey) next.delete(fileKey);
       return next;
     });
@@ -642,12 +660,13 @@ export default function App() {
                     file
                       .split("/")
                       .pop()
-                      ?.replace("run_", "")
+                      ?.replace(/^run_/, "")
                       .replace(".json", "")
                       .replace("?url", "") || "";
-                  const isLoaded = Array.from(loadedRunFiles).some((k) =>
-                    k.includes(runId),
-                  );
+                  const isLoaded = Array.from(loadedRunFiles).some((k) => {
+                    const id = k.split("/").pop()?.replace(/^run_/, "").replace(/\.json$/, "").replace(/\?url$/, "") || "";
+                    return id === runId;
+                  });
                   return (
                     <div
                       key={file}
@@ -1594,6 +1613,32 @@ export default function App() {
                                 )}
                               </div>
                             ))}
+                            {result.verificationOutput && (
+                              <div className="space-y-4">
+                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                  <CheckCircle2 className={cn("h-4 w-4", result.verificationOutput.exitCode === 0 ? "text-emerald-500" : "text-rose-500")} />
+                                  Verification Output
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {result.verificationOutput.stdout && (
+                                    <div className="space-y-1">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">STDOUT</p>
+                                      <pre className="p-3 rounded-lg bg-gray-900 text-gray-300 text-[10px] font-mono whitespace-pre-wrap max-h-60 overflow-auto border border-gray-800 shadow-inner">
+                                        {result.verificationOutput.stdout}
+                                      </pre>
+                                    </div>
+                                  )}
+                                  {result.verificationOutput.stderr && (
+                                    <div className="space-y-1">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-rose-400">STDERR</p>
+                                      <pre className="p-3 rounded-lg bg-rose-950/30 text-rose-200 text-[10px] font-mono whitespace-pre-wrap max-h-60 overflow-auto border border-rose-900/30 shadow-inner">
+                                        {result.verificationOutput.stderr}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </Card>

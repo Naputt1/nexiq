@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "",
+    "query": "GenericModal",
+    "strict": true,
+    "props": false,
+    "usages": false,
+    "loc": true,
+    "exclude": [
+      "**/node_modules/**",
+      ".git/**",
+      ".react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": []\n}"
+      }
+    ]
+  }
+}

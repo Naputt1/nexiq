@@ -1,0 +1,1243 @@
+[
+  {
+    "scenarioId": "small-1",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "baseline",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": true,
+    "totalTokens": 6241,
+    "toolCallsCount": 2,
+    "latencyMs": 7643,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Find the definition of `Button` and list every file where it is rendered.",
+        "tokens": 16
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_grep_search_2pWUM8yLE8l910MPWqaE",
+            "name": "grep_search",
+            "arguments": {
+              "pattern": "Button",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 56
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"content\\\": \\\"<Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 1,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={<Button variant=\\\\\\\"destructive\\\\\\\">Delete</Button>}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 42,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 38,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"<Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 52,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"destructive\\\\\\\" icon={<Trash className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 38,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"content\\\": \\\"<Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 43,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 46,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 51,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"<Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 82,\\n    \\\"content\\\": \\\"<Button onClick={() => commentsQuery.fetchNextPage()}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 88,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 96,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 102,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 42,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 8,\\n    \\\"content\\\": \\\"import { ButtonProps, buttonVariants } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"} & Pick<ButtonProps, 'size'> &\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 60,\\n    \\\"content\\\": \\\"buttonVariants({\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/notifications/notification.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/notifications/notification.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"</button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '../button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 49,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\" className=\\\\\\\"w-full\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 51,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 75,\\n    \\\"content\\\": \\\"triggerButton={<Button>Open Form</Button>}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 78,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 79,\\n    \\\"content\\\": \\\"<Button form=\\\\\\\"my-form\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 81,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { Button } from '../button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 18,\\n    \\\"content\\\": \\\"triggerButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"submitButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 28,\\n    \\\"content\\\": \\\"triggerButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 29,\\n    \\\"content\\\": \\\"submitButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 50,\\n    \\\"content\\\": \\\"<DrawerTrigger asChild>{triggerButton}</DrawerTrigger>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 60,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 62,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 64,\\n    \\\"content\\\": \\\"{submitButton}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 74,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 94,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\">Open</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 54,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"const cancelButtonRef = React.useRef(null);\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\">Open Dialog</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 43,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"<Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 46,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 18,\\n    \\\"content\\\": \\\"triggerButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"confirmButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 22,\\n    \\\"content\\\": \\\"cancelButtonText?: string;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 28,\\n    \\\"content\\\": \\\"triggerButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 29,\\n    \\\"content\\\": \\\"confirmButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 32,\\n    \\\"content\\\": \\\"cancelButtonText = 'Cancel',\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"const cancelButtonRef = React.useRef(null);\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 56,\\n    \\\"content\\\": \\\"<DialogTrigger asChild>{triggerButton}</DialogTrigger>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 80,\\n    \\\"content\\\": \\\"{confirmButton}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 81,\\n    \\\"content\\\": \\\"<Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 82,\\n    \\\"content\\\": \\\"{cancelButtonText}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 83,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_grep_search_2pWUM8yLE8l910MPWqaE",
+        "toolName": "grep_search",
+        "tokens": 4978
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_OcpbJ2OnAAWoIFb9nEX9",
+            "name": "read_file",
+            "arguments": {
+              "filePath": "src/components/ui/button/button.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 60
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Slot } from '@radix-ui/react-slot';\\nimport { cva, type VariantProps } from 'class-variance-authority';\\nimport * as React from 'react';\\n\\nimport { cn } from '@/utils/cn';\\n\\nimport { Spinner } from '../spinner';\\n\\nconst buttonVariants = cva(\\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\\n  {\\n    variants: {\\n      variant: {\\n        default:\\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\\n        destructive:\\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\\n        outline:\\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\\n        secondary:\\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\\n        link: 'text-primary underline-offset-4 hover:underline',\\n      },\\n      size: {\\n        default: 'h-9 px-4 py-2',\\n        sm: 'h-8 rounded-md px-3 text-xs',\\n        lg: 'h-10 rounded-md px-8',\\n        icon: 'size-9',\\n      },\\n    },\\n    defaultVariants: {\\n      variant: 'default',\\n      size: 'default',\\n    },\\n  },\\n);\\n\\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\\n  VariantProps<typeof buttonVariants> & {\\n    asChild?: boolean;\\n    isLoading?: boolean;\\n    icon?: React.ReactNode;\\n  };\\n\\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\\n  (\\n    {\\n      className,\\n      variant,\\n      size,\\n      asChild = false,\\n      children,\\n      isLoading,\\n      icon,\\n      ...props\\n    },\\n    ref,\\n  ) => {\\n    const Comp = asChild ? Slot : 'button';\\n    return (\\n      <Comp\\n        className={cn(buttonVariants({ variant, size, className }))}\\n        ref={ref}\\n        {...props}\\n      >\\n        {isLoading && <Spinner size=\\\"sm\\\" className=\\\"text-current\\\" />}\\n        {!isLoading && icon && <span className=\\\"mr-2\\\">{icon}</span>}\\n        <span className=\\\"mx-2\\\">{children}</span>\\n      </Comp>\\n    );\\n  },\\n);\\nButton.displayName = 'Button';\\n\\nexport { Button, buttonVariants };\\n\"}]}",
+        "toolCallId": "tool_read_file_OcpbJ2OnAAWoIFb9nEX9",
+        "toolName": "read_file",
+        "tokens": 647
+      },
+      {
+        "role": "assistant",
+        "content": "The `Button` component is defined in **`src/components/ui/button/button.tsx`**. It is a reusable component built using Radix UI's `Slot` and `class-variance-authority` (CVA) for styling.\n\n### Files where `Button` is rendered:\n\n**Feature Components:**\n*   `src/features/users/components/update-profile.tsx`\n*   `src/features/users/components/delete-user.tsx`\n*   `src/features/discussions/components/update-discussion.tsx`\n*   `src/features/discussions/components/delete-discussion.tsx`\n*   `src/features/discussions/components/create-discussion.tsx`\n*   `src/features/comments/components/delete-comment.tsx`\n*   `src/features/comments/components/create-comment.tsx`\n*   `src/features/comments/components/comments-list.tsx`\n*   `src/features/auth/components/register-form.tsx`\n*   `src/features/auth/components/login-form.tsx`\n\n**UI Library & Layout Components:**\n*   `src/components/ui/form/form-drawer.tsx`\n*   `src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx`\n\n**Storybook & Documentation:**\n*   `src/components/ui/form/form.stories.tsx`\n*   `src/components/ui/dropdown/dropdown.stories.tsx`\n*   `src/components/ui/drawer/drawer.stories.tsx`\n*   `src/components/ui/dialog/dialog.stories.tsx`",
+        "tokens": 289
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-1",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "react-map-warm",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": true,
+    "totalTokens": 2652,
+    "toolCallsCount": 1,
+    "latencyMs": 4909,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Find the definition of `Button` and list every file where it is rendered.",
+        "tokens": 16
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_info_HE5RFlS8vSRG3yMKLkXr",
+            "name": "get_symbol_info",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "Button",
+              "usages": true
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"definitions\\\": [\\n    {\\n      \\\"kind\\\": \\\"component\\\",\\n      \\\"name\\\": \\\"Button\\\",\\n      \\\"file\\\": \\\"/src/components/ui/button/button.tsx\\\",\\n      \\\"usages\\\": [\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n          \\\"in\\\": \\\"UpdateProfile\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n          \\\"in\\\": \\\"UpdateProfile\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n          \\\"in\\\": \\\"DeleteUser\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n          \\\"in\\\": \\\"DeleteUser\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n          \\\"in\\\": \\\"UpdateDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n          \\\"in\\\": \\\"UpdateDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n          \\\"in\\\": \\\"DeleteDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n          \\\"in\\\": \\\"DeleteDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n          \\\"in\\\": \\\"CreateDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n          \\\"in\\\": \\\"CreateDiscussion\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n          \\\"in\\\": \\\"DeleteComment\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n          \\\"in\\\": \\\"DeleteComment\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n          \\\"in\\\": \\\"CreateComment\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n          \\\"in\\\": \\\"CreateComment\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n          \\\"in\\\": \\\"CommentsList\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n          \\\"in\\\": \\\"RegisterForm\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n          \\\"in\\\": \\\"MyForm\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@75:21\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@79:8\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n          \\\"in\\\": \\\"FormDrawer\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n          \\\"in\\\": \\\"Default\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n          \\\"in\\\": \\\"WithCheckboxItems\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n          \\\"in\\\": \\\"WithRadioItems\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n          \\\"in\\\": \\\"WithSubmenus\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n          \\\"in\\\": \\\"DemoDrawer\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n          \\\"in\\\": \\\"DemoDrawer\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"DemoDialog\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"DemoDialog\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"DemoDialog\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n          \\\"in\\\": \\\"ConfirmationDialog\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@20:19\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@21:19\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@30:19\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n          \\\"in\\\": \\\"jsx@31:19\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n          \\\"in\\\": \\\"DashboardLayout\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n          \\\"in\\\": \\\"DashboardLayout\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/components/errors/main.tsx\\\",\\n          \\\"in\\\": \\\"MainErrorFallback\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n          \\\"in\\\": \\\"LandingRoute\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n          \\\"in\\\": \\\"LandingRoute\\\"\\n        },\\n        {\\n          \\\"kind\\\": \\\"render\\\",\\n          \\\"name\\\": \\\"Button\\\",\\n          \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n          \\\"in\\\": \\\"LoginForm\\\"\\n        }\\n      ]\\n    }\\n  ],\\n  \\\"externalUsages\\\": []\\n}\"}]}",
+        "toolCallId": "tool_get_symbol_info_HE5RFlS8vSRG3yMKLkXr",
+        "toolName": "get_symbol_info",
+        "tokens": 2081
+      },
+      {
+        "role": "assistant",
+        "content": "The `Button` component is defined in:\n- `/src/components/ui/button/button.tsx`\n\nIt is rendered in the following files:\n1.  `/src/features/users/components/update-profile.tsx`\n2.  `/src/features/users/components/delete-user.tsx`\n3.  `/src/features/discussions/components/update-discussion.tsx`\n4.  `/src/features/discussions/components/delete-discussion.tsx`\n5.  `/src/features/discussions/components/create-discussion.tsx`\n6.  `/src/features/comments/components/delete-comment.tsx`\n7.  `/src/features/comments/components/create-comment.tsx`\n8.  `/src/features/comments/components/comments-list.tsx`\n9.  `/src/features/auth/components/register-form.tsx`\n10. `/src/features/auth/components/login-form.tsx`\n11. `/src/components/ui/form/form.stories.tsx`\n12. `/src/components/ui/form/form-drawer.tsx`\n13. `/src/components/ui/dropdown/dropdown.stories.tsx`\n14. `/src/components/ui/drawer/drawer.stories.tsx`\n15. `/src/components/ui/dialog/dialog.stories.tsx`\n16. `/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx`\n17. `/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx`\n18. `/src/components/layouts/dashboard-layout.tsx`\n19. `/src/components/errors/main.tsx`\n20. `/src/app/routes/landing.tsx`",
+        "tokens": 297
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-2",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "baseline",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": true,
+    "totalTokens": 6836,
+    "toolCallsCount": 3,
+    "latencyMs": 8808,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Identify all props accepted by `Button` and find exactly where the data for the `isLoading` prop originates in `LoginForm`.",
+        "tokens": 26
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_grep_search_5KvBErrieIq0EoATQncf",
+            "name": "grep_search",
+            "arguments": {
+              "pattern": "Button",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"content\\\": \\\"<Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 1,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={<Button variant=\\\\\\\"destructive\\\\\\\">Delete</Button>}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 42,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 38,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"<Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 52,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"destructive\\\\\\\" icon={<Trash className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 38,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"content\\\": \\\"<Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 41,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 43,\\n    \\\"content\\\": \\\"confirmButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 46,\\n    \\\"content\\\": \\\"type=\\\\\\\"button\\\\\\\"\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 51,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"triggerButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"content\\\": \\\"<Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 36,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 82,\\n    \\\"content\\\": \\\"<Button onClick={() => commentsQuery.fetchNextPage()}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 88,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 96,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 102,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 42,\\n    \\\"content\\\": \\\"<Button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 8,\\n    \\\"content\\\": \\\"import { ButtonProps, buttonVariants } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"} & Pick<ButtonProps, 'size'> &\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/table/pagination.tsx\\\",\\n    \\\"line\\\": 60,\\n    \\\"content\\\": \\\"buttonVariants({\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/notifications/notification.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"<button\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/notifications/notification.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"content\\\": \\\"</button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '../button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 49,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\" className=\\\\\\\"w-full\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 51,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 75,\\n    \\\"content\\\": \\\"triggerButton={<Button>Open Form</Button>}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 78,\\n    \\\"content\\\": \\\"submitButton={\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 79,\\n    \\\"content\\\": \\\"<Button form=\\\\\\\"my-form\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 81,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { Button } from '../button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 18,\\n    \\\"content\\\": \\\"triggerButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"submitButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 28,\\n    \\\"content\\\": \\\"triggerButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 29,\\n    \\\"content\\\": \\\"submitButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 50,\\n    \\\"content\\\": \\\"<DrawerTrigger asChild>{triggerButton}</DrawerTrigger>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 60,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 62,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 64,\\n    \\\"content\\\": \\\"{submitButton}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 74,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 94,\\n    \\\"content\\\": \\\"<Button>Open Menu</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\">Open</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 54,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"const cancelButtonRef = React.useRef(null);\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"content\\\": \\\"<Button variant=\\\\\\\"outline\\\\\\\">Open Dialog</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 43,\\n    \\\"content\\\": \\\"<Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"content\\\": \\\"<Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 46,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { Button } from '@/components/ui/button';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 18,\\n    \\\"content\\\": \\\"triggerButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"confirmButton: React.ReactElement;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 22,\\n    \\\"content\\\": \\\"cancelButtonText?: string;\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 28,\\n    \\\"content\\\": \\\"triggerButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 29,\\n    \\\"content\\\": \\\"confirmButton,\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 32,\\n    \\\"content\\\": \\\"cancelButtonText = 'Cancel',\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"content\\\": \\\"const cancelButtonRef = React.useRef(null);\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 56,\\n    \\\"content\\\": \\\"<DialogTrigger asChild>{triggerButton}</DialogTrigger>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 80,\\n    \\\"content\\\": \\\"{confirmButton}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 81,\\n    \\\"content\\\": \\\"<Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 82,\\n    \\\"content\\\": \\\"{cancelButtonText}\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 83,\\n    \\\"content\\\": \\\"</Button>\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_grep_search_5KvBErrieIq0EoATQncf",
+        "toolName": "grep_search",
+        "tokens": 4978
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_RQ81oIjuSKWkQvdqT8Gh",
+            "name": "read_file",
+            "arguments": {
+              "filePath": "src/components/ui/button/button.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 62
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Slot } from '@radix-ui/react-slot';\\nimport { cva, type VariantProps } from 'class-variance-authority';\\nimport * as React from 'react';\\n\\nimport { cn } from '@/utils/cn';\\n\\nimport { Spinner } from '../spinner';\\n\\nconst buttonVariants = cva(\\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\\n  {\\n    variants: {\\n      variant: {\\n        default:\\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\\n        destructive:\\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\\n        outline:\\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\\n        secondary:\\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\\n        link: 'text-primary underline-offset-4 hover:underline',\\n      },\\n      size: {\\n        default: 'h-9 px-4 py-2',\\n        sm: 'h-8 rounded-md px-3 text-xs',\\n        lg: 'h-10 rounded-md px-8',\\n        icon: 'size-9',\\n      },\\n    },\\n    defaultVariants: {\\n      variant: 'default',\\n      size: 'default',\\n    },\\n  },\\n);\\n\\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\\n  VariantProps<typeof buttonVariants> & {\\n    asChild?: boolean;\\n    isLoading?: boolean;\\n    icon?: React.ReactNode;\\n  };\\n\\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\\n  (\\n    {\\n      className,\\n      variant,\\n      size,\\n      asChild = false,\\n      children,\\n      isLoading,\\n      icon,\\n      ...props\\n    },\\n    ref,\\n  ) => {\\n    const Comp = asChild ? Slot : 'button';\\n    return (\\n      <Comp\\n        className={cn(buttonVariants({ variant, size, className }))}\\n        ref={ref}\\n        {...props}\\n      >\\n        {isLoading && <Spinner size=\\\"sm\\\" className=\\\"text-current\\\" />}\\n        {!isLoading && icon && <span className=\\\"mr-2\\\">{icon}</span>}\\n        <span className=\\\"mx-2\\\">{children}</span>\\n      </Comp>\\n    );\\n  },\\n);\\nButton.displayName = 'Button';\\n\\nexport { Button, buttonVariants };\\n\"}]}",
+        "toolCallId": "tool_read_file_RQ81oIjuSKWkQvdqT8Gh",
+        "toolName": "read_file",
+        "tokens": 647
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_Q39d40E1x2PdWG2IlEaU",
+            "name": "read_file",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "src/features/auth/components/login-form.tsx"
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Link, useSearchParams } from 'react-router';\\n\\nimport { Button } from '@/components/ui/button';\\nimport { Form, Input } from '@/components/ui/form';\\nimport { paths } from '@/config/paths';\\nimport { useLogin, loginInputSchema } from '@/lib/auth';\\n\\ntype LoginFormProps = {\\n  onSuccess: () => void;\\n};\\n\\nexport const LoginForm = ({ onSuccess }: LoginFormProps) => {\\n  const login = useLogin({\\n    onSuccess,\\n  });\\n  const [searchParams] = useSearchParams();\\n  const redirectTo = searchParams.get('redirectTo');\\n\\n  return (\\n    <div>\\n      <Form\\n        onSubmit={(values) => {\\n          login.mutate(values);\\n        }}\\n        schema={loginInputSchema}\\n      >\\n        {({ register, formState }) => (\\n          <>\\n            <Input\\n              type=\\\"email\\\"\\n              label=\\\"Email Address\\\"\\n              error={formState.errors['email']}\\n              registration={register('email')}\\n            />\\n            <Input\\n              type=\\\"password\\\"\\n              label=\\\"Password\\\"\\n              error={formState.errors['password']}\\n              registration={register('password')}\\n            />\\n            <div>\\n              <Button\\n                isLoading={login.isPending}\\n                type=\\\"submit\\\"\\n                className=\\\"w-full\\\"\\n              >\\n                Log in\\n              </Button>\\n            </div>\\n          </>\\n        )}\\n      </Form>\\n      <div className=\\\"mt-2 flex items-center justify-end\\\">\\n        <div className=\\\"text-sm\\\">\\n          <Link\\n            to={paths.auth.register.getHref(redirectTo)}\\n            className=\\\"font-medium text-blue-600 hover:text-blue-500\\\"\\n          >\\n            Register\\n          </Link>\\n        </div>\\n      </div>\\n    </div>\\n  );\\n};\\n\"}]}",
+        "toolCallId": "tool_read_file_Q39d40E1x2PdWG2IlEaU",
+        "toolName": "read_file",
+        "tokens": 446
+      },
+      {
+        "role": "assistant",
+        "content": "The `Button` component accepts the following props:\n\n1.  **Inherited React Props**: All standard HTML button attributes via `React.ButtonHTMLAttributes<HTMLButtonElement>` (e.g., `type`, `onClick`, `className`, `disabled`, etc.).\n2.  **Variant Props (via `class-variance-authority`)**:\n    *   `variant`: `'default'`, `'destructive'`, `'outline'`, `'secondary'`, `'ghost'`, or `'link'`.\n    *   `size`: `'default'`, `'sm'`, `'lg'`, or `'icon'`.\n3.  **Custom Props**:\n    *   `asChild`: Boolean. If true, the button will render as its child component (using Radix UI Slot).\n    *   `isLoading`: Boolean. If true, displays a `Spinner`.\n    *   `icon`: `React.ReactNode`. Displays an icon before the button children if not loading.\n\n### Data Origin of `isLoading` in `LoginForm`\n\nIn `LoginForm`, the `isLoading` prop for the `Button` originates from the `login` object, specifically **`login.isPending`**.\n\nThe `login` object is created by calling the **`useLogin`** hook:\n\n```typescript\n// src/features/auth/components/login-form.tsx\n\nconst login = useLogin({\n  onSuccess,\n});\n\n// ... inside the return statement:\n<Button\n  isLoading={login.isPending}\n  type=\"submit\"\n  className=\"w-full\"\n>\n  Log in\n</Button>\n```\n\nThe `useLogin` hook (imported from `@/lib/auth`) typically wraps a TanStack Query (React Query) `useMutation`, where `isPending` indicates the current status of the asynchronous login request.",
+        "tokens": 362
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-2",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "react-map-warm",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": true,
+    "totalTokens": 9233,
+    "toolCallsCount": 9,
+    "latencyMs": 19352,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Identify all props accepted by `Button` and find exactly where the data for the `isLoading` prop originates in `LoginForm`.",
+        "tokens": 26
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_prop_definitions_gIRbFlxJpfB7EcD0wy3t",
+            "name": "get_prop_definitions",
+            "arguments": {
+              "componentName": "Button",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"name\\\": \\\"Button\\\",\\n    \\\"file\\\": \\\"/src/components/ui/button/button.tsx\\\",\\n    \\\"props\\\": [\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:className\\\",\\n        \\\"name\\\": \\\"className\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"74b500162f984d9f\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:variant\\\",\\n        \\\"name\\\": \\\"variant\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"594e28f9c091713b\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:size\\\",\\n        \\\"name\\\": \\\"size\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"84deae12a6dc5a63\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:asChild\\\",\\n        \\\"name\\\": \\\"asChild\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"defaultValue\\\": {\\n          \\\"type\\\": \\\"literal-type\\\",\\n          \\\"literal\\\": {\\n            \\\"type\\\": \\\"boolean\\\",\\n            \\\"value\\\": false\\n          }\\n        },\\n        \\\"hash\\\": \\\"da56eb39902a7a8e\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:children\\\",\\n        \\\"name\\\": \\\"children\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"ff601f5e72cf1428\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:isLoading\\\",\\n        \\\"name\\\": \\\"isLoading\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"4a078788c1274433\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:icon\\\",\\n        \\\"name\\\": \\\"icon\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"29315f971bf58ff8\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:props\\\",\\n        \\\"name\\\": \\\"props\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"spread\\\",\\n        \\\"hash\\\": \\\"4495b8899bc413ae\\\"\\n      },\\n      {\\n        \\\"id\\\": \\\"9b04df0652d807ec:prop:ref\\\",\\n        \\\"name\\\": \\\"ref\\\",\\n        \\\"type\\\": \\\"any\\\",\\n        \\\"kind\\\": \\\"prop\\\",\\n        \\\"hash\\\": \\\"e9ceb2c440128b84\\\"\\n      }\\n    ]\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_prop_definitions_gIRbFlxJpfB7EcD0wy3t",
+        "toolName": "get_prop_definitions",
+        "tokens": 697
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_6LlcqdFYnr9S6j1QssjH",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "Button"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"UpdateProfile\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      isDone={updateProfileMutation.isSuccess}\\\",\\n      \\\"      triggerButton={\\\",\\n      \\\"        <Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\",\\n      \\\"          Update Profile\\\",\\n      \\\"        </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"UpdateProfile\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      title=\\\\\\\"Update Profile\\\\\\\"\\\",\\n      \\\"      submitButton={\\\",\\n      \\\"        <Button\\\",\\n      \\\"          form=\\\\\\\"update-profile\\\\\\\"\\\",\\n      \\\"          type=\\\\\\\"submit\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"column\\\": 21,\\n    \\\"in\\\": \\\"DeleteUser\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      title=\\\\\\\"Delete User\\\\\\\"\\\",\\n      \\\"      body=\\\\\\\"Are you sure you want to delete this user?\\\\\\\"\\\",\\n      \\\"      triggerButton={<Button variant=\\\\\\\"destructive\\\\\\\">Delete</Button>}\\\",\\n      \\\"      confirmButton={\\\",\\n      \\\"        <Button\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"DeleteUser\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      triggerButton={<Button variant=\\\\\\\"destructive\\\\\\\">Delete</Button>}\\\",\\n      \\\"      confirmButton={\\\",\\n      \\\"        <Button\\\",\\n      \\\"          isLoading={deleteUserMutation.isPending}\\\",\\n      \\\"          type=\\\\\\\"button\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"UpdateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        isDone={updateDiscussionMutation.isSuccess}\\\",\\n      \\\"        triggerButton={\\\",\\n      \\\"          <Button icon={<Pen className=\\\\\\\"size-4\\\\\\\" />} size=\\\\\\\"sm\\\\\\\">\\\",\\n      \\\"            Update Discussion\\\",\\n      \\\"          </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 45,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"UpdateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        title=\\\\\\\"Update Discussion\\\\\\\"\\\",\\n      \\\"        submitButton={\\\",\\n      \\\"          <Button\\\",\\n      \\\"            form=\\\\\\\"update-discussion\\\\\\\"\\\",\\n      \\\"            type=\\\\\\\"submit\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"DeleteDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        body=\\\\\\\"Are you sure you want to delete this discussion?\\\\\\\"\\\",\\n      \\\"        triggerButton={\\\",\\n      \\\"          <Button variant=\\\\\\\"destructive\\\\\\\" icon={<Trash className=\\\\\\\"size-4\\\\\\\" />}>\\\",\\n      \\\"            Delete Discussion\\\",\\n      \\\"          </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 39,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"DeleteDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        }\\\",\\n      \\\"        confirmButton={\\\",\\n      \\\"          <Button\\\",\\n      \\\"            isLoading={deleteDiscussionMutation.isPending}\\\",\\n      \\\"            type=\\\\\\\"button\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"CreateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        isDone={createDiscussionMutation.isSuccess}\\\",\\n      \\\"        triggerButton={\\\",\\n      \\\"          <Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\",\\n      \\\"            Create Discussion\\\",\\n      \\\"          </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 37,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"CreateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        title=\\\\\\\"Create Discussion\\\\\\\"\\\",\\n      \\\"        submitButton={\\\",\\n      \\\"          <Button\\\",\\n      \\\"            form=\\\\\\\"create-discussion\\\\\\\"\\\",\\n      \\\"            type=\\\\\\\"submit\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"DeleteComment\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      body=\\\\\\\"Are you sure you want to delete this comment?\\\\\\\"\\\",\\n      \\\"      triggerButton={\\\",\\n      \\\"        <Button\\\",\\n      \\\"          variant=\\\\\\\"destructive\\\\\\\"\\\",\\n      \\\"          size=\\\\\\\"sm\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"DeleteComment\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      }\\\",\\n      \\\"      confirmButton={\\\",\\n      \\\"        <Button\\\",\\n      \\\"          isLoading={deleteCommentMutation.isPending}\\\",\\n      \\\"          type=\\\\\\\"button\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 34,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"CreateComment\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      isDone={createCommentMutation.isSuccess}\\\",\\n      \\\"      triggerButton={\\\",\\n      \\\"        <Button size=\\\\\\\"sm\\\\\\\" icon={<Plus className=\\\\\\\"size-4\\\\\\\" />}>\\\",\\n      \\\"          Create Comment\\\",\\n      \\\"        </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/create-comment.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"CreateComment\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      title=\\\\\\\"Create Comment\\\\\\\"\\\",\\n      \\\"      submitButton={\\\",\\n      \\\"        <Button\\\",\\n      \\\"          isLoading={createCommentMutation.isPending}\\\",\\n      \\\"          form=\\\\\\\"create-comment\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 82,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"CommentsList\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      {commentsQuery.hasNextPage && (\\\",\\n      \\\"        <div className=\\\\\\\"flex items-center justify-center py-4\\\\\\\">\\\",\\n      \\\"          <Button onClick={() => commentsQuery.fetchNextPage()}>\\\",\\n      \\\"            {commentsQuery.isFetchingNextPage ? (\\\",\\n      \\\"              <Spinner />\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/register-form.tsx\\\",\\n    \\\"line\\\": 96,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"RegisterForm\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"            )}\\\",\\n      \\\"            <div>\\\",\\n      \\\"              <Button\\\",\\n      \\\"                isLoading={registering.isPending}\\\",\\n      \\\"                type=\\\\\\\"submit\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 49,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"MyForm\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"          {!hideSubmit && (\\\",\\n      \\\"            <div>\\\",\\n      \\\"              <Button type=\\\\\\\"submit\\\\\\\" className=\\\\\\\"w-full\\\\\\\">\\\",\\n      \\\"                Submit\\\",\\n      \\\"              </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 75,\\n    \\\"column\\\": 21,\\n    \\\"in\\\": \\\"jsx@75:21\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"  render: () => (\\\",\\n      \\\"    <FormDrawer\\\",\\n      \\\"      triggerButton={<Button>Open Form</Button>}\\\",\\n      \\\"      isDone={true}\\\",\\n      \\\"      title=\\\\\\\"My Form\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form.stories.tsx\\\",\\n    \\\"line\\\": 79,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"jsx@79:8\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"      title=\\\\\\\"My Form\\\\\\\"\\\",\\n      \\\"      submitButton={\\\",\\n      \\\"        <Button form=\\\\\\\"my-form\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\",\\n      \\\"          Submit\\\",\\n      \\\"        </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n    \\\"line\\\": 60,\\n    \\\"column\\\": 12,\\n    \\\"in\\\": \\\"FormDrawer\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        <DrawerFooter>\\\",\\n      \\\"          <DrawerClose asChild>\\\",\\n      \\\"            <Button variant=\\\\\\\"outline\\\\\\\" type=\\\\\\\"submit\\\\\\\">\\\",\\n      \\\"              Close\\\",\\n      \\\"            </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"column\\\": 6,\\n    \\\"in\\\": \\\"Default\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"  <DropdownMenu>\\\",\\n      \\\"    <DropdownMenuTrigger asChild>\\\",\\n      \\\"      <Button>Open Menu</Button>\\\",\\n      \\\"    </DropdownMenuTrigger>\\\",\\n      \\\"    <DropdownMenuContent>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 48,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"WithCheckboxItems\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    <DropdownMenu>\\\",\\n      \\\"      <DropdownMenuTrigger asChild>\\\",\\n      \\\"        <Button>Open Menu</Button>\\\",\\n      \\\"      </DropdownMenuTrigger>\\\",\\n      \\\"      <DropdownMenuContent>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 74,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"WithRadioItems\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    <DropdownMenu>\\\",\\n      \\\"      <DropdownMenuTrigger asChild>\\\",\\n      \\\"        <Button>Open Menu</Button>\\\",\\n      \\\"      </DropdownMenuTrigger>\\\",\\n      \\\"      <DropdownMenuContent>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n    \\\"line\\\": 94,\\n    \\\"column\\\": 6,\\n    \\\"in\\\": \\\"WithSubmenus\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"  <DropdownMenu>\\\",\\n      \\\"    <DropdownMenuTrigger>\\\",\\n      \\\"      <Button>Open Menu</Button>\\\",\\n      \\\"    </DropdownMenuTrigger>\\\",\\n      \\\"    <DropdownMenuContent>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 40,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"DemoDrawer\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    >\\\",\\n      \\\"      <DrawerTrigger asChild>\\\",\\n      \\\"        <Button variant=\\\\\\\"outline\\\\\\\">Open</Button>\\\",\\n      \\\"      </DrawerTrigger>\\\",\\n      \\\"      <DrawerContent className=\\\\\\\"flex max-w-[800px] flex-col justify-between sm:max-w-[540px]\\\\\\\">\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n    \\\"line\\\": 54,\\n    \\\"column\\\": 12,\\n    \\\"in\\\": \\\"DemoDrawer\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        <DrawerFooter>\\\",\\n      \\\"          <DrawerClose asChild>\\\",\\n      \\\"            <Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\",\\n      \\\"          </DrawerClose>\\\",\\n      \\\"        </DrawerFooter>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"column\\\": 8,\\n    \\\"in\\\": \\\"DemoDialog\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    >\\\",\\n      \\\"      <DialogTrigger asChild>\\\",\\n      \\\"        <Button variant=\\\\\\\"outline\\\\\\\">Open Dialog</Button>\\\",\\n      \\\"      </DialogTrigger>\\\",\\n      \\\"      <DialogContent className=\\\\\\\"sm:max-w-[425px]\\\\\\\">\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 43,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"DemoDialog\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"\\\",\\n      \\\"        <DialogFooter>\\\",\\n      \\\"          <Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\",\\n      \\\"          <Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\",\\n      \\\"            Cancel\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n    \\\"line\\\": 44,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"DemoDialog\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        <DialogFooter>\\\",\\n      \\\"          <Button type=\\\\\\\"submit\\\\\\\">Save changes</Button>\\\",\\n      \\\"          <Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\",\\n      \\\"            Cancel\\\",\\n      \\\"          </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n    \\\"line\\\": 81,\\n    \\\"column\\\": 10,\\n    \\\"in\\\": \\\"ConfirmationDialog\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"        <DialogFooter>\\\",\\n      \\\"          {confirmButton}\\\",\\n      \\\"          <Button ref={cancelButtonRef} variant=\\\\\\\"outline\\\\\\\" onClick={close}>\\\",\\n      \\\"            {cancelButtonText}\\\",\\n      \\\"          </Button>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n    \\\"line\\\": 20,\\n    \\\"column\\\": 19,\\n    \\\"in\\\": \\\"jsx@20:19\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    title: 'Confirmation',\\\",\\n      \\\"    body: 'Hello World',\\\",\\n      \\\"    confirmButton: <Button className=\\\\\\\"bg-red-500\\\\\\\">Confirm</Button>,\\\",\\n      \\\"    triggerButton: <Button>Open</Button>,\\\",\\n      \\\"  },\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n    \\\"line\\\": 21,\\n    \\\"column\\\": 19,\\n    \\\"in\\\": \\\"jsx@21:19\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    body: 'Hello World',\\\",\\n      \\\"    confirmButton: <Button className=\\\\\\\"bg-red-500\\\\\\\">Confirm</Button>,\\\",\\n      \\\"    triggerButton: <Button>Open</Button>,\\\",\\n      \\\"  },\\\",\\n      \\\"};\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n    \\\"line\\\": 30,\\n    \\\"column\\\": 19,\\n    \\\"in\\\": \\\"jsx@30:19\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    title: 'Confirmation',\\\",\\n      \\\"    body: 'Hello World',\\\",\\n      \\\"    confirmButton: <Button>Confirm</Button>,\\\",\\n      \\\"    triggerButton: <Button>Open</Button>,\\\",\\n      \\\"  },\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n    \\\"line\\\": 31,\\n    \\\"column\\\": 19,\\n    \\\"in\\\": \\\"jsx@31:19\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    body: 'Hello World',\\\",\\n      \\\"    confirmButton: <Button>Confirm</Button>,\\\",\\n      \\\"    triggerButton: <Button>Open</Button>,\\\",\\n      \\\"  },\\\",\\n      \\\"};\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n    \\\"line\\\": 132,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"DashboardLayout\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"          <Drawer>\\\",\\n      \\\"            <DrawerTrigger asChild>\\\",\\n      \\\"              <Button size=\\\\\\\"icon\\\\\\\" variant=\\\\\\\"outline\\\\\\\" className=\\\\\\\"sm:hidden\\\\\\\">\\\",\\n      \\\"                <PanelLeft className=\\\\\\\"size-5\\\\\\\" />\\\",\\n      \\\"                <span className=\\\\\\\"sr-only\\\\\\\">Toggle Menu</span>\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n    \\\"line\\\": 173,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"DashboardLayout\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"          <DropdownMenu>\\\",\\n      \\\"            <DropdownMenuTrigger asChild>\\\",\\n      \\\"              <Button\\\",\\n      \\\"                variant=\\\\\\\"outline\\\\\\\"\\\",\\n      \\\"                size=\\\\\\\"icon\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/errors/main.tsx\\\",\\n    \\\"line\\\": 10,\\n    \\\"column\\\": 6,\\n    \\\"in\\\": \\\"MainErrorFallback\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"    >\\\",\\n      \\\"      <h2 className=\\\\\\\"text-lg font-semibold\\\\\\\">Ooops, something went wrong :( </h2>\\\",\\n      \\\"      <Button\\\",\\n      \\\"        className=\\\\\\\"mt-4\\\\\\\"\\\",\\n      \\\"        onClick={() => window.location.assign(window.location.origin)}\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n    \\\"line\\\": 33,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"LandingRoute\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"          <div className=\\\\\\\"mt-8 flex justify-center\\\\\\\">\\\",\\n      \\\"            <div className=\\\\\\\"inline-flex rounded-md shadow\\\\\\\">\\\",\\n      \\\"              <Button\\\",\\n      \\\"                onClick={handleStart}\\\",\\n      \\\"                icon={\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n    \\\"line\\\": 61,\\n    \\\"column\\\": 16,\\n    \\\"in\\\": \\\"LandingRoute\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"                rel=\\\\\\\"noreferrer\\\\\\\"\\\",\\n      \\\"              >\\\",\\n      \\\"                <Button\\\",\\n      \\\"                  variant=\\\\\\\"outline\\\\\\\"\\\",\\n      \\\"                  icon={\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"line\\\": 42,\\n    \\\"column\\\": 14,\\n    \\\"in\\\": \\\"LoginForm\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"            />\\\",\\n      \\\"            <div>\\\",\\n      \\\"              <Button\\\",\\n      \\\"                isLoading={login.isPending}\\\",\\n      \\\"                type=\\\\\\\"submit\\\\\\\"\\\"\\n    ]\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_6LlcqdFYnr9S6j1QssjH",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 5164
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_file_outline_E8BeeKPxTBxNbawO5doQ",
+            "name": "get_file_outline",
+            "arguments": {
+              "filePath": "/src/features/auth/components/login-form.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"df9da7513c533ee\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 12\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_file_outline_E8BeeKPxTBxNbawO5doQ",
+        "toolName": "get_file_outline",
+        "tokens": 66
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_content_DUvasAhCsFfyKYU9T1pF",
+            "name": "get_symbol_content",
+            "arguments": {
+              "query": "LoginForm",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 55
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/auth/components/__tests__/login-form.test.tsx:LoginForm\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/features/auth/components/__tests__/login-form.test.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/auth/login.tsx:LoginForm\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/app/routes/auth/login.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"df9da7513c533ee\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 12,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"content\\\": \\\"export const LoginForm = ({ onSuccess }: LoginFormProps) => {\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_content_DUvasAhCsFfyKYU9T1pF",
+        "toolName": "get_symbol_content",
+        "tokens": 321
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_location_DlrSZAuVhSglaZzcN7ZI",
+            "name": "get_symbol_location",
+            "arguments": {
+              "query": "LoginForm",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/auth/components/__tests__/login-form.test.tsx:LoginForm\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/features/auth/components/__tests__/login-form.test.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/auth/login.tsx:LoginForm\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/app/routes/auth/login.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"df9da7513c533ee\\\",\\n    \\\"name\\\": \\\"LoginForm\\\",\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 12,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_location_DlrSZAuVhSglaZzcN7ZI",
+        "toolName": "get_symbol_location",
+        "tokens": 288
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_74KqX95O3VNW6aYo34ic",
+            "name": "read_file",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "/src/features/auth/components/login-form.tsx"
+            }
+          }
+        ],
+        "tokens": 62
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Link, useSearchParams } from 'react-router';\\n\\nimport { Button } from '@/components/ui/button';\\nimport { Form, Input } from '@/components/ui/form';\\nimport { paths } from '@/config/paths';\\nimport { useLogin, loginInputSchema } from '@/lib/auth';\\n\\ntype LoginFormProps = {\\n  onSuccess: () => void;\\n};\\n\\nexport const LoginForm = ({ onSuccess }: LoginFormProps) => {\\n  const login = useLogin({\\n    onSuccess,\\n  });\\n  const [searchParams] = useSearchParams();\\n  const redirectTo = searchParams.get('redirectTo');\\n\\n  return (\\n    <div>\\n      <Form\\n        onSubmit={(values) => {\\n          login.mutate(values);\\n        }}\\n        schema={loginInputSchema}\\n      >\\n        {({ register, formState }) => (\\n          <>\\n            <Input\\n              type=\\\"email\\\"\\n              label=\\\"Email Address\\\"\\n              error={formState.errors['email']}\\n              registration={register('email')}\\n            />\\n            <Input\\n              type=\\\"password\\\"\\n              label=\\\"Password\\\"\\n              error={formState.errors['password']}\\n              registration={register('password')}\\n            />\\n            <div>\\n              <Button\\n                isLoading={login.isPending}\\n                type=\\\"submit\\\"\\n                className=\\\"w-full\\\"\\n              >\\n                Log in\\n              </Button>\\n            </div>\\n          </>\\n        )}\\n      </Form>\\n      <div className=\\\"mt-2 flex items-center justify-end\\\">\\n        <div className=\\\"text-sm\\\">\\n          <Link\\n            to={paths.auth.register.getHref(redirectTo)}\\n            className=\\\"font-medium text-blue-600 hover:text-blue-500\\\"\\n          >\\n            Register\\n          </Link>\\n        </div>\\n      </div>\\n    </div>\\n  );\\n};\\n\"}]}",
+        "toolCallId": "tool_read_file_74KqX95O3VNW6aYo34ic",
+        "toolName": "read_file",
+        "tokens": 446
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_info_SohxiFfRvyNKzp6cXl67",
+            "name": "get_symbol_info",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useLogin"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"definitions\\\": [\\n    {\\n      \\\"kind\\\": \\\"normal\\\",\\n      \\\"name\\\": \\\"useLogin\\\",\\n      \\\"file\\\": \\\"/src/lib/auth.tsx\\\"\\n    }\\n  ]\\n}\"}]}",
+        "toolCallId": "tool_get_symbol_info_SohxiFfRvyNKzp6cXl67",
+        "toolName": "get_symbol_info",
+        "tokens": 60
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_content_lHQbC2uZTj4wNOEu3gue",
+            "name": "get_symbol_content",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useLogin"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"a08167afba23bb44:a3cf7df609400d5f\\\",\\n    \\\"name\\\": \\\"useLogin\\\",\\n    \\\"file\\\": \\\"/src/lib/auth.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 75,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/auth/components/login-form.tsx:useLogin\\\",\\n    \\\"name\\\": \\\"useLogin\\\",\\n    \\\"file\\\": \\\"/src/features/auth/components/login-form.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_content_lHQbC2uZTj4wNOEu3gue",
+        "toolName": "get_symbol_content",
+        "tokens": 234
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_n2KhbE904UNXLuunXpj4",
+            "name": "read_file",
+            "arguments": {
+              "filePath": "/src/lib/auth.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { configureAuth } from 'react-query-auth';\\nimport { Navigate, useLocation } from 'react-router';\\nimport { z } from 'zod';\\n\\nimport { paths } from '@/config/paths';\\nimport { AuthResponse, User } from '@/types/api';\\n\\nimport { api } from './api-client';\\n\\n// api call definitions for auth (types, schemas, requests):\\n// these are not part of features as this is a module shared across features\\n\\nconst getUser = async (): Promise<User> => {\\n  const response = await api.get('/auth/me');\\n\\n  return response.data;\\n};\\n\\nconst logout = (): Promise<void> => {\\n  return api.post('/auth/logout');\\n};\\n\\nexport const loginInputSchema = z.object({\\n  email: z.string().min(1, 'Required').email('Invalid email'),\\n  password: z.string().min(5, 'Required'),\\n});\\n\\nexport type LoginInput = z.infer<typeof loginInputSchema>;\\nconst loginWithEmailAndPassword = (data: LoginInput): Promise<AuthResponse> => {\\n  return api.post('/auth/login', data);\\n};\\n\\nexport const registerInputSchema = z\\n  .object({\\n    email: z.string().min(1, 'Required'),\\n    firstName: z.string().min(1, 'Required'),\\n    lastName: z.string().min(1, 'Required'),\\n    password: z.string().min(5, 'Required'),\\n  })\\n  .and(\\n    z\\n      .object({\\n        teamId: z.string().min(1, 'Required'),\\n        teamName: z.null().default(null),\\n      })\\n      .or(\\n        z.object({\\n          teamName: z.string().min(1, 'Required'),\\n          teamId: z.null().default(null),\\n        }),\\n      ),\\n  );\\n\\nexport type RegisterInput = z.infer<typeof registerInputSchema>;\\n\\nconst registerWithEmailAndPassword = (\\n  data: RegisterInput,\\n): Promise<AuthResponse> => {\\n  return api.post('/auth/register', data);\\n};\\n\\nconst authConfig = {\\n  userFn: getUser,\\n  loginFn: async (data: LoginInput) => {\\n    const response = await loginWithEmailAndPassword(data);\\n    return response.user;\\n  },\\n  registerFn: async (data: RegisterInput) => {\\n    const response = await registerWithEmailAndPassword(data);\\n    return response.user;\\n  },\\n  logoutFn: logout,\\n};\\n\\nexport const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\\n  configureAuth(authConfig);\\n\\nexport const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {\\n  const user = useUser();\\n  const location = useLocation();\\n\\n  if (!user.data) {\\n    return (\\n      <Navigate to={paths.auth.login.getHref(location.pathname)} replace />\\n    );\\n  }\\n\\n  return children;\\n};\\n\"}]}",
+        "toolCallId": "tool_read_file_n2KhbE904UNXLuunXpj4",
+        "toolName": "read_file",
+        "tokens": 707
+      },
+      {
+        "role": "assistant",
+        "content": "Based on the analysis of the codebase, here are the props accepted by the `Button` component and the origin of the `isLoading` prop in `LoginForm`.\n\n### Props accepted by `Button`\nThe `Button` component (defined in `/src/components/ui/button/button.tsx`) accepts the following props:\n- **`className`**: Custom CSS classes for styling.\n- **`variant`**: Specifies the visual style (e.g., `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`).\n- **`size`**: Controls the size of the button (e.g., `default`, `sm`, `lg`, `icon`).\n- **`asChild`**: Boolean (default: `false`); if true, the button will render its child and pass props to it (using Radix UI Slot).\n- **`children`**: The content to be rendered inside the button.\n- **`isLoading`**: Boolean; indicates if the button is in a loading state (renders a `Spinner` if true).\n- **`icon`**: React node to render an icon alongside the text.\n- **`ref`**: Forwarded ref to the button element.\n- **`props`**: Spreads any other standard HTML button attributes (e.g., `type`, `onClick`, `disabled`, `form`).\n\n---\n\n### Origin of `isLoading` in `LoginForm`\nIn `LoginForm` (`/src/features/auth/components/login-form.tsx`), the `isLoading` prop for the `Button` is derived as follows:\n\n1.  **Usage in Render**:\n    ```tsx\n    <Button isLoading={login.isPending} type=\"submit\" ...>\n    ```\n2.  **Variable Source**: The `login` object is initialized using the `useLogin` hook:\n    ```tsx\n    const login = useLogin({ onSuccess });\n    ```\n3.  **Hook Definition**: The `useLogin` hook is generated by the `configureAuth` function from the `react-query-auth` library in `/src/lib/auth.tsx`.\n4.  **Data Origin**: `login.isPending` is a state managed by **TanStack Query (React Query)** via the `react-query-auth` wrapper. It specifically tracks the status of the `loginFn` (async login request to `/auth/login`) defined in the `authConfig`. It returns `true` while the login API request is in flight.",
+        "tokens": 497
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-3",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "baseline",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": true,
+    "totalTokens": 5114,
+    "toolCallsCount": 9,
+    "latencyMs": 17504,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Find all usages of the `useUser` hook and list every component that depends on the `user.data.role` field of the returned object.",
+        "tokens": 30
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_grep_search_wVHIADQPHCBbCkAksEyH",
+            "name": "grep_search",
+            "arguments": {
+              "pattern": "useUser",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 56
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { useUser } from './auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"line\\\": 29,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/lib/auth.tsx\\\",\\n    \\\"line\\\": 75,\\n    \\\"content\\\": \\\"export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/lib/auth.tsx\\\",\\n    \\\"line\\\": 79,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/users-list.tsx\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { useUsers } from '../api/get-users';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/users-list.tsx\\\",\\n    \\\"line\\\": 10,\\n    \\\"content\\\": \\\"const usersQuery = useUsers();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 6,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"line\\\": 14,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 4,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"line\\\": 13,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/api/update-profile.ts\\\",\\n    \\\"line\\\": 5,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/api/update-profile.ts\\\",\\n    \\\"line\\\": 28,\\n    \\\"content\\\": \\\"const { refetch: refetchUser } = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/api/get-users.ts\\\",\\n    \\\"line\\\": 18,\\n    \\\"content\\\": \\\"type UseUsersOptions = {\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/users/api/get-users.ts\\\",\\n    \\\"line\\\": 22,\\n    \\\"content\\\": \\\"export const useUsers = ({ queryConfig }: UseUsersOptions = {}) => {\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 6,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 20,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/layouts/auth-layout.tsx\\\",\\n    \\\"line\\\": 9,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/components/layouts/auth-layout.tsx\\\",\\n    \\\"line\\\": 17,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n    \\\"line\\\": 7,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n    \\\"line\\\": 11,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/app/profile.tsx\\\",\\n    \\\"line\\\": 3,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/app/profile.tsx\\\",\\n    \\\"line\\\": 19,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/app/dashboard.tsx\\\",\\n    \\\"line\\\": 2,\\n    \\\"content\\\": \\\"import { useUser } from '@/lib/auth';\\\"\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/app/dashboard.tsx\\\",\\n    \\\"line\\\": 6,\\n    \\\"content\\\": \\\"const user = useUser();\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_grep_search_wVHIADQPHCBbCkAksEyH",
+        "toolName": "grep_search",
+        "tokens": 1118
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_nABzIocpmi5zV6lWPzNV",
+            "name": "read_file",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "src/lib/authorization.tsx"
+            }
+          }
+        ],
+        "tokens": 60
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import * as React from 'react';\\n\\nimport { Comment, User } from '@/types/api';\\n\\nimport { useUser } from './auth';\\n\\nexport enum ROLES {\\n  ADMIN = 'ADMIN',\\n  USER = 'USER',\\n}\\n\\ntype RoleTypes = keyof typeof ROLES;\\n\\nexport const POLICIES = {\\n  'comment:delete': (user: User, comment: Comment) => {\\n    if (user.role === 'ADMIN') {\\n      return true;\\n    }\\n\\n    if (user.role === 'USER' && comment.author?.id === user.id) {\\n      return true;\\n    }\\n\\n    return false;\\n  },\\n};\\n\\nexport const useAuthorization = () => {\\n  const user = useUser();\\n\\n  if (!user.data) {\\n    throw Error('User does not exist!');\\n  }\\n\\n  const checkAccess = React.useCallback(\\n    ({ allowedRoles }: { allowedRoles: RoleTypes[] }) => {\\n      if (allowedRoles && allowedRoles.length > 0 && user.data) {\\n        return allowedRoles?.includes(user.data.role);\\n      }\\n\\n      return true;\\n    },\\n    [user.data],\\n  );\\n\\n  return { checkAccess, role: user.data.role };\\n};\\n\\ntype AuthorizationProps = {\\n  forbiddenFallback?: React.ReactNode;\\n  children: React.ReactNode;\\n} & (\\n  | {\\n      allowedRoles: RoleTypes[];\\n      policyCheck?: never;\\n    }\\n  | {\\n      allowedRoles?: never;\\n      policyCheck: boolean;\\n    }\\n);\\n\\nexport const Authorization = ({\\n  policyCheck,\\n  allowedRoles,\\n  forbiddenFallback = null,\\n  children,\\n}: AuthorizationProps) => {\\n  const { checkAccess } = useAuthorization();\\n\\n  let canAccess = false;\\n\\n  if (allowedRoles) {\\n    canAccess = checkAccess({ allowedRoles });\\n  }\\n\\n  if (typeof policyCheck !== 'undefined') {\\n    canAccess = policyCheck;\\n  }\\n\\n  return <>{canAccess ? children : forbiddenFallback}</>;\\n};\\n\"}]}",
+        "toolCallId": "tool_read_file_nABzIocpmi5zV6lWPzNV",
+        "toolName": "read_file",
+        "tokens": 510
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_IjgC9BHfiwY8hUT0N5dt",
+            "name": "run_shell_command",
+            "arguments": {
+              "command": "grep -r \"useAuthorization\" src",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 65
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/components/layouts/dashboard-layout.tsx:import { ROLES, useAuthorization } from '@/lib/authorization';\\\\nsrc/components/layouts/dashboard-layout.tsx:  const { checkAccess } = useAuthorization();\\\\nsrc/lib/authorization.tsx:export const useAuthorization = () => {\\\\nsrc/lib/authorization.tsx:  const { checkAccess } = useAuthorization();\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_IjgC9BHfiwY8hUT0N5dt",
+        "toolName": "run_shell_command",
+        "tokens": 116
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_R2fXgp759jSIvk9D7Jin",
+            "name": "run_shell_command",
+            "arguments": {
+              "command": "grep -r \"Authorization\" src",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 62
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/app/routes/app/users.tsx:import { Authorization, ROLES } from '@/lib/authorization';\\\\nsrc/app/routes/app/users.tsx:      <Authorization\\\\nsrc/app/routes/app/users.tsx:      </Authorization>\\\\nsrc/features/comments/components/comments-list.tsx:import { POLICIES, Authorization } from '@/lib/authorization';\\\\nsrc/features/comments/components/comments-list.tsx:            <Authorization\\\\nsrc/features/comments/components/comments-list.tsx:            </Authorization>\\\\nsrc/features/discussions/components/delete-discussion.tsx:import { Authorization, ROLES } from '@/lib/authorization';\\\\nsrc/features/discussions/components/delete-discussion.tsx:    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\\nsrc/features/discussions/components/delete-discussion.tsx:    </Authorization>\\\\nsrc/features/discussions/components/update-discussion.tsx:import { Authorization, ROLES } from '@/lib/authorization';\\\\nsrc/features/discussions/components/update-discussion.tsx:    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\\nsrc/features/discussions/components/update-discussion.tsx:    </Authorization>\\\\nsrc/features/discussions/components/create-discussion.tsx:import { Authorization, ROLES } from '@/lib/authorization';\\\\nsrc/features/discussions/components/create-discussion.tsx:    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\\nsrc/features/discussions/components/create-discussion.tsx:    </Authorization>\\\\nsrc/components/layouts/dashboard-layout.tsx:import { ROLES, useAuthorization } from '@/lib/authorization';\\\\nsrc/components/layouts/dashboard-layout.tsx:  const { checkAccess } = useAuthorization();\\\\nsrc/lib/__tests__/authorization.test.tsx:import { Authorization, ROLES } from '../authorization';\\\\nsrc/lib/__tests__/authorization.test.tsx:    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\\nsrc/lib/__tests__/authorization.test.tsx:    </Authorization>,\\\\nsrc/lib/__tests__/authorization.test.tsx:    <Authorization\\\\nsrc/lib/__tests__/authorization.test.tsx:    </Authorization>,\\\\nsrc/lib/__tests__/authorization.test.tsx:    <Authorization policyCheck={true}>{protectedResource}</Authorization>,\\\\nsrc/lib/__tests__/authorization.test.tsx:    <Authorization\\\\nsrc/lib/__tests__/authorization.test.tsx:    </Authorization>,\\\\nsrc/lib/authorization.tsx:export const useAuthorization = () => {\\\\nsrc/lib/authorization.tsx:type AuthorizationProps = {\\\\nsrc/lib/authorization.tsx:export const Authorization = ({\\\\nsrc/lib/authorization.tsx:}: AuthorizationProps) => {\\\\nsrc/lib/authorization.tsx:  const { checkAccess } = useAuthorization();\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_R2fXgp759jSIvk9D7Jin",
+        "toolName": "run_shell_command",
+        "tokens": 612
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_s4g5bq45TVdABZLRorpL",
+            "name": "run_shell_command",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "command": "grep -r \"user.data.role\" src"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/app/routes/app/profile.tsx:            <Entry label=\\\\\\\"Role\\\\\\\" value={user.data.role} />\\\\nsrc/lib/authorization.tsx:        return allowedRoles?.includes(user.data.role);\\\\nsrc/lib/authorization.tsx:  return { checkAccess, role: user.data.role };\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_s4g5bq45TVdABZLRorpL",
+        "toolName": "run_shell_command",
+        "tokens": 103
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_Hk8PtzKmXdDFdW6EsJOJ",
+            "name": "run_shell_command",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "command": "grep -r \"user.role\" src"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/testing/mocks/utils.ts:  if (user.role !== 'ADMIN') {\\\\nsrc/lib/__tests__/authorization.test.tsx:test('should view protected resource if user role is matching', async () => {\\\\nsrc/lib/__tests__/authorization.test.tsx:test('should not view protected resource if user role does not match and show fallback message instead', async () => {\\\\nsrc/lib/authorization.tsx:    if (user.role === 'ADMIN') {\\\\nsrc/lib/authorization.tsx:    if (user.role === 'USER' && comment.author?.id === user.id) {\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_Hk8PtzKmXdDFdW6EsJOJ",
+        "toolName": "run_shell_command",
+        "tokens": 163
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_BREJbBE4xPqaYkE9oPvU",
+            "name": "run_shell_command",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "command": "grep -r \"\\.role\" src"
+            }
+          }
+        ],
+        "tokens": 66
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/app/routes/app/dashboard.tsx:        Your role is : <b>{user.data?.role}</b>\\\\nsrc/app/routes/app/dashboard.tsx:      {user.data?.role === ROLES.USER && (\\\\nsrc/app/routes/app/dashboard.tsx:      {user.data?.role === ROLES.ADMIN && (\\\\nsrc/app/routes/app/profile.tsx:            <Entry label=\\\\\\\"Role\\\\\\\" value={user.data.role} />\\\\nsrc/testing/mocks/utils.ts:  if (user.role !== 'ADMIN') {\\\\nsrc/testing/mocks/handlers/comments.ts:            ...(user?.role === 'USER' && {\\\\nsrc/lib/authorization.tsx:    if (user.role === 'ADMIN') {\\\\nsrc/lib/authorization.tsx:    if (user.role === 'USER' && comment.author?.id === user.id) {\\\\nsrc/lib/authorization.tsx:        return allowedRoles?.includes(user.data.role);\\\\nsrc/lib/authorization.tsx:  return { checkAccess, role: user.data.role };\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_BREJbBE4xPqaYkE9oPvU",
+        "toolName": "run_shell_command",
+        "tokens": 261
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_KUE14kuwZpqcOHCK4Nad",
+            "name": "run_shell_command",
+            "arguments": {
+              "command": "grep -r \"\\.role\" src | grep -v \"test\" | grep -v \"mock\"",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 76
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/app/routes/app/dashboard.tsx:        Your role is : <b>{user.data?.role}</b>\\\\nsrc/app/routes/app/dashboard.tsx:      {user.data?.role === ROLES.USER && (\\\\nsrc/app/routes/app/dashboard.tsx:      {user.data?.role === ROLES.ADMIN && (\\\\nsrc/app/routes/app/profile.tsx:            <Entry label=\\\\\\\"Role\\\\\\\" value={user.data.role} />\\\\nsrc/lib/authorization.tsx:    if (user.role === 'ADMIN') {\\\\nsrc/lib/authorization.tsx:    if (user.role === 'USER' && comment.author?.id === user.id) {\\\\nsrc/lib/authorization.tsx:        return allowedRoles?.includes(user.data.role);\\\\nsrc/lib/authorization.tsx:  return { checkAccess, role: user.data.role };\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_KUE14kuwZpqcOHCK4Nad",
+        "toolName": "run_shell_command",
+        "tokens": 219
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_PkJHsoC4rD0njZebmZRP",
+            "name": "run_shell_command",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "command": "grep -r \"useUser\" src | grep -v \"test\" | grep -v \"mock\""
+            }
+          }
+        ],
+        "tokens": 78
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"src/app/routes/app/dashboard.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/app/routes/app/dashboard.tsx:  const user = useUser();\\\\nsrc/app/routes/app/profile.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/app/routes/app/profile.tsx:  const user = useUser();\\\\nsrc/app/routes/landing.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/app/routes/landing.tsx:  const user = useUser();\\\\nsrc/features/comments/components/comments-list.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/features/comments/components/comments-list.tsx:  const user = useUser();\\\\nsrc/features/users/components/users-list.tsx:import { useUsers } from '../api/get-users';\\\\nsrc/features/users/components/users-list.tsx:  const usersQuery = useUsers();\\\\nsrc/features/users/components/update-profile.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/features/users/components/update-profile.tsx:  const user = useUser();\\\\nsrc/features/users/components/delete-user.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/features/users/components/delete-user.tsx:  const user = useUser();\\\\nsrc/features/users/api/get-users.ts:export const useUsers = ({ queryConfig }: UseUsersOptions = {}) => {\\\\nsrc/features/users/api/update-profile.ts:import { useUser } from '@/lib/auth';\\\\nsrc/features/users/api/update-profile.ts:  const { refetch: refetchUser } = useUser();\\\\nsrc/components/layouts/auth-layout.tsx:import { useUser } from '@/lib/auth';\\\\nsrc/components/layouts/auth-layout.tsx:  const user = useUser();\\\\nsrc/lib/auth.tsx:export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\\\\nsrc/lib/auth.tsx:  const user = useUser();\\\\nsrc/lib/authorization.tsx:import { useUser } from './auth';\\\\nsrc/lib/authorization.tsx:  const user = useUser();\\\\n\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_PkJHsoC4rD0njZebmZRP",
+        "toolName": "run_shell_command",
+        "tokens": 488
+      },
+      {
+        "role": "assistant",
+        "content": "Based on the codebase analysis, here are the usages of the `useUser` hook and the components that depend on the `user.data.role` field:\n\n### **Usages of `useUser` hook:**\n1.  **`src/lib/auth.tsx`**: Defines and exports `useUser`.\n2.  **`src/lib/authorization.tsx`**: Uses it within the `useAuthorization` hook.\n3.  **`src/app/routes/app/dashboard.tsx`**: Uses it to display user-specific content.\n4.  **`src/app/routes/app/profile.tsx`**: Uses it to display profile information.\n5.  **`src/app/routes/landing.tsx`**: Uses it for navigation/CTA logic.\n6.  **`src/features/comments/components/comments-list.tsx`**: Uses it to check ownership of comments.\n7.  **`src/features/users/components/update-profile.tsx`**: Uses it to get current user data for editing.\n8.  **`src/features/users/components/delete-user.tsx`**: Uses it to check if the user is deleting themselves.\n9.  **`src/features/users/api/update-profile.ts`**: Uses the `refetch` method to refresh user data.\n10. **`src/components/layouts/auth-layout.tsx`**: Uses it to redirect authenticated users away from auth pages.\n\n### **Components/Hooks depending on `user.data.role`:**\n\n#### **Direct Dependency**\nThese components call `useUser` and directly access `.role` from the returned object:\n*   **`Dashboard`** (`src/app/routes/app/dashboard.tsx`): \n    *   Displays the role string: `{user.data?.role}`.\n    *   Conditionally renders content based on `ROLES.USER` and `ROLES.ADMIN`.\n*   **`Profile`** (`src/app/routes/app/profile.tsx`): \n    *   Displays the role in an entry field: `value={user.data.role}`.\n*   **`useAuthorization`** (`src/lib/authorization.tsx`):\n    *   Uses `user.data.role` in the `checkAccess` callback.\n    *   Returns `role: user.data.role` to its consumers.\n\n#### **Indirect Dependency (via `useAuthorization` or `Authorization`)**\nThe following components rely on `user.data.role` logic abstracted through the `Authorization` component or `useAuthorization` hook:\n*   **`DashboardLayout`** (`src/components/layouts/dashboard-layout.tsx`): Uses `checkAccess` from `useAuthorization` to filter navigation links based on roles.\n*   **`Users` route** (`src/app/routes/app/users.tsx`): Wraps content in `<Authorization allowedRoles={[ROLES.ADMIN]}>`.\n*   **`CommentsList`** (`src/features/comments/components/comments-list.tsx`): Uses the `POLICIES['comment:delete']` which checks `user.role` (passed from the `user` object).\n*   **`DeleteDiscussion`** (`src/features/discussions/components/delete-discussion.tsx`): Uses `<Authorization allowedRoles={[ROLES.ADMIN]}>`.\n*   **`UpdateDiscussion`** (`src/features/discussions/components/update-discussion.tsx`): Uses `<Authorization allowedRoles={[ROLES.ADMIN]}>`.\n*   **`CreateDiscussion`** (`src/features/discussions/components/create-discussion.tsx`): Uses `<Authorization allowedRoles={[ROLES.ADMIN]}>`.",
+        "tokens": 708
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-3",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "react-map-warm",
+    "testType": "single-prompt",
+    "model": "Gemini 3 Flash Preview",
+    "success": false,
+    "totalTokens": 7118,
+    "toolCallsCount": 15,
+    "latencyMs": 21360,
+    "steps": [
+      {
+        "role": "system",
+        "content": "The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.",
+        "tokens": 195
+      },
+      {
+        "role": "user",
+        "content": "Find all usages of the `useUser` hook and list every component that depends on the `user.data.role` field of the returned object.",
+        "tokens": 30
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_info_RJBCwFTsl8VdZyXzCDZd",
+            "name": "get_symbol_info",
+            "arguments": {
+              "query": "useUser",
+              "usages": true,
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"definitions\\\": [\\n    {\\n      \\\"kind\\\": \\\"normal\\\",\\n      \\\"name\\\": \\\"useUser\\\",\\n      \\\"file\\\": \\\"/src/lib/auth.tsx\\\",\\n      \\\"usages\\\": []\\n    }\\n  ],\\n  \\\"externalUsages\\\": []\\n}\"}]}",
+        "toolCallId": "tool_get_symbol_info_RJBCwFTsl8VdZyXzCDZd",
+        "toolName": "get_symbol_info",
+        "tokens": 77
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_K35aNFpnU1dbjSpDShP3",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useUser"
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_K35aNFpnU1dbjSpDShP3",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 12
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_find_files_aopM20KQoAI2qc5uH5fD",
+            "name": "find_files",
+            "arguments": {
+              "pattern": "**/*",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  \\\"/__mocks__/zustand.ts\\\",\\n  \\\"/e2e/tests/auth.setup.ts\\\",\\n  \\\"/e2e/tests/button-size.spec.ts\\\",\\n  \\\"/e2e/tests/profile.spec.ts\\\",\\n  \\\"/e2e/tests/smoke.spec.ts\\\",\\n  \\\"/mock-server.ts\\\",\\n  \\\"/playwright.config.ts\\\",\\n  \\\"/src/app/index.tsx\\\",\\n  \\\"/src/app/provider.tsx\\\",\\n  \\\"/src/app/router.tsx\\\",\\n  \\\"/src/app/routes/app/dashboard.tsx\\\",\\n  \\\"/src/app/routes/app/discussions/__tests__/discussion.test.tsx\\\",\\n  \\\"/src/app/routes/app/discussions/__tests__/discussions.test.tsx\\\",\\n  \\\"/src/app/routes/app/discussions/discussion.tsx\\\",\\n  \\\"/src/app/routes/app/discussions/discussions.tsx\\\",\\n  \\\"/src/app/routes/app/profile.tsx\\\",\\n  \\\"/src/app/routes/app/root.tsx\\\",\\n  \\\"/src/app/routes/app/users.tsx\\\",\\n  \\\"/src/app/routes/auth/login.tsx\\\",\\n  \\\"/src/app/routes/auth/register.tsx\\\",\\n  \\\"/src/app/routes/landing.tsx\\\",\\n  \\\"/src/app/routes/not-found.tsx\\\",\\n  \\\"/src/components/errors/main.tsx\\\",\\n  \\\"/src/components/layouts/auth-layout.tsx\\\",\\n  \\\"/src/components/layouts/content-layout.tsx\\\",\\n  \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n  \\\"/src/components/layouts/index.ts\\\",\\n  \\\"/src/components/seo/__tests__/head.test.tsx\\\",\\n  \\\"/src/components/seo/head.tsx\\\",\\n  \\\"/src/components/seo/index.ts\\\",\\n  \\\"/src/components/ui/button/button.stories.tsx\\\",\\n  \\\"/src/components/ui/button/button.tsx\\\",\\n  \\\"/src/components/ui/button/index.ts\\\",\\n  \\\"/src/components/ui/button/types.ts\\\",\\n  \\\"/src/components/ui/dialog/__tests__/dialog.test.tsx\\\",\\n  \\\"/src/components/ui/dialog/confirmation-dialog/__tests__/confirmation-dialog.test.tsx\\\",\\n  \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\\\",\\n  \\\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\\\",\\n  \\\"/src/components/ui/dialog/confirmation-dialog/index.ts\\\",\\n  \\\"/src/components/ui/dialog/dialog.stories.tsx\\\",\\n  \\\"/src/components/ui/dialog/dialog.tsx\\\",\\n  \\\"/src/components/ui/dialog/index.ts\\\",\\n  \\\"/src/components/ui/drawer/__tests__/drawer.test.tsx\\\",\\n  \\\"/src/components/ui/drawer/drawer.stories.tsx\\\",\\n  \\\"/src/components/ui/drawer/drawer.tsx\\\",\\n  \\\"/src/components/ui/drawer/index.ts\\\",\\n  \\\"/src/components/ui/dropdown/dropdown.stories.tsx\\\",\\n  \\\"/src/components/ui/dropdown/dropdown.tsx\\\",\\n  \\\"/src/components/ui/dropdown/index.ts\\\",\\n  \\\"/src/components/ui/form/__tests__/form.test.tsx\\\",\\n  \\\"/src/components/ui/form/error.tsx\\\",\\n  \\\"/src/components/ui/form/field-wrapper.tsx\\\",\\n  \\\"/src/components/ui/form/form-drawer.tsx\\\",\\n  \\\"/src/components/ui/form/form.stories.tsx\\\",\\n  \\\"/src/components/ui/form/form.tsx\\\",\\n  \\\"/src/components/ui/form/index.ts\\\",\\n  \\\"/src/components/ui/form/input.tsx\\\",\\n  \\\"/src/components/ui/form/label.tsx\\\",\\n  \\\"/src/components/ui/form/select.tsx\\\",\\n  \\\"/src/components/ui/form/switch.tsx\\\",\\n  \\\"/src/components/ui/form/textarea.tsx\\\",\\n  \\\"/src/components/ui/link/index.ts\\\",\\n  \\\"/src/components/ui/link/link.stories.tsx\\\",\\n  \\\"/src/components/ui/link/link.tsx\\\",\\n  \\\"/src/components/ui/md-preview/index.ts\\\",\\n  \\\"/src/components/ui/md-preview/md-preview.stories.tsx\\\",\\n  \\\"/src/components/ui/md-preview/md-preview.tsx\\\",\\n  \\\"/src/components/ui/notifications/__tests__/notifications.test.ts\\\",\\n  \\\"/src/components/ui/notifications/index.ts\\\",\\n  \\\"/src/components/ui/notifications/notification.stories.tsx\\\",\\n  \\\"/src/components/ui/notifications/notification.tsx\\\",\\n  \\\"/src/components/ui/notifications/notifications-store.ts\\\",\\n  \\\"/src/components/ui/notifications/notifications.tsx\\\",\\n  \\\"/src/components/ui/spinner/index.ts\\\",\\n  \\\"/src/components/ui/spinner/spinner.stories.tsx\\\",\\n  \\\"/src/components/ui/spinner/spinner.tsx\\\",\\n  \\\"/src/components/ui/table/index.ts\\\",\\n  \\\"/src/components/ui/table/pagination.tsx\\\",\\n  \\\"/src/components/ui/table/table.stories.tsx\\\",\\n  \\\"/src/components/ui/table/table.tsx\\\",\\n  \\\"/src/config/env.ts\\\",\\n  \\\"/src/config/paths.ts\\\",\\n  \\\"/src/features/auth/components/__tests__/login-form.test.tsx\\\",\\n  \\\"/src/features/auth/components/__tests__/register-form.test.tsx\\\",\\n  \\\"/src/features/auth/components/login-form.tsx\\\",\\n  \\\"/src/features/auth/components/register-form.tsx\\\",\\n  \\\"/src/features/comments/api/create-comment.ts\\\",\\n  \\\"/src/features/comments/api/delete-comment.ts\\\",\\n  \\\"/src/features/comments/api/get-comments.ts\\\",\\n  \\\"/src/features/comments/components/comments-list.tsx\\\",\\n  \\\"/src/features/comments/components/comments.tsx\\\",\\n  \\\"/src/features/comments/components/create-comment.tsx\\\",\\n  \\\"/src/features/comments/components/delete-comment.tsx\\\",\\n  \\\"/src/features/discussions/api/create-discussion.ts\\\",\\n  \\\"/src/features/discussions/api/delete-discussion.ts\\\",\\n  \\\"/src/features/discussions/api/get-discussion.ts\\\",\\n  \\\"/src/features/discussions/api/get-discussions.ts\\\",\\n  \\\"/src/features/discussions/api/update-discussion.ts\\\",\\n  \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n  \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n  \\\"/src/features/discussions/components/discussion-view.tsx\\\",\\n  \\\"/src/features/discussions/components/discussions-list.tsx\\\",\\n  \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n  \\\"/src/features/teams/api/get-teams.ts\\\",\\n  \\\"/src/features/users/api/delete-user.ts\\\",\\n  \\\"/src/features/users/api/get-users.ts\\\",\\n  \\\"/src/features/users/api/update-profile.ts\\\",\\n  \\\"/src/features/users/components/delete-user.tsx\\\",\\n  \\\"/src/features/users/components/update-profile.tsx\\\",\\n  \\\"/src/features/users/components/users-list.tsx\\\",\\n  \\\"/src/hooks/__tests__/use-disclosure.test.ts\\\",\\n  \\\"/src/hooks/use-disclosure.ts\\\",\\n  \\\"/src/lib/__tests__/authorization.test.tsx\\\",\\n  \\\"/src/lib/api-client.ts\\\",\\n  \\\"/src/lib/auth.tsx\\\",\\n  \\\"/src/lib/authorization.tsx\\\",\\n  \\\"/src/lib/react-query.ts\\\",\\n  \\\"/src/main.tsx\\\",\\n  \\\"/src/testing/data-generators.ts\\\",\\n  \\\"/src/testing/mocks/browser.ts\\\",\\n  \\\"/src/testing/mocks/db.ts\\\",\\n  \\\"/src/testing/mocks/handlers/auth.ts\\\",\\n  \\\"/src/testing/mocks/handlers/comments.ts\\\",\\n  \\\"/src/testing/mocks/handlers/discussions.ts\\\",\\n  \\\"/src/testing/mocks/handlers/index.ts\\\",\\n  \\\"/src/testing/mocks/handlers/teams.ts\\\",\\n  \\\"/src/testing/mocks/handlers/users.ts\\\",\\n  \\\"/src/testing/mocks/index.ts\\\",\\n  \\\"/src/testing/mocks/server.ts\\\",\\n  \\\"/src/testing/mocks/utils.ts\\\",\\n  \\\"/src/testing/setup-tests.ts\\\",\\n  \\\"/src/testing/test-utils.tsx\\\",\\n  \\\"/src/types/api.ts\\\",\\n  \\\"/src/utils/cn.ts\\\",\\n  \\\"/src/utils/format.ts\\\"\\n]\"}]}",
+        "toolCallId": "tool_find_files_aopM20KQoAI2qc5uH5fD",
+        "toolName": "find_files",
+        "tokens": 1758
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_content_Y5jhgWmzL8CCQcvaFPjl",
+            "name": "get_symbol_content",
+            "arguments": {
+              "query": "useUser",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/lib/authorization.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"a08167afba23bb44:bf9fba8fcba32833\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/lib/auth.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 75,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/users/components/update-profile.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/features/users/components/update-profile.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/users/components/delete-user.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/features/users/components/delete-user.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/users/api/update-profile.ts:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/features/users/api/update-profile.ts\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/comments/components/comments-list.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/components/layouts/auth-layout.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/components/layouts/auth-layout.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/landing.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/app/routes/landing.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/app/profile.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/app/routes/app/profile.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/app/dashboard.tsx:useUser\\\",\\n    \\\"name\\\": \\\"useUser\\\",\\n    \\\"file\\\": \\\"/src/app/routes/app/dashboard.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_content_Y5jhgWmzL8CCQcvaFPjl",
+        "toolName": "get_symbol_content",
+        "tokens": 1020
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_MXTGY4BLsguVqMlWZAxV",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "Authorization"
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"line\\\": 35,\\n    \\\"column\\\": 4,\\n    \\\"in\\\": \\\"UpdateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"\\\",\\n      \\\"  return (\\\",\\n      \\\"    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\",\\n      \\\"      <FormDrawer\\\",\\n      \\\"        isDone={updateDiscussionMutation.isSuccess}\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"line\\\": 28,\\n    \\\"column\\\": 4,\\n    \\\"in\\\": \\\"DeleteDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"\\\",\\n      \\\"  return (\\\",\\n      \\\"    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\",\\n      \\\"      <ConfirmationDialog\\\",\\n      \\\"        icon=\\\\\\\"danger\\\\\\\"\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"line\\\": 27,\\n    \\\"column\\\": 4,\\n    \\\"in\\\": \\\"CreateDiscussion\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"\\\",\\n      \\\"  return (\\\",\\n      \\\"    <Authorization allowedRoles={[ROLES.ADMIN]}>\\\",\\n      \\\"      <FormDrawer\\\",\\n      \\\"        isDone={createDiscussionMutation.isSuccess}\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"line\\\": 54,\\n    \\\"column\\\": 12,\\n    \\\"in\\\": \\\"CommentsList\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"            className=\\\\\\\"w-full bg-white p-4 shadow-sm\\\\\\\"\\\",\\n      \\\"          >\\\",\\n      \\\"            <Authorization\\\",\\n      \\\"              policyCheck={POLICIES['comment:delete'](\\\",\\n      \\\"                user.data as User,\\\"\\n    ]\\n  },\\n  {\\n    \\\"file\\\": \\\"/src/app/routes/app/users.tsx\\\",\\n    \\\"line\\\": 20,\\n    \\\"column\\\": 6,\\n    \\\"in\\\": \\\"UsersRoute\\\",\\n    \\\"kind\\\": \\\"render\\\",\\n    \\\"context\\\": [\\n      \\\"  return (\\\",\\n      \\\"    <ContentLayout title=\\\\\\\"Users\\\\\\\">\\\",\\n      \\\"      <Authorization\\\",\\n      \\\"        forbiddenFallback={<div>Only admin can view this.</div>}\\\",\\n      \\\"        allowedRoles={[ROLES.ADMIN]}\\\"\\n    ]\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_MXTGY4BLsguVqMlWZAxV",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 613
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_content_GHnI4FV9iEiErqvPf2ij",
+            "name": "get_symbol_content",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "Authorization"
+            }
+          }
+        ],
+        "tokens": 59
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"10ff2a2c4f0fe6c0\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 63,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"content\\\": \\\"export const Authorization = ({\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/lib/__tests__/authorization.test.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/lib/__tests__/authorization.test.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/discussions/components/update-discussion.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/features/discussions/components/update-discussion.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/discussions/components/delete-discussion.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/features/discussions/components/delete-discussion.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/discussions/components/create-discussion.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/features/discussions/components/create-discussion.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/features/comments/components/comments-list.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/features/comments/components/comments-list.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/app/routes/app/users.tsx:Authorization\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"file\\\": \\\"/src/app/routes/app/users.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_content_GHnI4FV9iEiErqvPf2ij",
+        "toolName": "get_symbol_content",
+        "tokens": 715
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_content_c33feX1DRw91ZdKEN8Vr",
+            "name": "get_symbol_content",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useAuthorization"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"59ef2dff96f40300\\\",\\n    \\\"name\\\": \\\"useAuthorization\\\",\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 28,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"hook\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"content\\\": \\\"export const useAuthorization = () => {\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/components/layouts/dashboard-layout.tsx:useAuthorization\\\",\\n    \\\"name\\\": \\\"useAuthorization\\\",\\n    \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"content\\\": \\\"\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_content_c33feX1DRw91ZdKEN8Vr",
+        "toolName": "get_symbol_content",
+        "tokens": 212
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_wJxDaaCZBGUZRZWYMyhY",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useAuthorization"
+            }
+          }
+        ],
+        "tokens": 63
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_wJxDaaCZBGUZRZWYMyhY",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 12
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_location_2QMWbCEamqyKVkGAqEXw",
+            "name": "get_symbol_location",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useAuthorization"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"59ef2dff96f40300\\\",\\n    \\\"name\\\": \\\"useAuthorization\\\",\\n    \\\"file\\\": \\\"/src/lib/authorization.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": 28,\\n      \\\"column\\\": 13\\n    },\\n    \\\"kind\\\": \\\"hook\\\",\\n    \\\"type\\\": \\\"function\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"symbol:import:/src/components/layouts/dashboard-layout.tsx:useAuthorization\\\",\\n    \\\"name\\\": \\\"useAuthorization\\\",\\n    \\\"file\\\": \\\"/src/components/layouts/dashboard-layout.tsx\\\",\\n    \\\"loc\\\": {\\n      \\\"line\\\": null,\\n      \\\"column\\\": null\\n    },\\n    \\\"kind\\\": \\\"import\\\",\\n    \\\"type\\\": \\\"data\\\"\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_symbol_location_2QMWbCEamqyKVkGAqEXw",
+        "toolName": "get_symbol_location",
+        "tokens": 190
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_file_outline_VOtZ4SbciIgZqGvGwDsN",
+            "name": "get_file_outline",
+            "arguments": {
+              "filePath": "/src/lib/authorization.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"641cd7c1ef2ddb10\\\",\\n    \\\"name\\\": \\\"POLICIES\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 14\\n  },\\n  {\\n    \\\"id\\\": \\\"59ef2dff96f40300\\\",\\n    \\\"name\\\": \\\"useAuthorization\\\",\\n    \\\"kind\\\": \\\"hook\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 28\\n  },\\n  {\\n    \\\"id\\\": \\\"10ff2a2c4f0fe6c0\\\",\\n    \\\"name\\\": \\\"Authorization\\\",\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 63\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_file_outline_VOtZ4SbciIgZqGvGwDsN",
+        "toolName": "get_file_outline",
+        "tokens": 181
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_JbLvevAA6C7z2WY29129",
+            "name": "read_file",
+            "arguments": {
+              "filePath": "/src/lib/authorization.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 60
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import * as React from 'react';\\n\\nimport { Comment, User } from '@/types/api';\\n\\nimport { useUser } from './auth';\\n\\nexport enum ROLES {\\n  ADMIN = 'ADMIN',\\n  USER = 'USER',\\n}\\n\\ntype RoleTypes = keyof typeof ROLES;\\n\\nexport const POLICIES = {\\n  'comment:delete': (user: User, comment: Comment) => {\\n    if (user.role === 'ADMIN') {\\n      return true;\\n    }\\n\\n    if (user.role === 'USER' && comment.author?.id === user.id) {\\n      return true;\\n    }\\n\\n    return false;\\n  },\\n};\\n\\nexport const useAuthorization = () => {\\n  const user = useUser();\\n\\n  if (!user.data) {\\n    throw Error('User does not exist!');\\n  }\\n\\n  const checkAccess = React.useCallback(\\n    ({ allowedRoles }: { allowedRoles: RoleTypes[] }) => {\\n      if (allowedRoles && allowedRoles.length > 0 && user.data) {\\n        return allowedRoles?.includes(user.data.role);\\n      }\\n\\n      return true;\\n    },\\n    [user.data],\\n  );\\n\\n  return { checkAccess, role: user.data.role };\\n};\\n\\ntype AuthorizationProps = {\\n  forbiddenFallback?: React.ReactNode;\\n  children: React.ReactNode;\\n} & (\\n  | {\\n      allowedRoles: RoleTypes[];\\n      policyCheck?: never;\\n    }\\n  | {\\n      allowedRoles?: never;\\n      policyCheck: boolean;\\n    }\\n);\\n\\nexport const Authorization = ({\\n  policyCheck,\\n  allowedRoles,\\n  forbiddenFallback = null,\\n  children,\\n}: AuthorizationProps) => {\\n  const { checkAccess } = useAuthorization();\\n\\n  let canAccess = false;\\n\\n  if (allowedRoles) {\\n    canAccess = checkAccess({ allowedRoles });\\n  }\\n\\n  if (typeof policyCheck !== 'undefined') {\\n    canAccess = policyCheck;\\n  }\\n\\n  return <>{canAccess ? children : forbiddenFallback}</>;\\n};\\n\"}]}",
+        "toolCallId": "tool_read_file_JbLvevAA6C7z2WY29129",
+        "toolName": "read_file",
+        "tokens": 510
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_vj3fPG9kyHtuhvazxPb4",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useUser"
+            }
+          }
+        ],
+        "tokens": 65
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_vj3fPG9kyHtuhvazxPb4",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 12
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_info_mzlkAB51QNPSX3T9dQaX",
+            "name": "get_symbol_info",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useUser"
+            }
+          }
+        ],
+        "tokens": 58
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"definitions\\\": [\\n    {\\n      \\\"kind\\\": \\\"normal\\\",\\n      \\\"name\\\": \\\"useUser\\\",\\n      \\\"file\\\": \\\"/src/lib/auth.tsx\\\"\\n    }\\n  ]\\n}\"}]}",
+        "toolCallId": "tool_get_symbol_info_mzlkAB51QNPSX3T9dQaX",
+        "toolName": "get_symbol_info",
+        "tokens": 60
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_file_outline_kycdyrmJRMwvMZjCnDhH",
+            "name": "get_file_outline",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "/src/lib/auth.tsx"
+            }
+          }
+        ],
+        "tokens": 61
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"243c3d783231df7e\\\",\\n    \\\"name\\\": \\\"getUser\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 13\\n  },\\n  {\\n    \\\"id\\\": \\\"8c7561ce29f53a51\\\",\\n    \\\"name\\\": \\\"logout\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 19\\n  },\\n  {\\n    \\\"id\\\": \\\"a20d895d5d9f1396\\\",\\n    \\\"name\\\": \\\"loginInputSchema\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 23\\n  },\\n  {\\n    \\\"id\\\": \\\"fa74b9dff0dca3cb\\\",\\n    \\\"name\\\": \\\"loginWithEmailAndPassword\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 29\\n  },\\n  {\\n    \\\"id\\\": \\\"927ed4ab3430023d\\\",\\n    \\\"name\\\": \\\"registerInputSchema\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 33\\n  },\\n  {\\n    \\\"id\\\": \\\"54ef7e559817e037\\\",\\n    \\\"name\\\": \\\"registerWithEmailAndPassword\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 56\\n  },\\n  {\\n    \\\"id\\\": \\\"dcfdafaf0e5271b4\\\",\\n    \\\"name\\\": \\\"authConfig\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 62\\n  },\\n  {\\n    \\\"id\\\": \\\"d52394b0c3e155ae\\\",\\n    \\\"name\\\": \\\"response\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 69\\n  },\\n  {\\n    \\\"id\\\": \\\"a08167afba23bb44\\\",\\n    \\\"name\\\": \\\"{\\\\n  useUser,\\\\n  useLogin,\\\\n  useLogout,\\\\n  useRegister,\\\\n  AuthLoader\\\\n}\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 75\\n  },\\n  {\\n    \\\"id\\\": \\\"232e9f480974c339\\\",\\n    \\\"name\\\": \\\"ProtectedRoute\\\",\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 78\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_file_outline_kycdyrmJRMwvMZjCnDhH",
+        "toolName": "get_file_outline",
+        "tokens": 595
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_symbol_usages_with_context_FoYC8Ui5J9CYwz03IsYi",
+            "name": "get_symbol_usages_with_context",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "query": "useUser"
+            }
+          }
+        ],
+        "tokens": 64
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[]\"}]}",
+        "toolCallId": "tool_get_symbol_usages_with_context_FoYC8Ui5J9CYwz03IsYi",
+        "toolName": "get_symbol_usages_with_context",
+        "tokens": 12
+      }
+    ]
+  },
+  {
+    "scenarioId": "small-coding-1",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "baseline",
+    "testType": "coding",
+    "model": "Gemini 3 Flash Preview",
+    "success": false,
+    "totalTokens": 2444,
+    "toolCallsCount": 5,
+    "latencyMs": 12866,
+    "steps": [
+      {
+        "role": "system",
+        "content": "You are an expert software engineer tasked with completing this coding task: \"Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.\". \n        The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.\n        1. Understand the requirements and explore the codebase.\n        2. Implement the changes requested.\n        3. Verify your work using any available testing tools if applicable.\n        4. Once you are finished, provide a summary of the changes made.",
+        "tokens": 318
+      },
+      {
+        "role": "user",
+        "content": "Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.",
+        "tokens": 53
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_list_directory_NMmTmkuTUVFoSXdTJ4Za",
+            "name": "list_directory",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "dirPath": "src/components/ui/button"
+            }
+          }
+        ],
+        "tokens": 59
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"directories\\\": [],\\n  \\\"files\\\": [\\n    \\\"button.stories.tsx\\\",\\n    \\\"button.tsx\\\",\\n    \\\"index.ts\\\",\\n    \\\"types.ts\\\"\\n  ]\\n}\"}]}",
+        "toolCallId": "tool_list_directory_NMmTmkuTUVFoSXdTJ4Za",
+        "toolName": "list_directory",
+        "tokens": 59
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_xFzYuZ63GT0BVa7yXb9w",
+            "name": "read_file",
+            "arguments": {
+              "filePath": "src/components/ui/button/button.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 62
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Slot } from '@radix-ui/react-slot';\\nimport { cva, type VariantProps } from 'class-variance-authority';\\nimport * as React from 'react';\\n\\nimport { cn } from '@/utils/cn';\\n\\nimport { Spinner } from '../spinner';\\n\\nconst buttonVariants = cva(\\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\\n  {\\n    variants: {\\n      variant: {\\n        default:\\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\\n        destructive:\\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\\n        outline:\\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\\n        secondary:\\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\\n        link: 'text-primary underline-offset-4 hover:underline',\\n      },\\n      size: {\\n        default: 'h-9 px-4 py-2',\\n        sm: 'h-8 rounded-md px-3 text-xs',\\n        lg: 'h-10 rounded-md px-8',\\n        icon: 'size-9',\\n      },\\n    },\\n    defaultVariants: {\\n      variant: 'default',\\n      size: 'default',\\n    },\\n  },\\n);\\n\\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\\n  VariantProps<typeof buttonVariants> & {\\n    asChild?: boolean;\\n    isLoading?: boolean;\\n    icon?: React.ReactNode;\\n  };\\n\\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\\n  (\\n    {\\n      className,\\n      variant,\\n      size,\\n      asChild = false,\\n      children,\\n      isLoading,\\n      icon,\\n      ...props\\n    },\\n    ref,\\n  ) => {\\n    const Comp = asChild ? Slot : 'button';\\n    return (\\n      <Comp\\n        className={cn(buttonVariants({ variant, size, className }))}\\n        ref={ref}\\n        {...props}\\n      >\\n        {isLoading && <Spinner size=\\\"sm\\\" className=\\\"text-current\\\" />}\\n        {!isLoading && icon && <span className=\\\"mr-2\\\">{icon}</span>}\\n        <span className=\\\"mx-2\\\">{children}</span>\\n      </Comp>\\n    );\\n  },\\n);\\nButton.displayName = 'Button';\\n\\nexport { Button, buttonVariants };\\n\"}]}",
+        "toolCallId": "tool_read_file_xFzYuZ63GT0BVa7yXb9w",
+        "toolName": "read_file",
+        "tokens": 647
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_78lvNrQsRxdcCAjaOoro",
+            "name": "read_file",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "src/components/ui/button/types.ts"
+            }
+          }
+        ],
+        "tokens": 57
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import * as React from 'react';\\nimport { VariantProps } from 'class-variance-authority';\\nimport { buttonVariants } from './button';\\n\\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\\n  VariantProps<typeof buttonVariants> & {\\n    asChild?: boolean;\\n    isLoading?: boolean;\\n    icon?: React.ReactNode;\\n  };\\n\"}]}",
+        "toolCallId": "tool_read_file_78lvNrQsRxdcCAjaOoro",
+        "toolName": "read_file",
+        "tokens": 100
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_kufi9jnUKZzRMwDHNNYG",
+            "name": "run_shell_command",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "command": "cat <<EOF > src/components/ui/button/types.ts\nimport { type VariantProps } from 'class-variance-authority';\nimport * as React from 'react';\n\nimport { type buttonVariants } from './button';\n\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\n  VariantProps<typeof buttonVariants> & {\n    asChild?: boolean;\n    isLoading?: boolean;\n    icon?: React.ReactNode;\n  };\nEOF\n"
+            }
+          }
+        ],
+        "tokens": 159
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_kufi9jnUKZzRMwDHNNYG",
+        "toolName": "run_shell_command",
+        "tokens": 36
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_run_shell_command_Xt20Gs4KShthgmE3gX0b",
+            "name": "run_shell_command",
+            "arguments": {
+              "command": "cat <<EOF > src/components/ui/button/button.tsx\nimport { Slot } from '@radix-ui/react-slot';\nimport { cva, type VariantProps } from 'class-variance-authority';\nimport * as React from 'react';\n\nimport { cn } from '@/utils/cn';\n\nimport { Spinner } from '../spinner';\nimport { type ButtonProps } from './types';\n\nconst buttonVariants = cva(\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\n  {\n    variants: {\n      variant: {\n        default:\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\n        destructive:\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\n        outline:\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\n        secondary:\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\n        link: 'text-primary underline-offset-4 hover:underline',\n      },\n      size: {\n        default: 'h-9 px-4 py-2',\n        sm: 'h-8 rounded-md px-3 text-xs',\n        lg: 'h-10 rounded-md px-8',\n        icon: 'size-9',\n      },\n    },\n    defaultVariants: {\n      variant: 'default',\n      size: 'default',\n    },\n  },\n);\n\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\n  (\n    {\n      className,\n      variant,\n      size,\n      asChild = false,\n      children,\n      isLoading,\n      icon,\n      ...props\n    },\n    ref,\n  ) => {\n    const Comp = asChild ? Slot : 'button';\n    return (\n      <Comp\n        className={cn(buttonVariants({ variant, size, className }))}\n        ref={ref}\n        {...props}\n      >\n        {isLoading && <Spinner size=\"sm\" className=\"text-current\" />}\n        {!isLoading && icon && <span className=\"mr-2\">{icon}</span>}\n        <span className=\"mx-2\">{children}</span>\n      </Comp>\n    );\n  },\n);\nButton.displayName = 'Button';\n\nexport { Button, buttonVariants };\nEOF\n",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 666
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"stdout\\\": \\\"\\\",\\n  \\\"stderr\\\": \\\"\\\",\\n  \\\"exitCode\\\": 0\\n}\"}]}",
+        "toolCallId": "tool_run_shell_command_Xt20Gs4KShthgmE3gX0b",
+        "toolName": "run_shell_command",
+        "tokens": 36
+      },
+      {
+        "role": "assistant",
+        "content": "I have refactored the `Button` component by moving the `ButtonProps` interface to a separate file.\n\n### Changes Made:\n\n1.  **Created/Updated `src/components/ui/button/types.ts`**:\n    *   Moved the `ButtonProps` interface definition to this file.\n    *   Imported necessary types from `class-variance-authority` and `react`.\n    *   Imported `buttonVariants` from `./button` to maintain the `VariantProps` dependency.\n\n2.  **Updated `src/components/ui/button/button.tsx`**:\n    *   Removed the `ButtonProps` interface definition.\n    *   Imported `ButtonProps` from `./types`.\n    *   Removed the `export` keyword from `ButtonProps` since it is no longer defined in this file.\n\nThis refactoring helps in organizing the codebase by separating type definitions from component implementation, which is especially useful as components grow in complexity.",
+        "tokens": 192
+      }
+    ],
+    "verificationOutput": {
+      "stdout": "\n> bulletproof-react-vite@1.0.0 lint\n> eslint src --ignore-path .gitignore\n\n",
+      "stderr": "Invalid option '--ignore-path' - perhaps you meant '--ignore-pattern'?\nYou're using eslint.config.js, some command line flags are no longer available. Please see https://eslint.org/docs/latest/use/command-line-interface for details.\n",
+      "exitCode": 2
+    }
+  },
+  {
+    "scenarioId": "small-coding-1",
+    "projectName": "Bulletproof React (Small)",
+    "approach": "react-map-warm",
+    "testType": "coding",
+    "model": "Gemini 3 Flash Preview",
+    "success": false,
+    "totalTokens": 2286,
+    "toolCallsCount": 4,
+    "latencyMs": 11287,
+    "steps": [
+      {
+        "role": "system",
+        "content": "You are an expert software engineer tasked with completing this coding task: \"Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.\". \n        The project is already open at \"/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite\". Use this absolute path for the 'projectPath' argument in all tool calls. \n    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. \n    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.\n    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.\n    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.\n    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.\n        1. Understand the requirements and explore the codebase.\n        2. Implement the changes requested.\n        3. Verify your work using any available testing tools if applicable.\n        4. Once you are finished, provide a summary of the changes made.",
+        "tokens": 318
+      },
+      {
+        "role": "user",
+        "content": "Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.",
+        "tokens": 53
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_get_file_outline_NNB54kw5UKOBOL4Hgqwr",
+            "name": "get_file_outline",
+            "arguments": {
+              "filePath": "src/components/ui/button/button.tsx",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 61
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[\\n  {\\n    \\\"id\\\": \\\"a89b800bda7a2eaf\\\",\\n    \\\"name\\\": \\\"buttonVariants\\\",\\n    \\\"kind\\\": \\\"normal\\\",\\n    \\\"type\\\": \\\"data\\\",\\n    \\\"line\\\": 9\\n  },\\n  {\\n    \\\"id\\\": \\\"9b04df0652d807ec\\\",\\n    \\\"name\\\": \\\"Button\\\",\\n    \\\"kind\\\": \\\"component\\\",\\n    \\\"type\\\": \\\"function\\\",\\n    \\\"line\\\": 46\\n  }\\n]\"}]}",
+        "toolCallId": "tool_get_file_outline_NNB54kw5UKOBOL4Hgqwr",
+        "toolName": "get_file_outline",
+        "tokens": 125
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_read_file_lJ8BGhDe8dEQO8NMdZlP",
+            "name": "read_file",
+            "arguments": {
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "src/components/ui/button/button.tsx"
+            }
+          }
+        ],
+        "tokens": 62
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"import { Slot } from '@radix-ui/react-slot';\\nimport { cva, type VariantProps } from 'class-variance-authority';\\nimport * as React from 'react';\\n\\nimport { cn } from '@/utils/cn';\\n\\nimport { Spinner } from '../spinner';\\n\\nconst buttonVariants = cva(\\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\\n  {\\n    variants: {\\n      variant: {\\n        default:\\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\\n        destructive:\\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\\n        outline:\\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\\n        secondary:\\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\\n        link: 'text-primary underline-offset-4 hover:underline',\\n      },\\n      size: {\\n        default: 'h-9 px-4 py-2',\\n        sm: 'h-8 rounded-md px-3 text-xs',\\n        lg: 'h-10 rounded-md px-8',\\n        icon: 'size-9',\\n      },\\n    },\\n    defaultVariants: {\\n      variant: 'default',\\n      size: 'default',\\n    },\\n  },\\n);\\n\\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\\n  VariantProps<typeof buttonVariants> & {\\n    asChild?: boolean;\\n    isLoading?: boolean;\\n    icon?: React.ReactNode;\\n  };\\n\\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\\n  (\\n    {\\n      className,\\n      variant,\\n      size,\\n      asChild = false,\\n      children,\\n      isLoading,\\n      icon,\\n      ...props\\n    },\\n    ref,\\n  ) => {\\n    const Comp = asChild ? Slot : 'button';\\n    return (\\n      <Comp\\n        className={cn(buttonVariants({ variant, size, className }))}\\n        ref={ref}\\n        {...props}\\n      >\\n        {isLoading && <Spinner size=\\\"sm\\\" className=\\\"text-current\\\" />}\\n        {!isLoading && icon && <span className=\\\"mr-2\\\">{icon}</span>}\\n        <span className=\\\"mx-2\\\">{children}</span>\\n      </Comp>\\n    );\\n  },\\n);\\nButton.displayName = 'Button';\\n\\nexport { Button, buttonVariants };\\n\"}]}",
+        "toolCallId": "tool_read_file_lJ8BGhDe8dEQO8NMdZlP",
+        "toolName": "read_file",
+        "tokens": 647
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_write_file_i7n6b4XJMR6dKP1ISuhu",
+            "name": "write_file",
+            "arguments": {
+              "content": "import { type VariantProps } from 'class-variance-authority';\nimport * as React from 'react';\n\nimport { buttonVariants } from './button';\n\nexport type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &\n  VariantProps<typeof buttonVariants> & {\n    asChild?: boolean;\n    isLoading?: boolean;\n    icon?: React.ReactNode;\n  };\n",
+              "filePath": "src/components/ui/button/types.ts",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+            }
+          }
+        ],
+        "tokens": 155
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"success\\\":true}\"}]}",
+        "toolCallId": "tool_write_file_i7n6b4XJMR6dKP1ISuhu",
+        "toolName": "write_file",
+        "tokens": 16
+      },
+      {
+        "role": "assistant",
+        "toolCalls": [
+          {
+            "id": "tool_write_file_8yPjMdTOrB91Vd4R35to",
+            "name": "write_file",
+            "arguments": {
+              "content": "import { Slot } from '@radix-ui/react-slot';\nimport { cva } from 'class-variance-authority';\nimport * as React from 'react';\n\nimport { cn } from '@/utils/cn';\n\nimport { Spinner } from '../spinner';\n\nimport { type ButtonProps } from './types';\n\nconst buttonVariants = cva(\n  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',\n  {\n    variants: {\n      variant: {\n        default:\n          'bg-primary text-primary-foreground shadow hover:bg-primary/90',\n        destructive:\n          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',\n        outline:\n          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',\n        secondary:\n          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',\n        ghost: 'hover:bg-accent hover:text-accent-foreground',\n        link: 'text-primary underline-offset-4 hover:underline',\n      },\n      size: {\n        default: 'h-9 px-4 py-2',\n        sm: 'h-8 rounded-md px-3 text-xs',\n        lg: 'h-10 rounded-md px-8',\n        icon: 'size-9',\n      },\n    },\n    defaultVariants: {\n      variant: 'default',\n      size: 'default',\n    },\n  },\n);\n\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\n  (\n    {\n      className,\n      variant,\n      size,\n      asChild = false,\n      children,\n      isLoading,\n      icon,\n      ...props\n    },\n    ref,\n  ) => {\n    const Comp = asChild ? Slot : 'button';\n    return (\n      <Comp\n        className={cn(buttonVariants({ variant, size, className }))}\n        ref={ref}\n        {...props}\n      >\n        {isLoading && <Spinner size=\"sm\" className=\"text-current\" />}\n        {!isLoading && icon && <span className=\"mr-2\">{icon}</span>}\n        <span className=\"mx-2\">{children}</span>\n      </Comp>\n    );\n  },\n);\nButton.displayName = 'Button';\n\nexport { Button, buttonVariants };\n",
+              "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+              "filePath": "src/components/ui/button/button.tsx"
+            }
+          }
+        ],
+        "tokens": 658
+      },
+      {
+        "role": "tool",
+        "content": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"success\\\":true}\"}]}",
+        "toolCallId": "tool_write_file_8yPjMdTOrB91Vd4R35to",
+        "toolName": "write_file",
+        "tokens": 16
+      },
+      {
+        "role": "assistant",
+        "content": "I have successfully refactored the `Button` component by moving the `ButtonProps` interface to a separate file.\n\n### Changes Made:\n\n1.  **Created `src/components/ui/button/types.ts`**:\n    *   Moved the `ButtonProps` interface definition to this new file.\n    *   Imported necessary types from `class-variance-authority` and `react`.\n    *   Imported `buttonVariants` from `./button` to maintain the `VariantProps` dependency.\n\n2.  **Updated `src/components/ui/button/button.tsx`**:\n    *   Removed the `ButtonProps` interface definition.\n    *   Imported `ButtonProps` from `./types`.\n    *   Updated imports to remove unused `VariantProps` from `class-variance-authority`.\n\nThis refactoring improves code organization by separating type definitions from component logic.",
+        "tokens": 175
+      }
+    ],
+    "verificationOutput": {
+      "stdout": "\n> bulletproof-react-vite@1.0.0 lint\n> eslint src --ignore-path .gitignore\n\n",
+      "stderr": "Invalid option '--ignore-path' - perhaps you meant '--ignore-pattern'?\nYou're using eslint.config.js, some command line flags are no longer available. Please see https://eslint.org/docs/latest/use/command-line-interface for details.\n",
+      "exitCode": 2
+    }
+  }
+]

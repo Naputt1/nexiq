@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "useLogin",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"a08167afba23bb44:a3cf7df609400d5f\",\n    \"name\": \"useLogin\",\n    \"file\": \"/src/lib/auth.tsx\",\n    \"loc\": {\n      \"line\": 75,\n      \"column\": 13\n    },\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"content\": \"export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\"\n  },\n  {\n    \"id\": \"symbol:import:/src/features/auth/components/login-form.tsx:useLogin\",\n    \"name\": \"useLogin\",\n    \"file\": \"/src/features/auth/components/login-form.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

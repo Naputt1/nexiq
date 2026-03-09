@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalFooter",
+    "usages": true,
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"ModalFooter\",\n      \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalFooter\",\n          \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n          \"in\": \"jsx@308:24\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalFooter\",\n          \"file\": \"/components/generic_modal.tsx\",\n          \"in\": \"jsx@308:24\"\n        }\n      ]\n    },\n    {\n      \"kind\": \"component\",\n      \"name\": \"ModalFooter\",\n      \"file\": \"/components/generic_modal.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalFooter\",\n          \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n          \"in\": \"jsx@308:24\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalFooter\",\n          \"file\": \"/components/generic_modal.tsx\",\n          \"in\": \"jsx@308:24\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

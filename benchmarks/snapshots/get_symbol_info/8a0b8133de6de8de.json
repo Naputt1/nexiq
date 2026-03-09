@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "Authorization",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"Authorization\",\n      \"file\": \"/src/lib/authorization.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"Authorization\",\n          \"file\": \"/src/features/discussions/components/update-discussion.tsx\",\n          \"in\": \"UpdateDiscussion\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"Authorization\",\n          \"file\": \"/src/features/discussions/components/delete-discussion.tsx\",\n          \"in\": \"DeleteDiscussion\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"Authorization\",\n          \"file\": \"/src/features/discussions/components/create-discussion.tsx\",\n          \"in\": \"CreateDiscussion\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"Authorization\",\n          \"file\": \"/src/features/comments/components/comments-list.tsx\",\n          \"in\": \"CommentsList\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"Authorization\",\n          \"file\": \"/src/app/routes/app/users.tsx\",\n          \"in\": \"UsersRoute\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

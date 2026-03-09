@@ -31,6 +31,15 @@
       "expected_answer_contains": [
         "src/lib/auth.tsx"
       ]
+    },
+    {
+      "id": "small-coding-1",
+      "type": "coding",
+      "prompt": "Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.",
+      "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 20
     }
   ]
 }

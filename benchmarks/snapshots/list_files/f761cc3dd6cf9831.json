@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "fields": [
+      "path"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"totalFiles\": 40,\n  \"displayedCount\": 40,\n  \"files\": [\n    {\n      \"path\": \"/playwright.config.ts\"\n    },\n    {\n      \"path\": \"/src/store.js\"\n    },\n    {\n      \"path\": \"/src/reducer.js\"\n    },\n    {\n      \"path\": \"/src/middleware.js\"\n    },\n    {\n      \"path\": \"/src/index.js\"\n    },\n    {\n      \"path\": \"/src/agent.js\"\n    },\n    {\n      \"path\": \"/src/reducers/settings.js\"\n    },\n    {\n      \"path\": \"/src/reducers/profile.js\"\n    },\n    {\n      \"path\": \"/src/reducers/home.js\"\n    },\n    {\n      \"path\": \"/src/reducers/editor.js\"\n    },\n    {\n      \"path\": \"/src/reducers/common.js\"\n    },\n    {\n      \"path\": \"/src/reducers/auth.js\"\n    },\n    {\n      \"path\": \"/src/reducers/articleList.js\"\n    },\n    {\n      \"path\": \"/src/reducers/article.js\"\n    },\n    {\n      \"path\": \"/src/constants/actionTypes.js\"\n    },\n    {\n      \"path\": \"/src/components/Settings.js\"\n    },\n    {\n      \"path\": \"/src/components/Register.js\"\n    },\n    {\n      \"path\": \"/src/components/ProfileFavorites.js\"\n    },\n    {\n      \"path\": \"/src/components/Profile.js\"\n    },\n    {\n      \"path\": \"/src/components/Login.js\"\n    },\n    {\n      \"path\": \"/src/components/ListPagination.js\"\n    },\n    {\n      \"path\": \"/src/components/ListErrors.js\"\n    },\n    {\n      \"path\": \"/src/components/Header.js\"\n    },\n    {\n      \"path\": \"/src/components/Editor.js\"\n    },\n    {\n      \"path\": \"/src/components/ArticlePreview.js\"\n    },\n    {\n      \"path\": \"/src/components/ArticleList.js\"\n    },\n    {\n      \"path\": \"/src/components/App.js\"\n    },\n    {\n      \"path\": \"/src/components/Home/index.js\"\n    },\n    {\n      \"path\": \"/src/components/Home/Tags.js\"\n    },\n    {\n      \"path\": \"/src/components/Home/MainView.js\"\n    },\n    {\n      \"path\": \"/src/components/Home/Banner.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/index.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/DeleteButton.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/CommentList.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/CommentInput.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/CommentContainer.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/Comment.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/ArticleMeta.js\"\n    },\n    {\n      \"path\": \"/src/components/Article/ArticleActions.js\"\n    },\n    {\n      \"path\": \"/e2e/header.spec.ts\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

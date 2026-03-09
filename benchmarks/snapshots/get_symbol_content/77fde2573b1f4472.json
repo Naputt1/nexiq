@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "useAuthorization",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"59ef2dff96f40300\",\n    \"name\": \"useAuthorization\",\n    \"file\": \"/src/lib/authorization.tsx\",\n    \"loc\": {\n      \"line\": 28,\n      \"column\": 13\n    },\n    \"kind\": \"hook\",\n    \"type\": \"function\",\n    \"content\": \"export const useAuthorization = () => {\"\n  },\n  {\n    \"id\": \"symbol:import:/src/components/layouts/dashboard-layout.tsx:useAuthorization\",\n    \"name\": \"useAuthorization\",\n    \"file\": \"/src/components/layouts/dashboard-layout.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  }\n]"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalFooter"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 284,\n    \"column\": 24,\n    \"in\": \"jsx@284:24\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                            {this.props.children}\",\n      \"                        </ModalBody>\",\n      \"                        <ModalFooter\",\n      \"                            cancelButton={cancelButton}\",\n      \"                            confirmButton={confirmButton}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

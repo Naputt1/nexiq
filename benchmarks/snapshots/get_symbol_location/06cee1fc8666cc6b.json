@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "subProject": "",
+    "query": "LoginForm"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"symbol:import:/src/features/auth/components/__tests__/login-form.test.tsx:LoginForm\",\n    \"name\": \"LoginForm\",\n    \"file\": \"/src/features/auth/components/__tests__/login-form.test.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\"\n  },\n  {\n    \"id\": \"symbol:import:/src/app/routes/auth/login.tsx:LoginForm\",\n    \"name\": \"LoginForm\",\n    \"file\": \"/src/app/routes/auth/login.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\"\n  },\n  {\n    \"id\": \"df9da7513c533ee\",\n    \"name\": \"LoginForm\",\n    \"file\": \"/src/features/auth/components/login-form.tsx\",\n    \"loc\": {\n      \"line\": 12,\n      \"column\": 13\n    },\n    \"kind\": \"component\",\n    \"type\": \"function\"\n  }\n]"
+      }
+    ]
+  }
+}

@@ -21,6 +21,15 @@
       "expected_answer_contains": [
         "mapStateToProps"
       ]
+    },
+    {
+      "id": "mid-coding-1",
+      "type": "coding",
+      "prompt": "Refactor the `Header` component in `src/components/Header.js` to extract the navigation links into a separate functional component called `NavLink`. The `NavLink` should take `to` and `children` as props.",
+      "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npx eslint --fix src && npx playwright test",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 20
     }
   ]
 }

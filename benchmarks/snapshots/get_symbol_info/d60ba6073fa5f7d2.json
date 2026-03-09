@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "ArticleList",
+    "usages": true,
+    "props": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"ArticleList\",\n      \"file\": \"/src/components/ArticleList.js\",\n      \"props\": [\n        {\n          \"id\": \"bbc11d24863e63b5:prop:props\",\n          \"name\": \"props\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"c913f4018cd56103\"\n        }\n      ],\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"ArticleList\",\n          \"file\": \"/src/components/Profile.js\",\n          \"in\": \"jsx@157:14\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"ArticleList\",\n          \"file\": \"/src/components/Home/MainView.js\",\n          \"in\": \"MainView\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}
