@@ -29,9 +29,11 @@ export default defineConfig(({ mode }) => ({
         vite: {
           build: {
             target: "node18",
+            minify: false,
             rollupOptions: {
               external: [
                 "electron",
+                "better-sqlite3",
                 "@parcel/watcher",
                 "@node-rs/xxhash",
                 "analyser",
@@ -62,6 +64,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      shared: path.resolve(__dirname, "../shared/src"),
+      analyser: path.resolve(__dirname, "../analyser/src"),
     },
   },
 }));

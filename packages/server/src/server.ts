@@ -876,16 +876,16 @@ export class BackendServer {
     });
   }
 
-  public async handleCallTool(tollCall: ToolCall) {
+  public async handleCallTool(toolCall: ToolCall) {
     // Handle extension tools
     const extensions = this.projectManager.getAllExtensions();
     for (const ext of extensions) {
-      if (tollCall.name.startsWith(`${ext.id}_`)) {
-        const toolName = tollCall.name.replace(`${ext.id}_`, "");
+      if (toolCall.name.startsWith(`${ext.id}_`)) {
+        const toolName = toolCall.name.replace(`${ext.id}_`, "");
         const tool = (ext.mcpTools || []).find((t) => t.name === toolName);
         if (tool) {
           const result = await tool.handler({
-            ...tollCall.args,
+            ...toolCall.args,
             projectManager: this.projectManager,
           });
           return {
@@ -895,10 +895,10 @@ export class BackendServer {
       }
     }
 
-    return await this.handleKnownTollCall(tollCall as KnownToolCall);
+    return await this.handleKnownToolCall(toolCall as KnownToolCall);
   }
 
-  private async handleKnownTollCall(knownCall: KnownToolCall) {
+  private async handleKnownToolCall(knownCall: KnownToolCall) {
     switch (knownCall.name) {
       case "open_project": {
         const { projectPath, subProject } = knownCall.args;
@@ -1487,25 +1487,14 @@ export class BackendServer {
             switch (data.type) {
               case "open_project": {
                 const { projectPath, subProject } = data.payload;
-                await this.projectManager.openProject(projectPath, subProject);
-                this.sendResponse(
-                  ws,
-                  "project_opened",
-                  undefined,
-                  data.requestId,
-                );
-                break;
-              }
-              case "get_graph_data": {
-                const { projectPath, subProject } = data.payload;
                 const project = await this.projectManager.openProject(
                   projectPath,
                   subProject,
                 );
-                this.sendChunkedResponse(
+                this.sendResponse(
                   ws,
-                  "get_graph_data",
-                  project.graph!,
+                  "project_opened",
+                  { sqlitePath: project.sqlitePath },
                   data.requestId,
                 );
                 break;

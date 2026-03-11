@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import type { GitStatus, GitCommit, GitFileDiff, JsonData } from "shared";
+import type { GitStatus, GitCommit, GitFileDiff, DatabaseData } from "shared";
 
 interface GitState {
   status: GitStatus | null;
   history: GitCommit[];
   diffs: Record<string, GitFileDiff[]>;
-  analyzedDiffs: Record<string, JsonData>;
+  analyzedDiffs: Record<string, DatabaseData>;
   isLoading: boolean;
   error: string | null;
 
@@ -25,7 +25,7 @@ interface GitState {
     projectRoot: string,
     commitHash: string | null,
     subPath?: string,
-  ) => Promise<JsonData | undefined>;
+  ) => Promise<DatabaseData | undefined>;
   clearAnalyzedDiffCache: () => void;
 }
 
@@ -127,8 +127,8 @@ export const useGitStore = create<GitState>((set, get) => ({
 
     set({ isLoading: true });
     try {
-      let dataB: JsonData;
-      let dataA: JsonData;
+      let dataB: DatabaseData;
+      let dataA: DatabaseData;
 
       if (commitHash) {
         // 1. Analyze target commit
@@ -150,7 +150,7 @@ export const useGitStore = create<GitState>((set, get) => ({
           );
         } catch {
           // Root commit, use empty graph as parent
-          dataA = { files: {}, edges: [], src: "" };
+          dataA = { files: [], entities: [], scopes: [], symbols: [], renders: [], exports: [], relations: [] };
         }
       } else {
         // 1. Current state
@@ -189,4 +189,3 @@ export const useGitStore = create<GitState>((set, get) => ({
 
   clearAnalyzedDiffCache: () => set({ analyzedDiffs: {} }),
 }));
-

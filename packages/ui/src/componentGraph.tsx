@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { type TypeDataDeclare, type JsonData } from "shared";
+import { type TypeDataDeclare, type DatabaseData } from "shared";
 import useGraph, {
   GraphCombo,
   GraphNode,
@@ -178,17 +178,15 @@ const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
         return;
       }
 
-      const {
-        nodes,
-        edges,
-        combos,
-        typeData: newTypeData,
-      } = (e.data as ViewWorkerResponse).result;
+      const { result, isIncremental, done } = e.data as ViewWorkerResponse;
+      const { nodes, edges, combos, typeData: newTypeData } = result;
       settypeData(newTypeData);
       setGraphData({ nodes, edges, combos });
-      setIsGeneratingView(false);
-    };
 
+      if (done || !isIncremental) {
+        setIsGeneratingView(false);
+      }
+    };
     worker.addEventListener("message", handleMessage);
 
     return () => {
@@ -258,7 +256,7 @@ const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
     return () => unsubscribe();
   }, [projectPath]);
 
-  const rawGraphDataRef = useRef<JsonData | null>(null);
+  const rawGraphDataRef = useRef<DatabaseData | null>(null);
 
   const loadData = useCallback(
     async (analysisPath?: string) => {
@@ -266,7 +264,7 @@ const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
       if (!targetPath) return;
 
       try {
-        let graphData: JsonData;
+        let graphData: DatabaseData;
         if (selectedCommit || activeTab === "git") {
           const diffData = await loadAnalyzedDiff(
             projectPath,
@@ -280,7 +278,7 @@ const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
             "read-graph-data",
             projectPath,
             targetPath,
-          )) as JsonData;
+          )) as DatabaseData;
         }
 
         if (!graphData) throw new Error("Graph data not found");
@@ -650,7 +648,29 @@ const ComponentGraph = ({ projectPath, subProject }: ComponentGraphProps) => {
     hasRestoredViewport.current = false; // Reset flag when project changes
     resetState();
     loadState(projectPath, subProject);
-  }, [projectPath, subProject, loadState, resetState]);
+
+    // Initial analysis to ensure sqlitePath is populated in main process
+    const triggerInitialAnalysis = async () => {
+      const targetPath = selectedSubProject || projectPath;
+      if (!targetPath) return;
+
+      setIsAnalyzing(true);
+      try {
+        await window.ipcRenderer.invoke(
+          "analyze-project",
+          targetPath,
+          projectPath,
+        );
+        // Data will be reloaded by the other useEffect watching status/graph
+      } catch (e) {
+        console.error("Failed initial analysis", e);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    triggerInitialAnalysis();
+  }, [projectPath, subProject, loadState, resetState, selectedSubProject]);
 
   // load data whenever sub-project selection or selected commit changes
   useEffect(() => {

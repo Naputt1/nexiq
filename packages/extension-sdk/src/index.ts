@@ -1,12 +1,12 @@
 import type {
-  JsonData,
   TypeDataDeclare,
   ComponentFileVar,
   VariableName,
+  DatabaseData,
 } from "shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
-export type { JsonData, TypeDataDeclare, ComponentFileVar, VariableName };
+export type { TypeDataDeclare, ComponentFileVar, VariableName, DatabaseData };
 
 export interface GraphItemPosition {
   x: number;
@@ -62,7 +62,11 @@ export interface GraphViewResult extends useGraphProps {
 export interface GraphViewTask {
   id: string;
   priority: number;
-  run: (data: JsonData, result: GraphViewResult) => GraphViewResult;
+  run: (
+    data: DatabaseData,
+    result: GraphViewResult,
+    batch?: Partial<DatabaseData>,
+  ) => GraphViewResult;
 }
 
 export interface DetailSectionProps {

@@ -9,3 +9,11 @@ ignoredBuiltDependencies:
   - "@swc/core"
 
 strictPeerDependencies: false
+
+nodeLinker: isolated
+
+# hoist: false
+# hoistPattern:
+#   - "!better-sqlite3"
+#   - "!**/better-sqlite3"
+#   - "!**/better-sqlite3/**"

@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./db": {
+      "types": "./dist/db/sqlite.d.ts",
+      "import": "./dist/db/sqlite.js"
     }
   },
   "scripts": {
@@ -19,7 +23,10 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
+  "dependencies": {},
   "devDependencies": {
+    "better-sqlite3": "^12.6.2",
+    "@types/better-sqlite3": "^7.6.13",
     "typescript": "^5.9.3"
   }
 }

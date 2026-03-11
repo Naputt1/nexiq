@@ -15,10 +15,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:coverage": "pnpm build:coverage && pnpm test:e2e && tsx e2e/merge-coverage.ts"
+    "test:coverage": "pnpm build:coverage && pnpm test:e2e && tsx e2e/merge-coverage.ts",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "rebuild-native": "electron-rebuild -f -w better-sqlite3"
   },
   "devDependencies": {
     "@antv/g6": "^5.0.50",
+    "@electron/rebuild": "^4.0.3",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.50.1",
     "@radix-ui/react-slot": "^1.2.4",
@@ -76,7 +79,7 @@
     "@tanstack/devtools-vite": "^0.5.1",
     "@tanstack/react-devtools": "^0.9.5",
     "@tanstack/react-virtual": "^3.13.18",
-    "analyser": "workspace:*",
+    "better-sqlite3": "12.6.2",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "lodash.debounce": "^4.0.8",

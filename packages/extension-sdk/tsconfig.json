@@ -11,11 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "shared": ["../shared/src/index.ts"],
-      "shared/*": ["../shared/src/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"]
 }

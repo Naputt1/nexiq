@@ -3,6 +3,7 @@ import path from "node:path";
 import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "analyser";
+import { SqliteDB } from "analyser/db/sqlite";
 import {
   type JsonData,
   type ProjectStatus,
@@ -13,18 +14,33 @@ import {
   type SubProject,
   getDisplayName,
   parseRawDiff,
+  type DatabaseData,
+  type SymbolRow,
+  type RenderRow,
 } from "shared";
 import type { Extension } from "@react-map/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import Database from "better-sqlite3";
 import { simpleGit, type LogOptions } from "simple-git";
 import yaml from "js-yaml";
 import fg from "fast-glob";
 import tmp from "tmp";
 
 const execAsync = promisify(exec);
+
+interface ExtendedSymbolRow extends SymbolRow {
+  file: string;
+  line: number;
+  column: number;
+  kind: string;
+  type: string;
+}
+
+interface ExtendedRenderRow extends RenderRow {
+  file: string;
+  in_name: string | null;
+}
 
 export interface PnpmWorkspace {
   packages?: string[];
@@ -42,7 +58,7 @@ export interface ProjectInfo {
   subscription?: watcher.AsyncSubscription;
   extensions: Extension[];
   sqlitePath: string;
-  db?: Database.Database;
+  db?: SqliteDB;
 }
 
 export interface SymbolSearchResult {
@@ -59,33 +75,6 @@ export interface SymbolSearchResult {
 export interface SymbolInfo {
   definitions: SymbolSearchResult[];
   externalUsages?: SymbolSearchResult[];
-}
-
-interface SymbolRow {
-  id: string;
-  name: string;
-  file: string;
-  line: number;
-  column: number;
-  kind: string;
-  type: string;
-  path?: string;
-  is_alias?: number;
-  has_default?: number;
-  data_json?: string;
-}
-
-interface RenderRow {
-  id: string;
-  symbol_id: string | null;
-  tag: string;
-  file: string;
-  line: number;
-  column: number;
-  parent_entity_id: string;
-  kind: string;
-  render_index: number;
-  in_name?: string;
 }
 
 interface TreeNode {
@@ -232,7 +221,7 @@ export class ProjectManager {
       graph,
       extensions,
       sqlitePath,
-      db: new Database(sqlitePath),
+      db: new SqliteDB(sqlitePath),
     };
 
     // Set up watcher
@@ -273,7 +262,7 @@ export class ProjectManager {
                 );
 
                 if (projectInfo.db) projectInfo.db.close();
-                projectInfo.db = new Database(projectInfo.sqlitePath);
+                projectInfo.db = new SqliteDB(projectInfo.sqlitePath);
 
                 console.error(
                   `Project ${analysisPath} re-analyzed successfully.`,
@@ -311,6 +300,14 @@ export class ProjectManager {
     }
 
     return projectInfo;
+  }
+
+  public async getDatabaseData(
+    projectPath: string,
+    subProject?: string,
+  ): Promise<DatabaseData> {
+    const project = await this.openProject(projectPath, subProject);
+    return project.db!.getAllData();
   }
 
   getOpenProjectPaths(): string[] {
@@ -362,12 +359,12 @@ export class ProjectManager {
     };
 
     // 1. Find the symbol's definition(s)
-    let definitions: SymbolRow[];
+    let definitions: ExtendedSymbolRow[];
     if (strict) {
       definitions = project
-        .db!.prepare(
+        .db!.db.prepare(
           `
-          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.data_json 
+          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.type, e.data_json 
           FROM symbols s
           JOIN entities e ON s.entity_id = e.id
           JOIN scopes sc ON e.scope_id = sc.id
@@ -375,12 +372,12 @@ export class ProjectManager {
           WHERE s.name = ? and e.kind != 'import'
         `,
         )
-        .all(query) as SymbolRow[];
+        .all(query) as ExtendedSymbolRow[];
     } else {
       definitions = project
-        .db!.prepare(
+        .db!.db.prepare(
           `
-          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.data_json 
+          SELECT s.*, f.path as file, e.line, e.column, e.kind, e.type, e.data_json 
           FROM symbols s
           JOIN entities e ON s.entity_id = e.id
           JOIN scopes sc ON e.scope_id = sc.id
@@ -388,7 +385,7 @@ export class ProjectManager {
           WHERE (s.name = ? OR s.name LIKE ?) and e.kind != 'import'
         `,
         )
-        .all(query, `%${query}%`) as SymbolRow[];
+        .all(query, `%${query}%`) as ExtendedSymbolRow[];
     }
 
     for (const def of definitions) {
@@ -398,7 +395,7 @@ export class ProjectManager {
         kind: def.kind,
         name: def.name,
         file: def.file,
-        loc: { line: def.line, column: def.column },
+        loc: { line: def.line || 0, column: def.column || 0 },
       };
 
       if (includeProps && def.data_json) {
@@ -414,7 +411,7 @@ export class ProjectManager {
         definition.usages = [];
         // 2. Find renders of this specific symbol ID or tag name
         const usages = project
-          .db!.prepare(
+          .db!.db.prepare(
             `
           SELECT r.*, f.path as file, s.name as in_name 
           FROM renders r
@@ -424,7 +421,7 @@ export class ProjectManager {
           WHERE r.symbol_id = ? OR r.tag = ?
         `,
           )
-          .all(def.id, def.name) as RenderRow[];
+          .all(def.id, def.name) as ExtendedRenderRow[];
 
         for (const usage of usages) {
           if (isExcluded(usage.file)) continue;
@@ -433,7 +430,7 @@ export class ProjectManager {
             kind: usage.kind === "jsx" ? "render" : "call",
             name: usage.tag,
             file: usage.file,
-            loc: { line: usage.line, column: usage.column },
+            loc: { line: usage.line || 0, column: usage.column || 0 },
             in: usage.in_name || "unknown",
           });
         }
@@ -445,7 +442,7 @@ export class ProjectManager {
     // 3. Fallback for external symbols (tags not defined in this project)
     if (includeUsages && definitions_results.length === 0) {
       const results = project
-        .db!.prepare(
+        .db!.db.prepare(
           `
         SELECT r.*, f.path as file, s.name as in_name 
         FROM renders r 
@@ -455,7 +452,7 @@ export class ProjectManager {
         WHERE r.tag = ?
       `,
         )
-        .all(query) as RenderRow[];
+        .all(query) as ExtendedRenderRow[];
 
       for (const usage of results) {
         if (isExcluded(usage.file)) continue;
@@ -464,7 +461,7 @@ export class ProjectManager {
           kind: usage.kind === "jsx" ? "render" : "call",
           name: usage.tag,
           file: usage.file,
-          loc: { line: usage.line, column: usage.column },
+          loc: { line: usage.line || 0, column: usage.column || 0 },
           in: usage.in_name || "unknown",
         });
       }
@@ -644,17 +641,18 @@ export class ProjectManager {
 
     // Find the starting component(s)
     const startComponents = project
-      .db!.prepare(
+      .db!.db.prepare(
         `
         SELECT s.*, f.path as file, e.line, e.column, e.kind, e.type
         FROM symbols s
         JOIN entities e ON s.entity_id = e.id
         JOIN scopes sc ON e.scope_id = sc.id
         JOIN files f ON sc.file_id = f.id
-        WHERE s.name = ?
+        WHERE s.name = ? AND e.kind = 'component'
       `,
       )
-      .all(componentName) as SymbolRow[];
+
+      .all(componentName) as ExtendedSymbolRow[];
 
     if (startComponents.length === 0) {
       return { error: `Component "${componentName}" not found.` };
@@ -666,7 +664,7 @@ export class ProjectManager {
       visited: Set<string>,
     ): ComponentHierarchyNode => {
       const sym = project
-        .db!.prepare(`SELECT * FROM symbols WHERE id = ?`)
+        .db!.db.prepare(`SELECT * FROM symbols WHERE id = ?`)
         .get(symbolId) as SymbolRow | undefined;
       if (!sym || currentDepth > depth || visited.has(symbolId)) {
         return {
@@ -679,10 +677,10 @@ export class ProjectManager {
       visited.add(symbolId);
 
       const children = project
-        .db!.prepare(
+        .db!.db.prepare(
           `SELECT r.*, f.path as file FROM renders r JOIN files f ON r.file_id = f.id WHERE parent_entity_id = (SELECT entity_id FROM symbols WHERE id = ?)`,
         )
-        .all(symbolId) as RenderRow[];
+        .all(symbolId) as ExtendedRenderRow[];
 
       return {
         id: sym.id,
@@ -706,7 +704,7 @@ export class ProjectManager {
     };
 
     const renderedBy = project
-      .db!.prepare(
+      .db!.db.prepare(
         `
       SELECT DISTINCT s.id, s.name, f.path as file 
       FROM symbols s
@@ -717,7 +715,7 @@ export class ProjectManager {
       WHERE r.tag = ? OR r.symbol_id IN (SELECT id FROM symbols WHERE name = ?)
     `,
       )
-      .all(componentName, componentName) as SymbolRow[];
+      .all(componentName, componentName) as ExtendedSymbolRow[];
 
     return {
       component: componentName,
@@ -749,7 +747,7 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
 
     const symbols = project
-      .db!.prepare(
+      .db!.db.prepare(
         `
         SELECT s.id, s.name, f.path as file, e.line, e.column, e.kind, e.type 
         FROM symbols s
@@ -757,14 +755,15 @@ export class ProjectManager {
         JOIN scopes sc ON e.scope_id = sc.id
         JOIN files f ON sc.file_id = f.id
         WHERE s.name = ?
-        `,
+      `,
       )
-      .all(query) as SymbolRow[];
+
+      .all(query) as ExtendedSymbolRow[];
     return symbols.map((s) => ({
       id: s.id,
       name: s.name,
       file: s.file,
-      loc: { line: s.line, column: s.column },
+      loc: { line: s.line || 0, column: s.column || 0 },
       kind: s.kind,
       type: s.type, // Keep database type, UI expects this as symbol type
     }));
@@ -1010,7 +1009,12 @@ export class ProjectManager {
     projectPath: string,
     command: string,
     subProject?: string,
-  ): Promise<{ stdout?: string; stderr?: string; error?: string; exitCode: number }> {
+  ): Promise<{
+    stdout?: string;
+    stderr?: string;
+    error?: string;
+    exitCode: number;
+  }> {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
@@ -1032,8 +1036,18 @@ export class ProjectManager {
       });
       return { stdout, stderr, exitCode: 0 };
     } catch (e: unknown) {
-      const err = e as { message: string; stdout?: string; stderr?: string; code?: number };
-      return { error: err.message, stdout: err.stdout, stderr: err.stderr, exitCode: err.code ?? 1 };
+      const err = e as {
+        message: string;
+        stdout?: string;
+        stderr?: string;
+        code?: number;
+      };
+      return {
+        error: err.message,
+        stdout: err.stdout,
+        stderr: err.stderr,
+        exitCode: err.code ?? 1,
+      };
     }
   }
 
@@ -1320,7 +1334,7 @@ export class ProjectManager {
     projectRoot: string,
     commitHash: string,
     subPath?: string,
-  ): Promise<JsonData> {
+  ): Promise<DatabaseData> {
     const git = simpleGit(projectRoot);
     const resolvedHash = await git.revparse([commitHash]);
 
@@ -1339,10 +1353,13 @@ export class ProjectManager {
       "cache",
       "commits",
     );
-    const cachePath = path.join(commitCacheDir, `${cacheKey}.json`);
+    const sqlitePath = path.join(commitCacheDir, `${cacheKey}.sqlite`);
 
-    if (fs.existsSync(cachePath)) {
-      return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+    if (fs.existsSync(sqlitePath)) {
+      const sqlite = new SqliteDB(sqlitePath);
+      const data = sqlite.getAllData();
+      sqlite.close();
+      return data;
     }
 
     if (!fs.existsSync(commitCacheDir)) {
@@ -1377,13 +1394,11 @@ export class ProjectManager {
         }
       }
 
-      const graph = await analyzeProject(
-        analysisPath,
-        undefined,
-        ignorePatterns,
-      );
-      fs.writeFileSync(cachePath, JSON.stringify(graph, null, 2));
-      return graph;
+      await analyzeProject(analysisPath, undefined, ignorePatterns, sqlitePath);
+      const sqlite = new SqliteDB(sqlitePath);
+      const data = sqlite.getAllData();
+      sqlite.close();
+      return data;
     } finally {
       tempDir.removeCallback();
     }
