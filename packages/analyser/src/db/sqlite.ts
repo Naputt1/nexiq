@@ -7,7 +7,12 @@ import type {
   ComponentFileVarJSX,
   ComponentInfoRender,
   VariableName,
+  EntityRow,
+  RelationRow,
+  RenderRow,
+  ExportRow,
 } from "shared";
+import { SqliteDB as BaseSqliteDB } from "shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
@@ -17,74 +22,18 @@ export interface AnalyzedFileResult {
   file: ComponentFile;
 }
 
-interface FileRow {
-  id: number;
-  path: string;
-  hash: string;
-  fingerprint: string;
-  default_export: string | null;
-  star_exports_json: string | null;
-}
-
-interface EntityRow {
-  id: string;
-  scope_id: string;
-  kind: string;
-  name: string;
-  type: string | null;
-  line: number | null;
-  column: number | null;
-  end_line: number | null;
-  end_column: number | null;
-  declaration_kind: string | null;
-  data_json: string | null;
-}
-
-interface RelationRow {
-  from_id: string;
-  to_id: string;
-  kind: string;
-  line: number | null;
-  column: number | null;
-  data_json: string | null;
-}
-
-interface RenderRow {
-  id: string;
-  file_id: number;
-  parent_entity_id: string;
-  parent_render_id: string | null;
-  render_index: number;
-  tag: string;
-  symbol_id: string | null;
-  line: number | null;
-  column: number | null;
-  kind: string;
-  data_json: string | null;
-}
-
-interface ExportRow {
-  id: number;
-  scope_id: string;
-  entity_id: string | null;
-  symbol_id: string | null;
-  name: string;
-  is_default: number;
-}
-
-export class SqliteDB {
-  public db: Database.Database;
-
-  constructor(dbPath: string) {
-    // Ensure directory exists
-    const dir = path.dirname(dbPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+export class SqliteDB extends BaseSqliteDB {
+  constructor(dbPath: string, options: { readonly?: boolean } = {}) {
+    // Ensure directory exists if not readonly
+    if (!options.readonly) {
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
     }
 
-    this.db = new Database(dbPath);
-    this.db.pragma("journal_mode = WAL");
-    this.db.pragma("foreign_keys = ON");
+    const db = new Database(dbPath, options);
+    super(db);
     this.initSchema();
   }
 
@@ -212,12 +161,6 @@ export class SqliteDB {
       CREATE INDEX IF NOT EXISTS idx_relations_from ON relations (from_id);
       CREATE INDEX IF NOT EXISTS idx_relations_to ON relations (to_id);
     `);
-  }
-
-  public getFileByPath(filePath: string): FileRow | undefined {
-    return this.db
-      .prepare("SELECT * FROM files WHERE path = ?")
-      .get(filePath) as FileRow | undefined;
   }
 
   private insertEntity(data: {
@@ -661,6 +604,8 @@ export class SqliteDB {
 
     // Reconstruct exports
     for (const exp of exports_) {
+      if (exp.name == null) continue;
+
       result.export[exp.name] = {
         id: exp.entity_id || (exp.symbol_id ? exp.symbol_id : ""),
         name: exp.name,
@@ -764,7 +709,12 @@ export class SqliteDB {
       } else {
         const parentEntity = varMap.get(r.parent_entity_id);
         const render = renderMap.get(r.id);
-        if (parentEntity && render && "children" in parentEntity && parentEntity.children) {
+        if (
+          parentEntity &&
+          render &&
+          "children" in parentEntity &&
+          parentEntity.children
+        ) {
           parentEntity.children[render.instanceId] = render;
         }
       }
@@ -785,22 +735,5 @@ export class SqliteDB {
       },
     );
     transaction(edges);
-  }
-
-  public getEdges(): { from: string; to: string; label: string }[] {
-    const rows = this.db
-      .prepare(
-        `
-      SELECT from_id as 'from', to_id as 'to', kind as label 
-      FROM relations 
-      WHERE kind NOT IN ('parent-child', 'renders', 'calls')
-    `,
-      )
-      .all() as { from: string; to: string; label: string }[];
-    return rows;
-  }
-
-  public close() {
-    this.db.close();
   }
 }

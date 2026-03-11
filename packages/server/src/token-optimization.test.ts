@@ -7,7 +7,6 @@ import type { JsonData } from "shared";
 import Database from "better-sqlite3";
 
 vi.mock("node:fs");
-vi.mock("analyser");
 vi.mock("@parcel/watcher");
 
 const createMockStmt = () => ({
@@ -23,6 +22,26 @@ const mockDb = {
   exec: vi.fn(),
   pragma: vi.fn(),
 };
+
+vi.mock("analyser", () => ({
+  analyzeProject: vi.fn(),
+}));
+
+vi.mock("analyser/db/sqlite", () => ({
+  SqliteDB: vi.fn().mockImplementation(() => ({
+    db: mockDb,
+    getAllData: vi.fn().mockReturnValue({
+      files: [],
+      entities: [],
+      scopes: [],
+      symbols: [],
+      renders: [],
+      exports: [],
+      relations: [],
+    }),
+    close: () => mockDb.close(),
+  })),
+}));
 
 vi.mock("better-sqlite3", () => {
   return {
@@ -63,7 +82,7 @@ describe("Token Optimization Tools", () => {
     projectManager = new ProjectManager();
     server = new BackendServer(projectManager);
     
-    await server.handleCallTool("open_project", { projectPath });
+    await server.handleCallTool({ name: "open_project", args: { projectPath } });
   });
 
   describe("get_symbol_info with filtering", () => {
@@ -76,7 +95,7 @@ describe("Token Optimization Tools", () => {
         ]),
       } as any);
 
-      const result = await server.handleCallTool("get_symbol_info", { projectPath, query: "Button" });
+      const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.definitions).toHaveLength(1);
@@ -91,10 +110,13 @@ describe("Token Optimization Tools", () => {
           ]),
         } as any);
   
-        const result = await server.handleCallTool("get_symbol_info", { 
-            projectPath, 
-            query: "Button",
-            exclude: ["**/components/**"] 
+        const result = await server.handleCallTool({ 
+            name: "get_symbol_info",
+            args: {
+                projectPath, 
+                query: "Button",
+                exclude: ["**/components/**"] 
+            }
         });
         const data = JSON.parse(result.content[0].text);
         
@@ -105,7 +127,7 @@ describe("Token Optimization Tools", () => {
 
   describe("list_files with filtering", () => {
     it("should exclude node_modules and tests by default", async () => {
-      const result = await server.handleCallTool("list_files", { projectPath });
+      const result = await server.handleCallTool({ name: "list_files", args: { projectPath } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.totalFiles).toBe(1);
@@ -135,8 +157,11 @@ export const App = () => {
   return <Button>Click</Button>;
 };`);
 
-      const result = await server.handleCallTool("get_symbol_usages_with_context", { 
-        projectPath, query: "Button", contextLines: 1 
+      const result = await server.handleCallTool({ 
+        name: "get_symbol_usages_with_context",
+        args: { 
+            projectPath, query: "Button", contextLines: 1 
+        }
       });
       const data = JSON.parse(result.content[0].text);
       
@@ -157,8 +182,11 @@ export const App = () => {
         }]),
       } as any);
 
-      const result = await server.handleCallTool("get_prop_definitions", { 
-        projectPath, componentName: "Button" 
+      const result = await server.handleCallTool({ 
+        name: "get_prop_definitions",
+        args: { 
+            projectPath, componentName: "Button" 
+        }
       });
       const data = JSON.parse(result.content[0].text);
       

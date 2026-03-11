@@ -846,7 +846,6 @@ export class FileDB {
     file.path = "/" + filename;
 
     const changed = this.isFileChanged(filename, file, cache);
-    console.log("FileDB add:", filename, "changed =", changed);
     if (!changed) {
       assert(cache != null, "Cache must be defined");
 

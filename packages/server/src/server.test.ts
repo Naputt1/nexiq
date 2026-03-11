@@ -25,6 +25,20 @@ describe("BackendServer", () => {
     vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
     vi.spyOn(console, "error").mockImplementation(() => {});
     mockProjectManager = new ProjectManager();
+    vi.mocked(mockProjectManager.openProject).mockResolvedValue({
+      projectPath: "/test",
+      sqlitePath: "/test/db.sqlite",
+      extensions: [],
+    } as any);
+    vi.mocked(mockProjectManager.getDatabaseData).mockResolvedValue({
+      files: [],
+      entities: [],
+      scopes: [],
+      symbols: [],
+      renders: [],
+      exports: [],
+      relations: [],
+    });
     vi.mocked(mockProjectManager.getAllExtensions).mockReturnValue([]);
     server = new BackendServer(mockProjectManager, 3030);
   });
@@ -671,36 +685,6 @@ describe("BackendServer", () => {
       expect(mockWs.send).toHaveBeenCalledWith(
         expect.stringContaining("req-1"),
       );
-    });
-
-    it("should handle get_graph_data message", async () => {
-      const mockGraph = { files: {}, edges: [] };
-      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
-        projectPath: "/test",
-        extensions: [],
-        sqlitePath: "test.sqlite",
-        graph: mockGraph as unknown as JsonData,
-      });
-
-      const messageHandler = mockWs.on.mock.calls.find(
-        (args) => args[0] === "message",
-      )![1] as (msg: string) => Promise<void>;
-
-      const payload = {
-        type: "get_graph_data",
-        payload: { projectPath: "/test" },
-        requestId: "req-2",
-      };
-
-      await messageHandler(JSON.stringify(payload));
-
-      expect(mockWs.send).toHaveBeenCalledWith(
-        expect.stringContaining("graph_data"),
-      );
-      const response = JSON.parse(mockWs.send.mock.calls[0][0]) as {
-        payload: unknown;
-      };
-      expect(response.payload).toEqual(mockGraph);
     });
 
     it("should handle call_tool message", async () => {

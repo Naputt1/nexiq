@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import {
   app,
   BrowserWindow,
@@ -16,13 +17,22 @@ import os from "node:os";
 
 import { WebSocket, type MessageEvent } from "ws";
 import { spawn, ChildProcess } from "node:child_process";
+import Database from "better-sqlite3";
+import { SqliteDB } from "../../shared/src/db/sqlite";
 
 const BACKEND_PORT = 3030;
 let backendProcess: ChildProcess | null = null;
 let backendWs: WebSocket | null = null;
+const projectSqlitePaths = new Map<string, string>();
 
 async function startBackend() {
   if (backendProcess) return;
+
+  if (process.env.VITE_EXTERNAL_BACKEND === "true") {
+    console.log("Using external backend as requested by VITE_EXTERNAL_BACKEND");
+    connectToBackend();
+    return;
+  }
 
   const serverDist = path.join(
     process.env.APP_ROOT!,
@@ -159,14 +169,11 @@ async function requestBackend<K extends BackendMessageType>(
 
 import type { AppStateData, GlobalSettings } from "./types";
 import type {
-  JsonData,
+  DatabaseData,
   GitStatus,
   GitCommit,
   GitFileDiff,
   UIStateMap,
-  PropData,
-  ComponentFileVar,
-  EffectInfo,
   ReactMapConfig,
   BackendRequestMap,
   BackendMessageType,
@@ -627,10 +634,13 @@ ipcMain.handle(
 ipcMain.handle(
   "analyze-project",
   async (_: IpcMainInvokeEvent, analysisPath: string, projectPath: string) => {
-    await requestBackend("open_project", {
+    const response = await requestBackend("open_project", {
       projectPath,
       subProject: analysisPath === projectPath ? undefined : analysisPath,
     });
+    if (response && response.sqlitePath) {
+      projectSqlitePaths.set(analysisPath, response.sqlitePath);
+    }
     return path.basename(analysisPath);
   },
 );
@@ -641,10 +651,33 @@ ipcMain.handle(
     const targetPath = analysisPath || projectRoot;
     if (!targetPath) return null;
 
-    return requestBackend("get_graph_data", {
-      projectPath: projectRoot,
-      subProject: analysisPath === projectRoot ? undefined : analysisPath,
-    });
+    let sqlitePath = projectSqlitePaths.get(targetPath);
+
+    if (!sqlitePath || !fs.existsSync(sqlitePath)) {
+      // Trigger analysis if not already done
+      const response = await requestBackend("open_project", {
+        projectPath: projectRoot,
+        subProject: targetPath === projectRoot ? undefined : targetPath,
+      });
+      if (response && response.sqlitePath) {
+        sqlitePath = response.sqlitePath;
+        projectSqlitePaths.set(targetPath, sqlitePath);
+      }
+    }
+
+    if (!sqlitePath || !fs.existsSync(sqlitePath)) {
+      throw new Error(`SQLite database not found for path: ${targetPath}`);
+    }
+
+    try {
+      const sqliteInstance = new SqliteDB(new Database(sqlitePath));
+      const data = sqliteInstance.getAllData();
+      sqliteInstance.close();
+      return data;
+    } catch (e) {
+      console.error("Failed to read graph data from sqlite", e);
+      throw e;
+    }
   },
 );
 
@@ -655,7 +688,7 @@ ipcMain.handle(
     projectRoot: string,
     commitHash: string,
     subPath?: string,
-  ): Promise<JsonData> => {
+  ): Promise<DatabaseData> => {
     return requestBackend("git_analyze_commit", {
       projectPath: projectRoot,
       commitHash,
@@ -668,146 +701,31 @@ ipcMain.handle(
   "analyze-diff",
   async (
     _: IpcMainInvokeEvent,
-    dataA: JsonData,
-    dataB: JsonData,
-  ): Promise<JsonData> => {
-    const mapA = new Map<string, string>(); // id -> hash
-    const mapB = new Map<string, string>();
-
-    const collectVars = (data: JsonData, map: Map<string, string>) => {
-      const traverseProps = (props: PropData[]) => {
-        for (const p of props) {
-          map.set(p.id, p.hash ?? "");
-          if (p.props) {
-            traverseProps(p.props);
-          }
-        }
-      };
-
-      const traverse = (vars: Record<string, ComponentFileVar>) => {
-        for (const v of Object.values(vars)) {
-          map.set(v.id, v.hash ?? "");
-
-          if ("props" in v && v.props) {
-            if (v.type === "jsx") {
-              // JSX variables have ComponentInfoRenderDependency[] which don't need prop traversal for hash
-              for (const p of v.props) {
-                map.set(p.id, "");
-              }
-            } else {
-              traverseProps(v.props as PropData[]);
-            }
-          }
-
-          if ("effects" in v && v.effects) {
-            for (const effect of Object.values(v.effects)) {
-              map.set(effect.id, "");
-            }
-          }
-
-          if ("children" in v && v.children) {
-            for (const render of Object.values(v.children)) {
-              map.set(render.id, "");
-            }
-          }
-
-          if ("var" in v && v.var) {
-            traverse(v.var);
-          }
-        }
-      };
-
-      for (const file of Object.values(data.files)) {
-        if (file.var) traverse(file.var);
-      }
-    };
-
-    collectVars(dataA, mapA);
-    collectVars(dataB, mapB);
-
+    dataA: DatabaseData,
+    dataB: DatabaseData,
+  ): Promise<DatabaseData> => {
     const added: string[] = [];
     const modified: string[] = [];
-    const deletedObjects: Record<
-      string,
-      ComponentFileVar | PropData | EffectInfo
-    > = {};
+    const deleted: string[] = [];
 
-    for (const [id, hashB] of mapB.entries()) {
+    const mapA = new Map(dataA.entities.map((e) => [e.id, e]));
+    const mapB = new Map(dataB.entities.map((e) => [e.id, e]));
+
+    for (const [id, entityB] of mapB.entries()) {
       if (!mapA.has(id)) {
         added.push(id);
-      } else if (mapA.get(id) !== hashB) {
-        modified.push(id);
+      } else {
+        const entityA = mapA.get(id);
+        if (entityA && entityA.data_json !== entityB.data_json) {
+          modified.push(id);
+        }
       }
     }
 
-    const deletedIds = new Set<string>();
     for (const id of mapA.keys()) {
       if (!mapB.has(id)) {
-        deletedIds.add(id);
+        deleted.push(id);
       }
-    }
-
-    if (deletedIds.size > 0) {
-      const collectDeletedObjects = (
-        data: JsonData,
-        targetIds: Set<string>,
-      ) => {
-        const traverseProps = (props: PropData[], v: ComponentFileVar) => {
-          for (const p of props) {
-            if (targetIds.has(p.id)) {
-              p.file = v.file;
-              deletedObjects[p.id] = p;
-            }
-            if (p.props) {
-              traverseProps(p.props, v);
-            }
-          }
-        };
-
-        const traverse = (vars: Record<string, ComponentFileVar>) => {
-          for (const v of Object.values(vars)) {
-            if (targetIds.has(v.id)) {
-              deletedObjects[v.id] = v;
-            }
-            if ("props" in v && v.props) {
-              if (v.type === "jsx") {
-                for (const p of v.props) {
-                  if (targetIds.has(p.id)) {
-                    // PropData and ComponentInfoRenderDependency are slightly different but we treat them as ChangeItemType conceptually
-                    const pWithFile = {
-                      ...p,
-                      file: v.file,
-                    } as unknown as PropData;
-                    deletedObjects[p.id] = pWithFile;
-                  }
-                }
-              } else {
-                traverseProps(v.props as PropData[], v);
-              }
-            }
-            if ("effects" in v && v.effects) {
-              for (const effect of Object.values(v.effects)) {
-                if (targetIds.has(effect.id)) {
-                  deletedObjects[effect.id] = {
-                    ...effect,
-                    file: v.file,
-                    kind: "effect",
-                  } as EffectInfo;
-                }
-              }
-            }
-            if ("var" in v && v.var) {
-              traverse(v.var);
-            }
-          }
-        };
-
-        for (const file of Object.values(data.files)) {
-          if (file.var) traverse(file.var);
-        }
-      };
-
-      collectDeletedObjects(dataA, deletedIds);
     }
 
     return {
@@ -815,8 +733,7 @@ ipcMain.handle(
       diff: {
         added,
         modified,
-        deleted: Array.from(deletedIds),
-        deletedObjects,
+        deleted,
       },
     };
   },

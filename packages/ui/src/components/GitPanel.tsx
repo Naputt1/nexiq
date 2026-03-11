@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import type { JsonData } from "shared";
+import type { DatabaseData } from "shared";
 
 import { GitChangeTree } from "./GitChangeTree";
 import { GitHistoryList } from "./GitHistoryList";
@@ -53,7 +53,7 @@ export function GitPanel({
     (s) => s.setSelectedSubProject,
   );
   const [subProjects, setSubProjects] = useState<SubProject[]>([]);
-  const [analyzedData, setAnalyzedData] = useState<JsonData | null>(null);
+  const [analyzedData, setAnalyzedData] = useState<DatabaseData | null>(null);
 
   const [historyLimit, setHistoryLimit] = useState(50);
   const [expandedSections, setExpandedSections] = useState({

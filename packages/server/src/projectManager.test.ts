@@ -14,7 +14,6 @@ import Database from "better-sqlite3";
 
 vi.mock("node:fs");
 vi.mock("@parcel/watcher");
-vi.mock("analyser");
 
 const createMockStmt = () => ({
   all: vi.fn(() => []),
@@ -25,7 +24,29 @@ const createMockStmt = () => ({
 const mockDb = {
   prepare: vi.fn(() => createMockStmt() as unknown as Database.Statement),
   close: vi.fn(),
+  pragma: vi.fn(),
+  exec: vi.fn(),
 };
+
+vi.mock("analyser", () => ({
+  analyzeProject: vi.fn(),
+}));
+
+vi.mock("analyser/db/sqlite", () => ({
+  SqliteDB: vi.fn().mockImplementation(() => ({
+    db: mockDb,
+    getAllData: vi.fn().mockReturnValue({
+      files: [],
+      entities: [],
+      scopes: [],
+      symbols: [],
+      renders: [],
+      exports: [],
+      relations: [],
+    }),
+    close: () => mockDb.close(),
+  })),
+}));
 
 vi.mock("better-sqlite3", () => {
   return {

@@ -1,4 +1,4 @@
-import { type JsonData } from "shared";
+import { type DatabaseData } from "shared";
 import {
   type GraphComboData,
   type GraphNodeData,
@@ -13,7 +13,7 @@ import {
 export const gitTask: GraphViewTask = {
   id: "git-status",
   priority: 100, // Run late to ensure all nodes/combos are present
-  run: (graphData: JsonData, result: GraphViewResult): GraphViewResult => {
+  run: (graphData: DatabaseData, result: GraphViewResult): GraphViewResult => {
     const { added = [], modified = [], deleted = [] } = graphData.diff || {};
 
     // Skip if no diff data

@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
-import { JsonData, GitStatus, GitCommit, GitFileDiff, UIStateMap } from "shared";
+import { DatabaseData, GitStatus, GitCommit, GitFileDiff, UIStateMap } from "shared";
 import {
   AppStateData,
   IpcEvents,
@@ -45,7 +45,7 @@ declare global {
         channel: "read-graph-data",
         projectRoot: string,
         analysisPath?: string,
-      ): Promise<JsonData | null>;
+      ): Promise<DatabaseData | null>;
       invoke(
         channel: "read-state",
         projectRoot: string,
@@ -86,12 +86,12 @@ declare global {
         projectRoot: string,
         commitHash: string,
         subPath?: string,
-      ): Promise<JsonData>;
+      ): Promise<DatabaseData>;
       invoke(
         channel: "analyze-diff",
-        dataA: JsonData,
-        dataB: JsonData,
-      ): Promise<JsonData>;
+        dataA: DatabaseData,
+        dataB: DatabaseData,
+      ): Promise<DatabaseData>;
       on<K extends keyof IpcEvents>(
         channel: K,
         listener: (payload: IpcEvents[K]) => void,

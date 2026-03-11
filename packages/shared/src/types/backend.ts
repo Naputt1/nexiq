@@ -1,4 +1,4 @@
-import type { JsonData } from "../index.js";
+import type { DatabaseData, JsonData } from "../index.js";
 import type {
   ProjectStatus,
   GitStatus,
@@ -47,15 +47,11 @@ export interface BackendRequestMap {
   };
   git_analyze_commit: {
     payload: { projectPath: string; commitHash: string; subPath?: string };
-    response: JsonData;
+    response: DatabaseData;
   };
   open_project: {
     payload: { projectPath: string; subProject?: string };
-    response: void;
-  };
-  get_graph_data: {
-    payload: { projectPath: string; subProject?: string };
-    response: JsonData;
+    response: { sqlitePath: string };
   };
   read_state: {
     payload: { projectPath: string };

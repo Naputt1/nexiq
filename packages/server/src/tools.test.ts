@@ -7,7 +7,6 @@ import type { JsonData } from "shared";
 import Database from "better-sqlite3";
 
 vi.mock("node:fs");
-vi.mock("analyser");
 vi.mock("@parcel/watcher");
 
 const createMockStmt = () => ({
@@ -23,6 +22,26 @@ const mockDb = {
   exec: vi.fn(),
   pragma: vi.fn(),
 };
+
+vi.mock("analyser", () => ({
+  analyzeProject: vi.fn(),
+}));
+
+vi.mock("analyser/db/sqlite", () => ({
+  SqliteDB: vi.fn().mockImplementation(() => ({
+    db: mockDb,
+    getAllData: vi.fn().mockReturnValue({
+      files: [],
+      entities: [],
+      scopes: [],
+      symbols: [],
+      renders: [],
+      exports: [],
+      relations: [],
+    }),
+    close: () => mockDb.close(),
+  })),
+}));
 
 vi.mock("better-sqlite3", () => {
   return {
@@ -61,11 +80,11 @@ describe("MCP Tools Integration", () => {
     server = new BackendServer(projectManager);
     
     // Pre-open the project for most tests
-    await server.handleCallTool("open_project", { projectPath });
+    await server.handleCallTool({ name: "open_project", args: { projectPath } });
   });
 
   it("open_project: should initialize project and return success message", async () => {
-    const result = await server.handleCallTool("open_project", { projectPath: "/new/path" });
+    const result = await server.handleCallTool({ name: "open_project", args: { projectPath: "/new/path" } });
     expect(result.content[0].text).toContain("opened and analyzed successfully");
     expect(analyzeProject).toHaveBeenCalledWith("/new/path", expect.any(String), undefined, expect.any(String));
   });
@@ -78,7 +97,7 @@ describe("MCP Tools Integration", () => {
         }]),
       } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-      const result = await server.handleCallTool("get_symbol_info", { projectPath, query: "Button" });
+      const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.definitions).toHaveLength(1);
@@ -102,9 +121,9 @@ describe("MCP Tools Integration", () => {
         }]),
       } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-      const result = await server.handleCallTool("get_symbol_info", { 
+      const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "Button", usages: true, loc: true 
-      });
+      } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.definitions[0].loc).toBeDefined();
@@ -123,9 +142,9 @@ describe("MCP Tools Integration", () => {
         }]),
       } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-      const result = await server.handleCallTool("get_symbol_info", { 
+      const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "div", usages: true 
-      });
+      } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.definitions).toHaveLength(0);
@@ -140,9 +159,9 @@ describe("MCP Tools Integration", () => {
         }]),
       } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-      const result = await server.handleCallTool("get_symbol_info", { 
+      const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "But", strict: false 
-      });
+      } });
       const data = JSON.parse(result.content[0].text);
       
       expect(data.definitions).toHaveLength(1);
@@ -152,26 +171,26 @@ describe("MCP Tools Integration", () => {
   });
 
   it("find_files: should support glob patterns", async () => {
-    const result = await server.handleCallTool("find_files", { projectPath, pattern: "**/*.tsx" });
+    const result = await server.handleCallTool({ name: "find_files", args: { projectPath, pattern: "**/*.tsx" } });
     const files = JSON.parse(result.content[0].text);
     expect(files).toContain("/src/App.tsx");
   });
 
   it("get_file_imports: should return imports for a file", async () => {
-    const result = await server.handleCallTool("get_file_imports", { projectPath, filePath: "src/App.tsx" });
+    const result = await server.handleCallTool({ name: "get_file_imports", args: { projectPath, filePath: "src/App.tsx" } });
     const imports = JSON.parse(result.content[0].text);
     expect(imports["react"]).toBeDefined();
   });
 
   it("get_project_tree: should return tree up to maxDepth", async () => {
-    const result = await server.handleCallTool("get_project_tree", { projectPath, maxDepth: 1 });
+    const result = await server.handleCallTool({ name: "get_project_tree", args: { projectPath, maxDepth: 1 } });
     const tree = JSON.parse(result.content[0].text);
     expect(tree.name).toBe("/");
     expect(tree.children[0].name).toBe("src");
   });
 
   it("list_files: should return summary for small projects", async () => {
-    const result = await server.handleCallTool("list_files", { projectPath });
+    const result = await server.handleCallTool({ name: "list_files", args: { projectPath } });
     const data = JSON.parse(result.content[0].text);
     expect(data.totalFiles).toBe(1);
     expect(data.files[0].path).toBe("/src/App.tsx");
@@ -202,7 +221,7 @@ describe("MCP Tools Integration", () => {
     // 6. children call (Button renders - empty)
     mockDb.prepare.mockReturnValueOnce({ all: vi.fn().mockReturnValue([]) } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const result = await server.handleCallTool("get_component_hierarchy", { projectPath, componentName: "App" });
+    const result = await server.handleCallTool({ name: "get_component_hierarchy", args: { projectPath, componentName: "App" } });
     const data = JSON.parse(result.content[0].text);
     
     expect(data.component).toBe("App");
@@ -218,7 +237,7 @@ describe("MCP Tools Integration", () => {
       }]),
     } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const result = await server.handleCallTool("get_symbol_location", { projectPath, query: "App" });
+    const result = await server.handleCallTool({ name: "get_symbol_location", args: { projectPath, query: "App" } });
     const locs = JSON.parse(result.content[0].text);
     expect(locs[0].file).toBe("/src/App.tsx");
     expect(locs[0].loc.line).toBe(5);
@@ -236,31 +255,31 @@ describe("MCP Tools Integration", () => {
 export const App = () => {}
 line 3`);
 
-    const result = await server.handleCallTool("get_symbol_content", { projectPath, query: "App" });
+    const result = await server.handleCallTool({ name: "get_symbol_content", args: { projectPath, query: "App" } });
     const contents = JSON.parse(result.content[0].text);
     expect(contents[0].content).toBe("export const App = () => {}");
   });
 
   it("add_label / list_labels / search_by_label: should manage entity labels", async () => {
-    await server.handleCallTool("add_label", { projectPath, id: "app-id", label: "entry" });
+    await server.handleCallTool({ name: "add_label", args: { projectPath, id: "app-id", label: "entry" } });
     
-    const listResult = await server.handleCallTool("list_labels", { projectPath });
+    const listResult = await server.handleCallTool({ name: "list_labels", args: { projectPath } });
     const labels = JSON.parse(listResult.content[0].text);
     expect(labels["app-id"]).toContain("entry");
 
-    const searchResult = await server.handleCallTool("search_by_label", { projectPath, label: "entry" });
+    const searchResult = await server.handleCallTool({ name: "search_by_label", args: { projectPath, label: "entry" } });
     const ids = JSON.parse(searchResult.content[0].text);
     expect(ids).toContain("app-id");
   });
 
   it("list_directory: should return files and subdirs", async () => {
-    const result = await server.handleCallTool("list_directory", { projectPath, dirPath: "src" });
+    const result = await server.handleCallTool({ name: "list_directory", args: { projectPath, dirPath: "src" } });
     const data = JSON.parse(result.content[0].text);
     expect(data.files).toContain("App.tsx");
   });
 
   it("get_file_outline: should return symbols in a file", async () => {
-    const result = await server.handleCallTool("get_file_outline", { projectPath, filePath: "src/App.tsx" });
+    const result = await server.handleCallTool({ name: "get_file_outline", args: { projectPath, filePath: "src/App.tsx" } });
     const outline = JSON.parse(result.content[0].text);
     expect(outline[0].name).toBe("App");
     expect(outline[0].line).toBe(1);
@@ -268,14 +287,14 @@ line 3`);
 
   it("read_file: should return raw file content", async () => {
     vi.mocked(fs.readFileSync).mockReturnValue("raw content");
-    const result = await server.handleCallTool("read_file", { projectPath, filePath: "src/App.tsx" });
+    const result = await server.handleCallTool({ name: "read_file", args: { projectPath, filePath: "src/App.tsx" } });
     expect(result.content[0].text).toBe("raw content");
   });
 
   it("grep_search: should find occurrences", async () => {
     vi.mocked(fs.readFileSync).mockReturnValue(`const x = 1;
 console.log(x);`);
-    const result = await server.handleCallTool("grep_search", { projectPath, pattern: "console" });
+    const result = await server.handleCallTool({ name: "grep_search", args: { projectPath, pattern: "console" } });
     const matches = JSON.parse(result.content[0].text);
     expect(matches[0].file).toBe("/src/App.tsx");
     expect(matches[0].content).toBe("console.log(x);");
@@ -284,7 +303,7 @@ console.log(x);`);
   it("run_shell_command: should execute and return output", async () => {
     // Mocking promisified exec is a bit tricky, but projectManager uses execAsync
     // We can mock it if needed, but let's at least test the restricted command check
-    await expect(server.handleCallTool("run_shell_command", { projectPath, command: "rm -rf /" }))
+    await expect(server.handleCallTool({ name: "run_shell_command", args: { projectPath, command: "rm -rf /" } }))
       .rejects.toThrow("restricted");
   });
 });

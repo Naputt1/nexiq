@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./db/sqlite": {
+      "types": "./dist/db/sqlite.d.ts",
+      "import": "./dist/db/sqlite.js"
     }
   },
   "scripts": {

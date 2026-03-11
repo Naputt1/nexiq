@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev:ui": "pnpm --filter=ui dev",
+    "dev:server": "pnpm --filter=server dev:electron",
     "test:analyze": "pnpm --filter=analyser test",
     "test:ui": "pnpm --filter=ui test",
     "snapshot:analyze": "pnpm --filter=analyser snapshot",
@@ -17,7 +18,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.30.1",
+  "packageManager": "pnpm@10.32.0+sha512.9b2634bb3fed5601c33633f2d92593f506270a3963b8c51d2b2d6a828da615ce4e9deebef9614ccebbc13ac8d3c0f9c9ccceb583c69c8578436fa477dbb20d70",
   "pnpm": {
     "overrides": {
       "vite": "npm:rolldown-vite@7.2.2",
@@ -30,6 +31,18 @@
       "ink-text-input>react": "^18.3.1",
       "ink-big-text>react": "^18.3.1",
       "ink-gradient>react": "^18.3.1"
+    },
+    "packageExtensions": {
+      "better-sqlite3": {
+        "peerDependencies": {
+          "electron": "*"
+        },
+        "peerDependenciesMeta": {
+          "electron": {
+            "optional": true
+          }
+        }
+      }
     },
     "onlyBuiltDependencies": [
       "@node-rs/xxhash",
@@ -46,6 +59,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
+    "@electron/rebuild": "^4.0.3",
     "@google/generative-ai": "^0.24.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "dotenv": "^17.3.1",
