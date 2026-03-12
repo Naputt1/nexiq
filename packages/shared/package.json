@@ -1,5 +1,5 @@
 {
-  "name": "shared",
+  "name": "@react-map/shared",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -18,6 +18,14 @@
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naputt/react-map.git",
+    "directory": "packages/shared"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [],
   "author": "",

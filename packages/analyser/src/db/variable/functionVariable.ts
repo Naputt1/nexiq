@@ -1,7 +1,7 @@
 import type {
   ComponentFileVarBaseTypeFunction,
   ComponentFileVarFunction,
-} from "shared";
+} from "@react-map/shared";
 import type { File } from "../fileDB.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 

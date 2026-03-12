@@ -1,5 +1,5 @@
 import { Worker } from "node:worker_threads";
-import type { ComponentFile } from "shared";
+import type { ComponentFile } from "@react-map/shared";
 
 export interface WorkerParams {
   filePath: string;

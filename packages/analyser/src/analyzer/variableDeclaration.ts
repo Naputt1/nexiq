@@ -10,7 +10,7 @@ import type {
   PropDataType,
   ReactDependency,
   VariableScope,
-} from "shared";
+} from "@react-map/shared";
 import {
   isHook,
   returnJSX,

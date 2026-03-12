@@ -2,7 +2,7 @@ import type {
   ComponentFileVarJSX,
   ComponentInfoRender,
   ComponentInfoRenderDependency,
-} from "shared";
+} from "@react-map/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 

@@ -3,7 +3,7 @@ import { BackendServer } from "./server.js";
 import { ProjectManager } from "./projectManager.js";
 import fs from "node:fs";
 import { analyzeProject } from "analyser";
-import type { JsonData } from "shared";
+import type { JsonData } from "@react-map/shared";
 import Database from "better-sqlite3";
 
 vi.mock("node:fs");

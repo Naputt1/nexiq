@@ -3,7 +3,7 @@ import type {
   ComponentFileVar,
   VariableName,
   DatabaseData,
-} from "shared";
+} from "@react-map/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
 export type { TypeDataDeclare, ComponentFileVar, VariableName, DatabaseData };
@@ -89,7 +89,7 @@ export interface DetailSection {
 }
 
 export interface MCPToolHandlerArgs {
-  projectPath: string;
+  projectPath?: string;
   projectManager: unknown; // We use unknown here to avoid dependency on server package
   [key: string]: unknown;
 }

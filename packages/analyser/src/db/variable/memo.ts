@@ -1,4 +1,4 @@
-import type { MemoFileVarHook } from "shared";
+import type { MemoFileVarHook } from "@react-map/shared";
 import type { File } from "../fileDB.js";
 import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 

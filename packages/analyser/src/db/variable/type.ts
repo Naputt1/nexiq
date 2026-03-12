@@ -4,7 +4,7 @@ import type { DataVariable } from "./dataVariable.js";
 import type { HookVariable } from "./hook.js";
 import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { ReactFunctionVariable } from "./reactFunctionVariable.js";
-import type { VarKind, VarType } from "shared";
+import type { VarKind, VarType } from "@react-map/shared";
 import type { StateVariable } from "./stateVariable.js";
 import type { MemoVariable } from "./memo.js";
 import type { RefVariable } from "./refVariable.js";

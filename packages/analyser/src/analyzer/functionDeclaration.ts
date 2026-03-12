@@ -9,7 +9,7 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarHook,
   ComponentFileVarNormalFunction,
-} from "shared";
+} from "@react-map/shared";
 import { getDeterministicId } from "../utils/hash.js";
 
 export default function FunctionDeclaration(
