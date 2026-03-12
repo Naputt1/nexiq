@@ -13,8 +13,11 @@
     "paths": {
       "analyser": ["../analyser/src/index.ts"],
       "analyser/*": ["../analyser/src/*"],
-      "shared": ["../shared/src/index.ts"],
-      "shared/*": ["../shared/src/*"]
+      "@react-map/shared": ["../shared/src/index.ts"],
+      "@react-map/shared/db": ["../shared/src/db/index.ts"],
+      "@react-map/shared/*": ["../shared/src/*"],
+      "@react-map/extension-sdk": ["../extension-sdk/src/index.ts"],
+      "@react-map/extension-sdk/*": ["../extension-sdk/src/*"]
     }
   }
 }

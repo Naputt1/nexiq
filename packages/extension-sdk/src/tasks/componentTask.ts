@@ -1,4 +1,4 @@
-import { type DatabaseData } from "shared";
+import { type DatabaseData } from "@react-map/shared";
 import {
   type GraphComboData,
   type GraphArrowData,

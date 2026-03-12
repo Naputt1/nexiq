@@ -37,7 +37,7 @@
     "glob": "^11.0.3",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5",
-    "shared": "workspace:*"
+    "@react-map/shared": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

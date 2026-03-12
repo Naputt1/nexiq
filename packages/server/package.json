@@ -22,7 +22,7 @@
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.2.2",
-    "shared": "workspace:*",
+    "@react-map/shared": "workspace:*",
     "simple-git": "^3.30.0",
     "tmp": "^0.2.5",
     "ws": "^8.19.0"

@@ -3,7 +3,7 @@ import type {
   VariableNamePattern,
   VariableObjectProperty,
   VariableArrayElement,
-} from "shared";
+} from "@react-map/shared";
 import { generateFn } from "../utils/babel.js";
 import { getDeterministicId } from "../utils/hash.js";
 

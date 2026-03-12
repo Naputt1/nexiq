@@ -1,5 +1,5 @@
-import type { ComponentFileVarComponent } from "shared";
-import type { TypeData } from "shared";
+import type { ComponentFileVarComponent } from "@react-map/shared";
+import type { TypeData } from "@react-map/shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 

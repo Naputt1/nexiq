@@ -7,7 +7,7 @@ import type {
   VarKind,
   VarType,
   UIItemState,
-} from "shared";
+} from "@react-map/shared";
 import type { File } from "../fileDB.js";
 import { getDeterministicId } from "../../utils/hash.js";
 

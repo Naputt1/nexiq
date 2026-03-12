@@ -13,7 +13,7 @@ import {
   getDisplayName,
   type BackendRequestMap,
   type BackendMessageType,
-} from "shared";
+} from "@react-map/shared";
 import { WebSocketServer, WebSocket } from "ws";
 import { minimatch } from "minimatch";
 import path from "node:path";

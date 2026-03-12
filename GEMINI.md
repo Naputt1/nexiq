@@ -16,14 +16,11 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
 - **`packages/server`**: The primary entry point for LLM-driven code exploration.
   - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
   - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
-- **`packages/server`**: A shared backend service that manages project analysis, file watching, and provides a WebSocket API for the UI.
-- **`packages/ui`**: An Electron-based desktop application for visualizing the component graph.
-  - Built with React, Vite, and Tailwind CSS.
-  - Uses `@antv/g6`, `Konva`, and `react-konva` for graph rendering and interactions.
-  - Connects to the shared backend to display real-time project data.
 - **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks, UI sections, or MCP tools.
-- **`packages/shared`**: Common TypeScript types and utilities shared across the monorepo.
+- **`packages/shared`** (as `@react-map/shared`): Common TypeScript types and utilities shared across the monorepo.
 - **`packages/sample-project`**: A collection of sample React projects used for testing and snapshot verification.
+
+_Note: The UI application has been moved to a separate repository: `react-map-ui`._
 
 ## Core Technologies
 
@@ -54,14 +51,6 @@ From the project root:
   ```bash
   pnpm install
   ```
-
-- **Run UI in Development Mode**:
-
-  ```bash
-  pnpm dev:ui
-  ```
-
-  This starts the Vite dev server for the Electron app.
 
 - **Run Analyser on Samples**:
 
@@ -112,15 +101,9 @@ From the project root:
 - New features should be verified with tests in `packages/analyser/src/analyzer.test.ts`. Use `pnpm test:analyze` to run tests once and exit.
 - If changing the graph structure, run `pnpm snapshot:analyze` to update baseline snapshots.
 
-### UI Development
-
-- Components are located in `packages/ui/src/components/`.
-- Global state is managed using `zustand`.
-- Graph visualization logic is primarily in `packages/ui/src/graph/` and `packages/ui/src/componentGraph.tsx`.
-
 ### Code Style
 
-- ESLint is configured for both `analyser` and `ui` packages.
+- ESLint is configured for the project.
 - Follow existing patterns for Babel traversal and React component structure.
 
 ### Testing & Coverage

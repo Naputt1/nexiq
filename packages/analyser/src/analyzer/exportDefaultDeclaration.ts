@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentFileExport } from "shared";
+import type { ComponentFileExport } from "@react-map/shared";
 
 export default function ExportDefaultDeclaration(
   componentDB: ComponentDB,

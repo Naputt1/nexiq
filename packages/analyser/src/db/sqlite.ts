@@ -11,8 +11,8 @@ import type {
   RelationRow,
   RenderRow,
   ExportRow,
-} from "shared";
-import { SqliteDB as BaseSqliteDB } from "shared/db";
+} from "@react-map/shared";
+import { SqliteDB as BaseSqliteDB } from "@react-map/shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,

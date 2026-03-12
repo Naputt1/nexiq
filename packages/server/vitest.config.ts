@@ -7,8 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      "shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
-      shared: path.resolve(__dirname, "../shared/src/index.ts"),
+      "@react-map/shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
+      "@react-map/shared": path.resolve(__dirname, "../shared/src/index.ts"),
       "analyser/db/sqlite": path.resolve(__dirname, "../analyser/src/db/sqlite.ts"),
       analyser: path.resolve(__dirname, "../analyser/src/index.ts"),
     },

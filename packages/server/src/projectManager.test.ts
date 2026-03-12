@@ -8,7 +8,7 @@ import path from "node:path";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "analyser";
 import "@react-map/extension-sdk";
-import type { JsonData } from "shared";
+import type { JsonData } from "@react-map/shared";
 
 import Database from "better-sqlite3";
 
@@ -303,12 +303,12 @@ describe("ProjectManager", () => {
     });
 
     it("should find entities by label", async () => {
-      await projectManager.addLabel(projectPath, "id1", "shared");
-      await projectManager.addLabel(projectPath, "id2", "shared");
+      await projectManager.addLabel(projectPath, "id1", "@react-map/shared");
+      await projectManager.addLabel(projectPath, "id2", "@react-map/shared");
 
       const found = await projectManager.findEntitiesByLabel(
         projectPath,
-        "shared",
+        "@react-map/shared",
       );
       expect(found).toEqual(["id1", "id2"]);
     });

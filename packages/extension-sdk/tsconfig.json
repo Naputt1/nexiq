@@ -11,7 +11,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@react-map/shared": ["../shared/src/index.ts"],
+      "@react-map/shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["src"]
 }

@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import { assert } from "console";
-import type { VariableLoc } from "shared";
+import type { VariableLoc } from "@react-map/shared";
 
 interface VariableComponentName {
   name: string;

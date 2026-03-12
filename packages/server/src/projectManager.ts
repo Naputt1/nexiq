@@ -17,7 +17,7 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
-} from "shared";
+} from "@react-map/shared";
 import type { Extension } from "@react-map/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";

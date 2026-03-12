@@ -3,7 +3,7 @@ import type {
   ComponentFileVarNormalData,
   ComponentInfoRender,
   VarKind,
-} from "shared";
+} from "@react-map/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 

@@ -11,13 +11,21 @@
       "import": "./dist/index.js"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naputt/react-map.git",
+    "directory": "packages/extension-sdk"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "shared": "workspace:*"
+    "@react-map/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

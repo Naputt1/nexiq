@@ -5,15 +5,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:ui": "pnpm --filter=ui dev",
     "dev:server": "pnpm --filter=server dev:electron",
     "test:analyze": "pnpm --filter=analyser test",
-    "test:ui": "pnpm --filter=ui test",
     "snapshot:analyze": "pnpm --filter=analyser snapshot",
     "benchmark": "pnpm --filter=@react-map/benchmark-cli start",
     "benchmark:view": "pnpm --filter=viewer dev",
-    "build:analyze": "pnpm --filter=analyser build",
-    "build:ui": "scripts/build-electron.sh"
+    "build:analyze": "pnpm --filter=analyser build"
   },
   "keywords": [],
   "author": "",

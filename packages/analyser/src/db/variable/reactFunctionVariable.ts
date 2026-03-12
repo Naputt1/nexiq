@@ -10,7 +10,7 @@ import type {
   TypeDataRef,
   VariableName,
   VarType,
-} from "shared";
+} from "@react-map/shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 import { Variable } from "./variable.js";

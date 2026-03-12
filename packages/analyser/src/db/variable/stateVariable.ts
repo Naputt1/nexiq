@@ -1,4 +1,4 @@
-import type { ComponentFileVarState } from "shared";
+import type { ComponentFileVarState } from "@react-map/shared";
 import type { File } from "../fileDB.js";
 import { ReactVariable } from "./reactVariable.js";
 

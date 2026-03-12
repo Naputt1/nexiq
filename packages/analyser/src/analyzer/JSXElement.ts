@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentInfoRenderDependency, VariableName } from "shared";
+import type { ComponentInfoRenderDependency, VariableName } from "@react-map/shared";
 import assert from "assert";
 import generate from "@babel/generator";
 import { getDeterministicId } from "../utils/hash.js";
