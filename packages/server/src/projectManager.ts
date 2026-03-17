@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
-import { analyzeProject } from "analyser";
-import { SqliteDB } from "analyser/db/sqlite";
+import { analyzeProject } from "@nexu/analyser";
+import { SqliteDB } from "@nexu/analyser/db/sqlite";
 import {
   type JsonData,
   type ProjectStatus,
@@ -259,7 +259,7 @@ export class ProjectManager {
               ignorePatterns,
               projectInfo.sqlitePath,
             )
-              .then((newGraph) => {
+              .then((newGraph: JsonData) => {
                 projectInfo.graph = newGraph;
                 fs.writeFileSync(
                   cacheFile,
@@ -273,7 +273,7 @@ export class ProjectManager {
                   `Project ${analysisPath} re-analyzed successfully.`,
                 );
               })
-              .catch((reAnalyzeError) => {
+              .catch((reAnalyzeError: Error) => {
                 console.error(
                   `Re-analysis failed for ${analysisPath}:`,
                   reAnalyzeError,

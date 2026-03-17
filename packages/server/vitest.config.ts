@@ -9,8 +9,8 @@ export default defineConfig({
     alias: {
       "@nexu/shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
       "@nexu/shared": path.resolve(__dirname, "../shared/src/index.ts"),
-      "analyser/db/sqlite": path.resolve(__dirname, "../analyser/src/db/sqlite.ts"),
-      analyser: path.resolve(__dirname, "../analyser/src/index.ts"),
+      "@nexu/analyser/db/sqlite": path.resolve(__dirname, "../analyser/src/db/sqlite.ts"),
+      "@nexu/analyser": path.resolve(__dirname, "../analyser/src/index.ts"),
     },
   },
   test: {
