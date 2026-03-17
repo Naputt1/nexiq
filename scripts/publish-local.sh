@@ -11,21 +11,23 @@ if [ -z "$NODE_AUTH_TOKEN" ]; then
 fi
 
 echo "Building all packages..."
-pnpm --filter @react-map/shared build
-pnpm --filter @react-map/extension-sdk build
-pnpm --filter @react-map/tanstack-query-extension build
-pnpm --filter @react-map/tanstack-router-extension build
+pnpm --filter @nexu/shared build
+pnpm --filter @nexu/extension-sdk build
+pnpm --filter @nexu/analyser build
+pnpm --filter nexu build
+# pnpm --filter @nexu/tanstack-query-extension build
+# pnpm --filter @nexu/tanstack-router-extension build
 
 echo "Publishing packages..."
 
 # Create/update .npmrc for local publishing
-echo "//npm.pkg.github.com/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
-echo "@react-map:registry=https://npm.pkg.github.com" >> .npmrc
+echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
+# No need for @nexu scope registry if it's on NPM
 
-pnpm --filter @react-map/shared publish --no-git-checks
-pnpm --filter @react-map/extension-sdk publish --no-git-checks
-pnpm --filter @react-map/tanstack-query-extension publish --no-git-checks
-pnpm --filter @react-map/tanstack-router-extension publish --no-git-checks
+pnpm --filter @nexu/shared publish --no-git-checks --access public
+pnpm --filter @nexu/extension-sdk publish --no-git-checks --access public
+pnpm --filter @nexu/analyser publish --no-git-checks --access public
+pnpm --filter nexu publish --no-git-checks --access public
 
 # Cleanup
 rm .npmrc

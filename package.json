@@ -5,12 +5,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=server dev:electron",
-    "test:analyze": "pnpm --filter=analyser test",
-    "snapshot:analyze": "pnpm --filter=analyser snapshot",
-    "benchmark": "pnpm --filter=@react-map/benchmark-cli start",
+    "dev:server": "pnpm --filter=nexu dev:electron",
+    "test:analyze": "pnpm --filter=@nexu/analyser test",
+    "snapshot:analyze": "pnpm --filter=@nexu/analyser snapshot",
+    "benchmark": "pnpm --filter=@nexu/benchmark-cli start",
     "benchmark:view": "pnpm --filter=viewer dev",
-    "build:analyze": "pnpm --filter=analyser build"
+    "build:analyze": "pnpm --filter=@nexu/analyser build"
   },
   "keywords": [],
   "author": "",

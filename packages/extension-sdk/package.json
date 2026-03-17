@@ -1,7 +1,7 @@
 {
-  "name": "@react-map/extension-sdk",
+  "name": "@nexu/extension-sdk",
   "version": "1.0.0",
-  "description": "SDK for creating react-map extensions",
+  "description": "SDK for creating nexu extensions",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,8 @@
     "directory": "packages/extension-sdk"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
@@ -25,7 +26,7 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "@react-map/shared": "workspace:*"
+    "@nexu/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

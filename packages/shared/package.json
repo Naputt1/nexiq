@@ -1,5 +1,5 @@
 {
-  "name": "@react-map/shared",
+  "name": "@nexu/shared",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -25,7 +25,8 @@
     "directory": "packages/shared"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "keywords": [],
   "author": "",

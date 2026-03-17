@@ -39,9 +39,9 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@react-map/shared": ["../shared/src/index.ts"],
-      "@react-map/shared/db": ["../shared/src/db/index.ts"],
-      "@react-map/shared/*": ["../shared/src/*"]
+      "@nexu/shared": ["../shared/src/index.ts"],
+      "@nexu/shared/db": ["../shared/src/db/index.ts"],
+      "@nexu/shared/*": ["../shared/src/*"]
     },
     // "emitDeclarationOnly": true,
     // "allowImportingTsExtensions": true

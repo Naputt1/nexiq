@@ -1,10 +1,14 @@
 {
-  "name": "server",
+  "name": "nexu",
   "version": "1.0.0",
-  "description": "Shared backend for react-map",
+  "description": "Short and powerful React component dependency analysis",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean --dts",
     "dev": "nodemon --watch src --ext ts --exec \"tsup src/index.ts --onSuccess 'node dist/index.js'\"",
@@ -16,13 +20,13 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@parcel/watcher": "^2.5.6",
-    "@react-map/extension-sdk": "workspace:*",
-    "analyser": "workspace:*",
+    "@nexu/extension-sdk": "workspace:*",
+    "@nexu/analyser": "workspace:*",
     "better-sqlite3": "^12.6.2",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.2.2",
-    "@react-map/shared": "workspace:*",
+    "@nexu/shared": "workspace:*",
     "simple-git": "^3.30.0",
     "tmp": "^0.2.5",
     "ws": "^8.19.0"

@@ -1,5 +1,5 @@
 {
-  "name": "analyser",
+  "name": "@nexu/analyser",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -14,6 +14,10 @@
       "types": "./dist/db/sqlite.d.ts",
       "import": "./dist/db/sqlite.js"
     }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsup",
@@ -37,7 +41,7 @@
     "glob": "^11.0.3",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5",
-    "@react-map/shared": "workspace:*"
+    "@nexu/shared": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
