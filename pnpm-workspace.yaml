@@ -1,7 +1,6 @@
 packages:
   - packages/*
   - packages/sample-project/*
-  - extensions/*
   - benchmarks/viewer
   - benchmarks/cli
 

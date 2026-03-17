@@ -1,0 +1,58 @@
+name: Publish Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@react-map'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Packages
+        run: |
+          pnpm --filter @react-map/shared build
+          pnpm --filter @react-map/extension-sdk build
+          pnpm --filter @react-map/tanstack-query-extension build
+          pnpm --filter @react-map/tanstack-router-extension build
+
+      - name: Publish @react-map/shared
+        run: pnpm --filter @react-map/shared publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @react-map/extension-sdk
+        run: pnpm --filter @react-map/extension-sdk publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @react-map/tanstack-query-extension
+        run: pnpm --filter @react-map/tanstack-query-extension publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @react-map/tanstack-router-extension
+        run: pnpm --filter @react-map/tanstack-router-extension publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
