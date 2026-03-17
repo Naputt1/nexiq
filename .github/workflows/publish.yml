@@ -19,8 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://npm.pkg.github.com'
-          scope: 'Naputt1'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -30,16 +29,28 @@ jobs:
 
       - name: Build Packages
         run: |
-          pnpm --filter @react-map/shared build
-          pnpm --filter @react-map/extension-sdk build
+          pnpm --filter @nexu/shared build
+          pnpm --filter @nexu/extension-sdk build
+          pnpm --filter @nexu/analyser build
+          pnpm --filter nexu build
 
-      - name: Publish @react-map/shared
-        run: pnpm --filter @react-map/shared publish --no-git-checks
+      - name: Publish @nexu/shared
+        run: pnpm --filter @nexu/shared publish --no-git-checks --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @react-map/extension-sdk
-        run: pnpm --filter @react-map/extension-sdk publish --no-git-checks
+      - name: Publish @nexu/extension-sdk
+        run: pnpm --filter @nexu/extension-sdk publish --no-git-checks --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nexu/analyser
+        run: pnpm --filter @nexu/analyser publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish nexu
+        run: pnpm --filter nexu publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

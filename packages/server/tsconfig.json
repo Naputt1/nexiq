@@ -11,13 +11,13 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "analyser": ["../analyser/src/index.ts"],
-      "analyser/*": ["../analyser/src/*"],
-      "@react-map/shared": ["../shared/src/index.ts"],
-      "@react-map/shared/db": ["../shared/src/db/index.ts"],
-      "@react-map/shared/*": ["../shared/src/*"],
-      "@react-map/extension-sdk": ["../extension-sdk/src/index.ts"],
-      "@react-map/extension-sdk/*": ["../extension-sdk/src/*"]
+      "@nexu/analyser": ["../analyser/src/index.ts"],
+      "@nexu/analyser/*": ["../analyser/src/*"],
+      "@nexu/shared": ["../shared/src/index.ts"],
+      "@nexu/shared/db": ["../shared/src/db/index.ts"],
+      "@nexu/shared/*": ["../shared/src/*"],
+      "@nexu/extension-sdk": ["../extension-sdk/src/index.ts"],
+      "@nexu/extension-sdk/*": ["../extension-sdk/src/*"]
     }
   }
 }

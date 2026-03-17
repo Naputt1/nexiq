@@ -1,5 +1,5 @@
 {
-  "name": "@react-map/benchmark-cli",
+  "name": "@nexu/benchmark-cli",
   "version": "1.0.0",
   "type": "module",
   "bin": "./dist/index.js",
