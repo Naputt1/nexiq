@@ -1,5 +1,5 @@
-import type { ComponentFileVarComponent } from "@react-map/shared";
-import type { TypeData } from "@react-map/shared";
+import type { ComponentFileVarComponent } from "@nexu/shared";
+import type { TypeData } from "@nexu/shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 

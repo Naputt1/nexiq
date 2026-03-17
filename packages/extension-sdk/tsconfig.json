@@ -13,8 +13,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@react-map/shared": ["../shared/src/index.ts"],
-      "@react-map/shared/*": ["../shared/src/*"]
+      "@nexu/shared": ["../shared/src/index.ts"],
+      "@nexu/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src"]

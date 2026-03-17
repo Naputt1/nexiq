@@ -2,7 +2,7 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 import { getReactHookInfo } from "../utils.js";
-import type { ReactDependency, VariableLoc, VariableScope } from "@react-map/shared";
+import type { ReactDependency, VariableLoc, VariableScope } from "@nexu/shared";
 import assert from "assert";
 import { generateFn } from "../utils/babel.js";
 

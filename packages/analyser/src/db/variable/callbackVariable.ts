@@ -1,4 +1,4 @@
-import type { ComponentFileVarCallback } from "@react-map/shared";
+import type { ComponentFileVarCallback } from "@nexu/shared";
 import type { File } from "../fileDB.js";
 import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 

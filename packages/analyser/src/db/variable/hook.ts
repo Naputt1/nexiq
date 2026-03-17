@@ -1,4 +1,4 @@
-import type { ComponentFileVarHook } from "@react-map/shared";
+import type { ComponentFileVarHook } from "@nexu/shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 

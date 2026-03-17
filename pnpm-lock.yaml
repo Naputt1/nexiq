@@ -175,12 +175,12 @@ importers:
       '@babel/types':
         specifier: ^7.28.5
         version: 7.29.0
+      '@nexu/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@node-rs/xxhash':
         specifier: ^1.7.6
         version: 1.7.6
-      '@react-map/shared':
-        specifier: workspace:*
-        version: link:../shared
       better-sqlite3:
         specifier: ^12.6.2
         version: 12.6.2(electron@39.2.4)
@@ -248,7 +248,7 @@ importers:
 
   packages/extension-sdk:
     dependencies:
-      '@react-map/shared':
+      '@nexu/shared':
         specifier: workspace:*
         version: link:../shared
       react:
@@ -503,18 +503,18 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.27.1(zod@4.3.6)
+      '@nexu/analyser':
+        specifier: workspace:*
+        version: link:../analyser
+      '@nexu/extension-sdk':
+        specifier: workspace:*
+        version: link:../extension-sdk
+      '@nexu/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@parcel/watcher':
         specifier: ^2.5.6
         version: 2.5.6
-      '@react-map/extension-sdk':
-        specifier: workspace:*
-        version: link:../extension-sdk
-      '@react-map/shared':
-        specifier: workspace:*
-        version: link:../shared
-      analyser:
-        specifier: workspace:*
-        version: link:../analyser
       better-sqlite3:
         specifier: ^12.6.2
         version: 12.6.2(electron@39.2.4)

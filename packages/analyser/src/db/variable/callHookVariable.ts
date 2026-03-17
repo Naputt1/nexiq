@@ -1,4 +1,4 @@
-import type { ComponentFileVarCallHook } from "@react-map/shared";
+import type { ComponentFileVarCallHook } from "@nexu/shared";
 import type { File } from "../fileDB.js";
 import { ReactVariable } from "./reactVariable.js";
 

@@ -11,8 +11,8 @@ import type {
   RelationRow,
   RenderRow,
   ExportRow,
-} from "@react-map/shared";
-import { SqliteDB as BaseSqliteDB } from "@react-map/shared/db";
+} from "@nexu/shared";
+import { SqliteDB as BaseSqliteDB } from "@nexu/shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,

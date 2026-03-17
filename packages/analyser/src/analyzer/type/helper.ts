@@ -9,10 +9,10 @@ import type {
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import * as t from "@babel/types";
 import assert from "assert";
-import type { FuncParam, TypeDataParamFunction } from "@react-map/shared";
+import type { FuncParam, TypeDataParamFunction } from "@nexu/shared";
 import { generateFn } from "../../utils/babel.js";
 
 function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {

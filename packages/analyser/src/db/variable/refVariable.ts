@@ -1,4 +1,4 @@
-import type { ComponentFileVarRef, PropDataType } from "@react-map/shared";
+import type { ComponentFileVarRef, PropDataType } from "@nexu/shared";
 import type { File } from "../fileDB.js";
 import { ReactVariable } from "./reactVariable.js";
 
