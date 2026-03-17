@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import generate from "@babel/generator";
-import type { PropData, PropDataType } from "@react-map/shared";
+import type { PropData, PropDataType } from "@nexu/shared";
 import { getDeterministicId } from "../utils/hash.js";
 import { getExpressionData } from "./type/helper.js";
 

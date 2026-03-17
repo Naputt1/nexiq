@@ -7,8 +7,8 @@ import fs from "node:fs";
 import path from "node:path";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "analyser";
-import "@react-map/extension-sdk";
-import type { JsonData } from "@react-map/shared";
+import "@nexu/extension-sdk";
+import type { JsonData } from "@nexu/shared";
 
 import Database from "better-sqlite3";
 
@@ -127,15 +127,15 @@ describe("ProjectManager", () => {
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
         ignorePatterns: ["*.test.ts"],
-        extensions: ["@react-map/test-extension"],
+        extensions: ["@nexu/test-extension"],
       }),
     );
 
     // Mock dynamic import
-    vi.mock("@react-map/test-extension", () => ({
+    vi.mock("@nexu/test-extension", () => ({
       default: { id: "test-ext" },
     }));
-    vi.mock("@react-map/fallback", () => ({
+    vi.mock("@nexu/fallback", () => ({
       default: { id: "fallback-ext" },
     }));
 
@@ -163,7 +163,7 @@ describe("ProjectManager", () => {
     );
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
-        extensions: ["@react-map/fail"],
+        extensions: ["@nexu/fail"],
       }),
     );
 
@@ -184,7 +184,7 @@ describe("ProjectManager", () => {
     );
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
-        extensions: ["@react-map/fallback"],
+        extensions: ["@nexu/fallback"],
       }),
     );
 
@@ -303,12 +303,12 @@ describe("ProjectManager", () => {
     });
 
     it("should find entities by label", async () => {
-      await projectManager.addLabel(projectPath, "id1", "@react-map/shared");
-      await projectManager.addLabel(projectPath, "id2", "@react-map/shared");
+      await projectManager.addLabel(projectPath, "id1", "@nexu/shared");
+      await projectManager.addLabel(projectPath, "id2", "@nexu/shared");
 
       const found = await projectManager.findEntitiesByLabel(
         projectPath,
-        "@react-map/shared",
+        "@nexu/shared",
       );
       expect(found).toEqual(["id1", "id2"]);
     });

@@ -1,14 +1,14 @@
 # React Map Extensions Guide
 
-Extensions allow you to add custom graph tasks, UI sections, and MCP tools to `react-map`.
+Extensions allow you to add custom graph tasks, UI sections, and MCP tools to `nexu`.
 
 ## Creating an Extension
 
-1. Create a new package depending on `@react-map/extension-sdk` and `@react-map/shared`.
+1. Create a new package depending on `@nexu/extension-sdk` and `@nexu/shared`.
 2. Define an `Extension` object:
 
 ```typescript
-import { Extension } from "@react-map/extension-sdk";
+import { Extension } from "@nexu/extension-sdk";
 
 const myExtension: Extension = {
   id: "my-custom-extension",
@@ -36,28 +36,28 @@ To use an extension in a project:
 
 1. Install the extension in your target project:
    ```bash
-   npm install @react-map/my-custom-extension
+   npm install @nexu/my-custom-extension
    ```
 
 2. Add the extension to your `react.map.config.json` in the project root:
    ```json
    {
-     "extensions": ["@react-map/my-custom-extension"]
+     "extensions": ["@nexu/my-custom-extension"]
    }
    ```
 
 ## Loading Extensions in the UI
 
-The `react-map-ui` application can load bundled extensions. To add an extension to your local UI build:
+The `nexu-ui` application can load bundled extensions. To add an extension to your local UI build:
 
 1. Install it in the UI repository:
    ```bash
-   pnpm add @react-map/my-custom-extension
+   pnpm add @nexu/my-custom-extension
    ```
 
 2. Register it in `src/views/tasks/all-tasks.ts`:
    ```typescript
-   import myExtension from "@react-map/my-custom-extension";
+   import myExtension from "@nexu/my-custom-extension";
 
    export const allExtensions = [
      // ...

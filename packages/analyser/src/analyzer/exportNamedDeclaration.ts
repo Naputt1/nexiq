@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentFileExport } from "@react-map/shared";
+import type { ComponentFileExport } from "@nexu/shared";
 import assert from "assert";
 import { getPattern, getPatternIdentifiers } from "./pattern.js";
 

@@ -1,6 +1,6 @@
 # Plan: MCP-Centric Architecture
 
-Transition `react-map` from a UI-focused visualization tool to an MCP-first (Model Context Protocol) code exploration platform.
+Transition `nexu` from a UI-focused visualization tool to an MCP-first (Model Context Protocol) code exploration platform.
 
 ## Goals
 

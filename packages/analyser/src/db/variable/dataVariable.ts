@@ -3,7 +3,7 @@ import type {
   ComponentFileVarNormalData,
   ComponentInfoRender,
   VarKind,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 

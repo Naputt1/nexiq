@@ -17,8 +17,8 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
-} from "@react-map/shared";
-import type { Extension } from "@react-map/extension-sdk";
+} from "@nexu/shared";
+import type { Extension } from "@nexu/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";

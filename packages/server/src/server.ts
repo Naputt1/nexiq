@@ -13,7 +13,7 @@ import {
   getDisplayName,
   type BackendRequestMap,
   type BackendMessageType,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import { WebSocketServer, WebSocket } from "ws";
 import { minimatch } from "minimatch";
 import path from "node:path";

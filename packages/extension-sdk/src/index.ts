@@ -3,7 +3,7 @@ import type {
   ComponentFileVar,
   VariableName,
   DatabaseData,
-} from "@react-map/shared";
+} from "@nexu/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
 export type { TypeDataDeclare, ComponentFileVar, VariableName, DatabaseData };

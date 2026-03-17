@@ -1,4 +1,4 @@
-import { type DatabaseData } from "@react-map/shared";
+import { type DatabaseData } from "@nexu/shared";
 import {
   type GraphComboData,
   type GraphNodeData,

@@ -3,7 +3,7 @@ import path from "node:path";
 import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import type { JsonData, ReactMapConfig } from "@react-map/shared";
+import type { JsonData, ReactMapConfig } from "@nexu/shared";
 import { SqliteDB } from "./db/sqlite.js";
 
 export async function analyzeProject(

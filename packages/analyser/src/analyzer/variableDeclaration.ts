@@ -10,7 +10,7 @@ import type {
   PropDataType,
   ReactDependency,
   VariableScope,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import {
   isHook,
   returnJSX,

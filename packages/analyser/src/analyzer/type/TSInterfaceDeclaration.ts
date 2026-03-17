@@ -1,9 +1,9 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { TypeDataDeclareInterface, TypeDataParam } from "@react-map/shared";
+import type { TypeDataDeclareInterface, TypeDataParam } from "@nexu/shared";
 import assert from "assert";
 import type { ComponentDB } from "../../db/componentDB.js";
-import type { TypeDataLiteralBody } from "@react-map/shared";
+import type { TypeDataLiteralBody } from "@nexu/shared";
 import { getType, getMember } from "./helper.js";
 import { getPattern } from "../pattern.js";
 

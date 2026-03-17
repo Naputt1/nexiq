@@ -5,7 +5,7 @@ import type {
   FunctionReturn,
   ComponentInfoRender,
   VarType,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 import { Scope } from "./scope.js";

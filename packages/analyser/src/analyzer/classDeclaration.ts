@@ -4,7 +4,7 @@ import type { ComponentDB } from "../db/componentDB.js";
 import { returnJSX } from "../utils.js";
 import assert from "assert";
 import { getPattern } from "./pattern.js";
-import type { ComponentFileVarComponent } from "@react-map/shared";
+import type { ComponentFileVarComponent } from "@nexu/shared";
 
 export default function ClassDeclaration(
   componentDB: ComponentDB,

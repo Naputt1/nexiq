@@ -3,7 +3,7 @@ import type {
   VariableLoc,
   VariableScope,
   VarKind,
-} from "@react-map/shared";
+} from "@nexu/shared";
 import type { Variable } from "./variable.js";
 import { isBaseFunctionVariable } from "./type.js";
 import {
