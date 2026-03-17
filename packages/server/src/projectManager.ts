@@ -168,23 +168,28 @@ export class ProjectManager {
     const extensions: Extension[] = [];
     for (const name of extensionNames) {
       try {
-        const monorepoRoot = path.join(process.cwd(), "../../");
-        const extensionSlug = name
-          .replace("@react-map/", "")
-          .replace("-extension", "");
-        const extPath = path.join(
-          monorepoRoot,
-          "extensions",
-          extensionSlug,
-          "dist",
-          "index.js",
-        );
-
         let loaded: unknown;
-        if (fs.existsSync(extPath)) {
-          loaded = await import(pathToFileURL(extPath).href);
-        } else {
+
+        try {
+          // 1. Try importing by name (resolves from server's node_modules)
           loaded = await import(name);
+        } catch (e: unknown) {
+          // 2. Try importing relative to the project being analyzed
+          const projectNodeModulesPath = path.join(
+            analysisPath,
+            "node_modules",
+            name,
+          );
+          const pkgJsonPath = path.join(projectNodeModulesPath, "package.json");
+
+          if (fs.existsSync(pkgJsonPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+            const entry = pkg.module || pkg.main || "index.js";
+            const fullPath = path.join(projectNodeModulesPath, entry);
+            loaded = await import(pathToFileURL(fullPath).href);
+          } else {
+            throw e; // Rethrow original error if project-relative also fails
+          }
         }
 
         const extension = Object.values(
