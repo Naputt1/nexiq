@@ -32,8 +32,6 @@ jobs:
         run: |
           pnpm --filter @react-map/shared build
           pnpm --filter @react-map/extension-sdk build
-          pnpm --filter @react-map/tanstack-query-extension build
-          pnpm --filter @react-map/tanstack-router-extension build
 
       - name: Publish @react-map/shared
         run: pnpm --filter @react-map/shared publish --no-git-checks
@@ -45,12 +43,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish @react-map/tanstack-query-extension
-        run: pnpm --filter @react-map/tanstack-query-extension publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish @react-map/tanstack-router-extension
-        run: pnpm --filter @react-map/tanstack-router-extension publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -27,9 +27,6 @@ jobs:
       - name: Run Analyser Tests
         run: pnpm test:analyze
 
-      - name: Run UI Tests
-        run: pnpm test:ui
-
   release:
     name: Build and Release (${{ matrix.os }})
     needs: test
@@ -60,12 +57,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-
-      - name: Build and Package
-        shell: bash
-        run: pnpm build:ui ${{ matrix.args }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
