@@ -6,7 +6,7 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import * as watcher from "@parcel/watcher";
-import { analyzeProject } from "analyser";
+import { analyzeProject } from "@nexu/analyser";
 import "@nexu/extension-sdk";
 import type { JsonData } from "@nexu/shared";
 
@@ -28,11 +28,11 @@ const mockDb = {
   exec: vi.fn(),
 };
 
-vi.mock("analyser", () => ({
+vi.mock("@nexu/analyser", () => ({
   analyzeProject: vi.fn(),
 }));
 
-vi.mock("analyser/db/sqlite", () => ({
+vi.mock("@nexu/analyser/db/sqlite", () => ({
   SqliteDB: vi.fn().mockImplementation(() => ({
     db: mockDb,
     getAllData: vi.fn().mockReturnValue({
