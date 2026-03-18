@@ -1,6 +1,6 @@
 {
   "name": "nexiq",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Short and powerful React component dependency analysis",
   "type": "module",
   "main": "dist/index.js",
