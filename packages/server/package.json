@@ -1,5 +1,5 @@
 {
-  "name": "nexiq",
+  "name": "@nexiq/cli",
   "version": "1.0.1",
   "description": "Short and powerful React component dependency analysis",
   "type": "module",
