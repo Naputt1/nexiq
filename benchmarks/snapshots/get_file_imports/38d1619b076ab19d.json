@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/components/ui/button/button.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"Slot\": {\n    \"localName\": \"Slot\",\n    \"importedName\": \"Slot\",\n    \"source\": \"@radix-ui/react-slot\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"cva\": {\n    \"localName\": \"cva\",\n    \"importedName\": \"cva\",\n    \"source\": \"class-variance-authority\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"VariantProps\": {\n    \"localName\": \"VariantProps\",\n    \"importedName\": \"VariantProps\",\n    \"source\": \"class-variance-authority\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": \"*\",\n    \"source\": \"react\",\n    \"type\": \"namespace\",\n    \"importKind\": \"value\"\n  },\n  \"cn\": {\n    \"localName\": \"cn\",\n    \"importedName\": \"cn\",\n    \"source\": \"/src/utils/cn.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Spinner\": {\n    \"localName\": \"Spinner\",\n    \"importedName\": \"Spinner\",\n    \"source\": \"/src/components/ui/spinner/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

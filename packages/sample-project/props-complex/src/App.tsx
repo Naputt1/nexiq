@@ -9,9 +9,17 @@ interface Props {
   c: string;
 }
 
+const a = "a";
+
 export const ComplexProps = ({
   a,
   b: { x, y: rename, ...restInner },
+  defaultString = "default",
+  defaultBool = false,
+  defaultNumber = 0,
+  defaultArray = [],
+  defaultObject = { test: "test" },
+  defaultRef = a,
   ...restOuter
 }: any) => {
   const refX = useRef(x);

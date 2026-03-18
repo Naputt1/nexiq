@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "useUser",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "strict": false
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

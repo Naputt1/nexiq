@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "usages": true,
+    "query": "useUser",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"normal\",\n      \"name\": \"useUser\",\n      \"file\": \"/src/lib/auth.tsx\",\n      \"usages\": []\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

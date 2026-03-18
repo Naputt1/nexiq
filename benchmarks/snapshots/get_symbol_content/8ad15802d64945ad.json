@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "CommentsList",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"symbol:import:/src/features/comments/components/comments.tsx:CommentsList\",\n    \"name\": \"CommentsList\",\n    \"file\": \"/src/features/comments/components/comments.tsx\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"dc57819c47eb81c1\",\n    \"name\": \"CommentsList\",\n    \"file\": \"/src/features/comments/components/comments-list.tsx\",\n    \"loc\": {\n      \"line\": 19,\n      \"column\": 13\n    },\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"content\": \"export const CommentsList = ({ discussionId }: CommentsListProps) => {\"\n  }\n]"
+      }
+    ]
+  }
+}

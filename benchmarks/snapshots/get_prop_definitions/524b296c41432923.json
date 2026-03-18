@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "componentName": "PostList",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

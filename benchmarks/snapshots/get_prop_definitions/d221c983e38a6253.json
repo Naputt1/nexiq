@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "componentName": "ArticleList"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"ArticleList\",\n    \"file\": \"/src/components/ArticleList.js\",\n    \"props\": [\n      {\n        \"id\": \"bbc11d24863e63b5:prop:props\",\n        \"name\": \"props\",\n        \"type\": \"any\",\n        \"kind\": \"prop\",\n        \"hash\": \"c913f4018cd56103\"\n      }\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

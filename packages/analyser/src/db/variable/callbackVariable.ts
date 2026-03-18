@@ -1,4 +1,4 @@
-import type { ComponentFileVarCallback } from "shared";
+import type { ComponentFileVarCallback } from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 
@@ -14,7 +14,8 @@ export class CallbackVariable extends ReactWithCallbackVariable<"callback"> {
       {
         ...options,
         kind: "callback",
-      },
+        type: "function",
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       file,
     );
   }

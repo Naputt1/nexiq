@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "ArticleList",
+    "strict": true,
+    "contextLines": 3
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/components/Profile.js\",\n    \"line\": 154,\n    \"column\": 14,\n    \"in\": \"jsx@154:14\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                {this.renderTabs()}\",\n      \"              </div>\",\n      \"\",\n      \"              <ArticleList\",\n      \"                pager={this.props.pager}\",\n      \"                articles={this.props.articles}\",\n      \"                articlesCount={this.props.articlesCount}\"\n    ]\n  },\n  {\n    \"file\": \"/src/components/Home/MainView.js\",\n    \"line\": 86,\n    \"column\": 6,\n    \"in\": \"MainView\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"        </ul>\",\n      \"      </div>\",\n      \"\",\n      \"      <ArticleList\",\n      \"        pager={props.pager}\",\n      \"        articles={props.articles}\",\n      \"        loading={props.loading}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

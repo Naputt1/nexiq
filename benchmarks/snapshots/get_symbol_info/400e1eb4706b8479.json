@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "query": "PostList",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "props": true,
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [],\n  \"externalUsages\": [\n    {\n      \"kind\": \"render\",\n      \"name\": \"PostList\",\n      \"file\": \"/components/post_view/post_view.tsx\",\n      \"in\": \"jsx@95:16\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

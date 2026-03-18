@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "Header",
+    "props": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": []\n}"
+      }
+    ]
+  }
+}

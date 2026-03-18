@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "src/components/ui/form/index.ts",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

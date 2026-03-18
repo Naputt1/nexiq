@@ -1,19 +1,26 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import { isHook } from "../utils.js";
-import type { ReactDependency, VariableLoc, VariableScope } from "shared";
+import { getReactHookInfo } from "../utils.js";
+import type { ReactDependency, VariableLoc, VariableScope } from "@nexiq/shared";
 import assert from "assert";
+import { generateFn } from "../utils/babel.js";
 
 export default function CallExpression(
   componentDB: ComponentDB,
   fileName: string,
 ): traverse.VisitNode<traverse.Node, t.CallExpression> {
   return (nodePath) => {
-    const callee = nodePath.node.callee;
-    if (callee.type !== "Identifier") return;
+    const hookInfo = getReactHookInfo(nodePath.node, componentDB, fileName);
+    if (!hookInfo) return;
 
-    const fn = callee.name;
+    assert(nodePath.node.loc?.start != null, "Function loc not found");
+
+    const callLoc = {
+      line: nodePath.node.loc.start.line,
+      column: nodePath.node.loc.start.column,
+    };
+
     const parentFunc = nodePath.getFunctionParent();
     let compName: string | undefined;
     let loc: VariableLoc | undefined;
@@ -62,18 +69,11 @@ export default function CallExpression(
     //   components[compName].contexts.push(fn);
     // }
 
-    if (fn === "useEffect") {
+    if (hookInfo?.isReact && hookInfo.name === "useEffect") {
       const effect = nodePath.node.arguments[0];
       const dependencies = nodePath.node.arguments[1];
 
       let scope: VariableScope | undefined;
-
-      assert(nodePath.node.loc?.start != null, "Function loc not found");
-
-      const effectLoc = {
-        line: nodePath.node.loc.start.line,
-        column: nodePath.node.loc.start.column,
-      };
 
       if (effect && effect.type == "ArrowFunctionExpression") {
         if (effect.body.type == "BlockStatement") {
@@ -91,35 +91,32 @@ export default function CallExpression(
           };
         }
       } else {
-        debugger;
+        // debugger;
       }
 
       const reactDeps: ReactDependency[] = [];
       if (dependencies && dependencies.type == "ArrayExpression") {
         for (const element of dependencies.elements) {
-          if (element == null) continue;
+          if (element == null || !t.isExpression(element)) continue;
 
-          if (element.type == "Identifier") {
-            reactDeps.push({ id: "", name: element.name });
-          } else {
-            debugger;
-          }
+          const name = t.isIdentifier(element)
+            ? element.name
+            : generateFn(element).code;
+          reactDeps.push({ id: "", name });
         }
-      } else {
-        debugger;
       }
 
-      if (loc && scope) {
-        componentDB.comAddEffect(fileName, loc, {
+      if (scope) {
+        componentDB.comAddEffect(fileName, callLoc, {
           scope,
-          loc: effectLoc,
+          loc: callLoc,
           reactDeps,
         });
       }
     }
 
-    if (compName && loc && isHook(fn)) {
-      componentDB.comAddHook(compName, loc, fileName, fn);
+    if (compName && loc && hookInfo) {
+      componentDB.comAddHook(hookInfo.name, callLoc, fileName, hookInfo.name);
     }
   };
 }

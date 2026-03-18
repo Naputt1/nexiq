@@ -18,11 +18,18 @@ const samples = args._[0]
       "hook",
       "props-complex",
       "destructuring-hook",
+      "jsx-variable",
+      "forward-ref",
+      "destructured-export",
+      "ts-method-signature",
       "cache",
       "cache-new",
+      "async-functions",
+      "destructuring-dependency",
+      "props-dot-dependency",
     ];
 
-function main(sample: string) {
+export async function runSnapshot(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
   const PUBLIC_FILE = "../ui/public/graph.json";
@@ -50,12 +57,14 @@ function main(sample: string) {
     }
   }
 
-  const graph: SnapshotData = analyzeFiles(
+  const graph: SnapshotData = await analyzeFiles(
     SRC_DIR,
     viteConfigPath,
     files,
     packageJson,
     cacheData,
+    undefined,
+    1,
   );
   delete graph.src;
   for (const file of Object.values(graph.files)) {
@@ -71,6 +80,10 @@ function main(sample: string) {
   console.log(`Graph written to ${OUT_FILE}`);
 }
 
-for (const sample of samples) {
-  main(sample);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  (async () => {
+    for (const sample of samples) {
+      await runSnapshot(sample);
+    }
+  })();
 }

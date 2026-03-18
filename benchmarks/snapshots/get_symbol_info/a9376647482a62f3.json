@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "",
+    "query": "ModalHeader",
+    "strict": true,
+    "props": false,
+    "usages": false,
+    "loc": true,
+    "exclude": [
+      "**/node_modules/**",
+      ".git/**",
+      ".react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"ModalHeader\",\n      \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n      \"loc\": {\n        \"line\": 17,\n        \"column\": 13\n      }\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

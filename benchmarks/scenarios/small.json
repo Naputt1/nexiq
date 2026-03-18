@@ -1,0 +1,45 @@
+{
+  "name": "Bulletproof React (Small)",
+  "root": "benchmarks/projects/small/apps/react-vite",
+  "scenarios": [
+    {
+      "id": "small-1",
+      "type": "breadth",
+      "prompt": "Find the definition of `Button` and list every file where it is rendered.",
+      "target_component": "Button",
+      "expected_answer_contains": [
+        "src/components/ui/button/button.tsx"
+      ]
+    },
+    {
+      "id": "small-2",
+      "type": "depth",
+      "prompt": "Identify all props accepted by `Button` and find exactly where the data for the `isLoading` prop originates in `LoginForm`.",
+      "target_component": "Button",
+      "target_prop": "isLoading",
+      "parent_component": "LoginForm",
+      "expected_answer_contains": [
+        "isLoading"
+      ]
+    },
+    {
+      "id": "small-3",
+      "type": "complexity",
+      "prompt": "Find all usages of the `useUser` hook and list every component that depends on the `user.data.role` field of the returned object.",
+      "target_hook": "useUser",
+      "target_field": "user.data.role",
+      "expected_answer_contains": [
+        "src/lib/auth.tsx"
+      ]
+    },
+    {
+      "id": "small-coding-1",
+      "type": "coding",
+      "prompt": "Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.",
+      "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 20
+    }
+  ]
+}

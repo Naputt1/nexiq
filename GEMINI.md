@@ -1,6 +1,9 @@
-# react-map
+# nexiq
 
-`react-map` is a tool designed to analyze React component structures and visualize their dependencies. It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored in a desktop application.
+`nexiq` is a tool designed to analyze React component structures and visualize their dependencies.
+ It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored via a **Model Context Protocol (MCP)** server or a desktop application.
+
+The project has pivoted towards an **MCP-first architecture**, where the core analysis and project management logic resides in a shared backend that serves both LLMs (via MCP) and human developers (via Electron).
 
 ## Project Structure
 
@@ -11,18 +14,21 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
   - Extracts component relationships, props (including destructuring and types), and hooks.
   - Generates a JSON graph output.
   - Supports caching for incremental analysis.
-- **`packages/ui`**: An Electron-based desktop application for visualizing the component graph.
-  - Built with React, Vite, and Tailwind CSS.
-  - Uses `@antv/g6`, `Konva`, and `react-konva` for graph rendering and interactions.
-  - Integrates with the `analyser` package to display project data.
-- **`packages/shared`**: Common TypeScript types and utilities shared between the analyser and the UI.
-- **`packages/sample-project`**: A collection of sample React projects (`simple`, `complex`, `props`, `hook`, etc.) used for testing and snapshot verification.
+- **`packages/server`**: The primary entry point for LLM-driven code exploration.
+  - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
+  - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
+- **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks, UI sections, or MCP tools.
+- **`packages/shared`** (as `@nexiq/shared`): Common TypeScript types and utilities shared across the monorepo.
+- **`packages/sample-project`**: A collection of sample React projects used for testing and snapshot verification.
+
+_Note: The UI application has been moved to a separate repository: `nexiq-ui`._
 
 ## Core Technologies
 
 - **Language**: TypeScript
 - **Package Manager**: `pnpm`
 - **Source Analysis**: Babel (`@babel/parser`, `@babel/traverse`)
+- **Backend Communication**: Model Context Protocol (MCP), WebSockets (ws)
 - **Frontend**: React, React Router, Radix UI
 - **Styling**: Tailwind CSS
 - **Visualization**: Konva / React-Konva, AntV G6
@@ -42,27 +48,34 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
 From the project root:
 
 - **Install Dependencies**:
+
   ```bash
   pnpm install
   ```
 
-- **Run UI in Development Mode**:
-  ```bash
-  pnpm dev:ui
-  ```
-  This starts the Vite dev server for the Electron app.
-
 - **Run Analyser on Samples**:
+
   ```bash
   pnpm --filter=analyser dev
   ```
+
   This builds the analyser in watch mode and runs it against the `sample-project`.
 
 - **Run Tests**:
+
   ```bash
   pnpm test:analyze
   ```
-  *Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode.*
+
+  _Note for AI Agent: Always use `pnpm test:analyze` (which runs `vitest run`) instead of `pnpm vitest` to ensure the process exits after completion and doesn't get stuck in watch mode._
+
+- **Run Benchmarks**:
+
+  ```bash
+  pnpm benchmark
+  ```
+
+  This starts the interactive CLI tool for running benchmarks across different projects and models.
 
 - **Update Snapshots**:
   ```bash
@@ -89,16 +102,16 @@ From the project root:
 - New features should be verified with tests in `packages/analyser/src/analyzer.test.ts`. Use `pnpm test:analyze` to run tests once and exit.
 - If changing the graph structure, run `pnpm snapshot:analyze` to update baseline snapshots.
 
-### UI Development
-
-- Components are located in `packages/ui/src/components/`.
-- Global state is managed using `zustand`.
-- Graph visualization logic is primarily in `packages/ui/src/graph/` and `packages/ui/src/componentGraph.tsx`.
-
 ### Code Style
 
-- ESLint is configured for both `analyser` and `ui` packages.
+- ESLint is configured for the project.
 - Follow existing patterns for Babel traversal and React component structure.
+
+### Testing & Coverage
+
+- **100% Coverage**: ALL backend packages (`analyser`, `server`, `mcp`, `shared`) MUST maintain 100% test coverage.
+- **Unit Tests**: Every new feature or tool handler must include corresponding unit tests in a `.test.ts` file.
+- **Verification**: Always run `pnpm test` (or the package-specific test command) to ensure all tests pass and coverage is maintained before submitting changes.
 
 ### TypeScript & Typing
 

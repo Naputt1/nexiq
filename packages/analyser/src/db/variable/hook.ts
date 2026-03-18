@@ -1,4 +1,4 @@
-import type { ComponentFileVarHook } from "shared";
+import type { ComponentFileVarHook } from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
@@ -10,7 +10,7 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
     >,
     file: File,
   ) {
-    super({ ...options, kind: "hook" }, file);
+    super({ ...options, kind: "hook", type: "function" }, file);
   }
 
   public load(data: HookVariable) {

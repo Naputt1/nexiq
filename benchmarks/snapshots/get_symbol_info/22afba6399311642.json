@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "query": "useUser",
+    "strict": false,
+    "usages": true,
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"normal\",\n      \"name\": \"useUser\",\n      \"file\": \"/src/lib/auth.tsx\",\n      \"usages\": []\n    },\n    {\n      \"kind\": \"hook\",\n      \"name\": \"useUsers\",\n      \"file\": \"/src/features/users/api/get-users.ts\",\n      \"usages\": []\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

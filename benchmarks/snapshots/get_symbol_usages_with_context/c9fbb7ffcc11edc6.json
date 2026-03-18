@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "Authorization",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/features/discussions/components/update-discussion.tsx\",\n    \"line\": 35,\n    \"column\": 4,\n    \"in\": \"UpdateDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"\",\n      \"  return (\",\n      \"    <Authorization allowedRoles={[ROLES.ADMIN]}>\",\n      \"      <FormDrawer\",\n      \"        isDone={updateDiscussionMutation.isSuccess}\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/discussions/components/delete-discussion.tsx\",\n    \"line\": 28,\n    \"column\": 4,\n    \"in\": \"DeleteDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"\",\n      \"  return (\",\n      \"    <Authorization allowedRoles={[ROLES.ADMIN]}>\",\n      \"      <ConfirmationDialog\",\n      \"        icon=\\\"danger\\\"\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/discussions/components/create-discussion.tsx\",\n    \"line\": 27,\n    \"column\": 4,\n    \"in\": \"CreateDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"\",\n      \"  return (\",\n      \"    <Authorization allowedRoles={[ROLES.ADMIN]}>\",\n      \"      <FormDrawer\",\n      \"        isDone={createDiscussionMutation.isSuccess}\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/comments/components/comments-list.tsx\",\n    \"line\": 54,\n    \"column\": 12,\n    \"in\": \"CommentsList\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"            className=\\\"w-full bg-white p-4 shadow-sm\\\"\",\n      \"          >\",\n      \"            <Authorization\",\n      \"              policyCheck={POLICIES['comment:delete'](\",\n      \"                user.data as User,\"\n    ]\n  },\n  {\n    \"file\": \"/src/app/routes/app/users.tsx\",\n    \"line\": 20,\n    \"column\": 6,\n    \"in\": \"UsersRoute\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  return (\",\n      \"    <ContentLayout title=\\\"Users\\\">\",\n      \"      <Authorization\",\n      \"        forbiddenFallback={<div>Only admin can view this.</div>}\",\n      \"        allowedRoles={[ROLES.ADMIN]}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

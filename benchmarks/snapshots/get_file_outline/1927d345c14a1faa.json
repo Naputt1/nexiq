@@ -1,0 +1,18 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "filePath": "/components/generic_modal.tsx",
+    "fields": [
+      "name",
+      "kind"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"ModalHeader\",\n    \"kind\": \"component\"\n  },\n  {\n    \"name\": \"ModalBody\",\n    \"kind\": \"component\"\n  },\n  {\n    \"name\": \"ModalFooter\",\n    \"kind\": \"component\"\n  },\n  {\n    \"name\": \"confirmButton\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"isConfirmOrDeleteClassName\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"confirmButtonText\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@221:16\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@231:16\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"cancelButton\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"cancelButtonText\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@252:16\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@262:16\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"isFocusTrapActive\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@279:12\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@302:16\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@303:20\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@308:24\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@313:24\",\n    \"kind\": \"normal\"\n  },\n  {\n    \"name\": \"jsx@321:24\",\n    \"kind\": \"normal\"\n  }\n]"
+      }
+    ]
+  }
+}

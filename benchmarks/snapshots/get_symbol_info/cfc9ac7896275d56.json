@@ -1,0 +1,24 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "subProject": "",
+    "query": "useUser",
+    "strict": false,
+    "props": false,
+    "usages": true,
+    "loc": true,
+    "exclude": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"normal\",\n      \"name\": \"useUser\",\n      \"file\": \"/src/lib/auth.tsx\",\n      \"loc\": {\n        \"line\": 75,\n        \"column\": 13\n      },\n      \"usages\": []\n    },\n    {\n      \"kind\": \"hook\",\n      \"name\": \"useUsers\",\n      \"file\": \"/src/features/users/api/get-users.ts\",\n      \"loc\": {\n        \"line\": 22,\n        \"column\": 13\n      },\n      \"usages\": []\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

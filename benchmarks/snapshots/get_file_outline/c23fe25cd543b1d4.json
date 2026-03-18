@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "src/features/auth/components/login-form.tsx",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"df9da7513c533ee\",\n    \"name\": \"LoginForm\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 16\n  }\n]"
+      }
+    ]
+  }
+}

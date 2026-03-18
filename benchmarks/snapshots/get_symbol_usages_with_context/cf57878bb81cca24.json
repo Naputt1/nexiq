@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalHeader",
+    "strict": false,
+    "contextLines": 5
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/components/view_user_group_modal/view_user_group_modal.tsx\",\n    \"line\": 205,\n    \"column\": 16,\n    \"in\": \"jsx@205:16\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                onHide={this.doHide}\",\n      \"                onExited={onExited}\",\n      \"                role='dialog'\",\n      \"                aria-labelledby='viewUserGroupModalLabel'\",\n      \"            >\",\n      \"                <ViewUserGroupModalHeader\",\n      \"                    onExited={onExited}\",\n      \"                    groupId={groupId}\",\n      \"                    backButtonCallback={this.props.backButtonCallback}\",\n      \"                    backButtonAction={this.props.backButtonAction}\",\n      \"                    incrementMemberCount={this.incrementMemberCount}\"\n    ]\n  },\n  {\n    \"file\": \"/components/user_groups_modal/user_groups_modal.tsx\",\n    \"line\": 228,\n    \"column\": 16,\n    \"in\": \"jsx@228:16\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                onExited={this.props.onExited}\",\n      \"                role='dialog'\",\n      \"                aria-labelledby='userGroupsModalLabel'\",\n      \"                id='userGroupsModal'\",\n      \"            >\",\n      \"                <UserGroupsModalHeader\",\n      \"                    onExited={this.props.onExited}\",\n      \"                    backButtonAction={this.props.backButtonAction}\",\n      \"                />\",\n      \"                <Modal.Body>\",\n      \"                    {(groups.length === 0 && !this.props.searchTerm) ? <>\"\n    ]\n  },\n  {\n    \"file\": \"/components/file_preview_modal/file_preview_modal.tsx\",\n    \"line\": 419,\n    \"column\": 32,\n    \"in\": \"jsx@419:32\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                            <Modal.Title\",\n      \"                                componentClass='div'\",\n      \"                                id='viewImageModalLabel'\",\n      \"                                className='file-preview-modal__title'\",\n      \"                            >\",\n      \"                                <FilePreviewModalHeader\",\n      \"                                    isMobileView={this.props.isMobileView}\",\n      \"                                    post={this.props.post!}\",\n      \"                                    showPublicLink={showPublicLink}\",\n      \"                                    fileIndex={this.state.imageIndex}\",\n      \"                                    totalFiles={this.props.fileInfos?.length}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

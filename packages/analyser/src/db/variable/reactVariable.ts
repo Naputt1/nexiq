@@ -1,4 +1,4 @@
-import type { ComponentFileVarReact, ReactVarKind, VarType } from "shared";
+import type { ComponentFileVarReact, ReactVarKind, VarType } from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { Variable } from "./variable.js";
 

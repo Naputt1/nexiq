@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "Button",
+    "props": true,
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"Button\",\n      \"file\": \"/src/components/ui/button/button.tsx\",\n      \"props\": [\n        {\n          \"id\": \"9b04df0652d807ec:prop:className\",\n          \"name\": \"className\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"74b500162f984d9f\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:variant\",\n          \"name\": \"variant\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"594e28f9c091713b\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:size\",\n          \"name\": \"size\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"84deae12a6dc5a63\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:asChild\",\n          \"name\": \"asChild\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"defaultValue\": {\n            \"type\": \"literal-type\",\n            \"literal\": {\n              \"type\": \"boolean\",\n              \"value\": false\n            }\n          },\n          \"hash\": \"da56eb39902a7a8e\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:children\",\n          \"name\": \"children\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"ff601f5e72cf1428\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:isLoading\",\n          \"name\": \"isLoading\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"4a078788c1274433\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:icon\",\n          \"name\": \"icon\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"29315f971bf58ff8\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:props\",\n          \"name\": \"props\",\n          \"type\": \"any\",\n          \"kind\": \"spread\",\n          \"hash\": \"4495b8899bc413ae\"\n        },\n        {\n          \"id\": \"9b04df0652d807ec:prop:ref\",\n          \"name\": \"ref\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"e9ceb2c440128b84\"\n        }\n      ]\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

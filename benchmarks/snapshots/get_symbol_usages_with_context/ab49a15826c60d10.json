@@ -1,0 +1,20 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "PostList",
+    "strict": false,
+    "contextLines": 5,
+    "exclude": [
+      "**/*.test.*",
+      "**/*.spec.*"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

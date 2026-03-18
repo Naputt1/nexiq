@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "filePath": "/components/generic_modal.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": null,\n    \"source\": \"react\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"classNames\": {\n    \"localName\": \"classNames\",\n    \"importedName\": null,\n    \"source\": \"classnames\",\n    \"type\": \"default\",\n    \"importKind\": \"value\"\n  },\n  \"Modal\": {\n    \"localName\": \"Modal\",\n    \"importedName\": \"Modal\",\n    \"source\": \"react-bootstrap\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"FormattedMessage\": {\n    \"localName\": \"FormattedMessage\",\n    \"importedName\": \"FormattedMessage\",\n    \"source\": \"react-intl\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"FocusTrap\": {\n    \"localName\": \"FocusTrap\",\n    \"importedName\": \"FocusTrap\",\n    \"source\": \"/packages/components/src//index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

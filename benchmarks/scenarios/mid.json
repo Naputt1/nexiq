@@ -1,0 +1,35 @@
+{
+  "name": "RealWorld App (Mid)",
+  "root": "benchmarks/projects/mid",
+  "scenarios": [
+    {
+      "id": "mid-1",
+      "type": "breadth",
+      "prompt": "Find the definition of `ArticleList` and list every file where it is rendered.",
+      "target_component": "ArticleList",
+      "expected_answer_contains": [
+        "src/components/ArticleList.js"
+      ]
+    },
+    {
+      "id": "mid-2",
+      "type": "depth",
+      "prompt": "Identify all props accepted by `ArticleList` and find exactly where the data for the `articles` prop originates in `MainView`.",
+      "target_component": "ArticleList",
+      "target_prop": "articles",
+      "parent_component": "MainView",
+      "expected_answer_contains": [
+        "mapStateToProps"
+      ]
+    },
+    {
+      "id": "mid-coding-1",
+      "type": "coding",
+      "prompt": "Refactor the `Header` component in `src/components/Header.js` to extract the navigation links into a separate functional component called `NavLink`. The `NavLink` should take `to` and `children` as props.",
+      "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npx eslint --fix src && npx playwright test",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 20
+    }
+  ]
+}

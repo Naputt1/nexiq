@@ -1,11 +1,21 @@
-import type { ComponentFileVar } from "shared";
+import type {
+  ComponentFileVar,
+  VariableLoc,
+  VariableScope,
+  VarKind,
+} from "@nexiq/shared";
 import type { Variable } from "./variable.js";
 import { isBaseFunctionVariable } from "./type.js";
-import { getVariableNameKey } from "../../analyzer/pattern.js";
+import {
+  getVariableNameKey,
+  getPatternIdentifiers,
+} from "../../analyzer/pattern.js";
+import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
 
 export class Scope {
   private variables = new Map<string, Variable>();
   private nameToVariable = new Map<string, Variable>();
+  private nameToId = new Map<string, string>();
   private prevIds = new Map<string, string>();
 
   constructor(
@@ -13,8 +23,45 @@ export class Scope {
     public owner?: Variable,
   ) {}
 
+  public static isLocInScope(loc: VariableLoc, scope: VariableScope): boolean {
+    if (loc.line < scope.start.line || loc.line > scope.end.line) return false;
+    if (loc.line === scope.start.line && loc.column < scope.start.column)
+      return false;
+    if (loc.line === scope.end.line && loc.column > scope.end.column)
+      return false;
+    return true;
+  }
+
+  public findDeepestScope(loc: VariableLoc): Scope {
+    for (const v of this.variables.values()) {
+      if (isBaseFunctionVariable(v)) {
+        if (v.scope && Scope.isLocInScope(loc, v.scope)) {
+          return v.var.findDeepestScope(loc);
+        }
+      }
+    }
+    return this;
+  }
+
+  public findDeepestVariable(
+    loc: VariableLoc,
+  ): BaseFunctionVariable<VarKind> | undefined {
+    for (const v of this.variables.values()) {
+      if (isBaseFunctionVariable(v)) {
+        if (v.scope && Scope.isLocInScope(loc, v.scope)) {
+          const inner = v.var.findDeepestVariable(loc);
+          if (inner) return inner;
+
+          return v;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
   public initPrevIds(vars: Record<string, ComponentFileVar>) {
-    for (const v of Object.values(vars)) {
+    for (const v of Object.values(vars || {})) {
       if (v.name && v.id) {
         const nameKey = getVariableNameKey(v.name);
         this.prevIds.set(nameKey, v.id);
@@ -30,8 +77,19 @@ export class Scope {
     this.variables.set(v.id, v);
     const nameKey = getVariableNameKey(v.name);
     this.nameToVariable.set(nameKey, v);
+    this.nameToId.set(nameKey, v.id);
+
+    // Register all identifiers in the pattern
+    // We want identifiers to point to their specific nested IDs anchored to the variable ID
+    const identifiers = getPatternIdentifiers(v.name, v.id);
+
+    for (const id of identifiers) {
+      this.nameToVariable.set(id.name, v);
+      this.nameToId.set(id.name, id.id);
+    }
+
     if (this.owner && isBaseFunctionVariable(this.owner)) {
-      v.parent = this.owner;
+      v.parent = this.owner as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
     if (isBaseFunctionVariable(v)) {
       if (v.var) {
@@ -46,7 +104,7 @@ export class Scope {
     if (v) return v;
     if (recursive) {
       for (const value of this.variables.values()) {
-        if (isBaseFunctionVariable(value)) {
+        if (isBaseFunctionVariable(value) && value.var) {
           v = value.var.get(id, true);
           if (v) return v;
         }
@@ -56,21 +114,15 @@ export class Scope {
   }
 
   public getByName(name: string): Variable | undefined {
-    return this.nameToVariable.get(name);
+    const v = this.nameToVariable.get(name);
+    if (v) return v;
+    return this.parent?.getByName(name);
   }
 
-  public getByPath(path: string[]): Scope | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let current: Scope = this;
-    for (let i = path.length - 1; i >= 0; i--) {
-      const v = current.getByName(path[i]!);
-      if (v && isBaseFunctionVariable(v)) {
-        current = v.var;
-      } else {
-        return undefined;
-      }
-    }
-    return current;
+  public getIdByName(name: string): string | undefined {
+    const id = this.nameToId.get(name);
+    if (id) return id;
+    return this.parent?.getIdByName(name);
   }
 
   public values() {

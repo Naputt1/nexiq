@@ -1,0 +1,22 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "subProject": "",
+    "query": "ButtonProps",
+    "strict": true,
+    "contextLines": 2,
+    "exclude": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "ArticleList",
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/components/Profile.js\",\n    \"line\": 157,\n    \"column\": 14,\n    \"in\": \"jsx@157:14\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"              <div className=\\\"articles-toggle\\\">{this.renderTabs()}</div>\",\n      \"\",\n      \"              <ArticleList\",\n      \"                pager={this.props.pager}\",\n      \"                articles={this.props.articles}\"\n    ]\n  },\n  {\n    \"file\": \"/src/components/Home/MainView.js\",\n    \"line\": 89,\n    \"column\": 6,\n    \"in\": \"MainView\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"      </div>\",\n      \"\",\n      \"      <ArticleList\",\n      \"        pager={props.pager}\",\n      \"        articles={props.articles}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

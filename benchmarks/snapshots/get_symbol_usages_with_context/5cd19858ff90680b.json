@@ -1,0 +1,22 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "",
+    "query": "FocusTrap",
+    "strict": true,
+    "contextLines": 2,
+    "exclude": [
+      "**/node_modules/**",
+      ".git/**",
+      ".react-map/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n    \"line\": 289,\n    \"column\": 16,\n    \"in\": \"jsx@289:16\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"                keyboard={this.props.keyboardEscape}\",\n      \"            >\",\n      \"                <FocusTrap active={isFocusTrapActive}>\",\n      \"                    <div\",\n      \"                        onKeyDown={this.onEnterKeyDown}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

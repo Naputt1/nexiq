@@ -1,7 +1,7 @@
 import type {
   ComponentFileVarBaseTypeFunction,
   ComponentFileVarFunction,
-} from "shared";
+} from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 
@@ -13,7 +13,7 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
     >,
     file: File,
   ) {
-    super({ ...options, kind: "normal" }, file);
+    super({ ...options, kind: "normal", type: "function" }, file);
   }
 
   public load(data: FunctionVariable) {

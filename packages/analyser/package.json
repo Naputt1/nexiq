@@ -1,5 +1,5 @@
 {
-  "name": "analyser",
+  "name": "@nexiq/analyser",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -9,7 +9,15 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./db/sqlite": {
+      "types": "./dist/db/sqlite.d.ts",
+      "import": "./dist/db/sqlite.js"
     }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsup",
@@ -24,24 +32,27 @@
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "dependencies": {
-    "@babel/generator": "^7.28.5",
+    "@babel/generator": "^7.29.1",
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
     "@babel/types": "^7.28.5",
     "@node-rs/xxhash": "^1.7.6",
+    "better-sqlite3": "^12.6.2",
     "glob": "^11.0.3",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5",
-    "shared": "workspace:*"
+    "@nexiq/shared": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.10.1",
     "@types/seedrandom": "^3.0.8",
-    "@vitest/ui": "^4.0.16",
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "ts-node": "^10.9.2",
@@ -49,6 +60,6 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.16"
+    "vitest": "^3.2.4"
   }
 }

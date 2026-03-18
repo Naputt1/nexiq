@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "filePath": "src/components/Header.js"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"6e08ef8e040df62f\",\n    \"name\": \"NavLink\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 4\n  },\n  {\n    \"id\": \"557a295414e87777\",\n    \"name\": \"LoggedOutView\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 14\n  },\n  {\n    \"id\": \"8982493f10e4e4fd\",\n    \"name\": \"LoggedInView\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 29\n  },\n  {\n    \"id\": \"a7eac81eb232a997\",\n    \"name\": \"jsx@61:6\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 61\n  },\n  {\n    \"id\": \"8ccb0d0731e8c16f\",\n    \"name\": \"jsx@62:8\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 62\n  },\n  {\n    \"id\": \"25a20a577c09e400\",\n    \"name\": \"jsx@63:10\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 63\n  },\n  {\n    \"id\": \"58cd969f0124d998\",\n    \"name\": \"jsx@67:10\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 67\n  },\n  {\n    \"id\": \"3bb1521a92fcbbe0\",\n    \"name\": \"jsx@69:10\",\n    \"kind\": \"normal\",\n    \"type\": \"jsx\",\n    \"line\": 69\n  }\n]"
+      }
+    ]
+  }
+}

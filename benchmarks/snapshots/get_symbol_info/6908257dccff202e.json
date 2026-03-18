@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "Input",
+    "props": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"Input\",\n      \"file\": \"/src/components/ui/form/input.tsx\",\n      \"props\": [\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:className\",\n          \"name\": \"className\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"74b500162f984d9f\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:type\",\n          \"name\": \"type\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"81fa547af52cef80\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:label\",\n          \"name\": \"label\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"847cee19515e041a\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:error\",\n          \"name\": \"error\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"9f0392cdbd263ad2\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:registration\",\n          \"name\": \"registration\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"1ebdb590ffbbf716\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:props\",\n          \"name\": \"props\",\n          \"type\": \"any\",\n          \"kind\": \"spread\",\n          \"hash\": \"4495b8899bc413ae\"\n        },\n        {\n          \"id\": \"73c3ad0d18cea9a1:prop:ref\",\n          \"name\": \"ref\",\n          \"type\": \"any\",\n          \"kind\": \"prop\",\n          \"hash\": \"e9ceb2c440128b84\"\n        }\n      ]\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

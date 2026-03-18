@@ -5,13 +5,15 @@ import type {
   TypeDataFunctionParameter,
   TypeDataImport,
   TypeDataLiteralBody,
+  TypeDataLiteralBodyMethod,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
-} from "shared";
+} from "@nexiq/shared";
 import * as t from "@babel/types";
 import assert from "assert";
-import type { FuncParam, TypeDataParamFunction } from "shared";
+import type { FuncParam, TypeDataParamFunction } from "@nexiq/shared";
+import { generateFn } from "../../utils/babel.js";
 
 function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
   const data: TypeDataParamFunction = {
@@ -77,7 +79,8 @@ function getFuncParam(
             name: property.argument.name,
           });
         } else {
-          debugger;
+          
+          // debugger;
         }
       }
 
@@ -195,7 +198,8 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
   } else if (tsType.left.type === "TSQualifiedName") {
     id.push(...getQualifiedName(tsType.left));
   } else {
-    debugger;
+    
+    // debugger;
   }
 
   if (tsType.right.type === "Identifier") {
@@ -246,6 +250,53 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
         type: getType(member.parameters[0]!.typeAnnotation.typeAnnotation),
       },
     };
+  } else if (member.type === "TSMethodSignature") {
+    if (member.key.type !== "Identifier") {
+      return null;
+    }
+
+    const body: TypeDataLiteralBodyMethod = {
+      signatureType: "method",
+      name: member.key.name,
+      params: [],
+      parameters: [],
+      return: member.typeAnnotation
+        ? getType(member.typeAnnotation.typeAnnotation)
+        : { type: "void" },
+    };
+
+    if (member.optional) {
+      body.optional = true;
+    }
+
+    if (member.computed) {
+      body.computed = true;
+    }
+
+    if (member.typeParameters) {
+      for (const param of member.typeParameters.params) {
+        body.params.push(getTypeParameter(param));
+      }
+    }
+
+    for (const param of member.parameters) {
+      const parameter: TypeDataFunctionParameter = {
+        param: getFuncParam(param),
+      };
+
+      if (param.typeAnnotation) {
+        assert(t.isTSTypeAnnotation(param.typeAnnotation));
+        parameter.typeData = getType(param.typeAnnotation);
+      }
+
+      if ("optional" in param && param.optional) {
+        parameter.optional = true;
+      }
+
+      body.parameters.push(parameter);
+    }
+
+    return body;
   }
 
   return null;
@@ -313,7 +364,8 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        debugger;
+        
+        // debugger;
         assert(false, "invlid type reference");
       }
 
@@ -367,50 +419,9 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       };
 
       for (const member of tsType.members) {
-        if (member.type === "TSPropertySignature") {
-          // TODO: handle other type
-          if (
-            member.key.type != "Identifier" ||
-            member.typeAnnotation?.type != "TSTypeAnnotation"
-          )
-            continue;
-          assert(member.key.type == "Identifier");
-          assert(member.typeAnnotation?.type == "TSTypeAnnotation");
-
-          const body: TypeDataLiteralBody = {
-            signatureType: "property",
-            name: member.key.name,
-            type: getType(member.typeAnnotation.typeAnnotation),
-          };
-
-          if (member.optional) {
-            body.optional = true;
-          }
-
-          if (member.computed) {
-            body.computed = true;
-          }
-
-          typeData.members.push(body);
-        } else if (member.type === "TSIndexSignature") {
-          assert(member.typeAnnotation?.type == "TSTypeAnnotation");
-          assert(member.parameters.length == 1);
-          assert(
-            member.parameters[0]!.typeAnnotation?.type == "TSTypeAnnotation",
-          );
-
-          typeData.members.push({
-            signatureType: "index",
-            type: getType(member.typeAnnotation.typeAnnotation),
-            parameter: {
-              name: member.parameters[0]!.name,
-              type: getType(
-                member.parameters[0]!.typeAnnotation.typeAnnotation,
-              ),
-            },
-          });
-        } else {
-          debugger;
+        const memberData = getMember(member);
+        if (memberData) {
+          typeData.members.push(memberData);
         }
       }
 
@@ -530,18 +541,29 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           expr,
         };
       } else {
-        debugger;
+        return { type: "any" };
       }
-
-      break;
-    default: {
-      debugger;
-    }
+    case "TSIntrinsicKeyword":
+    case "TSObjectKeyword":
+    case "TSSymbolKeyword":
+    case "TSThisType":
+    case "TSConstructorType":
+    case "TSTypePredicate":
+    case "TSOptionalType":
+    case "TSRestType":
+    case "TSConditionalType":
+    case "TSInferType":
+    case "TSTypeOperator":
+    case "TSMappedType":
+    case "TSTemplateLiteralType":
+    case "TSExpressionWithTypeArguments":
+    case "TSImportType":
+      return { type: "any" };
+    default:
+      return {
+        type: "any",
+      };
   }
-
-  return {
-    type: "any",
-  };
 }
 
 function getMemberExpressionNames(
@@ -562,6 +584,7 @@ function getMemberExpressionNames(
 }
 
 export function getExpressionData(expr: t.Expression): PropDataType | null {
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (expr.type) {
     case "BooleanLiteral":
       return {
@@ -621,6 +644,15 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       }
       break;
     }
+    case "BinaryExpression": {
+      return {
+        type: "literal-type",
+        literal: {
+          type: "string",
+          value: generateFn(expr).code,
+        },
+      };
+    }
     case "ArrayExpression": {
       const elements: PropDataType[] = [];
       for (const element of expr.elements) {
@@ -660,6 +692,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         properties,
       };
     }
+    default:
+      break;
   }
   return null;
 }

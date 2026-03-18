@@ -6,7 +6,8 @@ import type {
   VariableName,
   VarKind,
   VarType,
-} from "shared";
+  UIItemState,
+} from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { getDeterministicId } from "../../utils/hash.js";
 
@@ -20,16 +21,23 @@ export abstract class Variable<
   type: TType;
   kind: ComponentFileVarBase<TType, TKind>["kind"];
   parentId?: string | undefined;
+  declarationKind?:
+    | "const"
+    | "let"
+    | "var"
+    | "using"
+    | "await using"
+    | undefined
+    | "using"
+    | "await using";
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Variable<"function">;
+  parent?: Variable<"function" | "class">;
   loc: VariableLoc;
   ui?:
-    | {
-        x: number;
-        y: number;
-        renders?: Record<string, { x: number; y: number }>;
-        isLayoutCalculated?: boolean | undefined;
-      }
+    | (UIItemState & {
+        children?: Record<string, UIItemState>;
+        vars?: Record<string, UIItemState>;
+      })
     | undefined;
 
   constructor(
@@ -41,6 +49,7 @@ export abstract class Variable<
     this.type = data.type;
     this.kind = data.kind;
     this.parentId = data.parentId;
+    this.declarationKind = data.declarationKind;
     this.dependencies = data.dependencies;
     this.loc = data.loc;
     this.ui = data.ui;
@@ -50,6 +59,7 @@ export abstract class Variable<
 
   public load(data: Variable<TType>) {
     this.type = data.type;
+    this.declarationKind = data.declarationKind;
 
     // TODO: handle merge
     this.dependencies = data.dependencies;
@@ -72,6 +82,7 @@ export abstract class Variable<
       file: this.file.path,
       hash,
       parentId: this.parentId,
+      declarationKind: this.declarationKind,
       dependencies: this.dependencies,
       loc: this.loc,
       ui: this.ui,

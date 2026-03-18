@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "NavLink",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"NavLink\",\n      \"file\": \"/src/components/Header.js\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedOutView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"NavLink\",\n          \"file\": \"/src/components/Header.js\",\n          \"in\": \"LoggedInView\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "ProtectedRoute"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/app/router.tsx\",\n    \"line\": 41,\n    \"column\": 8,\n    \"in\": \"createAppRouter\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"      path: paths.app.root.path,\",\n      \"      element: (\",\n      \"        <ProtectedRoute>\",\n      \"          <AppRoot />\",\n      \"        </ProtectedRoute>\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

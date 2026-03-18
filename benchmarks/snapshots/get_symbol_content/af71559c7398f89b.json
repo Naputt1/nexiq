@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "MainView"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"symbol:import:/src/components/Home/index.js:MainView\",\n    \"name\": \"MainView\",\n    \"file\": \"/src/components/Home/index.js\",\n    \"loc\": {\n      \"line\": null,\n      \"column\": null\n    },\n    \"kind\": \"import\",\n    \"type\": \"data\",\n    \"content\": \"\"\n  },\n  {\n    \"id\": \"3540fed7c5df3e4c\",\n    \"name\": \"MainView\",\n    \"file\": \"/src/components/Home/MainView.js\",\n    \"loc\": {\n      \"line\": 72,\n      \"column\": 6\n    },\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"content\": \"const MainView = (props) => {\"\n  }\n]"
+      }
+    ]
+  }
+}

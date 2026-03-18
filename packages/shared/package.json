@@ -1,25 +1,41 @@
 {
-  "name": "shared",
+  "name": "@nexiq/shared",
   "type": "module",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./db": {
+      "types": "./dist/db/sqlite.d.ts",
+      "import": "./dist/db/sqlite.js"
     }
   },
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naputt1/nexu.git",
+    "directory": "packages/shared"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
+  "dependencies": {},
   "devDependencies": {
+    "better-sqlite3": "^12.6.2",
+    "@types/better-sqlite3": "^7.6.13",
     "typescript": "^5.9.3"
   }
 }
