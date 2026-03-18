@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
-import { analyzeProject } from "@nexu/analyser";
-import { SqliteDB } from "@nexu/analyser/db/sqlite";
+import { analyzeProject } from "@nexiq/analyser";
+import { SqliteDB } from "@nexiq/analyser/db/sqlite";
 import {
   type JsonData,
   type ProjectStatus,
@@ -17,8 +17,8 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
-} from "@nexu/shared";
-import type { Extension } from "@nexu/extension-sdk";
+} from "@nexiq/shared";
+import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";

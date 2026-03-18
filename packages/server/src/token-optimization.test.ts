@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BackendServer } from "./server.js";
 import { ProjectManager } from "./projectManager.js";
 import fs from "node:fs";
-import { analyzeProject } from "@nexu/analyser";
-import type { JsonData } from "@nexu/shared";
+import { analyzeProject } from "@nexiq/analyser";
+import type { JsonData } from "@nexiq/shared";
 import Database from "better-sqlite3";
 
 vi.mock("node:fs");
@@ -23,11 +23,11 @@ const mockDb = {
   pragma: vi.fn(),
 };
 
-vi.mock("@nexu/analyser", () => ({
+vi.mock("@nexiq/analyser", () => ({
   analyzeProject: vi.fn(),
 }));
 
-vi.mock("@nexu/analyser/db/sqlite", () => ({
+vi.mock("@nexiq/analyser/db/sqlite", () => ({
   SqliteDB: vi.fn().mockImplementation(() => ({
     db: mockDb,
     getAllData: vi.fn().mockReturnValue({

@@ -6,10 +6,10 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import type { JsonData } from "@nexu/shared";
+import type { JsonData } from "@nexiq/shared";
 import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
-import type { Extension } from "@nexu/extension-sdk";
+import type { Extension } from "@nexiq/extension-sdk";
 
 vi.mock("ws");
 vi.mock("@modelcontextprotocol/sdk/server/index.js");

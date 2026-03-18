@@ -9,7 +9,7 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarHook,
   ComponentFileVarNormalFunction,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { getDeterministicId } from "../utils/hash.js";
 
 export default function FunctionDeclaration(

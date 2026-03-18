@@ -33,7 +33,7 @@ import type {
   TypeDataDeclareInterface,
   TypeDataDeclareType,
   ReactFunctionVar,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
 import { JSXVariable } from "./variable/jsx.js";

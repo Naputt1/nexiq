@@ -11,8 +11,8 @@ import type {
   RelationRow,
   RenderRow,
   ExportRow,
-} from "@nexu/shared";
-import { SqliteDB as BaseSqliteDB } from "@nexu/shared/db";
+} from "@nexiq/shared";
+import { SqliteDB as BaseSqliteDB } from "@nexiq/shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,

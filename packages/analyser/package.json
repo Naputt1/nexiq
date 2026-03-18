@@ -1,5 +1,5 @@
 {
-  "name": "@nexu/analyser",
+  "name": "@nexiq/analyser",
   "type": "module",
   "version": "1.0.0",
   "description": "",
@@ -41,7 +41,7 @@
     "glob": "^11.0.3",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5",
-    "@nexu/shared": "workspace:*"
+    "@nexiq/shared": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

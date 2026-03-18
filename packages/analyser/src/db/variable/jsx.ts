@@ -2,7 +2,7 @@ import type {
   ComponentFileVarJSX,
   ComponentInfoRender,
   ComponentInfoRenderDependency,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 

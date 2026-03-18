@@ -3,7 +3,7 @@ import type {
   ReactDependency,
   ReactWithCallbackVar,
   VarType,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
 import { Variable } from "./variable.js";

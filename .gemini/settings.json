@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "react-map-debug": {
+    "nexiq-debug": {
       "command": "node",
       "args": [
-        "/Users/naputt/git/react-map/packages/server/dist/index.js"
+        "/Users/naputt/git/nexiq/packages/server/dist/index.js"
       ]
     }
   }

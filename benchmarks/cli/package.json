@@ -1,5 +1,5 @@
 {
-  "name": "@nexu/benchmark-cli",
+  "name": "@nexiq/benchmark-cli",
   "version": "1.0.0",
   "type": "module",
   "bin": "./dist/index.js",

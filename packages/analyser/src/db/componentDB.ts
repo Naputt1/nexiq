@@ -23,7 +23,7 @@ import type {
   VarKind,
   FunctionReturn,
   ComponentDBResolve,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
 import fs from "fs";

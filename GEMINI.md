@@ -1,6 +1,6 @@
-# nexu
+# nexiq
 
-`nexu` is a tool designed to analyze React component structures and visualize their dependencies.
+`nexiq` is a tool designed to analyze React component structures and visualize their dependencies.
  It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored via a **Model Context Protocol (MCP)** server or a desktop application.
 
 The project has pivoted towards an **MCP-first architecture**, where the core analysis and project management logic resides in a shared backend that serves both LLMs (via MCP) and human developers (via Electron).
@@ -18,10 +18,10 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
   - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
   - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
 - **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks, UI sections, or MCP tools.
-- **`packages/shared`** (as `@nexu/shared`): Common TypeScript types and utilities shared across the monorepo.
+- **`packages/shared`** (as `@nexiq/shared`): Common TypeScript types and utilities shared across the monorepo.
 - **`packages/sample-project`**: A collection of sample React projects used for testing and snapshot verification.
 
-_Note: The UI application has been moved to a separate repository: `nexu-ui`._
+_Note: The UI application has been moved to a separate repository: `nexiq-ui`._
 
 ## Core Technologies
 

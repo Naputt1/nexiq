@@ -3,7 +3,7 @@ import type {
   ComponentFileVar,
   VariableName,
   DatabaseData,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
 export type { TypeDataDeclare, ComponentFileVar, VariableName, DatabaseData };

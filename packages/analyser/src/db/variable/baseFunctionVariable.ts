@@ -5,7 +5,7 @@ import type {
   FunctionReturn,
   ComponentInfoRender,
   VarType,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 import { Scope } from "./scope.js";

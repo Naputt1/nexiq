@@ -1,5 +1,5 @@
 {
-  "name": "nexu",
+  "name": "nexiq",
   "version": "1.0.0",
   "description": "Short and powerful React component dependency analysis",
   "type": "module",
@@ -20,13 +20,13 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@parcel/watcher": "^2.5.6",
-    "@nexu/extension-sdk": "workspace:*",
-    "@nexu/analyser": "workspace:*",
+    "@nexiq/extension-sdk": "workspace:*",
+    "@nexiq/analyser": "workspace:*",
     "better-sqlite3": "^12.6.2",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.2.2",
-    "@nexu/shared": "workspace:*",
+    "@nexiq/shared": "workspace:*",
     "simple-git": "^3.30.0",
     "tmp": "^0.2.5",
     "ws": "^8.19.0"

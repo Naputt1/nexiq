@@ -1,16 +1,16 @@
 {
-  "name": "nexu",
+  "name": "nexiq",
   "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=nexu dev:electron",
-    "test:analyze": "pnpm --filter=@nexu/analyser test",
-    "snapshot:analyze": "pnpm --filter=@nexu/analyser snapshot",
-    "benchmark": "pnpm --filter=@nexu/benchmark-cli start",
+    "dev:server": "pnpm --filter=nexiq dev:electron",
+    "test:analyze": "pnpm --filter=@nexiq/analyser test",
+    "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
+    "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",
     "benchmark:view": "pnpm --filter=viewer dev",
-    "build:analyze": "pnpm --filter=@nexu/analyser build"
+    "build:analyze": "pnpm --filter=@nexiq/analyser build"
   },
   "keywords": [],
   "author": "",

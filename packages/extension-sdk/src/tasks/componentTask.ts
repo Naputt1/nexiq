@@ -1,4 +1,4 @@
-import { type DatabaseData } from "@nexu/shared";
+import { type DatabaseData } from "@nexiq/shared";
 import {
   type GraphComboData,
   type GraphArrowData,
