@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   dts: true, // Generate declaration files in case it is used as a library
   splitting: false,
-  external: ["@node-rs/xxhash", "better-sqlite3", "@nexu/shared"],
+  external: ["@node-rs/xxhash", "better-sqlite3", "@nexiq/shared"],
 });

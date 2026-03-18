@@ -1,5 +1,5 @@
 import { Worker } from "node:worker_threads";
-import type { ComponentFile } from "@nexu/shared";
+import type { ComponentFile } from "@nexiq/shared";
 
 export interface WorkerParams {
   filePath: string;

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.js";
 import { analyzeProject } from "./lib.js";
 import { PackageJson } from "./db/packageJson.js";
-import type { ComponentFileVar } from "@nexu/shared";
+import type { ComponentFileVar } from "@nexiq/shared";
 import path from "path";
 import fs from "fs";
 import os from "os";

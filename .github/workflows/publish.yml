@@ -30,28 +30,28 @@ jobs:
 
       - name: Build Packages
         run: |
-          pnpm --filter @nexu/shared build
-          pnpm --filter @nexu/extension-sdk build
-          pnpm --filter @nexu/analyser build
-          pnpm --filter nexu build
+          pnpm --filter @nexiq/shared build
+          pnpm --filter @nexiq/extension-sdk build
+          pnpm --filter @nexiq/analyser build
+          pnpm --filter nexiq build
 
-      - name: Publish @nexu/shared
-        run: pnpm --filter @nexu/shared publish --no-git-checks --access public --provenance
+      - name: Publish @nexiq/shared
+        run: pnpm --filter @nexiq/shared publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @nexu/extension-sdk
-        run: pnpm --filter @nexu/extension-sdk publish --no-git-checks --access public --provenance
+      - name: Publish @nexiq/extension-sdk
+        run: pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @nexu/analyser
-        run: pnpm --filter @nexu/analyser publish --no-git-checks --access public --provenance
+      - name: Publish @nexiq/analyser
+        run: pnpm --filter @nexiq/analyser publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish nexu
-        run: pnpm --filter nexu publish --no-git-checks --access public --provenance
+      - name: Publish nexiq
+        run: pnpm --filter nexiq publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

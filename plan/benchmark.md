@@ -48,14 +48,14 @@ Scenarios will be structurally identical across project tiers but adapted to use
 ### Fail-Safe Mechanism
 - **Tool Call Cap**: Each scenario will have a hard limit of **10 tool calls**. If reached without a definitive answer, the test is marked as `FAILED (LOOP DETECTED)`.
 - **Confidence Threshold**: The LLM must explicitly state "I have found the answer" to stop the clock.
-- **Fallback Rule**: If `nexu` returns an empty or suspicious result (e.g., missing essential file paths), the LLM must attempt one alternative query before terminating the test.
+- **Fallback Rule**: If `nexiq` returns an empty or suspicious result (e.g., missing essential file paths), the LLM must attempt one alternative query before terminating the test.
 
 ### Approach A: Baseline (Standard MCP)
 - Use only `read_file`, `grep_search`, and `list_directory`.
 - Record every tool call and the size of the returned text content.
 
 ### Approach B: React Map (No Cache / Cold)
-- Delete `.nexu/cache`.
+- Delete `.nexiq/cache`.
 - Call `open_project` followed by `get_symbol_info` or `list_files`.
 - Measure analysis time + tool output tokens.
 

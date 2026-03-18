@@ -1,6 +1,6 @@
 # Plan: MCP-Centric Architecture
 
-Transition `nexu` from a UI-focused visualization tool to an MCP-first (Model Context Protocol) code exploration platform.
+Transition `nexiq` from a UI-focused visualization tool to an MCP-first (Model Context Protocol) code exploration platform.
 
 ## Goals
 

@@ -19,7 +19,7 @@ import ArrowFunctionExpression from "./arrowFunctionExpression.js";
 import FunctionExpression from "./functionExpression.js";
 import TSInterfaceDeclaration from "./type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./type/TSTypeAliasDeclaration.js";
-import type { JsonData, ComponentFile } from "@nexu/shared";
+import type { JsonData, ComponentFile } from "@nexiq/shared";
 import { traverseFn } from "../utils/babel.js";
 import type { SqliteDB } from "../db/sqlite.js";
 import { WorkerPool } from "../workerPool.js";

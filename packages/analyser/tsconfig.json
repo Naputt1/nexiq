@@ -39,9 +39,9 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@nexu/shared": ["../shared/src/index.ts"],
-      "@nexu/shared/db": ["../shared/src/db/index.ts"],
-      "@nexu/shared/*": ["../shared/src/*"]
+      "@nexiq/shared": ["../shared/src/index.ts"],
+      "@nexiq/shared/db": ["../shared/src/db/index.ts"],
+      "@nexiq/shared/*": ["../shared/src/*"]
     },
     // "emitDeclarationOnly": true,
     // "allowImportingTsExtensions": true

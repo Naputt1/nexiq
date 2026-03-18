@@ -3,7 +3,7 @@ import type {
   ComponentFileVarNormalData,
   ComponentInfoRender,
   VarKind,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 

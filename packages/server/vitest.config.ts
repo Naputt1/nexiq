@@ -7,10 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      "@nexu/shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
-      "@nexu/shared": path.resolve(__dirname, "../shared/src/index.ts"),
-      "@nexu/analyser/db/sqlite": path.resolve(__dirname, "../analyser/src/db/sqlite.ts"),
-      "@nexu/analyser": path.resolve(__dirname, "../analyser/src/index.ts"),
+      "@nexiq/shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
+      "@nexiq/shared": path.resolve(__dirname, "../shared/src/index.ts"),
+      "@nexiq/analyser/db/sqlite": path.resolve(__dirname, "../analyser/src/db/sqlite.ts"),
+      "@nexiq/analyser": path.resolve(__dirname, "../analyser/src/index.ts"),
     },
   },
   test: {

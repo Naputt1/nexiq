@@ -11,23 +11,23 @@ if [ -z "$NODE_AUTH_TOKEN" ]; then
 fi
 
 echo "Building all packages..."
-pnpm --filter @nexu/shared build
-pnpm --filter @nexu/extension-sdk build
-pnpm --filter @nexu/analyser build
-pnpm --filter nexu build
-# pnpm --filter @nexu/tanstack-query-extension build
-# pnpm --filter @nexu/tanstack-router-extension build
+pnpm --filter @nexiq/shared build
+pnpm --filter @nexiq/extension-sdk build
+pnpm --filter @nexiq/analyser build
+pnpm --filter nexiq build
+# pnpm --filter @nexiq/tanstack-query-extension build
+# pnpm --filter @nexiq/tanstack-router-extension build
 
 echo "Publishing packages..."
 
 # Create/update .npmrc for local publishing
 echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
-# No need for @nexu scope registry if it's on NPM
+# No need for @nexiq scope registry if it's on NPM
 
-pnpm --filter @nexu/shared publish --no-git-checks --access public
-pnpm --filter @nexu/extension-sdk publish --no-git-checks --access public
-pnpm --filter @nexu/analyser publish --no-git-checks --access public
-pnpm --filter nexu publish --no-git-checks --access public
+pnpm --filter @nexiq/shared publish --no-git-checks --access public
+pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public
+pnpm --filter @nexiq/analyser publish --no-git-checks --access public
+pnpm --filter nexiq publish --no-git-checks --access public
 
 # Cleanup
 rm .npmrc

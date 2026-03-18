@@ -11,13 +11,13 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@nexu/analyser": ["../analyser/src/index.ts"],
-      "@nexu/analyser/*": ["../analyser/src/*"],
-      "@nexu/shared": ["../shared/src/index.ts"],
-      "@nexu/shared/db": ["../shared/src/db/index.ts"],
-      "@nexu/shared/*": ["../shared/src/*"],
-      "@nexu/extension-sdk": ["../extension-sdk/src/index.ts"],
-      "@nexu/extension-sdk/*": ["../extension-sdk/src/*"]
+      "@nexiq/analyser": ["../analyser/src/index.ts"],
+      "@nexiq/analyser/*": ["../analyser/src/*"],
+      "@nexiq/shared": ["../shared/src/index.ts"],
+      "@nexiq/shared/db": ["../shared/src/db/index.ts"],
+      "@nexiq/shared/*": ["../shared/src/*"],
+      "@nexiq/extension-sdk": ["../extension-sdk/src/index.ts"],
+      "@nexiq/extension-sdk/*": ["../extension-sdk/src/*"]
     }
   }
 }

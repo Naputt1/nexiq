@@ -175,7 +175,7 @@ importers:
       '@babel/types':
         specifier: ^7.28.5
         version: 7.29.0
-      '@nexu/shared':
+      '@nexiq/shared':
         specifier: workspace:*
         version: link:../shared
       '@node-rs/xxhash':
@@ -248,7 +248,7 @@ importers:
 
   packages/extension-sdk:
     dependencies:
-      '@nexu/shared':
+      '@nexiq/shared':
         specifier: workspace:*
         version: link:../shared
       react:
@@ -503,13 +503,13 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.27.1(zod@4.3.6)
-      '@nexu/analyser':
+      '@nexiq/analyser':
         specifier: workspace:*
         version: link:../analyser
-      '@nexu/extension-sdk':
+      '@nexiq/extension-sdk':
         specifier: workspace:*
         version: link:../extension-sdk
-      '@nexu/shared':
+      '@nexiq/shared':
         specifier: workspace:*
         version: link:../shared
       '@parcel/watcher':

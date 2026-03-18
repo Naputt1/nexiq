@@ -6,9 +6,9 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import * as watcher from "@parcel/watcher";
-import { analyzeProject } from "@nexu/analyser";
-import "@nexu/extension-sdk";
-import type { JsonData } from "@nexu/shared";
+import { analyzeProject } from "@nexiq/analyser";
+import "@nexiq/extension-sdk";
+import type { JsonData } from "@nexiq/shared";
 
 import Database from "better-sqlite3";
 
@@ -28,11 +28,11 @@ const mockDb = {
   exec: vi.fn(),
 };
 
-vi.mock("@nexu/analyser", () => ({
+vi.mock("@nexiq/analyser", () => ({
   analyzeProject: vi.fn(),
 }));
 
-vi.mock("@nexu/analyser/db/sqlite", () => ({
+vi.mock("@nexiq/analyser/db/sqlite", () => ({
   SqliteDB: vi.fn().mockImplementation(() => ({
     db: mockDb,
     getAllData: vi.fn().mockReturnValue({
@@ -127,15 +127,15 @@ describe("ProjectManager", () => {
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
         ignorePatterns: ["*.test.ts"],
-        extensions: ["@nexu/test-extension"],
+        extensions: ["@nexiq/test-extension"],
       }),
     );
 
     // Mock dynamic import
-    vi.mock("@nexu/test-extension", () => ({
+    vi.mock("@nexiq/test-extension", () => ({
       default: { id: "test-ext" },
     }));
-    vi.mock("@nexu/fallback", () => ({
+    vi.mock("@nexiq/fallback", () => ({
       default: { id: "fallback-ext" },
     }));
 
@@ -163,7 +163,7 @@ describe("ProjectManager", () => {
     );
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
-        extensions: ["@nexu/fail"],
+        extensions: ["@nexiq/fail"],
       }),
     );
 
@@ -184,7 +184,7 @@ describe("ProjectManager", () => {
     );
     vi.mocked(fs.readFileSync).mockReturnValue(
       JSON.stringify({
-        extensions: ["@nexu/fallback"],
+        extensions: ["@nexiq/fallback"],
       }),
     );
 
@@ -303,12 +303,12 @@ describe("ProjectManager", () => {
     });
 
     it("should find entities by label", async () => {
-      await projectManager.addLabel(projectPath, "id1", "@nexu/shared");
-      await projectManager.addLabel(projectPath, "id2", "@nexu/shared");
+      await projectManager.addLabel(projectPath, "id1", "@nexiq/shared");
+      await projectManager.addLabel(projectPath, "id2", "@nexiq/shared");
 
       const found = await projectManager.findEntitiesByLabel(
         projectPath,
-        "@nexu/shared",
+        "@nexiq/shared",
       );
       expect(found).toEqual(["id1", "id2"]);
     });

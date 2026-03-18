@@ -3,7 +3,7 @@ import type {
   VariableNamePattern,
   VariableObjectProperty,
   VariableArrayElement,
-} from "@nexu/shared";
+} from "@nexiq/shared";
 import { generateFn } from "../utils/babel.js";
 import { getDeterministicId } from "../utils/hash.js";
 
