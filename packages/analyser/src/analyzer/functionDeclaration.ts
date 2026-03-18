@@ -1,7 +1,7 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import { isHook, returnJSX } from "../utils.js";
+import { isHook, returnJSX, isRefUsed } from "../utils.js";
 import assert from "assert";
 import { getProps } from "./propExtractor.js";
 import { getPattern } from "./pattern.js";
@@ -9,34 +9,8 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarHook,
   ComponentFileVarNormalFunction,
-} from "shared";
+} from "@nexiq/shared";
 import { getDeterministicId } from "../utils/hash.js";
-
-function getParentPath(nodePath: traverse.NodePath<t.Node>) {
-  const parentPath: string[] = [];
-  let path: traverse.NodePath<t.Node> = nodePath;
-  while (true) {
-    if (path.scope.block.type === "Program") {
-      break;
-    }
-
-    if (path.scope.block.type === "FunctionDeclaration") {
-      if (path.scope.block.id?.type === "Identifier") {
-        parentPath.push(path.scope.block.id.name);
-      }
-    } else if (path.scope.block.type === "ArrowFunctionExpression") {
-      if (path.scope.parentBlock.type == "VariableDeclarator") {
-        if (path.scope.parentBlock.id.type === "Identifier") {
-          parentPath.push(path.scope.parentBlock.id.name);
-        }
-      }
-    }
-
-    path = path.scope.parent.path;
-  }
-
-  return parentPath;
-}
 
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
@@ -53,49 +27,66 @@ export default function FunctionDeclaration(
       column: nodePath.node.id.loc.start.column,
     };
 
-    const componentId = getDeterministicId(`${fileName}:${name}`);
+    const componentId = getDeterministicId(fileName, name);
+
+    assert(nodePath.node.loc != null, "Function loc not found");
 
     const scope = {
       start: {
-        line: nodePath.node.id.loc.start.line,
-        column: nodePath.node.id.loc.start.column,
+        line: nodePath.node.loc.start.line,
+        column: nodePath.node.loc.start.column,
       },
       end: {
-        line: nodePath.node.id.loc.end.line,
-        column: nodePath.node.id.loc.end.column,
+        line: nodePath.node.loc.end.line,
+        column: nodePath.node.loc.end.column,
       },
     };
 
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
+        const { props, propName } = getProps(nodePath, undefined, componentId);
         componentDB.addComponent(fileName, {
           name: pattern,
           type: "function",
           componentType: "Function",
           hooks: [],
-          props: getProps(nodePath, undefined, componentId),
+          props,
+          propName,
           contexts: [],
-          renders: {},
           dependencies: {},
           var: {},
+          children: {},
           loc,
           scope,
+          async: nodePath.node.async,
           effects: {},
-        } as Omit<ComponentFileVarComponent, "id" | "kind" | "states" | "hash" | "file">);
+          forwardRef: isRefUsed(nodePath),
+        } as Omit<
+          ComponentFileVarComponent,
+          "id" | "kind" | "states" | "hash" | "file"
+        >);
         return;
       }
 
       if (isHook(name)) {
+        const { props, propName } = getProps(nodePath, undefined, componentId);
         componentDB.addHook(fileName, {
           name: pattern,
           dependencies: {},
           type: "function",
           loc,
           scope,
-          props: getProps(nodePath, undefined, componentId),
+          async: nodePath.node.async,
+          props,
+          propName,
           effects: {},
           hooks: [],
-        } as Omit<ComponentFileVarHook, "kind" | "id" | "var" | "components" | "states" | "hash" | "file">);
+          children: {},
+          var: {},
+        } as Omit<
+          ComponentFileVarHook,
+          "kind" | "id" | "var" | "components" | "states" | "hash" | "file"
+        >);
         return;
       }
 
@@ -105,26 +96,27 @@ export default function FunctionDeclaration(
         type: "function",
         loc,
         scope,
-      } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">);
+        async: nodePath.node.async,
+        children: {},
+        var: {},
+      } as Omit<
+        ComponentFileVarNormalFunction,
+        "kind" | "file" | "id" | "var" | "components" | "hash"
+      >);
     } else {
-      if (
-        nodePath.scope.block.type === "FunctionDeclaration" &&
-        nodePath.scope.block.id?.type === "Identifier"
-      ) {
-        const parentPath = getParentPath(nodePath.scope.parent.path);
-
-        componentDB.addVariable(
-          fileName,
-          {
-            name: pattern,
-            dependencies: {},
-            type: "function",
-            loc,
-            scope,
-          } as Omit<ComponentFileVarNormalFunction, "kind" | "file" | "id" | "var" | "components" | "hash">,
-          parentPath,
-        );
-      }
+      componentDB.addVariable(fileName, {
+        name: pattern,
+        dependencies: {},
+        type: "function",
+        loc,
+        scope,
+        async: nodePath.node.async,
+        children: {},
+        var: {},
+      } as Omit<
+        ComponentFileVarNormalFunction,
+        "kind" | "file" | "id" | "var" | "components" | "hash"
+      >);
     }
   };
 }

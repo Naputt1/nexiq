@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "usages": true,
+    "query": "useAuthorization"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"hook\",\n      \"name\": \"useAuthorization\",\n      \"file\": \"/src/lib/authorization.tsx\",\n      \"usages\": []\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

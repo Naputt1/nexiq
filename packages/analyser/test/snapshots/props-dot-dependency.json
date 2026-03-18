@@ -1,0 +1,317 @@
+{
+  "files": {
+    "/index.tsx": {
+      "path": "/index.tsx",
+      "hash": "f7768887b13db1c9",
+      "import": {
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
+        },
+        "useEffect": {
+          "localName": "useEffect",
+          "importedName": "useEffect",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "CardBody": {
+          "name": "CardBody",
+          "type": "default",
+          "exportKind": "component",
+          "id": "d3a4c6ed6b965219"
+        }
+      },
+      "starExports": [],
+      "defaultExport": "CardBody",
+      "tsTypes": {},
+      "var": {
+        "d3a4c6ed6b965219": {
+          "id": "d3a4c6ed6b965219",
+          "name": {
+            "type": "identifier",
+            "name": "CardBody",
+            "loc": {
+              "line": 3,
+              "column": 24
+            },
+            "id": "9d89bfe64ca2860"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/index.tsx",
+          "hash": "cb9574f954a502d1",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 24
+          },
+          "var": {
+            "d3a4c6ed6b965219:state:[expanding, setExpanding]": {
+              "id": "d3a4c6ed6b965219:state:[expanding, setExpanding]",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "expanding",
+                      "loc": {
+                        "line": 7,
+                        "column": 9
+                      },
+                      "id": "8f362851d6468323"
+                    },
+                    "loc": {
+                      "line": 7,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setExpanding",
+                      "loc": {
+                        "line": 7,
+                        "column": 20
+                      },
+                      "id": "c37c880036b5a510"
+                    },
+                    "loc": {
+                      "line": 7,
+                      "column": 20
+                    }
+                  }
+                ],
+                "raw": "[expanding, setExpanding]",
+                "loc": {
+                  "line": 7,
+                  "column": 8
+                },
+                "id": "65beeb58fc140d46"
+              },
+              "kind": "state",
+              "type": "data",
+              "file": "/index.tsx",
+              "hash": "6f3edb13d657a9f3",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 8
+              }
+            },
+            "d3a4c6ed6b965219:state:[expanded, setExpanded]": {
+              "id": "d3a4c6ed6b965219:state:[expanded, setExpanded]",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "expanded",
+                      "loc": {
+                        "line": 8,
+                        "column": 9
+                      },
+                      "id": "1e3a8fdd3788da37"
+                    },
+                    "loc": {
+                      "line": 8,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setExpanded",
+                      "loc": {
+                        "line": 8,
+                        "column": 19
+                      },
+                      "id": "126f78be5531ae2"
+                    },
+                    "loc": {
+                      "line": 8,
+                      "column": 19
+                    }
+                  }
+                ],
+                "raw": "[expanded, setExpanded]",
+                "loc": {
+                  "line": 8,
+                  "column": 8
+                },
+                "id": "65beeb58fc140d46"
+              },
+              "kind": "state",
+              "type": "data",
+              "file": "/index.tsx",
+              "hash": "dab28af1ed8e8567",
+              "dependencies": {},
+              "loc": {
+                "line": 8,
+                "column": 8
+              }
+            },
+            "23e8ac41bdcd4b3d": {
+              "id": "23e8ac41bdcd4b3d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@18:4",
+                "loc": {
+                  "line": 18,
+                  "column": 4
+                },
+                "id": "5be092f6edc27045"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 4
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 15
+            },
+            "end": {
+              "line": 23,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": {
+            "id": "23e8ac41bdcd4b3d",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@18:4",
+              "loc": {
+                "line": 18,
+                "column": 4
+              },
+              "id": "5be092f6edc27045"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/index.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
+            "loc": {
+              "line": 18,
+              "column": 4
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "5f0e31d008fbd978": {
+              "id": "div",
+              "instanceId": "5f0e31d008fbd978",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 18,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
+          "states": [
+            "d3a4c6ed6b965219:state:[expanding, setExpanding]",
+            "d3a4c6ed6b965219:state:[expanded, setExpanded]"
+          ],
+          "props": [
+            {
+              "id": "d3a4c6ed6b965219:prop:expanded",
+              "name": "expanded",
+              "type": "boolean",
+              "kind": "prop",
+              "hash": "a18f4756a15cecef"
+            },
+            {
+              "id": "d3a4c6ed6b965219:prop:children",
+              "name": "children",
+              "type": "React.ReactNode",
+              "kind": "prop",
+              "hash": "77586bd2881e5282"
+            }
+          ],
+          "propName": "props",
+          "hooks": [],
+          "effects": {
+            "d3a4c6ed6b965219:effect:10:2": {
+              "id": "d3a4c6ed6b965219:effect:10:2",
+              "scope": {
+                "start": {
+                  "line": 10,
+                  "column": 18
+                },
+                "end": {
+                  "line": 15,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 10,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "d3a4c6ed6b965219:prop:expanded",
+                  "name": "props.expanded"
+                }
+              ]
+            }
+          },
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "d3a4c6ed6b965219",
+      "to": "23e8ac41bdcd4b3d",
+      "label": "render"
+    },
+    {
+      "from": "div",
+      "to": "d3a4c6ed6b965219",
+      "label": "render"
+    }
+  ],
+  "resolve": []
+}

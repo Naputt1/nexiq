@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "query": "FormInput",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"FormInput\",\n      \"file\": \"/src/features/auth/components/form-input.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"FormInput\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"LoginForm\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"FormInput\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"LoginForm\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

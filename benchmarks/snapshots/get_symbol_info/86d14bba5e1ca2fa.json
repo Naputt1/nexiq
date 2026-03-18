@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "Button",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"Button\",\n      \"file\": \"/src/components/ui/button/button.tsx\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

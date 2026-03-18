@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "query": "MainView",
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/components/Home/index.js\",\n    \"line\": 54,\n    \"column\": 12,\n    \"in\": \"jsx@54:12\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"        <div className=\\\"container page\\\">\",\n      \"          <div className=\\\"row\\\">\",\n      \"            <MainView />\",\n      \"\",\n      \"            <div className=\\\"col-md-3\\\">\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

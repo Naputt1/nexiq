@@ -1,15 +1,15 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
 
 export default function ImportDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ImportDeclaration> {
   return (nodePath) => {
     const source = componentDB.getImportFileName(
       nodePath.node.source.value,
-      fileName
+      fileName,
     );
 
     const importKind: "value" | "type" =

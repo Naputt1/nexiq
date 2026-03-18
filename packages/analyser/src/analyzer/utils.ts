@@ -28,6 +28,7 @@ export function getFiles(dir: string, customIgnore: string[] = []): string[] {
       "**/coverage/**",
       "**/public/**",
       "**/vite.config.ts",
+      "**/*.d.ts",
       ...customIgnore,
     ],
   });

@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "components/post_view/post_list/post_list.tsx",
+    "componentName": "PostList"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "ENOTDIR: not a directory, mkdir '/Users/naputt/git/react-map/benchmarks/projects/large/components/post_view/post_list/post_list.tsx/.react-map/cache'"
+      }
+    ],
+    "isError": true
+  }
+}

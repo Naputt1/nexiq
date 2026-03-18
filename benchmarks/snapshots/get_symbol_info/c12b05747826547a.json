@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "query": "FieldWrapper",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"FieldWrapper\",\n      \"file\": \"/src/components/ui/form/field-wrapper.tsx\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

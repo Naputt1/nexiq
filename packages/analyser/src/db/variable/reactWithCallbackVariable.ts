@@ -2,34 +2,39 @@ import type {
   ComponentFileVarReactWithCallback,
   ReactDependency,
   ReactWithCallbackVar,
-} from "shared";
+  VarType,
+} from "@nexiq/shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { File } from "../fileDB.js";
+import { Variable } from "./variable.js";
 
 export abstract class ReactWithCallbackVariable<
   TKind extends ReactWithCallbackVar = ReactWithCallbackVar,
-> extends BaseFunctionVariable<TKind> {
+  TType extends VarType = "function",
+> extends BaseFunctionVariable<TKind, TType> {
   reactDeps: ReactDependency[];
 
   constructor(
     options: Omit<
-      ComponentFileVarReactWithCallback<TKind>,
-      "var" | "components" | "type" | "file"
+      ComponentFileVarReactWithCallback<TKind, TType>,
+      "var" | "components" | "file"
     >,
     file: File,
   ) {
-    super(options, file);
+    super(options as any, file); // eslint-disable-line @typescript-eslint/no-explicit-any
 
     this.reactDeps = options.reactDeps;
   }
 
-  public load(data: ReactWithCallbackVariable<TKind>) {
+  public load(data: Variable<TType, TKind>) {
     super.load(data);
 
-    this.file = data.file;
+    if (data instanceof ReactWithCallbackVariable) {
+      this.reactDeps = data.reactDeps;
+    }
   }
 
-  protected getBaseData(): ComponentFileVarReactWithCallback<TKind> {
+  protected getBaseData(): ComponentFileVarReactWithCallback<TKind, TType> {
     return {
       ...super.getBaseData(),
       reactDeps: this.reactDeps,

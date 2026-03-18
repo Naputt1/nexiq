@@ -1,1 +1,1 @@
-# react-map
+# nexiq

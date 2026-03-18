@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "query": "PostList",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "subProject": "/components/post_view/post_list/index.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "ENOENT: no such file or directory, mkdir '/components/post_view/post_list/index.tsx/.react-map/cache'"
+      }
+    ],
+    "isError": true
+  }
+}

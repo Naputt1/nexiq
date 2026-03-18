@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "componentName": "ArticleList",
+    "depth": 2
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"component\": \"ArticleList\",\n  \"hierarchies\": [\n    {\n      \"id\": \"symbol:import:/src/components/Profile.js:ArticleList\",\n      \"name\": \"ArticleList\",\n      \"children\": []\n    },\n    {\n      \"id\": \"bbc11d24863e63b5\",\n      \"name\": \"ArticleList\",\n      \"children\": [\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        },\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        },\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        },\n        {\n          \"name\": \"ArticlePreview\",\n          \"status\": \"unresolved\",\n          \"kind\": \"jsx\",\n          \"index\": 0\n        },\n        {\n          \"name\": \"ListPagination\",\n          \"status\": \"unresolved\",\n          \"kind\": \"jsx\",\n          \"index\": 0\n        },\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        },\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        },\n        {\n          \"id\": \"div\",\n          \"name\": \"unknown\",\n          \"children\": [],\n          \"status\": \"limit-or-circular\"\n        }\n      ]\n    },\n    {\n      \"id\": \"symbol:import:/src/components/Home/MainView.js:ArticleList\",\n      \"name\": \"ArticleList\",\n      \"children\": []\n    }\n  ],\n  \"renderedBy\": [\n    {\n      \"id\": \"3540fed7c5df3e4c\",\n      \"name\": \"MainView\",\n      \"file\": \"/src/components/Home/MainView.js\"\n    },\n    {\n      \"id\": \"8d891689f3838419\",\n      \"name\": \"jsx@157:14\",\n      \"file\": \"/src/components/Profile.js\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

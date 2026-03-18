@@ -1,16 +1,18 @@
 import * as t from "@babel/types";
-import traverse from "@babel/traverse";
+import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentFileExport } from "shared";
+import type { ComponentFileExport } from "@nexiq/shared";
 import assert from "assert";
+import { getPattern, getPatternIdentifiers } from "./pattern.js";
 
 export default function ExportNamedDeclaration(
   componentDB: ComponentDB,
-  fileName: string
+  fileName: string,
 ): traverse.VisitNode<traverse.Node, t.ExportNamedDeclaration> {
-  return (nodePath) => {
-    const decl = nodePath.node.declaration;
-    if (decl) {
+  return {
+    exit(nodePath) {
+      const decl = nodePath.node.declaration;
+      if (decl) {
       let name: string | undefined;
 
       let exportType: ComponentFileExport["type"] = "named";
@@ -38,9 +40,11 @@ export default function ExportNamedDeclaration(
         name = decl.id?.name;
       } else if (decl.type === "VariableDeclaration") {
         decl.declarations.forEach((declarator) => {
-          if (declarator.id.type === "Identifier") {
+          const pattern = getPattern(declarator.id);
+          const identifiers = getPatternIdentifiers(pattern);
+          for (const ident of identifiers) {
             componentDB.fileAddExport(fileName, {
-              name: declarator.id.name,
+              name: ident.name,
               type: "named",
               exportKind: "value",
             });
@@ -83,5 +87,6 @@ export default function ExportNamedDeclaration(
         exportKind: "value",
       });
     }
-  };
+  },
+};
 }

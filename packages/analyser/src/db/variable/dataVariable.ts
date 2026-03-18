@@ -3,22 +3,22 @@ import type {
   ComponentFileVarNormalData,
   ComponentInfoRender,
   VarKind,
-} from "shared";
+} from "@nexiq/shared";
 import { Variable } from "./variable.js";
 import type { File } from "../fileDB.js";
 
 export class DataVariable extends Variable<"data"> {
-  components: Map<string, ComponentInfoRender>;
+  children: Record<string, ComponentInfoRender>;
 
   constructor(
     options: Omit<
       ComponentFileVarNormal,
-      "kind" | "var" | "components" | "file" | "hash"
+      "kind" | "var" | "children" | "file" | "hash"
     > & { kind?: VarKind },
     file: File,
   ) {
     super({ ...options, kind: options.kind ?? "normal", type: "data" }, file);
-    this.components = new Map();
+    this.children = {};
   }
 
   public load(data: DataVariable) {
@@ -26,8 +26,8 @@ export class DataVariable extends Variable<"data"> {
 
     this.type = data.type;
     // TODO: handle merge
-    if (data.components) {
-      this.components = new Map(Object.entries(data.components));
+    if (data.children) {
+      this.children = { ...data.children };
     }
   }
 
@@ -36,21 +36,21 @@ export class DataVariable extends Variable<"data"> {
       ...this.getBaseData(),
       type: "data",
       kind: this.kind as "normal",
-      components: Object.fromEntries(this.components),
+      children: this.children,
     };
   }
 
   protected getBaseData(): ComponentFileVarNormalData {
     return {
       ...super.getBaseData(),
-      components: Object.fromEntries(this.components),
+      children: this.children,
     } as ComponentFileVarNormalData;
   }
 
   protected getDataInternal() {
     return {
       name: this.name,
-      components: Object.fromEntries(this.components),
+      children: this.children,
     };
   }
 }

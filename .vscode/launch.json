@@ -25,12 +25,16 @@
         "./packages/sample-project/simple",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -41,12 +45,16 @@
         "./packages/sample-project/complex",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -57,12 +65,16 @@
         "./packages/sample-project/props",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -73,12 +85,16 @@
         "./packages/sample-project/cache",
         "./out/cache.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -95,7 +111,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -106,12 +125,16 @@
         "./packages/sample-project/hook",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -122,12 +145,116 @@
         "./packages/sample-project/props-complex",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "destructuring-hook",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/destructuring-hook",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "small",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./benchmarks/projects/small/apps/react-vite",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mid",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./benchmarks/projects/mid",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "large",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./benchmarks/projects/large",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "react-map",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        ".",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -138,12 +265,16 @@
         "../maemoo-minibus",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -154,12 +285,16 @@
         "../sysits-hr-2024/web",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     },
     {
       "type": "node",
@@ -170,12 +305,16 @@
         "../mastodon",
         "./out/graph.json",
         "./packages/ui/public/graph.json",
-        "--no-cache"
+        "--no-cache",
+        "--no-threads"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "build"
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     }
   ]
 }

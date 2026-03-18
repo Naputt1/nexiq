@@ -1,6 +1,6 @@
 # Git Interface Implementation Plan
 
-This plan outlines the integration of Git functionality into the `react-map` UI, allowing users to visualize changes across different commits and the current working tree.
+This plan outlines the integration of Git functionality into the `nexiq` UI, allowing users to visualize changes across different commits and the current working tree.
 
 ## Phase 1: Infrastructure & Backend (Done)
 
@@ -67,7 +67,7 @@ To easily test and identify Git changes, follow these steps:
     This creates a dummy React project in `packages/sample-project/git-demo` with historical commits and pending modifications.
 
 2.  **Open the Demo Project**:
-    - Start `react-map`.
+    - Start `nexiq`.
     - Click "Select Directory" and choose `packages/sample-project/git-demo`.
 
 3.  **Explore Git Control**:

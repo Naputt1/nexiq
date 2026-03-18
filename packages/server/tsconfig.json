@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "declaration": true,
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nexiq/analyser": ["../analyser/src/index.ts"],
+      "@nexiq/analyser/*": ["../analyser/src/*"],
+      "@nexiq/shared": ["../shared/src/index.ts"],
+      "@nexiq/shared/db": ["../shared/src/db/index.ts"],
+      "@nexiq/shared/*": ["../shared/src/*"],
+      "@nexiq/extension-sdk": ["../extension-sdk/src/index.ts"],
+      "@nexiq/extension-sdk/*": ["../extension-sdk/src/*"]
+    }
+  }
+}

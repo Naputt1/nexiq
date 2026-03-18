@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "query": "ModalHeader",
+    "usages": true,
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"ModalHeader\",\n      \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalHeader\",\n          \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n          \"in\": \"jsx@295:24\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalHeader\",\n          \"file\": \"/components/generic_modal.tsx\",\n          \"in\": \"jsx@295:24\"\n        }\n      ]\n    },\n    {\n      \"kind\": \"component\",\n      \"name\": \"ModalHeader\",\n      \"file\": \"/components/generic_modal.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalHeader\",\n          \"file\": \"/packages/components/src/generic_modal/generic_modal.tsx\",\n          \"in\": \"jsx@295:24\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"ModalHeader\",\n          \"file\": \"/components/generic_modal.tsx\",\n          \"in\": \"jsx@295:24\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

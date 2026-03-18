@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "nexiq-debug": {
+      "command": "node",
+      "args": [
+        "/Users/naputt/git/nexiq/packages/server/dist/index.js"
+      ]
+    }
+  }
+}

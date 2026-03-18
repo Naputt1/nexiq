@@ -1,6 +1,6 @@
 {
-  "name": "destructuring-hook",
+  "name": "sample-destructuring-hook",
   "dependencies": {
-    "react": "^18.0.0"
+    "react": "^18.3.1"
   }
 }

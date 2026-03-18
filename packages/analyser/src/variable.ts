@@ -1,7 +1,7 @@
 import type { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import { assert } from "console";
-import type { VariableLoc } from "shared";
+import type { VariableLoc } from "@nexiq/shared";
 
 interface VariableComponentName {
   name: string;
@@ -13,10 +13,12 @@ export function getVariableComponentName(
   loc?: VariableLoc,
 ): VariableComponentName | null {
   if (path == null) return null;
-  if (typeof (path as any).findParent !== "function") return null;
+  if (typeof path.findParent !== "function") return null;
 
-  if (loc && (path as any).loc == null) {
-    (path as any).loc = {
+  const pathWithLoc = path as { loc?: { start: VariableLoc; end: VariableLoc } | null };
+
+  if (loc && pathWithLoc.loc == null) {
+    pathWithLoc.loc = {
       start: loc,
       end: loc,
     };
@@ -28,7 +30,7 @@ export function getVariableComponentName(
       (p.isVariableDeclarator() &&
         t.isIdentifier(p.node.id) &&
         (t.isArrowFunctionExpression(p.node.init) ||
-          t.isFunctionExpression(p.node.init)))
+          t.isFunctionExpression(p.node.init))),
   );
 
   if (compPath) {

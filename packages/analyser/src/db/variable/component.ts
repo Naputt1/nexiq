@@ -1,24 +1,26 @@
-import type { ComponentFileVarComponent, ComponentInfoRender } from "shared";
-import type { TypeData } from "shared";
+import type { ComponentFileVarComponent } from "@nexiq/shared";
+import type { TypeData } from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { ReactFunctionVariable } from "./reactFunctionVariable.js";
 
-export class ComponentVariable extends ReactFunctionVariable<"component"> {
+export class ComponentVariable<
+  TType extends "function" | "class" = "function" | "class",
+> extends ReactFunctionVariable<"component", TType> {
   componentType: ComponentFileVarComponent["componentType"];
   propType: TypeData | undefined;
   contexts: string[];
-  renders: Record<string, ComponentInfoRender>;
+  forwardRef: boolean;
 
   constructor(
     options: Omit<
       ComponentFileVarComponent,
-      "kind" | "var" | "components" | "type" | "hash" | "file"
+      "kind" | "var" | "components" | "hash" | "file"
     >,
     file: File,
   ) {
     super(
       {
-        ...options,
+        ...(options as any), // eslint-disable-line @typescript-eslint/no-explicit-any
         kind: "component",
       },
       file,
@@ -26,10 +28,10 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
     this.componentType = options.componentType;
     this.propType = options.propType;
     this.contexts = options.contexts;
-    this.renders = options.renders;
+    this.forwardRef = options.forwardRef ?? false;
   }
 
-  public load(data: ComponentVariable) {
+  public load(data: ComponentVariable<TType>) {
     super.load(data);
 
     this.kind = "component";
@@ -38,7 +40,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
 
     // TODO: handle merge
     this.contexts = data.contexts;
-    this.renders = data.renders;
+    this.forwardRef = data.forwardRef;
   }
 
   public getData(): ComponentFileVarComponent {
@@ -46,8 +48,8 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       ...this.getBaseData(),
       componentType: this.componentType,
       contexts: this.contexts,
-      renders: this.renders,
-    };
+      forwardRef: this.forwardRef,
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     if (this.propType) {
       data.propType = this.propType;
@@ -61,7 +63,7 @@ export class ComponentVariable extends ReactFunctionVariable<"component"> {
       ...super.getDataInternal(),
       componentType: this.componentType,
       contexts: this.contexts,
-      renders: this.renders,
+      forwardRef: this.forwardRef,
     };
   }
 }

@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "DashboardLayout",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"DashboardLayout\",\n      \"file\": \"/src/components/layouts/dashboard-layout.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"DashboardLayout\",\n          \"file\": \"/src/app/routes/app/root.tsx\",\n          \"in\": \"AppRoot\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

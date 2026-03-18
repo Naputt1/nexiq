@@ -1,4 +1,4 @@
-import type { MemoFileVarHook } from "shared";
+import type { MemoFileVarHook } from "@nexiq/shared";
 import type { File } from "../fileDB.js";
 import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
 
@@ -14,7 +14,8 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
       {
         ...options,
         kind: "memo",
-      },
+        type: "function",
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       file,
     );
   }

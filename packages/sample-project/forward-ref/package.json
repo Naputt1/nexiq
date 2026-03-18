@@ -1,0 +1,6 @@
+{
+  "name": "sample-forward-ref",
+  "dependencies": {
+    "react": "^18.2.0"
+  }
+}

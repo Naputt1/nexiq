@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "components/post_view/post_list/index.tsx",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"dce97655ca103eac\",\n    \"name\": \"isFirstLoad\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 30\n  },\n  {\n    \"id\": \"f35e89b988000b0d\",\n    \"name\": \"memoizedGetLatestPostId\",\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"line\": 31\n  },\n  {\n    \"id\": \"9bd47138af151f38\",\n    \"name\": \"makeMapStateToProps\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 44\n  },\n  {\n    \"id\": \"5314eb99d16370d4\",\n    \"name\": \"mapDispatchToProps\",\n    \"kind\": \"normal\",\n    \"type\": \"function\",\n    \"line\": 105\n  }\n]"
+      }
+    ]
+  }
+}

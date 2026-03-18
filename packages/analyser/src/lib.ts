@@ -1,15 +1,17 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import type { JsonData, ReactMapConfig } from "shared";
+import type { JsonData, ReactMapConfig } from "@nexiq/shared";
+import { SqliteDB } from "./db/sqlite.js";
 
-export function analyzeProject(
+export async function analyzeProject(
   srcDir: string,
   cacheFile?: string,
   ignorePatterns?: string[],
-): JsonData {
+  sqlitePath?: string,
+): Promise<JsonData> {
   const packageJson = new PackageJson(srcDir);
   const viteConfigPath = getViteConfig(srcDir);
 
@@ -41,13 +43,23 @@ export function analyzeProject(
     }
   }
 
-  const graph = analyzeFiles(
+  let sqlite: SqliteDB | undefined;
+  if (sqlitePath) {
+    sqlite = new SqliteDB(sqlitePath);
+  }
+
+  const graph = await analyzeFiles(
     srcDir,
     viteConfigPath,
     files,
     packageJson,
     cacheData,
+    sqlite,
   );
+
+  if (sqlite) {
+    sqlite.close();
+  }
 
   return graph;
 }

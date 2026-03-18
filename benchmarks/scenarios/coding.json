@@ -1,0 +1,51 @@
+{
+  "name": "Coding Scenarios",
+  "root": "benchmarks/projects/small/apps/react-vite",
+  "scenarios": [
+    {
+      "id": "coding-1-refactor",
+      "type": "coding",
+      "prompt": "Refactor the `Button` component in `src/components/ui/button/button.tsx` to move its `ButtonProps` interface into a new file `src/components/ui/button/types.ts` and export it from there. Update the `Button` component to import it.",
+      "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+      "cleanup_command": "git checkout src",
+      "isolation": true,
+      "max_iterations": 20
+    },
+    {
+        "id": "coding-2-bugfix",
+        "type": "coding",
+        "prompt": "Fix a missing prop in `LoginForm`. The `Button` component has an `isLoading` prop, but it's not being passed from the `LoginForm`. Identify where `isLoading` should come from in `LoginForm` (possibly from the state or hook) and pass it to the `Button`.",
+        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+        "cleanup_command": "git checkout src",
+        "isolation": true,
+        "max_iterations": 20
+    },
+    {
+      "id": "coding-3-enhancement",
+      "type": "coding",
+      "prompt": "Add a new `size` prop to the `Button` component in `src/components/ui/button/button.tsx`. The `size` should be one of 'sm', 'md', 'lg'. Update the styles or class names to reflect the size. Specifically, if size is 'sm', it should include the class 'btn-sm'.",
+      "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npx playwright test e2e/tests/button-size.spec.ts",
+      "cleanup_command": "git checkout src",
+      "isolation": true,
+      "max_iterations": 20
+    },
+    {
+        "id": "coding-4-complex-refactor",
+        "type": "coding",
+        "prompt": "Extract a `FormInput` component from `LoginForm` in `src/features/auth/components/login-form.tsx`. The `FormInput` should encapsulate the `InputField` and its label/error logic. Replace the usage of `InputField` in `LoginForm` with the new `FormInput` component.",
+        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
+        "cleanup_command": "git checkout .",
+        "isolation": true,
+        "max_iterations": 30
+    },
+    {
+        "id": "coding-5-hook-extraction",
+        "type": "coding",
+        "prompt": "Extract the login submission logic from `LoginForm` in `src/features/auth/components/login-form.tsx` into a custom hook called `useLoginForm`. This hook should handle the `useLogin` mutation and any success/failure side effects (like showing notifications).",
+        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
+        "cleanup_command": "git checkout .",
+        "isolation": true,
+        "max_iterations": 30
+    }
+  ]
+}

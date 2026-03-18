@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "query": "LoginForm",
+    "usages": true,
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"LoginForm\",\n      \"file\": \"/src/features/auth/components/login-form.tsx\",\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/app/routes/auth/login.tsx\",\n          \"in\": \"LoginRoute\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

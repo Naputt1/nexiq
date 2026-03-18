@@ -1,0 +1,305 @@
+{
+  "files": {
+    "/src/auth.tsx": {
+      "path": "/src/auth.tsx",
+      "hash": "bd42752a86e8eb2c",
+      "import": {},
+      "export": {
+        "useUser": {
+          "name": "useUser",
+          "type": "named",
+          "exportKind": "value",
+          "id": "bcb4ad80b9e65abc"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "bcb4ad80b9e65abc": {
+          "id": "bcb4ad80b9e65abc",
+          "name": {
+            "type": "object",
+            "properties": [
+              {
+                "key": "useUser",
+                "value": {
+                  "type": "identifier",
+                  "name": "useUser",
+                  "loc": {
+                    "line": 1,
+                    "column": 15
+                  },
+                  "id": "bf9fba8fcba32833"
+                },
+                "loc": {
+                  "line": 1,
+                  "column": 15
+                }
+              }
+            ],
+            "raw": "{\n  useUser\n}",
+            "loc": {
+              "line": 1,
+              "column": 13
+            },
+            "id": "a69f4c7afb51a7a7"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/auth.tsx",
+          "hash": "ea60d894d4787bcf",
+          "dependencies": {},
+          "loc": {
+            "line": 1,
+            "column": 13
+          },
+          "children": {}
+        },
+        "5e2f756077b3eac1": {
+          "id": "5e2f756077b3eac1",
+          "name": {
+            "type": "identifier",
+            "name": "anonymous@1:38",
+            "loc": {
+              "line": 1,
+              "column": 38
+            },
+            "id": ""
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/auth.tsx",
+          "hash": "9f05e909c5e629ac",
+          "dependencies": {},
+          "loc": {
+            "line": 1,
+            "column": 38
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 1,
+              "column": 38
+            },
+            "end": {
+              "line": 1,
+              "column": 63
+            }
+          },
+          "return": {
+            "type": "literal-object",
+            "properties": {
+              "role": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "admin"
+                }
+              }
+            }
+          },
+          "children": {}
+        }
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "ed5da6989c871bf6",
+      "import": {
+        "useUser": {
+          "localName": "useUser",
+          "importedName": "useUser",
+          "source": "/src/auth.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "value",
+          "id": "311c554b828f67a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 3,
+              "column": 13
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "dc9252fda7b33da3",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 13
+          },
+          "var": {
+            "311c554b828f67a5:callhook:useUser:4:8": {
+              "id": "311c554b828f67a5:callhook:useUser:4:8",
+              "name": {
+                "type": "identifier",
+                "name": "user",
+                "loc": {
+                  "line": 4,
+                  "column": 8
+                },
+                "id": "99e389d25c10af32"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "320930bcc3a41283",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "call": {
+                "id": "bcb4ad80b9e65abc",
+                "name": "useUser"
+              }
+            },
+            "7cc97a23e626856d": {
+              "id": "7cc97a23e626856d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@5:9",
+                "loc": {
+                  "line": 5,
+                  "column": 9
+                },
+                "id": "5d5f68fbc2560c09"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2b619d8dd97d4218",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "tag": "div",
+              "props": [],
+              "children": {},
+              "srcId": "div"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 19
+            },
+            "end": {
+              "line": 6,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": {
+            "id": "7cc97a23e626856d",
+            "name": {
+              "type": "identifier",
+              "name": "jsx@5:9",
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "id": "5d5f68fbc2560c09"
+            },
+            "kind": "normal",
+            "type": "jsx",
+            "file": "/src/App.tsx",
+            "hash": "2b619d8dd97d4218",
+            "dependencies": {},
+            "loc": {
+              "line": 5,
+              "column": 9
+            },
+            "tag": "div",
+            "props": [],
+            "children": {},
+            "srcId": "div"
+          },
+          "children": {
+            "7b6a8c51fba318ad": {
+              "id": "bcb4ad80b9e65abc",
+              "instanceId": "7b6a8c51fba318ad",
+              "tag": "useUser",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 4,
+                "column": 15
+              },
+              "renderIndex": 0,
+              "kind": "hook",
+              "children": {}
+            },
+            "ca8cdcf6cdf8e769": {
+              "id": "div",
+              "instanceId": "ca8cdcf6cdf8e769",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "renderIndex": 1,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
+          "states": [],
+          "props": [],
+          "hooks": [
+            "bcb4ad80b9e65abc"
+          ],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "311c554b828f67a5",
+      "to": "7cc97a23e626856d",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "bcb4ad80b9e65abc",
+      "label": "hook"
+    },
+    {
+      "from": "311c554b828f67a5:callhook:useUser:4:8",
+      "to": "bcb4ad80b9e65abc",
+      "label": "hook"
+    },
+    {
+      "from": "div",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    }
+  ],
+  "resolve": []
+}

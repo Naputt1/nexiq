@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/features/auth/components/login-form.tsx"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"Link\": {\n    \"localName\": \"Link\",\n    \"importedName\": \"Link\",\n    \"source\": \"react-router\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"useSearchParams\": {\n    \"localName\": \"useSearchParams\",\n    \"importedName\": \"useSearchParams\",\n    \"source\": \"react-router\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Button\": {\n    \"localName\": \"Button\",\n    \"importedName\": \"Button\",\n    \"source\": \"/src/components/ui/button/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Form\": {\n    \"localName\": \"Form\",\n    \"importedName\": \"Form\",\n    \"source\": \"/src/components/ui/form/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Input\": {\n    \"localName\": \"Input\",\n    \"importedName\": \"Input\",\n    \"source\": \"/src/components/ui/form/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"paths\": {\n    \"localName\": \"paths\",\n    \"importedName\": \"paths\",\n    \"source\": \"/src/config/paths.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"useLogin\": {\n    \"localName\": \"useLogin\",\n    \"importedName\": \"useLogin\",\n    \"source\": \"/src/lib/auth.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"loginInputSchema\": {\n    \"localName\": \"loginInputSchema\",\n    \"importedName\": \"loginInputSchema\",\n    \"source\": \"/src/lib/auth.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

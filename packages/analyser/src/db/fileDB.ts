@@ -7,6 +7,7 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
+  ComponentInfoRender,
   DataEdge,
   EffectInfo,
   JsonData,
@@ -25,18 +26,25 @@ import type {
   TypeDataTypeBodyParathesis,
   TypeDataTypeBodyUnion,
   VariableLoc,
-  VariableScope,
   VariableName,
   ComponentFileVarHook,
-} from "shared";
+  FunctionReturn,
+  VarKind,
+  TypeDataDeclareInterface,
+  TypeDataDeclareType,
+  ReactFunctionVar,
+} from "@nexiq/shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
+import { JSXVariable } from "./variable/jsx.js";
 import {
   isHookVariable,
   isComponentVariable,
   isNormalVariable,
   isBaseFunctionVariable,
-  isDataVariable,
+  isCallHookVariable,
+  isJSXVariable,
+  isReactFunctionVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
 import fs from "fs";
@@ -52,6 +60,8 @@ import { CallbackVariable } from "./variable/callbackVariable.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 
 import { Scope } from "./variable/scope.js";
+import { CallHookVariable } from "./variable/callHookVariable.js";
+import { BaseFunctionVariable } from "./variable/baseFunctionVariable.js";
 
 type TypeDataHandlerMap = {
   ref: TypeDataRef;
@@ -79,16 +89,18 @@ export class File {
   hash: string;
   import: Map<string, ComponentFileImport>;
   export: Record<string, ComponentFileExport>;
+  starExports: string[];
   defaultExport: string | null;
   tsTypes: Map<string, TypeDataDeclare>;
   var: Scope;
-
-  scopes = new Set<Variable<"function">>();
 
   private init: boolean = true;
 
   // key = loc.line + @ + loc.column val = variable
   private locIdsMap = new Map<string, Variable>();
+
+  // key = instanceId val = ComponentInfoRender
+  private renderInstanceMap = new Map<string, ComponentInfoRender>();
 
   // key = name val = typeData
   private tsTypesID = new Map<string, TypeDataDeclare>();
@@ -99,47 +111,62 @@ export class File {
     this.hash = "";
     this.import = new Map();
     this.export = {};
+    this.starExports = [];
     this.defaultExport = null;
     this.tsTypes = new Map();
     this.var = new Scope();
   }
 
+  private loadRender(render: ComponentInfoRender) {
+    this.renderInstanceMap.set(render.instanceId, render);
+    for (const child of Object.values(render.children || {})) {
+      this.loadRender(child);
+    }
+  }
+
   private loadVariable(variable: ComponentFileVar, scope: Scope = this.var) {
     let v: Variable | undefined;
-    if (variable.kind === "normal") {
+    if (variable.type === "jsx") {
+      v = new JSXVariable(variable, this);
+      for (const render of Object.values(variable.children || {})) {
+        this.loadRender(render);
+      }
+    } else if (variable.kind === "normal") {
       if (variable.type === "function") {
         v = new FunctionVariable(variable, this);
       } else {
         v = new DataVariable(variable, this);
+        for (const render of Object.values(variable.children || {})) {
+          this.loadRender(render);
+        }
       }
     } else if (variable.kind === "component") {
       v = new ComponentVariable(variable, this);
     } else if (variable.kind === "hook") {
-      v = new HookVariable(variable, this);
+      if (variable.type === "function") {
+        v = new HookVariable(variable, this);
+      } else {
+        v = new CallHookVariable(variable, this);
+      }
     } else if (variable.kind === "state") {
       v = new StateVariable(variable, this);
-    } else if (variable.kind == "memo") {
+    } else if (variable.kind === "memo") {
       v = new MemoVariable(variable, this);
-    } else if (variable.kind == "callback") {
+    } else if (variable.kind === "callback") {
       v = new CallbackVariable(variable, this);
-    } else if (variable.kind == "ref") {
+    } else if (variable.kind === "ref") {
       v = new RefVariable(variable, this);
-    } else {
-      debugger;
     }
 
     assert(v != null, `Variable not found: ${variable.kind}`);
 
     scope.add(v);
-    if (isBaseFunctionVariable(v)) {
-      this.scopes.add(v);
-    }
 
     this.locIdsMap.set(this.getLocalId(v), v);
 
     if (variable.type === "function" && isBaseFunctionVariable(v)) {
-      v.var.initPrevIds(variable.var);
-      for (const childVar of Object.values(variable.var)) {
+      v.var.initPrevIds(variable.var || {});
+      for (const childVar of Object.values(variable.var || {})) {
         this.loadVariable(childVar, v.var);
       }
 
@@ -158,43 +185,42 @@ export class File {
     this.fingerPrint = data.fingerPrint;
     this.hash = data.hash;
     this.rawData = data;
+    this.starExports = data.starExports || [];
 
-    if (changed) {
-      if (data.var) {
-        this.var.initPrevIds(data.var);
+    if (data.var) {
+      this.var.initPrevIds(data.var);
+    }
+
+    for (const variable of Object.values(data.var || {})) {
+      this.loadVariable(variable);
+    }
+
+    for (const importData of Object.values(data.import || {})) {
+      this.import.set(importData.localName, {
+        localName: importData.localName,
+        importedName: importData.importedName,
+        source: importData.source,
+        type: importData.type,
+        importKind: importData.importKind,
+      });
+    }
+
+    for (const exportData of Object.values(data.export || {})) {
+      this.export[exportData.name] = {
+        id: exportData.id,
+        name: exportData.name,
+        type: exportData.type,
+        exportKind: exportData.exportKind,
+      };
+
+      if (exportData.type === "default") {
+        this.defaultExport = exportData.name;
       }
+    }
 
-      for (const variable of Object.values(data.var)) {
-        this.loadVariable(variable);
-      }
-
-      for (const importData of Object.values(data.import)) {
-        this.import.set(importData.localName, {
-          localName: importData.localName,
-          importedName: importData.importedName,
-          source: importData.source,
-          type: importData.type,
-          importKind: importData.importKind,
-        });
-      }
-
-      for (const exportData of Object.values(data.export)) {
-        this.export[exportData.name] = {
-          id: exportData.id,
-          name: exportData.name,
-          type: exportData.type,
-          exportKind: exportData.exportKind,
-        };
-
-        if (exportData.type === "default") {
-          this.defaultExport = exportData.name;
-        }
-      }
-
-      for (const typeData of Object.values(data.tsTypes)) {
-        this.tsTypes.set(typeData.id, typeData);
-        this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
-      }
+    for (const typeData of Object.values(data.tsTypes || {})) {
+      this.tsTypes.set(typeData.id, typeData);
+      this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
     }
   }
 
@@ -220,7 +246,7 @@ export class File {
     let id = this.getVariableID(exportData.name);
     if (!id) {
       // Fallback to deterministic ID based on file and name
-      id = getDeterministicId(`${this.path}:${exportData.name}`);
+      id = getDeterministicId(this.path, exportData.name);
     }
 
     this.export[exportData.name] = { ...exportData, id };
@@ -231,16 +257,32 @@ export class File {
     return id;
   }
 
-  public getExport(varImport: ComponentFileImport): string | undefined {
+  public getExport(
+    varImport: ComponentFileImport,
+    db: FileDB,
+    visited: Set<string> = new Set(),
+  ): string | undefined {
+    if (visited.has(this.path)) return undefined;
+    visited.add(this.path);
+
     if (varImport.type === "default") {
       if (this.defaultExport != null) {
         return this.export[this.defaultExport]?.id;
       }
     }
 
-    for (const ex of Object.values(this.export)) {
+    for (const ex of Object.values(this.export || {})) {
       if (ex.name === varImport.importedName) {
         return ex.id;
+      }
+    }
+
+    // Recursively check star exports
+    for (const source of this.starExports || []) {
+      if (db.has(source)) {
+        const file = db.get(source);
+        const id = file.getExport(varImport, db, visited);
+        if (id) return id;
       }
     }
 
@@ -249,7 +291,7 @@ export class File {
 
   public getNewVarID(name: VariableName, scope: Scope): string {
     const nameKey = getVariableNameKey(name);
-    for (const ex of Object.values(this.export)) {
+    for (const ex of Object.values(this.export || {})) {
       if (ex.name === nameKey) {
         return ex.id;
       }
@@ -261,25 +303,21 @@ export class File {
     }
 
     // Fallback to deterministic ID based on file and name if no cache
-    return getDeterministicId(`${this.path}:${nameKey}`);
+    return getDeterministicId(this.path, nameKey);
   }
 
   public getLocalId(variable: Variable): string {
     return `${variable.loc.line}@${variable.loc.column}`;
   }
 
-  public addVariable(variable: Variable, parentPath?: string[]): string {
-    const scope =
-      parentPath && parentPath.length > 0
-        ? this.var.getByPath(parentPath)
-        : this.var;
-
-    if (scope == null) {
-      debugger;
-      //TODO: handle parent not found
-      return "no parent";
+  public addVariable(variable: Variable): string {
+    const existing = this.getVariable(variable.loc);
+    if (existing && existing.kind === variable.kind) {
+      existing.load(variable);
+      return existing.id;
     }
 
+    const scope = this.var.findDeepestScope(variable.loc);
     const id = this.getNewVarID(variable.name, scope);
     variable.id = id;
 
@@ -291,8 +329,8 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
-    if (isBaseFunctionVariable(variable)) {
-      this.scopes.add(variable);
+    if (isJSXVariable(variable)) {
+      this.getDependenciesIds(variable.id, variable.props);
     }
 
     scope.add(variable);
@@ -305,10 +343,10 @@ export class File {
     memo: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    assert(component != null, "Component not found");
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     const variable = component.addMemo(memo);
-    this.scopes.add(variable);
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
     return variable.id;
@@ -319,10 +357,10 @@ export class File {
     callback: Omit<Memo, "id"> & { name: VariableName },
   ) {
     const component = this.getHookInfoFromLoc(loc);
-    assert(component != null, "Component not found");
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
 
     const variable = component.addCallback(callback);
-    this.scopes.add(variable);
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
     return variable.id;
@@ -333,30 +371,64 @@ export class File {
   ): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (variable.kind === "component") {
-      for (const render of Object.values(variable.renders)) {
+    const resolveRenders = (
+      children: Record<string, ComponentInfoRender>,
+      toId: string,
+    ) => {
+      for (const render of Object.values(children || {})) {
+        if (!render) continue;
         edges.push({
           from: render.id,
-          to: variable.id,
+          to: toId,
           label: "render",
         });
+        if (render.children) {
+          resolveRenders(render.children, toId);
+        }
       }
-    }
-
-    if (variable.hooks) {
-      for (const hookId of variable.hooks) {
-        edges.push({
-          from: variable.id,
-          to: hookId,
-          label: "hook",
-        });
-      }
-    }
+    };
 
     if (variable.var) {
-      for (const v of Object.values(variable.var)) {
-        if (v.kind == "component" || v.kind == "hook") {
+      for (const v of Object.values(variable.var || {})) {
+        if (
+          v.type === "function" &&
+          (v.kind === "component" || v.kind === "hook")
+        ) {
           edges.push(...this.__getEdgesRaw(v));
+        } else {
+          if (v.type === "jsx") {
+            const jsx = v;
+            if (variable.kind === "component") {
+              edges.push({
+                from: jsx.srcId ?? jsx.tag,
+                to: variable.id,
+                label: "render",
+              });
+              if (jsx.children) {
+                resolveRenders(jsx.children, variable.id);
+              }
+            }
+          }
+
+          if (v.kind === "hook" && v.type === "data") {
+            const hookCall = v;
+            if (hookCall.call.id) {
+              edges.push({
+                from: hookCall.id,
+                to: hookCall.call.id,
+                label: "hook",
+              });
+            }
+          }
+          if (v.dependencies) {
+            for (const dep of Object.values(v.dependencies || {})) {
+              edges.push({
+                from: v.id,
+                to: dep.id,
+                label: "hook",
+              });
+            }
+          }
         }
       }
     }
@@ -364,20 +436,29 @@ export class File {
     return edges;
   }
 
-  private __getEdges(variable: ReactFunctionVariable): DataEdge[] {
+  private __getEdges(
+    variable: ReactFunctionVariable<ReactFunctionVar, "function" | "class">,
+  ): DataEdge[] {
     const edges: DataEdge[] = [];
 
-    if (isComponentVariable(variable)) {
-      for (const render of Object.values(variable.renders)) {
+    const resolveRenders = (
+      children: Record<string, ComponentInfoRender>,
+      toId: string,
+    ) => {
+      for (const render of Object.values(children || {})) {
+        if (!render) continue;
         edges.push({
           from: render.id,
-          to: variable.id,
+          to: toId,
           label: "render",
         });
+        if (render.children) {
+          resolveRenders(render.children, toId);
+        }
       }
-    }
+    };
 
-    for (const hookId of variable.hooks) {
+    for (const hookId of variable.hooks || []) {
       edges.push({
         from: variable.id,
         to: hookId,
@@ -388,8 +469,29 @@ export class File {
     for (const v of variable.var.values()) {
       if (isComponentVariable(v) || isHookVariable(v)) {
         edges.push(...this.__getEdges(v));
-      } else if (v.kind === "hook") {
-        for (const dep of Object.values(v.dependencies)) {
+      } else {
+        if (isJSXVariable(v)) {
+          const jsx = v;
+          if (isComponentVariable(variable)) {
+            edges.push({
+              from: jsx.srcId ?? jsx.tag,
+              to: variable.id,
+              label: "render",
+            });
+            if (jsx.children) {
+              resolveRenders(jsx.children, variable.id);
+            }
+          }
+        }
+
+        if (v && isCallHookVariable(v)) {
+          edges.push({
+            from: v.id,
+            to: v.call.id,
+            label: "hook",
+          });
+        }
+        for (const dep of Object.values(v.dependencies || {})) {
           edges.push({
             from: v.id,
             to: dep.id,
@@ -405,13 +507,12 @@ export class File {
   public getEdges(): DataEdge[] {
     const edges: DataEdge[] = [];
     if (!this.init && this.rawData) {
-      for (const variable of Object.values(this.rawData.var)) {
-        if (variable.kind == "component" || variable.kind == "hook") {
-          edges.push(
-            ...this.__getEdgesRaw(
-              variable as ComponentFileVarComponent | ComponentFileVarHook,
-            ),
-          );
+      for (const variable of Object.values(this.rawData.var || {})) {
+        if (
+          variable.type === "function" &&
+          (variable.kind === "component" || variable.kind === "hook")
+        ) {
+          edges.push(...this.__getEdgesRaw(variable));
         }
       }
     } else {
@@ -438,16 +539,13 @@ export class File {
 
   public getHookInfoFromLoc(
     loc: VariableLoc,
-  ): ReactFunctionVariable | undefined {
-    const variable = this.getVariable(loc);
-    if (
-      variable &&
-      (isHookVariable(variable) || isComponentVariable(variable))
-    ) {
-      return variable;
+  ): BaseFunctionVariable<VarKind> | undefined {
+    const exact = this.getVariable(loc);
+    if (exact && isBaseFunctionVariable(exact)) {
+      return exact;
     }
 
-    return undefined;
+    return this.var.findDeepestVariable(loc);
   }
 
   public getData(): ComponentFile {
@@ -459,10 +557,9 @@ export class File {
       hash: this.hash,
       import: Object.fromEntries(this.import),
       export: this.export,
+      starExports: this.starExports,
       defaultExport: this.defaultExport,
-      tsTypes: Object.fromEntries(
-        Object.entries(Object.fromEntries(this.tsTypes)),
-      ),
+      tsTypes: Object.fromEntries(this.tsTypes),
       var: this.var.getData(),
     };
   }
@@ -471,11 +568,14 @@ export class File {
     parent: string,
     dependency: ComponentFileVarDependency,
   ) {
-    const v = this.var.getByName(parent);
+    let v = this.var.getByName(parent);
+    if (!v) {
+      v = this.var.get(parent, true);
+    }
 
-    assert(v != null, "Parent variable not found");
     if (v == null) return;
-    if (v.kind == "component") return;
+    if (v.kind === "component") return;
+    assert(v != null, "Parent variable not found");
 
     v.dependencies[dependency.id] = dependency;
   }
@@ -488,46 +588,42 @@ export class File {
     if (parent == null) return;
 
     if (isBaseFunctionVariable(parent)) {
-      for (const com of parent.var.values()) {
-        const comNameKey = getVariableNameKey(com.name);
-        if (Object.keys(depMap).includes(comNameKey)) {
-          const depIndices = depMap[comNameKey];
+      for (const name of Object.keys(depMap)) {
+        const id = parent.var.getIdByName(name);
+        if (id) {
+          const depIndices = depMap[name];
           if (depIndices) {
             for (const depI of depIndices) {
               const dep = dependencies[depI];
               if (dep) {
-                dep.valueId = com.id;
+                dep.valueId = id;
               }
             }
           }
-
-          delete depMap[comNameKey];
-          if (Object.keys(depMap).length === 0) {
-            return;
-          }
+          delete depMap[name];
         }
+      }
+
+      if (Object.keys(depMap).length === 0) {
+        return;
       }
     }
 
     if (Object.keys(depMap).length > 0) {
       if (parent.parent == null) {
-        for (const com of this.var.values()) {
-          const comNameKey = getVariableNameKey(com.name);
-          if (Object.keys(depMap).includes(comNameKey)) {
-            const depIndices = depMap[comNameKey];
+        for (const name of Object.keys(depMap)) {
+          const id = this.var.getIdByName(name);
+          if (id) {
+            const depIndices = depMap[name];
             if (depIndices) {
               for (const depI of depIndices) {
                 const dep = dependencies[depI];
                 if (dep) {
-                  dep.valueId = com.id;
+                  dep.valueId = id;
                 }
               }
             }
-
-            delete depMap[comNameKey];
-            if (Object.keys(depMap).length === 0) {
-              return;
-            }
+            delete depMap[name];
           }
         }
         return;
@@ -540,6 +636,7 @@ export class File {
     id: string,
     dependencies: ComponentInfoRenderDependency[],
   ) {
+    if (!dependencies) return;
     const depMap: Record<string, number[]> = {};
     for (const [i, dep] of dependencies.entries()) {
       let valueName: string | null = null;
@@ -580,40 +677,6 @@ export class File {
     return null;
   }
 
-  public getScope(scope: VariableScope) {
-    for (const s of this.scopes) {
-      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
-
-      if (
-        s.scope?.start.line == scope.start.line &&
-        s.scope?.start.column == scope.start.column &&
-        s.scope?.end.line == scope.end.line &&
-        s.scope?.end.column == scope.end.column
-      ) {
-        return s;
-      }
-    }
-
-    return null;
-  }
-
-  public getScopeFromLoc(loc: VariableLoc) {
-    for (const s of this.scopes) {
-      assert(isBaseFunctionVariable(s), "Scope variable must be a function");
-
-      if (
-        s.scope?.start.line == loc.line &&
-        s.scope?.start.column == loc.column &&
-        s.scope?.end.line == loc.line &&
-        s.scope?.end.column == loc.column
-      ) {
-        return s;
-      }
-    }
-
-    return null;
-  }
-
   public getTypeFromName(name: string) {
     return this.tsTypesID.get(name);
   }
@@ -624,57 +687,107 @@ export class File {
 
   public addTsTypes(loc: VariableLoc, type: TypeDataDeclare) {
     const nameKey = getVariableNameKey(type.name);
-    if (!type.id) {
-      const id = this.getNewVarID(type.name, this.var); // Root scope
-      type.id = id;
-    }
 
     this.tsTypes.set(type.id, type);
     this.tsTypesID.set(nameKey, type);
   }
 
   public addRender(
-    comLoc: string,
     srcId: string,
+    instanceId: string,
+    tag: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    kind: ComponentInfoRender["kind"],
+    parentId?: string,
   ) {
-    const variable = this.locIdsMap.get(comLoc);
+    const variable = this.getHookInfoFromLoc(loc);
     if (variable == null) return;
-    if (!variable) return;
     this.getDependenciesIds(variable.id, dependencies);
 
-    if (isComponentVariable(variable)) {
-      variable.renders[srcId] = {
-        id: srcId,
-        dependencies,
-        isDependency,
-        loc,
-      };
-    } else if (isNormalVariable(variable) && isDataVariable(variable)) {
-      variable.components.set(srcId, {
-        id: srcId,
-        dependencies,
-        isDependency,
-        loc,
-      });
+    if (loc) {
+      const jsxVar = this.getVariable(loc);
+      if (jsxVar && isJSXVariable(jsxVar)) {
+        jsxVar.srcId = srcId;
+      }
+    }
+
+    let targetMap: Record<string, ComponentInfoRender> | undefined;
+    let renderIndex = 0;
+
+    if (parentId) {
+      const parent = this.renderInstanceMap.get(parentId);
+      if (parent) {
+        targetMap = parent.children;
+        renderIndex = Object.keys(parent.children).length;
+      }
+    }
+
+    if (!targetMap) {
+      if (
+        isJSXVariable(variable) ||
+        isNormalVariable(variable) ||
+        isBaseFunctionVariable(variable)
+      ) {
+        targetMap = variable.children;
+        renderIndex = Object.keys(variable.children || {}).length;
+      }
+    }
+
+    const newRender: ComponentInfoRender = {
+      id: srcId,
+      instanceId,
+      tag,
+      dependencies,
+      isDependency,
+      loc,
+      parentId,
+      renderIndex,
+      kind,
+      children: {},
+    };
+
+    this.renderInstanceMap.set(instanceId, newRender);
+
+    if (targetMap) {
+      targetMap[instanceId] = newRender;
+
+      if (parentId) {
+        const parent = this.renderInstanceMap.get(parentId);
+        if (parent && parent.loc) {
+          const parentVar = this.getVariable(parent.loc);
+          if (
+            parentVar &&
+            (isJSXVariable(parentVar) ||
+              isNormalVariable(parentVar) ||
+              isBaseFunctionVariable(parentVar))
+          ) {
+            parentVar.children[instanceId] = newRender;
+          }
+        }
+      }
     }
 
     return variable.id;
   }
 
   public addEffect(loc: VariableLoc, effect: Omit<EffectInfo, "id">) {
-    const variable = this.getVariable(loc);
+    const variable = this.getHookInfoFromLoc(loc);
 
-    assert(variable != null, "Variable not found");
+    if (variable == null) return;
 
-    assert(
-      isHookVariable(variable) || isComponentVariable(variable),
-      "can't add hook to non-hook",
-    );
+    if (isHookVariable(variable) || isComponentVariable(variable)) {
+      variable.addEffect(effect);
+    }
+  }
 
-    variable.addEffect(effect);
+  public setReturn(loc: VariableLoc, returnId: FunctionReturn) {
+    const variable = this.getHookInfoFromLoc(loc);
+
+    if (variable && isBaseFunctionVariable(variable)) {
+      variable.return = returnId;
+    }
   }
 }
 
@@ -710,9 +823,17 @@ export class FileDB {
       );
 
       if (cache) {
-        return file.hash !== cache.hash;
+        const res = file.hash !== cache.hash;
+        console.log(
+          "isFileChanged (cache exists):",
+          filename,
+          "changed =",
+          res,
+        );
+        return res;
       }
 
+      console.log("isFileChanged (no cache):", filename, "returning true");
       return true;
     } catch (e) {
       console.error(e);
@@ -769,17 +890,29 @@ export class FileDB {
     if (Object.hasOwn(file.export, localName)) {
       return (
         file.export[localName]?.id ??
-        getDeterministicId(`${fileName}:${localName}`)
+        this.getVariableID(fileName, localName) ??
+        getDeterministicId(fileName, localName)
       );
     }
 
-    // Fallback to deterministic ID based on file and name
-    return getDeterministicId(`${fileName}:${localName}`);
+    return (
+      this.getVariableID(fileName, localName) ??
+      getDeterministicId(fileName, localName)
+    );
+  }
+
+  public getVariableID(fileName: string, name: string): string | null {
+    const file = this.files.get(fileName);
+    if (file == null) {
+      return null;
+    }
+
+    return file.getVariableID(name);
   }
 
   public getData(): JsonData["files"] {
     return Object.fromEntries(
-      Object.entries(Object.fromEntries(this.files)).map(([k, value]) => [
+      Array.from(this.files.entries()).map(([k, value]) => [
         k,
         value.getData(),
       ]),
@@ -795,20 +928,23 @@ export class FileDB {
     return file.addExport(exportData);
   }
 
+  public addStarExport(fileName: string, source: string) {
+    const file = this.get(fileName);
+    if (!file.starExports.includes(source)) {
+      file.starExports.push(source);
+    }
+  }
+
   public getDefaultExport(fileName: string) {
     const file = this.get(fileName);
     return file.defaultExport;
   }
 
-  public addVariable(
-    fileName: string,
-    variable: Variable,
-    parentPath?: string[],
-  ) {
+  public addVariable(fileName: string, variable: Variable) {
     // resolve propType
     const file = this.get(fileName);
 
-    return file.addVariable(variable, parentPath);
+    return file.addVariable(variable);
   }
 
   public addMemo(
@@ -860,7 +996,11 @@ export class FileDB {
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
     const file = this.get(fileName);
-    return file.getHookInfoFromLoc(loc);
+    const v = file.getHookInfoFromLoc(loc);
+    if (v && isReactFunctionVariable(v)) {
+      return v;
+    }
+    return undefined;
   }
 
   public getComponentFromLoc(
@@ -899,7 +1039,7 @@ export class FileDB {
     file.addVariableDependency(parent, dependency);
   }
 
-  public getRefTypeId(name: string, file: File) {
+  public getRefTypeId(name: string, file: File): string | undefined {
     const varId = file.getVariableID(name);
     if (varId) return varId;
 
@@ -913,10 +1053,14 @@ export class FileDB {
       if (importData) {
         if (this.has(importData.source)) {
           const file = this.get(importData.source);
-          return file.getExport(importData);
+          if (file) {
+            return file.getExport(importData, this);
+          }
         }
       }
     }
+
+    return undefined;
   }
 
   private updateTypeDataLiteral(
@@ -987,7 +1131,34 @@ export class FileDB {
     parenthesis: (db, td: TypeDataTypeBodyParathesis, file, params) =>
       db.updateTypeDataID(td.members, file, params),
     "type-literal": (db, td: TypeDataTypeBodyLiteral, file, params) =>
-      td.members.every((m) => db.updateTypeDataID(m.type, file, params)),
+      td.members.every((m) => {
+        if (m.signatureType === "method") {
+          for (const p of m.parameters) {
+            if (p.typeData && !db.updateTypeDataID(p.typeData, file, params)) {
+              return false;
+            }
+          }
+
+          for (const param of m.params) {
+            if (
+              param.constraint &&
+              !db.updateTypeDataID(param.constraint, file, params)
+            ) {
+              return false;
+            }
+            if (
+              param.default &&
+              !db.updateTypeDataID(param.default, file, params)
+            ) {
+              return false;
+            }
+          }
+
+          return db.updateTypeDataID(m.return, file, params);
+        }
+
+        return db.updateTypeDataID(m.type, file, params);
+      }),
     "literal-type": (
       db,
       td: { literal: TypeDataLiteralTypeLiteral },
@@ -1100,7 +1271,7 @@ export class FileDB {
     let allResolved = true;
 
     if (typeDeclare.params) {
-      for (const param of Object.values(typeDeclare.params)) {
+      for (const param of Object.values(typeDeclare.params || {})) {
         params.add(param.name);
 
         if (param.constraint && param.constraint.type === "ref") {
@@ -1130,8 +1301,38 @@ export class FileDB {
       }
 
       for (const body of typeDeclare.body) {
-        if (!this.updateTypeDataID(body.type, file, params)) {
-          allResolved = false;
+        if (body.signatureType === "method") {
+          for (const p of body.parameters) {
+            if (
+              p.typeData &&
+              !this.updateTypeDataID(p.typeData, file, params)
+            ) {
+              allResolved = false;
+            }
+          }
+
+          for (const param of body.params) {
+            if (
+              param.constraint &&
+              !this.updateTypeDataID(param.constraint, file, params)
+            ) {
+              allResolved = false;
+            }
+            if (
+              param.default &&
+              !this.updateTypeDataID(param.default, file, params)
+            ) {
+              allResolved = false;
+            }
+          }
+
+          if (!this.updateTypeDataID(body.return, file, params)) {
+            allResolved = false;
+          }
+        } else {
+          if (!this.updateTypeDataID(body.type, file, params)) {
+            allResolved = false;
+          }
         }
       }
     } else if (typeDeclare.type === "type") {
@@ -1143,13 +1344,17 @@ export class FileDB {
     return allResolved;
   }
 
-  public addTsTypes(fileName: string, type: Omit<TypeDataDeclare, "id">) {
+  public addTsTypes(
+    fileName: string,
+    type:
+      | Omit<TypeDataDeclareInterface, "id">
+      | Omit<TypeDataDeclareType, "id">,
+  ) {
     const file = this.get(fileName);
 
-    const typeDeclare = {
-      id: file.getNewVarID(type.name, file.var),
-      ...type,
-    } as TypeDataDeclare;
+    const id = file.getNewVarID(type.name, file.var);
+    const typeDeclare: TypeDataDeclare =
+      type.type === "interface" ? { ...type, id } : { ...type, id };
 
     this.resolveTsTypeID(typeDeclare, file);
 
@@ -1160,14 +1365,26 @@ export class FileDB {
 
   public addRender(
     fileName: string,
-    comLoc: string,
     srcId: string,
+    instanceId: string,
+    tag: string,
     dependencies: ComponentInfoRenderDependency[],
     isDependency: boolean,
     loc: VariableLoc,
+    kind: ComponentInfoRender["kind"],
+    parentId?: string,
   ) {
     const file = this.get(fileName);
 
-    return file.addRender(comLoc, srcId, dependencies, isDependency, loc);
+    return file.addRender(
+      srcId,
+      instanceId,
+      tag,
+      dependencies,
+      isDependency,
+      loc,
+      kind,
+      parentId,
+    );
   }
 }
