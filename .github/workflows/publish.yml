@@ -18,8 +18,8 @@ on:
         description: 'Publish @nexiq/analyser'
         type: boolean
         default: false
-      nexiq:
-        description: 'Publish nexiq'
+      cli:
+        description: 'Publish @nexiq/cli'
         type: boolean
         default: false
       all:
@@ -54,7 +54,7 @@ jobs:
           pnpm --filter @nexiq/shared build
           pnpm --filter @nexiq/extension-sdk build
           pnpm --filter @nexiq/analyser build
-          pnpm --filter nexiq build
+          pnpm --filter @nexiq/cli build
 
       - name: Publish @nexiq/shared
         if: |
@@ -83,12 +83,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish nexiq
+      - name: Publish @nexiq/cli
         if: |
           github.event_name == 'push' ||
           inputs.all == true ||
-          inputs.nexiq == true
-        run: pnpm --filter nexiq publish --no-git-checks --access public --provenance
+          inputs.cli == true
+        run: pnpm --filter @nexiq/cli publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

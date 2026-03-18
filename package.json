@@ -1,11 +1,11 @@
 {
-  "name": "nexiq",
+  "name": "@nexiq/monorepo",
   "type": "module",
   "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=nexiq dev:electron",
+    "dev:server": "pnpm --filter=@nexiq/cli dev:electron",
     "test:analyze": "pnpm --filter=@nexiq/analyser test",
     "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
     "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",
