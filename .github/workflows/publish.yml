@@ -5,6 +5,27 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      shared:
+        description: 'Publish @nexiq/shared'
+        type: boolean
+        default: false
+      extension-sdk:
+        description: 'Publish @nexiq/extension-sdk'
+        type: boolean
+        default: false
+      analyser:
+        description: 'Publish @nexiq/analyser'
+        type: boolean
+        default: false
+      nexiq:
+        description: 'Publish nexiq'
+        type: boolean
+        default: false
+      all:
+        description: 'Publish all packages'
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -36,21 +57,37 @@ jobs:
           pnpm --filter nexiq build
 
       - name: Publish @nexiq/shared
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.shared == true
         run: pnpm --filter @nexiq/shared publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @nexiq/extension-sdk
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.extension-sdk == true
         run: pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @nexiq/analyser
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.analyser == true
         run: pnpm --filter @nexiq/analyser publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish nexiq
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.nexiq == true
         run: pnpm --filter nexiq publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
