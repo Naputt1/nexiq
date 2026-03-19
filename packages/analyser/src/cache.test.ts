@@ -101,7 +101,7 @@ describe("analyser cache snapshots", () => {
       process.cwd(),
       `../sample-project/${projectName}`,
     );
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-sqlite-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-sqlite-test-"));
     const sqlitePath = path.join(tmpDir, "test.sqlite");
     
     // Copy sample project to tmp dir to avoid side effects

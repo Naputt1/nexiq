@@ -35,11 +35,12 @@ export default myExtension;
 To use an extension in a project:
 
 1. Install the extension in your target project:
+
    ```bash
    npm install @nexiq/my-custom-extension
    ```
 
-2. Add the extension to your `react.map.config.json` in the project root:
+2. Add the extension to your `nexiq.config.json` in the project root:
    ```json
    {
      "extensions": ["@nexiq/my-custom-extension"]
@@ -51,17 +52,19 @@ To use an extension in a project:
 The `nexiq-ui` application can load bundled extensions. To add an extension to your local UI build:
 
 1. Install it in the UI repository:
+
    ```bash
    pnpm add @nexiq/my-custom-extension
    ```
 
 2. Register it in `src/views/tasks/all-tasks.ts`:
+
    ```typescript
    import myExtension from "@nexiq/my-custom-extension";
 
    export const allExtensions = [
      // ...
-     myExtension
+     myExtension,
    ];
    ```
 

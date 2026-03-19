@@ -142,10 +142,12 @@ vite.config.ts.timestamp-*
 
 graph.json
 .react-map/
+.nexiq/
 **/node_modules/
 **/dist/
 **/out/
 react.map.config.json
+nexiq.config.json
 git-demo
 benchmarks/projects/
 scripts/benchmarks/

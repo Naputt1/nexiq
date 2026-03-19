@@ -79,7 +79,7 @@ describe("ProjectManager", () => {
 
     expect(info.projectPath).toBe(projectPath);
     expect(fs.mkdirSync).toHaveBeenCalledWith(
-      expect.stringContaining(".react-map/cache"),
+      expect.stringContaining(".nexiq/cache"),
       { recursive: true },
     );
     expect(analyzeProject).toHaveBeenCalledWith(
@@ -117,7 +117,7 @@ describe("ProjectManager", () => {
 
   it("should load config and extensions if present", async () => {
     const projectPath = "/test/project";
-    const configPath = path.join(projectPath, "react.map.config.json");
+    const configPath = path.join(projectPath, "nexiq.config.json");
 
     vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
       if (p === configPath) return true;
@@ -156,7 +156,7 @@ describe("ProjectManager", () => {
 
   it("should handle extension load failures", async () => {
     const projectPath = "/test/project";
-    const configPath = path.join(projectPath, "react.map.config.json");
+    const configPath = path.join(projectPath, "nexiq.config.json");
 
     vi.mocked(fs.existsSync).mockImplementation(
       (p: string | fs.PathLike) => p === configPath,
@@ -177,7 +177,7 @@ describe("ProjectManager", () => {
 
   it("should handle extension fallback import", async () => {
     const projectPath = "/test/project";
-    const configPath = path.join(projectPath, "react.map.config.json");
+    const configPath = path.join(projectPath, "nexiq.config.json");
 
     vi.mocked(fs.existsSync).mockImplementation(
       (p: string | fs.PathLike) => p === configPath,
@@ -678,7 +678,7 @@ describe("ProjectManager", () => {
         "export const App = () => {\n  return <div>App</div>\n}";
       vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
         const s = p as string;
-        if (s.includes(".react-map/cache")) return true;
+        if (s.includes(".nexiq/cache")) return true;
         if (s.includes("/src/App.tsx")) return true;
         return false;
       });
@@ -711,7 +711,7 @@ describe("ProjectManager", () => {
       const fileContent = "export const App = () => {}";
       vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
         const s = p as string;
-        if (s.includes(".react-map/cache")) return true;
+        if (s.includes(".nexiq/cache")) return true;
         if (s.includes("/src/App.tsx")) return true;
         return false;
       });
@@ -741,7 +741,7 @@ describe("ProjectManager", () => {
       } as unknown as Database.Statement);
       vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
         const s = p as string;
-        if (s.includes(".react-map/cache")) return true;
+        if (s.includes(".nexiq/cache")) return true;
         return false;
       });
       const content = (await projectManager.getSymbolContent(

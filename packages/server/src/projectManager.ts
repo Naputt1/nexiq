@@ -10,7 +10,7 @@ import {
   type GitStatus,
   type GitCommit,
   type GitFileDiff,
-  type ReactMapConfig,
+  type NexiqConfig,
   type SubProject,
   getDisplayName,
   parseRawDiff,
@@ -130,7 +130,7 @@ export class ProjectManager {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
-    const cacheDir = path.join(analysisPath, ".react-map", "cache");
+    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     try {
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true });
@@ -150,7 +150,7 @@ export class ProjectManager {
     );
 
     // Load config
-    const configPath = path.join(analysisPath, "react.map.config.json");
+    const configPath = path.join(analysisPath, "nexiq.config.json");
     let ignorePatterns: string[] | undefined;
     let extensionNames: string[] = [];
 
@@ -285,7 +285,7 @@ export class ProjectManager {
           ignore: [
             "node_modules",
             ".git",
-            ".react-map",
+            ".nexiq",
             "dist",
             "build",
             ".next",
@@ -1058,7 +1058,7 @@ export class ProjectManager {
 
   async saveAppState(projectPath: string, state: unknown): Promise<boolean> {
     try {
-      const dotDir = path.join(projectPath, ".react-map");
+      const dotDir = path.join(projectPath, ".nexiq");
       if (!fs.existsSync(dotDir)) fs.mkdirSync(dotDir, { recursive: true });
       fs.writeFileSync(
         path.join(dotDir, "state.json"),
@@ -1071,7 +1071,7 @@ export class ProjectManager {
   }
 
   async readAppState(projectPath: string): Promise<unknown> {
-    const statePath = path.join(projectPath, ".react-map", "state.json");
+    const statePath = path.join(projectPath, ".nexiq", "state.json");
     if (fs.existsSync(statePath)) {
       try {
         return JSON.parse(fs.readFileSync(statePath, "utf-8"));
@@ -1086,7 +1086,7 @@ export class ProjectManager {
     const analysisPath = project.subProject
       ? path.resolve(project.projectPath, project.subProject)
       : project.projectPath;
-    const cacheDir = path.join(analysisPath, ".react-map", "cache");
+    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
     fs.writeFileSync(
       path.join(cacheDir, `${path.basename(analysisPath)}-${pathHash}.json`),
@@ -1104,13 +1104,13 @@ export class ProjectManager {
     };
 
     try {
-      const configPath = path.join(directoryPath, "react.map.config.json");
+      const configPath = path.join(directoryPath, "nexiq.config.json");
       if (fs.existsSync(configPath)) {
         status.hasConfig = true;
         try {
           status.config = JSON.parse(
             fs.readFileSync(configPath, "utf-8"),
-          ) as ReactMapConfig;
+          ) as NexiqConfig;
         } catch (e: unknown) {
           console.error("Error reading config", e);
         }
@@ -1204,11 +1204,11 @@ export class ProjectManager {
 
   async saveProjectConfig(
     directoryPath: string,
-    config: ReactMapConfig,
+    config: NexiqConfig,
   ): Promise<boolean> {
     try {
-      const configPath = path.join(directoryPath, "react.map.config.json");
-      let oldConfig: ReactMapConfig | null = null;
+      const configPath = path.join(directoryPath, "nexiq.config.json");
+      let oldConfig: NexiqConfig | null = null;
       if (fs.existsSync(configPath)) {
         try {
           oldConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -1225,7 +1225,7 @@ export class ProjectManager {
         JSON.stringify(config.ignorePatterns);
 
       if (patternsChanged) {
-        const cacheDir = path.join(directoryPath, ".react-map", "cache");
+        const cacheDir = path.join(directoryPath, ".nexiq", "cache");
         if (fs.existsSync(cacheDir)) {
           const files = fs.readdirSync(cacheDir);
           for (const file of files) {
@@ -1354,7 +1354,7 @@ export class ProjectManager {
       : resolvedHash;
     const commitCacheDir = path.join(
       projectRoot,
-      ".react-map",
+      ".nexiq",
       "cache",
       "commits",
     );
@@ -1388,7 +1388,7 @@ export class ProjectManager {
         ? path.join(tempDir.name, relativeSubPath)
         : tempDir.name;
 
-      const configPath = path.join(projectRoot, "react.map.config.json");
+      const configPath = path.join(projectRoot, "nexiq.config.json");
       let ignorePatterns: string[] | undefined = undefined;
       if (fs.existsSync(configPath)) {
         try {
