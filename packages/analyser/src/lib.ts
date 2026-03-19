@@ -3,7 +3,7 @@ import path from "node:path";
 import { PackageJson } from "./db/packageJson.js";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import type { JsonData, ReactMapConfig } from "@nexiq/shared";
+import type { JsonData, NexiqConfig } from "@nexiq/shared";
 import { SqliteDB } from "./db/sqlite.js";
 
 export async function analyzeProject(
@@ -18,10 +18,10 @@ export async function analyzeProject(
   const activeIgnorePatterns =
     ignorePatterns ||
     (() => {
-      const configPath = path.join(srcDir, "react.map.config.json");
+      const configPath = path.join(srcDir, "nexiq.config.json");
       if (fs.existsSync(configPath)) {
         try {
-          const config: ReactMapConfig = JSON.parse(
+          const config: NexiqConfig = JSON.parse(
             fs.readFileSync(configPath, "utf-8"),
           );
           return config.ignorePatterns;

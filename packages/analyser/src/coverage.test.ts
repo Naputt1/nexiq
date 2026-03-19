@@ -14,7 +14,7 @@ import * as snapshotCli from "./snapshot.js";
 describe("analyser coverage expansion", () => {
   const createTmpProject = (files: Record<string, string>) => {
     const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "react-map-coverage-"),
+      path.join(os.tmpdir(), "nexiq-coverage-"),
     );
 
     for (const [filePath, content] of Object.entries(files)) {
@@ -35,7 +35,7 @@ describe("analyser coverage expansion", () => {
 
   it("should cover analyzeProject and config loading", async () => {
     const tmpDir = createTmpProject({
-      "react.map.config.json": JSON.stringify({
+      "nexiq.config.json": JSON.stringify({
         ignorePatterns: ["**/ignored.ts"],
       }),
       "src/App.tsx": "export const App = () => <div>Hello</div>;",

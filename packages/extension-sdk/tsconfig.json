@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "declaration": true,
+    "rootDir": "src",
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
@@ -13,8 +14,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@nexiq/shared": ["../shared/src/index.ts"],
-      "@nexiq/shared/*": ["../shared/src/*"]
+      "@nexiq/shared": ["../shared/dist/index.d.ts"],
+      "@nexiq/shared/*": ["../shared/dist/*"]
     }
   },
   "include": ["src"]

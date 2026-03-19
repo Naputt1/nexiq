@@ -1,6 +1,6 @@
 import type { ComponentLoc, VariableName } from "../component.js";
 import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
-import type { ReactMapConfig, SubProject } from "./config.js";
+import type { NexiqConfig, SubProject } from "./config.js";
 export * from "./primitive.js";
 export * from "./object.js";
 export * from "./git.js";
@@ -10,7 +10,7 @@ export interface ProjectStatus {
   hasConfig: boolean;
   isMonorepo: boolean;
   projectType: "vite" | "next" | "unknown";
-  config: ReactMapConfig | null;
+  config: NexiqConfig | null;
   subProjects: SubProject[];
 }
 

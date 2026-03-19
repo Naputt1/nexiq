@@ -1,7 +1,7 @@
 {
   "name": "@nexiq/extension-sdk",
-  "version": "1.0.1",
-  "description": "SDK for creating nexu extensions",
+  "version": "1.0.2",
+  "description": "SDK for creating nexiq extensions",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Naputt1/nexu.git",
+    "url": "git+https://github.com/Naputt1/nexiq.git",
     "directory": "packages/extension-sdk"
   },
   "publishConfig": {

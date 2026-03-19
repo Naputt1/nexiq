@@ -7,7 +7,7 @@ import os from "os";
 
 describe("analyser robustness", () => {
   it("should handle problematic React patterns without crashing", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "react-map-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-test-"));
     const srcDir = path.join(tmpDir, "src");
     fs.mkdirSync(srcDir);
 
@@ -59,7 +59,7 @@ describe("analyser robustness", () => {
 
   it("should handle circular dependencies without infinite loops", async () => {
     const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "react-map-circular-"),
+      path.join(os.tmpdir(), "nexiq-circular-"),
     );
     const srcDir = path.join(tmpDir, "src");
     fs.mkdirSync(srcDir);

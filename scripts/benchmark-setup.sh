@@ -46,8 +46,8 @@ setup_project() {
         project_root="$target/apps/react-vite"
     fi
 
-    # Create react.map.config.json in the project root
-    cat <<EOF > "$project_root/react.map.config.json"
+    # Create nexiq.config.json in the project root
+    cat <<EOF > "$project_root/nexiq.config.json"
 {
   "ignorePatterns": [
     "node_modules",
@@ -64,8 +64,8 @@ setup_project() {
     "*.spec.tsx"
   ],
   "extensions": [
-    "@react-map/tanstack-router-extension",
-    "@react-map/tanstack-query-extension"
+    "@nexiq/tanstack-router-extension",
+    "@nexiq/tanstack-query-extension"
   ]
 }
 EOF
@@ -251,11 +251,11 @@ EOF
     # Add a commit so cleanup commands (git checkout .) work against this baseline
     cd "$target"
     git add .
-    git config user.email "benchmark@react-map.com"
+    git config user.email "benchmark@nexiq.com"
     git config user.name "Benchmark Runner"
     # Commit changes (including node_modules if not ignored, but usually they are)
     # We want to commit the configuration and any changes made during setup.
-    git commit -m "chore: baseline for react-map benchmark" || echo "Baseline already committed or no changes."
+    git commit -m "chore: baseline for nexiq benchmark" || echo "Baseline already committed or no changes."
     cd - > /dev/null
 }
 

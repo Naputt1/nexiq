@@ -4,7 +4,7 @@ import type {
   GitStatus,
   GitCommit,
   GitFileDiff,
-  ReactMapConfig,
+  NexiqConfig,
   AppStateData,
   UIStateMap,
 } from "./index.js";
@@ -15,7 +15,7 @@ export interface BackendRequestMap {
     response: ProjectStatus;
   };
   save_project_config: {
-    payload: { projectPath: string; config: ReactMapConfig };
+    payload: { projectPath: string; config: NexiqConfig };
     response: { success: boolean };
   };
   get_project_icon: {

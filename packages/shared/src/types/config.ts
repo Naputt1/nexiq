@@ -37,7 +37,7 @@ export interface SubProject {
   path: string;
 }
 
-export interface ReactMapConfig {
+export interface NexiqConfig {
   entry?: string;
   aliases?: Record<string, string>;
   extensions?: string[];

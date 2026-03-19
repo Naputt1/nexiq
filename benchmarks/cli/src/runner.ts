@@ -57,7 +57,7 @@ export interface BenchmarkStep {
 export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "react-map-cold" | "react-map-warm";
+  approach: "baseline" | "nexiq-cold" | "nexiq-warm";
   testType: "single-prompt" | "planning" | "coding";
   model: string;
   success: boolean;
@@ -76,7 +76,7 @@ export interface RunOptions {
   projects: string[]; // Tier names (small, mid, large, coding)
   models: LlmClient[];
   testTypes: ("single-prompt" | "planning" | "coding")[];
-  approaches: ("baseline" | "react-map-cold" | "react-map-warm")[];
+  approaches: ("baseline" | "nexiq-cold" | "nexiq-warm")[];
   concurrency?: number;
   onProgress?: (update: ProgressUpdate) => void;
 }
@@ -209,8 +209,8 @@ export class OpenRouterClient implements LlmClient {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: process.env.OPENROUTER_API_KEY,
       defaultHeaders: {
-        "HTTP-Referer": "https://github.com/google-gemini/react-map",
-        "X-Title": "React Map Benchmark",
+        "HTTP-Referer": "https://github.com/google-gemini/nexiq",
+        "X-Title": "Nexiq Benchmark",
       },
     });
   }
@@ -318,7 +318,7 @@ export class BenchmarkRunner {
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
-    approach: "baseline" | "react-map-cold" | "react-map-warm",
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
     testType: "single-prompt" | "planning" | "coding",
     llm: LlmClient,
     mcp: McpRunner,
@@ -334,8 +334,8 @@ export class BenchmarkRunner {
     const absoluteRoot = path.resolve(REPO_ROOT, project.root);
 
     // Pre-scenario setup
-    if (approach === "react-map-cold") {
-      const cacheDir = path.join(absoluteRoot, ".react-map", "cache");
+    if (approach === "nexiq-cold") {
+      const cacheDir = path.join(absoluteRoot, ".nexiq", "cache");
       if (fs.existsSync(cacheDir)) {
         fs.rmSync(cacheDir, { recursive: true });
       }
@@ -358,10 +358,10 @@ export class BenchmarkRunner {
           )
         : allTools.filter(
             (t) => !["grep_search", "run_shell_command"].includes(t.name),
-          ); // Force specialized tools for react-map approach
+          ); // Force specialized tools for nexiq approach
 
     const pathContext = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
-    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.react-map' directories as they contain large amounts of noise. 
+    IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.
     To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.
     Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.
@@ -468,7 +468,7 @@ export class BenchmarkRunner {
 
           const result = await mcp.callTool(tc.name, toolArgs);
 
-          // Snapshot tool result (only for react-map specialized tools)
+          // Snapshot tool result (only for nexiq specialized tools)
           const genericTools = [
             "list_directory",
             "read_file",
@@ -657,7 +657,7 @@ export async function runBenchmarks(options: RunOptions) {
     project: ProjectScenarios; 
     scenario: Scenario; 
     model: LlmClient; 
-    approach: "baseline" | "react-map-cold" | "react-map-warm"; 
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm"; 
     testType: "single-prompt" | "planning" | "coding" 
   }[] = [];
 

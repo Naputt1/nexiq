@@ -143,7 +143,7 @@ const Badge = ({
 interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "react-map-cold" | "react-map-warm";
+  approach: "baseline" | "nexiq-cold" | "nexiq-warm";
   testType: "single-prompt" | "planning";
   model: string;
   success: boolean;

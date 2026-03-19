@@ -1,7 +1,7 @@
 {
   "name": "@nexiq/shared",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Naputt1/nexu.git",
+    "url": "git+https://github.com/Naputt1/nexiq.git",
     "directory": "packages/shared"
   },
   "publishConfig": {

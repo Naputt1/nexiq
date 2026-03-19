@@ -248,7 +248,7 @@ const DEFAULT_EXCLUDES = [
   "**/__tests__/**",
   "**/*.test.*",
   "**/__snapshots__/**",
-  "**/.react-map/**",
+  "**/.nexiq/**",
 ];
 
 export class BackendServer {
@@ -264,7 +264,7 @@ export class BackendServer {
   ) {
     this.mcpServer = new Server(
       {
-        name: "react-map-mcp",
+        name: "nexiq-mcp",
         version: "0.2.0",
       },
       {
@@ -764,7 +764,7 @@ export class BackendServer {
         {
           name: "run_shell_command",
           description:
-            "Execute a shell command in the project directory. Use this for terminal tasks. For searching code, prefer 'grep_search'. If using 'grep' manually, ensure you exclude '.git', 'node_modules', and '.react-map' directories to avoid noise.",
+            "Execute a shell command in the project directory. Use this for terminal tasks. For searching code, prefer 'grep_search'. If using 'grep' manually, ensure you exclude '.git', 'node_modules', and '.nexiq' directories to avoid noise.",
           inputSchema: {
             type: "object",
             properties: {
