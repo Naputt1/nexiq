@@ -1,9 +1,9 @@
 # nexiq
 
 `nexiq` is a tool designed to analyze React component structures and visualize their dependencies.
- It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored via a **Model Context Protocol (MCP)** server or a desktop application.
+ It parses source code to extract component definitions, imports, exports, and props, generating a graph representation that can be explored via a **Model Context Protocol (MCP)** server.
 
-The project has pivoted towards an **MCP-first architecture**, where the core analysis and project management logic resides in a shared backend that serves both LLMs (via MCP) and human developers (via Electron).
+The project has pivoted towards an **MCP-first architecture**, where the core analysis and project management logic resides in a shared backend that serves both LLMs (via MCP) and human developers (via the separate `nexiq-ui` application).
 
 ## Project Structure
 
@@ -17,7 +17,7 @@ This is a monorepo managed by `pnpm`, consisting of the following packages:
 - **`packages/server`**: The primary entry point for LLM-driven code exploration.
   - Implements an MCP server providing tools like `open_project`, `get_symbol_info`, and `list_files`.
   - Supports dynamic extension loading to register project-specific tools (e.g., TanStack Query/Router).
-- **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks, UI sections, or MCP tools.
+- **`packages/extension-sdk`**: SDK for creating extensions that add custom graph tasks or MCP tools.
 - **`packages/shared`** (as `@nexiq/shared`): Common TypeScript types and utilities shared across the monorepo.
 - **`packages/sample-project`**: A collection of sample React projects used for testing and snapshot verification.
 
@@ -29,11 +29,8 @@ _Note: The UI application has been moved to a separate repository: `nexiq-ui`._
 - **Package Manager**: `pnpm`
 - **Source Analysis**: Babel (`@babel/parser`, `@babel/traverse`)
 - **Backend Communication**: Model Context Protocol (MCP), WebSockets (ws)
-- **Frontend**: React, React Router, Radix UI
-- **Styling**: Tailwind CSS
-- **Visualization**: Konva / React-Konva, AntV G6
-- **Desktop Environment**: Electron
-- **Build Tools**: Vite (using `rolldown-vite` via overrides), `tsup`
+- **Frontend (Benchmarks)**: React, Recharts, Tailwind CSS (for `benchmarks/viewer`)
+- **Build Tools**: Vite, `tsup`
 - **Testing**: Vitest
 
 ## Getting Started
@@ -116,4 +113,5 @@ From the project root:
 ### TypeScript & Typing
 
 - **No `any`**: The use of the `any` type is strictly forbidden.
-- **Explicit Types**: Always create explicit types or interfaces for data structures, function parameters, and IPC messages. Use generics where appropriate to maintain type safety across boundaries (e.g., Electron IPC).
+- **Explicit Types**: Always create explicit types or interfaces for data structures, function parameters, and IPC messages.
+

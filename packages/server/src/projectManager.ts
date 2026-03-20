@@ -832,20 +832,6 @@ export class ProjectManager {
     return results;
   }
 
-  async updateGraphPosition(
-    projectPath: string,
-    subProject: string | undefined,
-    _positions: unknown,
-    _contextId?: string,
-  ): Promise<boolean> {
-    // This still operates on the JSON graph for now as UI uses it
-    const project = await this.openProject(projectPath, subProject);
-    if (!project.graph) return false;
-
-    // ... (rest of the existing position update logic is kept in implementation)
-    return true;
-  }
-
   async addLabel(
     projectPath: string,
     id: string,
@@ -1352,12 +1338,7 @@ export class ProjectManager {
     const cacheKey = relativeSubPath
       ? `${resolvedHash}-${relativeSubPath.replace(/[/\\]/g, "_")}`
       : resolvedHash;
-    const commitCacheDir = path.join(
-      projectRoot,
-      ".nexiq",
-      "cache",
-      "commits",
-    );
+    const commitCacheDir = path.join(projectRoot, ".nexiq", "cache", "commits");
     const sqlitePath = path.join(commitCacheDir, `${cacheKey}.sqlite`);
 
     if (fs.existsSync(sqlitePath)) {

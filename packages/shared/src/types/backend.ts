@@ -61,15 +61,6 @@ export interface BackendRequestMap {
     payload: { projectPath: string; state: AppStateData };
     response: boolean;
   };
-  update_graph_position: {
-    payload: {
-      projectPath: string;
-      subProject?: string;
-      positions: UIStateMap;
-      contextId?: string;
-    };
-    response: boolean;
-  };
   call_tool: {
     payload: { name: string; arguments: Record<string, unknown> };
     response: unknown;
