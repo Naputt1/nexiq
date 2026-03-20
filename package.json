@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=@nexiq/cli dev:electron",
+    "dev:server": "pnpm --filter=@nexiq/cli dev",
     "test:analyze": "pnpm --filter=@nexiq/analyser test",
     "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
     "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",
@@ -29,25 +29,11 @@
       "ink-big-text>react": "^18.3.1",
       "ink-gradient>react": "^18.3.1"
     },
-    "packageExtensions": {
-      "better-sqlite3": {
-        "peerDependencies": {
-          "electron": "*"
-        },
-        "peerDependenciesMeta": {
-          "electron": {
-            "optional": true
-          }
-        }
-      }
-    },
     "onlyBuiltDependencies": [
       "@node-rs/xxhash",
       "@parcel/watcher",
       "better-sqlite3",
       "bson",
-      "electron",
-      "electron-winstaller",
       "esbuild"
     ]
   },
@@ -56,7 +42,6 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
-    "@electron/rebuild": "^4.0.3",
     "@google/generative-ai": "^0.24.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "dotenv": "^17.3.1",

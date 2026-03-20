@@ -22,7 +22,7 @@
     "@parcel/watcher": "^2.5.6",
     "@nexiq/extension-sdk": "workspace:*",
     "@nexiq/analyser": "workspace:*",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^12.8",
     "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.2.2",

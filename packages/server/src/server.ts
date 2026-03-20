@@ -1499,23 +1499,6 @@ export class BackendServer {
                 );
                 break;
               }
-              case "update_graph_position": {
-                const { projectPath, subProject, positions, contextId } =
-                  data.payload;
-                const success = await this.projectManager.updateGraphPosition(
-                  projectPath,
-                  subProject,
-                  positions,
-                  contextId,
-                );
-                this.sendResponse(
-                  ws,
-                  "position_updated",
-                  { success },
-                  data.requestId,
-                );
-                break;
-              }
               case "save_state": {
                 const { projectPath, state } = data.payload;
                 const success = await this.projectManager.saveAppState(
