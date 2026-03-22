@@ -19,14 +19,14 @@ import {
   type RenderRow,
   type ComponentFileVar,
   type UIItemState,
+  discoverWorkspacePackages,
+  getWorkspacePatterns,
 } from "@nexiq/shared";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { simpleGit, type LogOptions } from "simple-git";
-import yaml from "js-yaml";
-import fg from "fast-glob";
 import tmp from "tmp";
 
 const execAsync = promisify(exec);
@@ -42,10 +42,6 @@ interface ExtendedSymbolRow extends SymbolRow {
 interface ExtendedRenderRow extends RenderRow {
   file: string;
   in_name: string | null;
-}
-
-export interface PnpmWorkspace {
-  packages?: string[];
 }
 
 export interface PackageJson {
@@ -1221,23 +1217,11 @@ export class ProjectManager {
         }
       }
 
-      const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
       const packageJsonPath = path.join(directoryPath, "package.json");
+      const workspacePatterns = getWorkspacePatterns(directoryPath);
 
-      let workspacePatterns: string[] = [];
-
-      if (fs.existsSync(pnpmWorkspace)) {
+      if (workspacePatterns.length > 0) {
         status.isMonorepo = true;
-        try {
-          const doc = yaml.load(
-            fs.readFileSync(pnpmWorkspace, "utf-8"),
-          ) as PnpmWorkspace;
-          if (doc && doc.packages && Array.isArray(doc.packages)) {
-            workspacePatterns = doc.packages;
-          }
-        } catch (e: unknown) {
-          console.error("Error reading pnpm-workspace.yaml", e);
-        }
       } else if (fs.existsSync(packageJsonPath)) {
         try {
           const pkg = JSON.parse(
@@ -1245,14 +1229,6 @@ export class ProjectManager {
           ) as PackageJson;
           if (pkg.workspaces) {
             status.isMonorepo = true;
-            if (Array.isArray(pkg.workspaces)) {
-              workspacePatterns = pkg.workspaces;
-            } else if (
-              pkg.workspaces.packages &&
-              Array.isArray(pkg.workspaces.packages)
-            ) {
-              workspacePatterns = pkg.workspaces.packages;
-            }
           }
         } catch {
           // ignore
@@ -1261,30 +1237,13 @@ export class ProjectManager {
 
       if (status.isMonorepo && workspacePatterns.length > 0) {
         try {
-          const entries = await fg(
-            workspacePatterns.map((p) =>
-              p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
-            ),
-            {
-              cwd: directoryPath,
-              ignore: ["**/node_modules/**"],
-              absolute: true,
-            },
-          );
-
           const subProjects: SubProject[] = [];
+          const entries = await discoverWorkspacePackages(directoryPath);
           for (const entry of entries) {
-            try {
-              const pkg = JSON.parse(
-                fs.readFileSync(entry, "utf-8"),
-              ) as PackageJson;
-              subProjects.push({
-                name: pkg.name || path.basename(path.dirname(entry)),
-                path: path.dirname(entry),
-              });
-            } catch {
-              // ignore
-            }
+            subProjects.push({
+              name: entry.name,
+              path: entry.path,
+            });
           }
           status.subProjects = subProjects;
         } catch (e: unknown) {

@@ -62,6 +62,7 @@ export class ComponentDB {
   public sqlite: SqliteDB | undefined;
 
   private resolveTasks: ComponentDBResolve[];
+  private unresolvedResolveTasks: ComponentDBResolve[];
   private typesToResolve: Set<string>;
 
   private isResolve = false;
@@ -79,6 +80,7 @@ export class ComponentDB {
     this.files = new FileDB(options.dir);
 
     this.resolveTasks = [];
+    this.unresolvedResolveTasks = [];
     this.typesToResolve = new Set();
 
     this.packageJson = options.packageJson;
@@ -830,6 +832,7 @@ export class ComponentDB {
 
   public resolve() {
     this.isResolve = true;
+    this.unresolvedResolveTasks = [];
 
     const maxRetries = 1000;
     let retries = 0;
@@ -855,6 +858,7 @@ export class ComponentDB {
     }
 
     if (retries >= maxRetries && this.resolveTasks.length > 0) {
+      this.unresolvedResolveTasks = [...this.resolveTasks];
       console.warn(
         "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
         {
@@ -868,6 +872,11 @@ export class ComponentDB {
 
     // this.resolveTasks = [];
     this.isResolve = false;
+    return [...this.unresolvedResolveTasks];
+  }
+
+  public getUnresolvedResolveTasks() {
+    return [...this.unresolvedResolveTasks];
   }
 
   public isDependency(name: string, fileName?: string): boolean {
