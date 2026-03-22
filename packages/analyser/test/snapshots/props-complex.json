@@ -139,7 +139,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "7ceb485fb8e24499",
+          "hash": "655ea4350fbfb9f4",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -461,6 +461,7 @@
           "effects": {
             "c03f8e59d14c727c:effect:28:2": {
               "id": "c03f8e59d14c727c:effect:28:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 28,
@@ -484,6 +485,7 @@
             },
             "c03f8e59d14c727c:effect:32:2": {
               "id": "c03f8e59d14c727c:effect:32:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 32,
@@ -507,6 +509,7 @@
             },
             "c03f8e59d14c727c:effect:36:2": {
               "id": "c03f8e59d14c727c:effect:36:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 36,
@@ -530,6 +533,7 @@
             },
             "c03f8e59d14c727c:effect:40:2": {
               "id": "c03f8e59d14c727c:effect:40:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 40,
@@ -553,6 +557,7 @@
             },
             "c03f8e59d14c727c:effect:44:2": {
               "id": "c03f8e59d14c727c:effect:44:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 44,
@@ -576,6 +581,7 @@
             },
             "c03f8e59d14c727c:effect:48:2": {
               "id": "c03f8e59d14c727c:effect:48:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 48,
@@ -599,6 +605,7 @@
             },
             "c03f8e59d14c727c:effect:52:2": {
               "id": "c03f8e59d14c727c:effect:52:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 52,

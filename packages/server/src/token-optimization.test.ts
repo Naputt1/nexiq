@@ -60,29 +60,40 @@ describe("Token Optimization Tools", () => {
     mockDb.prepare.mockImplementation(
       () => createMockStmt() as unknown as Database.Statement,
     );
-    
+
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFileSync).mockReturnValue("{}");
-    
+
     vi.mocked(analyzeProject).mockResolvedValue({
       src: projectPath,
       files: {
         "/src/App.tsx": {
           path: "/src/App.tsx",
-          var: { "app-id": { id: "app-id", name: { type: "identifier", name: "App" }, kind: "component", type: "function", loc: { line: 1, column: 1 } } }
+          var: {
+            "app-id": {
+              id: "app-id",
+              name: { type: "identifier", name: "App" },
+              kind: "component",
+              type: "function",
+              loc: { line: 1, column: 1 },
+            },
+          },
         },
         "/src/App.test.tsx": {
           path: "/src/App.test.tsx",
-          var: {}
-        }
+          var: {},
+        },
       },
       edges: [],
     } as unknown as JsonData);
 
     projectManager = new ProjectManager();
     server = new BackendServer(projectManager);
-    
-    await server.handleCallTool({ name: "open_project", args: { projectPath } });
+
+    await server.handleCallTool({
+      name: "open_project",
+      args: { projectPath },
+    });
   });
 
   describe("get_symbol_info with filtering", () => {
@@ -90,46 +101,80 @@ describe("Token Optimization Tools", () => {
       // Definition in a test file (which should be filtered out by default)
       mockDb.prepare.mockReturnValueOnce({
         all: vi.fn().mockReturnValue([
-          { id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 1, column: 1, kind: "component" },
-          { id: "sym-2", name: "Button", file: "/src/Button.test.tsx", line: 1, column: 1, kind: "component" }
+          {
+            id: "sym-1",
+            name: "Button",
+            file: "/src/Button.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+          },
+          {
+            id: "sym-2",
+            name: "Button",
+            file: "/src/Button.test.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+          },
         ]),
-      } as any);
+      } as unknown as Database.Statement);
 
-      const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
+      const result = await server.handleCallTool({
+        name: "get_symbol_info",
+        args: { projectPath, query: "Button" },
+      });
       const data = JSON.parse(result.content[0].text);
-      
+
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].file).toBe("/src/Button.tsx");
     });
 
     it("should allow custom exclude patterns", async () => {
-        mockDb.prepare.mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([
-            { id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 1, column: 1, kind: "component" },
-            { id: "sym-2", name: "Button", file: "/src/components/Button.tsx", line: 1, column: 1, kind: "component" }
-          ]),
-        } as any);
-  
-        const result = await server.handleCallTool({ 
-            name: "get_symbol_info",
-            args: {
-                projectPath, 
-                query: "Button",
-                exclude: ["**/components/**"] 
-            }
-        });
-        const data = JSON.parse(result.content[0].text);
-        
-        expect(data.definitions).toHaveLength(1);
-        expect(data.definitions[0].file).toBe("/src/Button.tsx");
+      mockDb.prepare.mockReturnValueOnce({
+        all: vi.fn().mockReturnValue([
+          {
+            id: "sym-1",
+            name: "Button",
+            file: "/src/Button.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+          },
+          {
+            id: "sym-2",
+            name: "Button",
+            file: "/src/components/Button.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+          },
+        ]),
+      } as unknown as Database.Statement);
+
+      const result = await server.handleCallTool({
+        name: "get_symbol_info",
+        args: {
+          projectPath,
+          query: "Button",
+          exclude: ["**/components/**"],
+        },
       });
+      const data = JSON.parse(result.content[0].text);
+
+      expect(data.definitions).toHaveLength(1);
+      expect(data.definitions[0].file).toBe("/src/Button.tsx");
+    });
   });
 
   describe("list_files with filtering", () => {
     it("should exclude node_modules and tests by default", async () => {
-      const result = await server.handleCallTool({ name: "list_files", args: { projectPath } });
+      const result = await server.handleCallTool({
+        name: "list_files",
+        args: { projectPath },
+      });
       const data = JSON.parse(result.content[0].text);
-      
+
       expect(data.totalFiles).toBe(1);
       expect(data.files[0].path).toBe("/src/App.tsx");
       // App.test.tsx should be excluded
@@ -140,31 +185,48 @@ describe("Token Optimization Tools", () => {
     it("should return usages with source code context", async () => {
       // 1. Definition call
       mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          id: "btn-1", name: "Button", file: "/src/Button.tsx", line: 1, column: 1, kind: "component"
-        }]),
-      } as any);
-      
+        all: vi.fn().mockReturnValue([
+          {
+            id: "btn-1",
+            name: "Button",
+            file: "/src/Button.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+          },
+        ]),
+      } as unknown as Database.Statement);
+
       // 2. Usages call
       mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          tag: "Button", file: "/src/App.tsx", line: 3, column: 10, kind: "jsx", in_name: "App"
-        }]),
-      } as any);
+        all: vi.fn().mockReturnValue([
+          {
+            tag: "Button",
+            file: "/src/App.tsx",
+            line: 3,
+            column: 10,
+            kind: "jsx",
+            in_name: "App",
+          },
+        ]),
+      } as unknown as Database.Statement);
 
-      vi.mocked(fs.readFileSync).mockReturnValue(`import { Button } from './Button';
+      vi.mocked(fs.readFileSync)
+        .mockReturnValue(`import { Button } from './Button';
 export const App = () => {
   return <Button>Click</Button>;
 };`);
 
-      const result = await server.handleCallTool({ 
+      const result = await server.handleCallTool({
         name: "get_symbol_usages_with_context",
-        args: { 
-            projectPath, query: "Button", contextLines: 1 
-        }
+        args: {
+          projectPath,
+          query: "Button",
+          contextLines: 1,
+        },
       });
       const data = JSON.parse(result.content[0].text);
-      
+
       expect(data).toHaveLength(1);
       expect(data[0].file).toBe("/src/App.tsx");
       expect(data[0].line).toBe(3);
@@ -176,20 +238,30 @@ export const App = () => {
   describe("get_prop_definitions", () => {
     it("should return clean prop summary", async () => {
       mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          id: "btn-1", name: "Button", file: "/src/Button.tsx", line: 1, column: 1, kind: "component",
-          data_json: JSON.stringify({ props: [{ name: "label", type: "string" }] })
-        }]),
-      } as any);
+        all: vi.fn().mockReturnValue([
+          {
+            id: "btn-1",
+            name: "Button",
+            file: "/src/Button.tsx",
+            line: 1,
+            column: 1,
+            kind: "component",
+            data_json: JSON.stringify({
+              props: [{ name: "label", type: "string" }],
+            }),
+          },
+        ]),
+      } as unknown as Database.Statement);
 
-      const result = await server.handleCallTool({ 
+      const result = await server.handleCallTool({
         name: "get_prop_definitions",
-        args: { 
-            projectPath, componentName: "Button" 
-        }
+        args: {
+          projectPath,
+          componentName: "Button",
+        },
       });
       const data = JSON.parse(result.content[0].text);
-      
+
       expect(data).toHaveLength(1);
       expect(data[0].name).toBe("Button");
       expect(data[0].props[0].name).toBe("label");

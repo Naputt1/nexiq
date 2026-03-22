@@ -179,6 +179,28 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "test",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
+      "args": [
+        "./packages/sample-project/test",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--no-threads",
+        "--sqlite",
+        "./out/sqlite.db"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "small",
       "program": "${workspaceFolder}/packages/analyser/dist/analyzer.js",
       "args": [

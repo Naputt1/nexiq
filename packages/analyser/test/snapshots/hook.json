@@ -73,7 +73,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "4ba721e08f50082c",
+          "hash": "e2f66304acaa4f3d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -840,6 +840,7 @@
           "effects": {
             "65338fa51b33f878:effect:13:2": {
               "id": "65338fa51b33f878:effect:13:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 13,
@@ -863,6 +864,7 @@
             },
             "65338fa51b33f878:effect:17:2": {
               "id": "65338fa51b33f878:effect:17:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 17,
@@ -1041,7 +1043,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "f35494ab0226727f",
+          "hash": "be84379e6f82c7fa",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1420,6 +1422,7 @@
           "effects": {
             "66289b593d160656:effect:11:2": {
               "id": "66289b593d160656:effect:11:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 11,
@@ -1451,6 +1454,7 @@
             },
             "66289b593d160656:effect:15:2": {
               "id": "66289b593d160656:effect:15:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 15,
@@ -2413,7 +2417,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "6d228bfb61d53c44",
+          "hash": "70239dec10abf52c",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2505,6 +2509,7 @@
           "effects": {
             "7a755d146a3ba89a:effect:6:2": {
               "id": "7a755d146a3ba89a:effect:6:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 6,

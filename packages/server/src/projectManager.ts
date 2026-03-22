@@ -17,6 +17,8 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
+  type ComponentFileVar,
+  type UIItemState,
 } from "@nexiq/shared";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
@@ -924,13 +926,15 @@ export class ProjectManager {
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
     const file = project.graph!.files[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
-    const outline = Object.values(file.var || {}).map((v) => ({
-      id: v.id,
-      name: getDisplayName(v.name),
-      kind: v.kind,
-      type: v.type,
-      line: v.loc.line,
-    }));
+    const outline = Object.values(file.var || {})
+      .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))
+      .map((v) => ({
+        id: v.id,
+        name: getDisplayName(v.name),
+        kind: v.kind,
+        type: v.type,
+        line: v.loc.line,
+      }));
     return outline.sort((a, b) => a.line - b.line);
   }
 
@@ -1039,6 +1043,121 @@ export class ProjectManager {
         stderr: err.stderr,
         exitCode: err.code ?? 1,
       };
+    }
+  }
+
+  async updateGraphPosition(
+    projectPath: string,
+    subProject: string | undefined,
+    positions: Record<string, UIItemState>,
+    contextId?: string,
+  ): Promise<boolean> {
+    const project = await this.openProject(projectPath, subProject);
+    if (!project || !project.graph) return false;
+
+    const analysisPath = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
+    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
+    const cacheFile = path.join(
+      cacheDir,
+      `${path.basename(analysisPath)}-${pathHash}.json`,
+    );
+
+    try {
+      // Helper to apply positions recursively
+      const applyUIState = (
+        item: ComponentFileVar,
+        stateMap: Record<string, UIItemState>,
+      ) => {
+        const state = stateMap[item.id];
+        if (state) {
+          if (!item.ui) item.ui = { x: 0, y: 0 };
+          item.ui.x = state.x;
+          item.ui.y = state.y;
+          if (state.radius !== undefined) item.ui.radius = state.radius;
+          if (state.collapsedRadius !== undefined)
+            item.ui.collapsedRadius = state.collapsedRadius;
+          if (state.expandedRadius !== undefined)
+            item.ui.expandedRadius = state.expandedRadius;
+          if (state.collapsed !== undefined)
+            item.ui.collapsed = state.collapsed;
+
+          const isCombo =
+            item.kind === "component" ||
+            (item.kind === "hook" && item.type === "function");
+
+          if (contextId && item.id === contextId) {
+            item.ui.isLayoutCalculated = true;
+          } else if (contextId === "root") {
+            if (!isCombo) item.ui.isLayoutCalculated = true;
+          } else if (contextId) {
+            if (!isCombo) item.ui.isLayoutCalculated = true;
+          } else if (state.isLayoutCalculated !== undefined) {
+            item.ui.isLayoutCalculated = state.isLayoutCalculated;
+          }
+        }
+
+        // Apply to sub-items
+        const renderComboId = `${item.id}-render`;
+        const renderPrefix = `${item.id}-render-`;
+        const varPrefix = `${item.id}:`;
+
+        for (const [id, subState] of Object.entries(stateMap)) {
+          if (
+            id === renderComboId ||
+            id.startsWith(renderPrefix) ||
+            id.startsWith(varPrefix)
+          ) {
+            if (!item.ui) item.ui = { x: 0, y: 0 };
+
+            if (id === renderComboId || id.startsWith(renderPrefix)) {
+              if (!item.ui.renders) item.ui.renders = {};
+              item.ui.renders[id] = {
+                x: subState.x,
+                y: subState.y,
+                radius: subState.radius,
+                collapsedRadius: subState.collapsedRadius,
+                expandedRadius: subState.expandedRadius,
+                isLayoutCalculated:
+                  contextId === id ? true : subState.isLayoutCalculated,
+                collapsed: subState.collapsed,
+              };
+            } else {
+              if (!item.ui.vars) item.ui.vars = {};
+              item.ui.vars[id] = {
+                x: subState.x,
+                y: subState.y,
+                radius: subState.radius,
+                collapsedRadius: subState.collapsedRadius,
+                expandedRadius: subState.expandedRadius,
+                isLayoutCalculated:
+                  contextId === id ? true : subState.isLayoutCalculated,
+                collapsed: subState.collapsed,
+              };
+            }
+          }
+        }
+
+        if ("var" in item && item.var) {
+          for (const v of Object.values(item.var)) {
+            applyUIState(v, stateMap);
+          }
+        }
+      };
+
+      for (const file of Object.values(project.graph.files)) {
+        for (const variable of Object.values(file.var)) {
+          applyUIState(variable, positions);
+        }
+      }
+
+      fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
+      return true;
+    } catch (e) {
+      console.error("Failed to update graph positions", e);
+      return false;
     }
   }
 

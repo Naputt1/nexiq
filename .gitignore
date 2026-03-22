@@ -152,6 +152,7 @@ git-demo
 benchmarks/projects/
 scripts/benchmarks/
 packages/sample-project/git-demo/
+packages/sample-project/test/
 packages/analyser/out/
 packages/ui/out/
 packages/ui/dist/

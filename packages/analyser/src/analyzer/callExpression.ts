@@ -69,7 +69,12 @@ export default function CallExpression(
     //   components[compName].contexts.push(fn);
     // }
 
-    if (hookInfo?.isReact && hookInfo.name === "useEffect") {
+    if (
+      hookInfo?.isReact &&
+      (hookInfo.name === "useEffect" ||
+        hookInfo.name === "useLayoutEffect" ||
+        hookInfo.name === "useInsertionEffect")
+    ) {
       const effect = nodePath.node.arguments[0];
       const dependencies = nodePath.node.arguments[1];
 
@@ -108,6 +113,7 @@ export default function CallExpression(
 
       if (scope) {
         componentDB.comAddEffect(fileName, callLoc, {
+          name: hookInfo.name,
           scope,
           loc: callLoc,
           reactDeps,

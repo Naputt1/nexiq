@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", "coverage"]),
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -18,10 +18,6 @@ export default defineConfig([
     },
     rules: {
       // Add custom rules here if needed
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_" },
-      ],
       "@typescript-eslint/switch-exhaustiveness-check": "error",
       "no-debugger": "warn",
       "@typescript-eslint/no-unused-vars": [
@@ -32,6 +28,7 @@ export default defineConfig([
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
 ]);

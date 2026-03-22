@@ -1115,10 +1115,12 @@ export class BackendServer {
           fileSummary = displayedFiles.map(([path, file]) => {
             return {
               path,
-              exports: Object.values(file.var || {}).map((v) => ({
-                name: getDisplayName(v.name),
-                kind: v.kind,
-              })),
+              exports: Object.values(file.var || {})
+                .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))
+                .map((v) => ({
+                  name: getDisplayName(v.name),
+                  kind: v.kind,
+                })),
             };
           });
         }

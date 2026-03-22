@@ -4,7 +4,6 @@ import fs from "node:fs";
 import type {
   ComponentFile,
   ComponentFileVar,
-  ComponentFileVarJSX,
   ComponentInfoRender,
   VariableName,
   EntityRow,
@@ -472,25 +471,6 @@ export class SqliteDB extends BaseSqliteDB {
             entity_id: v.id,
           });
 
-          if (v.type === "jsx") {
-            const jsx = v as ComponentFileVarJSX;
-            this.insertRender({
-              id: v.id,
-              file_id: fileId,
-              parent_entity_id: parentEntityId || v.id,
-              render_index: 0,
-              tag: jsx.tag || "unknown",
-              symbol_id: jsx.srcId || null,
-              line: v.loc.line,
-              column: v.loc.column,
-              kind: "jsx",
-              data_json: JSON.stringify({
-                dependencies: v.dependencies,
-                props: jsx.props,
-              }),
-            });
-          }
-
           if ("var" in v) {
             for (const childVar of Object.values(v.var || {})) {
               insertVariable(childVar, newScopeId, v.id);
@@ -499,7 +479,9 @@ export class SqliteDB extends BaseSqliteDB {
 
           if ("children" in v) {
             for (const render of Object.values(v.children || {})) {
-              insertRender(render, v.id, newScopeId);
+              if (!render.parentId) {
+                insertRender(render, v.id, newScopeId);
+              }
             }
           }
         }
