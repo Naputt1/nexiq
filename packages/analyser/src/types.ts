@@ -1,5 +1,7 @@
 import type {
   AnalysisRunRow,
+  ComponentFileExport,
+  ComponentFileImport,
   CrossPackageResolveErrorRow,
   FileAnalysisErrorRow,
   FileRunStatusRow,
@@ -46,6 +48,7 @@ export interface DeferredResolveTask {
 
 export interface PackageAnalysisSummary {
   packageId: string;
+  packageName: string;
   runId: string;
   srcDir: string;
   dbPath?: string | undefined;
@@ -54,6 +57,61 @@ export interface PackageAnalysisSummary {
   filesFailed: number;
   resolveErrors: number;
   graph: JsonData;
+  workspaceHandoff: WorkspaceAnalysisHandoff;
+}
+
+export interface WorkspacePackageDependency {
+  name: string;
+  version: string;
+  isDev: boolean;
+}
+
+export interface WorkspacePackageExport {
+  packageId: string;
+  packageName: string;
+  filePath: string;
+  exportName: string;
+  exportType: ComponentFileExport["type"];
+  exportKind: ComponentFileExport["exportKind"];
+  exportId: string;
+  isDefault: boolean;
+}
+
+export interface WorkspaceExternalImport {
+  packageId: string;
+  packageName: string;
+  filePath: string;
+  sourceModule: string;
+  sourcePackageName: string;
+  sourceSubpath?: string | undefined;
+  localName: string;
+  importedName: string | null;
+  importType: ComponentFileImport["type"];
+  importKind: ComponentFileImport["importKind"];
+}
+
+export interface WorkspaceAnalysisHandoff {
+  packageId: string;
+  packageName: string;
+  exports: WorkspacePackageExport[];
+  externalImports: WorkspaceExternalImport[];
+  dependencies: WorkspacePackageDependency[];
+  deferredResolveTasks: DeferredResolveTask[];
+  entryCandidates: string[];
+}
+
+export interface ResolvedCrossPackageRelation {
+  fromPackageId: string;
+  fromPackageName: string;
+  toPackageId: string;
+  toPackageName: string;
+  sourceFilePath: string;
+  targetFilePath: string;
+  sourceLocalName: string;
+  targetExportName: string;
+  targetExportId: string;
+  sourceImportId: string;
+  relationKind: "import";
 }
 
 export interface AnalyzeProjectOptions {

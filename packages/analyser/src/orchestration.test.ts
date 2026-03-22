@@ -127,7 +127,7 @@ describe("analyser orchestration", () => {
       "import { Shared } from '@workspace/pkg-b'; export const App = () => <Shared />;",
     );
 
-    await analyzeProject(rootDir, {
+    const graph = await analyzeProject(rootDir, {
       monorepo: true,
       packageDbDir,
       centralSqlitePath: centralDbPath,
@@ -139,16 +139,169 @@ describe("analyser orchestration", () => {
     const workspacePackages = centralDb
       .prepare("SELECT * FROM workspace_packages")
       .all() as { package_id: string }[];
+    const packageExports = centralDb
+      .prepare("SELECT * FROM package_export_index")
+      .all() as { package_id: string; export_name: string }[];
+    const deferredImports = centralDb
+      .prepare("SELECT * FROM deferred_external_imports")
+      .all() as { package_id: string; source_module: string }[];
     const packageRelations = centralDb
       .prepare("SELECT * FROM package_relations")
-      .all() as { from_package_id: string; to_package_id: string }[];
+      .all() as {
+        from_package_id: string;
+        to_package_id: string;
+        source_file_path: string;
+        target_file_path: string;
+      }[];
     centralDb.close();
 
     expect(workspacePackages).toHaveLength(2);
+    expect(packageExports.some((row) => row.export_name === "Shared")).toBe(true);
+    expect(
+      deferredImports.some((row) => row.source_module === "@workspace/pkg-b"),
+    ).toBe(true);
     expect(packageRelations).toHaveLength(1);
     expect(packageRelations[0]?.from_package_id).toContain("@workspace/pkg-a");
     expect(packageRelations[0]?.to_package_id).toContain("@workspace/pkg-b");
+    expect(packageRelations[0]?.source_file_path).toBe("/src/index.tsx");
+    expect(packageRelations[0]?.target_file_path).toBe("/src/index.tsx");
     expect(fs.existsSync(packageDbDir)).toBe(true);
     expect(fs.readdirSync(packageDbDir).length).toBeGreaterThanOrEqual(2);
+    expect(graph.edges.some((edge) => edge.label === "import")).toBe(true);
+  });
+
+  it("resolves default imports from workspace package exports", async () => {
+    const rootDir = createTempDir("nexiq-monorepo-default-");
+    const centralDbPath = path.join(rootDir, ".nexiq", "workspace.sqlite");
+
+    writeJson(path.join(rootDir, "package.json"), {
+      name: "workspace-root",
+      version: "1.0.0",
+      private: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "pnpm-workspace.yaml"),
+      "packages:\n  - packages/*\n",
+    );
+
+    writeJson(path.join(rootDir, "packages", "pkg-b", "package.json"), {
+      name: "@workspace/pkg-b",
+      version: "1.0.0",
+    });
+    fs.mkdirSync(path.join(rootDir, "packages", "pkg-b", "src"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "packages", "pkg-b", "src", "index.tsx"),
+      "export default function Shared(){ return <div>shared</div>; }",
+    );
+
+    writeJson(path.join(rootDir, "packages", "pkg-a", "package.json"), {
+      name: "@workspace/pkg-a",
+      version: "1.0.0",
+      dependencies: {
+        "@workspace/pkg-b": "1.0.0",
+      },
+    });
+    fs.mkdirSync(path.join(rootDir, "packages", "pkg-a", "src"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "packages", "pkg-a", "src", "index.tsx"),
+      "import Shared from '@workspace/pkg-b'; export const App = () => <Shared />;",
+    );
+
+    const graph = await analyzeProject(rootDir, {
+      monorepo: true,
+      centralSqlitePath: centralDbPath,
+      fileWorkerThreads: 1,
+      packageConcurrency: 1,
+    });
+
+    const centralDb = new Database(centralDbPath, { readonly: true });
+    const relations = centralDb
+      .prepare("SELECT * FROM package_relations")
+      .all() as { target_symbol: string }[];
+    const errors = centralDb
+      .prepare("SELECT * FROM cross_package_resolve_errors")
+      .all() as unknown[];
+    centralDb.close();
+
+    expect(relations).toHaveLength(1);
+    expect(relations[0]?.target_symbol).not.toBe("");
+    expect(errors).toHaveLength(0);
+    expect(graph.edges.some((edge) => edge.label === "import")).toBe(true);
+  });
+
+  it("records cross-package resolve errors for missing exports without creating fake edges", async () => {
+    const rootDir = createTempDir("nexiq-monorepo-missing-export-");
+    const centralDbPath = path.join(rootDir, ".nexiq", "workspace.sqlite");
+
+    writeJson(path.join(rootDir, "package.json"), {
+      name: "workspace-root",
+      version: "1.0.0",
+      private: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "pnpm-workspace.yaml"),
+      "packages:\n  - packages/*\n",
+    );
+
+    writeJson(path.join(rootDir, "packages", "pkg-b", "package.json"), {
+      name: "@workspace/pkg-b",
+      version: "1.0.0",
+    });
+    fs.mkdirSync(path.join(rootDir, "packages", "pkg-b", "src"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "packages", "pkg-b", "src", "index.tsx"),
+      "export const Existing = () => <div>shared</div>;",
+    );
+
+    writeJson(path.join(rootDir, "packages", "pkg-a", "package.json"), {
+      name: "@workspace/pkg-a",
+      version: "1.0.0",
+      dependencies: {
+        "@workspace/pkg-b": "1.0.0",
+      },
+    });
+    fs.mkdirSync(path.join(rootDir, "packages", "pkg-a", "src"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "packages", "pkg-a", "src", "index.tsx"),
+      "import { Missing } from '@workspace/pkg-b'; export const App = () => <Missing />;",
+    );
+
+    const graph = await analyzeProject(rootDir, {
+      monorepo: true,
+      centralSqlitePath: centralDbPath,
+      fileWorkerThreads: 1,
+      packageConcurrency: 1,
+    });
+
+    const centralDb = new Database(centralDbPath, { readonly: true });
+    const relations = centralDb
+      .prepare("SELECT * FROM package_relations")
+      .all() as unknown[];
+    const errors = centralDb
+      .prepare("SELECT * FROM cross_package_resolve_errors")
+      .all() as { source_module: string; message: string }[];
+    centralDb.close();
+
+    expect(relations).toHaveLength(0);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.source_module).toBe("@workspace/pkg-b");
+    expect(errors[0]?.message).toContain("No matching export");
+    expect(graph.edges.some((edge) => edge.label === "import")).toBe(false);
+    expect(
+      graph.resolve.some(
+        (task) =>
+          task.type === "crossPackageImport" &&
+          "source" in task &&
+          task.source === "@workspace/pkg-b",
+      ),
+    ).toBe(true);
   });
 });

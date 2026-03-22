@@ -828,6 +828,9 @@ export class ComponentDB {
     comPropsTsType: (db, task) => {
       return db.files.resolveComPropsTsTypeID(task.id, task.fileName);
     },
+    crossPackageImport: (_db, _task) => {
+      return false;
+    },
   };
 
   public resolve() {
