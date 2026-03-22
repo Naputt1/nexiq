@@ -14,7 +14,7 @@ export interface ProjectStatus {
   subProjects: SubProject[];
 }
 
-export type GraphViewType = "component" | "file" | "router";
+export type GraphViewType = "component" | "file" | "router" | "package";
 
 export interface AppStateData {
   selectedSubProject: string | null;

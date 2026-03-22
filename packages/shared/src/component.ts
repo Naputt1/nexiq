@@ -383,4 +383,5 @@ export type ComponentFile = {
   defaultExport: string | null;
   tsTypes: Record<string, TypeDataDeclare>;
   var: Record<string, ComponentFileVar>;
+  package_id?: string | undefined;
 };

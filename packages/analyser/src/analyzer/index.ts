@@ -110,9 +110,6 @@ async function analyzeFiles(
     for (const { filePath, result, error: _error } of results) {
       if (result) {
         componentDB.addFile(filePath, result); // This time it will populate
-        if (sqlite) {
-          sqlite.saveFileResults(result);
-        }
       }
     }
   } else {
@@ -152,10 +149,6 @@ async function analyzeFiles(
         TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
       });
 
-      const result = componentDB.getFile(fileName).getData();
-      if (sqlite) {
-        sqlite.saveFileResults(result);
-      }
     }
   }
 
@@ -168,6 +161,45 @@ async function analyzeFiles(
   // Save global edges if sqlite is used
   if (sqlite) {
     sqlite.saveEdges(graphData.edges);
+
+    // Save package data
+    const packages = packageJson.getAllLoadedPackages();
+    for (const [dir, rawPkgJson] of packages) {
+      if (!rawPkgJson.name || !rawPkgJson.version) continue;
+
+      const pkgId = `${rawPkgJson.name}@${rawPkgJson.version}`;
+      sqlite.insertPackage({
+        id: pkgId,
+        name: rawPkgJson.name,
+        version: rawPkgJson.version,
+        path: dir,
+      });
+
+      sqlite.clearPackageDependencies(pkgId);
+      
+      const insertDeps = (deps: Record<string, string> | undefined, isDev: boolean) => {
+        if (!deps) return;
+        for (const [depName, depVersion] of Object.entries(deps)) {
+          sqlite.insertPackageDependency({
+            package_id: pkgId,
+            dependency_name: depName,
+            dependency_version: depVersion,
+            is_dev: isDev,
+          });
+        }
+      };
+
+      insertDeps(rawPkgJson.dependencies, false);
+      insertDeps(rawPkgJson.devDependencies, true);
+    }
+
+    // Save files after packages are stored to satisfy foreign key constraints
+    for (const fullfileName of filesToAnalyze) {
+      const fileName = "/" + fullfileName;
+      const result = componentDB.getFile(fileName).getData();
+      result.package_id = packageJson.getPackageIdForFile(path.resolve(SRC_DIR, fullfileName)) || undefined;
+      sqlite.saveFileResults(result);
+    }
   }
 
   return graphData;

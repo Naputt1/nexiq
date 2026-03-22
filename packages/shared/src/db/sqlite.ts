@@ -7,6 +7,8 @@ import type {
   SymbolRow,
   RenderRow,
   ExportRow,
+  PackageRow,
+  PackageDependencyRow,
 } from "../index.js";
 
 export class SqliteDB {
@@ -38,6 +40,10 @@ export class SqliteDB {
   }
 
   public getAllData() {
+    const packages = this.db.prepare("SELECT * FROM packages").all() as PackageRow[];
+    const package_dependencies = this.db
+      .prepare("SELECT * FROM package_dependencies")
+      .all() as PackageDependencyRow[];
     const files = this.db.prepare("SELECT * FROM files").all() as FileRow[];
     const entities = this.db
       .prepare("SELECT * FROM entities")
@@ -57,6 +63,8 @@ export class SqliteDB {
       .all() as RelationRow[];
 
     return {
+      packages,
+      package_dependencies,
       files,
       entities,
       scopes,

@@ -411,7 +411,7 @@ export class ComponentDB {
     const comImport = this.files.getImport(fileName, name);
     if (!comImport) return null;
 
-    const isDependency = this.isDependency(comImport.source);
+    const isDependency = this.isDependency(comImport.source, fileName);
     if (isDependency) {
       return { id: comImport.localName, isDependency: true };
     }
@@ -870,8 +870,8 @@ export class ComponentDB {
     this.isResolve = false;
   }
 
-  public isDependency(name: string): boolean {
-    return this.packageJson.isDependency(name);
+  public isDependency(name: string, fileName?: string): boolean {
+    return this.packageJson.isDependency(name, fileName ? path.resolve(this.dir, fileName) : undefined);
   }
 
   public getImportFileName(name: string, fileName: string) {
@@ -880,7 +880,7 @@ export class ComponentDB {
       const fileDir = path.dirname(fileName);
       source = path.join(fileDir, source);
       source = path.normalize(source);
-    } else if (!this.isDependency(source)) {
+    } else if (!this.isDependency(source, fileName)) {
       let isAliase = false;
       for (const alias in this.viteAliases) {
         if (source.startsWith(alias)) {
