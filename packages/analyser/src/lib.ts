@@ -1,22 +1,40 @@
 import fs from "node:fs";
 import path from "node:path";
-import { PackageJson } from "./db/packageJson.js";
+import type { JsonData, NexiqConfig } from "@nexiq/shared";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import type { JsonData, NexiqConfig } from "@nexiq/shared";
+import { CentralMaster } from "./centralMaster.js";
+import { PackageJson } from "./db/packageJson.js";
 import { SqliteDB } from "./db/sqlite.js";
+import type { AnalyzeProjectOptions } from "./types.js";
+
+function normalizeOptions(
+  cacheFileOrOptions?: string | AnalyzeProjectOptions,
+  ignorePatterns?: string[],
+  sqlitePath?: string,
+): AnalyzeProjectOptions {
+  if (cacheFileOrOptions && typeof cacheFileOrOptions === "object") {
+    return cacheFileOrOptions;
+  }
+
+  return {
+    cacheFile: cacheFileOrOptions,
+    ignorePatterns,
+    sqlitePath,
+  };
+}
 
 export async function analyzeProject(
   srcDir: string,
-  cacheFile?: string,
+  cacheFileOrOptions?: string | AnalyzeProjectOptions,
   ignorePatterns?: string[],
   sqlitePath?: string,
 ): Promise<JsonData> {
-  const packageJson = new PackageJson(srcDir);
+  const options = normalizeOptions(cacheFileOrOptions, ignorePatterns, sqlitePath);
   const viteConfigPath = getViteConfig(srcDir);
 
   const activeIgnorePatterns =
-    ignorePatterns ||
+    options.ignorePatterns ||
     (() => {
       const configPath = path.join(srcDir, "nexiq.config.json");
       if (fs.existsSync(configPath)) {
@@ -32,34 +50,44 @@ export async function analyzeProject(
       return undefined;
     })();
 
-  const files = getFiles(srcDir, activeIgnorePatterns || []);
-
   let cacheData = undefined;
-  if (cacheFile && fs.existsSync(cacheFile)) {
+  if (options.cacheFile && fs.existsSync(options.cacheFile)) {
     try {
-      cacheData = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
+      cacheData = JSON.parse(fs.readFileSync(options.cacheFile, "utf-8"));
     } catch (e) {
       console.warn("Failed to load cache", e);
     }
   }
 
+  if (options.monorepo) {
+    const master = new CentralMaster({
+      ...options,
+      srcDir,
+      cacheData,
+      ignorePatterns: activeIgnorePatterns || [],
+    });
+    return master.analyzeWorkspace();
+  }
+
+  const packageJson = new PackageJson(srcDir);
+  const files = getFiles(srcDir, activeIgnorePatterns || []);
   let sqlite: SqliteDB | undefined;
-  if (sqlitePath) {
-    sqlite = new SqliteDB(sqlitePath);
+
+  if (options.sqlitePath) {
+    sqlite = new SqliteDB(options.sqlitePath);
   }
 
-  const graph = await analyzeFiles(
-    srcDir,
-    viteConfigPath,
-    files,
-    packageJson,
-    cacheData,
-    sqlite,
-  );
-
-  if (sqlite) {
-    sqlite.close();
+  try {
+    return await analyzeFiles(
+      srcDir,
+      viteConfigPath,
+      files,
+      packageJson,
+      cacheData,
+      sqlite,
+      options.fileWorkerThreads,
+    );
+  } finally {
+    sqlite?.close();
   }
-
-  return graph;
 }

@@ -16,12 +16,14 @@ import CallExpression from "./analyzer/callExpression.js";
 import ReturnStatement from "./analyzer/returnStatement.js";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
+import type { FileTaskMessage } from "./types.js";
 
 interface WorkerParams {
   filePath: string;
   srcDir: string;
   viteAliases: Record<string, string>;
   packageJsonData: Record<string, unknown>;
+  runId?: string;
 }
 
 async function analyzeFile(params: WorkerParams) {
@@ -29,13 +31,12 @@ async function analyzeFile(params: WorkerParams) {
     filePath,
     srcDir,
     viteAliases,
-    packageJsonData: _packageJsonData,
+    packageJsonData,
   } = params;
   const fileName = "/" + filePath;
   const fullPath = path.resolve(srcDir, filePath);
 
-  const packageJson = new PackageJson(srcDir);
-  // Re-hydrate packageJson if needed (it currently reads from disk)
+  const packageJson = new PackageJson(srcDir, packageJsonData);
 
   const componentDB = new ComponentDB({
     packageJson,
@@ -80,14 +81,32 @@ if (parentPort) {
   parentPort.on("message", async (params: WorkerParams) => {
     try {
       const result = await analyzeFile(params);
-      parentPort!.postMessage({ type: "success", result });
+      const message: FileTaskMessage = {
+        type: "file_success",
+        filePath: params.filePath,
+        result,
+      };
+      parentPort!.postMessage(message);
     } catch (error) {
       console.error(`Worker error for ${params.filePath}:`, error);
-      parentPort!.postMessage({
-        type: "error",
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      const err = error as Error & {
+        code?: string;
+        loc?: { line?: number; column?: number };
+        pos?: number;
+      };
+      const isParseError =
+        err?.name === "SyntaxError" ||
+        typeof err?.message === "string" && err.message.includes("Unexpected");
+      const message: FileTaskMessage = {
+        type: isParseError ? "file_parse_error" : "file_extract_error",
+        filePath: params.filePath,
+        error: err instanceof Error ? err.message : String(error),
+        stack: err instanceof Error ? err.stack : undefined,
+        line: err?.loc?.line,
+        column: err?.loc?.column,
+        parser: "babel",
+      };
+      parentPort!.postMessage(message);
     }
   });
 }

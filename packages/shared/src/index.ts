@@ -94,6 +94,117 @@ export interface FileRow {
   star_exports_json: string | null;
 }
 
+export interface AnalysisRunRow {
+  id: string;
+  package_id: string | null;
+  src_dir: string;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+}
+
+export interface FileRunStatusRow {
+  id: string;
+  run_id: string;
+  package_id: string | null;
+  file_path: string;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+  attempt: number;
+  file_hash: string | null;
+  fingerprint: string | null;
+}
+
+export interface FileAnalysisErrorRow {
+  id: string;
+  run_id: string;
+  package_id: string | null;
+  file_path: string;
+  stage: string;
+  error_code: string | null;
+  message: string;
+  line: number | null;
+  column: number | null;
+  stack: string | null;
+  parser: string | null;
+  file_hash: string | null;
+  fingerprint: string | null;
+  created_at: string;
+}
+
+export interface ResolveErrorRow {
+  id: string;
+  run_id: string;
+  package_id: string | null;
+  file_path: string;
+  scope_id: string | null;
+  entity_id: string | null;
+  relation_kind: string;
+  source_name: string | null;
+  source_module: string | null;
+  target_hint: string | null;
+  resolver_stage: string;
+  message: string;
+  loc_line: number | null;
+  loc_column: number | null;
+  retry_count: number;
+  created_at: string;
+}
+
+export interface WorkspacePackageRow {
+  package_id: string;
+  name: string;
+  version: string | null;
+  path: string;
+  db_path: string;
+}
+
+export interface WorkspaceRunRow {
+  id: string;
+  root_dir: string;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+}
+
+export interface PackageRunSummaryRow {
+  id: string;
+  workspace_run_id: string;
+  package_id: string;
+  analysis_run_id: string;
+  status: string;
+  files_total: number;
+  files_succeeded: number;
+  files_failed: number;
+  resolve_errors: number;
+}
+
+export interface PackageRelationRow {
+  from_package_id: string;
+  to_package_id: string;
+  relation_kind: string;
+  source_file_path: string | null;
+  target_file_path: string | null;
+  source_symbol: string | null;
+  target_symbol: string | null;
+  run_id: string;
+}
+
+export interface CrossPackageResolveErrorRow {
+  id: string;
+  run_id: string;
+  from_package_id: string;
+  file_path: string;
+  source_name: string | null;
+  source_module: string | null;
+  relation_kind: string;
+  message: string;
+  loc_line: number | null;
+  loc_column: number | null;
+  created_at: string;
+}
+
 export interface ExportRow {
   id: string;
   scope_id: string;
@@ -104,8 +215,8 @@ export interface ExportRow {
 }
 
 export type DatabaseData = {
-  packages: PackageRow[];
-  package_dependencies: PackageDependencyRow[];
+  packages?: PackageRow[];
+  package_dependencies?: PackageDependencyRow[];
   files: FileRow[];
   entities: EntityRow[];
   scopes: ScopeRow[];
@@ -113,6 +224,10 @@ export type DatabaseData = {
   renders: RenderRow[];
   exports: ExportRow[];
   relations: RelationRow[];
+  analysis_runs?: AnalysisRunRow[];
+  file_run_status?: FileRunStatusRow[];
+  file_analysis_errors?: FileAnalysisErrorRow[];
+  resolve_errors?: ResolveErrorRow[];
   diff?: AnalyzedDiff;
 };
 
@@ -163,3 +278,4 @@ export interface BenchmarkResult {
 export * from "./types/index.js";
 export * from "./component.js";
 export * from "./utils.js";
+export * from "./workspace.js";

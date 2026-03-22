@@ -1,27 +1,26 @@
 import { Worker } from "node:worker_threads";
-import type { ComponentFile } from "@nexiq/shared";
+import type { FileTaskMessage } from "./types.js";
 
 export interface WorkerParams {
   filePath: string;
   srcDir: string;
   viteAliases: Record<string, string>;
   packageJsonData: Record<string, unknown>;
+  runId?: string;
 }
 
-export type WorkerMessage =
-  | { type: "success"; result: ComponentFile }
-  | { type: "error"; error: string; stack?: string };
+export type WorkerMessage = FileTaskMessage;
 
 export class WorkerPool {
   private workers: { worker: Worker; idle: boolean }[] = [];
   private taskQueue: {
     task: WorkerParams;
-    resolve: (val: ComponentFile) => void;
+    resolve: (val: WorkerMessage) => void;
     reject: (err: Error) => void;
   }[] = [];
   private currentTasks = new Map<
     Worker,
-    { resolve: (val: ComponentFile) => void; reject: (err: Error) => void }
+    { resolve: (val: WorkerMessage) => void; reject: (err: Error) => void }
   >();
 
   constructor(
@@ -55,11 +54,7 @@ export class WorkerPool {
       this.currentTasks.delete(worker);
 
       if (task) {
-        if (msg.type === "success") {
-          task.resolve(msg.result);
-        } else {
-          task.reject(new Error(msg.error));
-        }
+        task.resolve(msg);
       }
       this.nextTask();
     }
@@ -89,7 +84,7 @@ export class WorkerPool {
     }
   }
 
-  public runTask(task: WorkerParams): Promise<ComponentFile> {
+  public runTask(task: WorkerParams): Promise<WorkerMessage> {
     return new Promise((resolve, reject) => {
       this.taskQueue.push({ task, resolve, reject });
       this.nextTask();

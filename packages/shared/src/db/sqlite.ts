@@ -1,5 +1,9 @@
 import type { Database } from "better-sqlite3";
 import type {
+  AnalysisRunRow,
+  FileRunStatusRow,
+  FileAnalysisErrorRow,
+  ResolveErrorRow,
   FileRow,
   EntityRow,
   RelationRow,
@@ -61,6 +65,18 @@ export class SqliteDB {
     const relations = this.db
       .prepare("SELECT * FROM relations")
       .all() as RelationRow[];
+    const analysis_runs = this.db
+      .prepare("SELECT * FROM analysis_runs")
+      .all() as AnalysisRunRow[];
+    const file_run_status = this.db
+      .prepare("SELECT * FROM file_run_status")
+      .all() as FileRunStatusRow[];
+    const file_analysis_errors = this.db
+      .prepare("SELECT * FROM file_analysis_errors")
+      .all() as FileAnalysisErrorRow[];
+    const resolve_errors = this.db
+      .prepare("SELECT * FROM resolve_errors")
+      .all() as ResolveErrorRow[];
 
     return {
       packages,
@@ -72,6 +88,10 @@ export class SqliteDB {
       renders,
       exports,
       relations,
+      analysis_runs,
+      file_run_status,
+      file_analysis_errors,
+      resolve_errors,
     };
   }
 
