@@ -528,7 +528,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "122ce8d003dc5fb0",
+          "hash": "4dea9e0051648424",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1549,6 +1549,7 @@
           "effects": {
             "311c554b828f67a5:effect:31:2": {
               "id": "311c554b828f67a5:effect:31:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 31,

@@ -1,4 +1,4 @@
-import type { DatabaseData, JsonData } from "../index.js";
+import type { DatabaseData } from "../index.js";
 import type {
   ProjectStatus,
   GitStatus,
@@ -6,7 +6,6 @@ import type {
   GitFileDiff,
   NexiqConfig,
   AppStateData,
-  UIStateMap,
 } from "./index.js";
 
 export interface BackendRequestMap {

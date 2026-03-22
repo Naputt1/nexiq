@@ -256,6 +256,9 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@25.5.0)(@vitest/ui@3.2.4)(jiti@2.6.1)(tsx@4.21.0)
 
   packages/sample-project/async-functions:
     dependencies:
@@ -487,6 +490,8 @@ importers:
         specifier: npm:rolldown-vite@7.2.2
         version: rolldown-vite@7.2.2(@types/node@24.12.0)(jiti@2.6.1)(tsx@4.21.0)
 
+  packages/sample-project/test: {}
+
   packages/sample-project/ts-method-signature:
     dependencies:
       react:
@@ -580,15 +585,27 @@ importers:
 
   packages/shared:
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.39.1
+        version: 9.39.4
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
       better-sqlite3:
         specifier: ^12.6.2
         version: 12.8.0
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.4(jiti@2.6.1)
+      globals:
+        specifier: ^16.5.0
+        version: 16.5.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.46.4
+        version: 8.57.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
 
 packages:
 

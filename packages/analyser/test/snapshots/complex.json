@@ -816,7 +816,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "e859dca2dea7b26",
+          "hash": "8c5389dc8f06df96",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -955,6 +955,7 @@
           "effects": {
             "7a755d146a3ba89a:effect:8:2": {
               "id": "7a755d146a3ba89a:effect:8:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 8,
@@ -1042,7 +1043,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "531facef32a6da40",
+          "hash": "92eb4b53439844e6",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -1186,6 +1187,7 @@
           "effects": {
             "79cf30df8bf873d3:effect:21:2": {
               "id": "79cf30df8bf873d3:effect:21:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 21,
@@ -3353,7 +3355,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "4faad7bce416b61e",
+          "hash": "5378e8ec8587621b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3520,6 +3522,7 @@
           "effects": {
             "7732b08b7377499b:effect:49:2": {
               "id": "7732b08b7377499b:effect:49:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 49,

@@ -56,6 +56,7 @@ export interface ComponentInfoRender extends ComponentLoc {
 
 export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
+  name?: string;
   scope?: VariableScope;
   file?: string;
   kind?: "effect";
@@ -89,7 +90,7 @@ export interface ReactFunctionInfo extends ReactFunctionInfoBase {
   file: string;
 }
 
-export interface HookInfo extends ReactFunctionInfoBase {}
+export type HookInfo = ReactFunctionInfoBase;
 
 export interface ComponentInfo extends ReactFunctionInfoBase {
   componentType: "Function" | "Class";
@@ -185,7 +186,7 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   dependencies: Record<string, ComponentFileVarDependency>;
   ui?:
     | (UIItemState & {
-        children?: Record<string, UIItemState>;
+        renders?: Record<string, UIItemState>;
         vars?: Record<string, UIItemState>;
       })
     | undefined;
@@ -249,11 +250,13 @@ export type ComponentFileVarReactWithCallback<
   TType extends VarType = "function",
 > = ComponentFileVarBaseTypeFunction<TKind, TType> & ReactDependencies;
 
-export type ComponentFileVarComponent =
-  ComponentFileVarReactFunction<"component", "function" | "class"> &
-    ComponentInfo & {
-      kind: "component";
-    };
+export type ComponentFileVarComponent = ComponentFileVarReactFunction<
+  "component",
+  "function" | "class"
+> &
+  ComponentInfo & {
+    kind: "component";
+  };
 
 export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
   setter?: string | undefined;
@@ -267,7 +270,10 @@ export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {
   defaultData: PropDataType;
 };
 
-export type ComponentFileVarHook = ComponentFileVarReactFunction<"hook", "function"> &
+export type ComponentFileVarHook = ComponentFileVarReactFunction<
+  "hook",
+  "function"
+> &
   HookInfo & {
     kind: "hook";
   };
@@ -283,9 +289,10 @@ export type ComponentFileVarNormalBase<TType extends VarType> = ComponentLoc &
     kind: "normal";
   };
 
-export type ComponentFileVarNormalFunction =
-  ComponentFileVarNormalBase<"function" | "class"> &
-    ComponentFileVarBaseTypeFunction<"normal">;
+export type ComponentFileVarNormalFunction = ComponentFileVarNormalBase<
+  "function" | "class"
+> &
+  ComponentFileVarBaseTypeFunction<"normal">;
 export type ComponentFileVarNormalData = ComponentFileVarNormalBase<"data"> &
   ComponentFileVarBaseTypeData<"normal">;
 

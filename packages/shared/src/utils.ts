@@ -3,6 +3,10 @@ import type { GitFileDiff, GitDiffHunk } from "./types/git.js";
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
+export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
 export const getDisplayName = (
   name: VariableName | string | undefined,
 ): string => {

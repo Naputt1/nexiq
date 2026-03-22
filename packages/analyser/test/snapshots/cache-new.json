@@ -205,7 +205,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "9a7d321ce404d29d",
+          "hash": "9e1f5342a720745",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -604,6 +604,7 @@
           "effects": {
             "8058275cdfd1a41c:effect:6:2": {
               "id": "8058275cdfd1a41c:effect:6:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 6,

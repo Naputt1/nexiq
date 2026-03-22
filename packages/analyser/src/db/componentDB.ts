@@ -4,6 +4,7 @@ import type {
   DataEdge,
   ComponentFileExport,
   JsonData,
+  ComponentFileVar,
   ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
@@ -23,6 +24,7 @@ import type {
   VarKind,
   FunctionReturn,
   ComponentDBResolve,
+  DistributiveOmit,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -225,15 +227,10 @@ export class ComponentDB {
 
   public addVariable(
     fileName: string,
-    variable:
-      | Omit<
-          ComponentFileVarNormalFunction,
-          "id" | "kind" | "var" | "children" | "file" | "hash"
-        >
-      | Omit<
-          ComponentFileVarNormalData,
-          "id" | "kind" | "var" | "children" | "file" | "hash"
-        >,
+    variable: DistributiveOmit<
+      ComponentFileVar,
+      "id" | "kind" | "var" | "children" | "file" | "hash" | "components"
+    >,
     kind?: VarKind,
     declarationKind?:
       | "const"
@@ -252,17 +249,37 @@ export class ComponentDB {
       v = new FunctionVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+          ...(variable as unknown as Omit<
+            ComponentFileVarNormalFunction,
+            | "id"
+            | "kind"
+            | "var"
+            | "children"
+            | "file"
+            | "hash"
+            | "components"
+            | "type"
+          >),
           children: {},
           declarationKind,
         },
         file,
       );
-    } else if (((variable as any).type as string) === "class") { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } else if (variable.type === "class") {
       v = new ClassVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+          ...(variable as unknown as Omit<
+            ComponentFileVarNormalFunction,
+            | "id"
+            | "kind"
+            | "var"
+            | "children"
+            | "file"
+            | "hash"
+            | "components"
+            | "type"
+          >),
           children: {},
           declarationKind,
         },
@@ -274,7 +291,10 @@ export class ComponentDB {
       v = new DataVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+          ...(variable as Omit<
+            ComponentFileVarNormalData,
+            "id" | "kind" | "var" | "children" | "file" | "hash"
+          >),
           kind,
           declarationKind,
         },
@@ -842,7 +862,7 @@ export class ComponentDB {
           taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
         },
       );
-      
+
       // debugger;
     }
 

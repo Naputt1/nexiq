@@ -52,7 +52,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "cb9574f954a502d1",
+          "hash": "8b8f3ea329aedc08",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -272,6 +272,7 @@
           "effects": {
             "d3a4c6ed6b965219:effect:10:2": {
               "id": "d3a4c6ed6b965219:effect:10:2",
+              "name": "useEffect",
               "scope": {
                 "start": {
                   "line": 10,

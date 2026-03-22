@@ -35,7 +35,7 @@ export abstract class Variable<
   loc: VariableLoc;
   ui?:
     | (UIItemState & {
-        children?: Record<string, UIItemState>;
+        renders?: Record<string, UIItemState>;
         vars?: Record<string, UIItemState>;
       })
     | undefined;

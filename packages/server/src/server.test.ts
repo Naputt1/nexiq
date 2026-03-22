@@ -29,7 +29,7 @@ describe("BackendServer", () => {
       projectPath: "/test",
       sqlitePath: "/test/db.sqlite",
       extensions: [],
-    } as any);
+    } as unknown as Awaited<ReturnType<ProjectManager["openProject"]>>);
     vi.mocked(mockProjectManager.getDatabaseData).mockResolvedValue({
       files: [],
       entities: [],
