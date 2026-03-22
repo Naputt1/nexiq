@@ -25,7 +25,15 @@ import ArrowFunctionExpression from "./analyzer/arrowFunctionExpression.js";
 import FunctionExpression from "./analyzer/functionExpression.js";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
-import type { DeferredResolveTask, FileRunStatus, PackageAnalysisSummary } from "./types.js";
+import type {
+  DeferredResolveTask,
+  FileRunStatus,
+  PackageAnalysisSummary,
+  WorkspaceAnalysisHandoff,
+  WorkspaceExternalImport,
+  WorkspacePackageDependency,
+  WorkspacePackageExport,
+} from "./types.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +57,44 @@ function getPackageRow(packageJson: PackageJsonStore, srcDir: string): PackageRo
     version: raw.version,
     path: srcDir,
   };
+}
+
+function getPackageNameFromModule(sourceModule: string) {
+  if (sourceModule.startsWith("@")) {
+    const parts = sourceModule.split("/");
+    return parts.slice(0, 2).join("/");
+  }
+  return sourceModule.split("/")[0] || sourceModule;
+}
+
+function getPackageSubpath(sourceModule: string) {
+  const packageName = getPackageNameFromModule(sourceModule);
+  const remainder = sourceModule.slice(packageName.length).replace(/^\/+/, "");
+  return remainder.length > 0 ? remainder : undefined;
+}
+
+function getEntryCandidates(
+  rawData: Record<string, unknown>,
+): string[] {
+  const candidates = new Set<string>();
+  const valueKeys = ["exports", "module", "main", "source"];
+  for (const key of valueKeys) {
+    const value = rawData[key];
+    if (typeof value === "string") {
+      candidates.add(value);
+    }
+  }
+
+  candidates.add("src/index.tsx");
+  candidates.add("src/index.ts");
+  candidates.add("src/index.jsx");
+  candidates.add("src/index.js");
+  candidates.add("index.tsx");
+  candidates.add("index.ts");
+  candidates.add("index.jsx");
+  candidates.add("index.js");
+
+  return Array.from(candidates);
 }
 
 function toDeferredResolveTask(
@@ -120,6 +166,18 @@ function toDeferredResolveTask(
         message: `Failed to resolve component props type ${task.id}`,
         resolverStage: "package_local",
       };
+    case "crossPackageImport":
+      return {
+        filePath: task.fileName,
+        packageId,
+        type: task.type,
+        sourceName: task.localName,
+        sourceModule: task.source,
+        targetHint: task.importedName || task.localName,
+        retryCount: 0,
+        message: task.message || `Failed to resolve cross-package import ${task.source}`,
+        resolverStage: "cross_package",
+      };
   }
 }
 
@@ -150,6 +208,7 @@ export class PackageMaster {
   private readonly packageRow: PackageRow | undefined;
   private readonly runId: string;
   private readonly startedAt: string;
+  private readonly packageName: string;
 
   constructor(options: PackageMasterOptions) {
     this.srcDir = options.srcDir;
@@ -170,6 +229,9 @@ export class PackageMaster {
       sqlite: this.sqlite,
     });
     this.packageRow = getPackageRow(this.packageJson, this.srcDir);
+    this.packageName =
+      this.packageRow?.name ||
+      ((this.packageJson.rawData as { name?: string }).name ?? this.srcDir);
     this.runId = createRunId("run", this.packageRow?.id || this.srcDir);
     this.startedAt = new Date().toISOString();
   }
@@ -334,6 +396,90 @@ export class PackageMaster {
     const result = this.componentDB.getFile(fileName).getData();
     result.package_id = this.packageJson.getPackageIdForFile(path.resolve(this.srcDir, filePath)) || undefined;
     return result;
+  }
+
+  private buildDependencies(): WorkspacePackageDependency[] {
+    const raw = this.packageJson.rawData as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const dependencies: WorkspacePackageDependency[] = [];
+
+    for (const [name, version] of Object.entries(raw.dependencies || {})) {
+      dependencies.push({
+        name,
+        version,
+        isDev: false,
+      });
+    }
+
+    for (const [name, version] of Object.entries(raw.devDependencies || {})) {
+      dependencies.push({
+        name,
+        version,
+        isDev: true,
+      });
+    }
+
+    return dependencies;
+  }
+
+  private buildWorkspaceHandoff(
+    graphData: JsonData,
+    unresolvedTasks: ComponentDBResolve[],
+  ): WorkspaceAnalysisHandoff {
+    const exports: WorkspacePackageExport[] = [];
+    const externalImports: WorkspaceExternalImport[] = [];
+
+    for (const file of Object.values(graphData.files)) {
+      for (const fileExport of Object.values(file.export)) {
+        exports.push({
+          packageId: this.packageRow?.id || this.srcDir,
+          packageName: this.packageName,
+          filePath: file.path,
+          exportName: fileExport.name,
+          exportType: fileExport.type,
+          exportKind: fileExport.exportKind,
+          exportId: fileExport.id,
+          isDefault: fileExport.type === "default",
+        });
+      }
+
+      for (const fileImport of Object.values(file.import)) {
+        if (
+          fileImport.source.startsWith(".") ||
+          fileImport.source.startsWith("/") ||
+          fileImport.source.startsWith("node:")
+        ) {
+          continue;
+        }
+
+        externalImports.push({
+          packageId: this.packageRow?.id || this.srcDir,
+          packageName: this.packageName,
+          filePath: file.path,
+          sourceModule: fileImport.source,
+          sourcePackageName: getPackageNameFromModule(fileImport.source),
+          sourceSubpath: getPackageSubpath(fileImport.source),
+          localName: fileImport.localName,
+          importedName: fileImport.importedName,
+          importType: fileImport.type,
+          importKind: fileImport.importKind,
+        });
+      }
+    }
+
+    return {
+      packageId: this.packageRow?.id || this.srcDir,
+      packageName: this.packageName,
+      exports,
+      externalImports,
+      dependencies: this.buildDependencies(),
+      deferredResolveTasks: unresolvedTasks.map((task) =>
+        toDeferredResolveTask(task, this.packageRow?.id),
+      ),
+      entryCandidates: getEntryCandidates(this.packageJson.rawData),
+    };
   }
 
   public async analyzePackage(): Promise<PackageAnalysisSummary> {
@@ -514,6 +660,7 @@ export class PackageMaster {
 
     return {
       packageId: this.packageRow?.id || this.srcDir,
+      packageName: this.packageName,
       runId: this.runId,
       srcDir: this.srcDir,
       filesTotal: filesToAnalyze.length,
@@ -521,6 +668,7 @@ export class PackageMaster {
       filesFailed,
       resolveErrors: unresolvedTasks.length,
       graph: graphData,
+      workspaceHandoff: this.buildWorkspaceHandoff(graphData, unresolvedTasks),
     };
   }
 }

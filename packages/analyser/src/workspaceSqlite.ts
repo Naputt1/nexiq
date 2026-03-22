@@ -47,6 +47,34 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         FOREIGN KEY (workspace_run_id) REFERENCES workspace_runs (id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS package_export_index (
+        id TEXT PRIMARY KEY,
+        run_id TEXT NOT NULL,
+        package_id TEXT NOT NULL,
+        package_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        export_name TEXT NOT NULL,
+        export_type TEXT NOT NULL,
+        export_kind TEXT NOT NULL,
+        export_id TEXT NOT NULL,
+        is_default BOOLEAN NOT NULL DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS deferred_external_imports (
+        id TEXT PRIMARY KEY,
+        run_id TEXT NOT NULL,
+        package_id TEXT NOT NULL,
+        package_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        source_module TEXT NOT NULL,
+        source_package_name TEXT NOT NULL,
+        source_subpath TEXT,
+        local_name TEXT NOT NULL,
+        imported_name TEXT,
+        import_type TEXT NOT NULL,
+        import_kind TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS package_relations (
         from_package_id TEXT NOT NULL,
         to_package_id TEXT NOT NULL,
@@ -72,6 +100,9 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         loc_column INTEGER,
         created_at TEXT NOT NULL
       );
+
+      CREATE INDEX IF NOT EXISTS idx_package_export_index_package ON package_export_index (package_id, export_name, is_default);
+      CREATE INDEX IF NOT EXISTS idx_deferred_external_imports_package ON deferred_external_imports (package_id, source_package_name);
     `);
   }
 
@@ -135,6 +166,76 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         data.files_succeeded,
         data.files_failed,
         data.resolve_errors,
+      );
+  }
+
+  public updatePackageRunSummaryStatus(id: string, status: string) {
+    this.db
+      .prepare("UPDATE package_run_summaries SET status = ? WHERE id = ?")
+      .run(status, id);
+  }
+
+  public insertPackageExport(data: {
+    id: string;
+    run_id: string;
+    package_id: string;
+    package_name: string;
+    file_path: string;
+    export_name: string;
+    export_type: string;
+    export_kind: string;
+    export_id: string;
+    is_default: boolean;
+  }) {
+    this.db
+      .prepare(
+        "INSERT OR REPLACE INTO package_export_index (id, run_id, package_id, package_name, file_path, export_name, export_type, export_kind, export_id, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
+      .run(
+        data.id,
+        data.run_id,
+        data.package_id,
+        data.package_name,
+        data.file_path,
+        data.export_name,
+        data.export_type,
+        data.export_kind,
+        data.export_id,
+        data.is_default ? 1 : 0,
+      );
+  }
+
+  public insertDeferredExternalImport(data: {
+    id: string;
+    run_id: string;
+    package_id: string;
+    package_name: string;
+    file_path: string;
+    source_module: string;
+    source_package_name: string;
+    source_subpath?: string | undefined;
+    local_name: string;
+    imported_name: string | null;
+    import_type: string;
+    import_kind: string;
+  }) {
+    this.db
+      .prepare(
+        "INSERT OR REPLACE INTO deferred_external_imports (id, run_id, package_id, package_name, file_path, source_module, source_package_name, source_subpath, local_name, imported_name, import_type, import_kind) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
+      .run(
+        data.id,
+        data.run_id,
+        data.package_id,
+        data.package_name,
+        data.file_path,
+        data.source_module,
+        data.source_package_name,
+        data.source_subpath || null,
+        data.local_name,
+        data.imported_name,
+        data.import_type,
+        data.import_kind,
       );
   }
 

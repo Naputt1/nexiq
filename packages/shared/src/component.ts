@@ -366,12 +366,24 @@ export type IResolveComPropsTsType = {
   id: string;
 };
 
+export type IResolveCrossPackageImport = {
+  type: "crossPackageImport";
+  fileName: string;
+  source: string;
+  localName: string;
+  importedName: string | null;
+  importType: ComponentFileImport["type"];
+  importKind: ComponentFileImport["importKind"];
+  message?: string | undefined;
+};
+
 export type ComponentDBResolve =
   | IResolveAddRender
   | IResolveAddHook
   | IResolveCallHook
   | IResolveTsType
-  | IResolveComPropsTsType;
+  | IResolveComPropsTsType
+  | IResolveCrossPackageImport;
 
 export type ComponentFile = {
   path: string;
