@@ -90,6 +90,8 @@ export interface TypeDataLiteralType {
 export type TypeDataRef = {
   type: "ref";
   params?: TypeData[];
+  resolvedId?: string | undefined;
+  unresolvedWorkspace?: boolean | undefined;
 } & (
   | {
       refType: "named";
@@ -192,6 +194,8 @@ export interface TypeDataImport {
   type: "import";
   name: string;
   qualifier?: string;
+  resolvedId?: string | undefined;
+  unresolvedWorkspace?: boolean | undefined;
 }
 
 export interface TypeDataLiteralBodyBase {

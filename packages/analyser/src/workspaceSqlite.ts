@@ -17,6 +17,25 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
   }
 
   private initSchema() {
+    const versionRow = this.db.prepare("PRAGMA user_version").get() as {
+      user_version: number;
+    };
+    const currentVersion = versionRow.user_version;
+    const targetVersion = 2;
+
+    if (currentVersion < targetVersion) {
+      this.db.exec(`
+        DROP TABLE IF EXISTS cross_package_resolve_errors;
+        DROP TABLE IF EXISTS package_relations;
+        DROP TABLE IF EXISTS deferred_external_imports;
+        DROP TABLE IF EXISTS package_export_index;
+        DROP TABLE IF EXISTS package_run_summaries;
+        DROP TABLE IF EXISTS workspace_runs;
+        DROP TABLE IF EXISTS workspace_packages;
+        PRAGMA user_version = ${targetVersion};
+      `);
+    }
+
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS workspace_packages (
         package_id TEXT PRIMARY KEY,
@@ -84,7 +103,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         source_symbol TEXT,
         target_symbol TEXT,
         run_id TEXT NOT NULL,
-        PRIMARY KEY (from_package_id, to_package_id, relation_kind, source_file_path, source_symbol)
+        PRIMARY KEY (run_id, from_package_id, to_package_id, relation_kind, source_file_path, source_symbol)
       );
 
       CREATE TABLE IF NOT EXISTS cross_package_resolve_errors (
@@ -103,6 +122,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
 
       CREATE INDEX IF NOT EXISTS idx_package_export_index_package ON package_export_index (package_id, export_name, is_default);
       CREATE INDEX IF NOT EXISTS idx_deferred_external_imports_package ON deferred_external_imports (package_id, source_package_name);
+      CREATE INDEX IF NOT EXISTS idx_package_relations_run ON package_relations (run_id, from_package_id, to_package_id);
     `);
   }
 

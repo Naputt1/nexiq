@@ -16,9 +16,11 @@ import type {
   TypeDataArray,
   TypeDataDeclare,
   TypeDataFunction,
+  TypeDataImport,
   TypeDataIndexAccess,
   TypeDataLiteralType,
   TypeDataLiteralTypeLiteral,
+  TypeDataQuery,
   TypeDataRef,
   TypeDataTuple,
   TypeDataTypeBodyIntersection,
@@ -58,6 +60,7 @@ import { RefVariable } from "./variable/refVariable.js";
 import { MemoVariable } from "./variable/memo.js";
 import { CallbackVariable } from "./variable/callbackVariable.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
+import type { PackageJson } from "./packageJson.js";
 
 import { Scope } from "./variable/scope.js";
 import { CallHookVariable } from "./variable/callHookVariable.js";
@@ -65,6 +68,8 @@ import { BaseFunctionVariable } from "./variable/baseFunctionVariable.js";
 
 type TypeDataHandlerMap = {
   ref: TypeDataRef;
+  import: TypeDataImport;
+  query: TypeDataQuery;
   union: TypeDataTypeBodyUnion;
   intersection: TypeDataTypeBodyIntersection;
   array: TypeDataArray;
@@ -82,6 +87,8 @@ type TypeDataHandler<T> = (
   file: File,
   params: Set<string>,
 ) => boolean;
+
+const FILE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 
 export class File {
   path: string;
@@ -202,6 +209,8 @@ export class File {
         source: importData.source,
         type: importData.type,
         importKind: importData.importKind,
+        resolvedId: importData.resolvedId,
+        unresolvedWorkspace: importData.unresolvedWorkspace,
       });
     }
 
@@ -239,6 +248,8 @@ export class File {
       source: fileImport.source,
       type: fileImport.type,
       importKind: fileImport.importKind,
+      resolvedId: fileImport.resolvedId,
+      unresolvedWorkspace: fileImport.unresolvedWorkspace,
     });
   }
 
@@ -412,7 +423,11 @@ export class File {
 
           if (v.kind === "hook" && v.type === "data") {
             const hookCall = v;
-            if (hookCall.call.id) {
+            if (
+              hookCall.call.id &&
+              !hookCall.call.unresolvedWorkspace &&
+              !hookCall.call.resolvedId
+            ) {
               edges.push({
                 from: hookCall.id,
                 to: hookCall.call.id,
@@ -485,11 +500,13 @@ export class File {
         }
 
         if (v && isCallHookVariable(v)) {
-          edges.push({
-            from: v.id,
-            to: v.call.id,
-            label: "hook",
-          });
+          if (!v.call.unresolvedWorkspace && !v.call.resolvedId) {
+            edges.push({
+              from: v.id,
+              to: v.call.id,
+              label: "hook",
+            });
+          }
         }
         for (const dep of Object.values(v.dependencies || {})) {
           edges.push({
@@ -795,10 +812,12 @@ export class FileDB {
   src_dir: string;
 
   private files: Map<string, File>;
+  private readonly packageJson: PackageJson;
 
-  constructor(src_dir: string) {
+  constructor(src_dir: string, packageJson: PackageJson) {
     this.files = new Map();
     this.src_dir = src_dir;
+    this.packageJson = packageJson;
   }
 
   public getFiles() {
@@ -1039,28 +1058,128 @@ export class FileDB {
     file.addVariableDependency(parent, dependency);
   }
 
-  public getRefTypeId(name: string, file: File): string | undefined {
+  private isWorkspaceDependencyImport(source: string, filePath: string) {
+    const rawPackageName =
+      typeof this.packageJson.rawData.name === "string"
+        ? this.packageJson.rawData.name
+        : undefined;
+    const currentScope = rawPackageName?.startsWith("@")
+      ? rawPackageName.split("/")[0]
+      : undefined;
+    const sourceScope = source.startsWith("@") ? source.split("/")[0] : undefined;
+    const resolvedFileName = filePath.startsWith("/")
+      ? path.join(this.src_dir, filePath)
+      : path.resolve(this.src_dir, filePath);
+
+    return (
+      currentScope != null &&
+      sourceScope === currentScope &&
+      this.packageJson.isDependency(source, resolvedFileName)
+    );
+  }
+
+  private getImportSymbolId(filePath: string, localName: string) {
+    return `symbol:import:${filePath}:${localName}`;
+  }
+
+  private resolveSourceFileFromModule(
+    currentFilePath: string,
+    source: string,
+  ): string | null {
+    let normalizedSource = source;
+    if (source.startsWith(".") || source.startsWith("/")) {
+      const currentDir = path.posix.dirname(currentFilePath);
+      normalizedSource = source.startsWith("/")
+        ? path.posix.normalize(source)
+        : path.posix.normalize(path.posix.join(currentDir, source));
+    } else {
+      return this.has(source) ? source : null;
+    }
+
+    if (this.has(normalizedSource)) {
+      return normalizedSource;
+    }
+
+    for (const extension of FILE_EXTENSIONS) {
+      if (this.has(`${normalizedSource}${extension}`)) {
+        return `${normalizedSource}${extension}`;
+      }
+      if (this.has(path.posix.join(normalizedSource, `index${extension}`))) {
+        return path.posix.join(normalizedSource, `index${extension}`);
+      }
+    }
+
+    return null;
+  }
+
+  private getExportIdFromImportSource(
+    currentFilePath: string,
+    source: string,
+    exportName: string,
+    importKind: ComponentFileImport["importKind"] = "type",
+  ) {
+    const resolvedSource = this.resolveSourceFileFromModule(currentFilePath, source);
+    if (!resolvedSource || !this.has(resolvedSource)) {
+      return undefined;
+    }
+
+    const sourceFile = this.get(resolvedSource);
+    return sourceFile.getExport(
+      {
+        localName: exportName,
+        importedName: exportName,
+        source: resolvedSource,
+        type: "named",
+        importKind,
+      },
+      this,
+    );
+  }
+
+  private getRefTypeResolution(
+    name: string,
+    file: File,
+  ): {
+    id: string;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  } | null {
     const varId = file.getVariableID(name);
-    if (varId) return varId;
+    if (varId) return { id: varId };
 
     const type = file.getTypeFromName(name);
-    if (type) return type.id;
+    if (type) return { id: type.id };
 
-    if (file.getTypeByID(name)) return name;
+    if (file.getTypeByID(name)) return { id: name };
 
     if (file.import?.has(name)) {
       const importData = file.import.get(name);
       if (importData) {
         if (this.has(importData.source)) {
-          const file = this.get(importData.source);
-          if (file) {
-            return file.getExport(importData, this);
+          const sourceFile = this.get(importData.source);
+          if (sourceFile) {
+            const exportId = sourceFile.getExport(importData, this);
+            if (exportId) {
+              return { id: exportId };
+            }
           }
+        }
+
+        if (this.isWorkspaceDependencyImport(importData.source, file.path)) {
+          return {
+            id: this.getImportSymbolId(file.path, importData.localName),
+            resolvedId: importData.resolvedId,
+            unresolvedWorkspace: importData.unresolvedWorkspace ?? true,
+          };
         }
       }
     }
 
-    return undefined;
+    return null;
+  }
+
+  public getRefTypeId(name: string, file: File): string | undefined {
+    return this.getRefTypeResolution(name, file)?.id;
   }
 
   private updateTypeDataLiteral(
@@ -1088,6 +1207,121 @@ export class FileDB {
     }
   }
 
+  private applyTypeResolution(
+    typeData: TypeDataRef | TypeDataImport,
+    resolution: {
+      id: string;
+      resolvedId?: string | undefined;
+      unresolvedWorkspace?: boolean | undefined;
+    },
+    options?: {
+      keepQualified?: boolean;
+      qualifiedMember?: string;
+    },
+  ) {
+    if ("refType" in typeData) {
+      if (options?.keepQualified) {
+        if (typeData.refType === "qualified" && typeData.names.length > 0) {
+          typeData.names[0] = resolution.id;
+          if (options.qualifiedMember) {
+            typeData.names[1] = options.qualifiedMember;
+          }
+        }
+      } else if (typeData.refType === "named") {
+        typeData.name = resolution.id;
+      } else {
+        const ref = typeData as unknown as Record<string, unknown>;
+        ref.refType = "named";
+        ref.name = resolution.id;
+        delete ref.names;
+      }
+    } else {
+      typeData.name = resolution.id;
+    }
+
+    if (resolution.resolvedId) {
+      typeData.resolvedId = resolution.resolvedId;
+    }
+    if (resolution.unresolvedWorkspace) {
+      typeData.unresolvedWorkspace = true;
+    } else {
+      delete typeData.unresolvedWorkspace;
+    }
+  }
+
+  private getQualifiedRefTypeResolution(
+    typeData: TypeDataRef,
+    file: File,
+  ): {
+    id: string;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  } | null {
+    if (typeData.refType !== "qualified" || typeData.names.length !== 2) {
+      return null;
+    }
+
+    const [namespaceName, exportName] = typeData.names;
+    if (!namespaceName || !exportName) {
+      return null;
+    }
+
+    const importData = file.import.get(namespaceName);
+    if (!importData || importData.type !== "namespace") {
+      return null;
+    }
+
+    const localExportId = this.getExportIdFromImportSource(
+      file.path,
+      importData.source,
+      exportName,
+      importData.importKind,
+    );
+    if (localExportId) {
+      return { id: localExportId };
+    }
+
+    if (this.isWorkspaceDependencyImport(importData.source, file.path)) {
+      return {
+        id: this.getImportSymbolId(file.path, importData.localName),
+        resolvedId: importData.resolvedId,
+        unresolvedWorkspace: importData.unresolvedWorkspace ?? true,
+      };
+    }
+
+    return null;
+  }
+
+  private getImportTypeResolution(
+    typeData: TypeDataImport,
+    file: File,
+  ): {
+    id: string;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  } | null {
+    if (typeData.qualifier) {
+      const localExportId = this.getExportIdFromImportSource(
+        file.path,
+        typeData.name,
+        typeData.qualifier,
+      );
+      if (localExportId) {
+        return { id: localExportId };
+      }
+    }
+
+    if (this.isWorkspaceDependencyImport(typeData.name, file.path)) {
+      return {
+        id: typeData.name,
+        resolvedId: typeData.resolvedId,
+        unresolvedWorkspace: typeData.unresolvedWorkspace ?? true,
+      };
+    }
+
+    return null;
+  }
+
   private _resolveTypeRef(
     typeData: TypeDataRef,
     file: File,
@@ -1096,14 +1330,34 @@ export class FileDB {
     const name = this.getTypeDataRefName(typeData);
     if (params.has(name)) return true;
 
-    const id = this.getRefTypeId(name, file);
-    if (id != null) {
-      if (typeData.refType === "named") {
-        typeData.name = id;
-      } else {
-        assert(typeData.names?.length > 0);
-        typeData.names[0] = id;
+    if (typeData.unresolvedWorkspace) {
+      if (typeData.params) {
+        for (const param of typeData.params) {
+          if (!this.updateTypeDataID(param, file, params)) return false;
+        }
       }
+      return true;
+    }
+
+    const resolution =
+      (typeData.refType === "qualified"
+        ? this.getQualifiedRefTypeResolution(typeData, file)
+        : null) || this.getRefTypeResolution(name, file);
+    if (resolution != null) {
+      const resolutionOptions =
+        typeData.refType === "qualified"
+          ? typeData.names[1]
+            ? {
+                keepQualified: !!resolution.unresolvedWorkspace,
+                qualifiedMember: typeData.names[1],
+              }
+            : {
+                keepQualified: !!resolution.unresolvedWorkspace,
+              }
+          : undefined;
+      this.applyTypeResolution(typeData, resolution, {
+        ...resolutionOptions,
+      });
     } else {
       return false;
     }
@@ -1122,6 +1376,25 @@ export class FileDB {
   } = {
     ref: (db, td: TypeDataRef, file, params) =>
       db._resolveTypeRef(td, file, params),
+    import: (db, td: TypeDataImport, file, _params) => {
+      if (td.unresolvedWorkspace) {
+        return true;
+      }
+
+      const resolution = db.getImportTypeResolution(td, file);
+      if (!resolution) {
+        return false;
+      }
+
+      db.applyTypeResolution(td, resolution);
+      return true;
+    },
+    query: (db, td: TypeDataQuery, file, params) => {
+      if (td.expr.type === "import") {
+        return FileDB.TYPE_DATA_HANDLERS.import(db, td.expr, file, params);
+      }
+      return true;
+    },
     union: (db, td: TypeDataTypeBodyUnion, file, params) =>
       td.members.every((m) => db.updateTypeDataID(m, file, params)),
     intersection: (db, td: TypeDataTypeBodyIntersection, file, params) =>
@@ -1203,6 +1476,10 @@ export class FileDB {
   ): boolean {
     if (typeData.type === "ref") {
       return FileDB.TYPE_DATA_HANDLERS.ref(this, typeData, file, params);
+    } else if (typeData.type === "import") {
+      return FileDB.TYPE_DATA_HANDLERS.import(this, typeData, file, params);
+    } else if (typeData.type === "query") {
+      return FileDB.TYPE_DATA_HANDLERS.query(this, typeData, file, params);
     } else if (typeData.type === "union") {
       return FileDB.TYPE_DATA_HANDLERS.union(this, typeData, file, params);
     } else if (typeData.type === "intersection") {

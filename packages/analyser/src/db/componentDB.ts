@@ -77,7 +77,7 @@ export class ComponentDB {
 
   constructor(options: ComponentDBOptions) {
     this.edges = [];
-    this.files = new FileDB(options.dir);
+    this.files = new FileDB(options.dir, options.packageJson);
 
     this.resolveTasks = [];
     this.unresolvedResolveTasks = [];
@@ -347,19 +347,29 @@ export class ComponentDB {
     const comImport = this.files.getImport(fileName, hookName);
 
     if (comImport?.source !== "react") {
-      const exportInfo = this._getExportId(fileName, hookName);
-      let hookId: string | null = null;
-
-      if (exportInfo) {
-        hookId = exportInfo.id;
-      } else {
-        hookId = this.getVariableID(hookName, fileName);
-      }
-
-      if (hookId) {
+      if (
+        comImport &&
+        this.isWorkspaceDependencyImport(comImport.source, fileName)
+      ) {
         const v = component.var.get(id);
         if (v && isCallHookVariable(v)) {
-          v.call.id = hookId;
+          v.call.unresolvedWorkspace = true;
+        }
+        return id;
+      }
+
+      const resolvedTarget = this.getResolvedHookTarget(fileName, hookName);
+
+      if (resolvedTarget?.hookId) {
+        const v = component.var.get(id);
+        if (v && isCallHookVariable(v)) {
+          v.call.id = resolvedTarget.hookId;
+          if (resolvedTarget.resolvedId) {
+            v.call.resolvedId = resolvedTarget.resolvedId;
+          }
+          if (resolvedTarget.unresolvedWorkspace) {
+            v.call.unresolvedWorkspace = true;
+          }
         }
       } else {
         if (this.isResolve) return id;
@@ -406,16 +416,79 @@ export class ComponentDB {
     return this.files.addCallback(fileName, loc, callback);
   }
 
+  private isWorkspaceDependencyImport(source: string, fileName: string) {
+    const rawPackageName =
+      typeof this.packageJson.rawData.name === "string"
+        ? this.packageJson.rawData.name
+        : undefined;
+    const currentScope = rawPackageName?.startsWith("@")
+      ? rawPackageName.split("/")[0]
+      : undefined;
+    const sourceScope = source.startsWith("@") ? source.split("/")[0] : undefined;
+    const resolvedFileName = fileName.startsWith("/")
+      ? path.join(this.dir, fileName)
+      : path.resolve(this.dir, fileName);
+
+    return (
+      currentScope != null &&
+      sourceScope === currentScope &&
+      this.packageJson.isDependency(source, resolvedFileName)
+    );
+  }
+
+  private getResolvedHookTarget(fileName: string, hookName: string) {
+    const exportInfo = this._getExportId(fileName, hookName);
+    if (exportInfo) {
+      return {
+        hookId: exportInfo.id,
+        resolvedId: exportInfo.resolvedId,
+        unresolvedWorkspace: exportInfo.unresolvedWorkspace ? true : undefined,
+      };
+    }
+
+    const hookId = this.getVariableID(hookName, fileName);
+    if (hookId) {
+      return {
+        hookId,
+        resolvedId: undefined,
+        unresolvedWorkspace: undefined,
+      };
+    }
+
+    const comImport = this.files.getImport(fileName, hookName);
+    if (comImport && this.isWorkspaceDependencyImport(comImport.source, fileName)) {
+      return {
+        hookId: comImport.localName,
+        resolvedId: comImport.resolvedId,
+        unresolvedWorkspace: comImport.unresolvedWorkspace ?? true,
+      };
+    }
+
+    return null;
+  }
+
   private _getExportId(
     fileName: string,
     name: string,
-  ): { id: string; isDependency: boolean } | null {
+  ): {
+    id: string;
+    isDependency: boolean;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  } | null {
     const comImport = this.files.getImport(fileName, name);
     if (!comImport) return null;
 
     const isDependency = this.isDependency(comImport.source, fileName);
     if (isDependency) {
-      return { id: comImport.localName, isDependency: true };
+      return {
+        id: comImport.localName,
+        isDependency: true,
+        resolvedId: comImport.resolvedId,
+        unresolvedWorkspace:
+          comImport.unresolvedWorkspace ??
+          this.isWorkspaceDependencyImport(comImport.source, fileName),
+      };
     }
 
     if (this.files.has(comImport.source)) {
@@ -455,6 +528,10 @@ export class ComponentDB {
 
     const component = this.files.getHookInfoFromLoc(fileName, loc);
     if (component == null || !isReactFunctionVariable(component)) return;
+
+    if (exportInfo.isDependency && exportInfo.unresolvedWorkspace) {
+      return;
+    }
 
     component.addHook(exportInfo.id);
 
@@ -795,20 +872,32 @@ export class ComponentDB {
       db.comAddHook(task.name, task.loc, task.fileName, task.hook);
     },
     comResolveCallHook: (db, task) => {
-      const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
-      if (component && isReactFunctionVariable(component)) {
-        const exportInfo = db._getExportId(task.fileName, task.hook);
-        let hookId: string | null = null;
-        if (exportInfo) {
-          hookId = exportInfo.id;
-        } else {
-          hookId = db.getVariableID(task.hook, task.fileName);
-        }
+      const comImport = db.files.getImport(task.fileName, task.hook);
+      if (
+        comImport &&
+        db.isWorkspaceDependencyImport(comImport.source, task.fileName)
+      ) {
+        return true;
+      }
 
-        if (hookId) {
+      const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
+      const resolvedTarget = db.getResolvedHookTarget(task.fileName, task.hook);
+
+      if (resolvedTarget?.unresolvedWorkspace && !resolvedTarget.resolvedId) {
+        return true;
+      }
+
+      if (component && isReactFunctionVariable(component)) {
+        if (resolvedTarget?.hookId) {
           const v = component.var.get(task.id);
           if (v && isCallHookVariable(v)) {
-            v.call.id = hookId;
+            v.call.id = resolvedTarget.hookId;
+            if (resolvedTarget.resolvedId) {
+              v.call.resolvedId = resolvedTarget.resolvedId;
+            }
+            if (resolvedTarget.unresolvedWorkspace) {
+              v.call.unresolvedWorkspace = true;
+            }
           }
           return true;
         }
@@ -858,6 +947,23 @@ export class ComponentDB {
       }
 
       retries++;
+    }
+
+    if (this.resolveTasks.length > 0) {
+      const remainingTasks: ComponentDBResolve[] = [];
+      for (const task of this.resolveTasks) {
+        if (task.type === "comResolveCallHook") {
+          const comImport = this.files.getImport(task.fileName, task.hook);
+          if (
+            comImport &&
+            this.isWorkspaceDependencyImport(comImport.source, task.fileName)
+          ) {
+            continue;
+          }
+        }
+        remainingTasks.push(task);
+      }
+      this.resolveTasks = remainingTasks;
     }
 
     if (retries >= maxRetries && this.resolveTasks.length > 0) {
