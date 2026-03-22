@@ -20,13 +20,30 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1);
   });
 
-  process.on("SIGINT", async () => {
-    await projectManager.closeAll();
+  const cleanupAndExit = async () => {
+    console.log("Shutting down backend server...");
+    // Force exit after 1 second if closeAll hangs or workers are still running
+    setTimeout(() => {
+      console.error("Force exiting after timeout");
+      process.exit(0);
+    }, 1000).unref();
+    
+    try {
+      await projectManager.closeAll();
+    } catch (err) {
+      console.error("Error during cleanup:", err);
+    }
     process.exit(0);
-  });
+  };
 
-  process.on("SIGTERM", async () => {
-    await projectManager.closeAll();
-    process.exit(0);
-  });
+  process.on("SIGINT", cleanupAndExit);
+  process.on("SIGTERM", cleanupAndExit);
+
+  // If spawned with an IPC channel, exit when the parent process disconnects
+  if (process.send) {
+    process.on("disconnect", () => {
+      console.log("Parent process disconnected, exiting...");
+      cleanupAndExit();
+    });
+  }
 }
