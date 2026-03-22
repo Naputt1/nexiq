@@ -7,7 +7,7 @@
         "js": {
           "localName": "js",
           "importedName": null,
-          "source": "@eslint/js",
+          "source": "/src/eslint/js",
           "type": "default",
           "importKind": "value"
         },

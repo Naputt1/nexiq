@@ -12,6 +12,21 @@ export type DataEdge = {
   label: string;
 };
 
+export interface PackageRow {
+  id: string; // usually name@version or path
+  name: string;
+  version: string;
+  path: string;
+}
+
+export interface PackageDependencyRow {
+  id: number;
+  package_id: string;
+  dependency_name: string;
+  dependency_version: string;
+  is_dev: boolean;
+}
+
 export interface EntityRow {
   id: string;
   scope_id: string;
@@ -72,6 +87,7 @@ export interface RelationRow {
 export interface FileRow {
   id: number;
   path: string;
+  package_id: string | null;
   hash: string;
   fingerprint: string;
   default_export: string | null;
@@ -88,6 +104,8 @@ export interface ExportRow {
 }
 
 export type DatabaseData = {
+  packages: PackageRow[];
+  package_dependencies: PackageDependencyRow[];
   files: FileRow[];
   entities: EntityRow[];
   scopes: ScopeRow[];

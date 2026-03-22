@@ -10,6 +10,7 @@ import type {
   RelationRow,
   RenderRow,
   ExportRow,
+  PackageRow,
 } from "@nexiq/shared";
 import { SqliteDB as BaseSqliteDB } from "@nexiq/shared/db";
 import {
@@ -42,7 +43,7 @@ export class SqliteDB extends BaseSqliteDB {
       user_version: number;
     };
     const currentVersion = versionRow.user_version;
-    const targetVersion = 3;
+    const targetVersion = 4;
 
     if (currentVersion < targetVersion) {
       // Force recreation of affected tables to apply new schema/FK changes
@@ -53,6 +54,9 @@ export class SqliteDB extends BaseSqliteDB {
         DROP TABLE IF EXISTS symbols;
         DROP TABLE IF EXISTS scopes;
         DROP TABLE IF EXISTS entities;
+        DROP TABLE IF EXISTS files;
+        DROP TABLE IF EXISTS package_dependencies;
+        DROP TABLE IF EXISTS packages;
         PRAGMA user_version = ${targetVersion};
       `);
     }
@@ -69,13 +73,31 @@ export class SqliteDB extends BaseSqliteDB {
     }
 
     this.db.exec(`
+      CREATE TABLE IF NOT EXISTS packages (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        version TEXT NOT NULL,
+        path TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS package_dependencies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        package_id TEXT NOT NULL,
+        dependency_name TEXT NOT NULL,
+        dependency_version TEXT NOT NULL,
+        is_dev BOOLEAN DEFAULT 0,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         path TEXT UNIQUE NOT NULL,
+        package_id TEXT,
         hash TEXT NOT NULL,
         fingerprint TEXT NOT NULL,
         default_export TEXT,
-        star_exports_json TEXT
+        star_exports_json TEXT,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
       );
 
       CREATE TABLE IF NOT EXISTS entities (
@@ -159,7 +181,34 @@ export class SqliteDB extends BaseSqliteDB {
       CREATE INDEX IF NOT EXISTS idx_exports_scope ON exports (scope_id);
       CREATE INDEX IF NOT EXISTS idx_relations_from ON relations (from_id);
       CREATE INDEX IF NOT EXISTS idx_relations_to ON relations (to_id);
+      CREATE INDEX IF NOT EXISTS idx_files_package ON files (package_id);
+      CREATE INDEX IF NOT EXISTS idx_package_dependencies_package ON package_dependencies (package_id);
     `);
+  }
+
+  public insertPackage(data: PackageRow) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO packages (id, name, version, path)
+      VALUES (@id, @name, @version, @path)
+    `);
+    stmt.run(data);
+  }
+
+  public insertPackageDependency(data: { package_id: string; dependency_name: string; dependency_version: string; is_dev: boolean }) {
+    const stmt = this.db.prepare(`
+      INSERT INTO package_dependencies (package_id, dependency_name, dependency_version, is_dev)
+      VALUES (@package_id, @dependency_name, @dependency_version, @is_dev)
+    `);
+    stmt.run({
+      package_id: data.package_id,
+      dependency_name: data.dependency_name,
+      dependency_version: data.dependency_version,
+      is_dev: data.is_dev ? 1 : 0
+    });
+  }
+
+  public clearPackageDependencies(packageId: string) {
+    this.db.prepare("DELETE FROM package_dependencies WHERE package_id = ?").run(packageId);
   }
 
   private insertEntity(data: {
@@ -309,18 +358,19 @@ export class SqliteDB extends BaseSqliteDB {
     }
   }
 
-  public saveFileResults(fileData: ComponentFile) {
-    const transaction = this.db.transaction((data: ComponentFile) => {
+  public saveFileResults(fileData: ComponentFile & { package_id?: string | undefined }) {
+    const transaction = this.db.transaction((data: ComponentFile & { package_id?: string | undefined }) => {
       // 1. Insert/Update file
       this.db
         .prepare(
           `
-        INSERT OR REPLACE INTO files (path, hash, fingerprint, default_export, star_exports_json)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json)
+        VALUES (?, ?, ?, ?, ?, ?)
       `,
         )
         .run(
           data.path,
+          data.package_id || null,
           data.hash,
           data.fingerPrint,
           data.defaultExport,

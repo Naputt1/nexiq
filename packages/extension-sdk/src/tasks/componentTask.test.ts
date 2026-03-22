@@ -12,6 +12,7 @@ describe("componentTask", () => {
         fingerprint: "1",
         default_export: null,
         star_exports_json: null,
+        package_id: null,
       },
       {
         id: 2,
@@ -20,6 +21,7 @@ describe("componentTask", () => {
         fingerprint: "2",
         default_export: null,
         star_exports_json: null,
+        package_id: null,
       },
     ],
     entities: [
@@ -181,6 +183,8 @@ describe("componentTask", () => {
         data_json: null,
       },
     ],
+    packages: [],
+    package_dependencies: [],
   };
 
   const initialResult: GraphViewResult = {

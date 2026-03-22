@@ -64,6 +64,7 @@ async function analyzeFile(params: WorkerParams) {
   });
 
   const fileData = componentDB.getFile(fileName).getData();
+  fileData.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
   return fileData;
 }
 
