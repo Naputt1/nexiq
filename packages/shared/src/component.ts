@@ -7,6 +7,8 @@ export type ComponentFileImport = {
   source: string;
   type: "default" | "named" | "namespace" | "type";
   importKind: "value" | "type";
+  resolvedId?: string | undefined;
+  unresolvedWorkspace?: boolean | undefined;
 };
 
 export type ComponentFileExport = {
@@ -263,7 +265,12 @@ export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
 };
 
 export type ComponentFileVarCallHook = ComponentFileVarReact<"data", "hook"> & {
-  call: { id: string; name: string };
+  call: {
+    id: string;
+    name: string;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  };
 };
 
 export type ComponentFileVarRef = ComponentFileVarReact<"data", "ref"> & {

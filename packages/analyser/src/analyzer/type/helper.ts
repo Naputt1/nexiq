@@ -543,6 +543,22 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       } else {
         return { type: "any" };
       }
+    case "TSImportType": {
+      const typeData: TypeDataImport = {
+        type: "import",
+        name: tsType.argument.value,
+      };
+
+      if (tsType.qualifier) {
+        if (tsType.qualifier.type === "Identifier") {
+          typeData.qualifier = tsType.qualifier.name;
+        } else {
+          return { type: "any" };
+        }
+      }
+
+      return typeData;
+    }
     case "TSIntrinsicKeyword":
     case "TSObjectKeyword":
     case "TSSymbolKeyword":
@@ -557,7 +573,6 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
     case "TSMappedType":
     case "TSTemplateLiteralType":
     case "TSExpressionWithTypeArguments":
-    case "TSImportType":
       return { type: "any" };
     default:
       return {
