@@ -10,7 +10,7 @@ import type {
   TypeData,
   TypeDataDeclare,
 } from "@nexiq/shared";
-import { discoverWorkspacePackages } from "@nexiq/shared";
+import { discoverWorkspacePackages } from "@nexiq/shared/workspace";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import { PackageJson } from "./db/packageJson.js";
 import { SqliteDB } from "./db/sqlite.js";
@@ -77,7 +77,11 @@ function stripExtension(filePath: string) {
   return filePath.replace(/\.(tsx?|jsx?|mjs|cjs)$/, "");
 }
 
-function toRootRelativePath(workspaceRoot: string, packageDir: string, filePath: string) {
+function toRootRelativePath(
+  workspaceRoot: string,
+  packageDir: string,
+  filePath: string,
+) {
   const withoutLeadingSlash = filePath.replace(/^\//, "");
   return `/${path.relative(workspaceRoot, path.join(packageDir, withoutLeadingSlash)).replaceAll(path.sep, "/")}`;
 }
@@ -112,8 +116,12 @@ function getCrossPackageErrorId(
 function matchesEntryCandidate(filePath: string, entryCandidates: string[]) {
   const normalized = stripExtension(filePath.replace(/^\//, ""));
   return entryCandidates.some((candidate) => {
-    const candidateNoExt = stripExtension(candidate.replace(/^\.\//, "").replace(/^\//, ""));
-    return normalized === candidateNoExt || normalized.endsWith(`/${candidateNoExt}`);
+    const candidateNoExt = stripExtension(
+      candidate.replace(/^\.\//, "").replace(/^\//, ""),
+    );
+    return (
+      normalized === candidateNoExt || normalized.endsWith(`/${candidateNoExt}`)
+    );
   });
 }
 
@@ -147,9 +155,15 @@ function resolveImportAgainstExports(
   let candidates = scopedExports;
   if (externalImport.importType === "default") {
     candidates = candidates.filter((candidate) => candidate.isDefault);
-  } else if (externalImport.importType === "named" || externalImport.importType === "type") {
-    const importedName = externalImport.importedName || externalImport.localName;
-    candidates = candidates.filter((candidate) => candidate.exportName === importedName);
+  } else if (
+    externalImport.importType === "named" ||
+    externalImport.importType === "type"
+  ) {
+    const importedName =
+      externalImport.importedName || externalImport.localName;
+    candidates = candidates.filter(
+      (candidate) => candidate.exportName === importedName,
+    );
   } else {
     return {
       error: `Unsupported workspace import type ${externalImport.importType}`,
@@ -189,7 +203,10 @@ function resolveImportAgainstExports(
       sourceLocalName: externalImport.localName,
       targetExportName: match.exportName,
       targetExportId: match.exportId,
-      sourceImportId: getImportSymbolId(externalImport.filePath, externalImport.localName),
+      sourceImportId: getImportSymbolId(
+        externalImport.filePath,
+        externalImport.localName,
+      ),
       relationKind: "import",
     },
   };
@@ -237,7 +254,11 @@ type TypeRewriteContext = {
   sourceFilePath: string;
   sourcePackageId: string;
   sourcePackageName: string;
-  onUnresolved: (sourceModule: string, exportName: string, message: string) => void;
+  onUnresolved: (
+    sourceModule: string,
+    exportName: string,
+    message: string,
+  ) => void;
 };
 
 function qualifyGraphId(filePath: string, id: string) {
@@ -248,7 +269,10 @@ function sortReplacements(replacements: Iterable<StringReplacement>) {
   return Array.from(replacements).sort((a, b) => b.from.length - a.from.length);
 }
 
-function applyStringReplacements(value: string, replacements: StringReplacement[]) {
+function applyStringReplacements(
+  value: string,
+  replacements: StringReplacement[],
+) {
   let next = value;
   for (const replacement of replacements) {
     if (!replacement.from || replacement.from === replacement.to) {
@@ -262,7 +286,9 @@ function applyStringReplacements(value: string, replacements: StringReplacement[
 }
 
 function remapJsonValue<T>(value: T, replacements: StringReplacement[]): T {
-  return JSON.parse(applyStringReplacements(JSON.stringify(value), replacements)) as T;
+  return JSON.parse(
+    applyStringReplacements(JSON.stringify(value), replacements),
+  ) as T;
 }
 
 function collectFileLocalGraphIds(file: ComponentFile) {
@@ -346,7 +372,11 @@ function buildPackageGraphRemapContext(
   };
 
   for (const file of Object.values(summary.graph.files)) {
-    const canonicalPath = toRootRelativePath(workspaceRoot, packageDir, file.path);
+    const canonicalPath = toRootRelativePath(
+      workspaceRoot,
+      packageDir,
+      file.path,
+    );
     canonicalPathByFile.set(file.path, canonicalPath);
 
     const fileLocalIds = collectFileLocalGraphIds(file);
@@ -379,11 +409,18 @@ function remapResolveTask(
   task: ComponentDBResolve,
   context: PackageGraphRemapContext,
 ): ComponentDBResolve {
-  const fileReplacements = context.fileReplacementsByPath.get(task.fileName) || [];
+  const fileReplacements =
+    context.fileReplacementsByPath.get(task.fileName) || [];
   const globalReplacements = sortReplacements(
-    Array.from(context.globalIdMap.entries()).map(([from, to]) => ({ from, to })),
+    Array.from(context.globalIdMap.entries()).map(([from, to]) => ({
+      from,
+      to,
+    })),
   );
-  return remapJsonValue(task, sortReplacements([...fileReplacements, ...globalReplacements]));
+  return remapJsonValue(
+    task,
+    sortReplacements([...fileReplacements, ...globalReplacements]),
+  );
 }
 
 function edgeKey(edge: DataEdge) {
@@ -437,7 +474,9 @@ function collectCrossPackageUsageEdges(
 
   const walkVariable = (variable: ComponentFileVar, ownerId?: string) => {
     const currentOwnerId =
-      variable.kind === "component" || variable.kind === "hook" ? variable.id : ownerId;
+      variable.kind === "component" || variable.kind === "hook"
+        ? variable.id
+        : ownerId;
 
     if ("hooks" in variable && Array.isArray(variable.hooks)) {
       for (const hookId of variable.hooks) {
@@ -452,10 +491,16 @@ function collectCrossPackageUsageEdges(
       }
     }
 
-    if ("return" in variable && variable.return && typeof variable.return !== "string") {
+    if (
+      "return" in variable &&
+      variable.return &&
+      typeof variable.return !== "string"
+    ) {
       const returnValue = variable.return;
       if (returnValue.type === "jsx" && currentOwnerId) {
-        const targetExportId = getResolvedImportId(returnValue.srcId || returnValue.tag);
+        const targetExportId = getResolvedImportId(
+          returnValue.srcId || returnValue.tag,
+        );
         if (targetExportId) {
           pushEdge({
             from: targetExportId,
@@ -564,8 +609,9 @@ function resolveCanonicalWorkspaceExport(
   }
 
   const canonicalTargetExportId =
-    targetPackage.remapContext?.globalIdMap.get(resolution.relation.targetExportId) ||
-    resolution.relation.targetExportId;
+    targetPackage.remapContext?.globalIdMap.get(
+      resolution.relation.targetExportId,
+    ) || resolution.relation.targetExportId;
 
   return {
     exportId: canonicalTargetExportId,
@@ -581,7 +627,11 @@ function rewriteTypeDataRefTargets(
   }
 
   const rewriteRef = (ref: Extract<TypeData, { type: "ref" }>) => {
-    if (ref.refType === "qualified" && ref.unresolvedWorkspace && ref.names.length === 2) {
+    if (
+      ref.refType === "qualified" &&
+      ref.unresolvedWorkspace &&
+      ref.names.length === 2
+    ) {
       const [namespaceId, exportName] = ref.names;
       if (!namespaceId || !exportName) {
         return;
@@ -599,7 +649,11 @@ function rewriteTypeDataRefTargets(
       );
       if (!resolution.exportId) {
         if (resolution.message) {
-          context.onUnresolved(namespaceBinding.externalImport.sourceModule, exportName, resolution.message);
+          context.onUnresolved(
+            namespaceBinding.externalImport.sourceModule,
+            exportName,
+            resolution.message,
+          );
         }
         return;
       }
@@ -614,8 +668,7 @@ function rewriteTypeDataRefTargets(
     }
 
     const currentRef =
-      ref.resolvedId ||
-      (ref.refType === "named" ? ref.name : ref.names[0]);
+      ref.resolvedId || (ref.refType === "named" ? ref.name : ref.names[0]);
     if (!currentRef) {
       return;
     }
@@ -647,7 +700,11 @@ function rewriteTypeDataRefTargets(
       );
       if (!resolution.exportId) {
         if (resolution.message) {
-          context.onUnresolved(importType.name, importType.qualifier, resolution.message);
+          context.onUnresolved(
+            importType.name,
+            importType.qualifier,
+            resolution.message,
+          );
         }
         return;
       }
@@ -658,7 +715,9 @@ function rewriteTypeDataRefTargets(
     }
   };
 
-  const rewriteLiteralType = (literal: Extract<TypeData, { type: "literal-type" }>["literal"]) => {
+  const rewriteLiteralType = (
+    literal: Extract<TypeData, { type: "literal-type" }>["literal"],
+  ) => {
     if (literal.type === "template") {
       for (const expression of literal.expression) {
         rewriteTypeDataRefTargets(expression, context);
@@ -837,15 +896,25 @@ export class CentralMaster {
     };
 
     for (const summary of summaries) {
-      const packageDir = packageDirById.get(summary.packageId) || summary.srcDir;
-      const remapContext = buildPackageGraphRemapContext(this.srcDir, packageDir, summary);
+      const packageDir =
+        packageDirById.get(summary.packageId) || summary.srcDir;
+      const remapContext = buildPackageGraphRemapContext(
+        this.srcDir,
+        packageDir,
+        summary,
+      );
       const globalReplacements = sortReplacements(
-        Array.from(remapContext.globalIdMap.entries()).map(([from, to]) => ({ from, to })),
+        Array.from(remapContext.globalIdMap.entries()).map(([from, to]) => ({
+          from,
+          to,
+        })),
       );
 
       for (const file of Object.values(summary.graph.files)) {
-        const mergedKey = remapContext.canonicalPathByFile.get(file.path) || file.path;
-        const fileReplacements = remapContext.fileReplacementsByPath.get(file.path) || [];
+        const mergedKey =
+          remapContext.canonicalPathByFile.get(file.path) || file.path;
+        const fileReplacements =
+          remapContext.fileReplacementsByPath.get(file.path) || [];
         merged.files[mergedKey] = remapJsonValue(cloneFile(file), [
           ...fileReplacements,
           ...globalReplacements,
@@ -860,7 +929,9 @@ export class CentralMaster {
         })),
       );
       merged.resolve.push(
-        ...summary.graph.resolve.map((task) => remapResolveTask(task, remapContext)),
+        ...summary.graph.resolve.map((task) =>
+          remapResolveTask(task, remapContext),
+        ),
       );
     }
 
@@ -868,9 +939,14 @@ export class CentralMaster {
   }
 
   public async analyzeWorkspace(): Promise<JsonData> {
-    const packages = (await discoverWorkspacePackages(this.srcDir)).sort((a, b) =>
-      a.path.localeCompare(b.path),
-    );
+    const discoveredPackages = (
+      await discoverWorkspacePackages(this.srcDir)
+    ).sort((a, b) => a.path.localeCompare(b.path));
+    const packages = this.options.analysisPaths
+      ? discoveredPackages.filter((p) =>
+          this.options.analysisPaths!.includes(p.path),
+        )
+      : discoveredPackages;
     if (packages.length === 0) {
       const packageJson = new PackageJson(this.srcDir);
       const sqlite = this.options.sqlitePath
@@ -896,6 +972,7 @@ export class CentralMaster {
     const packageDbDir =
       this.options.packageDbDir || path.join(this.srcDir, ".nexiq", "packages");
     const centralDbPath =
+      this.options.sqlitePath ||
       this.options.centralSqlitePath ||
       path.join(this.srcDir, ".nexiq", "workspace.sqlite");
     const workspaceDb = new WorkspaceSqliteDB(centralDbPath);
@@ -922,7 +999,8 @@ export class CentralMaster {
 
     await runWithConcurrency(
       packages,
-      this.options.packageConcurrency || Math.max(1, Math.floor(os.cpus().length / 2)),
+      this.options.packageConcurrency ||
+        Math.max(1, Math.floor(os.cpus().length / 2)),
       async (pkg) => {
         const packageJson = new PackageJson(pkg.path);
         const dbPath = getPackageDbPath(packageDbDir, pkg.path);
@@ -964,6 +1042,18 @@ export class CentralMaster {
             workspacePackage.version = pkg.version;
           }
           workspaceDb.upsertWorkspacePackage(workspacePackage);
+
+          // Store package dependencies in central DB
+          workspaceDb.clearPackageDependencies(summary.packageId);
+          for (const dep of summary.workspaceHandoff.dependencies) {
+            workspaceDb.insertPackageDependency({
+              package_id: summary.packageId,
+              dependency_name: dep.name,
+              dependency_version: dep.version,
+              is_dev: dep.isDev,
+            });
+          }
+
           workspaceDb.insertPackageRunSummary({
             id: `${runId}:${summary.packageId}`,
             workspace_run_id: runId,
@@ -994,7 +1084,8 @@ export class CentralMaster {
             });
           }
 
-          for (const externalImport of summary.workspaceHandoff.externalImports) {
+          for (const externalImport of summary.workspaceHandoff
+            .externalImports) {
             workspaceDb.insertDeferredExternalImport({
               id: `${runId}:${externalImport.packageId}:${externalImport.filePath}:${externalImport.localName}:${externalImport.sourceModule}`,
               run_id: runId,
@@ -1019,9 +1110,14 @@ export class CentralMaster {
     const merged = this.mergePackageGraphs(summaries, packageDirById);
     for (const summary of summaries) {
       const pkg = packageByName.get(summary.packageName);
-      const packageDir = packageDirById.get(summary.packageId) || summary.srcDir;
+      const packageDir =
+        packageDirById.get(summary.packageId) || summary.srcDir;
       if (pkg) {
-        pkg.remapContext = buildPackageGraphRemapContext(this.srcDir, packageDir, summary);
+        pkg.remapContext = buildPackageGraphRemapContext(
+          this.srcDir,
+          packageDir,
+          summary,
+        );
       }
     }
     const crossPackageErrorsByPackage = new Map<string, number>();
@@ -1051,9 +1147,13 @@ export class CentralMaster {
 
     for (const summary of summaries) {
       for (const externalImport of summary.workspaceHandoff.externalImports) {
-        const targetPackageName = getPackageNameFromModule(externalImport.sourceModule);
+        const targetPackageName = getPackageNameFromModule(
+          externalImport.sourceModule,
+        );
         const targetPackage = packageByName.get(targetPackageName);
-        const sourceRemapContext = packageByName.get(summary.packageName)?.remapContext;
+        const sourceRemapContext = packageByName.get(
+          summary.packageName,
+        )?.remapContext;
         const isWorkspaceCandidate =
           targetPackage != null ||
           (targetPackageName.startsWith("@") &&
@@ -1064,8 +1164,15 @@ export class CentralMaster {
         if (externalImport.importType === "namespace") {
           const canonicalSourceImportId =
             sourceRemapContext?.globalIdMap.get(
-              getImportSymbolId(externalImport.filePath, externalImport.localName),
-            ) || getImportSymbolId(externalImport.filePath, externalImport.localName);
+              getImportSymbolId(
+                externalImport.filePath,
+                externalImport.localName,
+              ),
+            ) ||
+            getImportSymbolId(
+              externalImport.filePath,
+              externalImport.localName,
+            );
           namespaceBindings.set(canonicalSourceImportId, {
             externalImport,
             targetPackageName,
@@ -1107,7 +1214,9 @@ export class CentralMaster {
         );
 
         if (!resolution.relation) {
-          const message = resolution.error || `Failed to resolve import ${externalImport.sourceModule}`;
+          const message =
+            resolution.error ||
+            `Failed to resolve import ${externalImport.sourceModule}`;
           workspaceDb.insertCrossPackageResolveError({
             id: getCrossPackageErrorId(runId, externalImport),
             run_id: runId,
@@ -1146,14 +1255,18 @@ export class CentralMaster {
           run_id: runId,
         });
 
-        const targetRemapContext = packageByName.get(targetPackageName)?.remapContext;
+        const targetRemapContext =
+          packageByName.get(targetPackageName)?.remapContext;
         const canonicalSourceImportId =
-          sourceRemapContext?.globalIdMap.get(relation.sourceImportId) || relation.sourceImportId;
+          sourceRemapContext?.globalIdMap.get(relation.sourceImportId) ||
+          relation.sourceImportId;
         const canonicalTargetExportId =
-          targetRemapContext?.globalIdMap.get(relation.targetExportId) || relation.targetExportId;
+          targetRemapContext?.globalIdMap.get(relation.targetExportId) ||
+          relation.targetExportId;
         const canonicalSourceFilePath =
-          sourceRemapContext?.canonicalPathByFile.get(relation.sourceFilePath) ||
-          relation.sourceFilePath;
+          sourceRemapContext?.canonicalPathByFile.get(
+            relation.sourceFilePath,
+          ) || relation.sourceFilePath;
         const importResolution: CanonicalImportResolution = {
           canonicalFilePath: canonicalSourceFilePath,
           localName: relation.sourceLocalName,
@@ -1228,7 +1341,10 @@ export class CentralMaster {
       });
     }
     for (const file of Object.values(merged.files)) {
-      for (const edge of collectCrossPackageUsageEdges(file, canonicalImportResolutions)) {
+      for (const edge of collectCrossPackageUsageEdges(
+        file,
+        canonicalImportResolutions,
+      )) {
         const key = edgeKey(edge);
         if (!existingEdgeKeys.has(key)) {
           existingEdgeKeys.add(key);

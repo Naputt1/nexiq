@@ -29,8 +29,20 @@ export const componentTask: GraphViewTask = {
     const relations = batch?.relations || data.relations || [];
     const renders = batch?.renders || data.renders || [];
     const files = data.files || [];
+    const packages = data.packages || [];
 
-    const fileMap = new Map(files.map((f) => [f.id, f.path]));
+    const packagePathMap = new Map(packages.map((p) => [p.id, p.path]));
+    const fileInfoMap = new Map(
+      files.map((f) => [
+        f.id,
+        {
+          path: f.path,
+          projectPath: f.package_id
+            ? packagePathMap.get(f.package_id)
+            : undefined,
+        },
+      ]),
+    );
 
     // Identify automatic JSX symbols and their entities to skip them and their scopes
     const automaticJsxEntities = new Set<string>();
@@ -45,8 +57,9 @@ export const componentTask: GraphViewTask = {
     for (const exp of data.exports) {
       const scope = data.scopes.find((s) => s.id === exp.scope_id);
       if (!scope) continue;
-      const filePath = fileMap.get(scope.file_id);
-      if (!filePath) continue;
+      const fileInfo = fileInfoMap.get(scope.file_id);
+      if (!fileInfo) continue;
+      const filePath = fileInfo.path;
 
       if (!exportMap.has(filePath)) {
         exportMap.set(filePath, new Map());
@@ -138,7 +151,9 @@ export const componentTask: GraphViewTask = {
       }
 
       const scope = data.scopes.find((s) => s.id === symbol.scope_id);
-      const file = scope ? fileMap.get(scope.file_id) : undefined;
+      const fileInfo = scope ? fileInfoMap.get(scope.file_id) : undefined;
+      const file = fileInfo?.path;
+      const projectPath = fileInfo?.projectPath;
 
       // Check if this symbol's entity has an associated scope (e.g. the body)
       const blockScope = data.scopes.find((s) => s.entity_id === entity.id);
@@ -152,6 +167,7 @@ export const componentTask: GraphViewTask = {
           combo.displayName = symbol.name;
           combo.type = entity.kind;
           combo.fileName = file;
+          combo.projectPath = projectPath;
           combo.loc = { line: entity.line || 0, column: entity.column || 0 };
 
           // Handle effects for this component/hook
@@ -170,6 +186,7 @@ export const componentTask: GraphViewTask = {
                     combo: blockScope.id,
                     type: "effect",
                     fileName: file,
+                    projectPath: projectPath,
                     loc: { line: effect.loc.line, column: effect.loc.column },
                     displayName: effectName,
                   });
@@ -288,6 +305,7 @@ export const componentTask: GraphViewTask = {
           combo: parentComboId,
           type: entity.kind,
           fileName: file,
+          projectPath: projectPath,
           loc: { line: entity.line || 0, column: entity.column || 0 },
           displayName: symbol.name,
         });
@@ -302,7 +320,9 @@ export const componentTask: GraphViewTask = {
       )
         continue;
 
-      const file = fileMap.get(render.file_id);
+      const fileInfo = fileInfoMap.get(render.file_id);
+      const file = fileInfo?.path;
+      const projectPath = fileInfo?.projectPath;
       const parentScope = data.scopes.find(
         (s) => s.entity_id === render.parent_entity_id,
       );
@@ -335,6 +355,7 @@ export const componentTask: GraphViewTask = {
         combo: finalParentCombo,
         type: "render",
         fileName: file,
+        projectPath: projectPath,
         loc: { line: render.line || 0, column: render.column || 0 },
         displayName: render.tag,
       };

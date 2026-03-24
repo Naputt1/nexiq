@@ -17,7 +17,7 @@ export interface ProjectStatus {
 export type GraphViewType = "component" | "file" | "router" | "package";
 
 export interface AppStateData {
-  selectedSubProject: string | null;
+  selectedSubProjects: string[];
   centeredItemId: string | null;
   selectedId: string | null;
   isSidebarOpen: boolean;

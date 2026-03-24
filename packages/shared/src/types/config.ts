@@ -43,6 +43,7 @@ export interface NexiqConfig {
   extensions?: string[];
   dependencyDepth?: number;
   analysisPath?: string;
+  analysisPaths?: string[];
   ignorePatterns?: string[];
   ignoreSubProjects?: string[];
 }

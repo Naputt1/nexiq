@@ -8,10 +8,10 @@ import type {
   JsonData,
   PackageRunSummaryRow,
   ResolveErrorRow,
-  WorkspacePackageInfo,
   WorkspacePackageRow,
   WorkspaceRunRow,
 } from "@nexiq/shared";
+import type { WorkspacePackageInfo } from "@nexiq/shared/workspace";
 
 export type PackageJson = {
   dependencies: Record<string, string>;
@@ -123,6 +123,7 @@ export interface AnalyzeProjectOptions {
   packageDbDir?: string | undefined;
   packageConcurrency?: number | undefined;
   fileWorkerThreads?: number | undefined;
+  analysisPaths?: string[] | undefined;
 }
 
 export interface FileTaskSuccessMessage {
