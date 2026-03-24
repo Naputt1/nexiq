@@ -1488,10 +1488,11 @@ export class BackendServer {
 
             switch (data.type) {
               case "open_project": {
-                const { projectPath, subProject } = data.payload;
+                const { projectPath, subProject, subProjects } = data.payload;
                 const project = await this.projectManager.openProject(
                   projectPath,
                   subProject,
+                  subProjects,
                 );
                 this.sendResponse(
                   ws,

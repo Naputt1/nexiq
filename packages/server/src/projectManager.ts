@@ -19,9 +19,11 @@ import {
   type RenderRow,
   type ComponentFileVar,
   type UIItemState,
+} from "@nexiq/shared";
+import {
   discoverWorkspacePackages,
   getWorkspacePatterns,
-} from "@nexiq/shared";
+} from "@nexiq/shared/workspace";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
@@ -94,6 +96,7 @@ export class ProjectManager {
   async openProject(
     projectPath: string,
     subProject?: string,
+    subProjects?: string[],
   ): Promise<ProjectInfo> {
     const key = subProject ? `${projectPath}:${subProject}` : projectPath;
     if (this.projects.has(key)) {
@@ -109,7 +112,11 @@ export class ProjectManager {
 
     const openPromise = (async () => {
       try {
-        const result = await this._openProjectInternal(projectPath, subProject);
+        const result = await this._openProjectInternal(
+          projectPath,
+          subProject,
+          subProjects,
+        );
         this.projects.set(key, result);
         return result;
       } finally {
@@ -124,6 +131,7 @@ export class ProjectManager {
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
+    subProjects?: string[],
   ): Promise<ProjectInfo> {
     const analysisPath = subProject
       ? path.resolve(projectPath, subProject)
@@ -210,10 +218,14 @@ export class ProjectManager {
 
     console.error(`Analyzing project: ${analysisPath}`);
     const graph = await analyzeProject(
-      analysisPath,
-      cacheFile,
-      ignorePatterns,
-      sqlitePath,
+      subProjects && subProjects.length > 0 ? projectPath : analysisPath,
+      {
+        cacheFile,
+        ignorePatterns,
+        sqlitePath,
+        analysisPaths: subProjects,
+        monorepo: subProjects && subProjects.length > 0 ? true : undefined,
+      },
     );
 
     fs.writeFileSync(cacheFile, JSON.stringify(graph, null, 2));

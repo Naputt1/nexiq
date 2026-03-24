@@ -18,6 +18,7 @@ export interface GraphNodeData {
   name: VariableName | string;
   label?: { text: string; fill?: string };
   type?: string;
+  projectPath?: string;
   fileName?: string;
   pureFileName?: string;
   loc?: { line: number; column: number };

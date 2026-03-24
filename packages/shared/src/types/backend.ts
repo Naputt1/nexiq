@@ -48,7 +48,11 @@ export interface BackendRequestMap {
     response: { sqlitePath: string };
   };
   open_project: {
-    payload: { projectPath: string; subProject?: string };
+    payload: {
+      projectPath: string;
+      subProject?: string;
+      subProjects?: string[];
+    };
     response: { sqlitePath: string };
   };
   read_state: {

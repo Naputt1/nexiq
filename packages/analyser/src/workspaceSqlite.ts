@@ -25,6 +25,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
 
     if (currentVersion < targetVersion) {
       this.db.exec(`
+        DROP TABLE IF EXISTS package_dependencies;
         DROP TABLE IF EXISTS cross_package_resolve_errors;
         DROP TABLE IF EXISTS package_relations;
         DROP TABLE IF EXISTS deferred_external_imports;
@@ -43,6 +44,15 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         version TEXT,
         path TEXT NOT NULL,
         db_path TEXT NOT NULL
+      );
+      
+      CREATE TABLE IF NOT EXISTS package_dependencies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        package_id TEXT NOT NULL,
+        dependency_name TEXT NOT NULL,
+        dependency_version TEXT NOT NULL,
+        is_dev BOOLEAN DEFAULT 0,
+        FOREIGN KEY (package_id) REFERENCES workspace_packages (package_id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS workspace_runs (
@@ -123,6 +133,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
       CREATE INDEX IF NOT EXISTS idx_package_export_index_package ON package_export_index (package_id, export_name, is_default);
       CREATE INDEX IF NOT EXISTS idx_deferred_external_imports_package ON deferred_external_imports (package_id, source_package_name);
       CREATE INDEX IF NOT EXISTS idx_package_relations_run ON package_relations (run_id, from_package_id, to_package_id);
+      CREATE INDEX IF NOT EXISTS idx_package_dependencies_package ON package_dependencies (package_id);
     `);
   }
 
@@ -158,7 +169,37 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
       .prepare(
         "INSERT OR REPLACE INTO workspace_packages (package_id, name, version, path, db_path) VALUES (?, ?, ?, ?, ?)",
       )
-      .run(data.package_id, data.name, data.version || null, data.path, data.db_path);
+      .run(
+        data.package_id,
+        data.name,
+        data.version || null,
+        data.path,
+        data.db_path,
+      );
+  }
+
+  public insertPackageDependency(data: {
+    package_id: string;
+    dependency_name: string;
+    dependency_version: string;
+    is_dev: boolean;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT INTO package_dependencies (package_id, dependency_name, dependency_version, is_dev)
+      VALUES (@package_id, @dependency_name, @dependency_version, @is_dev)
+    `);
+    stmt.run({
+      package_id: data.package_id,
+      dependency_name: data.dependency_name,
+      dependency_version: data.dependency_version,
+      is_dev: data.is_dev ? 1 : 0,
+    });
+  }
+
+  public clearPackageDependencies(packageId: string) {
+    this.db
+      .prepare("DELETE FROM package_dependencies WHERE package_id = ?")
+      .run(packageId);
   }
 
   public insertPackageRunSummary(data: {
