@@ -1581,15 +1581,15 @@ export class BackendServer {
               }
               case "git_analyze_commit": {
                 const { projectPath, commitHash, subPath } = data.payload;
-                const graph = await this.projectManager.gitAnalyzeCommit(
+                const snapshot = await this.projectManager.gitAnalyzeCommit(
                   projectPath,
                   commitHash,
                   subPath,
                 );
-                this.sendChunkedResponse(
+                this.sendResponse(
                   ws,
                   "git_analyze_commit",
-                  graph,
+                  snapshot,
                   data.requestId,
                 );
                 break;

@@ -1403,7 +1403,7 @@ export class ProjectManager {
     projectRoot: string,
     commitHash: string,
     subPath?: string,
-  ): Promise<DatabaseData> {
+  ): Promise<{ sqlitePath: string }> {
     const git = simpleGit(projectRoot);
     const resolvedHash = await git.revparse([commitHash]);
 
@@ -1420,10 +1420,7 @@ export class ProjectManager {
     const sqlitePath = path.join(commitCacheDir, `${cacheKey}.sqlite`);
 
     if (fs.existsSync(sqlitePath)) {
-      const sqlite = new SqliteDB(sqlitePath);
-      const data = sqlite.getAllData();
-      sqlite.close();
-      return data;
+      return { sqlitePath };
     }
 
     if (!fs.existsSync(commitCacheDir)) {
@@ -1459,10 +1456,7 @@ export class ProjectManager {
       }
 
       await analyzeProject(analysisPath, undefined, ignorePatterns, sqlitePath);
-      const sqlite = new SqliteDB(sqlitePath);
-      const data = sqlite.getAllData();
-      sqlite.close();
-      return data;
+      return { sqlitePath };
     } finally {
       tempDir.removeCallback();
     }

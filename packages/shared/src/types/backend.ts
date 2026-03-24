@@ -1,4 +1,3 @@
-import type { DatabaseData } from "../index.js";
 import type {
   ProjectStatus,
   GitStatus,
@@ -19,7 +18,7 @@ export interface BackendRequestMap {
   };
   get_project_icon: {
     payload: { projectPath: string };
-    response: string | null;
+    response: { icon: string } | null;
   };
   git_status: {
     payload: { projectPath: string };
@@ -46,7 +45,7 @@ export interface BackendRequestMap {
   };
   git_analyze_commit: {
     payload: { projectPath: string; commitHash: string; subPath?: string };
-    response: DatabaseData;
+    response: { sqlitePath: string };
   };
   open_project: {
     payload: { projectPath: string; subProject?: string };

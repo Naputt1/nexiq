@@ -39,6 +39,9 @@ describe("BackendServer", () => {
       exports: [],
       relations: [],
     });
+    vi.mocked(mockProjectManager.gitAnalyzeCommit).mockResolvedValue({
+      sqlitePath: "/test/commit.sqlite",
+    });
     vi.mocked(mockProjectManager.getAllExtensions).mockReturnValue([]);
     server = new BackendServer(mockProjectManager, 3030);
   });
@@ -712,6 +715,39 @@ describe("BackendServer", () => {
       await messageHandler(JSON.stringify({ type: "unknown", payload: {} }));
       expect(mockWs.send).toHaveBeenCalledWith(
         expect.stringContaining("Unknown message type"),
+      );
+    });
+
+    it("should return sqlite metadata for git_analyze_commit without chunking", async () => {
+      const messageHandler = mockWs.on.mock.calls.find(
+        (args) => args[0] === "message",
+      )![1] as (msg: string) => Promise<void>;
+
+      await messageHandler(
+        JSON.stringify({
+          type: "git_analyze_commit",
+          payload: {
+            projectPath: "/test",
+            commitHash: "HEAD",
+            subPath: "packages/app",
+          },
+          requestId: "req-git",
+        }),
+      );
+
+      expect(mockProjectManager.gitAnalyzeCommit).toHaveBeenCalledWith(
+        "/test",
+        "HEAD",
+        "packages/app",
+      );
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining('"git_analyze_commit"'),
+      );
+      expect(mockWs.send).toHaveBeenCalledWith(
+        expect.stringContaining("/test/commit.sqlite"),
+      );
+      expect(mockWs.send).not.toHaveBeenCalledWith(
+        expect.stringContaining('"chunked_response"'),
       );
     });
 
