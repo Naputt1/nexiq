@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { JsonData, NexiqConfig } from "@nexiq/shared";
+import { getWorkspacePatterns } from "@nexiq/shared";
 import analyzeFiles from "./analyzer/index.js";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
 import { CentralMaster } from "./centralMaster.js";
@@ -59,7 +60,10 @@ export async function analyzeProject(
     }
   }
 
-  if (options.monorepo) {
+  const isMonorepo =
+    options.monorepo ?? getWorkspacePatterns(srcDir).length > 0;
+
+  if (isMonorepo) {
     const master = new CentralMaster({
       ...options,
       srcDir,
