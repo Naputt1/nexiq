@@ -1041,17 +1041,28 @@ export class CentralMaster {
           if (pkg.version) {
             workspacePackage.version = pkg.version;
           }
-          workspaceDb.upsertWorkspacePackage(workspacePackage);
 
-          // Store package dependencies in central DB
-          workspaceDb.clearPackageDependencies(summary.packageId);
-          for (const dep of summary.workspaceHandoff.dependencies) {
-            workspaceDb.insertPackageDependency({
-              package_id: summary.packageId,
-              dependency_name: dep.name,
-              dependency_version: dep.version,
-              is_dev: dep.isDev,
-            });
+          // Store package and its dependencies in central DB within a transaction
+          // to prevent race conditions and FK constraint violations
+          try {
+            workspaceDb.db.transaction(() => {
+              workspaceDb.upsertWorkspacePackage(workspacePackage);
+              workspaceDb.clearPackageDependencies(summary.packageId);
+              for (const dep of summary.workspaceHandoff.dependencies) {
+                workspaceDb.insertPackageDependency({
+                  package_id: summary.packageId,
+                  dependency_name: dep.name,
+                  dependency_version: dep.version,
+                  is_dev: dep.isDev,
+                });
+              }
+            })();
+          } catch (err: unknown) {
+            console.error(
+              `Error updating workspace DB for package ${summary.packageId}:`,
+              err,
+            );
+            throw err;
           }
 
           workspaceDb.insertPackageRunSummary({

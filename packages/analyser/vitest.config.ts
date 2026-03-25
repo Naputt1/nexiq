@@ -8,6 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@nexiq/shared/db": path.resolve(__dirname, "../shared/src/db/sqlite.ts"),
+      "@nexiq/shared/workspace": path.resolve(
+        __dirname,
+        "../shared/src/workspace.ts",
+      ),
       "@nexiq/shared": path.resolve(__dirname, "../shared/src/index.ts"),
     },
   },

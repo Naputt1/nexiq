@@ -21,10 +21,11 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
       user_version: number;
     };
     const currentVersion = versionRow.user_version;
-    const targetVersion = 2;
+    const targetVersion = 4;
 
     if (currentVersion < targetVersion) {
       this.db.exec(`
+        DROP TABLE IF EXISTS workspace_package_dependencies;
         DROP TABLE IF EXISTS package_dependencies;
         DROP TABLE IF EXISTS cross_package_resolve_errors;
         DROP TABLE IF EXISTS package_relations;
@@ -46,7 +47,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
         db_path TEXT NOT NULL
       );
       
-      CREATE TABLE IF NOT EXISTS package_dependencies (
+      CREATE TABLE IF NOT EXISTS workspace_package_dependencies (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         package_id TEXT NOT NULL,
         dependency_name TEXT NOT NULL,
@@ -133,7 +134,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
       CREATE INDEX IF NOT EXISTS idx_package_export_index_package ON package_export_index (package_id, export_name, is_default);
       CREATE INDEX IF NOT EXISTS idx_deferred_external_imports_package ON deferred_external_imports (package_id, source_package_name);
       CREATE INDEX IF NOT EXISTS idx_package_relations_run ON package_relations (run_id, from_package_id, to_package_id);
-      CREATE INDEX IF NOT EXISTS idx_package_dependencies_package ON package_dependencies (package_id);
+      CREATE INDEX IF NOT EXISTS idx_workspace_package_dependencies_package ON workspace_package_dependencies (package_id);
     `);
   }
 
@@ -165,17 +166,64 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
     path: string;
     db_path: string;
   }) {
-    this.db
-      .prepare(
-        "INSERT OR REPLACE INTO workspace_packages (package_id, name, version, path, db_path) VALUES (?, ?, ?, ?, ?)",
-      )
-      .run(
-        data.package_id,
-        data.name,
-        data.version || null,
-        data.path,
-        data.db_path,
+    // Explicitly ensure FKs are ON before this operation if possible,
+    // although it's set in constructor.
+    this.db.pragma("foreign_keys = ON");
+
+    // Use a transaction for the upsert to ensure consistency
+    const transaction = this.db.transaction(() => {
+      // First, check if it exists
+      const existing = this.db
+        .prepare(
+          "SELECT package_id FROM workspace_packages WHERE package_id = ?",
+        )
+        .get(data.package_id);
+
+      if (existing) {
+        // Update existing row
+        this.db
+          .prepare(
+            `
+          UPDATE workspace_packages 
+          SET name = ?, version = ?, path = ?, db_path = ? 
+          WHERE package_id = ?
+        `,
+          )
+          .run(
+            data.name,
+            data.version || null,
+            data.path,
+            data.db_path,
+            data.package_id,
+          );
+      } else {
+        // Insert new row
+        this.db
+          .prepare(
+            `
+          INSERT INTO workspace_packages (package_id, name, version, path, db_path) 
+          VALUES (?, ?, ?, ?, ?)
+        `,
+          )
+          .run(
+            data.package_id,
+            data.name,
+            data.version || null,
+            data.path,
+            data.db_path,
+          );
+      }
+    });
+
+    try {
+      transaction();
+    } catch (err: unknown) {
+      console.error(
+        `Error in upsertWorkspacePackage for ${data.package_id}:`,
+        err,
       );
+      throw err;
+    }
   }
 
   public insertPackageDependency(data: {
@@ -185,7 +233,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
     is_dev: boolean;
   }) {
     const stmt = this.db.prepare(`
-      INSERT INTO package_dependencies (package_id, dependency_name, dependency_version, is_dev)
+      INSERT INTO workspace_package_dependencies (package_id, dependency_name, dependency_version, is_dev)
       VALUES (@package_id, @dependency_name, @dependency_version, @is_dev)
     `);
     stmt.run({
@@ -198,7 +246,9 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
 
   public clearPackageDependencies(packageId: string) {
     this.db
-      .prepare("DELETE FROM package_dependencies WHERE package_id = ?")
+      .prepare(
+        "DELETE FROM workspace_package_dependencies WHERE package_id = ?",
+      )
       .run(packageId);
   }
 
