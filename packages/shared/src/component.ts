@@ -128,7 +128,7 @@ export type ReactVarKind =
   | ReactFunctionVar
   | ReactStateVar
   | ReactWithCallbackVar;
-export type VarKind = "normal" | ReactVarKind;
+export type VarKind = "normal" | "class" | "method" | "property" | ReactVarKind;
 
 export type VariableNamePattern =
   | { type: "identifier"; name: string; loc: VariableLoc; id: string }
@@ -200,6 +200,8 @@ export interface ComponentFileVarBase<
 >
   extends ComponentLoc, ComponentFileVarBaseType<TType> {
   kind: TKind;
+  isStatic?: boolean | undefined;
+  memberKind?: string | undefined;
 }
 
 export type FunctionReturn = PropDataType | ComponentFileVarJSX | string;
@@ -214,6 +216,7 @@ export interface ComponentFileVarBaseTypeFunction<
   var: Record<string, ComponentFileVar>;
   return?: FunctionReturn | undefined;
   children: Record<string, ComponentInfoRender>;
+  superClass?: { id?: string; name: string } | undefined;
 }
 
 export interface ComponentFileVarBaseTypeData<
@@ -318,6 +321,25 @@ export interface ComponentFileVarJSX extends ComponentFileVarBase<
   srcId?: string | undefined;
 }
 
+export type ComponentFileVarClass = ComponentFileVarBaseTypeData<
+  "class",
+  "data"
+> & {
+  var: Record<string, ComponentFileVar>;
+  scope: VariableScope;
+  superClass?: { id?: string; name: string } | undefined;
+};
+
+export type ComponentFileVarMethod = ComponentFileVarBaseTypeFunction<
+  "method",
+  "function"
+>;
+
+export type ComponentFileVarProperty = ComponentFileVarBaseTypeData<
+  "property",
+  "data"
+>;
+
 export type ComponentFileVarFunction =
   ComponentFileVarBaseTypeFunction<"normal"> & {
     kind: "normal";
@@ -333,7 +355,10 @@ export type ComponentFileVar =
   | ComponentFileVarCallback
   | MemoFileVarHook
   | ComponentFileVarFunction
-  | ComponentFileVarJSX;
+  | ComponentFileVarJSX
+  | ComponentFileVarClass
+  | ComponentFileVarMethod
+  | ComponentFileVarProperty;
 
 export type IResolveAddRender = {
   type: "comAddRender";

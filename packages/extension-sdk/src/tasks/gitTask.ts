@@ -1,9 +1,10 @@
-import { type DatabaseData } from "@nexiq/shared";
 import {
   type GraphComboData,
   type GraphNodeData,
   type GraphViewResult,
   type GraphViewTask,
+  type TaskContext,
+  getTaskData,
 } from "../index.js";
 
 /**
@@ -13,8 +14,9 @@ import {
 export const gitTask: GraphViewTask = {
   id: "git-status",
   priority: 100, // Run late to ensure all nodes/combos are present
-  run: (graphData: DatabaseData, result: GraphViewResult): GraphViewResult => {
-    const { added = [], modified = [], deleted = [] } = graphData.diff || {};
+  run: (result: GraphViewResult, context: TaskContext): GraphViewResult => {
+    const data = getTaskData(context);
+    const { added = [], modified = [], deleted = [] } = data.diff || {};
 
     // Skip if no diff data
     if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
@@ -52,12 +54,8 @@ export const gitTask: GraphViewTask = {
     combos.forEach((combo) => {
       if (combo.id.endsWith("-props")) {
         const childStatuses = [
-          ...nodes
-            .filter((n) => n.combo === combo.id)
-            .map((n) => n.gitStatus),
-          ...combos
-            .filter((c) => c.combo === combo.id)
-            .map((c) => c.gitStatus),
+          ...nodes.filter((n) => n.combo === combo.id).map((n) => n.gitStatus),
+          ...combos.filter((c) => c.combo === combo.id).map((c) => c.gitStatus),
         ].filter(Boolean);
 
         if (childStatuses.length > 0) {

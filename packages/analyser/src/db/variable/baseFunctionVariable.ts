@@ -20,6 +20,7 @@ export abstract class BaseFunctionVariable<
   async?: boolean | undefined;
   return?: FunctionReturn | undefined;
   children: Record<string, ComponentInfoRender>;
+  superClass?: { id?: string; name: string } | undefined;
 
   constructor(
     options: Omit<
@@ -34,6 +35,7 @@ export abstract class BaseFunctionVariable<
     this.async = options.async;
     this.return = options.return;
     this.children = options.children || {};
+    this.superClass = options.superClass;
   }
 
   public load(data: Variable<TType, TKind>) {
@@ -45,6 +47,7 @@ export abstract class BaseFunctionVariable<
       this.async = data.async;
       this.return = data.return;
       this.children = data.children;
+      this.superClass = data.superClass;
     }
   }
 
@@ -65,6 +68,7 @@ export abstract class BaseFunctionVariable<
       async: this.async,
       return: returnData,
       children: this.children,
+      superClass: this.superClass,
     };
   }
 
@@ -76,6 +80,7 @@ export abstract class BaseFunctionVariable<
       async: this.async,
       return: this.return,
       children: this.children,
+      superClass: this.superClass,
     };
   }
 }

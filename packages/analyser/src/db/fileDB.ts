@@ -35,6 +35,9 @@ import type {
   TypeDataDeclareInterface,
   TypeDataDeclareType,
   ReactFunctionVar,
+  ComponentFileVarClass,
+  ComponentFileVarMethod,
+  ComponentFileVarProperty,
 } from "@nexiq/shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -49,6 +52,9 @@ import {
   isReactFunctionVariable,
 } from "./variable/type.js";
 import { HookVariable } from "./variable/hook.js";
+import { ClassVariable } from "./variable/classVariable.js";
+import { MethodVariable } from "./variable/methodVariable.js";
+import { PropertyVariable } from "./variable/propertyVariable.js";
 import fs from "fs";
 import path from "path";
 import { getDeterministicId } from "../utils/hash.js";
@@ -159,6 +165,12 @@ export class File {
       v = new StateVariable(variable, this);
     } else if (variable.kind === "memo") {
       v = new MemoVariable(variable, this);
+    } else if (variable.kind === "class") {
+      v = new ClassVariable(variable as ComponentFileVarClass, this);
+    } else if (variable.kind === "method") {
+      v = new MethodVariable(variable as ComponentFileVarMethod, this);
+    } else if (variable.kind === "property") {
+      v = new PropertyVariable(variable as ComponentFileVarProperty, this);
     } else if (variable.kind === "callback") {
       v = new CallbackVariable(variable, this);
     } else if (variable.kind === "ref") {
@@ -1066,7 +1078,9 @@ export class FileDB {
     const currentScope = rawPackageName?.startsWith("@")
       ? rawPackageName.split("/")[0]
       : undefined;
-    const sourceScope = source.startsWith("@") ? source.split("/")[0] : undefined;
+    const sourceScope = source.startsWith("@")
+      ? source.split("/")[0]
+      : undefined;
     const resolvedFileName = filePath.startsWith("/")
       ? path.join(this.src_dir, filePath)
       : path.resolve(this.src_dir, filePath);
@@ -1118,7 +1132,10 @@ export class FileDB {
     exportName: string,
     importKind: ComponentFileImport["importKind"] = "type",
   ) {
-    const resolvedSource = this.resolveSourceFileFromModule(currentFilePath, source);
+    const resolvedSource = this.resolveSourceFileFromModule(
+      currentFilePath,
+      source,
+    );
     if (!resolvedSource || !this.has(resolvedSource)) {
       return undefined;
     }

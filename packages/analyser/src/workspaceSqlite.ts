@@ -162,7 +162,7 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
   public upsertWorkspacePackage(data: {
     package_id: string;
     name: string;
-    version?: string | undefined;
+    version?: string | null;
     path: string;
     db_path: string;
   }) {

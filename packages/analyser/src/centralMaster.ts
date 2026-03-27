@@ -9,6 +9,7 @@ import type {
   JsonData,
   TypeData,
   TypeDataDeclare,
+  WorkspacePackageRow,
 } from "@nexiq/shared";
 import { discoverWorkspacePackages } from "@nexiq/shared/workspace";
 import { getFiles, getViteConfig } from "./analyzer/utils.js";
@@ -273,16 +274,28 @@ function applyStringReplacements(
   value: string,
   replacements: StringReplacement[],
 ) {
-  let next = value;
-  for (const replacement of replacements) {
-    if (!replacement.from || replacement.from === replacement.to) {
-      continue;
-    }
-    next = next
-      .split(JSON.stringify(replacement.from))
-      .join(JSON.stringify(replacement.to));
+  if (replacements.length === 0) {
+    return value;
   }
-  return next;
+  const map = new Map<string, string>();
+  for (const r of replacements) {
+    map.set(r.from, r.to);
+  }
+
+  // Create a regex that matches any of the 'from' strings, escaped for regex
+  // Sort by length descending to match longest possible string first (standard for ID remapping)
+  const sortedKeys = replacements
+    .map((r) => r.from)
+    .sort((a, b) => b.length - a.length);
+  const pattern = sortedKeys
+    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|");
+  const regex = new RegExp(`"(${pattern})"`, "g");
+
+  return value.replace(regex, (match, p1) => {
+    const to = map.get(p1);
+    return to ? JSON.stringify(to) : match;
+  });
 }
 
 function remapJsonValue<T>(value: T, replacements: StringReplacement[]): T {
@@ -939,24 +952,40 @@ export class CentralMaster {
   }
 
   public async analyzeWorkspace(): Promise<JsonData> {
-    const discoveredPackages = (
-      await discoverWorkspacePackages(this.srcDir)
-    ).sort((a, b) => a.path.localeCompare(b.path));
-    const packages = this.options.analysisPaths
+    const rootDir = path.resolve(this.srcDir).replace(/[/\\]$/, "");
+    const discoveredPackages = (await discoverWorkspacePackages(rootDir)).sort(
+      (a, b) => a.path.localeCompare(b.path),
+    );
+
+    const normalize = (p: string) =>
+      path.resolve(rootDir, p).replace(/[/\\]$/, "");
+    const analysisPaths = this.options.analysisPaths?.map(normalize);
+
+    const packages = analysisPaths
       ? discoveredPackages.filter((p) =>
-          this.options.analysisPaths!.includes(p.path),
+          analysisPaths!.includes(normalize(p.path)),
         )
       : discoveredPackages;
+
     if (packages.length === 0) {
-      const packageJson = new PackageJson(this.srcDir);
+      console.warn(
+        `No workspace packages matching [${
+          this.options.analysisPaths?.join(", ") || ""
+        }] found in ${rootDir}. ` +
+          `Discovered: [${discoveredPackages
+            .map((p) => p.path)
+            .join(", ")}]. ` +
+          `Falling back to single package analysis.`,
+      );
+      const packageJson = new PackageJson(rootDir);
       const sqlite = this.options.sqlitePath
         ? new SqliteDB(this.options.sqlitePath)
         : undefined;
       try {
         const master = new PackageMaster({
-          srcDir: this.srcDir,
-          viteConfigPath: getViteConfig(this.srcDir),
-          files: getFiles(this.srcDir, this.options.ignorePatterns || []),
+          srcDir: rootDir,
+          viteConfigPath: getViteConfig(rootDir),
+          files: getFiles(rootDir, this.options.ignorePatterns || []),
           packageJson,
           cacheData: this.options.cacheData,
           sqlite,
@@ -970,14 +999,15 @@ export class CentralMaster {
     }
 
     const packageDbDir =
-      this.options.packageDbDir || path.join(this.srcDir, ".nexiq", "packages");
+      this.options.packageDbDir || path.join(rootDir, ".nexiq", "packages");
     const centralDbPath =
       this.options.sqlitePath ||
       this.options.centralSqlitePath ||
-      path.join(this.srcDir, ".nexiq", "workspace.sqlite");
+      path.join(rootDir, ".nexiq", "workspace.sqlite");
+
     const workspaceDb = new WorkspaceSqliteDB(centralDbPath);
-    const runId = getWorkspaceRunId(this.srcDir);
-    const summaries: PackageAnalysisSummary[] = [];
+    const runId = getWorkspaceRunId(rootDir);
+    const summaries: (PackageAnalysisSummary & { dbPath: string })[] = [];
     const packageDirById = new Map<string, string>();
     const packageByName = new Map<
       string,
@@ -992,397 +1022,403 @@ export class CentralMaster {
 
     workspaceDb.beginWorkspaceRun({
       id: runId,
-      root_dir: this.srcDir,
+      root_dir: rootDir,
       status: "running",
       started_at: new Date().toISOString(),
     });
 
-    await runWithConcurrency(
-      packages,
-      this.options.packageConcurrency ||
-        Math.max(1, Math.floor(os.cpus().length / 2)),
-      async (pkg) => {
-        const packageJson = new PackageJson(pkg.path);
-        const dbPath = getPackageDbPath(packageDbDir, pkg.path);
-        const sqlite = new SqliteDB(dbPath);
-        try {
-          const master = new PackageMaster({
-            srcDir: pkg.path,
-            viteConfigPath: getViteConfig(pkg.path),
-            files: getFiles(pkg.path, this.options.ignorePatterns || []),
-            packageJson,
-            cacheData: undefined,
-            sqlite,
-            threads: this.options.fileWorkerThreads,
-          });
-          const summary = await master.analyzePackage();
-          summaries.push({
-            ...summary,
-            dbPath,
-          });
-          packageDirById.set(summary.packageId, pkg.path);
-          packageByName.set(summary.packageName, {
-            packageId: summary.packageId,
-            handoff: summary.workspaceHandoff,
-            srcDir: pkg.path,
-          });
-          const workspacePackage: {
-            package_id: string;
-            name: string;
-            version?: string | undefined;
-            path: string;
-            db_path: string;
-          } = {
-            package_id: summary.packageId,
-            name: summary.packageName,
-            path: pkg.path,
-            db_path: dbPath,
-          };
-          if (pkg.version) {
-            workspacePackage.version = pkg.version;
-          }
-
-          // Store package and its dependencies in central DB within a transaction
-          // to prevent race conditions and FK constraint violations
+    try {
+      await runWithConcurrency(
+        packages,
+        this.options.packageConcurrency ||
+          Math.max(1, Math.floor(os.cpus().length / 2)),
+        async (pkg) => {
+          const packageJson = new PackageJson(pkg.path);
+          const dbPath = getPackageDbPath(packageDbDir, pkg.path);
+          const sqlite = new SqliteDB(dbPath);
           try {
-            workspaceDb.db.transaction(() => {
-              workspaceDb.upsertWorkspacePackage(workspacePackage);
-              workspaceDb.clearPackageDependencies(summary.packageId);
-              for (const dep of summary.workspaceHandoff.dependencies) {
-                workspaceDb.insertPackageDependency({
-                  package_id: summary.packageId,
-                  dependency_name: dep.name,
-                  dependency_version: dep.version,
-                  is_dev: dep.isDev,
-                });
-              }
-            })();
-          } catch (err: unknown) {
-            console.error(
-              `Error updating workspace DB for package ${summary.packageId}:`,
-              err,
-            );
-            throw err;
-          }
-
-          workspaceDb.insertPackageRunSummary({
-            id: `${runId}:${summary.packageId}`,
-            workspace_run_id: runId,
-            package_id: summary.packageId,
-            analysis_run_id: summary.runId,
-            status:
-              summary.filesFailed > 0 || summary.resolveErrors > 0
-                ? "completed_with_errors"
-                : "completed",
-            files_total: summary.filesTotal,
-            files_succeeded: summary.filesSucceeded,
-            files_failed: summary.filesFailed,
-            resolve_errors: summary.resolveErrors,
-          });
-
-          for (const pkgExport of summary.workspaceHandoff.exports) {
-            workspaceDb.insertPackageExport({
-              id: `${runId}:${pkgExport.packageId}:${pkgExport.filePath}:${pkgExport.exportName}:${pkgExport.exportType}`,
-              run_id: runId,
-              package_id: pkgExport.packageId,
-              package_name: pkgExport.packageName,
-              file_path: pkgExport.filePath,
-              export_name: pkgExport.exportName,
-              export_type: pkgExport.exportType,
-              export_kind: pkgExport.exportKind,
-              export_id: pkgExport.exportId,
-              is_default: pkgExport.isDefault,
+            const master = new PackageMaster({
+              srcDir: pkg.path,
+              viteConfigPath: getViteConfig(pkg.path),
+              files: getFiles(pkg.path, this.options.ignorePatterns || []),
+              packageJson,
+              cacheData: undefined,
+              sqlite,
+              threads: this.options.fileWorkerThreads,
             });
-          }
-
-          for (const externalImport of summary.workspaceHandoff
-            .externalImports) {
-            workspaceDb.insertDeferredExternalImport({
-              id: `${runId}:${externalImport.packageId}:${externalImport.filePath}:${externalImport.localName}:${externalImport.sourceModule}`,
-              run_id: runId,
-              package_id: externalImport.packageId,
-              package_name: externalImport.packageName,
-              file_path: externalImport.filePath,
-              source_module: externalImport.sourceModule,
-              source_package_name: externalImport.sourcePackageName,
-              source_subpath: externalImport.sourceSubpath,
-              local_name: externalImport.localName,
-              imported_name: externalImport.importedName,
-              import_type: externalImport.importType,
-              import_kind: externalImport.importKind,
+            const summary = await master.analyzePackage();
+            summaries.push({
+              ...summary,
+              dbPath,
             });
+            packageDirById.set(summary.packageId, pkg.path);
+            packageByName.set(summary.packageName, {
+              packageId: summary.packageId,
+              handoff: summary.workspaceHandoff,
+              srcDir: pkg.path,
+            });
+          } finally {
+            sqlite.close();
           }
-        } finally {
-          sqlite.close();
+        },
+      );
+
+      // Sequential database updates to avoid better-sqlite3 transaction conflicts
+      for (const summary of summaries) {
+        const pkgPath = packageDirById.get(summary.packageId)!;
+        const workspacePackage: WorkspacePackageRow = {
+          package_id: summary.packageId,
+          name: summary.packageName,
+          path: pkgPath,
+          db_path: summary.dbPath,
+          version: null,
+        };
+        const originalPkg = packages.find((p) => p.path === pkgPath);
+        if (originalPkg?.version) {
+          workspacePackage.version = originalPkg.version;
         }
-      },
-    );
 
-    const merged = this.mergePackageGraphs(summaries, packageDirById);
-    for (const summary of summaries) {
-      const pkg = packageByName.get(summary.packageName);
-      const packageDir =
-        packageDirById.get(summary.packageId) || summary.srcDir;
-      if (pkg) {
-        pkg.remapContext = buildPackageGraphRemapContext(
-          this.srcDir,
-          packageDir,
-          summary,
-        );
-      }
-    }
-    const crossPackageErrorsByPackage = new Map<string, number>();
-    const canonicalImportResolutions = new Map<string, string>();
-    const namespaceBindings = new Map<string, NamespaceBinding>();
-    const canonicalFileOwners = new Map<
-      string,
-      { packageId: string; packageName: string }
-    >();
-    let totalCrossPackageErrors = 0;
-    const totalPackageErrors = summaries.reduce(
-      (count, summary) => count + summary.filesFailed + summary.resolveErrors,
-      0,
-    );
+        try {
+          workspaceDb.db.transaction(() => {
+            workspaceDb.upsertWorkspacePackage(workspacePackage);
+            workspaceDb.clearPackageDependencies(summary.packageId);
+            for (const dep of summary.workspaceHandoff.dependencies) {
+              workspaceDb.insertPackageDependency({
+                package_id: summary.packageId,
+                dependency_name: dep.name,
+                dependency_version: dep.version,
+                is_dev: dep.isDev,
+              });
+            }
+          })();
+        } catch (err: unknown) {
+          console.error(
+            `Error updating workspace DB for package ${summary.packageId}:`,
+            err,
+          );
+          throw err;
+        }
 
-    for (const summary of summaries) {
-      const pkg = packageByName.get(summary.packageName);
-      for (const file of Object.values(summary.graph.files)) {
-        const canonicalFilePath =
-          pkg?.remapContext?.canonicalPathByFile.get(file.path) || file.path;
-        canonicalFileOwners.set(canonicalFilePath, {
-          packageId: summary.packageId,
-          packageName: summary.packageName,
+        workspaceDb.insertPackageRunSummary({
+          id: `${runId}:${summary.packageId}`,
+          workspace_run_id: runId,
+          package_id: summary.packageId,
+          analysis_run_id: summary.runId,
+          status:
+            summary.filesFailed > 0 || summary.resolveErrors > 0
+              ? "completed_with_errors"
+              : "completed",
+          files_total: summary.filesTotal,
+          files_succeeded: summary.filesSucceeded,
+          files_failed: summary.filesFailed,
+          resolve_errors: summary.resolveErrors,
         });
-      }
-    }
 
-    for (const summary of summaries) {
-      for (const externalImport of summary.workspaceHandoff.externalImports) {
-        const targetPackageName = getPackageNameFromModule(
-          externalImport.sourceModule,
-        );
-        const targetPackage = packageByName.get(targetPackageName);
-        const sourceRemapContext = packageByName.get(
-          summary.packageName,
-        )?.remapContext;
-        const isWorkspaceCandidate =
-          targetPackage != null ||
-          (targetPackageName.startsWith("@") &&
-            workspaceScopes.has(targetPackageName.split("/")[0] || ""));
-        if (!isWorkspaceCandidate) {
-          continue;
+        for (const pkgExport of summary.workspaceHandoff.exports) {
+          workspaceDb.insertPackageExport({
+            id: `${runId}:${pkgExport.packageId}:${pkgExport.filePath}:${pkgExport.exportName}:${pkgExport.exportType}`,
+            run_id: runId,
+            package_id: pkgExport.packageId,
+            package_name: pkgExport.packageName,
+            file_path: pkgExport.filePath,
+            export_name: pkgExport.exportName,
+            export_type: pkgExport.exportType,
+            export_kind: pkgExport.exportKind,
+            export_id: pkgExport.exportId,
+            is_default: pkgExport.isDefault,
+          });
         }
-        if (externalImport.importType === "namespace") {
-          const canonicalSourceImportId =
-            sourceRemapContext?.globalIdMap.get(
+
+        for (const externalImport of summary.workspaceHandoff.externalImports) {
+          workspaceDb.insertDeferredExternalImport({
+            id: `${runId}:${externalImport.packageId}:${externalImport.filePath}:${externalImport.localName}:${externalImport.sourceModule}`,
+            run_id: runId,
+            package_id: externalImport.packageId,
+            package_name: externalImport.packageName,
+            file_path: externalImport.filePath,
+            source_module: externalImport.sourceModule,
+            source_package_name: externalImport.sourcePackageName,
+            source_subpath: externalImport.sourceSubpath,
+            local_name: externalImport.localName,
+            imported_name: externalImport.importedName,
+            import_type: externalImport.importType,
+            import_kind: externalImport.importKind,
+          });
+        }
+      }
+
+      const merged = this.mergePackageGraphs(summaries, packageDirById);
+      for (const summary of summaries) {
+        const pkg = packageByName.get(summary.packageName);
+        const packageDir =
+          packageDirById.get(summary.packageId) || summary.srcDir;
+        if (pkg) {
+          pkg.remapContext = buildPackageGraphRemapContext(
+            rootDir,
+            packageDir,
+            summary,
+          );
+        }
+      }
+      const crossPackageErrorsByPackage = new Map<string, number>();
+      const canonicalImportResolutions = new Map<string, string>();
+      const namespaceBindings = new Map<string, NamespaceBinding>();
+      const canonicalFileOwners = new Map<
+        string,
+        { packageId: string; packageName: string }
+      >();
+      let totalCrossPackageErrors = 0;
+      const totalPackageErrors = summaries.reduce(
+        (count, summary) => count + summary.filesFailed + summary.resolveErrors,
+        0,
+      );
+
+      for (const summary of summaries) {
+        const pkg = packageByName.get(summary.packageName);
+        for (const file of Object.values(summary.graph.files)) {
+          const canonicalFilePath =
+            pkg?.remapContext?.canonicalPathByFile.get(file.path) || file.path;
+          canonicalFileOwners.set(canonicalFilePath, {
+            packageId: summary.packageId,
+            packageName: summary.packageName,
+          });
+        }
+      }
+
+      for (const summary of summaries) {
+        for (const externalImport of summary.workspaceHandoff.externalImports) {
+          const targetPackageName = getPackageNameFromModule(
+            externalImport.sourceModule,
+          );
+          const targetPackage = packageByName.get(targetPackageName);
+          const sourceRemapContext = packageByName.get(
+            summary.packageName,
+          )?.remapContext;
+          const isWorkspaceCandidate =
+            targetPackage != null ||
+            (targetPackageName.startsWith("@") &&
+              workspaceScopes.has(targetPackageName.split("/")[0] || ""));
+          if (!isWorkspaceCandidate) {
+            continue;
+          }
+          if (externalImport.importType === "namespace") {
+            const canonicalSourceImportId =
+              sourceRemapContext?.globalIdMap.get(
+                getImportSymbolId(
+                  externalImport.filePath,
+                  externalImport.localName,
+                ),
+              ) ||
               getImportSymbolId(
                 externalImport.filePath,
                 externalImport.localName,
-              ),
-            ) ||
-            getImportSymbolId(
-              externalImport.filePath,
-              externalImport.localName,
-            );
-          namespaceBindings.set(canonicalSourceImportId, {
-            externalImport,
-            targetPackageName,
-          });
-          continue;
-        }
-        if (!targetPackage) {
-          const message = `Failed to resolve workspace package import ${externalImport.sourceModule}`;
-          workspaceDb.insertCrossPackageResolveError({
-            id: getCrossPackageErrorId(runId, externalImport),
-            run_id: runId,
-            from_package_id: summary.packageId,
-            file_path: externalImport.filePath,
-            source_name: externalImport.localName,
-            source_module: externalImport.sourceModule,
-            relation_kind: "import",
-            message,
-          });
-          merged.resolve.push(
-            sourceRemapContext
-              ? remapResolveTask(
-                  createCrossPackageResolveTask(externalImport, message),
-                  sourceRemapContext,
-                )
-              : createCrossPackageResolveTask(externalImport, message),
-          );
-          crossPackageErrorsByPackage.set(
-            summary.packageId,
-            (crossPackageErrorsByPackage.get(summary.packageId) || 0) + 1,
-          );
-          totalCrossPackageErrors++;
-          continue;
-        }
-
-        const resolution = resolveImportAgainstExports(
-          externalImport,
-          targetPackage.handoff.exports,
-          targetPackage.handoff.entryCandidates,
-        );
-
-        if (!resolution.relation) {
-          const message =
-            resolution.error ||
-            `Failed to resolve import ${externalImport.sourceModule}`;
-          workspaceDb.insertCrossPackageResolveError({
-            id: getCrossPackageErrorId(runId, externalImport),
-            run_id: runId,
-            from_package_id: summary.packageId,
-            file_path: externalImport.filePath,
-            source_name: externalImport.localName,
-            source_module: externalImport.sourceModule,
-            relation_kind: "import",
-            message,
-          });
-          merged.resolve.push(
-            sourceRemapContext
-              ? remapResolveTask(
-                  createCrossPackageResolveTask(externalImport, message),
-                  sourceRemapContext,
-                )
-              : createCrossPackageResolveTask(externalImport, message),
-          );
-          crossPackageErrorsByPackage.set(
-            summary.packageId,
-            (crossPackageErrorsByPackage.get(summary.packageId) || 0) + 1,
-          );
-          totalCrossPackageErrors++;
-          continue;
-        }
-
-        const relation = resolution.relation;
-        workspaceDb.insertPackageRelation({
-          from_package_id: relation.fromPackageId,
-          to_package_id: relation.toPackageId,
-          relation_kind: relation.relationKind,
-          source_file_path: relation.sourceFilePath,
-          target_file_path: relation.targetFilePath,
-          source_symbol: relation.sourceLocalName,
-          target_symbol: relation.targetExportName,
-          run_id: runId,
-        });
-
-        const targetRemapContext =
-          packageByName.get(targetPackageName)?.remapContext;
-        const canonicalSourceImportId =
-          sourceRemapContext?.globalIdMap.get(relation.sourceImportId) ||
-          relation.sourceImportId;
-        const canonicalTargetExportId =
-          targetRemapContext?.globalIdMap.get(relation.targetExportId) ||
-          relation.targetExportId;
-        const canonicalSourceFilePath =
-          sourceRemapContext?.canonicalPathByFile.get(
-            relation.sourceFilePath,
-          ) || relation.sourceFilePath;
-        const importResolution: CanonicalImportResolution = {
-          canonicalFilePath: canonicalSourceFilePath,
-          localName: relation.sourceLocalName,
-          sourceImportId: canonicalSourceImportId,
-          targetExportId: canonicalTargetExportId,
-        };
-        canonicalImportResolutions.set(
-          `${importResolution.canonicalFilePath}:${importResolution.localName}`,
-          importResolution.targetExportId,
-        );
-        canonicalImportResolutions.set(
-          importResolution.sourceImportId,
-          importResolution.targetExportId,
-        );
-        merged.edges.push({
-          from: canonicalTargetExportId,
-          to: canonicalSourceImportId,
-          label: "import",
-        });
-      }
-    }
-
-    const existingEdgeKeys = new Set(merged.edges.map((edge) => edgeKey(edge)));
-    for (const file of Object.values(merged.files)) {
-      const owner = canonicalFileOwners.get(file.path);
-      if (!owner) {
-        continue;
-      }
-
-      const seenTypeErrors = new Set<string>();
-      rewriteFileTypeRefTargets(file, {
-        resolvedImportTargets: canonicalImportResolutions,
-        namespaceBindings,
-        packageByName,
-        workspaceScopes,
-        sourceFilePath: file.path,
-        sourcePackageId: owner.packageId,
-        sourcePackageName: owner.packageName,
-        onUnresolved: (sourceModule, exportName, message) => {
-          const key = `${file.path}:${sourceModule}:${exportName}`;
-          if (seenTypeErrors.has(key)) {
-            return;
+              );
+            namespaceBindings.set(canonicalSourceImportId, {
+              externalImport,
+              targetPackageName,
+            });
+            continue;
           }
-          seenTypeErrors.add(key);
+          if (!targetPackage) {
+            const message = `Failed to resolve workspace package import ${externalImport.sourceModule}`;
+            workspaceDb.insertCrossPackageResolveError({
+              id: getCrossPackageErrorId(runId, externalImport),
+              run_id: runId,
+              from_package_id: summary.packageId,
+              file_path: externalImport.filePath,
+              source_name: externalImport.localName,
+              source_module: externalImport.sourceModule,
+              relation_kind: "import",
+              message,
+            });
+            merged.resolve.push(
+              sourceRemapContext
+                ? remapResolveTask(
+                    createCrossPackageResolveTask(externalImport, message),
+                    sourceRemapContext,
+                  )
+                : createCrossPackageResolveTask(externalImport, message),
+            );
+            crossPackageErrorsByPackage.set(
+              summary.packageId,
+              (crossPackageErrorsByPackage.get(summary.packageId) || 0) + 1,
+            );
+            totalCrossPackageErrors++;
+            continue;
+          }
 
-          workspaceDb.insertCrossPackageResolveError({
-            id: `${runId}:${owner.packageId}:${file.path}:${exportName}:${sourceModule}:type`,
-            run_id: runId,
-            from_package_id: owner.packageId,
-            file_path: file.path,
-            source_name: exportName,
-            source_module: sourceModule,
-            relation_kind: "import",
-            message,
-          });
-          merged.resolve.push({
-            type: "crossPackageImport",
-            fileName: file.path,
-            source: sourceModule,
-            localName: exportName,
-            importedName: exportName,
-            importType: "type",
-            importKind: "type",
-            message,
-          });
-          crossPackageErrorsByPackage.set(
-            owner.packageId,
-            (crossPackageErrorsByPackage.get(owner.packageId) || 0) + 1,
+          const resolution = resolveImportAgainstExports(
+            externalImport,
+            targetPackage.handoff.exports,
+            targetPackage.handoff.entryCandidates,
           );
-          totalCrossPackageErrors++;
-        },
-      });
-    }
-    for (const file of Object.values(merged.files)) {
-      for (const edge of collectCrossPackageUsageEdges(
-        file,
-        canonicalImportResolutions,
-      )) {
-        const key = edgeKey(edge);
-        if (!existingEdgeKeys.has(key)) {
-          existingEdgeKeys.add(key);
-          merged.edges.push(edge);
+
+          if (!resolution.relation) {
+            const message =
+              resolution.error ||
+              `Failed to resolve import ${externalImport.sourceModule}`;
+            workspaceDb.insertCrossPackageResolveError({
+              id: getCrossPackageErrorId(runId, externalImport),
+              run_id: runId,
+              from_package_id: summary.packageId,
+              file_path: externalImport.filePath,
+              source_name: externalImport.localName,
+              source_module: externalImport.sourceModule,
+              relation_kind: "import",
+              message,
+            });
+            merged.resolve.push(
+              sourceRemapContext
+                ? remapResolveTask(
+                    createCrossPackageResolveTask(externalImport, message),
+                    sourceRemapContext,
+                  )
+                : createCrossPackageResolveTask(externalImport, message),
+            );
+            crossPackageErrorsByPackage.set(
+              summary.packageId,
+              (crossPackageErrorsByPackage.get(summary.packageId) || 0) + 1,
+            );
+            totalCrossPackageErrors++;
+            continue;
+          }
+
+          const relation = resolution.relation;
+          workspaceDb.insertPackageRelation({
+            from_package_id: relation.fromPackageId,
+            to_package_id: relation.toPackageId,
+            relation_kind: relation.relationKind,
+            source_file_path: relation.sourceFilePath,
+            target_file_path: relation.targetFilePath,
+            source_symbol: relation.sourceLocalName,
+            target_symbol: relation.targetExportName,
+            run_id: runId,
+          });
+
+          const targetRemapContext =
+            packageByName.get(targetPackageName)?.remapContext;
+          const canonicalSourceImportId =
+            sourceRemapContext?.globalIdMap.get(relation.sourceImportId) ||
+            relation.sourceImportId;
+          const canonicalTargetExportId =
+            targetRemapContext?.globalIdMap.get(relation.targetExportId) ||
+            relation.targetExportId;
+          const canonicalSourceFilePath =
+            sourceRemapContext?.canonicalPathByFile.get(
+              relation.sourceFilePath,
+            ) || relation.sourceFilePath;
+          const importResolution: CanonicalImportResolution = {
+            canonicalFilePath: canonicalSourceFilePath,
+            localName: relation.sourceLocalName,
+            sourceImportId: canonicalSourceImportId,
+            targetExportId: canonicalTargetExportId,
+          };
+          canonicalImportResolutions.set(
+            `${importResolution.canonicalFilePath}:${importResolution.localName}`,
+            importResolution.targetExportId,
+          );
+          canonicalImportResolutions.set(
+            importResolution.sourceImportId,
+            importResolution.targetExportId,
+          );
+          merged.edges.push({
+            from: canonicalTargetExportId,
+            to: canonicalSourceImportId,
+            label: "import",
+          });
         }
       }
-    }
 
-    for (const summary of summaries) {
-      const summaryId = `${runId}:${summary.packageId}`;
-      const hasErrors =
-        summary.filesFailed > 0 ||
-        summary.resolveErrors > 0 ||
-        (crossPackageErrorsByPackage.get(summary.packageId) || 0) > 0;
-      workspaceDb.updatePackageRunSummaryStatus(
-        summaryId,
-        hasErrors ? "completed_with_errors" : "completed",
+      const existingEdgeKeys = new Set(
+        merged.edges.map((edge) => edgeKey(edge)),
       );
-    }
+      for (const file of Object.values(merged.files)) {
+        const owner = canonicalFileOwners.get(file.path);
+        if (!owner) {
+          continue;
+        }
 
-    workspaceDb.finishWorkspaceRun(
-      runId,
-      totalCrossPackageErrors > 0 || totalPackageErrors > 0
-        ? "completed_with_errors"
-        : "completed",
-    );
-    workspaceDb.close();
-    return merged;
+        const seenTypeErrors = new Set<string>();
+        rewriteFileTypeRefTargets(file, {
+          resolvedImportTargets: canonicalImportResolutions,
+          namespaceBindings,
+          packageByName,
+          workspaceScopes,
+          sourceFilePath: file.path,
+          sourcePackageId: owner.packageId,
+          sourcePackageName: owner.packageName,
+          onUnresolved: (sourceModule, exportName, message) => {
+            const key = `${file.path}:${sourceModule}:${exportName}`;
+            if (seenTypeErrors.has(key)) {
+              return;
+            }
+            seenTypeErrors.add(key);
+
+            workspaceDb.insertCrossPackageResolveError({
+              id: `${runId}:${owner.packageId}:${file.path}:${exportName}:${sourceModule}:type`,
+              run_id: runId,
+              from_package_id: owner.packageId,
+              file_path: file.path,
+              source_name: exportName,
+              source_module: sourceModule,
+              relation_kind: "import",
+              message,
+            });
+            merged.resolve.push({
+              type: "crossPackageImport",
+              fileName: file.path,
+              source: sourceModule,
+              localName: exportName,
+              importedName: exportName,
+              importType: "type",
+              importKind: "type",
+              message,
+            });
+            crossPackageErrorsByPackage.set(
+              owner.packageId,
+              (crossPackageErrorsByPackage.get(owner.packageId) || 0) + 1,
+            );
+            totalCrossPackageErrors++;
+          },
+        });
+      }
+      for (const file of Object.values(merged.files)) {
+        for (const edge of collectCrossPackageUsageEdges(
+          file,
+          canonicalImportResolutions,
+        )) {
+          const key = edgeKey(edge);
+          if (!existingEdgeKeys.has(key)) {
+            existingEdgeKeys.add(key);
+            merged.edges.push(edge);
+          }
+        }
+      }
+
+      for (const summary of summaries) {
+        const summaryId = `${runId}:${summary.packageId}`;
+        const hasErrors =
+          summary.filesFailed > 0 ||
+          summary.resolveErrors > 0 ||
+          (crossPackageErrorsByPackage.get(summary.packageId) || 0) > 0;
+        workspaceDb.updatePackageRunSummaryStatus(
+          summaryId,
+          hasErrors ? "completed_with_errors" : "completed",
+        );
+      }
+
+      workspaceDb.finishWorkspaceRun(
+        runId,
+        totalCrossPackageErrors > 0 || totalPackageErrors > 0
+          ? "completed_with_errors"
+          : "completed",
+      );
+      return merged;
+    } catch (err: unknown) {
+      workspaceDb.finishWorkspaceRun(runId, "failed");
+      throw err;
+    } finally {
+      workspaceDb.close();
+    }
   }
 }

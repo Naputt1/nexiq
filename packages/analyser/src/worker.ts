@@ -11,6 +11,9 @@ import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.js";
 import ExportAllDeclaration from "./analyzer/exportAllDeclaration.js";
 import FunctionDeclaration from "./analyzer/functionDeclaration.js";
 import VariableDeclarator from "./analyzer/variableDeclaration.js";
+import ClassDeclaration from "./analyzer/classDeclaration.js";
+import ClassMethod from "./analyzer/classMethod.js";
+import ClassProperty from "./analyzer/classProperty.js";
 import JSXElement from "./analyzer/JSXElement.js";
 import CallExpression from "./analyzer/callExpression.js";
 import ReturnStatement from "./analyzer/returnStatement.js";
@@ -27,12 +30,7 @@ interface WorkerParams {
 }
 
 async function analyzeFile(params: WorkerParams) {
-  const {
-    filePath,
-    srcDir,
-    viteAliases,
-    packageJsonData,
-  } = params;
+  const { filePath, srcDir, viteAliases, packageJsonData } = params;
   const fileName = "/" + filePath;
   const fullPath = path.resolve(srcDir, filePath);
 
@@ -56,6 +54,12 @@ async function analyzeFile(params: WorkerParams) {
     ExportAllDeclaration: ExportAllDeclaration(componentDB, fileName),
     ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
     FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
+    ClassDeclaration: ClassDeclaration(componentDB, fileName),
+    ClassExpression: ClassDeclaration(componentDB, fileName),
+    ClassMethod: ClassMethod(componentDB, fileName),
+    ClassPrivateMethod: ClassMethod(componentDB, fileName),
+    ClassProperty: ClassProperty(componentDB, fileName),
+    ClassPrivateProperty: ClassProperty(componentDB, fileName),
     VariableDeclarator: VariableDeclarator(componentDB, fileName),
     ReturnStatement: ReturnStatement(componentDB, fileName),
     ...JSXElement(componentDB, fileName),
@@ -96,7 +100,8 @@ if (parentPort) {
       };
       const isParseError =
         err?.name === "SyntaxError" ||
-        typeof err?.message === "string" && err.message.includes("Unexpected");
+        (typeof err?.message === "string" &&
+          err.message.includes("Unexpected"));
       const message: FileTaskMessage = {
         type: isParseError ? "file_parse_error" : "file_extract_error",
         filePath: params.filePath,

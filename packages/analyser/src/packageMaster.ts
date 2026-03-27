@@ -2,7 +2,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ComponentFile, JsonData, PackageRow, ComponentDBResolve } from "@nexiq/shared";
+import type {
+  ComponentFile,
+  JsonData,
+  PackageRow,
+  ComponentDBResolve,
+} from "@nexiq/shared";
 import { getTsConfigAliases, getViteAliases } from "./vite.js";
 import { ComponentDB } from "./db/componentDB.js";
 import type { PackageJson as PackageJsonStore } from "./db/packageJson.js";
@@ -18,6 +23,8 @@ import ExportAllDeclaration from "./analyzer/exportAllDeclaration.js";
 import FunctionDeclaration from "./analyzer/functionDeclaration.js";
 import VariableDeclarator from "./analyzer/variableDeclaration.js";
 import ClassDeclaration from "./analyzer/classDeclaration.js";
+import ClassMethod from "./analyzer/classMethod.js";
+import ClassProperty from "./analyzer/classProperty.js";
 import JSXElement from "./analyzer/JSXElement.js";
 import CallExpression from "./analyzer/callExpression.js";
 import ReturnStatement from "./analyzer/returnStatement.js";
@@ -43,7 +50,10 @@ function createRunId(prefix: string, scope: string) {
   return `${prefix}:${safeScope}:${Date.now()}`;
 }
 
-function getPackageRow(packageJson: PackageJsonStore, srcDir: string): PackageRow | undefined {
+function getPackageRow(
+  packageJson: PackageJsonStore,
+  srcDir: string,
+): PackageRow | undefined {
   const raw = packageJson.rawData as {
     name?: string;
     version?: string;
@@ -73,9 +83,7 @@ function getPackageSubpath(sourceModule: string) {
   return remainder.length > 0 ? remainder : undefined;
 }
 
-function getEntryCandidates(
-  rawData: Record<string, unknown>,
-): string[] {
+function getEntryCandidates(rawData: Record<string, unknown>): string[] {
   const candidates = new Set<string>();
   const valueKeys = ["exports", "module", "main", "source"];
   for (const key of valueKeys) {
@@ -175,7 +183,9 @@ function toDeferredResolveTask(
         sourceModule: task.source,
         targetHint: task.importedName || task.localName,
         retryCount: 0,
-        message: task.message || `Failed to resolve cross-package import ${task.source}`,
+        message:
+          task.message ||
+          `Failed to resolve cross-package import ${task.source}`,
         resolverStage: "cross_package",
       };
   }
@@ -217,7 +227,9 @@ export class PackageMaster {
     this.packageJson = options.packageJson;
     this.cacheData = options.cacheData;
     this.sqlite = options.sqlite;
-    this.threads = options.threads ?? (process.env.VITEST || process.env.SNAPSHOT ? 1 : os.cpus().length);
+    this.threads =
+      options.threads ??
+      (process.env.VITEST || process.env.SNAPSHOT ? 1 : os.cpus().length);
     this.viteAliases = {
       ...getViteAliases(this.viteConfigPath),
       ...getTsConfigAliases(this.srcDir),
@@ -248,7 +260,9 @@ export class PackageMaster {
         dependencies?: Record<string, string>;
         devDependencies?: Record<string, string>;
       };
-      for (const [dependency_name, dependency_version] of Object.entries(raw.dependencies || {})) {
+      for (const [dependency_name, dependency_version] of Object.entries(
+        raw.dependencies || {},
+      )) {
         this.sqlite.insertPackageDependency({
           package_id: this.packageRow.id,
           dependency_name,
@@ -256,7 +270,9 @@ export class PackageMaster {
           is_dev: false,
         });
       }
-      for (const [dependency_name, dependency_version] of Object.entries(raw.devDependencies || {})) {
+      for (const [dependency_name, dependency_version] of Object.entries(
+        raw.devDependencies || {},
+      )) {
         this.sqlite.insertPackageDependency({
           package_id: this.packageRow.id,
           dependency_name,
@@ -302,7 +318,11 @@ export class PackageMaster {
       file_path: `/${filePath}`.replace("//", "/"),
       status,
       started_at: overrides.startedAt || this.startedAt,
-      finished_at: overrides.finishedAt ?? (status === "running" || status === "pending" ? null : new Date().toISOString()),
+      finished_at:
+        overrides.finishedAt ??
+        (status === "running" || status === "pending"
+          ? null
+          : new Date().toISOString()),
       file_hash: overrides.fileHash ?? null,
       fingerprint: overrides.fingerprint ?? null,
     });
@@ -350,7 +370,10 @@ export class PackageMaster {
     for (const task of unresolvedTasks) {
       const deferred = toDeferredResolveTask(task, this.packageRow?.id);
       this.sqlite.recordResolveError({
-        id: createRunId("resolve_error", `${this.runId}:${deferred.filePath}:${deferred.type}`),
+        id: createRunId(
+          "resolve_error",
+          `${this.runId}:${deferred.filePath}:${deferred.type}`,
+        ),
         run_id: this.runId,
         package_id: this.packageRow?.id || null,
         file_path: deferred.filePath,
@@ -366,7 +389,10 @@ export class PackageMaster {
         loc_column: deferred.locColumn ?? null,
         retry_count: deferred.retryCount,
       });
-      this.markFileStatus(deferred.filePath.replace(/^\//, ""), "failed_resolve");
+      this.markFileStatus(
+        deferred.filePath.replace(/^\//, ""),
+        "failed_resolve",
+      );
     }
   }
 
@@ -377,24 +403,46 @@ export class PackageMaster {
 
     traverseFn(ast, {
       ImportDeclaration: ImportDeclaration(this.componentDB, fileName),
-      ExportNamedDeclaration: ExportNamedDeclaration(this.componentDB, fileName),
+      ExportNamedDeclaration: ExportNamedDeclaration(
+        this.componentDB,
+        fileName,
+      ),
       ExportAllDeclaration: ExportAllDeclaration(this.componentDB, fileName),
-      ExportDefaultDeclaration: ExportDefaultDeclaration(this.componentDB, fileName),
+      ExportDefaultDeclaration: ExportDefaultDeclaration(
+        this.componentDB,
+        fileName,
+      ),
       FunctionDeclaration: FunctionDeclaration(this.componentDB, fileName),
       ClassDeclaration: ClassDeclaration(this.componentDB, fileName),
       ClassExpression: ClassDeclaration(this.componentDB, fileName),
+      ClassMethod: ClassMethod(this.componentDB, fileName),
+      ClassPrivateMethod: ClassMethod(this.componentDB, fileName),
+      ClassProperty: ClassProperty(this.componentDB, fileName),
+      ClassPrivateProperty: ClassProperty(this.componentDB, fileName),
       VariableDeclarator: VariableDeclarator(this.componentDB, fileName),
       ReturnStatement: ReturnStatement(this.componentDB, fileName),
-      ArrowFunctionExpression: ArrowFunctionExpression(this.componentDB, fileName),
+      ArrowFunctionExpression: ArrowFunctionExpression(
+        this.componentDB,
+        fileName,
+      ),
       FunctionExpression: FunctionExpression(this.componentDB, fileName),
       ...JSXElement(this.componentDB, fileName),
       CallExpression: CallExpression(this.componentDB, fileName),
-      TSTypeAliasDeclaration: TSTypeAliasDeclaration(this.componentDB, fileName),
-      TSInterfaceDeclaration: TSInterfaceDeclaration(this.componentDB, fileName),
+      TSTypeAliasDeclaration: TSTypeAliasDeclaration(
+        this.componentDB,
+        fileName,
+      ),
+      TSInterfaceDeclaration: TSInterfaceDeclaration(
+        this.componentDB,
+        fileName,
+      ),
     });
 
     const result = this.componentDB.getFile(fileName).getData();
-    result.package_id = this.packageJson.getPackageIdForFile(path.resolve(this.srcDir, filePath)) || undefined;
+    result.package_id =
+      this.packageJson.getPackageIdForFile(
+        path.resolve(this.srcDir, filePath),
+      ) || undefined;
     return result;
   }
 
@@ -492,7 +540,8 @@ export class PackageMaster {
 
     for (const fullfileName of this.files) {
       const fileNameWithSlash = `/${fullfileName}`;
-      let fileCache: ComponentFile | undefined = this.cacheData?.files?.[fileNameWithSlash];
+      let fileCache: ComponentFile | undefined =
+        this.cacheData?.files?.[fileNameWithSlash];
       if (!fileCache && this.sqlite) {
         fileCache = this.sqlite.getLatestSuccessfulFileResult(fullfileName);
       }
@@ -560,11 +609,16 @@ export class PackageMaster {
             });
             this.markFileStatus(
               filePath,
-              message.type === "worker_runtime_error" ? "worker_crashed" : stage === "parse" ? "failed_parse" : "failed_extract",
+              message.type === "worker_runtime_error"
+                ? "worker_crashed"
+                : stage === "parse"
+                  ? "failed_parse"
+                  : "failed_extract",
             );
           } catch (error) {
             filesFailed++;
-            const err = error instanceof Error ? error : new Error(String(error));
+            const err =
+              error instanceof Error ? error : new Error(String(error));
             this.recordFileError(filePath, "worker_runtime", err.message, {
               stack: err.stack,
             });
@@ -596,7 +650,9 @@ export class PackageMaster {
           succeededFiles.push(filePath);
         } catch (error) {
           filesFailed++;
-          const err = error as Error & { loc?: { line?: number; column?: number } };
+          const err = error as Error & {
+            loc?: { line?: number; column?: number };
+          };
           const stage = err.name === "SyntaxError" ? "parse" : "extract";
           this.recordFileError(filePath, stage, err.message, {
             line: err.loc?.line,
@@ -604,7 +660,10 @@ export class PackageMaster {
             stack: err.stack,
             parser: "babel",
           });
-          this.markFileStatus(filePath, stage === "parse" ? "failed_parse" : "failed_extract");
+          this.markFileStatus(
+            filePath,
+            stage === "parse" ? "failed_parse" : "failed_extract",
+          );
         }
       }
     }
@@ -639,16 +698,21 @@ export class PackageMaster {
         const fileName = `/${fullfileName}`;
         const result = this.componentDB.getFile(fileName).getData();
         result.package_id =
-          this.packageJson.getPackageIdForFile(path.resolve(this.srcDir, fullfileName)) ||
-          undefined;
+          this.packageJson.getPackageIdForFile(
+            path.resolve(this.srcDir, fullfileName),
+          ) || undefined;
         this.sqlite.saveFileResults({
           ...result,
           package_id: this.packageRow?.id,
         });
-        this.markFileStatus(fullfileName, unresolvedTasks.length > 0 ? "resolved" : "resolved", {
-          fileHash: result.hash,
-          fingerprint: result.fingerPrint,
-        });
+        this.markFileStatus(
+          fullfileName,
+          unresolvedTasks.length > 0 ? "resolved" : "resolved",
+          {
+            fileHash: result.hash,
+            fingerprint: result.fingerPrint,
+          },
+        );
       }
 
       this.recordResolveErrors(unresolvedTasks);
