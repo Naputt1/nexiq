@@ -1,9 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { componentTask } from "./componentTask.js";
-import { type DatabaseData, type GraphViewResult } from "../index.js";
+import {
+  type DatabaseData,
+  type GraphViewResult,
+  type TaskContext,
+  type GraphNodeData,
+  type GraphComboData,
+  type GraphArrowData,
+} from "../index.js";
 
 describe("componentTask", () => {
   const mockData: DatabaseData = {
+    // ... rest of mockData remains same, I will use a concise replacement
     files: [
       {
         id: 1,
@@ -239,51 +247,76 @@ describe("componentTask", () => {
       ],
     };
 
-    const result = componentTask.run(dataWithJsx, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithJsx,
+    };
+    const result = componentTask.run(initialResult, context);
 
     // Verify symbol node is skipped
-    const jsxNode = result.nodes.find((n) => n.name === "jsx@8:4");
+    const jsxNode = result.nodes.find(
+      (n: GraphNodeData) => n.name === "jsx@8:4",
+    );
     expect(jsxNode).toBeUndefined();
 
     // Verify scope combo is skipped
-    const jsxScope = result.combos.find((c) => c.id === "s-jsx-block");
+    const jsxScope = result.combos.find(
+      (c: GraphComboData) => c.id === "s-jsx-block",
+    );
     expect(jsxScope).toBeUndefined();
   });
 
   it("should hide import nodes and redirect relations", () => {
-    const result = componentTask.run(mockData, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: mockData,
+    };
+    const result = componentTask.run(initialResult, context);
 
     // Verify import node is NOT present
-    const importNode = result.nodes.find((n) => n.id === "sym-import");
-    const importCombo = result.combos.find((c) => c.id === "sym-import");
+    const importNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "sym-import",
+    );
+    const importCombo = result.combos.find(
+      (c: GraphComboData) => c.id === "sym-import",
+    );
     expect(importNode).toBeUndefined();
     expect(importCombo).toBeUndefined();
 
     // Verify relation is redirected from sym-app to sym-comp
     // Step 4 logic: const edgeId = `${sourceId}-${targetId}-${rel.kind}`;
     const edgeId = "sym-app-sym-comp-usage";
-    const edge = result.edges.find((e) => e.id === edgeId);
+    const edge = result.edges.find((e: GraphArrowData) => e.id === edgeId);
     expect(edge).toBeDefined();
     expect(edge?.source).toBe("sym-app");
     expect(edge?.target).toBe("sym-comp");
   });
 
   it("should use tag name for top-level JSX label and stack correctly", () => {
-    const result = componentTask.run(mockData, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: mockData,
+    };
+    const result = componentTask.run(initialResult, context);
 
     const renderGroup = result.combos.find(
-      (c) => c.id === "render-group-s-app-block",
+      (c: GraphComboData) => c.id === "render-group-s-app-block",
     );
     expect(renderGroup).toBeDefined();
     expect(renderGroup?.name).toBe("render");
     expect(renderGroup?.combo).toBe("s-app-block");
 
-    const compRender = result.combos.find((c) => c.id === "r-1");
+    const compRender = result.combos.find(
+      (c: GraphComboData) => c.id === "r-1",
+    );
     expect(compRender).toBeDefined();
     expect(compRender?.label?.text).toBe("Comp");
     expect(compRender?.combo).toBe("render-group-s-app-block");
 
-    const divRender = result.combos.find((c) => c.id === "r-2");
+    const divRender = result.combos.find((c: GraphComboData) => c.id === "r-2");
     expect(divRender).toBeDefined();
     expect(divRender?.label?.text).toBe("div");
     expect(divRender?.combo).toBe("r-1"); // Nested inside r-1
@@ -311,16 +344,23 @@ describe("componentTask", () => {
       }),
     };
 
-    const result = componentTask.run(dataWithEffect, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithEffect,
+    };
+    const result = componentTask.run(initialResult, context);
 
-    const effectNode = result.nodes.find((n) => n.id === "e-app:effect:10:5");
+    const effectNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "e-app:effect:10:5",
+    );
     expect(effectNode).toBeDefined();
     expect(effectNode?.name).toBe("useEffect");
     expect(effectNode?.combo).toBe("s-app-block");
 
     // Verify dependency edge (sym-import should be redirected to sym-comp, arrow points FROM dependency TO consumer)
     const depEdge = result.edges.find(
-      (e) => e.id === "sym-comp-e-app:effect:10:5-effect-dep",
+      (e: GraphArrowData) => e.id === "sym-comp-e-app:effect:10:5-effect-dep",
     );
     expect(depEdge).toBeDefined();
     expect(depEdge?.source).toBe("sym-comp");
@@ -363,14 +403,21 @@ describe("componentTask", () => {
       ],
     };
 
-    const result = componentTask.run(dataWithMemo, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithMemo,
+    };
+    const result = componentTask.run(initialResult, context);
 
-    const memoNode = result.nodes.find((n) => n.id === "sym-memo");
+    const memoNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "sym-memo",
+    );
     expect(memoNode).toBeDefined();
 
     // Verify dependency edge (arrow points FROM dependency TO consumer)
     const depEdge = result.edges.find(
-      (e) => e.id === "sym-comp-sym-memo-react-dep",
+      (e: GraphArrowData) => e.id === "sym-comp-sym-memo-react-dep",
     );
     expect(depEdge).toBeDefined();
     expect(depEdge?.source).toBe("sym-comp");
@@ -400,9 +447,16 @@ describe("componentTask", () => {
       }),
     };
 
-    const result = componentTask.run(dataWithEffect, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithEffect,
+    };
+    const result = componentTask.run(initialResult, context);
 
-    const effectNode = result.nodes.find((n) => n.id === "e-app:effect:10:5");
+    const effectNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "e-app:effect:10:5",
+    );
     expect(effectNode).toBeDefined();
     expect(effectNode?.name).toBe("useLayoutEffect");
     expect(effectNode?.label?.text).toBe("useLayoutEffect");
@@ -475,16 +529,21 @@ describe("componentTask", () => {
       ],
     };
 
-    const result = componentTask.run(dataWithState, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithState,
+    };
+    const result = componentTask.run(initialResult, context);
 
     const stateNode = result.nodes.filter(
-      (n) => n.id === "sym-state" || n.id === "sym-setter",
+      (n: GraphNodeData) => n.id === "sym-state" || n.id === "sym-setter",
     );
     expect(stateNode.length).toBe(1);
     expect(stateNode[0].id).toBe("sym-state");
     expect(stateNode[0].label?.text).toBe("count");
 
-    const refNode = result.nodes.find((n) => n.id === "sym-ref");
+    const refNode = result.nodes.find((n: GraphNodeData) => n.id === "sym-ref");
     expect(refNode).toBeDefined();
     expect(refNode?.label?.text).toBe("myRef");
   });
@@ -533,23 +592,32 @@ describe("componentTask", () => {
       ],
     };
 
-    const result = componentTask.run(dataWithDestructuring, initialResult);
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: dataWithDestructuring,
+    };
+    const result = componentTask.run(initialResult, context);
 
     // Verify 'rows' node
-    const rowsNode = result.nodes.find((n) => n.id === "sym-rows");
+    const rowsNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "sym-rows",
+    );
     expect(rowsNode).toBeDefined();
     expect(rowsNode?.combo).toBe("s-app-block:source:e-hook-call"); // First layer grouped under source
 
     // Verify source combo
     const sourceCombo = result.combos.find(
-      (c) => c.id === "s-app-block:source:e-hook-call",
+      (c: GraphComboData) => c.id === "s-app-block:source:e-hook-call",
     );
     expect(sourceCombo).toBeDefined();
     expect(sourceCombo?.name).toBe("useTable");
     expect(sourceCombo?.combo).toBe("s-app-block");
 
     // Verify 'original' node and intermediate combos
-    const origNode = result.nodes.find((n) => n.id === "sym-orig");
+    const origNode = result.nodes.find(
+      (n: GraphNodeData) => n.id === "sym-orig",
+    );
     expect(origNode).toBeDefined();
 
     // Path ["rows", "0", "original"]
@@ -560,14 +628,16 @@ describe("componentTask", () => {
     expect(origNode?.combo).toBe("s-app-block:source:e-hook-call:path:rows/0");
 
     const combo0 = result.combos.find(
-      (c) => c.id === "s-app-block:source:e-hook-call:path:rows/0",
+      (c: GraphComboData) =>
+        c.id === "s-app-block:source:e-hook-call:path:rows/0",
     );
     expect(combo0).toBeDefined();
     expect(combo0?.name).toBe("0");
     expect(combo0?.combo).toBe("s-app-block:source:e-hook-call:path:rows");
 
     const comboRows = result.combos.find(
-      (c) => c.id === "s-app-block:source:e-hook-call:path:rows",
+      (c: GraphComboData) =>
+        c.id === "s-app-block:source:e-hook-call:path:rows",
     );
     expect(comboRows).toBeDefined();
     expect(comboRows?.name).toBe("rows");

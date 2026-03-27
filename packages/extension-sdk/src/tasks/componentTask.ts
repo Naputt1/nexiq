@@ -1,33 +1,28 @@
-import {
-  type DatabaseData,
-  type EffectInfo,
-  type ReactDependency,
-} from "@nexiq/shared";
+import { type EffectInfo, type ReactDependency } from "@nexiq/shared";
 import {
   type GraphComboData,
   type GraphArrowData,
   type GraphNodeData,
   type GraphViewResult,
   type GraphViewTask,
+  type TaskContext,
+  getTaskData,
 } from "../index.js";
 
 export const componentTask: GraphViewTask = {
   id: "component-structure",
   priority: 10,
-  run: (
-    data: DatabaseData,
-    result: GraphViewResult,
-    batch?: Partial<DatabaseData>,
-  ): GraphViewResult => {
+  run: (result: GraphViewResult, context: TaskContext): GraphViewResult => {
+    const data = getTaskData(context);
     const combos: GraphComboData[] = [...result.combos];
     const nodes: GraphNodeData[] = [...result.nodes];
     const edges: GraphArrowData[] = [...result.edges];
     const typeData = { ...result.typeData };
 
-    const scopes = batch?.scopes || data.scopes || [];
-    const symbols = batch?.symbols || data.symbols || [];
-    const relations = batch?.relations || data.relations || [];
-    const renders = batch?.renders || data.renders || [];
+    const scopes = data.scopes || [];
+    const symbols = data.symbols || [];
+    const relations = data.relations || [];
+    const renders = data.renders || [];
     const files = data.files || [];
     const packages = data.packages || [];
 
@@ -37,12 +32,31 @@ export const componentTask: GraphViewTask = {
         f.id,
         {
           path: f.path,
+          packageId: f.package_id,
           projectPath: f.package_id
             ? packagePathMap.get(f.package_id)
             : undefined,
         },
       ]),
     );
+
+    const usePackageCombos = packages.length > 1;
+
+    const ensurePackageCombo = (packageId: string) => {
+      if (!usePackageCombos) return undefined;
+      const comboId = `package:${packageId}`;
+      if (!combos.some((c) => c.id === comboId)) {
+        const pkg = packages.find((p) => p.id === packageId);
+        combos.push({
+          id: comboId,
+          name: pkg?.name || packageId,
+          label: { text: pkg?.name || packageId },
+          type: "package",
+          collapsed: true,
+        });
+      }
+      return comboId;
+    };
 
     // Identify automatic JSX symbols and their entities to skip them and their scopes
     const automaticJsxEntities = new Set<string>();
@@ -102,10 +116,17 @@ export const componentTask: GraphViewTask = {
         continue;
 
       const parentScope = data.scopes.find((s) => s.id === scope.parent_id);
-      const parentComboId =
+      let parentComboId =
         parentScope && parentScope.kind !== "module"
           ? scope.parent_id
           : undefined;
+
+      if (!parentComboId) {
+        const fileInfo = fileInfoMap.get(scope.file_id);
+        if (fileInfo?.packageId) {
+          parentComboId = ensurePackageCombo(fileInfo.packageId);
+        }
+      }
 
       combos.push({
         id: scope.id,
@@ -215,6 +236,12 @@ export const componentTask: GraphViewTask = {
         // Handle destructuring paths to group variables and reduce clutter
         let parentComboId =
           scope && scope.kind !== "module" ? symbol.scope_id : undefined;
+
+        if (!parentComboId) {
+          if (fileInfo?.packageId) {
+            parentComboId = ensurePackageCombo(fileInfo.packageId);
+          }
+        }
 
         if (symbol.path && entity.kind !== "state") {
           try {
@@ -331,6 +358,13 @@ export const componentTask: GraphViewTask = {
 
       // Create a "render" group combo within the parent combo if not exists
       let finalParentCombo = render.parent_render_id ?? parentCombo;
+
+      if (!finalParentCombo) {
+        if (fileInfo?.packageId) {
+          finalParentCombo = ensurePackageCombo(fileInfo.packageId);
+        }
+      }
+
       if (parentCombo && !render.parent_render_id) {
         const renderGroupId = `render-group-${parentCombo}`;
         if (!combos.some((c) => c.id === renderGroupId)) {

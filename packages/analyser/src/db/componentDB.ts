@@ -16,8 +16,6 @@ import type {
   TypeDataDeclareInterface,
   TypeDataDeclareType,
   ComponentFile,
-  ComponentFileVarNormalFunction,
-  ComponentFileVarNormalData,
   Memo,
   RefData,
   VariableName,
@@ -25,6 +23,11 @@ import type {
   FunctionReturn,
   ComponentDBResolve,
   DistributiveOmit,
+  ComponentFileVarClass,
+  ComponentFileVarMethod,
+  ComponentFileVarBaseTypeFunction,
+  ComponentFileVarProperty,
+  ComponentFileVarNormal,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.js";
 import type { PackageJson } from "./packageJson.js";
@@ -48,6 +51,8 @@ import { getDeterministicId } from "../utils/hash.js";
 import { getVariableNameKey } from "../analyzer/pattern.js";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
 import { SqliteDB } from "./sqlite.js";
+import { PropertyVariable } from "./variable/propertyVariable.js";
+import { MethodVariable } from "./variable/methodVariable.js";
 
 export type ComponentDBOptions = {
   packageJson: PackageJson;
@@ -233,73 +238,91 @@ export class ComponentDB {
       ComponentFileVar,
       "id" | "kind" | "var" | "children" | "file" | "hash" | "components"
     >,
-    kind?: VarKind,
-    declarationKind?:
+    kind: VarKind = "normal",
+    declarationKind:
       | "const"
       | "let"
       | "var"
       | "using"
-      | "await using"
-      | undefined,
+      | "await using" = "const",
   ) {
     const file = this.files.get(fileName);
 
     const nameKey = getVariableNameKey(variable.name);
 
     let v: Variable | undefined;
-    if (variable.type === "function") {
+    if (kind === "class") {
+      v = new ClassVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarClass,
+          "var" | "type" | "kind" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (kind === "method") {
+      v = new MethodVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarMethod,
+          "var" | "components" | "type" | "kind" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (kind === "property") {
+      v = new PropertyVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarProperty,
+          "kind" | "type" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (variable.type === "function") {
       v = new FunctionVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as unknown as Omit<
-            ComponentFileVarNormalFunction,
-            | "id"
-            | "kind"
-            | "var"
-            | "children"
-            | "file"
-            | "hash"
-            | "components"
-            | "type"
-          >),
-          children: {},
+          ...variable,
           declarationKind,
-        },
+        } as unknown as Omit<
+          ComponentFileVarBaseTypeFunction<"normal">,
+          "var" | "components" | "file" | "hash"
+        >,
         file,
       );
     } else if (variable.type === "class") {
       v = new ClassVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as unknown as Omit<
-            ComponentFileVarNormalFunction,
-            | "id"
-            | "kind"
-            | "var"
-            | "children"
-            | "file"
-            | "hash"
-            | "components"
-            | "type"
-          >),
-          children: {},
+          ...variable,
           declarationKind,
-        },
+        } as unknown as Omit<
+          ComponentFileVarClass,
+          "var" | "type" | "kind" | "file" | "hash"
+        >,
         file,
       );
     } else if (variable.type === "data") {
-      assert(kind != null, "kind must be defined for data variable");
-
       v = new DataVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as Omit<
-            ComponentFileVarNormalData,
-            "id" | "kind" | "var" | "children" | "file" | "hash"
-          >),
+          ...variable,
           kind,
           declarationKind,
-        },
+          type: "data",
+        } as unknown as Omit<
+          ComponentFileVarNormal,
+          "kind" | "var" | "children" | "file" | "hash"
+        > & { kind?: VarKind },
         file,
       );
     }
@@ -424,7 +447,9 @@ export class ComponentDB {
     const currentScope = rawPackageName?.startsWith("@")
       ? rawPackageName.split("/")[0]
       : undefined;
-    const sourceScope = source.startsWith("@") ? source.split("/")[0] : undefined;
+    const sourceScope = source.startsWith("@")
+      ? source.split("/")[0]
+      : undefined;
     const resolvedFileName = fileName.startsWith("/")
       ? path.join(this.dir, fileName)
       : path.resolve(this.dir, fileName);
@@ -456,7 +481,10 @@ export class ComponentDB {
     }
 
     const comImport = this.files.getImport(fileName, hookName);
-    if (comImport && this.isWorkspaceDependencyImport(comImport.source, fileName)) {
+    if (
+      comImport &&
+      this.isWorkspaceDependencyImport(comImport.source, fileName)
+    ) {
       return {
         hookId: comImport.localName,
         resolvedId: comImport.resolvedId,
@@ -989,7 +1017,10 @@ export class ComponentDB {
   }
 
   public isDependency(name: string, fileName?: string): boolean {
-    return this.packageJson.isDependency(name, fileName ? path.resolve(this.dir, fileName) : undefined);
+    return this.packageJson.isDependency(
+      name,
+      fileName ? path.resolve(this.dir, fileName) : undefined,
+    );
   }
 
   public getImportFileName(name: string, fileName: string) {

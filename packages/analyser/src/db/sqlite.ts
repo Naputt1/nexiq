@@ -8,7 +8,6 @@ import type {
   ComponentInfoRender,
   ExportRow,
   FileAnalysisErrorRow,
-  FileRunStatusRow,
   EntityRow,
   PackageRow,
   RelationRow,
@@ -27,7 +26,9 @@ export interface AnalyzedFileResult {
   file: ComponentFile;
 }
 
-type FileResultWithPackage = ComponentFile & { package_id?: string | undefined };
+type FileResultWithPackage = ComponentFile & {
+  package_id?: string | undefined;
+};
 
 export class SqliteDB extends BaseSqliteDB {
   constructor(dbPath: string, options: { readonly?: boolean } = {}) {
@@ -267,7 +268,9 @@ export class SqliteDB extends BaseSqliteDB {
     `);
   }
 
-  public beginRun(data: Omit<AnalysisRunRow, "finished_at"> & { finished_at?: string | null }) {
+  public beginRun(
+    data: Omit<AnalysisRunRow, "finished_at"> & { finished_at?: string | null },
+  ) {
     this.db
       .prepare(
         `
@@ -281,7 +284,11 @@ export class SqliteDB extends BaseSqliteDB {
       });
   }
 
-  public finishRun(runId: string, status: string, finishedAt: string = new Date().toISOString()) {
+  public finishRun(
+    runId: string,
+    status: string,
+    finishedAt: string = new Date().toISOString(),
+  ) {
     this.db
       .prepare(
         "UPDATE analysis_runs SET status = ?, finished_at = ? WHERE id = ?",
@@ -370,7 +377,9 @@ export class SqliteDB extends BaseSqliteDB {
       });
   }
 
-  public getLatestSuccessfulFileResult(filePath: string): ComponentFile | undefined {
+  public getLatestSuccessfulFileResult(
+    filePath: string,
+  ): ComponentFile | undefined {
     return this.loadFileResults(filePath);
   }
 
@@ -380,7 +389,9 @@ export class SqliteDB extends BaseSqliteDB {
       : "SELECT * FROM file_analysis_errors WHERE run_id = ?";
     return this.db
       .prepare(sql)
-      .all(...(filePath ? [runId, filePath] : [runId])) as FileAnalysisErrorRow[];
+      .all(
+        ...(filePath ? [runId, filePath] : [runId]),
+      ) as FileAnalysisErrorRow[];
   }
 
   public getResolveErrorsForRun(runId: string) {
@@ -397,7 +408,12 @@ export class SqliteDB extends BaseSqliteDB {
     stmt.run(data);
   }
 
-  public insertPackageDependency(data: { package_id: string; dependency_name: string; dependency_version: string; is_dev: boolean }) {
+  public insertPackageDependency(data: {
+    package_id: string;
+    dependency_name: string;
+    dependency_version: string;
+    is_dev: boolean;
+  }) {
     const stmt = this.db.prepare(`
       INSERT INTO package_dependencies (package_id, dependency_name, dependency_version, is_dev)
       VALUES (@package_id, @dependency_name, @dependency_version, @is_dev)
@@ -406,12 +422,14 @@ export class SqliteDB extends BaseSqliteDB {
       package_id: data.package_id,
       dependency_name: data.dependency_name,
       dependency_version: data.dependency_version,
-      is_dev: data.is_dev ? 1 : 0
+      is_dev: data.is_dev ? 1 : 0,
     });
   }
 
   public clearPackageDependencies(packageId: string) {
-    this.db.prepare("DELETE FROM package_dependencies WHERE package_id = ?").run(packageId);
+    this.db
+      .prepare("DELETE FROM package_dependencies WHERE package_id = ?")
+      .run(packageId);
   }
 
   private insertEntity(data: {
@@ -893,7 +911,7 @@ export class SqliteDB extends BaseSqliteDB {
         ...metadata,
       };
 
-      if (e.type === "function") {
+      if (e.type === "function" || e.type === "class") {
         varObj.var = {};
         varObj.children = {};
         varObj.scope = {

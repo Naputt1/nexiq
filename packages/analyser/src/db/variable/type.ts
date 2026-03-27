@@ -1,6 +1,8 @@
 import type { ComponentVariable } from "./component.js";
 import type { Variable } from "./variable.js";
 import type { DataVariable } from "./dataVariable.js";
+import type { MethodVariable } from "./methodVariable.js";
+import type { PropertyVariable } from "./propertyVariable.js";
 import type { HookVariable } from "./hook.js";
 import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
 import type { ReactFunctionVariable } from "./reactFunctionVariable.js";
@@ -11,9 +13,24 @@ import type { RefVariable } from "./refVariable.js";
 import type { CallHookVariable } from "./callHookVariable.js";
 import type { JSXVariable } from "./jsx.js";
 import { CallbackVariable } from "./callbackVariable.js";
+import { ClassVariable } from "./classVariable.js";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.kind === "component" && (v.type === "function" || v.type === "class");
+  return (
+    v.kind === "component" && (v.type === "function" || v.type === "class")
+  );
+}
+
+export function isClassVariable(v: Variable): v is ClassVariable {
+  return v.kind === "class" && v.type === "data";
+}
+
+export function isMethodVariable(v: Variable): v is MethodVariable {
+  return v.kind === "method" && v.type === "function";
+}
+
+export function isPropertyVariable(v: Variable): v is PropertyVariable {
+  return v.kind === "property" && v.type === "data";
 }
 
 export function isJSXVariable(v: Variable): v is JSXVariable {
@@ -41,7 +58,7 @@ export function isNormalVariable(v: Variable): v is DataVariable {
 export function isBaseFunctionVariable<TKind extends VarKind>(
   v: Variable<VarType, TKind>,
 ): v is BaseFunctionVariable<TKind> {
-  return v.type === "function" || v.type === "class";
+  return v.type === "function";
 }
 
 export function isDataVariable(v: Variable): v is DataVariable {

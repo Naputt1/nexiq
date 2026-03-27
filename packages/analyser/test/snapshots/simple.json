@@ -431,7 +431,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ebcd71c63b04f0c5",
+          "hash": "7d1fce9f20b0a4f2",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -1614,7 +1614,8 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "6f83d40dc0b75a5a",
+              "hash": "cd07b9fa5245b31d",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 28,
@@ -1636,6 +1637,7 @@
                   "type": "function",
                   "file": "/src/App.tsx",
                   "hash": "56891f98e9c5cd3f",
+                  "declarationKind": "const",
                   "dependencies": {},
                   "loc": {
                     "line": 28,
@@ -2894,7 +2896,8 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "bd7e09304547227c",
+          "hash": "984d26e84002a14",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -2916,6 +2919,7 @@
               "type": "function",
               "file": "/src/export/express.tsx",
               "hash": "1854d1ff18c4685a",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 2,
@@ -3048,6 +3052,7 @@
           "type": "function",
           "file": "/src/export/arrow.tsx",
           "hash": "fdf4c102c545a231",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 1,

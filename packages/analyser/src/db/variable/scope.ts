@@ -5,7 +5,7 @@ import type {
   VarKind,
 } from "@nexiq/shared";
 import type { Variable } from "./variable.js";
-import { isBaseFunctionVariable } from "./type.js";
+import { isBaseFunctionVariable, isClassVariable } from "./type.js";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
@@ -34,7 +34,7 @@ export class Scope {
 
   public findDeepestScope(loc: VariableLoc): Scope {
     for (const v of this.variables.values()) {
-      if (isBaseFunctionVariable(v)) {
+      if (isBaseFunctionVariable(v) || isClassVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
           return v.var.findDeepestScope(loc);
         }

@@ -162,7 +162,9 @@ export class ProjectManager {
 
     if (fs.existsSync(configPath)) {
       try {
-        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        const config = JSON.parse(
+          fs.readFileSync(configPath, "utf-8"),
+        ) as NexiqConfig;
         ignorePatterns = config.ignorePatterns;
         extensionNames = config.extensions || [];
       } catch (e: unknown) {
@@ -174,11 +176,11 @@ export class ProjectManager {
     const extensions: Extension[] = [];
     for (const name of extensionNames) {
       try {
-        let loaded: unknown;
+        let loaded: Record<string, unknown>;
 
         try {
           // 1. Try importing by name (resolves from server's node_modules)
-          loaded = await import(name);
+          loaded = (await import(name)) as Record<string, unknown>;
         } catch (e: unknown) {
           // 2. Try importing relative to the project being analyzed
           const projectNodeModulesPath = path.join(
@@ -192,17 +194,19 @@ export class ProjectManager {
             const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
             const entry = pkg.module || pkg.main || "index.js";
             const fullPath = path.join(projectNodeModulesPath, entry);
-            loaded = await import(pathToFileURL(fullPath).href);
+            loaded = (await import(pathToFileURL(fullPath).href)) as Record<
+              string,
+              unknown
+            >;
           } else {
             throw e; // Rethrow original error if project-relative also fails
           }
         }
 
-        const extension = Object.values(
-          (loaded as Record<string, unknown>) || {},
-        ).find(
-          (val: unknown) => val && typeof val === "object" && "id" in val,
-        ) as Extension;
+        const extension = Object.values(loaded || {}).find(
+          (val: unknown): val is Extension =>
+            !!(val && typeof val === "object" && "id" in val),
+        );
 
         if (extension) {
           extensions.push(extension);
@@ -223,7 +227,7 @@ export class ProjectManager {
         cacheFile,
         ignorePatterns,
         sqlitePath,
-        analysisPaths: subProjects,
+        analysisPaths: subProjects?.map((p) => path.resolve(projectPath, p)),
         monorepo: subProjects && subProjects.length > 0 ? true : undefined,
       },
     );

@@ -4,7 +4,12 @@ import type { ComponentDB } from "../db/componentDB.js";
 import { returnJSX } from "../utils.js";
 import assert from "assert";
 import { getPattern } from "./pattern.js";
-import type { ComponentFileVarComponent } from "@nexiq/shared";
+import type {
+  ComponentFileVar,
+  ComponentFileVarComponent,
+  DistributiveOmit,
+} from "@nexiq/shared";
+import { generateFn } from "../utils/babel.js";
 
 export default function ClassDeclaration(
   componentDB: ComponentDB,
@@ -46,40 +51,43 @@ export default function ClassDeclaration(
       },
     };
 
+    const superClassNode = nodePath.node.superClass;
+    let superClass: { id?: string; name: string } | undefined;
+    if (superClassNode) {
+      if (t.isIdentifier(superClassNode)) {
+        superClass = { name: superClassNode.name };
+      } else {
+        superClass = { name: generateFn(superClassNode).code };
+      }
+    }
+
     let isComponent = false;
     // Heuristic: check if it has a render method returning JSX
-    nodePath.traverse({
-      ClassMethod(methodPath) {
-        if (t.isIdentifier(methodPath.node.key, { name: "render" })) {
-          if (returnJSX(methodPath.node)) {
+    for (const member of nodePath.node.body.body) {
+      if (
+        t.isClassMethod(member) &&
+        t.isIdentifier(member.key, { name: "render" })
+      ) {
+        if (returnJSX(member)) {
+          isComponent = true;
+          break;
+        }
+      }
+      if (
+        t.isClassProperty(member) &&
+        t.isIdentifier(member.key, { name: "render" })
+      ) {
+        if (
+          t.isArrowFunctionExpression(member.value) ||
+          t.isFunctionExpression(member.value)
+        ) {
+          if (returnJSX(member.value)) {
             isComponent = true;
-            methodPath.stop();
+            break;
           }
         }
-      },
-      ClassProperty(propPath) {
-        if (t.isIdentifier(propPath.node.key, { name: "render" })) {
-          if (
-            t.isArrowFunctionExpression(propPath.node.value) ||
-            t.isFunctionExpression(propPath.node.value)
-          ) {
-            if (returnJSX(propPath.node.value)) {
-              isComponent = true;
-              propPath.stop();
-            }
-          }
-        }
-      },
-      FunctionDeclaration(fPath) {
-        fPath.skip();
-      },
-      FunctionExpression(fPath) {
-        fPath.skip();
-      },
-      ArrowFunctionExpression(fPath) {
-        fPath.skip();
-      },
-    });
+      }
+    }
 
     if (isComponent) {
       componentDB.addComponent(fileName, {
@@ -99,9 +107,10 @@ export default function ClassDeclaration(
         async: false,
         effects: {},
         forwardRef: false,
+        superClass,
       } as unknown as Omit<
         ComponentFileVarComponent,
-        "id" | "kind" | "hash" | "file"
+        "id" | "kind" | "states" | "hash" | "file"
       >);
     } else {
       // Just register as a variable
@@ -114,10 +123,12 @@ export default function ClassDeclaration(
           loc,
           scope,
           async: false,
-          children: {},
-          var: {},
-        } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-        "normal",
+          superClass,
+        } as DistributiveOmit<
+          ComponentFileVar,
+          "id" | "kind" | "var" | "children" | "file" | "hash" | "components"
+        >,
+        "class",
         "const",
       );
     }

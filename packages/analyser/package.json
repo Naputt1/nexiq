@@ -25,7 +25,8 @@
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
     "snapshot": "tsx src/snapshot.ts",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

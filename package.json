@@ -10,7 +10,9 @@
     "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
     "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",
     "benchmark:view": "pnpm --filter=viewer dev",
-    "build:analyze": "pnpm --filter=@nexiq/analyser build"
+    "build:analyze": "pnpm --filter=@nexiq/analyser build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint --fix"
   },
   "keywords": [],
   "author": "",
