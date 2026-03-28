@@ -19,6 +19,7 @@ import CallExpression from "./analyzer/callExpression.js";
 import ReturnStatement from "./analyzer/returnStatement.js";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
+import { extractFileUsages } from "./analyzer/usageCollector.js";
 import type { FileTaskMessage } from "./types.js";
 
 interface WorkerParams {
@@ -67,6 +68,8 @@ async function analyzeFile(params: WorkerParams) {
     TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
     TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
   });
+
+  extractFileUsages(ast, componentDB, fileName);
 
   const fileData = componentDB.getFile(fileName).getData();
   fileData.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;

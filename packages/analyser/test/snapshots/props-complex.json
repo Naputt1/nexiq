@@ -632,7 +632,323 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "dc80f04b65eb748d",
+          "to_id": "c03f8e59d14c727c",
+          "kind": "usage-read",
+          "line": 22,
+          "column": 15,
+          "data_json": {
+            "usageId": "2b98ec569fd47cc5",
+            "filePath": "/src/App.tsx",
+            "line": 22,
+            "column": 15,
+            "ownerId": "c03f8e59d14c727c",
+            "ownerKind": "component",
+            "displayLabel": "a"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c",
+          "to_id": "symbol:import:/src/App.tsx:useRef",
+          "kind": "usage-call",
+          "line": 25,
+          "column": 15,
+          "data_json": {
+            "usageId": "ee759fdf7e8eba34",
+            "filePath": "/src/App.tsx",
+            "line": 25,
+            "column": 15,
+            "ownerId": "c03f8e59d14c727c",
+            "ownerKind": "component",
+            "displayLabel": "useRef"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c",
+          "to_id": "symbol:import:/src/App.tsx:useState",
+          "kind": "usage-call",
+          "line": 26,
+          "column": 30,
+          "data_json": {
+            "usageId": "5cfcf19cf3dba50f",
+            "filePath": "/src/App.tsx",
+            "line": 26,
+            "column": 30,
+            "ownerId": "c03f8e59d14c727c",
+            "ownerKind": "component",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:28:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 28,
+          "column": 2,
+          "data_json": {
+            "usageId": "2c5a0a3e9b627eec",
+            "filePath": "/src/App.tsx",
+            "line": 28,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:28:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "dc80f04b65eb748d",
+          "to_id": "c03f8e59d14c727c:effect:28:2",
+          "kind": "usage-read",
+          "line": 29,
+          "column": 16,
+          "data_json": {
+            "usageId": "6f462b9dab4cdcaf",
+            "filePath": "/src/App.tsx",
+            "line": 29,
+            "column": 16,
+            "ownerId": "c03f8e59d14c727c:effect:28:2",
+            "ownerKind": "effect",
+            "displayLabel": "a"
+          }
+        },
+        {
+          "from_id": "dc80f04b65eb748d",
+          "to_id": "c03f8e59d14c727c:effect:28:2",
+          "kind": "usage-read",
+          "line": 30,
+          "column": 6,
+          "data_json": {
+            "usageId": "7835ec34cbb0d50e",
+            "filePath": "/src/App.tsx",
+            "line": 30,
+            "column": 6,
+            "ownerId": "c03f8e59d14c727c:effect:28:2",
+            "ownerKind": "effect",
+            "displayLabel": "a"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:32:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 32,
+          "column": 2,
+          "data_json": {
+            "usageId": "f6caa19e632dd263",
+            "filePath": "/src/App.tsx",
+            "line": 32,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:32:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:36:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 36,
+          "column": 2,
+          "data_json": {
+            "usageId": "4cefd3fc7cb21aaa",
+            "filePath": "/src/App.tsx",
+            "line": 36,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:36:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:40:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 40,
+          "column": 2,
+          "data_json": {
+            "usageId": "ae738d9a9f055aaa",
+            "filePath": "/src/App.tsx",
+            "line": 40,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:40:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:44:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 44,
+          "column": 2,
+          "data_json": {
+            "usageId": "af8e8245351a041c",
+            "filePath": "/src/App.tsx",
+            "line": 44,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:44:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:state:[stateX, setStateX]:3a2be848cadeb6e5",
+          "to_id": "c03f8e59d14c727c:effect:44:2",
+          "kind": "usage-read",
+          "line": 45,
+          "column": 16,
+          "data_json": {
+            "usageId": "b4aded0a51ae3e19",
+            "filePath": "/src/App.tsx",
+            "line": 45,
+            "column": 16,
+            "ownerId": "c03f8e59d14c727c:effect:44:2",
+            "ownerKind": "effect",
+            "displayLabel": "stateX"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:state:[stateX, setStateX]:3a2be848cadeb6e5",
+          "to_id": "c03f8e59d14c727c:effect:44:2",
+          "kind": "usage-read",
+          "line": 46,
+          "column": 6,
+          "data_json": {
+            "usageId": "50313c2122067ee0",
+            "filePath": "/src/App.tsx",
+            "line": 46,
+            "column": 6,
+            "ownerId": "c03f8e59d14c727c:effect:44:2",
+            "ownerKind": "effect",
+            "displayLabel": "stateX"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:48:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 48,
+          "column": 2,
+          "data_json": {
+            "usageId": "34696cfd2b07dc7f",
+            "filePath": "/src/App.tsx",
+            "line": 48,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:48:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:ref:refX",
+          "to_id": "c03f8e59d14c727c:effect:48:2",
+          "kind": "usage-read",
+          "line": 49,
+          "column": 16,
+          "data_json": {
+            "usageId": "98ef4dfc344ba629",
+            "filePath": "/src/App.tsx",
+            "line": 49,
+            "column": 16,
+            "ownerId": "c03f8e59d14c727c:effect:48:2",
+            "ownerKind": "effect",
+            "displayLabel": "refX"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:ref:refX",
+          "to_id": "c03f8e59d14c727c:effect:48:2",
+          "kind": "usage-read",
+          "line": 50,
+          "column": 6,
+          "data_json": {
+            "usageId": "64c56c4a74dafaa3",
+            "filePath": "/src/App.tsx",
+            "line": 50,
+            "column": 6,
+            "ownerId": "c03f8e59d14c727c:effect:48:2",
+            "ownerKind": "effect",
+            "displayLabel": "refX"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:effect:52:2",
+          "to_id": "symbol:import:/src/App.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 52,
+          "column": 2,
+          "data_json": {
+            "usageId": "f9dcea50c6264198",
+            "filePath": "/src/App.tsx",
+            "line": 52,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c:effect:52:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:ref:refX",
+          "to_id": "c03f8e59d14c727c:effect:52:2",
+          "kind": "usage-read",
+          "line": 53,
+          "column": 16,
+          "data_json": {
+            "usageId": "804c0813e092639f",
+            "filePath": "/src/App.tsx",
+            "line": 53,
+            "column": 16,
+            "ownerId": "c03f8e59d14c727c:effect:52:2",
+            "ownerKind": "effect",
+            "accessPath": [
+              "current"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "refX.current"
+          }
+        },
+        {
+          "from_id": "c03f8e59d14c727c:ref:refX",
+          "to_id": "c03f8e59d14c727c:effect:52:2",
+          "kind": "usage-read",
+          "line": 54,
+          "column": 6,
+          "data_json": {
+            "usageId": "36b2f7e037a3f032",
+            "filePath": "/src/App.tsx",
+            "line": 54,
+            "column": 6,
+            "ownerId": "c03f8e59d14c727c:effect:52:2",
+            "ownerKind": "effect",
+            "accessPath": [
+              "current"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "refX.current"
+          }
+        },
+        {
+          "from_id": "dc80f04b65eb748d",
+          "to_id": "486f8c03b42afb2f",
+          "kind": "usage-read",
+          "line": 58,
+          "column": 7,
+          "data_json": {
+            "usageId": "42abd99bf9df6e47",
+            "filePath": "/src/App.tsx",
+            "line": 58,
+            "column": 7,
+            "ownerId": "486f8c03b42afb2f",
+            "ownerKind": "normal",
+            "displayLabel": "a"
+          }
+        }
+      ]
     }
   },
   "edges": [

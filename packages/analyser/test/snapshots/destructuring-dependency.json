@@ -128,7 +128,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "ed296c2824af0767",
+          "hash": "bbace640429737f9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -176,6 +176,7 @@
               "type": "function",
               "file": "/index.tsx",
               "hash": "5812fee2bd9e235a",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 15,
@@ -269,6 +270,7 @@
               "type": "data",
               "file": "/index.tsx",
               "hash": "892e16305c23a729",
+              "declarationKind": "const",
               "dependencies": {
                 "27f5be35fc906e3d": {
                   "id": "27f5be35fc906e3d",
@@ -454,7 +456,137 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "ba1bf171ca67c6dd",
+          "to_id": "b3b83d0e8e708509",
+          "kind": "usage-call",
+          "line": 15,
+          "column": 17,
+          "data_json": {
+            "usageId": "eaa8bb2a9aa4e524",
+            "filePath": "/index.tsx",
+            "line": 15,
+            "column": 17,
+            "ownerId": "ba1bf171ca67c6dd",
+            "ownerKind": "component",
+            "displayLabel": "useSelector"
+          }
+        },
+        {
+          "from_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+          "to_id": "1981986fd63b9d23",
+          "kind": "usage-read",
+          "line": 19,
+          "column": 6,
+          "data_json": {
+            "usageId": "cb400df0c5ee0e26",
+            "filePath": "/index.tsx",
+            "line": 19,
+            "column": 6,
+            "ownerId": "1981986fd63b9d23",
+            "ownerKind": "normal",
+            "displayLabel": "thread"
+          }
+        },
+        {
+          "from_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "to_id": "symbol:import:/index.tsx:useCallback",
+          "kind": "usage-call",
+          "line": 21,
+          "column": 26,
+          "data_json": {
+            "usageId": "3aecc9717521b6f3",
+            "filePath": "/index.tsx",
+            "line": 21,
+            "column": 26,
+            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerKind": "callback",
+            "displayLabel": "useCallback"
+          }
+        },
+        {
+          "from_id": "1981986fd63b9d23:841e96e73f3a4bc0",
+          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "kind": "usage-read",
+          "line": 23,
+          "column": 18,
+          "data_json": {
+            "usageId": "2ef22e336b43438c",
+            "filePath": "/index.tsx",
+            "line": 23,
+            "column": 18,
+            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerKind": "callback",
+            "displayLabel": "isFollowing"
+          }
+        },
+        {
+          "from_id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
+          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "kind": "usage-read",
+          "line": 23,
+          "column": 31,
+          "data_json": {
+            "usageId": "77bc4a9b8658bb76",
+            "filePath": "/index.tsx",
+            "line": 23,
+            "column": 31,
+            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerKind": "callback",
+            "displayLabel": "channelId"
+          }
+        },
+        {
+          "from_id": "1981986fd63b9d23:841e96e73f3a4bc0",
+          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 5,
+          "data_json": {
+            "usageId": "43e02c52293b1c80",
+            "filePath": "/index.tsx",
+            "line": 25,
+            "column": 5,
+            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerKind": "callback",
+            "displayLabel": "isFollowing"
+          }
+        },
+        {
+          "from_id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
+          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 18,
+          "data_json": {
+            "usageId": "ce2ee4c89319867d",
+            "filePath": "/index.tsx",
+            "line": 25,
+            "column": 18,
+            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerKind": "callback",
+            "displayLabel": "channelId"
+          }
+        },
+        {
+          "from_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "to_id": "7cd77b33010ba84d",
+          "kind": "usage-read",
+          "line": 28,
+          "column": 23,
+          "data_json": {
+            "usageId": "dad58910630c307d",
+            "filePath": "/index.tsx",
+            "line": 28,
+            "column": 23,
+            "ownerId": "7cd77b33010ba84d",
+            "ownerKind": "normal",
+            "displayLabel": "handleFollowing"
+          }
+        }
+      ]
     }
   },
   "edges": [

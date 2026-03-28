@@ -173,7 +173,8 @@
           "id": "dcf492560ff097d3"
         }
       },
-      "var": {}
+      "var": {},
+      "relations": []
     },
     "/src/type.tsx": {
       "path": "/src/type.tsx",
@@ -1814,7 +1815,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "a01d6f19c61395fd",
+          "hash": "65960787aa5a0efe",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2014,6 +2015,7 @@
               "type": "function",
               "file": "/src/type.tsx",
               "hash": "883a3723bea4c8d9",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 119,
@@ -2326,7 +2328,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "2d6c64fb0c8b91cc",
+          "hash": "fcda5ad57d636522",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2525,6 +2527,7 @@
               "type": "function",
               "file": "/src/type.tsx",
               "hash": "6840448b54053cdd",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 132,
@@ -2823,7 +2826,153 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "symbol:import:/src/type.tsx:React",
+          "to_id": "798772ab7346d97e",
+          "kind": "usage-read",
+          "line": 90,
+          "column": 27,
+          "data_json": {
+            "usageId": "e5cbcb2ede44e717",
+            "filePath": "/src/type.tsx",
+            "line": 90,
+            "column": 27,
+            "ownerId": "798772ab7346d97e",
+            "ownerKind": "component",
+            "displayLabel": "React"
+          }
+        },
+        {
+          "from_id": "e4bf78fed7667fe",
+          "to_id": "798772ab7346d97e",
+          "kind": "usage-read",
+          "line": 90,
+          "column": 36,
+          "data_json": {
+            "usageId": "ceca6f9cbfd2ad34",
+            "filePath": "/src/type.tsx",
+            "line": 90,
+            "column": 36,
+            "ownerId": "798772ab7346d97e",
+            "ownerKind": "component",
+            "displayLabel": "Test"
+          }
+        },
+        {
+          "from_id": "448560a5731deb3b",
+          "to_id": "798772ab7346d97e",
+          "kind": "usage-read",
+          "line": 91,
+          "column": 7,
+          "data_json": {
+            "usageId": "e37674989bb12203",
+            "filePath": "/src/type.tsx",
+            "line": 91,
+            "column": 7,
+            "ownerId": "798772ab7346d97e",
+            "ownerKind": "component",
+            "displayLabel": "InnerType"
+          }
+        },
+        {
+          "from_id": "e2c649b92ba9d565",
+          "to_id": "798772ab7346d97e",
+          "kind": "usage-read",
+          "line": 95,
+          "column": 12,
+          "data_json": {
+            "usageId": "a4edc7b6cae01990",
+            "filePath": "/src/type.tsx",
+            "line": 95,
+            "column": 12,
+            "ownerId": "798772ab7346d97e",
+            "ownerKind": "component",
+            "displayLabel": "InnerType2"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/type.tsx:React",
+          "to_id": "90e2b1081177c79d",
+          "kind": "usage-read",
+          "line": 102,
+          "column": 35,
+          "data_json": {
+            "usageId": "fae808ead779997c",
+            "filePath": "/src/type.tsx",
+            "line": 102,
+            "column": 35,
+            "ownerId": "90e2b1081177c79d",
+            "ownerKind": "component",
+            "displayLabel": "React"
+          }
+        },
+        {
+          "from_id": "61e7cd474108d1a5",
+          "to_id": "90e2b1081177c79d",
+          "kind": "usage-read",
+          "line": 102,
+          "column": 44,
+          "data_json": {
+            "usageId": "ac0b7f074e1dcdb8",
+            "filePath": "/src/type.tsx",
+            "line": 102,
+            "column": 44,
+            "ownerId": "90e2b1081177c79d",
+            "ownerKind": "component",
+            "displayLabel": "Parent"
+          }
+        },
+        {
+          "from_id": "a35aba9b9c28985e",
+          "to_id": "c6fb8be07af7c236",
+          "kind": "usage-read",
+          "line": 110,
+          "column": 53,
+          "data_json": {
+            "usageId": "7f343278a380a200",
+            "filePath": "/src/type.tsx",
+            "line": 110,
+            "column": 53,
+            "ownerId": "c6fb8be07af7c236",
+            "ownerKind": "component",
+            "displayLabel": "Child"
+          }
+        },
+        {
+          "from_id": "f7ced95f55e414b6",
+          "to_id": "80b1b60c7d127de5",
+          "kind": "usage-read",
+          "line": 114,
+          "column": 70,
+          "data_json": {
+            "usageId": "98c868f73ee90756",
+            "filePath": "/src/type.tsx",
+            "line": 114,
+            "column": 70,
+            "ownerId": "80b1b60c7d127de5",
+            "ownerKind": "component",
+            "displayLabel": "Props"
+          }
+        },
+        {
+          "from_id": "f7ced95f55e414b6",
+          "to_id": "f51adcb408401731",
+          "kind": "usage-read",
+          "line": 127,
+          "column": 52,
+          "data_json": {
+            "usageId": "52d46529d905a09",
+            "filePath": "/src/type.tsx",
+            "line": 127,
+            "column": 52,
+            "ownerId": "f51adcb408401731",
+            "ownerKind": "component",
+            "displayLabel": "Props"
+          }
+        }
+      ]
     },
     "/src/main.tsx": {
       "path": "/src/main.tsx",
@@ -2909,7 +3058,41 @@
           "props": [],
           "children": {}
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "5453275af356e1ca",
+          "to_id": "symbol:import:/src/main.tsx:StrictMode",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 3,
+          "data_json": {
+            "usageId": "2ca09581a588217",
+            "filePath": "/src/main.tsx",
+            "line": 7,
+            "column": 3,
+            "ownerId": "5453275af356e1ca",
+            "ownerKind": "normal",
+            "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "d28ef55e6ceebff3",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 8,
+          "column": 5,
+          "data_json": {
+            "usageId": "ddcf6ae4062a8027",
+            "filePath": "/src/main.tsx",
+            "line": 8,
+            "column": 5,
+            "ownerId": "d28ef55e6ceebff3",
+            "ownerKind": "normal",
+            "displayLabel": "App"
+          }
+        }
+      ]
     },
     "/src/Destructuring.tsx": {
       "path": "/src/Destructuring.tsx",
@@ -2949,7 +3132,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "bfc73da61ee50c3",
+          "hash": "9d47f7673e675523",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3149,6 +3332,7 @@
               "type": "function",
               "file": "/src/Destructuring.tsx",
               "hash": "4e1b4a2ee34bd9e4",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 14,
@@ -3447,7 +3631,8 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": []
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
@@ -3824,7 +4009,25 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "24b99651629c6aff",
+          "to_id": "symbol:import:/src/App.tsx:DestructuringProps",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 7,
+          "data_json": {
+            "usageId": "fada3f8a8497c5a5",
+            "filePath": "/src/App.tsx",
+            "line": 7,
+            "column": 7,
+            "ownerId": "24b99651629c6aff",
+            "ownerKind": "normal",
+            "displayLabel": "DestructuringProps"
+          }
+        }
+      ]
     }
   },
   "edges": [

@@ -38,7 +38,8 @@
       ],
       "defaultExport": "MainNested",
       "tsTypes": {},
-      "var": {}
+      "var": {},
+      "relations": []
     },
     "/src/Nested.tsx": {
       "path": "/src/Nested.tsx",
@@ -750,7 +751,57 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "3a50e9f202cab7c2",
+          "to_id": "a32b256a44b5089f",
+          "kind": "usage-render-call",
+          "line": 8,
+          "column": 7,
+          "data_json": {
+            "usageId": "7939e9b9e49f0d1a",
+            "filePath": "/src/Nested.tsx",
+            "line": 8,
+            "column": 7,
+            "ownerId": "3a50e9f202cab7c2",
+            "ownerKind": "normal",
+            "displayLabel": "SubComponentA"
+          }
+        },
+        {
+          "from_id": "298ca28793771e94",
+          "to_id": "a19fd7017beb07a8",
+          "kind": "usage-render-call",
+          "line": 19,
+          "column": 7,
+          "data_json": {
+            "usageId": "a217f657fe3cc43f",
+            "filePath": "/src/Nested.tsx",
+            "line": 19,
+            "column": 7,
+            "ownerId": "298ca28793771e94",
+            "ownerKind": "normal",
+            "displayLabel": "SubComponentB"
+          }
+        },
+        {
+          "from_id": "f2a0564c91943e3f",
+          "to_id": "c933ac8b20ff268e",
+          "kind": "usage-render-call",
+          "line": 20,
+          "column": 7,
+          "data_json": {
+            "usageId": "7e98282f25297076",
+            "filePath": "/src/Nested.tsx",
+            "line": 20,
+            "column": 7,
+            "ownerId": "f2a0564c91943e3f",
+            "ownerKind": "normal",
+            "displayLabel": "InternalComponent"
+          }
+        }
+      ]
     },
     "/src/Hooks.ts": {
       "path": "/src/Hooks.ts",
@@ -1043,7 +1094,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "92eb4b53439844e6",
+          "hash": "7b3100f1583b9549",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -1065,6 +1116,7 @@
               "type": "function",
               "file": "/src/Hooks.ts",
               "hash": "65c10ae4b726e6a7",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 20,
@@ -1133,6 +1185,7 @@
               "type": "function",
               "file": "/src/Hooks.ts",
               "hash": "43998637b146a170",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 28,
@@ -1215,7 +1268,233 @@
             }
           }
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "7a755d146a3ba89a",
+          "to_id": "symbol:import:/src/Hooks.ts:useState",
+          "kind": "usage-call",
+          "line": 4,
+          "column": 28,
+          "data_json": {
+            "usageId": "52d2f7a54d993bf8",
+            "filePath": "/src/Hooks.ts",
+            "line": 4,
+            "column": 28,
+            "ownerId": "7a755d146a3ba89a",
+            "ownerKind": "hook",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:memo:memoVal",
+          "to_id": "symbol:import:/src/Hooks.ts:useMemo",
+          "kind": "usage-call",
+          "line": 6,
+          "column": 18,
+          "data_json": {
+            "usageId": "9574ba081c54b7b5",
+            "filePath": "/src/Hooks.ts",
+            "line": 6,
+            "column": 18,
+            "ownerId": "7a755d146a3ba89a:memo:memoVal",
+            "ownerKind": "memo",
+            "displayLabel": "useMemo"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
+          "to_id": "7a755d146a3ba89a:memo:memoVal",
+          "kind": "usage-read",
+          "line": 6,
+          "column": 32,
+          "data_json": {
+            "usageId": "b0e59631698398e5",
+            "filePath": "/src/Hooks.ts",
+            "line": 6,
+            "column": 32,
+            "ownerId": "7a755d146a3ba89a:memo:memoVal",
+            "ownerKind": "memo",
+            "displayLabel": "value"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
+          "to_id": "7a755d146a3ba89a:memo:memoVal",
+          "kind": "usage-read",
+          "line": 6,
+          "column": 44,
+          "data_json": {
+            "usageId": "2501899048c42d4",
+            "filePath": "/src/Hooks.ts",
+            "line": 6,
+            "column": 44,
+            "ownerId": "7a755d146a3ba89a:memo:memoVal",
+            "ownerKind": "memo",
+            "displayLabel": "value"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:effect:8:2",
+          "to_id": "symbol:import:/src/Hooks.ts:useEffect",
+          "kind": "usage-call",
+          "line": 8,
+          "column": 2,
+          "data_json": {
+            "usageId": "88d801ec6c53133f",
+            "filePath": "/src/Hooks.ts",
+            "line": 8,
+            "column": 2,
+            "ownerId": "7a755d146a3ba89a:effect:8:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
+          "to_id": "7a755d146a3ba89a:effect:8:2",
+          "kind": "usage-read",
+          "line": 9,
+          "column": 34,
+          "data_json": {
+            "usageId": "997bbdd88e0e3708",
+            "filePath": "/src/Hooks.ts",
+            "line": 9,
+            "column": 34,
+            "ownerId": "7a755d146a3ba89a:effect:8:2",
+            "ownerKind": "effect",
+            "displayLabel": "value"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:memo:memoVal",
+          "to_id": "7a755d146a3ba89a:effect:8:2",
+          "kind": "usage-read",
+          "line": 10,
+          "column": 39,
+          "data_json": {
+            "usageId": "b7aa87aae181ce0a",
+            "filePath": "/src/Hooks.ts",
+            "line": 10,
+            "column": 39,
+            "ownerId": "7a755d146a3ba89a:effect:8:2",
+            "ownerKind": "effect",
+            "displayLabel": "memoVal"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
+          "to_id": "7a755d146a3ba89a:effect:8:2",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 6,
+          "data_json": {
+            "usageId": "5c1686b2bb254406",
+            "filePath": "/src/Hooks.ts",
+            "line": 11,
+            "column": 6,
+            "ownerId": "7a755d146a3ba89a:effect:8:2",
+            "ownerKind": "effect",
+            "displayLabel": "value"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:memo:memoVal",
+          "to_id": "7a755d146a3ba89a:effect:8:2",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 13,
+          "data_json": {
+            "usageId": "31bef6fca97614d8",
+            "filePath": "/src/Hooks.ts",
+            "line": 11,
+            "column": 13,
+            "ownerId": "7a755d146a3ba89a:effect:8:2",
+            "ownerKind": "effect",
+            "displayLabel": "memoVal"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
+          "to_id": "7a755d146a3ba89a",
+          "kind": "usage-read",
+          "line": 13,
+          "column": 10,
+          "data_json": {
+            "usageId": "454ea06843cde368",
+            "filePath": "/src/Hooks.ts",
+            "line": 13,
+            "column": 10,
+            "ownerId": "7a755d146a3ba89a",
+            "ownerKind": "hook",
+            "displayLabel": "value"
+          }
+        },
+        {
+          "from_id": "7a755d146a3ba89a:state:[value, setValue]:2f2325f637d24725",
+          "to_id": "7a755d146a3ba89a",
+          "kind": "usage-read",
+          "line": 13,
+          "column": 17,
+          "data_json": {
+            "usageId": "3ca7ac3cc72b36ee",
+            "filePath": "/src/Hooks.ts",
+            "line": 13,
+            "column": 17,
+            "ownerId": "7a755d146a3ba89a",
+            "ownerKind": "hook",
+            "displayLabel": "setValue"
+          }
+        },
+        {
+          "from_id": "79cf30df8bf873d3:effect:21:2",
+          "to_id": "symbol:import:/src/Hooks.ts:useEffect",
+          "kind": "usage-call",
+          "line": 21,
+          "column": 2,
+          "data_json": {
+            "usageId": "d05cc60f0d75a8e9",
+            "filePath": "/src/Hooks.ts",
+            "line": 21,
+            "column": 2,
+            "ownerId": "79cf30df8bf873d3:effect:21:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "8ceb6354f84f126b",
+          "to_id": "79cf30df8bf873d3:effect:21:2",
+          "kind": "usage-read",
+          "line": 27,
+          "column": 43,
+          "data_json": {
+            "usageId": "9fe6a60555450a19",
+            "filePath": "/src/Hooks.ts",
+            "line": 27,
+            "column": 43,
+            "ownerId": "79cf30df8bf873d3:effect:21:2",
+            "ownerKind": "effect",
+            "displayLabel": "onMouseDown"
+          }
+        },
+        {
+          "from_id": "8ceb6354f84f126b",
+          "to_id": "79cf30df8bf873d3",
+          "kind": "usage-read",
+          "line": 28,
+          "column": 59,
+          "data_json": {
+            "usageId": "8f926002a0fa4156",
+            "filePath": "/src/Hooks.ts",
+            "line": 28,
+            "column": 59,
+            "ownerId": "79cf30df8bf873d3",
+            "ownerKind": "hook",
+            "displayLabel": "onMouseDown"
+          }
+        }
+      ]
     },
     "/src/HocForwardRef.tsx": {
       "path": "/src/HocForwardRef.tsx",
@@ -1310,6 +1589,7 @@
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
           "hash": "6cc5eedf67ba5b5b",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1582,7 +1862,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "10de6619391a6699",
+          "hash": "b28c655dedc01f38",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1605,6 +1885,7 @@
               "type": "function",
               "file": "/src/HocForwardRef.tsx",
               "hash": "c7df62c4e8786306",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 12,
@@ -1750,6 +2031,7 @@
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
           "hash": "c78ac2fab5e08408",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 18,
@@ -1834,7 +2116,73 @@
             }
           }
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "7cb39a3350cd7439",
+          "to_id": "symbol:import:/src/HocForwardRef.tsx:memo",
+          "kind": "usage-call",
+          "line": 3,
+          "column": 33,
+          "data_json": {
+            "usageId": "685fe2d9c8aeaed3",
+            "filePath": "/src/HocForwardRef.tsx",
+            "line": 3,
+            "column": 33,
+            "ownerId": "7cb39a3350cd7439",
+            "ownerKind": "normal",
+            "displayLabel": "memo"
+          }
+        },
+        {
+          "from_id": "66105c08a1f70b91",
+          "to_id": "symbol:import:/src/HocForwardRef.tsx:forwardRef",
+          "kind": "usage-call",
+          "line": 7,
+          "column": 35,
+          "data_json": {
+            "usageId": "4b53c323d84b4ffc",
+            "filePath": "/src/HocForwardRef.tsx",
+            "line": 7,
+            "column": 35,
+            "ownerId": "66105c08a1f70b91",
+            "ownerKind": "component",
+            "displayLabel": "forwardRef"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/HocForwardRef.tsx:React",
+          "to_id": "5b62cadc7d4120ac",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 30,
+          "data_json": {
+            "usageId": "c587496a495363a0",
+            "filePath": "/src/HocForwardRef.tsx",
+            "line": 11,
+            "column": 30,
+            "ownerId": "5b62cadc7d4120ac",
+            "ownerKind": "normal",
+            "displayLabel": "React"
+          }
+        },
+        {
+          "from_id": "8b20080379f3a04b",
+          "to_id": "5b62cadc7d4120ac",
+          "kind": "usage-call",
+          "line": 18,
+          "column": 32,
+          "data_json": {
+            "usageId": "346d821ad370f094",
+            "filePath": "/src/HocForwardRef.tsx",
+            "line": 18,
+            "column": 32,
+            "ownerId": "8b20080379f3a04b",
+            "ownerKind": "normal",
+            "displayLabel": "withLogging"
+          }
+        }
+      ]
     },
     "/src/Destructuring.tsx": {
       "path": "/src/Destructuring.tsx",
@@ -1881,7 +2229,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "4562703661315548",
+          "hash": "6daea59e95c8fb8f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2100,6 +2448,7 @@
               "type": "function",
               "file": "/src/Destructuring.tsx",
               "hash": "d3899121267063ee",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -2457,7 +2806,25 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "e80d302618701e37",
+          "to_id": "symbol:import:/src/Destructuring.tsx:A",
+          "kind": "usage-render-call",
+          "line": 11,
+          "column": 7,
+          "data_json": {
+            "usageId": "58aa0e9585f9da40",
+            "filePath": "/src/Destructuring.tsx",
+            "line": 11,
+            "column": 7,
+            "ownerId": "e80d302618701e37",
+            "ownerKind": "normal",
+            "displayLabel": "A"
+          }
+        }
+      ]
     },
     "/src/Deep.tsx": {
       "path": "/src/Deep.tsx",
@@ -3549,7 +3916,185 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "1658a0018d5849c8",
+          "to_id": "b995f1131187f14d",
+          "kind": "usage-render-call",
+          "line": 11,
+          "column": 7,
+          "data_json": {
+            "usageId": "d2e2705b8fb28b24",
+            "filePath": "/src/Deep.tsx",
+            "line": 11,
+            "column": 7,
+            "ownerId": "1658a0018d5849c8",
+            "ownerKind": "normal",
+            "displayLabel": "DeepLevel3"
+          }
+        },
+        {
+          "from_id": "638d9057bd6d9bf3",
+          "to_id": "e38009d8920a967c",
+          "kind": "usage-render-call",
+          "line": 20,
+          "column": 7,
+          "data_json": {
+            "usageId": "acd09a5e0d9b86e7",
+            "filePath": "/src/Deep.tsx",
+            "line": 20,
+            "column": 7,
+            "ownerId": "638d9057bd6d9bf3",
+            "ownerKind": "normal",
+            "displayLabel": "DeepLevel2"
+          }
+        },
+        {
+          "from_id": "5a51946d93053e40",
+          "to_id": "8f8962cbd9809746",
+          "kind": "usage-call",
+          "line": 26,
+          "column": 15,
+          "data_json": {
+            "usageId": "54f4c21562f7069e",
+            "filePath": "/src/Deep.tsx",
+            "line": 26,
+            "column": 15,
+            "ownerId": "5a51946d93053e40",
+            "ownerKind": "component",
+            "displayLabel": "useDeep1"
+          }
+        },
+        {
+          "from_id": "2ceef350b508989a",
+          "to_id": "c9b0f178ddc8d164",
+          "kind": "usage-render-call",
+          "line": 29,
+          "column": 7,
+          "data_json": {
+            "usageId": "daba06c463538ec9",
+            "filePath": "/src/Deep.tsx",
+            "line": 29,
+            "column": 7,
+            "ownerId": "2ceef350b508989a",
+            "ownerKind": "normal",
+            "displayLabel": "DeepLevel1"
+          }
+        },
+        {
+          "from_id": "5a51946d93053e40:callhook:useDeep1:26:8",
+          "to_id": "220501f851971291",
+          "kind": "usage-read",
+          "line": 30,
+          "column": 7,
+          "data_json": {
+            "usageId": "e0b0e74b1309c16f",
+            "filePath": "/src/Deep.tsx",
+            "line": 30,
+            "column": 7,
+            "ownerId": "220501f851971291",
+            "ownerKind": "normal",
+            "displayLabel": "data"
+          }
+        },
+        {
+          "from_id": "85b9973ad997cda",
+          "to_id": "f72daa2fc6a75495",
+          "kind": "usage-call",
+          "line": 40,
+          "column": 9,
+          "data_json": {
+            "usageId": "110fcab1eb140ea4",
+            "filePath": "/src/Deep.tsx",
+            "line": 40,
+            "column": 9,
+            "ownerId": "85b9973ad997cda",
+            "ownerKind": "hook",
+            "displayLabel": "useDeep3"
+          }
+        },
+        {
+          "from_id": "8f8962cbd9809746",
+          "to_id": "85b9973ad997cda",
+          "kind": "usage-call",
+          "line": 44,
+          "column": 9,
+          "data_json": {
+            "usageId": "6a554caa9d3782f7",
+            "filePath": "/src/Deep.tsx",
+            "line": 44,
+            "column": 9,
+            "ownerId": "8f8962cbd9809746",
+            "ownerKind": "hook",
+            "displayLabel": "useDeep2"
+          }
+        },
+        {
+          "from_id": "7732b08b7377499b",
+          "to_id": "symbol:import:/src/Deep.tsx:useState",
+          "kind": "usage-call",
+          "line": 48,
+          "column": 34,
+          "data_json": {
+            "usageId": "90ed2289897f0320",
+            "filePath": "/src/Deep.tsx",
+            "line": 48,
+            "column": 34,
+            "ownerId": "7732b08b7377499b",
+            "ownerKind": "component",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "7732b08b7377499b:effect:49:2",
+          "to_id": "symbol:import:/src/Deep.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 49,
+          "column": 2,
+          "data_json": {
+            "usageId": "5a07ad1ad78b6df8",
+            "filePath": "/src/Deep.tsx",
+            "line": 49,
+            "column": 2,
+            "ownerId": "7732b08b7377499b:effect:49:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "7732b08b7377499b:effect:49:2",
+          "to_id": "7732b08b7377499b:state:[progress, setProgress]:51f01b2b07e307f2",
+          "kind": "usage-call",
+          "line": 50,
+          "column": 4,
+          "data_json": {
+            "usageId": "37190f826ad5f2ab",
+            "filePath": "/src/Deep.tsx",
+            "line": 50,
+            "column": 4,
+            "ownerId": "7732b08b7377499b:effect:49:2",
+            "ownerKind": "effect",
+            "displayLabel": "setProgress"
+          }
+        },
+        {
+          "from_id": "7732b08b7377499b:state:[progress, setProgress]:f3893d22eedac210",
+          "to_id": "27b1cf33c59e6e3c",
+          "kind": "usage-read",
+          "line": 52,
+          "column": 15,
+          "data_json": {
+            "usageId": "b48943dc72015633",
+            "filePath": "/src/Deep.tsx",
+            "line": 52,
+            "column": 15,
+            "ownerId": "27b1cf33c59e6e3c",
+            "ownerKind": "normal",
+            "displayLabel": "progress"
+          }
+        }
+      ]
     },
     "/src/Context.tsx": {
       "path": "/src/Context.tsx",
@@ -3905,7 +4450,94 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "f151b03626e3635f",
+          "to_id": "symbol:import:/src/Context.tsx:createContext",
+          "kind": "usage-call",
+          "line": 3,
+          "column": 25,
+          "data_json": {
+            "usageId": "18ba013ab44eac83",
+            "filePath": "/src/Context.tsx",
+            "line": 3,
+            "column": 25,
+            "ownerId": "f151b03626e3635f",
+            "ownerKind": "normal",
+            "displayLabel": "createContext"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/Context.tsx:React",
+          "to_id": "cf259be6f1cb800b",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 53,
+          "data_json": {
+            "usageId": "41cdd34bead21720",
+            "filePath": "/src/Context.tsx",
+            "line": 5,
+            "column": 53,
+            "ownerId": "cf259be6f1cb800b",
+            "ownerKind": "component",
+            "displayLabel": "React"
+          }
+        },
+        {
+          "from_id": "922ba1247fc0dd3d",
+          "to_id": "symbol:import:/src/Context.tsx:useContext",
+          "kind": "usage-call",
+          "line": 14,
+          "column": 18,
+          "data_json": {
+            "usageId": "7d55585995f01a24",
+            "filePath": "/src/Context.tsx",
+            "line": 14,
+            "column": 18,
+            "ownerId": "922ba1247fc0dd3d",
+            "ownerKind": "component",
+            "displayLabel": "useContext"
+          }
+        },
+        {
+          "from_id": "f151b03626e3635f",
+          "to_id": "922ba1247fc0dd3d",
+          "kind": "usage-read",
+          "line": 14,
+          "column": 29,
+          "data_json": {
+            "usageId": "d69a1ab7489a5cce",
+            "filePath": "/src/Context.tsx",
+            "line": 14,
+            "column": 29,
+            "ownerId": "922ba1247fc0dd3d",
+            "ownerKind": "component",
+            "displayLabel": "MyContext"
+          }
+        },
+        {
+          "from_id": "922ba1247fc0dd3d:callhook:useContext:14:8",
+          "to_id": "2d33d3680b996928",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 22,
+          "data_json": {
+            "usageId": "509372d431d3c006",
+            "filePath": "/src/Context.tsx",
+            "line": 15,
+            "column": 22,
+            "ownerId": "2d33d3680b996928",
+            "ownerKind": "normal",
+            "accessPath": [
+              "theme"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "context.theme"
+          }
+        }
+      ]
     },
     "/src/ComplexApp.tsx": {
       "path": "/src/ComplexApp.tsx",
@@ -4008,7 +4640,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "fc6160eded881ef0",
+          "hash": "54f2be29a720c9e7",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -4615,6 +5247,7 @@
               "type": "function",
               "file": "/src/ComplexApp.tsx",
               "hash": "de3fcb544da2ef46",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 20,
@@ -5127,7 +5760,201 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "1554bc91c15f5c0b",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:useCustomHook",
+          "kind": "usage-call",
+          "line": 9,
+          "column": 24,
+          "data_json": {
+            "usageId": "37171b064f1537af",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 9,
+            "column": 24,
+            "ownerId": "1554bc91c15f5c0b",
+            "ownerKind": "component",
+            "displayLabel": "useCustomHook"
+          }
+        },
+        {
+          "from_id": "e21e54955829da11",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:MyProvider",
+          "kind": "usage-render-call",
+          "line": 12,
+          "column": 5,
+          "data_json": {
+            "usageId": "71d28d3282ecb6c7",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 12,
+            "column": 5,
+            "ownerId": "e21e54955829da11",
+            "ownerKind": "normal",
+            "displayLabel": "MyProvider"
+          }
+        },
+        {
+          "from_id": "340dee4b9889ae44",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:MainNested",
+          "kind": "usage-render-call",
+          "line": 13,
+          "column": 7,
+          "data_json": {
+            "usageId": "cb19499932f258b4",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 13,
+            "column": 7,
+            "ownerId": "340dee4b9889ae44",
+            "ownerKind": "normal",
+            "displayLabel": "MainNested"
+          }
+        },
+        {
+          "from_id": "9202585aea3f0819",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:AliasedA",
+          "kind": "usage-render-call",
+          "line": 14,
+          "column": 7,
+          "data_json": {
+            "usageId": "751933e77a3009d4",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 14,
+            "column": 7,
+            "ownerId": "9202585aea3f0819",
+            "ownerKind": "normal",
+            "displayLabel": "AliasedA"
+          }
+        },
+        {
+          "from_id": "1d6ae610590ac201",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:MyConsumer",
+          "kind": "usage-render-call",
+          "line": 15,
+          "column": 7,
+          "data_json": {
+            "usageId": "31418fb7b6826c32",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 15,
+            "column": 7,
+            "ownerId": "1d6ae610590ac201",
+            "ownerKind": "normal",
+            "displayLabel": "MyConsumer"
+          }
+        },
+        {
+          "from_id": "4a6294be96b7e1ad",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:MemoizedComponent",
+          "kind": "usage-render-call",
+          "line": 16,
+          "column": 7,
+          "data_json": {
+            "usageId": "dcd1da9c9f87c843",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 16,
+            "column": 7,
+            "ownerId": "4a6294be96b7e1ad",
+            "ownerKind": "normal",
+            "displayLabel": "MemoizedComponent"
+          }
+        },
+        {
+          "from_id": "d44334aff97ece78",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:ForwardRefComponent",
+          "kind": "usage-render-call",
+          "line": 17,
+          "column": 7,
+          "data_json": {
+            "usageId": "8da94bb6c2563a6f",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 17,
+            "column": 7,
+            "ownerId": "d44334aff97ece78",
+            "ownerKind": "normal",
+            "displayLabel": "ForwardRefComponent"
+          }
+        },
+        {
+          "from_id": "75e80754afd78817",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:WrappedComponent",
+          "kind": "usage-render-call",
+          "line": 18,
+          "column": 7,
+          "data_json": {
+            "usageId": "8e1060c91bf5288",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 18,
+            "column": 7,
+            "ownerId": "75e80754afd78817",
+            "ownerKind": "normal",
+            "displayLabel": "WrappedComponent"
+          }
+        },
+        {
+          "from_id": "9e8e21bcd081a6c9",
+          "to_id": "symbol:import:/src/ComplexApp.tsx:DestructuringProps",
+          "kind": "usage-render-call",
+          "line": 19,
+          "column": 7,
+          "data_json": {
+            "usageId": "309dd418028cc7b8",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 19,
+            "column": 7,
+            "ownerId": "9e8e21bcd081a6c9",
+            "ownerKind": "normal",
+            "displayLabel": "DestructuringProps"
+          }
+        },
+        {
+          "from_id": "9663c337db4e5d7b",
+          "to_id": "1554bc91c15f5c0b:callhook:useCustomHook:9:8:e47106d12ba28314",
+          "kind": "usage-call",
+          "line": 20,
+          "column": 29,
+          "data_json": {
+            "usageId": "415d77edeab3143e",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 20,
+            "column": 29,
+            "ownerId": "9663c337db4e5d7b",
+            "ownerKind": "normal",
+            "displayLabel": "setVal"
+          }
+        },
+        {
+          "from_id": "1554bc91c15f5c0b:callhook:useCustomHook:9:8:69b24c6c38ba560f",
+          "to_id": "9663c337db4e5d7b",
+          "kind": "usage-read",
+          "line": 20,
+          "column": 36,
+          "data_json": {
+            "usageId": "3a71eb11ee92f721",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 20,
+            "column": 36,
+            "ownerId": "9663c337db4e5d7b",
+            "ownerKind": "normal",
+            "displayLabel": "val"
+          }
+        },
+        {
+          "from_id": "1554bc91c15f5c0b:callhook:useCustomHook:9:8:69b24c6c38ba560f",
+          "to_id": "9663c337db4e5d7b",
+          "kind": "usage-read",
+          "line": 20,
+          "column": 57,
+          "data_json": {
+            "usageId": "eff056f2e6e9b547",
+            "filePath": "/src/ComplexApp.tsx",
+            "line": 20,
+            "column": 57,
+            "ownerId": "9663c337db4e5d7b",
+            "ownerKind": "normal",
+            "displayLabel": "val"
+          }
+        }
+      ]
     }
   },
   "edges": [

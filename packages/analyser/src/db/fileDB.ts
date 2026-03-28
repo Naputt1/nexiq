@@ -38,6 +38,7 @@ import type {
   ComponentFileVarClass,
   ComponentFileVarMethod,
   ComponentFileVarProperty,
+  ComponentRelation,
 } from "@nexiq/shared";
 import type { Variable } from "./variable/variable.js";
 import { ComponentVariable } from "./variable/component.js";
@@ -106,6 +107,7 @@ export class File {
   defaultExport: string | null;
   tsTypes: Map<string, TypeDataDeclare>;
   var: Scope;
+  relations: ComponentRelation[];
 
   private init: boolean = true;
 
@@ -128,6 +130,7 @@ export class File {
     this.defaultExport = null;
     this.tsTypes = new Map();
     this.var = new Scope();
+    this.relations = [];
   }
 
   private loadRender(render: ComponentInfoRender) {
@@ -205,6 +208,7 @@ export class File {
     this.hash = data.hash;
     this.rawData = data;
     this.starExports = data.starExports || [];
+    this.relations = [...(data.relations || [])];
 
     if (data.var) {
       this.var.initPrevIds(data.var);
@@ -263,6 +267,28 @@ export class File {
       resolvedId: fileImport.resolvedId,
       unresolvedWorkspace: fileImport.unresolvedWorkspace,
     });
+  }
+
+  public addRelation(relation: ComponentRelation) {
+    this.relations.push(relation);
+  }
+
+  public getDeepestScope(loc: VariableLoc): Scope {
+    return this.var.findDeepestScope(loc);
+  }
+
+  public getReferenceId(name: string, loc: VariableLoc): string | null {
+    const scope = this.getDeepestScope(loc);
+    const scopedId = scope.getIdByName(name);
+    if (scopedId) {
+      return scopedId;
+    }
+
+    if (this.import.has(name)) {
+      return `symbol:import:${this.path}:${name}`;
+    }
+
+    return this.getVariableID(name);
   }
 
   public addExport(exportData: Omit<ComponentFileExport, "id">) {
@@ -590,6 +616,7 @@ export class File {
       defaultExport: this.defaultExport,
       tsTypes: Object.fromEntries(this.tsTypes),
       var: this.var.getData(),
+      relations: this.relations,
     };
   }
 
@@ -666,6 +693,40 @@ export class File {
     dependencies: ComponentInfoRenderDependency[],
   ) {
     if (!dependencies) return;
+    const relationMap = new Map<string, string>();
+    for (const relation of this.relations) {
+      if (
+        relation.to_id !== id ||
+        typeof relation.kind !== "string" ||
+        !relation.kind.startsWith("usage-") ||
+        !relation.data_json ||
+        typeof relation.data_json !== "object"
+      ) {
+        continue;
+      }
+
+      const usage = relation.data_json as {
+        displayLabel?: string;
+        accessPath?: string[];
+      };
+
+      const labels = new Set<string>();
+      if (usage.displayLabel) {
+        labels.add(usage.displayLabel);
+        labels.add(usage.displayLabel.split(/[.[?]/)[0]!);
+      }
+      if (usage.accessPath && usage.accessPath.length > 0) {
+        labels.add(usage.accessPath.join("."));
+        labels.add(usage.accessPath[usage.accessPath.length - 1]!);
+      }
+
+      for (const label of labels) {
+        if (!relationMap.has(label)) {
+          relationMap.set(label, relation.from_id);
+        }
+      }
+    }
+
     const depMap: Record<string, number[]> = {};
     for (const [i, dep] of dependencies.entries()) {
       let valueName: string | null = null;
@@ -680,6 +741,13 @@ export class File {
       }
 
       if (valueName) {
+        const directRelationId =
+          relationMap.get(valueName) ||
+          relationMap.get(valueName.split(/[.[?]/)[0]!);
+        if (directRelationId) {
+          dep.valueId = directRelationId;
+          continue;
+        }
         if (!depMap[valueName]) {
           depMap[valueName] = [];
         }

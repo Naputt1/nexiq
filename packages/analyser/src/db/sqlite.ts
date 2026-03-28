@@ -610,6 +610,11 @@ export class SqliteDB extends BaseSqliteDB {
         .run(fileId);
       this.db
         .prepare(
+          "DELETE FROM relations WHERE json_extract(data_json, '$.filePath') = ?",
+        )
+        .run(data.path);
+      this.db
+        .prepare(
           "DELETE FROM exports WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
         )
         .run(fileId);
@@ -798,6 +803,22 @@ export class SqliteDB extends BaseSqliteDB {
           data_json: JSON.stringify(type),
         });
       }
+
+      // 8. Insert persisted usage relations for this file
+      for (const relation of data.relations || []) {
+        this.db
+          .prepare(
+            "INSERT OR REPLACE INTO relations (from_id, to_id, kind, line, column, data_json) VALUES (?, ?, ?, ?, ?, ?)",
+          )
+          .run(
+            relation.from_id,
+            relation.to_id,
+            relation.kind,
+            relation.line ?? 0,
+            relation.column ?? 0,
+            relation.data_json ? JSON.stringify(relation.data_json) : null,
+          );
+      }
     });
 
     transaction(fileData);
@@ -936,6 +957,14 @@ export class SqliteDB extends BaseSqliteDB {
     `,
       )
       .all(fileId) as RelationRow[];
+    const usageRelations = this.db
+      .prepare(
+        `
+      SELECT * FROM relations
+      WHERE json_extract(data_json, '$.filePath') = ?
+    `,
+      )
+      .all(filePath) as RelationRow[];
 
     for (const rel of relations) {
       const parent = varMap.get(rel.from_id);
@@ -944,6 +973,15 @@ export class SqliteDB extends BaseSqliteDB {
         parent.var[child.id] = child;
       }
     }
+
+    result.relations = usageRelations.map((rel) => ({
+      from_id: rel.from_id,
+      to_id: rel.to_id,
+      kind: rel.kind,
+      line: rel.line,
+      column: rel.column,
+      data_json: rel.data_json ? JSON.parse(rel.data_json) : null,
+    }));
 
     // Root variables
     const childIds = new Set(relations.map((r) => r.to_id));

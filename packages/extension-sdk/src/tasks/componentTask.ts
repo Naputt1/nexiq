@@ -1,4 +1,8 @@
-import { type EffectInfo, type ReactDependency } from "@nexiq/shared";
+import {
+  type EffectInfo,
+  type ReactDependency,
+  type UsageOccurrence,
+} from "@nexiq/shared";
 import {
   type GraphComboData,
   type GraphArrowData,
@@ -41,6 +45,25 @@ export const componentTask: GraphViewTask = {
     );
 
     const usePackageCombos = packages.length > 1;
+    const usageEdgeMap = new Map<
+      string,
+      {
+        id: string;
+        source: string;
+        target: string;
+        edgeKind: string;
+        category: string;
+        usages: UsageOccurrence[];
+      }
+    >();
+
+    const addEdge = (edge: GraphArrowData) => {
+      edges.push({
+        category: edge.category || edge.edgeKind || edge.label || "dependency",
+        edgeKind: edge.edgeKind || edge.label || "dependency",
+        ...edge,
+      });
+    };
 
     const ensurePackageCombo = (packageId: string) => {
       if (!usePackageCombos) return undefined;
@@ -215,12 +238,14 @@ export const componentTask: GraphViewTask = {
                   if (effect.reactDeps) {
                     for (const dep of effect.reactDeps as ReactDependency[]) {
                       const targetId = redirectionMap.get(dep.id) || dep.id;
-                      if (targetId) {
-                        edges.push({
+                  if (targetId) {
+                        addEdge({
                           id: `${targetId}-${effect.id}-effect-dep`,
                           source: targetId,
                           target: effect.id,
                           label: "dependency",
+                          edgeKind: "dependency",
+                          category: "dependency",
                         });
                       }
                     }
@@ -311,11 +336,13 @@ export const componentTask: GraphViewTask = {
               }[]) {
                 const targetId = redirectionMap.get(dep.id) || dep.id;
                 if (targetId) {
-                  edges.push({
+                  addEdge({
                     id: `${targetId}-${symbol.id}-react-dep`,
                     source: targetId,
                     target: symbol.id,
                     label: "dependency",
+                    edgeKind: "dependency",
+                    category: "dependency",
                   });
                 }
               }
@@ -421,16 +448,68 @@ export const componentTask: GraphViewTask = {
 
     // 4. Handle Relations (Edges)
     for (const rel of relations) {
+      if (rel.kind === "parent-child") continue;
       const sourceId = redirectionMap.get(rel.from_id) || rel.from_id;
       const targetId = redirectionMap.get(rel.to_id) || rel.to_id;
+      const isUsageRelation = rel.kind.startsWith("usage-");
+      if (isUsageRelation) {
+        const edgeId = `${sourceId}-${targetId}-${rel.kind}`;
+        const key = edgeId;
+        const usage = rel.data_json
+          ? (JSON.parse(rel.data_json) as UsageOccurrence)
+          : undefined;
+
+        const entry = usageEdgeMap.get(key) || {
+          id: edgeId,
+          source: sourceId,
+          target: targetId,
+          edgeKind: rel.kind,
+          category: rel.kind,
+          usages: [],
+        };
+
+        if (usage) {
+          entry.usages.push(usage);
+        }
+
+        usageEdgeMap.set(key, entry);
+        continue;
+      }
+
       const edgeId = `${sourceId}-${targetId}-${rel.kind}`;
       if (edges.some((e) => e.id === edgeId)) continue;
 
-      edges.push({
+      addEdge({
         id: edgeId,
         source: sourceId,
         target: targetId,
         label: rel.kind,
+        edgeKind: rel.kind,
+        category:
+          rel.kind === "render" || rel.kind === "dependency"
+            ? rel.kind
+            : rel.kind,
+      });
+    }
+
+    for (const usageEdge of usageEdgeMap.values()) {
+      addEdge({
+        id: usageEdge.id,
+        source: usageEdge.source,
+        target: usageEdge.target,
+        label: usageEdge.edgeKind,
+        edgeKind: usageEdge.edgeKind,
+        category: usageEdge.category,
+        usages: usageEdge.usages,
+        usageCount: usageEdge.usages.length,
+        opensTo:
+          usageEdge.usages[0] != null
+            ? {
+                fileName: usageEdge.usages[0].filePath,
+                line: usageEdge.usages[0].line,
+                column: usageEdge.usages[0].column,
+              }
+            : undefined,
       });
     }
 
