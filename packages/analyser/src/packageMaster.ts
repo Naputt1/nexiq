@@ -32,6 +32,7 @@ import ArrowFunctionExpression from "./analyzer/arrowFunctionExpression.js";
 import FunctionExpression from "./analyzer/functionExpression.js";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
+import { extractFileUsages } from "./analyzer/usageCollector.js";
 import type {
   DeferredResolveTask,
   FileRunStatus,
@@ -437,6 +438,8 @@ export class PackageMaster {
         fileName,
       ),
     });
+
+    extractFileUsages(ast, this.componentDB, fileName);
 
     const result = this.componentDB.getFile(fileName).getData();
     result.package_id =

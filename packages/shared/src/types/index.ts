@@ -16,10 +16,18 @@ export interface ProjectStatus {
 
 export type GraphViewType = "component" | "file" | "router" | "package";
 
+export interface AppSelectionState {
+  type: "node" | "edge";
+  id: string;
+}
+
 export interface AppStateData {
   selectedSubProjects: string[];
   centeredItemId: string | null;
   selectedId: string | null;
+  selectedEdgeId?: string | null;
+  selectedItemType?: "node" | "edge" | null;
+  selected?: AppSelectionState | null;
   isSidebarOpen: boolean;
   activeTab: "projects" | "git";
   selectedCommit: string | null;

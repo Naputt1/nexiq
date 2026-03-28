@@ -49,6 +49,7 @@
           "type": "data",
           "file": "/src/auth.tsx",
           "hash": "ea60d894d4787bcf",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -71,6 +72,7 @@
           "type": "function",
           "file": "/src/auth.tsx",
           "hash": "9f05e909c5e629ac",
+          "declarationKind": "const",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -101,7 +103,8 @@
           },
           "children": {}
         }
-      }
+      },
+      "relations": []
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
@@ -276,7 +279,46 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "311c554b828f67a5",
+          "to_id": "symbol:import:/src/App.tsx:useUser",
+          "kind": "usage-call",
+          "line": 4,
+          "column": 15,
+          "data_json": {
+            "usageId": "3b0187ae561893af",
+            "filePath": "/src/App.tsx",
+            "line": 4,
+            "column": 15,
+            "ownerId": "311c554b828f67a5",
+            "ownerKind": "component",
+            "displayLabel": "useUser"
+          }
+        },
+        {
+          "from_id": "311c554b828f67a5:callhook:useUser:4:8",
+          "to_id": "7cc97a23e626856d",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 15,
+          "data_json": {
+            "usageId": "5acdd349b94b2870",
+            "filePath": "/src/App.tsx",
+            "line": 5,
+            "column": 15,
+            "ownerId": "7cc97a23e626856d",
+            "ownerKind": "normal",
+            "accessPath": [
+              "role"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "user.role"
+          }
+        }
+      ]
     }
   },
   "edges": [

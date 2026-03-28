@@ -105,6 +105,43 @@ export interface ComponentFileVarDependency {
   name: string;
 }
 
+export type UsageRelationKind =
+  | "usage-read"
+  | "usage-call"
+  | "usage-write"
+  | "usage-render-call";
+
+export type RelationKind =
+  | "render"
+  | "dependency"
+  | "parent-child"
+  | "import"
+  | UsageRelationKind
+  | (string & {});
+
+export interface UsageOccurrence {
+  usageId: string;
+  filePath: string;
+  line: number;
+  column: number;
+  ownerId: string;
+  ownerKind: string;
+  accessPath?: string[] | undefined;
+  isOptional?: boolean | undefined;
+  isComputed?: boolean | undefined;
+  hiddenIntermediate?: string | undefined;
+  displayLabel?: string | undefined;
+}
+
+export interface ComponentRelation {
+  from_id: string;
+  to_id: string;
+  kind: RelationKind;
+  line?: number | null | undefined;
+  column?: number | null | undefined;
+  data_json?: UsageOccurrence | Record<string, unknown> | null | undefined;
+}
+
 export interface VariableLoc {
   line: number;
   column: number;
@@ -427,5 +464,6 @@ export type ComponentFile = {
   defaultExport: string | null;
   tsTypes: Record<string, TypeDataDeclare>;
   var: Record<string, ComponentFileVar>;
+  relations?: ComponentRelation[] | undefined;
   package_id?: string | undefined;
 };

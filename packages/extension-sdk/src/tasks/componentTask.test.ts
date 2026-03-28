@@ -185,10 +185,18 @@ describe("componentTask", () => {
       {
         from_id: "sym-app",
         to_id: "sym-import",
-        kind: "usage",
+        kind: "usage-read",
         line: 10,
         column: 5,
-        data_json: null,
+        data_json: JSON.stringify({
+          usageId: "u-0",
+          filePath: "/src/App.tsx",
+          line: 10,
+          column: 5,
+          ownerId: "sym-app",
+          ownerKind: "component",
+          displayLabel: "Comp",
+        }),
       },
     ],
     packages: [],
@@ -287,11 +295,73 @@ describe("componentTask", () => {
 
     // Verify relation is redirected from sym-app to sym-comp
     // Step 4 logic: const edgeId = `${sourceId}-${targetId}-${rel.kind}`;
-    const edgeId = "sym-app-sym-comp-usage";
+    const edgeId = "sym-app-sym-comp-usage-read";
     const edge = result.edges.find((e: GraphArrowData) => e.id === edgeId);
     expect(edge).toBeDefined();
     expect(edge?.source).toBe("sym-app");
     expect(edge?.target).toBe("sym-comp");
+    expect(edge?.usageCount).toBe(1);
+    expect(edge?.opensTo).toEqual({
+      fileName: "/src/App.tsx",
+      line: 10,
+      column: 5,
+    });
+  });
+
+  it("groups repeated usage relations into a single edge with occurrences", () => {
+    const context: TaskContext = {
+      projectRoot: "/",
+      viewType: "component",
+      snapshotData: {
+        ...mockData,
+        relations: [
+          {
+            from_id: "sym-comp",
+            to_id: "sym-app",
+            kind: "usage-read",
+            line: 10,
+            column: 5,
+            data_json: JSON.stringify({
+              usageId: "u-1",
+              filePath: "/src/App.tsx",
+              line: 10,
+              column: 5,
+              ownerId: "sym-app",
+              ownerKind: "component",
+            }),
+          },
+          {
+            from_id: "sym-comp",
+            to_id: "sym-app",
+            kind: "usage-read",
+            line: 11,
+            column: 5,
+            data_json: JSON.stringify({
+              usageId: "u-2",
+              filePath: "/src/App.tsx",
+              line: 11,
+              column: 5,
+              ownerId: "sym-app",
+              ownerKind: "component",
+            }),
+          },
+        ],
+      },
+    };
+
+    const result = componentTask.run(initialResult, context);
+    const usageEdge = result.edges.find(
+      (edge: GraphArrowData) => edge.edgeKind === "usage-read",
+    );
+
+    expect(usageEdge).toBeDefined();
+    expect(usageEdge?.usageCount).toBe(2);
+    expect(usageEdge?.usages).toHaveLength(2);
+    expect(usageEdge?.opensTo).toEqual({
+      fileName: "/src/App.tsx",
+      line: 10,
+      column: 5,
+    });
   });
 
   it("should use tag name for top-level JSX label and stack correctly", () => {

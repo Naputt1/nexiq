@@ -27,9 +27,278 @@ export type {
   GraphViewType,
 };
 
+export interface UsageOccurrence {
+  usageId: string;
+  filePath: string;
+  line: number;
+  column: number;
+  ownerId: string;
+  ownerKind: string;
+  accessPath?: string[] | undefined;
+  isOptional?: boolean | undefined;
+  isComputed?: boolean | undefined;
+  hiddenIntermediate?: string | undefined;
+  displayLabel?: string | undefined;
+}
+
+export interface NodeAppearance {
+  color?: string | undefined;
+  radius?: number | undefined;
+}
+
+export interface GraphAppearance {
+  nodeHighlight?: string;
+  comboHighlight?: string;
+  arrowColor?: string;
+  directFlowColor?: string;
+  sideEffectFlowColor?: string;
+  labelColor?: string;
+  gitAdded?: string;
+  gitModified?: string;
+  gitDeleted?: string;
+  nodes?: Partial<
+    Record<
+      | "package"
+      | "scope"
+      | "component"
+      | "hook"
+      | "renderGroup"
+      | "sourceGroup"
+      | "pathGroup"
+      | "callback"
+      | "state"
+      | "memo"
+      | "ref"
+      | "effect"
+      | "prop"
+      | "render",
+      NodeAppearance
+    >
+  >;
+  typeKeyword?: string;
+  typeLiteral?: string;
+  typeString?: string;
+  typeNumber?: string;
+  typeBoolean?: string;
+  typePunctuation?: string;
+  typeReference?: string;
+  typeComponent?: string;
+  typeDefault?: string;
+  genericsColor?: string;
+}
+
+export type CustomColors = GraphAppearance;
+
+export const DEFAULT_GRAPH_APPEARANCE: GraphAppearance = {
+  directFlowColor: "#2563eb",
+  sideEffectFlowColor: "#f59e0b",
+  gitAdded: "#22c55e",
+  gitModified: "#f59e0b",
+  gitDeleted: "#ef4444",
+  nodes: {
+    package: { color: "#0f766e", radius: 24 },
+    scope: { color: "#475569", radius: 18 },
+    component: { color: "#2563eb", radius: 20 },
+    hook: { color: "#7c3aed", radius: 18 },
+    renderGroup: { color: "#0ea5e9", radius: 18 },
+    sourceGroup: { color: "#14b8a6", radius: 16 },
+    pathGroup: { color: "#64748b", radius: 14 },
+    callback: { color: "#ef4444", radius: 14 },
+    state: { color: "#ef4444", radius: 16 },
+    memo: { color: "#ef4444", radius: 14 },
+    ref: { color: "#ef4444", radius: 14 },
+    effect: { color: "#eab308", radius: 14 },
+    prop: { color: "#22c55e", radius: 12 },
+    render: { color: "#2563eb", radius: 14 },
+  },
+  typeKeyword: "#c084fc",
+  typeLiteral: "#fdba74",
+  typeString: "#86efac",
+  typeNumber: "#93c5fd",
+  typeBoolean: "#fde047",
+  typePunctuation: "#6b7280",
+  typeReference: "#60a5fa",
+  typeComponent: "#67e8f9",
+  typeDefault: "#d1d5db",
+  genericsColor: "#fde047",
+};
+
+type LegacyNodeColorKeys = Partial<
+  Record<
+    | "stateNode"
+    | "memoNode"
+    | "callbackNode"
+    | "refNode"
+    | "effectNode"
+    | "propNode"
+    | "componentNode"
+    | "hookNode"
+    | "renderNode"
+    | "packageNode",
+    string
+  >
+>;
+
+export function normalizeGraphAppearance(
+  appearance?: GraphAppearance | null,
+): GraphAppearance {
+  const legacy = (appearance || {}) as GraphAppearance & LegacyNodeColorKeys;
+  const nodes = {
+    package: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.package,
+      color:
+        legacy.packageNode ||
+        appearance?.nodes?.package?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.package?.color,
+      radius:
+        appearance?.nodes?.package?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.package?.radius,
+    },
+    scope: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.scope,
+      color:
+        appearance?.nodes?.scope?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.scope?.color,
+      radius:
+        appearance?.nodes?.scope?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.scope?.radius,
+    },
+    component: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.component,
+      color:
+        legacy.componentNode ||
+        appearance?.nodes?.component?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.component?.color,
+      radius:
+        appearance?.nodes?.component?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.component?.radius,
+    },
+    hook: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.hook,
+      color:
+        legacy.hookNode ||
+        appearance?.nodes?.hook?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.hook?.color,
+      radius:
+        appearance?.nodes?.hook?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.hook?.radius,
+    },
+    renderGroup: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.renderGroup,
+      color:
+        appearance?.nodes?.renderGroup?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.renderGroup?.color,
+      radius:
+        appearance?.nodes?.renderGroup?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.renderGroup?.radius,
+    },
+    sourceGroup: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.sourceGroup,
+      color:
+        appearance?.nodes?.sourceGroup?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.sourceGroup?.color,
+      radius:
+        appearance?.nodes?.sourceGroup?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.sourceGroup?.radius,
+    },
+    pathGroup: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.pathGroup,
+      color:
+        appearance?.nodes?.pathGroup?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.pathGroup?.color,
+      radius:
+        appearance?.nodes?.pathGroup?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.pathGroup?.radius,
+    },
+    callback: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.callback,
+      color:
+        legacy.callbackNode ||
+        appearance?.nodes?.callback?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.callback?.color,
+      radius:
+        appearance?.nodes?.callback?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.callback?.radius,
+    },
+    state: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.state,
+      color:
+        legacy.stateNode ||
+        appearance?.nodes?.state?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.state?.color,
+      radius:
+        appearance?.nodes?.state?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.state?.radius,
+    },
+    memo: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.memo,
+      color:
+        legacy.memoNode ||
+        appearance?.nodes?.memo?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.memo?.color,
+      radius:
+        appearance?.nodes?.memo?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.memo?.radius,
+    },
+    ref: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.ref,
+      color:
+        legacy.refNode ||
+        appearance?.nodes?.ref?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.ref?.color,
+      radius:
+        appearance?.nodes?.ref?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.ref?.radius,
+    },
+    effect: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.effect,
+      color:
+        legacy.effectNode ||
+        appearance?.nodes?.effect?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.effect?.color,
+      radius:
+        appearance?.nodes?.effect?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.effect?.radius,
+    },
+    prop: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.prop,
+      color:
+        legacy.propNode ||
+        appearance?.nodes?.prop?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.prop?.color,
+      radius:
+        appearance?.nodes?.prop?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.prop?.radius,
+    },
+    render: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.render,
+      color:
+        legacy.renderNode ||
+        appearance?.nodes?.render?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.render?.color,
+      radius:
+        appearance?.nodes?.render?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.render?.radius,
+    },
+  };
+
+  return {
+    ...DEFAULT_GRAPH_APPEARANCE,
+    ...appearance,
+    nodes,
+  };
+}
+
 export interface GraphItemPosition {
   x: number;
   y: number;
+}
+
+export interface AppearanceOverride {
+  color?: string;
+  radius?: number;
+  collapsedRadius?: number;
+  expandedRadius?: number;
 }
 
 export interface GraphNodeData {
@@ -46,6 +315,7 @@ export interface GraphNodeData {
   combo?: string;
   gitStatus?: "added" | "modified" | "deleted";
   declarationKind?: "const" | "let" | "var" | "using" | "await using";
+  appearanceOverride?: AppearanceOverride;
   tag?: string;
   raw?: ComponentFileVar;
   displayName?: string;
@@ -57,6 +327,7 @@ export interface GraphComboData extends GraphNodeData {
   collapsedRadius?: number;
   expandedRadius?: number;
   padding?: number;
+  appearanceOverride?: AppearanceOverride;
   [key: string]: unknown;
 }
 
@@ -65,6 +336,14 @@ export interface GraphArrowData {
   source: string;
   target: string;
   label?: string;
+  edgeKind?: string;
+  category?: string;
+  flowRole?: "direct" | "side-effect" | null;
+  usageCount?: number;
+  usages?: UsageOccurrence[];
+  highlighted?: boolean;
+  dimmed?: boolean;
+  opensTo?: { fileName: string; line: number; column: number };
   combo?: string;
   [key: string]: unknown;
 }

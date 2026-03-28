@@ -4,6 +4,8 @@ import type {
   PropData,
   EffectInfo,
   ComponentDBResolve,
+  RelationKind,
+  UsageOccurrence,
 } from "./component.js";
 
 export type DataEdge = {
@@ -78,11 +80,13 @@ export interface RenderRow {
 export interface RelationRow {
   from_id: string;
   to_id: string;
-  kind: string;
+  kind: RelationKind;
   line: number | null;
   column: number | null;
   data_json: string | null;
 }
+
+export type { RelationKind, UsageOccurrence, ComponentRelation } from "./component.js";
 
 export interface FileRow {
   id: number;

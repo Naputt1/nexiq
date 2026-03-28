@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "@nexiq/shared": ["../../packages/shared/src"],
+      "@nexiq/extension-sdk": ["../../packages/extension-sdk/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "../projects"]
+}

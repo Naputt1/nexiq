@@ -1667,7 +1667,201 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "1076ea2026161c64",
+          "to_id": "94b6fcbf54cdfaec",
+          "kind": "usage-render-call",
+          "line": 12,
+          "column": 13,
+          "data_json": {
+            "usageId": "ce9df817597636fe",
+            "filePath": "/src/App.tsx",
+            "line": 12,
+            "column": 13,
+            "ownerId": "1076ea2026161c64",
+            "ownerKind": "normal",
+            "displayLabel": "Child"
+          }
+        },
+        {
+          "from_id": "8c693c9c0c2fe891",
+          "to_id": "1076ea2026161c64",
+          "kind": "usage-read",
+          "line": 12,
+          "column": 25,
+          "data_json": {
+            "usageId": "67234f00d175d71b",
+            "filePath": "/src/App.tsx",
+            "line": 12,
+            "column": 25,
+            "ownerId": "1076ea2026161c64",
+            "ownerKind": "normal",
+            "displayLabel": "x"
+          }
+        },
+        {
+          "from_id": "3c494cbacd69a670",
+          "to_id": "c499dc217e5afa37",
+          "kind": "usage-render-call",
+          "line": 16,
+          "column": 5,
+          "data_json": {
+            "usageId": "d84999d8bc987e87",
+            "filePath": "/src/App.tsx",
+            "line": 16,
+            "column": 5,
+            "ownerId": "3c494cbacd69a670",
+            "ownerKind": "normal",
+            "displayLabel": "CustomForm"
+          }
+        },
+        {
+          "from_id": "8c693c9c0c2fe891",
+          "to_id": "71ebfad76923d940",
+          "kind": "usage-read",
+          "line": 22,
+          "column": 27,
+          "data_json": {
+            "usageId": "f1d238108b61741c",
+            "filePath": "/src/App.tsx",
+            "line": 22,
+            "column": 27,
+            "ownerId": "71ebfad76923d940",
+            "ownerKind": "normal",
+            "displayLabel": "x"
+          }
+        },
+        {
+          "from_id": "8193523605bdc018",
+          "to_id": "bd489cb67c07a9cd",
+          "kind": "usage-read",
+          "line": 24,
+          "column": 36,
+          "data_json": {
+            "usageId": "ff9e028ac83a567f",
+            "filePath": "/src/App.tsx",
+            "line": 24,
+            "column": 36,
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
+            "displayLabel": "y"
+          }
+        },
+        {
+          "from_id": "69a7d87f8dc552ec",
+          "to_id": "bd489cb67c07a9cd",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 11,
+          "data_json": {
+            "usageId": "488f4971696a19d8",
+            "filePath": "/src/App.tsx",
+            "line": 25,
+            "column": 11,
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
+            "displayLabel": "v"
+          }
+        },
+        {
+          "from_id": "5558f68a9e93a311",
+          "to_id": "bd489cb67c07a9cd",
+          "kind": "usage-read",
+          "line": 26,
+          "column": 11,
+          "data_json": {
+            "usageId": "225c9559e0a08872",
+            "filePath": "/src/App.tsx",
+            "line": 26,
+            "column": 11,
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
+            "displayLabel": "form"
+          }
+        },
+        {
+          "from_id": "f4497d729cd6f52",
+          "to_id": "7c128c607822e129",
+          "kind": "usage-render-call",
+          "line": 29,
+          "column": 7,
+          "data_json": {
+            "usageId": "380968d659ed6d63",
+            "filePath": "/src/App.tsx",
+            "line": 29,
+            "column": 7,
+            "ownerId": "f4497d729cd6f52",
+            "ownerKind": "normal",
+            "displayLabel": "Child2"
+          }
+        },
+        {
+          "from_id": "8193523605bdc018",
+          "to_id": "f4497d729cd6f52",
+          "kind": "usage-read",
+          "line": 29,
+          "column": 20,
+          "data_json": {
+            "usageId": "1c12c2142ce543b2",
+            "filePath": "/src/App.tsx",
+            "line": 29,
+            "column": 20,
+            "ownerId": "f4497d729cd6f52",
+            "ownerKind": "normal",
+            "displayLabel": "y"
+          }
+        },
+        {
+          "from_id": "8c693c9c0c2fe891",
+          "to_id": "7a63dceff672863b",
+          "kind": "usage-read",
+          "line": 31,
+          "column": 27,
+          "data_json": {
+            "usageId": "588db7dc4c31ece6",
+            "filePath": "/src/App.tsx",
+            "line": 31,
+            "column": 27,
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
+            "displayLabel": "x"
+          }
+        },
+        {
+          "from_id": "8c693c9c0c2fe891",
+          "to_id": "7a63dceff672863b",
+          "kind": "usage-read",
+          "line": 31,
+          "column": 51,
+          "data_json": {
+            "usageId": "93c22ed0e458da33",
+            "filePath": "/src/App.tsx",
+            "line": 31,
+            "column": 51,
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
+            "displayLabel": "x"
+          }
+        },
+        {
+          "from_id": "8193523605bdc018",
+          "to_id": "7a63dceff672863b",
+          "kind": "usage-read",
+          "line": 31,
+          "column": 55,
+          "data_json": {
+            "usageId": "6b1b1bec72be7483",
+            "filePath": "/src/App.tsx",
+            "line": 31,
+            "column": 55,
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
+            "displayLabel": "y"
+          }
+        }
+      ]
     }
   },
   "edges": [

@@ -41,7 +41,8 @@ describe("analyser class handling", () => {
       // Check for MyClass
       const myClass = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'MyClass');
       expect(myClass).toBeDefined();
-      expect(myClass?.type).toBe('class');
+      expect(myClass?.kind).toBe('class');
+      expect(myClass?.type).toBe('data');
 
       // Check for 'x'
       const topLevelX = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'x');

@@ -257,7 +257,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "2e8f3c4b99e8cf41",
+          "hash": "ecc4b47670bfcc07",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -350,6 +350,7 @@
               "type": "function",
               "file": "/index.tsx",
               "hash": "8c34b4dd01ec70b5",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 30,
@@ -545,7 +546,57 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": [
+        {
+          "from_id": "f708b44afe0a51a5:callback:handleAsync",
+          "to_id": "symbol:import:/index.tsx:useCallback",
+          "kind": "usage-call",
+          "line": 20,
+          "column": 22,
+          "data_json": {
+            "usageId": "c9dfa34d14aa6e53",
+            "filePath": "/index.tsx",
+            "line": 20,
+            "column": 22,
+            "ownerId": "f708b44afe0a51a5:callback:handleAsync",
+            "ownerKind": "callback",
+            "displayLabel": "useCallback"
+          }
+        },
+        {
+          "from_id": "f708b44afe0a51a5:memo:asyncValue",
+          "to_id": "symbol:import:/index.tsx:useMemo",
+          "kind": "usage-call",
+          "line": 25,
+          "column": 21,
+          "data_json": {
+            "usageId": "37c9faaf918e4993",
+            "filePath": "/index.tsx",
+            "line": 25,
+            "column": 21,
+            "ownerId": "f708b44afe0a51a5:memo:asyncValue",
+            "ownerKind": "memo",
+            "displayLabel": "useMemo"
+          }
+        },
+        {
+          "from_id": "5c94816a24672f50",
+          "to_id": "3a012224bc5a1fc6",
+          "kind": "usage-render-call",
+          "line": 36,
+          "column": 7,
+          "data_json": {
+            "usageId": "e4dddb94100761a9",
+            "filePath": "/index.tsx",
+            "line": 36,
+            "column": 7,
+            "ownerId": "5c94816a24672f50",
+            "ownerKind": "normal",
+            "displayLabel": "AsyncComponent"
+          }
+        }
+      ]
     }
   },
   "edges": [
