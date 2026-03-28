@@ -356,6 +356,8 @@ export interface useGraphProps {
 
 export interface GraphViewResult extends useGraphProps {
   typeData: Record<string, TypeDataDeclare>;
+  layout?: string;
+  comboLayouts?: Record<string, string>;
 }
 
 /**
