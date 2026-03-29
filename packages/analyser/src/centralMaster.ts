@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type {
@@ -954,17 +955,32 @@ export class CentralMaster {
   public async analyzeWorkspace(): Promise<JsonData> {
     const rootDir = path.resolve(this.srcDir).replace(/[/\\]$/, "");
     const discoveredPackages = (await discoverWorkspacePackages(rootDir)).sort(
-      (a, b) => a.path.localeCompare(b.path),
+      (a, b) => (a.path || "").localeCompare(b.path || ""),
     );
 
-    const normalize = (p: string) =>
-      path.resolve(rootDir, p).replace(/[/\\]$/, "");
+    const normalize = (p: string) => {
+      if (!p) {
+        console.warn("normalize called with undefined/empty path");
+        return "";
+      }
+      try {
+        // Use realpath if possible to resolve symlinks
+        return fs.realpathSync(path.resolve(rootDir, p)).replace(/[/\\]$/, "");
+      } catch {
+        return path.resolve(rootDir, p).replace(/[/\\]$/, "");
+      }
+    };
+
     const analysisPaths = this.options.analysisPaths?.map(normalize);
 
     const packages = analysisPaths
-      ? discoveredPackages.filter((p) =>
-          analysisPaths!.includes(normalize(p.path)),
-        )
+      ? discoveredPackages.filter((p) => {
+          const normalizedP = normalize(p.path);
+          // Case-insensitive check for macOS/Windows
+          return analysisPaths!.some(
+            (ap) => ap.toLowerCase() === normalizedP.toLowerCase(),
+          );
+        })
       : discoveredPackages;
 
     if (packages.length === 0) {
