@@ -92,9 +92,10 @@ export function getTsConfigAliases(dir: string): Record<string, string> {
   try {
     const code = fs.readFileSync(tsconfigPath, "utf-8");
     // Strip comments and trailing commas before parsing
+    // Match strings or comments, only keep strings
     const cleanedCode = code
-      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-      .replace(/,\s*([}\]])/g, '$1');
+      .replace(/("(?:\\.|[^\\"])*")|(\/\*[\s\S]*?\*\/|\/\/.*)/g, (match, string) => string || "")
+      .replace(/,\s*([}\]])/g, "$1");
 
     const tsconfig = JSON.parse(cleanedCode);
     const paths = tsconfig?.compilerOptions?.paths;
