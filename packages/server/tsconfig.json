@@ -9,7 +9,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "@nexiq/analyser": ["../analyser/src/index.ts"],
       "@nexiq/analyser/*": ["../analyser/src/*"],
