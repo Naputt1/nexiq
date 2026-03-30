@@ -37,7 +37,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@nexiq/shared": ["../shared/src/index.ts"],
       "@nexiq/shared/db": ["../shared/src/db/index.ts"],
