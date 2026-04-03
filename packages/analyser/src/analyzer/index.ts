@@ -1,7 +1,7 @@
 import type { JsonData } from "@nexiq/shared";
-import type { PackageJson } from "../db/packageJson.js";
-import type { SqliteDB } from "../db/sqlite.js";
-import { PackageMaster } from "../packageMaster.js";
+import type { PackageJson } from "../db/packageJson.ts";
+import type { SqliteDB } from "../db/sqlite.ts";
+import { PackageMaster } from "../packageMaster.ts";
 
 async function analyzeFiles(
   SRC_DIR: string,

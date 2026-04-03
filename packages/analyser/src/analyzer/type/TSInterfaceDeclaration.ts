@@ -2,10 +2,10 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { TypeDataDeclareInterface, TypeDataParam } from "@nexiq/shared";
 import assert from "assert";
-import type { ComponentDB } from "../../db/componentDB.js";
+import type { ComponentDB } from "../../db/componentDB.ts";
 import type { TypeDataLiteralBody } from "@nexiq/shared";
-import { getType, getMember } from "./helper.js";
-import { getPattern } from "../pattern.js";
+import { getType, getMember } from "./helper.ts";
+import { getPattern } from "../pattern.ts";
 
 export default function TSInterfaceDeclaration(
   componentDB: ComponentDB,

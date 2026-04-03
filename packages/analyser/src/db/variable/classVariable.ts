@@ -3,9 +3,9 @@ import type {
   ComponentFileVarClass,
   VariableScope,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { Variable } from "./variable.js";
-import { Scope } from "./scope.js";
+import type { File } from "../fileDB.ts";
+import { Variable } from "./variable.ts";
+import { Scope } from "./scope.ts";
 
 export class ClassVariable extends Variable<"data", "class"> {
   public var: Scope;
@@ -34,8 +34,8 @@ export class ClassVariable extends Variable<"data", "class"> {
   public load(data: ClassVariable) {
     super.load(data);
 
-    this.scope = data.scope;
-    this.superClass = data.superClass;
+    this.scope = data.scope || this.scope;
+    this.superClass = data.superClass || this.superClass;
   }
 
   protected getDataInternal() {

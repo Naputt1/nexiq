@@ -20,10 +20,7 @@ import {
   type ComponentFileVar,
   type UIItemState,
 } from "@nexiq/shared";
-import {
-  discoverWorkspacePackages,
-  getWorkspacePatterns,
-} from "@nexiq/shared/workspace";
+import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/shared";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
@@ -134,7 +131,7 @@ export class ProjectManager {
     subProjects?: string[],
   ): Promise<ProjectInfo> {
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     try {
@@ -227,7 +224,9 @@ export class ProjectManager {
         cacheFile,
         ignorePatterns,
         sqlitePath,
-        analysisPaths: subProjects?.map((p) => path.resolve(projectPath, p)),
+        analysisPaths: subProjects?.map((p) =>
+          path.join(projectPath, p.replace(/^\/+/, "")),
+        ),
         monorepo: subProjects && subProjects.length > 0 ? true : undefined,
       },
     );
@@ -519,7 +518,7 @@ export class ProjectManager {
     const results = [];
 
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
 
     for (const usage of allUsages) {
@@ -814,7 +813,7 @@ export class ProjectManager {
       return { error: `Symbol "${query}" not found.` };
 
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const results: {
       id: string;
@@ -952,7 +951,7 @@ export class ProjectManager {
 
   async readFile(projectPath: string, filePath: string, subProject?: string) {
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const fullPath = path.resolve(
       analysisPath,
@@ -973,7 +972,7 @@ export class ProjectManager {
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
 
     const isExcluded = (filePath: string) => {
@@ -1023,7 +1022,7 @@ export class ProjectManager {
     exitCode: number;
   }> {
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const dangerous = [
       "rm -rf",
@@ -1068,7 +1067,7 @@ export class ProjectManager {
     if (!project || !project.graph) return false;
 
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);

@@ -3,7 +3,7 @@ import path from "path";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { CallExpression, ObjectProperty } from "@babel/types";
-import { traverseFn } from "./utils/babel.js";
+import { traverseFn } from "./utils/babel.ts";
 
 export function getViteAliases(
   viteConfigFile?: string | null,
@@ -94,7 +94,10 @@ export function getTsConfigAliases(dir: string): Record<string, string> {
     // Strip comments and trailing commas before parsing
     // Match strings or comments, only keep strings
     const cleanedCode = code
-      .replace(/("(?:\\.|[^\\"])*")|(\/\*[\s\S]*?\*\/|\/\/.*)/g, (match, string) => string || "")
+      .replace(
+        /("(?:\\.|[^\\"])*")|(\/\*[\s\S]*?\*\/|\/\/.*)/g,
+        (match, string) => string || "",
+      )
       .replace(/,\s*([}\]])/g, "$1");
 
     const tsconfig = JSON.parse(cleanedCode);

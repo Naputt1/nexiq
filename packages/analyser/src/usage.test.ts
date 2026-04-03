@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
 
@@ -38,8 +38,7 @@ describe("usage extraction", () => {
 
       const setterCall = file?.relations?.find(
         (relation) =>
-          relation.kind === "usage-call" &&
-          relation.to_id.includes(":state:"),
+          relation.kind === "usage-call" && relation.to_id.includes(":state:"),
       );
       expect(setterCall).toBeDefined();
 

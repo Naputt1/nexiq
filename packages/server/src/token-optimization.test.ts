@@ -28,9 +28,9 @@ vi.mock("@nexiq/analyser", () => ({
 }));
 
 vi.mock("@nexiq/analyser/db/sqlite", () => ({
-  SqliteDB: vi.fn().mockImplementation(() => ({
-    db: mockDb,
-    getAllData: vi.fn().mockReturnValue({
+  SqliteDB: vi.fn().mockImplementation(function (this: any) {
+    this.db = mockDb;
+    this.getAllData = vi.fn().mockReturnValue({
       files: [],
       entities: [],
       scopes: [],
@@ -38,9 +38,9 @@ vi.mock("@nexiq/analyser/db/sqlite", () => ({
       renders: [],
       exports: [],
       relations: [],
-    }),
-    close: () => mockDb.close(),
-  })),
+    });
+    this.close = () => mockDb.close();
+  }),
 }));
 
 vi.mock("better-sqlite3", () => {

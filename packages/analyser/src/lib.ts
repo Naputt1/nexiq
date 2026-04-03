@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { JsonData, NexiqConfig } from "@nexiq/shared";
-import { getWorkspacePatterns } from "@nexiq/shared/workspace";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { CentralMaster } from "./centralMaster.js";
-import { PackageJson } from "./db/packageJson.js";
-import { SqliteDB } from "./db/sqlite.js";
-import type { AnalyzeProjectOptions } from "./types.js";
+import { getWorkspacePatterns } from "@nexiq/shared";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { CentralMaster } from "./centralMaster.ts";
+import { PackageJson } from "./db/packageJson.ts";
+import { SqliteDB } from "./db/sqlite.ts";
+import type { AnalyzeProjectOptions } from "./types.ts";
 
 function normalizeOptions(
   cacheFileOrOptions?: string | AnalyzeProjectOptions,

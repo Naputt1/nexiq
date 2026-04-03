@@ -1,6 +1,6 @@
 import type { ComponentFileVarHook } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactFunctionVariable } from "./reactFunctionVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactFunctionVariable } from "./reactFunctionVariable.ts";
 
 export class HookVariable extends ReactFunctionVariable<"hook"> {
   constructor(
@@ -15,7 +15,6 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
 
   public load(data: HookVariable) {
     super.load(data);
-
     this.kind = "hook";
   }
 

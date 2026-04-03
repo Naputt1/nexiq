@@ -1,6 +1,6 @@
 import type { ComponentFileVarRef, PropDataType } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactVariable } from "./reactVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactVariable } from "./reactVariable.ts";
 
 export class RefVariable extends ReactVariable<"data", "ref"> {
   defaultData: PropDataType;
@@ -16,6 +16,8 @@ export class RefVariable extends ReactVariable<"data", "ref"> {
 
   public load(data: RefVariable) {
     super.load(data);
+
+    this.defaultData = data.defaultData || this.defaultData;
   }
 
   public getData(): ComponentFileVarRef {

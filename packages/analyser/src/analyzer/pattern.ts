@@ -4,8 +4,8 @@ import type {
   VariableObjectProperty,
   VariableArrayElement,
 } from "@nexiq/shared";
-import { generateFn } from "../utils/babel.js";
-import { getDeterministicId } from "../utils/hash.js";
+import { generateFn } from "../utils/babel.ts";
+import { getDeterministicId } from "../utils/hash.ts";
 
 export function getPattern(
   node: t.LVal | t.VoidPattern,

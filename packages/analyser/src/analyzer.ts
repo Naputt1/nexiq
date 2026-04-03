@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { PackageJson } from "./db/packageJson.js";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
+import { PackageJson } from "./db/packageJson.ts";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
 import minimist from "minimist";
-import { SqliteDB } from "./db/sqlite.js";
+import { SqliteDB } from "./db/sqlite.ts";
 
 const args = minimist(process.argv.slice(2));
 

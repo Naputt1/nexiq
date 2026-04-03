@@ -681,6 +681,7 @@ describe("BackendServer", () => {
       expect(mockProjectManager.openProject).toHaveBeenCalledWith(
         "/test",
         undefined,
+        undefined,
       );
       expect(mockWs.send).toHaveBeenCalledWith(
         expect.stringContaining("project_opened"),

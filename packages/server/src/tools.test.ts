@@ -28,9 +28,9 @@ vi.mock("@nexiq/analyser", () => ({
 }));
 
 vi.mock("@nexiq/analyser/db/sqlite", () => ({
-  SqliteDB: vi.fn().mockImplementation(() => ({
-    db: mockDb,
-    getAllData: vi.fn().mockReturnValue({
+  SqliteDB: vi.fn().mockImplementation(function (this: any) {
+    this.db = mockDb;
+    this.getAllData = vi.fn().mockReturnValue({
       files: [],
       entities: [],
       scopes: [],
@@ -38,9 +38,9 @@ vi.mock("@nexiq/analyser/db/sqlite", () => ({
       renders: [],
       exports: [],
       relations: [],
-    }),
-    close: () => mockDb.close(),
-  })),
+    });
+    this.close = () => mockDb.close();
+  }),
 }));
 
 vi.mock("better-sqlite3", () => {
@@ -86,7 +86,13 @@ describe("MCP Tools Integration", () => {
   it("open_project: should initialize project and return success message", async () => {
     const result = await server.handleCallTool({ name: "open_project", args: { projectPath: "/new/path" } });
     expect(result.content[0].text).toContain("opened and analyzed successfully");
-    expect(analyzeProject).toHaveBeenCalledWith("/new/path", expect.any(String), undefined, expect.any(String));
+    expect(analyzeProject).toHaveBeenCalledWith(
+      "/new/path",
+      expect.objectContaining({
+        cacheFile: expect.any(String),
+        sqlitePath: expect.any(String),
+      }),
+    );
   });
 
   describe("get_symbol_info", () => {

@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
+import type { ComponentDB } from "../db/componentDB.ts";
+import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
 
 export default function FunctionExpression(
   componentDB: ComponentDB,
@@ -48,31 +49,32 @@ export default function FunctionExpression(
         column: nodePath.node.loc!.start.column,
       };
 
-      componentDB.addVariable(
-        fileName,
-        {
-          name: {
-            type: "identifier",
-            name: `anonymous@${loc.line}:${loc.column}`,
-            loc: loc,
-            id: "",
-          },
-          type: "function",
+      const functionVariable: Omit<
+        ComponentFileVarBaseTypeFunction<"normal">,
+        "var" | "components" | "kind" | "file" | "hash" | "children" | "id"
+      > = {
+        name: {
+          type: "identifier",
+          name: `anonymous@${loc.line}:${loc.column}`,
           loc: loc,
-          scope: {
-            start: {
-              line: nodePath.node.loc!.start.line,
-              column: nodePath.node.loc!.start.column,
-            },
-            end: {
-              line: nodePath.node.loc!.end.line,
-              column: nodePath.node.loc!.end.column,
-            },
-          },
-          dependencies: {},
+          id: "",
         },
-        undefined,
-      );
+        type: "function",
+        loc: loc,
+        scope: {
+          start: {
+            line: nodePath.node.loc!.start.line,
+            column: nodePath.node.loc!.start.column,
+          },
+          end: {
+            line: nodePath.node.loc!.end.line,
+            column: nodePath.node.loc!.end.column,
+          },
+        },
+        dependencies: {},
+      };
+
+      componentDB.addVariable(fileName, functionVariable, undefined);
     },
   };
 }

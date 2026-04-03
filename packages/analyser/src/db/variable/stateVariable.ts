@@ -1,9 +1,10 @@
-import type { ComponentFileVarState } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactVariable } from "./reactVariable.js";
+import type { ComponentFileVarState, TypeData } from "@nexiq/shared";
+import type { File } from "../fileDB.ts";
+import { ReactVariable } from "./reactVariable.ts";
 
 export class StateVariable extends ReactVariable<"data", "state"> {
   setter: string | undefined;
+  stateType: TypeData | undefined;
 
   constructor(
     options: Omit<ComponentFileVarState, "kind" | "file" | "type">,
@@ -12,11 +13,14 @@ export class StateVariable extends ReactVariable<"data", "state"> {
     super({ ...options, kind: "state", type: "data" }, file);
 
     this.setter = options.setter;
+    this.stateType = options.stateType;
   }
 
   public load(data: StateVariable) {
     super.load(data);
 
+    this.setter = data.setter || this.setter;
+    this.stateType = data.stateType || this.stateType;
     this.kind = "state";
   }
 
@@ -30,6 +34,10 @@ export class StateVariable extends ReactVariable<"data", "state"> {
       data.setter = this.setter;
     }
 
+    if (this.stateType) {
+      data.stateType = this.stateType;
+    }
+
     return data;
   }
 
@@ -37,6 +45,7 @@ export class StateVariable extends ReactVariable<"data", "state"> {
     return {
       name: this.name,
       setter: this.setter,
+      stateType: this.stateType,
     };
   }
 }

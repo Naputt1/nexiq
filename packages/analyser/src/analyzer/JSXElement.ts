@@ -1,16 +1,19 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
-import type { ComponentInfoRenderDependency, VariableName } from "@nexiq/shared";
+import type { ComponentDB } from "../db/componentDB.ts";
+import type {
+  ComponentInfoRenderDependency,
+  VariableName,
+} from "@nexiq/shared";
 import assert from "assert";
 import generate from "@babel/generator";
-import { getDeterministicId } from "../utils/hash.js";
-import { getExpressionData } from "./type/helper.js";
+import { getDeterministicId } from "../utils/hash.ts";
+import { getExpressionData } from "./type/helper.ts";
 import {
   isJSXVariable,
   isComponentVariable,
   isBaseFunctionVariable,
-} from "../db/variable/type.js";
+} from "../db/variable/type.ts";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
@@ -147,11 +150,12 @@ export default function JSXElement(
           }
         }
 
-        let id: string;
+        const parentID = componentDB.getCurrentRenderInstance();
+
+        let id: string | null = null;
         if (existingVar && isJSXVariable(existingVar)) {
-          existingVar.props = dependency;
           id = existingVar.id;
-        } else {
+        } else if (!parentID) {
           const name: VariableName = {
             type: "identifier",
             name: `jsx@${loc.line}:${loc.column}`,
@@ -161,18 +165,17 @@ export default function JSXElement(
 
           id = componentDB.addJSXVariable(fileName, {
             name,
-            tag,
-            props: dependency,
             loc,
             dependencies: {},
-            children: {},
           });
         }
 
-        componentDB.pushJSX(id);
+        if (id) {
+          componentDB.pushJSX(id);
+        }
 
         const parentFunc = nodePath.getFunctionParent();
-        if (parentFunc) {
+        if (parentFunc && id) {
           let funcLoc: { line: number; column: number } | undefined;
           if (parentFunc.node.type === "FunctionDeclaration") {
             if (parentFunc.node.id?.loc) {
@@ -217,13 +220,11 @@ export default function JSXElement(
             dependency,
             loc,
             "jsx",
-            componentDB.getCurrentRenderInstance(),
+            parentID,
           );
           componentDB.pushRenderInstance(instanceId);
         } else {
-          componentDB.pushRenderInstance(
-            componentDB.getCurrentRenderInstance(),
-          );
+          componentDB.pushRenderInstance(parentID);
         }
       },
       exit() {
@@ -239,36 +240,33 @@ export default function JSXElement(
           column: nodePath.node.loc.start.column,
         };
 
+        const parentID = componentDB.getCurrentRenderInstance();
+
         const existingVar = componentDB.getVariableFromLoc(fileName, loc);
+        let id: string | null = null;
         if (existingVar && isJSXVariable(existingVar)) {
-          componentDB.pushJSX(existingVar.id);
-          componentDB.pushRenderInstance(
-            componentDB.getCurrentRenderInstance(),
-          );
-          return;
+          id = existingVar.id;
+        } else if (!parentID) {
+          const name: VariableName = {
+            type: "identifier",
+            name: `jsx@${loc.line}:${loc.column}`,
+            loc,
+            id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
+          };
+
+          id = componentDB.addJSXVariable(fileName, {
+            name,
+            loc,
+            dependencies: {},
+          });
         }
 
-        const tag = "Fragment";
-        const name: VariableName = {
-          type: "identifier",
-          name: `jsx@${loc.line}:${loc.column}`,
-          loc,
-          id: getDeterministicId(`jsx@${loc.line}:${loc.column}`),
-        };
-
-        const id = componentDB.addJSXVariable(fileName, {
-          name,
-          tag,
-          props: [],
-          loc,
-          dependencies: {},
-          children: {},
-        });
-
-        componentDB.pushJSX(id);
+        if (id) {
+          componentDB.pushJSX(id);
+        }
 
         const parentFunc = nodePath.getFunctionParent();
-        if (parentFunc) {
+        if (parentFunc && id) {
           let funcLoc: { line: number; column: number } | undefined;
           if (parentFunc.node.type === "FunctionDeclaration") {
             if (parentFunc.node.id?.loc) {
@@ -304,13 +302,14 @@ export default function JSXElement(
           }
         }
 
+        const tag = "Fragment";
         const instanceId = componentDB.comAddRender(
           fileName,
           tag,
           [],
           loc,
           "jsx",
-          componentDB.getCurrentRenderInstance(),
+          parentID,
         );
         componentDB.pushRenderInstance(instanceId);
       },

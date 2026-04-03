@@ -317,6 +317,7 @@ export interface GraphNodeData {
   declarationKind?: "const" | "let" | "var" | "using" | "await using";
   appearanceOverride?: AppearanceOverride;
   tag?: string;
+  componentType?: "function" | "class" | string | null;
   raw?: ComponentFileVar;
   displayName?: string;
   [key: string]: unknown;

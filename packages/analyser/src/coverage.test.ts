@@ -1,21 +1,19 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { analyzeProject } from "./lib.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { analyzeProject } from "./lib.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import type { ComponentFileVar } from "@nexiq/shared";
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { RouterParser } from "./routerParser/index.js";
-import { ReactRouterParser } from "./routerParser/react-router.js";
-import * as analyzerCli from "./analyzer.js";
-import * as snapshotCli from "./snapshot.js";
+import { RouterParser } from "./routerParser/index.ts";
+import { ReactRouterParser } from "./routerParser/react-router.ts";
+import * as analyzerCli from "./analyzer.ts";
+import * as snapshotCli from "./snapshot.ts";
 
 describe("analyser coverage expansion", () => {
   const createTmpProject = (files: Record<string, string>) => {
-    const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "nexiq-coverage-"),
-    );
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-coverage-"));
 
     for (const [filePath, content] of Object.entries(files)) {
       const fullPath = path.join(tmpDir, filePath);
@@ -81,7 +79,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -121,7 +124,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -147,7 +155,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -164,7 +177,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -212,7 +230,12 @@ describe("analyser coverage expansion", () => {
     });
 
     const packageJson = new PackageJson(tmpDir);
-    const graph = await analyzeFiles(tmpDir, null, ["src/App.tsx"], packageJson);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
     expect(graph.files["/src/App.tsx"]).toBeDefined();
     fs.rmSync(tmpDir, { recursive: true });
   });
@@ -276,6 +299,7 @@ describe("analyser coverage expansion", () => {
       var: {},
       dependencies: {},
       hooks: [],
+      refs: [],
       props: [],
       effects: {},
       states: [],
@@ -310,7 +334,7 @@ describe("analyser coverage expansion", () => {
   });
 
   it("should cover package index", async () => {
-    const index = await import("./index.js");
+    const index = await import("./index.ts");
     expect(index.analyzeProject).toBeDefined();
   });
 

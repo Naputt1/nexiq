@@ -3,6 +3,7 @@
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "7df77c191cf1f52f",
+      "package_id": "props-complex@0.0.0",
       "import": {
         "React": {
           "localName": "React",
@@ -61,6 +62,10 @@
               "name": "a",
               "type": {
                 "type": "string"
+              },
+              "loc": {
+                "line": 4,
+                "column": 2
               }
             },
             {
@@ -74,6 +79,10 @@
                     "name": "x",
                     "type": {
                       "type": "number"
+                    },
+                    "loc": {
+                      "line": 6,
+                      "column": 4
                     }
                   },
                   {
@@ -81,9 +90,17 @@
                     "name": "y",
                     "type": {
                       "type": "number"
+                    },
+                    "loc": {
+                      "line": 7,
+                      "column": 4
                     }
                   }
                 ]
+              },
+              "loc": {
+                "line": 5,
+                "column": 2
               }
             },
             {
@@ -91,6 +108,10 @@
               "name": "c",
               "type": {
                 "type": "string"
+              },
+              "loc": {
+                "line": 9,
+                "column": 2
               }
             }
           ],
@@ -139,7 +160,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "655ea4350fbfb9f4",
+          "hash": "5fb48e52e0b45655",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -242,7 +263,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "2b619d8dd97d4218",
+              "hash": "4ac1566734cf64f9",
               "dependencies": {
                 "e6c632b61e964e1f": {
                   "id": "e6c632b61e964e1f",
@@ -257,9 +278,20 @@
                 "line": 57,
                 "column": 4
               },
-              "tag": "div",
-              "props": [],
-              "children": {},
+              "render": {
+                "id": "div",
+                "instanceId": "9be1ac48bcec2adc",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 57,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
               "srcId": "div"
             }
           },
@@ -274,58 +306,12 @@
             }
           },
           "async": false,
-          "return": {
-            "id": "486f8c03b42afb2f",
-            "name": {
-              "type": "identifier",
-              "name": "jsx@57:4",
-              "loc": {
-                "line": 57,
-                "column": 4
-              },
-              "id": "544dc0d968dfb374"
-            },
-            "kind": "normal",
-            "type": "jsx",
-            "file": "/src/App.tsx",
-            "hash": "2b619d8dd97d4218",
-            "dependencies": {
-              "e6c632b61e964e1f": {
-                "id": "e6c632b61e964e1f",
-                "name": "a"
-              },
-              "eaf06c6480b2cd11": {
-                "id": "eaf06c6480b2cd11",
-                "name": "x"
-              }
-            },
-            "loc": {
-              "line": 57,
-              "column": 4
-            },
-            "tag": "div",
-            "props": [],
-            "children": {},
-            "srcId": "div"
-          },
-          "children": {
-            "9be1ac48bcec2adc": {
-              "id": "div",
-              "instanceId": "9be1ac48bcec2adc",
-              "tag": "div",
-              "dependencies": [],
-              "isDependency": false,
-              "loc": {
-                "line": 57,
-                "column": 4
-              },
-              "renderIndex": 0,
-              "kind": "jsx",
-              "children": {}
-            }
-          },
+          "return": "486f8c03b42afb2f",
           "states": [
             "c03f8e59d14c727c:state:[stateX, setStateX]"
+          ],
+          "refs": [
+            "c03f8e59d14c727c:ref:refX"
           ],
           "props": [
             {

@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
 import os from "os";
-import type { SnapshotData } from "./types/test.js";
-import { SqliteDB } from "./db/sqlite.js";
+import type { SnapshotData } from "./types/test.ts";
+import { SqliteDB } from "./db/sqlite.ts";
 
 describe("analyser cache snapshots", () => {
   const projectName = "cache";
@@ -19,7 +19,12 @@ describe("analyser cache snapshots", () => {
     const viteConfigPath = getViteConfig(projectPath);
     const files = getFiles(projectPath);
 
-    const graph = await analyzeFiles(projectPath, viteConfigPath, files, packageJson);
+    const graph = await analyzeFiles(
+      projectPath,
+      viteConfigPath,
+      files,
+      packageJson,
+    );
 
     const snapshotPath = path.resolve(
       process.cwd(),
@@ -103,10 +108,10 @@ describe("analyser cache snapshots", () => {
     );
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-sqlite-test-"));
     const sqlitePath = path.join(tmpDir, "test.sqlite");
-    
+
     // Copy sample project to tmp dir to avoid side effects
     fs.cpSync(projectPath, tmpDir, { recursive: true });
-    
+
     const packageJson = new PackageJson(tmpDir);
     const viteConfigPath = getViteConfig(tmpDir);
     const files = getFiles(tmpDir);
@@ -130,7 +135,7 @@ describe("analyser cache snapshots", () => {
     sqlite2.close();
 
     // 2. Second run - should load from SQLite and skip analysis
-    // We can verify this by checking if it still works even if we delete the source file 
+    // We can verify this by checking if it still works even if we delete the source file
     // (Wait, analyzeFiles still checks if file exists on disk to calculate hash)
     // So we'll just check if the output is the same.
     const sqlite3 = new SqliteDB(sqlitePath);
@@ -145,8 +150,10 @@ describe("analyser cache snapshots", () => {
     sqlite3.close();
 
     // Basic equality check (excluding src path)
-    expect(Object.keys(secondGraph.files)).toEqual(Object.keys(firstGraph.files));
-    
+    expect(Object.keys(secondGraph.files)).toEqual(
+      Object.keys(firstGraph.files),
+    );
+
     // Cleanup
     fs.rmSync(tmpDir, { recursive: true });
   });

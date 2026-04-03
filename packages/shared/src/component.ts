@@ -79,10 +79,11 @@ export interface PropData {
 
 export interface ReactFunctionInfoBase {
   states: string[];
+  refs: string[];
   hooks: string[];
   props: PropData[];
   propName?: string | undefined;
-  propType?: TypeData;
+  propType?: TypeData | undefined;
   effects: Record<string, EffectInfo>;
 }
 
@@ -94,11 +95,23 @@ export interface ReactFunctionInfo extends ReactFunctionInfoBase {
 
 export type HookInfo = ReactFunctionInfoBase;
 
-export interface ComponentInfo extends ReactFunctionInfoBase {
-  componentType: "Function" | "Class";
+export interface ComponentInfoBase {
   contexts: string[];
   forwardRef?: boolean;
 }
+
+export interface FunctionComponentInfo
+  extends ReactFunctionInfoBase, ComponentInfoBase {
+  componentType: "Function";
+}
+
+export interface ClassComponentInfo
+  extends ReactFunctionInfoBase, ComponentInfoBase {
+  componentType: "Class";
+  stateType?: TypeData | undefined;
+}
+
+export type ComponentInfo = FunctionComponentInfo | ClassComponentInfo;
 
 export interface ComponentFileVarDependency {
   id: string;
@@ -252,7 +265,6 @@ export interface ComponentFileVarBaseTypeFunction<
   async?: boolean | undefined;
   var: Record<string, ComponentFileVar>;
   return?: FunctionReturn | undefined;
-  children: Record<string, ComponentInfoRender>;
   superClass?: { id?: string; name: string } | undefined;
 }
 
@@ -292,16 +304,29 @@ export type ComponentFileVarReactWithCallback<
   TType extends VarType = "function",
 > = ComponentFileVarBaseTypeFunction<TKind, TType> & ReactDependencies;
 
-export type ComponentFileVarComponent = ComponentFileVarReactFunction<
+export type ComponentFileVarFunctionComponent = ComponentFileVarReactFunction<
   "component",
-  "function" | "class"
+  "function"
 > &
-  ComponentInfo & {
+  FunctionComponentInfo & {
     kind: "component";
   };
 
+export type ComponentFileVarClassComponent = ComponentFileVarReactFunction<
+  "component",
+  "class"
+> &
+  ClassComponentInfo & {
+    kind: "component";
+  };
+
+export type ComponentFileVarComponent =
+  | ComponentFileVarFunctionComponent
+  | ComponentFileVarClassComponent;
+
 export type ComponentFileVarState = ComponentFileVarReact<"data", "state"> & {
   setter?: string | undefined;
+  stateType?: TypeData | undefined;
 };
 
 export type ComponentFileVarCallHook = ComponentFileVarReact<"data", "hook"> & {
@@ -352,9 +377,7 @@ export interface ComponentFileVarJSX extends ComponentFileVarBase<
   "normal"
 > {
   type: "jsx";
-  tag: string;
-  props: ComponentInfoRenderDependency[];
-  children: Record<string, ComponentInfoRender>;
+  render: ComponentInfoRender | null;
   srcId?: string | undefined;
 }
 
@@ -406,13 +429,13 @@ export type IResolveAddRender = {
   kind?: ComponentInfoRender["kind"] | undefined;
   parentId?: string | undefined;
 };
-
 export type IResolveAddHook = {
   type: "comAddHook";
   name: string;
   fileName: string;
   hook: string;
   loc: VariableLoc;
+  parentId?: string | undefined;
 };
 
 export type IResolveCallHook = {
@@ -435,6 +458,12 @@ export type IResolveComPropsTsType = {
   id: string;
 };
 
+export type IResolveComClassStateTsType = {
+  type: "comClassStateTsType";
+  fileName: string;
+  id: string;
+};
+
 export type IResolveCrossPackageImport = {
   type: "crossPackageImport";
   fileName: string;
@@ -452,6 +481,7 @@ export type ComponentDBResolve =
   | IResolveCallHook
   | IResolveTsType
   | IResolveComPropsTsType
+  | IResolveComClassStateTsType
   | IResolveCrossPackageImport;
 
 export type ComponentFile = {

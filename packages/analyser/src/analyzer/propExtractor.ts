@@ -2,8 +2,8 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import generate from "@babel/generator";
 import type { PropData, PropDataType } from "@nexiq/shared";
-import { getDeterministicId } from "../utils/hash.js";
-import { getExpressionData } from "./type/helper.js";
+import { getDeterministicId } from "../utils/hash.ts";
+import { getExpressionData } from "./type/helper.ts";
 
 const generateFn: typeof generate.default = generate.default || generate;
 
@@ -87,7 +87,10 @@ function resolveType(
   return [];
 }
 
-function extractFromPattern(pattern: t.LVal, componentId?: string): PropData[] {
+export function extractFromPattern(
+  pattern: t.LVal,
+  componentId?: string,
+): PropData[] {
   const props: PropData[] = [];
 
   if (t.isAssignmentPattern(pattern)) {

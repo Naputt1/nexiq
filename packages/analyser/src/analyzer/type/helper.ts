@@ -13,7 +13,7 @@ import type {
 import * as t from "@babel/types";
 import assert from "assert";
 import type { FuncParam, TypeDataParamFunction } from "@nexiq/shared";
-import { generateFn } from "../../utils/babel.js";
+import { generateFn } from "../../utils/babel.ts";
 
 function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
   const data: TypeDataParamFunction = {
@@ -79,7 +79,6 @@ function getFuncParam(
             name: property.argument.name,
           });
         } else {
-          
           // debugger;
         }
       }
@@ -198,7 +197,6 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
   } else if (tsType.left.type === "TSQualifiedName") {
     id.push(...getQualifiedName(tsType.left));
   } else {
-    
     // debugger;
   }
 
@@ -222,6 +220,9 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
       signatureType: "property",
       name: member.key.name,
       type: getType(member.typeAnnotation.typeAnnotation),
+      loc: member.loc
+        ? { line: member.loc.start.line, column: member.loc.start.column }
+        : undefined,
     };
 
     if (member.optional) {
@@ -263,6 +264,9 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
       return: member.typeAnnotation
         ? getType(member.typeAnnotation.typeAnnotation)
         : { type: "void" },
+      loc: member.loc
+        ? { line: member.loc.start.line, column: member.loc.start.column }
+        : undefined,
     };
 
     if (member.optional) {
@@ -364,7 +368,6 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        
         // debugger;
         assert(false, "invlid type reference");
       }
@@ -599,7 +602,6 @@ function getMemberExpressionNames(
 }
 
 export function getExpressionData(expr: t.Expression): PropDataType | null {
-  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (expr.type) {
     case "BooleanLiteral":
       return {

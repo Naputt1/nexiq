@@ -1,6 +1,6 @@
-import assert from "assert";
 import fs from "fs";
 import path from "path";
+import { resolvePath } from "../utils/path.ts";
 
 export type PackageJsonData = {
   name: string;
@@ -15,10 +15,10 @@ export class PackageJson {
   public rootDir: string;
 
   constructor(dir: string, initialData?: Record<string, unknown>) {
-    this.rootDir = path.resolve(dir);
+    this.rootDir = resolvePath(dir);
     this.dataCache = new Map();
     this.isDepCache = new Map();
-    
+
     if (initialData) {
       this.dataCache.set(this.rootDir, initialData as PackageJsonData);
     } else {
@@ -29,7 +29,10 @@ export class PackageJson {
   public get rawData(): Record<string, unknown> {
     const rootData = this.dataCache.get(this.rootDir);
     // Provide a fallback so it doesn't break initialization when passing to worker
-    return (rootData || { dependencies: {}, devDependencies: {} }) as unknown as Record<string, unknown>;
+    return (rootData || {
+      dependencies: {},
+      devDependencies: {},
+    }) as unknown as Record<string, unknown>;
   }
 
   private loadPackageJson(dir: string): PackageJsonData | null {
@@ -53,7 +56,9 @@ export class PackageJson {
     return null;
   }
 
-  public getPackageForFile(filePath: string): { dir: string; data: PackageJsonData } | null {
+  public getPackageForFile(
+    filePath: string,
+  ): { dir: string; data: PackageJsonData } | null {
     let currentDir = filePath;
     // Check if path is a file, avoid issues with .ext
     if (!fs.existsSync(currentDir) || fs.statSync(currentDir).isFile()) {
@@ -81,12 +86,15 @@ export class PackageJson {
   }
 
   public getAllLoadedPackages() {
-    return Array.from(this.dataCache.entries())
-      .filter(([_, data]) => data !== null) as [string, PackageJsonData][];
+    return Array.from(this.dataCache.entries()).filter(
+      ([_, data]) => data !== null,
+    ) as [string, PackageJsonData][];
   }
 
   public isDependency(name: string, filePath?: string): boolean {
-    const cacheKey = filePath ? `${filePath}:${name}` : `${this.rootDir}:${name}`;
+    const cacheKey = filePath
+      ? `${filePath}:${name}`
+      : `${this.rootDir}:${name}`;
     let isDepSet = this.isDepCache.get(cacheKey);
     if (!isDepSet) {
       isDepSet = new Set();
@@ -97,14 +105,20 @@ export class PackageJson {
       return true;
     }
 
-    const pkg = filePath ? this.getPackageForFile(filePath) : this.getPackageForFile(this.rootDir);
+    const pkg = filePath
+      ? this.getPackageForFile(filePath)
+      : this.getPackageForFile(this.rootDir);
     const data = pkg?.data || { dependencies: {}, devDependencies: {} };
 
     const nameParts = name.split("/");
     if (nameParts.length === 1) {
       if (
-        (data.dependencies && typeof data.dependencies === 'object' && name in data.dependencies) ||
-        (data.devDependencies && typeof data.devDependencies === 'object' && name in data.devDependencies)
+        (data.dependencies &&
+          typeof data.dependencies === "object" &&
+          name in data.dependencies) ||
+        (data.devDependencies &&
+          typeof data.devDependencies === "object" &&
+          name in data.devDependencies)
       ) {
         isDepSet.add(name);
         return true;
@@ -115,8 +129,12 @@ export class PackageJson {
     for (let i = 0; i < nameParts.length; i++) {
       const n = nameParts.slice(0, i + 1).join("/");
       if (
-        (data.dependencies && typeof data.dependencies === 'object' && n in data.dependencies) ||
-        (data.devDependencies && typeof data.devDependencies === 'object' && n in data.devDependencies)
+        (data.dependencies &&
+          typeof data.dependencies === "object" &&
+          n in data.dependencies) ||
+        (data.devDependencies &&
+          typeof data.devDependencies === "object" &&
+          n in data.devDependencies)
       ) {
         isDepSet.add(name);
         return true;

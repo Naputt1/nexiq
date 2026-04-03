@@ -1,6 +1,6 @@
 import type { ComponentFileVarCallback } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.ts";
 
 export class CallbackVariable extends ReactWithCallbackVariable<"callback"> {
   constructor(
