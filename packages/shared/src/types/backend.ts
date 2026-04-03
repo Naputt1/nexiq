@@ -5,7 +5,7 @@ import type {
   GitFileDiff,
   NexiqConfig,
   AppStateData,
-} from "./index.ts";
+} from "./index.js";
 
 export interface BackendRequestMap {
   check_project_status: {

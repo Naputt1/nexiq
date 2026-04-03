@@ -16,8 +16,6 @@
       "@nexiq/shared": ["../shared/dist/index.d.ts"],
       "@nexiq/shared/*": ["../shared/dist/*"]
     },
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
   },
   "include": ["src"]
 }
