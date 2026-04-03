@@ -681,8 +681,6 @@ export class File {
   }
 
   public getData(): ComponentFile {
-    if (!this.init && this.rawData) return this.rawData;
-
     return {
       path: this.path,
       fingerPrint: this.fingerPrint,

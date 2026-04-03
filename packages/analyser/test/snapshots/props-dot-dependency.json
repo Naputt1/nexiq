@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "5ee33cdca511f527",
+          "hash": "346a72e545aac3a3",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -184,7 +184,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "50c0b5a2a29deff3",
+              "hash": "3aa4f253a9c8046e",
               "dependencies": {},
               "loc": {
                 "line": 18,

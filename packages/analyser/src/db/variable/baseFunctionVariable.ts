@@ -40,15 +40,13 @@ export abstract class BaseFunctionVariable<
   public load(data: BaseFunctionVariable<TKind, TType>) {
     super.load(data);
 
-    if (data instanceof BaseFunctionVariable) {
-      this.type = data.type;
-      this.scope = data.scope || this.scope;
-      this.async = data.async;
-      this.return = data.return;
-      this.children = { ...this.children, ...data.children };
-      this.superClass = data.superClass;
-      this.var.merge(data.var);
-    }
+    this.type = data.type;
+    this.scope = data.scope || this.scope;
+    this.async = data.async;
+    this.return = data.return;
+    this.children = { ...this.children, ...data.children };
+    this.superClass = data.superClass;
+    this.var.merge(data.var);
   }
 
   protected getBaseData(): ComponentFileVarBaseTypeFunction<TKind, TType> {
@@ -70,7 +68,6 @@ export abstract class BaseFunctionVariable<
       scope: this.scope,
       async: this.async,
       return: this.return,
-      children: this.children,
       superClass: this.superClass,
     };
   }
