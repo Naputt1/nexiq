@@ -1,14 +1,4 @@
 import { parentPort, threadId } from "node:worker_threads";
-// import { register } from "node:module";
-
-// Ensure tsx is registered for this worker to handle .ts files with .js extensions
-// if (import.meta.url.endsWith(".ts")) {
-//   try {
-//     register("tsx", import.meta.url);
-//   } catch (e) {
-//     // register might not be available in all node versions, but --import should have handled it
-//   }
-// }
 
 console.error("Worker process starting...");
 

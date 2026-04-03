@@ -578,7 +578,7 @@ export class PackageMaster {
     }
 
     if (this.threads > 1 && filesToAnalyze.length > 0) {
-      const ext = import.meta.url.endsWith(".ts") ? ".ts" : ".ts";
+      const ext = import.meta.url.endsWith(".ts") ? ".ts" : ".js";
       let workerScript = fileURLToPath(
         new URL(`./worker${ext}`, import.meta.url),
       );

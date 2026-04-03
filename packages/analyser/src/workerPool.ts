@@ -52,16 +52,34 @@ export class WorkerPool {
       ? new URL(this.workerScript)
       : pathToFileURL(this.workerScript);
 
-    const bootstrap = `
-import 'tsx/esm';
-import('${scriptUrl.toString()}');
-`;
+    const isTs = this.workerScript.endsWith(".ts");
+    const baseExecArgv = this.getWorkerOptions().execArgv;
+    const hasTsx = baseExecArgv.some(
+      (arg) => arg.includes("tsx") || arg.includes("ts-node"),
+    );
 
-    const worker = new Worker(bootstrap, {
-      ...this.getWorkerOptions(),
-      eval: true,
-      execArgv: ["--import=tsx"],
-    });
+    const finalExecArgv = [...baseExecArgv];
+    if (isTs && !hasTsx) {
+      finalExecArgv.push("--import=tsx");
+    }
+
+    let worker: Worker;
+    if (isTs) {
+      // Use bootstrap only for .ts to handle dynamic registration if needed
+      // but prefer clean imports
+      const bootstrap = `import('${scriptUrl.toString()}');`;
+      worker = new Worker(bootstrap, {
+        ...this.getWorkerOptions(),
+        eval: true,
+        execArgv: finalExecArgv,
+      });
+    } else {
+      // Direct load for .js
+      worker = new Worker(scriptUrl, {
+        ...this.getWorkerOptions(),
+        execArgv: finalExecArgv,
+      });
+    }
 
     worker.stdout.on("data", (data) => {
       process.stdout.write(`[Worker ${worker.threadId}] ${data}`);
