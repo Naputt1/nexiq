@@ -13,7 +13,7 @@ import type {
   ExportRow,
   PackageRow,
   PackageDependencyRow,
-} from "../index.js";
+} from "../index.ts";
 
 export class SqliteDB {
   public db: Database;
@@ -44,7 +44,9 @@ export class SqliteDB {
   }
 
   public getAllData() {
-    const packages = this.db.prepare("SELECT * FROM packages").all() as PackageRow[];
+    const packages = this.db
+      .prepare("SELECT * FROM packages")
+      .all() as PackageRow[];
     const package_dependencies = this.db
       .prepare("SELECT * FROM package_dependencies")
       .all() as PackageDependencyRow[];

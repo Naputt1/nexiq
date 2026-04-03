@@ -5,7 +5,7 @@ import type {
   EffectInfo,
   ComponentDBResolve,
   RelationKind,
-} from "./component.js";
+} from "./component.ts";
 
 export type DataEdge = {
   from: string;
@@ -89,7 +89,7 @@ export type {
   RelationKind,
   UsageOccurrence,
   ComponentRelation,
-} from "./component.js";
+} from "./component.ts";
 
 export interface FileRow {
   id: number;
@@ -282,7 +282,7 @@ export interface BenchmarkResult {
   steps: BenchmarkStep[];
 }
 
-export * from "./types/index.js";
-export * from "./component.js";
-export * from "./utils.js";
-export * from "./workspace.js";
+export * from "./types/index.ts";
+export * from "./component.ts";
+export * from "./utils.ts";
+export * from "./workspace.ts";

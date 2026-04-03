@@ -6,6 +6,7 @@ import type {
   TypeDataImport,
   TypeDataLiteralBody,
   TypeDataLiteralBodyMethod,
+  TypeDataLiteralBodyProperty,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
@@ -216,14 +217,18 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
       return null;
     }
 
-    const body: TypeDataLiteralBody = {
+    const body: TypeDataLiteralBodyProperty = {
       signatureType: "property",
       name: member.key.name,
       type: getType(member.typeAnnotation.typeAnnotation),
-      loc: member.loc
-        ? { line: member.loc.start.line, column: member.loc.start.column }
-        : undefined,
     };
+
+    if (member.loc) {
+      body.loc = {
+        line: member.loc.start.line,
+        column: member.loc.start.column,
+      };
+    }
 
     if (member.optional) {
       body.optional = true;
@@ -264,10 +269,14 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
       return: member.typeAnnotation
         ? getType(member.typeAnnotation.typeAnnotation)
         : { type: "void" },
-      loc: member.loc
-        ? { line: member.loc.start.line, column: member.loc.start.column }
-        : undefined,
     };
+
+    if (member.loc) {
+      body.loc = {
+        line: member.loc.start.line,
+        column: member.loc.start.column,
+      };
+    }
 
     if (member.optional) {
       body.optional = true;

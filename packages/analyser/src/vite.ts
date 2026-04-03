@@ -31,7 +31,7 @@ export function getViteAliases(
         const value = path.node.value;
         if (value?.type === "ObjectExpression") {
           value.properties.forEach((prop) => {
-            let key = "";
+            let key;
             let replacement = "";
             if (prop.type === "ObjectProperty") {
               const k = prop.key;

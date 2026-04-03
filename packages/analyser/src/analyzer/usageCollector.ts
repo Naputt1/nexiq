@@ -17,8 +17,10 @@ import {
   isReactFunctionVariable,
   isStateVariable,
   isJSXVariable,
+  isScope,
 } from "../db/variable/type.ts";
 import { traverseFn } from "../utils/babel.ts";
+import { Scope } from "../db/variable/scope.ts";
 
 function getStartLoc(node: t.Node): VariableLoc | null {
   if (!node.loc?.start) return null;
@@ -114,9 +116,9 @@ function getOwnerVariable(
 }
 
 function findReactStateTarget(owner: Variable | undefined, name: string) {
-  let current = owner;
+  let current: Variable | Scope | undefined = owner;
   while (current) {
-    if (isReactFunctionVariable(current)) {
+    if (!isScope(current) && isReactFunctionVariable(current)) {
       for (const stateId of current.states) {
         const state = current.var.get(stateId);
         if (state && isStateVariable(state)) {
@@ -206,9 +208,9 @@ function resolveIdentifierTarget(
   if (owner) {
     // If it's props or state in a class method or constructor
     if (name === "props" || name === "state") {
-      let current: Variable | undefined = owner;
+      let current: Variable | Scope | undefined = owner;
       while (current) {
-        if (isComponentVariable(current)) {
+        if (!isScope(current) && isComponentVariable(current)) {
           return { id: current.id, hiddenIntermediate: undefined };
         }
         current = current.parent;
@@ -500,39 +502,46 @@ export function extractFileUsages(
             (firstArg.isArrowFunctionExpression() ||
               firstArg.isFunctionExpression())
           ) {
-            const params = (firstArg as any).get("params");
-            // First parameter is 'state'
-            if (params.length >= 1 && params[0].isIdentifier()) {
-              const paramName = params[0].node.name;
-              const paramLoc = getStartLoc(params[0].node);
-              if (paramLoc) {
-                const paramVar = fileDb.getVariable(paramLoc);
-                if (paramVar) {
-                  componentDB.addVariableDependency(fileName, paramVar.id, {
-                    id: target.id,
-                    name: paramName,
-                  });
+            const params = firstArg.get("params");
+
+            if (Array.isArray(params)) {
+              // First parameter is 'state'
+              if (params.length >= 1 && params[0]?.isIdentifier()) {
+                const paramName = params[0].node.name;
+                const paramLoc = getStartLoc(params[0].node);
+                if (paramLoc) {
+                  const paramVar = fileDb.getVariable(paramLoc);
+                  if (paramVar) {
+                    componentDB.addVariableDependency(fileName, paramVar.id, {
+                      id: target.id,
+                      name: paramName,
+                    });
+                  }
                 }
               }
-            }
-            // Second parameter is 'props'
-            if (params.length >= 2 && params[1].isIdentifier()) {
-              const paramName = params[1].node.name;
-              const paramLoc = getStartLoc(params[1].node);
-              if (paramLoc) {
-                const paramVar = fileDb.getVariable(paramLoc);
-                if (paramVar) {
-                  // Link props parameter to the component itself (since component ID is also used for this.props)
-                  let current: Variable | undefined = owner;
-                  while (current) {
-                    if (isComponentVariable(current)) {
-                      componentDB.addVariableDependency(fileName, paramVar.id, {
-                        id: current.id,
-                        name: paramName,
-                      });
-                      break;
+              // Second parameter is 'props'
+              if (params.length >= 2 && params[1]?.isIdentifier()) {
+                const paramName = params[1].node.name;
+                const paramLoc = getStartLoc(params[1].node);
+                if (paramLoc) {
+                  const paramVar = fileDb.getVariable(paramLoc);
+                  if (paramVar) {
+                    // Link props parameter to the component itself (since component ID is also used for this.props)
+                    let current: Variable | Scope | undefined = owner;
+                    while (current) {
+                      if (!isScope(current) && isComponentVariable(current)) {
+                        componentDB.addVariableDependency(
+                          fileName,
+                          paramVar.id,
+                          {
+                            id: current.id,
+                            name: paramName,
+                          },
+                        );
+                        break;
+                      }
+                      current = current.parent;
                     }
-                    current = current.parent;
                   }
                 }
               }
@@ -568,9 +577,9 @@ export function extractFileUsages(
                 ) {
                   const stateName = prop.key.name;
                   // Resolve stateName to individual state variable
-                  let current: Variable | undefined = owner;
+                  let current: Variable | Scope | undefined = owner;
                   while (current) {
-                    if (isComponentVariable(current)) {
+                    if (!isScope(current) && isComponentVariable(current)) {
                       const stateId = current.var.getIdByName(stateName);
                       if (stateId) {
                         emitRelation(

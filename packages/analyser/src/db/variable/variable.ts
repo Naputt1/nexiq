@@ -10,6 +10,7 @@ import type {
 } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { getDeterministicId } from "../../utils/hash.ts";
+import { Scope } from "./scope.ts";
 
 export abstract class Variable<
   TType extends VarType = VarType,
@@ -29,7 +30,7 @@ export abstract class Variable<
     | "await using"
     | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Variable<"function" | "class">;
+  parent?: Scope;
   loc: VariableLoc;
   isStatic?: boolean | undefined;
   memberKind?: string | undefined;

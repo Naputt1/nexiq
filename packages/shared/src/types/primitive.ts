@@ -1,4 +1,4 @@
-import type { FuncParam, TypeDataParamFunction } from "./index.js";
+import type { FuncParam, TypeDataParamFunction } from "./index.ts";
 
 export interface TypeDataString {
   type: "string";

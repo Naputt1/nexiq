@@ -49,7 +49,7 @@ export default function ClassProperty(
 
         if (component && isClassComponentVariable(component)) {
           const keys = extractStateKeys(
-            (node as t.ClassProperty).value as any,
+            (node as t.ClassProperty).value,
             nodePath.scope,
           );
           for (const keyInfo of keys) {

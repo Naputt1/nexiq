@@ -61,6 +61,7 @@ import {
   isJSXVariable,
   isReactFunctionVariable,
   isClassVariable,
+  isScope,
 } from "./variable/type.ts";
 import { HookVariable } from "./variable/hook.ts";
 import { ClassVariable } from "./variable/classVariable.ts";
@@ -430,10 +431,6 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
-    if (isJSXVariable(variable)) {
-      this.getDependenciesIds(variable.id, variable.props);
-    }
-
     scope.add(variable);
 
     return variable.id;
@@ -478,7 +475,6 @@ export class File {
     ) => {
       for (const render of Object.values(children || {})) {
         if (!render) continue;
-        if (render.tag == "Child") debugger;
         edges.push({
           from: render.id,
           to: toId,
@@ -721,11 +717,11 @@ export class File {
   private _getDependenciesIds(
     dependencies: ComponentInfoRenderDependency[],
     depMap: Record<string, number[]>,
-    parent: Variable | undefined,
+    parent: Variable | Scope | undefined,
   ) {
     if (parent == null) return;
 
-    if (isBaseFunctionVariable(parent)) {
+    if (!isScope(parent) && isBaseFunctionVariable(parent)) {
       for (const name of Object.keys(depMap)) {
         const id = parent.var.getIdByName(name);
         if (id) {
@@ -992,9 +988,10 @@ export class File {
 
     if (variable == null) return null;
 
-    let targetComponent: Variable = variable;
+    let targetComponent: Variable | Scope = variable;
     while (
       targetComponent &&
+      !isScope(targetComponent) &&
       !isComponentVariable(targetComponent) &&
       targetComponent.parent
     ) {
@@ -1028,8 +1025,9 @@ export class File {
           return null;
         }
       } else if (
-        isComponentVariable(targetComponent) ||
-        isHookVariable(targetComponent)
+        !isScope(targetComponent) &&
+        (isComponentVariable(targetComponent) ||
+          isHookVariable(targetComponent))
       ) {
         targetMap = targetComponent.children;
         renderIndex = Object.keys(targetComponent.children).length;
@@ -1052,8 +1050,9 @@ export class File {
         const parent = this.renderInstanceMap.get(effectiveParentId);
         if (parent) targetMap = parent.children;
       } else if (
-        isComponentVariable(targetComponent) ||
-        isHookVariable(targetComponent)
+        !isScope(targetComponent) &&
+        (isComponentVariable(targetComponent) ||
+          isHookVariable(targetComponent))
       ) {
         targetMap = targetComponent.children;
       }
@@ -1122,11 +1121,11 @@ export class File {
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
     const exact = this.getVariable(loc);
-    let current: Variable | undefined =
+    let current: Variable | Scope | undefined =
       exact || this.var.findDeepestVariable(loc);
 
     while (current) {
-      if (isReactFunctionVariable(current)) {
+      if (!isScope(current) && isReactFunctionVariable(current)) {
         return current;
       }
       current = current.parent;
@@ -1170,42 +1169,30 @@ export class FileDB {
     return this.files.values();
   }
 
+  // can throw error
   private isFileChanged(filename: string, file: File, cache?: ComponentFile) {
-    try {
-      // console.log(this.src_dir, filename, resolvePath(this.src_dir, filename));
-      const stat = fs.statSync(resolvePath(this.src_dir, filename));
-      file.fingerPrint = `${stat.size}:${stat.mtimeMs}`;
+    const stat = fs.statSync(resolvePath(this.src_dir, filename));
+    file.fingerPrint = `${stat.size}:${stat.mtimeMs}`;
 
-      if (cache) {
-        if (cache.fingerPrint == file.fingerPrint) {
-          file.hash = cache.hash;
-          return false;
-        }
+    if (cache) {
+      if (cache.fingerPrint == file.fingerPrint) {
+        file.hash = cache.hash;
+        return false;
       }
-
-      file.hash = getDeterministicId(
-        fs.readFileSync(resolvePath(this.src_dir, filename)),
-      );
-
-      if (cache) {
-        const res = file.hash !== cache.hash;
-        console.log(
-          "isFileChanged (cache exists):",
-          filename,
-          "changed =",
-          res,
-        );
-        return res;
-      }
-
-      console.log("isFileChanged (no cache):", filename, "returning true");
-      return true;
-    } catch (e) {
-      console.error(e);
-      throw new Error(
-        `File read failed for ${filename}: ${e instanceof Error ? e.message : String(e)}`,
-      );
     }
+
+    file.hash = getDeterministicId(
+      fs.readFileSync(resolvePath(this.src_dir, filename)),
+    );
+
+    if (cache) {
+      const res = file.hash !== cache.hash;
+      console.log("isFileChanged (cache exists):", filename, "changed =", res);
+      return res;
+    }
+
+    console.log("isFileChanged (no cache):", filename, "returning true");
+    return true;
   }
 
   public add(filename: string, cache?: ComponentFile) {

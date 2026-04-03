@@ -1,5 +1,5 @@
-import type { FuncParam } from "./object.js";
-import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
+import type { FuncParam } from "./object.ts";
+import type { TypeData, TypeDataLiteralBody } from "./primitive.ts";
 
 export interface TypeDataFunctionParameterBase {
   optional?: boolean;
@@ -7,14 +7,12 @@ export interface TypeDataFunctionParameterBase {
   decorator: never;
 }
 
-export interface TypeDataFunctionParameterName
-  extends TypeDataFunctionParameterBase {
+export interface TypeDataFunctionParameterName extends TypeDataFunctionParameterBase {
   name: string;
   body: TypeData;
 }
 
-export interface TypeDataFunctionParameterObject
-  extends TypeDataFunctionParameterBase {
+export interface TypeDataFunctionParameterObject extends TypeDataFunctionParameterBase {
   name: string;
   body: TypeDataLiteralBody[];
   properties: FuncParam[];

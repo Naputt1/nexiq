@@ -2,10 +2,7 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import { ComponentDB } from "../db/componentDB.ts";
 import { extractStateKeys, getStartLoc } from "./classDeclaration.ts";
-import {
-  isClassComponentVariable,
-  isMethodVariable,
-} from "../db/variable/type.ts";
+import { isClassComponentVariable } from "../db/variable/type.ts";
 import { Variable } from "../db/variable/variable.ts";
 
 export default function AssignmentExpression(
@@ -25,10 +22,8 @@ export default function AssignmentExpression(
         // Find the class component we are in
         const file = componentDB.getFile(fileName);
         const loc = getStartLoc(left);
-        let component: Variable | undefined = file.var.findDeepestVariable(loc);
-        if (component && isMethodVariable(component)) {
-          component = component.parent;
-        }
+        const component: Variable | undefined =
+          file.var.findDeepestVariable(loc);
 
         if (component && isClassComponentVariable(component)) {
           const keys = extractStateKeys(right, nodePath.scope);

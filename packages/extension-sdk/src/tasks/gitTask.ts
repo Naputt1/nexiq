@@ -5,7 +5,7 @@ import {
   type GraphViewTask,
   type TaskContext,
   getTaskData,
-} from "../index.js";
+} from "../index.ts";
 
 /**
  * Task that applies Git status (added, modified, deleted) to nodes and combos.
