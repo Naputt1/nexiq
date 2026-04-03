@@ -95,7 +95,11 @@ export class ProjectManager {
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const key = subProject ? `${projectPath}:${subProject}` : projectPath;
+    const key = subProjects
+      ? `${projectPath}:multi:${subProjects.join(",")}`
+      : subProject
+        ? `${projectPath}:${subProject}`
+        : projectPath;
     if (this.projects.has(key)) {
       return this.projects.get(key)!;
     }
@@ -130,9 +134,7 @@ export class ProjectManager {
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     try {
       if (!fs.existsSync(cacheDir)) {
@@ -517,9 +519,7 @@ export class ProjectManager {
     const fileCache = new Map<string, string[]>();
     const results = [];
 
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
 
     for (const usage of allUsages) {
       const fullPath = path.resolve(
@@ -812,9 +812,7 @@ export class ProjectManager {
     if (locations.length === 0)
       return { error: `Symbol "${query}" not found.` };
 
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const results: {
       id: string;
       name: string;
@@ -971,9 +969,7 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
 
     const isExcluded = (filePath: string) => {
       if (!exclude || exclude.length === 0) return false;
@@ -1021,9 +1017,7 @@ export class ProjectManager {
     error?: string;
     exitCode: number;
   }> {
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const dangerous = [
       "rm -rf",
       "mkfs",
@@ -1066,9 +1060,7 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     if (!project || !project.graph) return false;
 
-    const analysisPath = subProject
-      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
     const cacheFile = path.join(
@@ -1199,9 +1191,10 @@ export class ProjectManager {
   }
 
   private _saveCache(project: ProjectInfo) {
-    const analysisPath = project.subProject
-      ? path.resolve(project.projectPath, project.subProject)
-      : project.projectPath;
+    const analysisPath = this.getAnalysisPath(
+      project.projectPath,
+      project.subProject,
+    );
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
     fs.writeFileSync(
@@ -1614,5 +1607,18 @@ export class ProjectManager {
       if (project.db) project.db.close();
     }
     this.projects.clear();
+  }
+
+  private getAnalysisPath(projectPath: string, subProject?: string): string {
+    if (!subProject) return projectPath;
+    if (path.isAbsolute(subProject)) {
+      // If it's inside projectPath, we can still use it.
+      // If it's a subproject name like "/src", it might be absolute on Unix but intended as relative.
+      // The old behavior was to always join it.
+      if (subProject.startsWith(projectPath)) return subProject;
+      // Fallback for cases like "/src" which are absolute but we want relative
+      return path.join(projectPath, subProject.replace(/^\/+/, ""));
+    }
+    return path.join(projectPath, subProject.replace(/^\/+/, ""));
   }
 }
