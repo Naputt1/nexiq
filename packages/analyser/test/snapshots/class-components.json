@@ -615,7 +615,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "20b7131c881633bb",
+          "hash": "e355ca872b9bcc70",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -657,6 +657,28 @@
                 }
               },
               "async": false
+            },
+            "85f4419ef29e0cd2": {
+              "id": "85f4419ef29e0cd2",
+              "name": {
+                "type": "identifier",
+                "name": "count",
+                "loc": {
+                  "line": 14,
+                  "column": 9
+                },
+                "id": "f0756bb1d309e3f0"
+              },
+              "kind": "state",
+              "type": "data",
+              "file": "/src/SimpleClass.tsx",
+              "hash": "aa7be8481de6b398",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 9
+              },
+              "setter": "this.setState"
             },
             "1a3b38e2da4e7e96": {
               "id": "1a3b38e2da4e7e96",
@@ -812,7 +834,9 @@
           "superClass": {
             "name": "React.Component"
           },
-          "states": [],
+          "states": [
+            "85f4419ef29e0cd2"
+          ],
           "refs": [],
           "props": [],
           "propName": "this.props",
@@ -959,6 +983,23 @@
             "isOptional": false,
             "isComputed": false,
             "displayLabel": "props.initialCount"
+          }
+        },
+        {
+          "from_id": "1a3b38e2da4e7e96",
+          "to_id": "85f4419ef29e0cd2",
+          "kind": "usage-write",
+          "line": 20,
+          "column": 32,
+          "data_json": {
+            "usageId": "781436392f5fe5d",
+            "filePath": "/src/SimpleClass.tsx",
+            "line": 20,
+            "column": 32,
+            "ownerId": "1a3b38e2da4e7e96",
+            "ownerKind": "property",
+            "hiddenIntermediate": "state-setter",
+            "displayLabel": "count"
           }
         },
         {

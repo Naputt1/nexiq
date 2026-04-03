@@ -2,8 +2,13 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import { ComponentDB } from "../db/componentDB.ts";
 import { extractStateKeys, getStartLoc } from "./classDeclaration.ts";
-import { isClassComponentVariable } from "../db/variable/type.ts";
+import {
+  isClassComponentVariable,
+  isMethodVariable,
+  isScope,
+} from "../db/variable/type.ts";
 import { Variable } from "../db/variable/variable.ts";
+import { Scope } from "../db/variable/scope.ts";
 
 export default function AssignmentExpression(
   componentDB: ComponentDB,
@@ -22,10 +27,17 @@ export default function AssignmentExpression(
         // Find the class component we are in
         const file = componentDB.getFile(fileName);
         const loc = getStartLoc(left);
-        const component: Variable | undefined =
+        let component: Variable | Scope | undefined =
           file.var.findDeepestVariable(loc);
+        if (component && isMethodVariable(component)) {
+          component = component.parent;
+        }
 
-        if (component && isClassComponentVariable(component)) {
+        if (
+          component &&
+          !isScope(component) &&
+          isClassComponentVariable(component)
+        ) {
           const keys = extractStateKeys(right, nodePath.scope);
           for (const keyInfo of keys) {
             componentDB.addStateVariable(
