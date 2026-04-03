@@ -1,26 +1,50 @@
-import { parentPort } from "node:worker_threads";
+import { parentPort, threadId } from "node:worker_threads";
+// import { register } from "node:module";
+
+// Ensure tsx is registered for this worker to handle .ts files with .js extensions
+// if (import.meta.url.endsWith(".ts")) {
+//   try {
+//     register("tsx", import.meta.url);
+//   } catch (e) {
+//     // register might not be available in all node versions, but --import should have handled it
+//   }
+// }
+
+console.error("Worker process starting...");
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception in worker:", err);
+});
+
+process.on("unhandledRejection", (reason, _promise) => {
+  console.error("Unhandled Rejection in worker:", reason);
+});
+
 import fs from "node:fs";
-import path from "node:path";
-import { parseCode } from "./analyzer/utils.js";
-import { traverseFn } from "./utils/babel.js";
-import { ComponentDB } from "./db/componentDB.js";
-import { PackageJson } from "./db/packageJson.js";
-import ImportDeclaration from "./analyzer/importDeclaration.js";
-import ExportNamedDeclaration from "./analyzer/exportNamedDeclaration.js";
-import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.js";
-import ExportAllDeclaration from "./analyzer/exportAllDeclaration.js";
-import FunctionDeclaration from "./analyzer/functionDeclaration.js";
-import VariableDeclarator from "./analyzer/variableDeclaration.js";
-import ClassDeclaration from "./analyzer/classDeclaration.js";
-import ClassMethod from "./analyzer/classMethod.js";
-import ClassProperty from "./analyzer/classProperty.js";
-import JSXElement from "./analyzer/JSXElement.js";
-import CallExpression from "./analyzer/callExpression.js";
-import ReturnStatement from "./analyzer/returnStatement.js";
-import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
-import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
-import { extractFileUsages } from "./analyzer/usageCollector.js";
-import type { FileTaskMessage } from "./types.js";
+import { parseCode } from "./analyzer/utils.ts";
+import { traverseFn } from "./utils/babel.ts";
+import { ComponentDB } from "./db/componentDB.ts";
+import { PackageJson } from "./db/packageJson.ts";
+import ImportDeclaration from "./analyzer/importDeclaration.ts";
+import ExportNamedDeclaration from "./analyzer/exportNamedDeclaration.ts";
+import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.ts";
+import ExportAllDeclaration from "./analyzer/exportAllDeclaration.ts";
+import FunctionDeclaration from "./analyzer/functionDeclaration.ts";
+import VariableDeclarator from "./analyzer/variableDeclaration.ts";
+import ClassDeclaration from "./analyzer/classDeclaration.ts";
+import ClassMethod from "./analyzer/classMethod.ts";
+import ClassProperty from "./analyzer/classProperty.ts";
+import ArrowFunctionExpression from "./analyzer/arrowFunctionExpression.ts";
+import FunctionExpression from "./analyzer/functionExpression.ts";
+import JSXElement from "./analyzer/JSXElement.ts";
+import CallExpression from "./analyzer/callExpression.ts";
+import ReturnStatement from "./analyzer/returnStatement.ts";
+import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
+import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
+import { extractFileUsages } from "./analyzer/usageCollector.ts";
+import type { FileTaskMessage, FileTaskSuccessMessage } from "./types.ts";
+import { resolvePath } from "./utils/path.ts";
+import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 
 interface WorkerParams {
   filePath: string;
@@ -32,8 +56,8 @@ interface WorkerParams {
 
 async function analyzeFile(params: WorkerParams) {
   const { filePath, srcDir, viteAliases, packageJsonData } = params;
-  const fileName = "/" + filePath;
-  const fullPath = path.resolve(srcDir, filePath);
+  const fileName = filePath;
+  const fullPath = resolvePath(srcDir, filePath);
 
   const packageJson = new PackageJson(srcDir, packageJsonData);
 
@@ -63,39 +87,54 @@ async function analyzeFile(params: WorkerParams) {
     ClassPrivateProperty: ClassProperty(componentDB, fileName),
     VariableDeclarator: VariableDeclarator(componentDB, fileName),
     ReturnStatement: ReturnStatement(componentDB, fileName),
+    ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),
+    FunctionExpression: FunctionExpression(componentDB, fileName),
     ...JSXElement(componentDB, fileName),
     CallExpression: CallExpression(componentDB, fileName),
     TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
     TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
+    AssignmentExpression: AssignmentExpression(componentDB, fileName),
   });
 
-  extractFileUsages(ast, componentDB, fileName);
+  extractFileUsages(ast, componentDB, filePath);
 
-  const fileData = componentDB.getFile(fileName).getData();
-  fileData.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
-  return fileData;
+  componentDB.resolveDependency();
+
+  const file = componentDB.getFile(filePath);
+  if (file) {
+    file.init = true;
+    file.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
+  }
+  const fileData = file!.getData();
+  console.error(
+    `[Worker ${threadId}] Found ${Object.keys(fileData.var).length} top-level components/variables in ${filePath}`,
+  );
+  return {
+    fileData,
+    resolveTasks: componentDB.getResolveTasks(),
+  };
 }
-
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception in worker:", err);
-});
-
-process.on("unhandledRejection", (reason, _promise) => {
-  console.error("Unhandled Rejection in worker:", reason);
-});
 
 if (parentPort) {
   parentPort.on("message", async (params: WorkerParams) => {
+    const { filePath } = params;
+    console.log(`[Worker ${threadId}] Received task: ${filePath}`);
     try {
-      const result = await analyzeFile(params);
-      const message: FileTaskMessage = {
+      console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
+      const { fileData, resolveTasks } = await analyzeFile(params);
+      console.log(`[Worker ${threadId}] Analysis complete for: ${filePath}`);
+      const message: FileTaskSuccessMessage = {
         type: "file_success",
         filePath: params.filePath,
-        result,
+        result: fileData,
+        resolveTasks,
       };
       parentPort!.postMessage(message);
     } catch (error) {
-      console.error(`Worker error for ${params.filePath}:`, error);
+      console.error(`[Worker ${threadId}] Error analyzing ${filePath}:`, error);
+      if (error instanceof Error) {
+        console.error(error.stack);
+      }
       const err = error as Error & {
         code?: string;
         loc?: { line?: number; column?: number };

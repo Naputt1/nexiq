@@ -8,8 +8,8 @@ import type {
   VarType,
   UIItemState,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { getDeterministicId } from "../../utils/hash.js";
+import type { File } from "../fileDB.ts";
+import { getDeterministicId } from "../../utils/hash.ts";
 
 export abstract class Variable<
   TType extends VarType = VarType,

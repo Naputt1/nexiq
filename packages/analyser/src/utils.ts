@@ -1,6 +1,6 @@
 import type { NodePath, Node } from "@babel/traverse";
 import * as t from "@babel/types";
-import type { ComponentDB } from "./db/componentDB.js";
+import type { ComponentDB } from "./db/componentDB.ts";
 
 export function isHook(name: string) {
   return name.startsWith("use");
@@ -20,7 +20,8 @@ export function getReactHookInfo(
     const comImport = file.import.get(localName);
 
     if (comImport?.source === "react") {
-      const importedName = comImport.type === "named" ? comImport.importedName : localName;
+      const importedName =
+        comImport.type === "named" ? comImport.importedName : localName;
       if (importedName?.startsWith("use") || localName.startsWith("use")) {
         return {
           name: importedName || localName,

@@ -2,8 +2,8 @@ import type {
   ComponentFileVarBaseTypeFunction,
   ComponentFileVarMethod,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
+import type { File } from "../fileDB.ts";
+import { BaseFunctionVariable } from "./baseFunctionVariable.ts";
 
 export class MethodVariable extends BaseFunctionVariable<"method", "function"> {
   constructor(

@@ -2,8 +2,8 @@ import type {
   ComponentFileVarBase,
   ComponentFileVarProperty,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { Variable } from "./variable.js";
+import type { File } from "../fileDB.ts";
+import { Variable } from "./variable.ts";
 
 export class PropertyVariable extends Variable<"data", "property"> {
   constructor(

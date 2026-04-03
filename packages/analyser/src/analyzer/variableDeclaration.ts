@@ -1,8 +1,8 @@
 import * as t from "@babel/types";
 import type * as traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
+import type { ComponentDB } from "../db/componentDB.ts";
 import type {
-  ComponentFileVarComponent,
+  ComponentFileVarFunctionComponent,
   ComponentFileVarHook,
   ComponentFileVarNormalData,
   ComponentFileVarNormalFunction,
@@ -18,14 +18,14 @@ import {
   isForwardRefRefUsed,
   isRefUsed,
   getReactHookInfo,
-} from "../utils.js";
+} from "../utils.ts";
 import assert from "assert";
-import { getProps } from "./propExtractor.js";
-import { getExpressionData, getType } from "./type/helper.js";
-import { getPattern, getVariableNameKey } from "./pattern.js";
-import { getDeterministicId } from "../utils/hash.js";
-import { getVariableComponentName } from "../variable.js";
-import { generateFn } from "../utils/babel.js";
+import { getProps } from "./propExtractor.ts";
+import { getExpressionData, getType } from "./type/helper.ts";
+import { getPattern, getVariableNameKey } from "./pattern.ts";
+import { getDeterministicId } from "../utils/hash.ts";
+import { getVariableComponentName } from "../variable.ts";
+import { generateFn } from "../utils/babel.ts";
 
 export default function VariableDeclarator(
   componentDB: ComponentDB,
@@ -194,7 +194,7 @@ export default function VariableDeclarator(
 
           const { props, propName } = getProps(innerFnPath, pId, componentId);
           const component: Omit<
-            ComponentFileVarComponent,
+            ComponentFileVarFunctionComponent,
             "id" | "kind" | "states" | "hash" | "file"
           > = {
             name: pattern,
@@ -206,8 +206,8 @@ export default function VariableDeclarator(
             contexts: [],
             dependencies: {},
             var: {},
-            children: {},
             effects: {},
+            refs: [],
             loc,
             scope,
             async: innerFn.async,
@@ -243,31 +243,19 @@ export default function VariableDeclarator(
             }
           }
 
-          currentId = componentDB.addComponent(
+          currentId = componentDB.addFunctionComponent(
             fileName,
             component,
             declarationKind,
           );
           return currentId;
         } else if (init && init.type === "JSXElement") {
-          // ... (existing JSX variable handling)
-          const opening = init.openingElement.name;
-          let tag = "";
-          if (opening.type === "JSXIdentifier") {
-            tag = opening.name;
-          } else if (opening.type === "JSXMemberExpression") {
-            tag = generateFn(opening).code;
-          }
-
           currentId = componentDB.addJSXVariable(
             fileName,
             {
               name: pattern,
-              tag,
-              props: [],
               loc,
               dependencies: {},
-              children: {},
             },
             declarationKind,
           );
@@ -299,8 +287,8 @@ export default function VariableDeclarator(
             props,
             propName,
             effects: {},
+            refs: [],
             hooks: [],
-            children: {},
             parentId: pParentId,
           };
 
@@ -334,13 +322,14 @@ export default function VariableDeclarator(
                 pId,
                 componentId,
               );
-              currentId = componentDB.addComponent(
+              currentId = componentDB.addFunctionComponent(
                 fileName,
                 {
                   name: pattern,
                   type: "function",
                   componentType: "Function",
                   hooks: [],
+                  refs: [],
                   props,
                   propName,
                   contexts: [],
@@ -360,7 +349,7 @@ export default function VariableDeclarator(
                   ),
                   parentId: pParentId,
                 } as Omit<
-                  ComponentFileVarComponent,
+                  ComponentFileVarFunctionComponent,
                   "id" | "kind" | "states" | "hash" | "file"
                 >,
                 declarationKind,
@@ -388,6 +377,7 @@ export default function VariableDeclarator(
                   propName,
                   effects: {},
                   hooks: [],
+                  refs: [],
                   children: {},
                   var: {},
                   parentId: pParentId,

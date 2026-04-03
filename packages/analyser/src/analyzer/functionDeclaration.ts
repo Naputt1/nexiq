@@ -1,16 +1,16 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
-import { isHook, returnJSX, isRefUsed } from "../utils.js";
+import type { ComponentDB } from "../db/componentDB.ts";
+import { isHook, returnJSX, isRefUsed } from "../utils.ts";
 import assert from "assert";
-import { getProps } from "./propExtractor.js";
-import { getPattern } from "./pattern.js";
+import { getProps } from "./propExtractor.ts";
+import { getPattern } from "./pattern.ts";
 import type {
-  ComponentFileVarComponent,
+  ComponentFileVarFunctionComponent,
   ComponentFileVarHook,
   ComponentFileVarNormalFunction,
 } from "@nexiq/shared";
-import { getDeterministicId } from "../utils/hash.js";
+import { getDeterministicId } from "../utils/hash.ts";
 
 export default function FunctionDeclaration(
   componentDB: ComponentDB,
@@ -45,7 +45,7 @@ export default function FunctionDeclaration(
     if (nodePath.parentPath.scope.block.type === "Program") {
       if (returnJSX(nodePath.node)) {
         const { props, propName } = getProps(nodePath, undefined, componentId);
-        componentDB.addComponent(fileName, {
+        componentDB.addFunctionComponent(fileName, {
           name: pattern,
           type: "function",
           componentType: "Function",
@@ -60,9 +60,10 @@ export default function FunctionDeclaration(
           scope,
           async: nodePath.node.async,
           effects: {},
+          refs: [],
           forwardRef: isRefUsed(nodePath),
         } as Omit<
-          ComponentFileVarComponent,
+          ComponentFileVarFunctionComponent,
           "id" | "kind" | "states" | "hash" | "file"
         >);
         return;
@@ -81,6 +82,7 @@ export default function FunctionDeclaration(
           propName,
           effects: {},
           hooks: [],
+          refs: [],
           children: {},
           var: {},
         } as Omit<

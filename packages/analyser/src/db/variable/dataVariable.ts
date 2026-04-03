@@ -4,8 +4,8 @@ import type {
   ComponentInfoRender,
   VarKind,
 } from "@nexiq/shared";
-import { Variable } from "./variable.js";
-import type { File } from "../fileDB.js";
+import { Variable } from "./variable.ts";
+import type { File } from "../fileDB.ts";
 
 export class DataVariable extends Variable<"data"> {
   children: Record<string, ComponentInfoRender>;
@@ -25,7 +25,6 @@ export class DataVariable extends Variable<"data"> {
     super.load(data);
 
     this.type = data.type;
-    // TODO: handle merge
     if (data.children) {
       this.children = { ...data.children };
     }

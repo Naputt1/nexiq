@@ -19,8 +19,8 @@ import { SqliteDB as BaseSqliteDB } from "@nexiq/shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
-} from "../analyzer/pattern.js";
-import type { FileRunStatus } from "../types.js";
+} from "../analyzer/pattern.ts";
+import type { FileRunStatus } from "../types.ts";
 
 export interface AnalyzedFileResult {
   file: ComponentFile;
@@ -733,9 +733,9 @@ export class SqliteDB extends BaseSqliteDB {
             .run(parentEntityId, v.id, "parent-child");
         }
 
-        // If it's a function/jsx, it has its own scope
+        // If it's a function/jsx/class, it has its own scope
         if (
-          (v.type === "function" || v.type === "jsx") &&
+          (v.type === "function" || v.type === "jsx" || v.type === "class") &&
           ("var" in v || "children" in v)
         ) {
           const newScopeId = `scope:block:${v.id}`;
@@ -969,7 +969,12 @@ export class SqliteDB extends BaseSqliteDB {
     for (const rel of relations) {
       const parent = varMap.get(rel.from_id);
       const child = varMap.get(rel.to_id);
-      if (parent && child && parent.type === "function" && parent.var) {
+      if (
+        parent &&
+        child &&
+        (parent.type === "function" || parent.type === "class") &&
+        parent.var
+      ) {
         parent.var[child.id] = child;
       }
     }

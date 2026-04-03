@@ -8,31 +8,32 @@ import type {
   PackageRow,
   ComponentDBResolve,
 } from "@nexiq/shared";
-import { getTsConfigAliases, getViteAliases } from "./vite.js";
-import { ComponentDB } from "./db/componentDB.js";
-import type { PackageJson as PackageJsonStore } from "./db/packageJson.js";
-import { SqliteDB } from "./db/sqlite.js";
-import { WorkerPool } from "./workerPool.js";
-import { parseCode } from "./analyzer/utils.js";
+import { getTsConfigAliases, getViteAliases } from "./vite.ts";
+import { ComponentDB } from "./db/componentDB.ts";
+import type { PackageJson as PackageJsonStore } from "./db/packageJson.ts";
+import { SqliteDB } from "./db/sqlite.ts";
+import { WorkerPool } from "./workerPool.ts";
+import { parseCode } from "./analyzer/utils.ts";
 import type { File } from "@babel/types";
-import { traverseFn } from "./utils/babel.js";
-import ImportDeclaration from "./analyzer/importDeclaration.js";
-import ExportNamedDeclaration from "./analyzer/exportNamedDeclaration.js";
-import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.js";
-import ExportAllDeclaration from "./analyzer/exportAllDeclaration.js";
-import FunctionDeclaration from "./analyzer/functionDeclaration.js";
-import VariableDeclarator from "./analyzer/variableDeclaration.js";
-import ClassDeclaration from "./analyzer/classDeclaration.js";
-import ClassMethod from "./analyzer/classMethod.js";
-import ClassProperty from "./analyzer/classProperty.js";
-import JSXElement from "./analyzer/JSXElement.js";
-import CallExpression from "./analyzer/callExpression.js";
-import ReturnStatement from "./analyzer/returnStatement.js";
-import ArrowFunctionExpression from "./analyzer/arrowFunctionExpression.js";
-import FunctionExpression from "./analyzer/functionExpression.js";
-import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.js";
-import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.js";
-import { extractFileUsages } from "./analyzer/usageCollector.js";
+import { traverseFn } from "./utils/babel.ts";
+import ImportDeclaration from "./analyzer/importDeclaration.ts";
+import ExportNamedDeclaration from "./analyzer/exportNamedDeclaration.ts";
+import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.ts";
+import ExportAllDeclaration from "./analyzer/exportAllDeclaration.ts";
+import FunctionDeclaration from "./analyzer/functionDeclaration.ts";
+import VariableDeclarator from "./analyzer/variableDeclaration.ts";
+import ClassDeclaration from "./analyzer/classDeclaration.ts";
+import ClassMethod from "./analyzer/classMethod.ts";
+import ClassProperty from "./analyzer/classProperty.ts";
+import JSXElement from "./analyzer/JSXElement.ts";
+import CallExpression from "./analyzer/callExpression.ts";
+import ReturnStatement from "./analyzer/returnStatement.ts";
+import ArrowFunctionExpression from "./analyzer/arrowFunctionExpression.ts";
+import FunctionExpression from "./analyzer/functionExpression.ts";
+import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
+import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
+import AssignmentExpression from "./analyzer/assignmentExpression.ts";
+import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
   DeferredResolveTask,
   FileRunStatus,
@@ -41,7 +42,8 @@ import type {
   WorkspaceExternalImport,
   WorkspacePackageDependency,
   WorkspacePackageExport,
-} from "./types.js";
+} from "./types.ts";
+import { resolvePath } from "./utils/path.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -97,11 +99,11 @@ function getEntryCandidates(rawData: Record<string, unknown>): string[] {
   candidates.add("src/index.tsx");
   candidates.add("src/index.ts");
   candidates.add("src/index.jsx");
-  candidates.add("src/index.js");
+  candidates.add("src/index.ts");
   candidates.add("index.tsx");
   candidates.add("index.ts");
   candidates.add("index.jsx");
-  candidates.add("index.js");
+  candidates.add("index.ts");
 
   return Array.from(candidates);
 }
@@ -118,6 +120,7 @@ function toDeferredResolveTask(
         type: task.type,
         sourceName: task.tag,
         targetHint: task.parentId,
+        entityId: task.kind,
         locLine: task.loc.line,
         locColumn: task.loc.column,
         retryCount: 1000,
@@ -131,6 +134,7 @@ function toDeferredResolveTask(
         type: task.type,
         sourceName: task.name,
         targetHint: task.hook,
+        scopeId: task.parentId,
         locLine: task.loc.line,
         locColumn: task.loc.column,
         retryCount: 1000,
@@ -173,6 +177,18 @@ function toDeferredResolveTask(
         targetHint: task.id,
         retryCount: 1000,
         message: `Failed to resolve component props type ${task.id}`,
+        resolverStage: "package_local",
+      };
+    case "comClassStateTsType":
+      return {
+        filePath: task.fileName,
+        packageId,
+        type: task.type,
+        sourceName: task.id,
+        entityId: task.id,
+        targetHint: task.id,
+        retryCount: 1000,
+        message: `Failed to resolve component class state type ${task.id}`,
         resolverStage: "package_local",
       };
     case "crossPackageImport":
@@ -397,9 +413,9 @@ export class PackageMaster {
     }
   }
 
-  private runSingleThreadedAnalysis(filePath: string): ComponentFile {
-    const fileName = `/${filePath}`;
-    const code = fs.readFileSync(path.resolve(this.srcDir, filePath), "utf-8");
+  private runSingleThreadedAnalysis(fileName: string): ComponentFile {
+    this.componentDB.clearStack();
+    const code = fs.readFileSync(resolvePath(this.srcDir, fileName), "utf-8");
     const ast: File = parseCode(code);
 
     traverseFn(ast, {
@@ -437,15 +453,19 @@ export class PackageMaster {
         this.componentDB,
         fileName,
       ),
+      AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
     });
 
+    this.componentDB.clearStack();
     extractFileUsages(ast, this.componentDB, fileName);
 
-    const result = this.componentDB.getFile(fileName).getData();
-    result.package_id =
+    const file = this.componentDB.getFile(fileName);
+    file.package_id =
       this.packageJson.getPackageIdForFile(
-        path.resolve(this.srcDir, filePath),
+        resolvePath(this.srcDir, fileName),
       ) || undefined;
+
+    const result = file.getData();
     return result;
   }
 
@@ -549,19 +569,27 @@ export class PackageMaster {
         fileCache = this.sqlite.getLatestSuccessfulFileResult(fullfileName);
       }
 
-      if (!this.componentDB.addFile(fullfileName, fileCache)) {
+      if (!this.componentDB.addFile(fileNameWithSlash, fileCache)) {
         continue;
       }
 
-      filesToAnalyze.push(fullfileName);
+      filesToAnalyze.push(fileNameWithSlash);
       this.markFileStatus(fullfileName, "pending");
     }
 
     if (this.threads > 1 && filesToAnalyze.length > 0) {
-      const isTs = import.meta.url.endsWith(".ts");
-      const workerScript = fileURLToPath(
-        new URL(isTs ? "./worker.ts" : "./worker.js", import.meta.url),
+      const ext = import.meta.url.endsWith(".ts") ? ".ts" : ".ts";
+      let workerScript = fileURLToPath(
+        new URL(`./worker${ext}`, import.meta.url),
       );
+
+      const distWorker = workerScript
+        .replace("/src/", "/dist/")
+        .replace(".ts", ".js");
+      if (fs.existsSync(distWorker)) {
+        workerScript = distWorker;
+      }
+
       const pool = new WorkerPool(this.threads, workerScript);
 
       await Promise.all(
@@ -579,6 +607,7 @@ export class PackageMaster {
             if (message.type === "file_success") {
               const result = message.result;
               this.componentDB.addFile(filePath, result);
+              this.componentDB.addResolveTasks(message.resolveTasks);
               this.markFileStatus(filePath, "parsed", {
                 fileHash: result.hash,
                 fingerprint: result.fingerPrint,
@@ -698,11 +727,10 @@ export class PackageMaster {
       }
 
       for (const fullfileName of succeededFiles) {
-        const fileName = `/${fullfileName}`;
-        const result = this.componentDB.getFile(fileName).getData();
+        const result = this.componentDB.getFile(fullfileName).getData();
         result.package_id =
           this.packageJson.getPackageIdForFile(
-            path.resolve(this.srcDir, fullfileName),
+            resolvePath(this.srcDir, fullfileName),
           ) || undefined;
         this.sqlite.saveFileResults({
           ...result,

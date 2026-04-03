@@ -7,9 +7,9 @@ import type {
   UsageRelationKind,
   VariableLoc,
 } from "@nexiq/shared";
-import type { ComponentDB } from "../db/componentDB.js";
-import type { Variable } from "../db/variable/variable.js";
-import { getDeterministicId } from "../utils/hash.js";
+import type { ComponentDB } from "../db/componentDB.ts";
+import type { Variable } from "../db/variable/variable.ts";
+import { getDeterministicId } from "../utils/hash.ts";
 import {
   isClassVariable,
   isComponentVariable,
@@ -17,8 +17,8 @@ import {
   isReactFunctionVariable,
   isStateVariable,
   isJSXVariable,
-} from "../db/variable/type.js";
-import { traverseFn } from "../utils/babel.js";
+} from "../db/variable/type.ts";
+import { traverseFn } from "../utils/babel.ts";
 
 function getStartLoc(node: t.Node): VariableLoc | null {
   if (!node.loc?.start) return null;
@@ -30,7 +30,7 @@ function getStartLoc(node: t.Node): VariableLoc | null {
 
 function getOwnerVariable(
   path: traverse.NodePath,
-  fileDb: import("../db/fileDB.js").File,
+  fileDb: import("../db/fileDB.ts").File,
 ): Variable | undefined {
   const jsxPath = path.findParent(
     (candidate) => candidate.isJSXElement() || candidate.isJSXFragment(),
@@ -140,7 +140,7 @@ function findReactStateTarget(owner: Variable | undefined, name: string) {
 
 function findClassMemberTarget(
   path: traverse.NodePath,
-  fileDb: import("../db/fileDB.js").File,
+  fileDb: import("../db/fileDB.ts").File,
   propertyName: string,
 ) {
   const classPath = path.findParent(
@@ -171,6 +171,14 @@ function findClassMemberTarget(
     return { id: targetId, hiddenIntermediate: undefined };
   }
 
+  if (propertyName === "props") {
+    return { id: classVar.id, hiddenIntermediate: undefined };
+  }
+
+  if (propertyName === "state") {
+    return { id: classVar.id, hiddenIntermediate: undefined };
+  }
+
   if (propertyName === "setState") {
     const stateId = classVar.var.getIdByName("state");
     if (stateId) {
@@ -179,17 +187,35 @@ function findClassMemberTarget(
         hiddenIntermediate: "state-setter",
       };
     }
+    // Fallback if no state property is explicitly defined
+    return {
+      id: classVar.id,
+      hiddenIntermediate: "state-setter",
+    };
   }
 
   return null;
 }
 
 function resolveIdentifierTarget(
-  fileDb: import("../db/fileDB.js").File,
+  fileDb: import("../db/fileDB.ts").File,
   owner: Variable | undefined,
   name: string,
   loc: VariableLoc,
 ) {
+  if (owner) {
+    // If it's props or state in a class method or constructor
+    if (name === "props" || name === "state") {
+      let current: Variable | undefined = owner;
+      while (current) {
+        if (isComponentVariable(current)) {
+          return { id: current.id, hiddenIntermediate: undefined };
+        }
+        current = current.parent;
+      }
+    }
+  }
+
   const reactState = findReactStateTarget(owner, name);
   if (reactState) {
     return reactState;
@@ -203,7 +229,7 @@ function resolveIdentifierTarget(
 function resolveMemberTarget(
   member: t.MemberExpression | t.OptionalMemberExpression,
   path: traverse.NodePath,
-  fileDb: import("../db/fileDB.js").File,
+  fileDb: import("../db/fileDB.ts").File,
 ) {
   const accessPath: string[] = [];
   let current: t.Expression = member;
@@ -465,6 +491,110 @@ export function extractFileUsages(
       ) {
         const target = resolveMemberTarget(callee, path, fileDb);
         if (!target || target.id === owner.id) return;
+
+        // Special handling for setState functional update parameters
+        if (target.hiddenIntermediate === "state-setter") {
+          const firstArg = path.get("arguments")[0];
+          if (
+            firstArg &&
+            (firstArg.isArrowFunctionExpression() ||
+              firstArg.isFunctionExpression())
+          ) {
+            const params = (firstArg as any).get("params");
+            // First parameter is 'state'
+            if (params.length >= 1 && params[0].isIdentifier()) {
+              const paramName = params[0].node.name;
+              const paramLoc = getStartLoc(params[0].node);
+              if (paramLoc) {
+                const paramVar = fileDb.getVariable(paramLoc);
+                if (paramVar) {
+                  componentDB.addVariableDependency(fileName, paramVar.id, {
+                    id: target.id,
+                    name: paramName,
+                  });
+                }
+              }
+            }
+            // Second parameter is 'props'
+            if (params.length >= 2 && params[1].isIdentifier()) {
+              const paramName = params[1].node.name;
+              const paramLoc = getStartLoc(params[1].node);
+              if (paramLoc) {
+                const paramVar = fileDb.getVariable(paramLoc);
+                if (paramVar) {
+                  // Link props parameter to the component itself (since component ID is also used for this.props)
+                  let current: Variable | undefined = owner;
+                  while (current) {
+                    if (isComponentVariable(current)) {
+                      componentDB.addVariableDependency(fileName, paramVar.id, {
+                        id: current.id,
+                        name: paramName,
+                      });
+                      break;
+                    }
+                    current = current.parent;
+                  }
+                }
+              }
+            }
+          }
+
+          // Emit usage-write for each key in the setState argument
+          if (firstArg) {
+            let stateNode: t.Node | null = firstArg.node;
+            if (
+              t.isArrowFunctionExpression(stateNode) ||
+              t.isFunctionExpression(stateNode)
+            ) {
+              if (t.isObjectExpression(stateNode.body)) {
+                stateNode = stateNode.body;
+              } else if (t.isBlockStatement(stateNode.body)) {
+                const lastStatement = stateNode.body.body.at(-1);
+                if (
+                  t.isReturnStatement(lastStatement) &&
+                  lastStatement.argument
+                ) {
+                  stateNode = lastStatement.argument;
+                }
+              }
+            }
+
+            if (t.isObjectExpression(stateNode)) {
+              for (const prop of stateNode.properties) {
+                if (
+                  t.isObjectProperty(prop) &&
+                  !prop.computed &&
+                  t.isIdentifier(prop.key)
+                ) {
+                  const stateName = prop.key.name;
+                  // Resolve stateName to individual state variable
+                  let current: Variable | undefined = owner;
+                  while (current) {
+                    if (isComponentVariable(current)) {
+                      const stateId = current.var.getIdByName(stateName);
+                      if (stateId) {
+                        emitRelation(
+                          "usage-write",
+                          owner.id,
+                          stateId,
+                          getStartLoc(prop.key)!,
+                          owner,
+                          {
+                            displayLabel: stateName,
+                            hiddenIntermediate: "state-setter",
+                          },
+                        );
+                      }
+                      break;
+                    }
+                    current = current.parent;
+                  }
+                }
+              }
+            }
+          }
+        }
+
         emitRelation("usage-call", owner.id, target.id, loc, owner, {
           accessPath: target.accessPath,
           isOptional: target.isOptional,

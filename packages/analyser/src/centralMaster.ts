@@ -12,11 +12,11 @@ import type {
   TypeDataDeclare,
   WorkspacePackageRow,
 } from "@nexiq/shared";
-import { discoverWorkspacePackages } from "@nexiq/shared/workspace";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
-import { SqliteDB } from "./db/sqlite.js";
-import { PackageMaster } from "./packageMaster.js";
+import { discoverWorkspacePackages } from "@nexiq/shared";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
+import { SqliteDB } from "./db/sqlite.ts";
+import { PackageMaster } from "./packageMaster.ts";
 import type {
   AnalyzeProjectOptions,
   PackageAnalysisSummary,
@@ -24,8 +24,9 @@ import type {
   WorkspaceAnalysisHandoff,
   WorkspaceExternalImport,
   WorkspacePackageExport,
-} from "./types.js";
-import { WorkspaceSqliteDB } from "./workspaceSqlite.js";
+} from "./types.ts";
+import { WorkspaceSqliteDB } from "./workspaceSqlite.ts";
+import { resolvePath } from "./utils/path.ts";
 
 function getWorkspaceRunId(rootDir: string) {
   return `workspace:${rootDir.replace(/[^a-zA-Z0-9_-]/g, "_")}:${Date.now()}`;
@@ -443,6 +444,7 @@ function edgeKey(edge: DataEdge) {
 
 function collectCrossPackageUsageEdges(
   file: ComponentFile,
+  canonicalFilePath: string,
   resolvedImportTargets: Map<string, string>,
 ): DataEdge[] {
   const edges: DataEdge[] = [];
@@ -460,7 +462,7 @@ function collectCrossPackageUsageEdges(
     if (!name) {
       return undefined;
     }
-    return resolvedImportTargets.get(`${file.path}:${name}`);
+    return resolvedImportTargets.get(`${canonicalFilePath}:${name}`);
   };
 
   const walkRenderChildren = (
@@ -472,9 +474,10 @@ function collectCrossPackageUsageEdges(
     }
 
     for (const child of Object.values(children)) {
-      const targetExportId =
-        (child.isDependency ? getResolvedImportId(child.id) : undefined) ||
-        (child.isDependency ? getResolvedImportId(child.tag) : undefined);
+      const targetExportId = child.isDependency
+        ? getResolvedImportId(child.tag)
+        : undefined;
+
       if (targetExportId) {
         pushEdge({
           from: targetExportId,
@@ -483,6 +486,32 @@ function collectCrossPackageUsageEdges(
         });
       }
       walkRenderChildren(child.children, ownerId);
+    }
+  };
+
+  //TODO: test and replace
+  const walkRenderChildren2 = (
+    child: ComponentInfoRender | null,
+    ownerId: string,
+  ) => {
+    if (!child) {
+      return;
+    }
+
+    const targetExportId = child.isDependency
+      ? getResolvedImportId(child.tag)
+      : undefined;
+
+    if (targetExportId) {
+      pushEdge({
+        from: targetExportId,
+        to: ownerId,
+        label: "render",
+      });
+    }
+
+    for (const grandChild of Object.values(child.children)) {
+      walkRenderChildren2(grandChild, ownerId);
     }
   };
 
@@ -512,9 +541,8 @@ function collectCrossPackageUsageEdges(
     ) {
       const returnValue = variable.return;
       if (returnValue.type === "jsx" && currentOwnerId) {
-        const targetExportId = getResolvedImportId(
-          returnValue.srcId || returnValue.tag,
-        );
+        const targetExportId = getResolvedImportId(returnValue.srcId);
+
         if (targetExportId) {
           pushEdge({
             from: targetExportId,
@@ -522,7 +550,7 @@ function collectCrossPackageUsageEdges(
             label: "render",
           });
         }
-        walkRenderChildren(returnValue.children, currentOwnerId);
+        walkRenderChildren2(returnValue.render, currentOwnerId);
       }
     }
 
@@ -550,8 +578,15 @@ function collectCrossPackageUsageEdges(
       }
     }
 
-    if ("children" in variable && variable.children && currentOwnerId) {
-      walkRenderChildren(variable.children, currentOwnerId);
+    if (currentOwnerId) {
+      if ("render" in variable && variable.render) {
+        walkRenderChildren(
+          { [variable.render.instanceId]: variable.render },
+          currentOwnerId,
+        );
+      } else if ("children" in variable && variable.children) {
+        walkRenderChildren(variable.children, currentOwnerId);
+      }
     }
 
     if ("var" in variable && variable.var) {
@@ -953,7 +988,7 @@ export class CentralMaster {
   }
 
   public async analyzeWorkspace(): Promise<JsonData> {
-    const rootDir = path.resolve(this.srcDir).replace(/[/\\]$/, "");
+    const rootDir = resolvePath(this.srcDir).replace(/[/\\]$/, "");
     const discoveredPackages = (await discoverWorkspacePackages(rootDir)).sort(
       (a, b) => (a.path || "").localeCompare(b.path || ""),
     );
@@ -965,9 +1000,9 @@ export class CentralMaster {
       }
       try {
         // Use realpath if possible to resolve symlinks
-        return fs.realpathSync(path.resolve(rootDir, p)).replace(/[/\\]$/, "");
+        return fs.realpathSync(resolvePath(rootDir, p)).replace(/[/\\]$/, "");
       } catch {
-        return path.resolve(rootDir, p).replace(/[/\\]$/, "");
+        return resolvePath(rootDir, p).replace(/[/\\]$/, "");
       }
     };
 
@@ -1398,15 +1433,31 @@ export class CentralMaster {
           },
         });
       }
-      for (const file of Object.values(merged.files)) {
-        for (const edge of collectCrossPackageUsageEdges(
-          file,
-          canonicalImportResolutions,
-        )) {
-          const key = edgeKey(edge);
-          if (!existingEdgeKeys.has(key)) {
-            existingEdgeKeys.add(key);
-            merged.edges.push(edge);
+      for (const summary of summaries) {
+        const pkg = packageByName.get(summary.packageName);
+        if (!pkg || !pkg.remapContext) {
+          continue;
+        }
+
+        for (const file of Object.values(summary.graph.files)) {
+          const canonicalFilePath =
+            pkg.remapContext.canonicalPathByFile.get(file.path) || file.path;
+          for (const edge of collectCrossPackageUsageEdges(
+            file,
+            canonicalFilePath,
+            canonicalImportResolutions,
+          )) {
+            const canonicalEdge = {
+              ...edge,
+              from: pkg.remapContext.globalIdMap.get(edge.from) || edge.from,
+              to: pkg.remapContext.globalIdMap.get(edge.to) || edge.to,
+            };
+
+            const key = edgeKey(canonicalEdge);
+            if (!existingEdgeKeys.has(key)) {
+              existingEdgeKeys.add(key);
+              merged.edges.push(canonicalEdge);
+            }
           }
         }
       }

@@ -43,9 +43,10 @@
       "@nexiq/shared/*": ["../shared/src/*"]
     },
     // "emitDeclarationOnly": true,
-    // "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
     "experimentalDecorators": true,
     // "emitDecoratorMetadata": true,
+    "noEmit": true
   },
   "include": [
     "src",

@@ -3,6 +3,7 @@
     "/index.tsx": {
       "path": "/index.tsx",
       "hash": "39e788c752873edb",
+      "package_id": "sample-destructuring-dependency@0.0.0",
       "import": {
         "React": {
           "localName": "React",
@@ -45,7 +46,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "abffa871ce7fedd2",
+          "hash": "b8d5145c5ef4d327",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -99,8 +100,8 @@
               }
             }
           },
-          "children": {},
           "states": [],
+          "refs": [],
           "props": [
             {
               "id": "b3b83d0e8e708509:prop:fn",
@@ -128,7 +129,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "bbace640429737f9",
+          "hash": "f4871ed4c882b7b5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -200,8 +201,7 @@
                   "state",
                   "thread"
                 ]
-              },
-              "children": {}
+              }
             },
             "1981986fd63b9d23": {
               "id": "1981986fd63b9d23",
@@ -315,7 +315,6 @@
                 }
               },
               "async": false,
-              "children": {},
               "reactDeps": [
                 {
                   "id": "1981986fd63b9d23:841e96e73f3a4bc0",
@@ -341,7 +340,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "4a714924b2a2fd3b",
+              "hash": "4983ac47944d5031",
               "dependencies": {
                 "9ac06b202649e60f": {
                   "id": "9ac06b202649e60f",
@@ -352,20 +351,31 @@
                 "line": 28,
                 "column": 9
               },
-              "tag": "div",
-              "props": [
-                {
-                  "id": "e67a7184a83a3fcb",
-                  "name": "onClick",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "handleFollowing"
-                  },
-                  "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
-                }
-              ],
-              "children": {},
+              "render": {
+                "id": "div",
+                "instanceId": "7709f763261dd73a",
+                "tag": "div",
+                "dependencies": [
+                  {
+                    "id": "e67a7184a83a3fcb",
+                    "name": "onClick",
+                    "value": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "handleFollowing"
+                    },
+                    "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
+                  }
+                ],
+                "isDependency": false,
+                "loc": {
+                  "line": 28,
+                  "column": 9
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
               "srcId": "div"
             }
           },
@@ -380,75 +390,9 @@
             }
           },
           "async": false,
-          "return": {
-            "id": "7cd77b33010ba84d",
-            "name": {
-              "type": "identifier",
-              "name": "jsx@28:9",
-              "loc": {
-                "line": 28,
-                "column": 9
-              },
-              "id": "2ed5eb0122c9967b"
-            },
-            "kind": "normal",
-            "type": "jsx",
-            "file": "/index.tsx",
-            "hash": "4a714924b2a2fd3b",
-            "dependencies": {
-              "9ac06b202649e60f": {
-                "id": "9ac06b202649e60f",
-                "name": "handleFollowing"
-              }
-            },
-            "loc": {
-              "line": 28,
-              "column": 9
-            },
-            "tag": "div",
-            "props": [
-              {
-                "id": "e67a7184a83a3fcb",
-                "name": "onClick",
-                "value": {
-                  "type": "ref",
-                  "refType": "named",
-                  "name": "handleFollowing"
-                },
-                "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
-              }
-            ],
-            "children": {},
-            "srcId": "div"
-          },
-          "children": {
-            "7709f763261dd73a": {
-              "id": "div",
-              "instanceId": "7709f763261dd73a",
-              "tag": "div",
-              "dependencies": [
-                {
-                  "id": "e67a7184a83a3fcb",
-                  "name": "onClick",
-                  "value": {
-                    "type": "ref",
-                    "refType": "named",
-                    "name": "handleFollowing"
-                  },
-                  "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
-                }
-              ],
-              "isDependency": false,
-              "loc": {
-                "line": 28,
-                "column": 9
-              },
-              "renderIndex": 0,
-              "kind": "jsx",
-              "children": {}
-            }
-          },
+          "return": "7cd77b33010ba84d",
           "states": [],
+          "refs": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -472,6 +416,27 @@
             "ownerId": "ba1bf171ca67c6dd",
             "ownerKind": "component",
             "displayLabel": "useSelector"
+          }
+        },
+        {
+          "from_id": "ba1bf171ca67c6dd",
+          "to_id": "33fd1016c5f45012",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 45,
+          "data_json": {
+            "usageId": "d79c26b4aa22981c",
+            "filePath": "/index.tsx",
+            "line": 15,
+            "column": 45,
+            "ownerId": "33fd1016c5f45012",
+            "ownerKind": "normal",
+            "accessPath": [
+              "thread"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "state.thread"
           }
         },
         {

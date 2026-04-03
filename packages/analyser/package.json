@@ -23,7 +23,7 @@
     "build": "tsup",
     "dev": "tsup --watch --onSuccess \"node dist/analyzer.js ./sample-project ./out/graph.json\"",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
-    "snapshot": "tsx src/snapshot.ts",
+    "snapshot": "pnpm build && echo 'Build complete' && tsx src/snapshot.ts",
     "test": "vitest run",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"

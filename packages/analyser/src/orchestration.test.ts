@@ -3,8 +3,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import Database from "better-sqlite3";
-import { analyzeProject } from "./index.js";
-import { SqliteDB } from "./db/sqlite.js";
+import { analyzeProject } from "./index.ts";
+import { SqliteDB } from "./db/sqlite.ts";
 
 function createTempDir(prefix: string) {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -61,13 +61,19 @@ describe("analyser orchestration", () => {
     fs.mkdirSync(path.join(projectDir, "src"), { recursive: true });
     const appPath = path.join(projectDir, "src", "App.tsx");
 
-    fs.writeFileSync(appPath, "export default function App(){ return <div>ok</div>; }");
+    fs.writeFileSync(
+      appPath,
+      "export default function App(){ return <div>ok</div>; }",
+    );
     await analyzeProject(projectDir, {
       sqlitePath,
       fileWorkerThreads: 1,
     });
 
-    fs.writeFileSync(appPath, "export default function App(){ return <div>{</div>; }");
+    fs.writeFileSync(
+      appPath,
+      "export default function App(){ return <div>{</div>; }",
+    );
     await analyzeProject(projectDir, {
       sqlitePath,
       fileWorkerThreads: 1,
@@ -148,15 +154,17 @@ describe("analyser orchestration", () => {
     const packageRelations = centralDb
       .prepare("SELECT * FROM package_relations")
       .all() as {
-        from_package_id: string;
-        to_package_id: string;
-        source_file_path: string;
-        target_file_path: string;
-      }[];
+      from_package_id: string;
+      to_package_id: string;
+      source_file_path: string;
+      target_file_path: string;
+    }[];
     centralDb.close();
 
     expect(workspacePackages).toHaveLength(2);
-    expect(packageExports.some((row) => row.export_name === "Shared")).toBe(true);
+    expect(packageExports.some((row) => row.export_name === "Shared")).toBe(
+      true,
+    );
     expect(
       deferredImports.some((row) => row.source_module === "@workspace/pkg-b"),
     ).toBe(true);
@@ -385,8 +393,10 @@ describe("analyser orchestration", () => {
       "/packages/pkg-c/src/index.tsx",
     );
 
-    const exportB = graph.files["/packages/pkg-b/src/index.tsx"]?.export.SharedB?.id;
-    const exportC = graph.files["/packages/pkg-c/src/index.tsx"]?.export.SharedC?.id;
+    const exportB =
+      graph.files["/packages/pkg-b/src/index.tsx"]?.export.SharedB?.id;
+    const exportC =
+      graph.files["/packages/pkg-c/src/index.tsx"]?.export.SharedC?.id;
     expect(exportB).toBeDefined();
     expect(exportC).toBeDefined();
     expect(exportB).not.toBe(exportC);
@@ -453,10 +463,7 @@ describe("analyser orchestration", () => {
       packageConcurrency: 1,
     });
 
-    fs.writeFileSync(
-      appPath,
-      "export const App = () => <div>local</div>;",
-    );
+    fs.writeFileSync(appPath, "export const App = () => <div>local</div>;");
 
     await analyzeProject(rootDir, {
       monorepo: true,
@@ -617,7 +624,11 @@ describe("analyser orchestration", () => {
 
     expect(sharedPropsExportId).toBeDefined();
     expect(appComponent).toBeDefined();
-    expect(appComponent && "propType" in appComponent ? appComponent.propType : undefined).toMatchObject({
+    expect(
+      appComponent && "propType" in appComponent
+        ? appComponent.propType
+        : undefined,
+    ).toMatchObject({
       type: "ref",
       refType: "named",
       name: sharedPropsExportId,
@@ -858,7 +869,9 @@ describe("analyser orchestration", () => {
           task.localName === "MissingType",
       ),
     ).toBe(true);
-    expect(errors.some((error) => error.source_name === "MissingType")).toBe(true);
+    expect(errors.some((error) => error.source_name === "MissingType")).toBe(
+      true,
+    );
 
     const packageDbDir = path.join(rootDir, ".nexiq", "packages");
     const packageDbPath = fs
@@ -1057,7 +1070,9 @@ describe("analyser orchestration", () => {
         value.name.name === "App",
     );
     expect(
-      appComponent && "propType" in appComponent ? appComponent.propType : undefined,
+      appComponent && "propType" in appComponent
+        ? appComponent.propType
+        : undefined,
     ).toMatchObject({
       type: "ref",
       refType: "named",
@@ -1078,7 +1093,9 @@ describe("analyser orchestration", () => {
           task.localName === "MissingType",
       ),
     ).toBe(true);
-    expect(errors.some((error) => error.source_name === "MissingType")).toBe(true);
+    expect(errors.some((error) => error.source_name === "MissingType")).toBe(
+      true,
+    );
     expect(JSON.stringify(appComponent)).not.toContain("/packages/pkg-b/");
 
     const packageDbDir = path.join(rootDir, ".nexiq", "packages");
@@ -1245,11 +1262,15 @@ describe("analyser orchestration", () => {
             task.localName === "useShared",
         ),
       ).toBe(true);
-      expect(errors.some((error) => error.source_name === "useShared")).toBe(true);
+      expect(errors.some((error) => error.source_name === "useShared")).toBe(
+        true,
+      );
 
       const packageDb = new Database(packageDbPath!, { readonly: true });
       const resolveErrors = packageDb
-        .prepare("SELECT * FROM resolve_errors WHERE relation_kind = 'comResolveCallHook'")
+        .prepare(
+          "SELECT * FROM resolve_errors WHERE relation_kind = 'comResolveCallHook'",
+        )
         .all() as unknown[];
       packageDb.close();
       expect(resolveErrors).toHaveLength(0);
@@ -1261,5 +1282,4 @@ describe("analyser orchestration", () => {
       warnSpy.mockRestore();
     }
   });
-
 });

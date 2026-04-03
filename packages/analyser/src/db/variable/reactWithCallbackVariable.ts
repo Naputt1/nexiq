@@ -4,9 +4,8 @@ import type {
   ReactWithCallbackVar,
   VarType,
 } from "@nexiq/shared";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
-import type { File } from "../fileDB.js";
-import { Variable } from "./variable.js";
+import { BaseFunctionVariable } from "./baseFunctionVariable.ts";
+import type { File } from "../fileDB.ts";
 
 export abstract class ReactWithCallbackVariable<
   TKind extends ReactWithCallbackVar = ReactWithCallbackVar,
@@ -26,12 +25,10 @@ export abstract class ReactWithCallbackVariable<
     this.reactDeps = options.reactDeps;
   }
 
-  public load(data: Variable<TType, TKind>) {
+  public load(data: ReactWithCallbackVariable<TKind, TType>) {
     super.load(data);
 
-    if (data instanceof ReactWithCallbackVariable) {
-      this.reactDeps = data.reactDeps;
-    }
+    this.reactDeps = data.reactDeps ? [...data.reactDeps] : this.reactDeps;
   }
 
   protected getBaseData(): ComponentFileVarReactWithCallback<TKind, TType> {

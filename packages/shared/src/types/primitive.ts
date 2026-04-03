@@ -219,6 +219,7 @@ export interface TypeDataLiteralBodyProperty extends TypeDataLiteralBodyBase {
   optional?: boolean;
   computed?: boolean;
   name: string;
+  loc?: { line: number; column: number };
 }
 
 export interface TypeDataLiteralBodyMethod extends TypeDataLiteralBodyBase {
@@ -229,6 +230,7 @@ export interface TypeDataLiteralBodyMethod extends TypeDataLiteralBodyBase {
   params: TypeDataParamFunction[];
   parameters: TypeDataFunctionParameter[];
   return: TypeData;
+  loc?: { line: number; column: number };
 }
 
 export type TypeDataLiteralBody =

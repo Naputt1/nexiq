@@ -1,8 +1,8 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
-import { isJSXVariable } from "../db/variable/type.js";
-import { getExpressionData } from "./type/helper.js";
+import type { ComponentDB } from "../db/componentDB.ts";
+import { isJSXVariable } from "../db/variable/type.ts";
+import { getExpressionData } from "./type/helper.ts";
 
 export default function ReturnStatement(
   componentDB: ComponentDB,

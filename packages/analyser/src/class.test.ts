@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
 
 describe("analyser class handling", () => {
   it("should correctly scope variables inside class methods", async () => {
     const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
-    
+
     // Create a temporary file with a class
     const fileName = "ClassScopeTest.tsx";
     const code = `
@@ -19,10 +19,10 @@ describe("analyser class handling", () => {
         }
       }
     `;
-    
+
     const filePath = path.resolve(projectPath, fileName);
     fs.writeFileSync(filePath, code);
-    
+
     try {
       const packageJson = new PackageJson(projectPath);
       const viteConfigPath = getViteConfig(projectPath);
@@ -39,32 +39,39 @@ describe("analyser class handling", () => {
       expect(file).toBeDefined();
 
       // Check for MyClass
-      const myClass = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'MyClass');
+      const myClass = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "MyClass",
+      );
       expect(myClass).toBeDefined();
-      expect(myClass?.kind).toBe('class');
-      expect(myClass?.type).toBe('data');
+      expect(myClass?.kind).toBe("class");
+      expect(myClass?.type).toBe("data");
 
       // Check for 'x'
-      const topLevelX = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'x');
-      
+      const topLevelX = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "x",
+      );
+
       // 'x' should NOT be at the top level
       expect(topLevelX).toBeUndefined();
 
       // Check for myMethod
       const myClassVar = (myClass as any).var;
       expect(myClassVar).toBeDefined();
-      
-      const myMethod = Object.values(myClassVar).find((v: any) => v.name.type === 'identifier' && v.name.name === 'myMethod');
+
+      const myMethod = Object.values(myClassVar).find(
+        (v: any) => v.name.type === "identifier" && v.name.name === "myMethod",
+      );
       expect(myMethod).toBeDefined();
-      expect((myMethod as any).type).toBe('function');
+      expect((myMethod as any).type).toBe("function");
 
       // 'x' should be inside myMethod's var
       const myMethodVar = (myMethod as any).var;
       expect(myMethodVar).toBeDefined();
-      
-      const methodX = Object.values(myMethodVar).find((v: any) => v.name.type === 'identifier' && v.name.name === 'x');
+
+      const methodX = Object.values(myMethodVar).find(
+        (v: any) => v.name.type === "identifier" && v.name.name === "x",
+      );
       expect(methodX).toBeDefined();
-      
     } finally {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
@@ -74,7 +81,7 @@ describe("analyser class handling", () => {
 
   it("should capture inheritance and members", async () => {
     const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
-    
+
     const fileName = "ClassMembersTest.tsx";
     const code = `
       class Base {}
@@ -89,10 +96,10 @@ describe("analyser class handling", () => {
         }
       }
     `;
-    
+
     const filePath = path.resolve(projectPath, fileName);
     fs.writeFileSync(filePath, code);
-    
+
     try {
       const packageJson = new PackageJson(projectPath);
       const viteConfigPath = getViteConfig(projectPath);
@@ -106,30 +113,39 @@ describe("analyser class handling", () => {
       );
 
       const file = graph.files["/ClassMembersTest.tsx"];
-      const myClass: any = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'MyClass');
-      
+      const myClass: any = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "MyClass",
+      );
+
       expect(myClass).toBeDefined();
       expect(myClass.superClass).toBeDefined();
-      expect(myClass.superClass.name).toBe('Base');
-      
-      const myClassVar = myClass.var;
-      
-      const myProp = Object.values(myClassVar).find((v: any) => v.name.name === 'myProp');
-      expect(myProp).toBeDefined();
-      expect((myProp as any).memberKind).toBe('property');
+      expect(myClass.superClass.name).toBe("Base");
 
-      const staticProp = Object.values(myClassVar).find((v: any) => v.name.name === 'staticProp');
+      const myClassVar = myClass.var;
+
+      const myProp = Object.values(myClassVar).find(
+        (v: any) => v.name.name === "myProp",
+      );
+      expect(myProp).toBeDefined();
+      expect((myProp as any).memberKind).toBe("property");
+
+      const staticProp = Object.values(myClassVar).find(
+        (v: any) => v.name.name === "staticProp",
+      );
       expect(staticProp).toBeDefined();
       expect((staticProp as any).isStatic).toBe(true);
 
-      const constructor = Object.values(myClassVar).find((v: any) => v.name.name === 'constructor');
+      const constructor = Object.values(myClassVar).find(
+        (v: any) => v.name.name === "constructor",
+      );
       expect(constructor).toBeDefined();
-      expect((constructor as any).memberKind).toBe('constructor');
+      expect((constructor as any).memberKind).toBe("constructor");
 
-      const myMethod = Object.values(myClassVar).find((v: any) => v.name.name === 'myMethod');
+      const myMethod = Object.values(myClassVar).find(
+        (v: any) => v.name.name === "myMethod",
+      );
       expect(myMethod).toBeDefined();
-      expect((myMethod as any).memberKind).toBe('method');
-      
+      expect((myMethod as any).memberKind).toBe("method");
     } finally {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);

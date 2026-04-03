@@ -1,5 +1,7 @@
 import type {
   AnalysisRunRow,
+  ComponentDBResolve,
+  ComponentFile,
   ComponentFileExport,
   ComponentFileImport,
   CrossPackageResolveErrorRow,
@@ -129,7 +131,8 @@ export interface AnalyzeProjectOptions {
 export interface FileTaskSuccessMessage {
   type: "file_success";
   filePath: string;
-  result: import("@nexiq/shared").ComponentFile;
+  result: ComponentFile;
+  resolveTasks: ComponentDBResolve[];
 }
 
 export interface FileTaskErrorMessage {

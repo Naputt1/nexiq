@@ -1,9 +1,9 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import assert from "assert";
-import type { ComponentDB } from "../../db/componentDB.js";
-import { getType } from "./helper.js";
-import { getPattern } from "../pattern.js";
+import type { ComponentDB } from "../../db/componentDB.ts";
+import { getType } from "./helper.ts";
+import { getPattern } from "../pattern.ts";
 
 export default function TSTypeAliasDeclaration(
   componentDB: ComponentDB,

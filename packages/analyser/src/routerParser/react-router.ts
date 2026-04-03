@@ -1,4 +1,4 @@
-import { RouterParser } from "./index.js";
+import { RouterParser } from "./index.ts";
 
 export class ReactRouterParser extends RouterParser {
   public based: "code" | "file" | "declare" | null = null;
