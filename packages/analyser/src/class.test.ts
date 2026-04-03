@@ -54,8 +54,8 @@ describe("analyser class handling", () => {
       // 'x' should NOT be at the top level
       expect(topLevelX).toBeUndefined();
 
-      if (myClass?.kind !== "component")
-        throw new Error("MyClass should be a component");
+      if (myClass?.kind !== "class")
+        throw new Error("MyClass should be a class");
 
       // Check for myMethod
       const myClassVar = myClass?.var;
