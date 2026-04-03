@@ -52,7 +52,6 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
   protected getDataInternal() {
     return {
       render: this.render,
-      children: this.children,
       srcId: this.srcId,
     };
   }

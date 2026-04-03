@@ -180,7 +180,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "a5084bba74f206c8",
+          "hash": "a84867d0b23a5d9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -202,7 +202,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "e9c154a9af003982",
+              "hash": "36225f6de92dfee6",
               "dependencies": {},
               "loc": {
                 "line": 13,
