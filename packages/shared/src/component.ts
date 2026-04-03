@@ -1,5 +1,5 @@
-import type { TypeDataDeclare, UIItemState } from "./types/index.js";
-import type { PropDataType, TypeData } from "./types/primitive.js";
+import type { TypeDataDeclare, UIItemState } from "./types/index.ts";
+import type { PropDataType, TypeData } from "./types/primitive.ts";
 
 export type ComponentFileImport = {
   localName: string;

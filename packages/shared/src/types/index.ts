@@ -1,10 +1,10 @@
-import type { ComponentLoc, VariableName } from "../component.js";
-import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
-import type { NexiqConfig, SubProject } from "./config.js";
-export * from "./primitive.js";
-export * from "./object.js";
-export * from "./git.js";
-export * from "./config.js";
+import type { ComponentLoc, VariableName } from "../component.ts";
+import type { TypeData, TypeDataLiteralBody } from "./primitive.ts";
+import type { NexiqConfig, SubProject } from "./config.ts";
+export * from "./primitive.ts";
+export * from "./object.ts";
+export * from "./git.ts";
+export * from "./config.ts";
 
 export interface ProjectStatus {
   hasConfig: boolean;
@@ -97,4 +97,4 @@ export interface UIItemState {
 
 export type UIStateMap = Record<string, UIItemState>;
 
-export * from "./backend.js";
+export * from "./backend.ts";

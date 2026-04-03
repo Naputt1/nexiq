@@ -18,6 +18,7 @@ import type { CallHookVariable } from "./callHookVariable.ts";
 import type { JSXVariable } from "./jsx.ts";
 import { CallbackVariable } from "./callbackVariable.ts";
 import { ClassVariable } from "./classVariable.ts";
+import { Scope } from "./scope.ts";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
   return v.kind === "component";
@@ -97,4 +98,8 @@ export function isCallbackVariable(v: Variable): v is CallbackVariable {
 
 export function isRefVariable(v: Variable): v is RefVariable {
   return v.type === "data" && v.kind === "ref";
+}
+
+export function isScope(v: Variable | Scope): v is Scope {
+  return (v as Scope).type === "scope";
 }

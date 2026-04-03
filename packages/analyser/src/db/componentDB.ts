@@ -10,7 +10,6 @@ import type {
   VariableLoc,
   ComponentInfoRender,
   ComponentFileVarHook,
-  ComponentFileVarJSX,
   EffectInfo,
   TypeDataDeclareInterface,
   TypeDataDeclareType,
@@ -32,6 +31,7 @@ import type {
   TypeData,
   PropData,
   PropDataType,
+  ComponentFileVarJSX,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.ts";
 import type { PackageJson } from "./packageJson.ts";
@@ -201,6 +201,11 @@ export class ComponentDB {
     const nameKey = getVariableNameKey(component.name);
     const id = getDeterministicId(file.path, nameKey);
 
+    assert(
+      component.name.type === "identifier",
+      "Class name should be an identifier",
+    );
+
     const existingId = file.getVariableID(component.name.name);
     if (existingId) {
       const existing = file.var.get(existingId);
@@ -267,7 +272,7 @@ export class ComponentDB {
     fileName: string,
     jsx: Omit<
       ComponentFileVarJSX,
-      "id" | "kind" | "type" | "hash" | "file" | "render"
+      "id" | "kind" | "type" | "hash" | "file" | "render" | "children"
     >,
     declarationKind?:
       | "const"

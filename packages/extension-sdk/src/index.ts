@@ -669,5 +669,5 @@ export interface Extension {
   mcpTools?: MCPTool[];
 }
 
-export * from "./tasks/componentTask.js";
-export * from "./tasks/gitTask.js";
+export * from "./tasks/componentTask.ts";
+export * from "./tasks/gitTask.ts";

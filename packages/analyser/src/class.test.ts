@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.ts";
-import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { getViteConfig } from "./analyzer/utils.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
@@ -54,22 +54,28 @@ describe("analyser class handling", () => {
       // 'x' should NOT be at the top level
       expect(topLevelX).toBeUndefined();
 
+      if (myClass?.kind !== "component")
+        throw new Error("MyClass should be a component");
+
       // Check for myMethod
-      const myClassVar = (myClass as any).var;
+      const myClassVar = myClass?.var;
       expect(myClassVar).toBeDefined();
 
       const myMethod = Object.values(myClassVar).find(
-        (v: any) => v.name.type === "identifier" && v.name.name === "myMethod",
+        (v) => v.name.type === "identifier" && v.name.name === "myMethod",
       );
       expect(myMethod).toBeDefined();
-      expect((myMethod as any).type).toBe("function");
+      expect(myMethod?.type).toBe("function");
+
+      if (myMethod?.kind !== "method")
+        throw new Error("myMethod should be a method");
 
       // 'x' should be inside myMethod's var
-      const myMethodVar = (myMethod as any).var;
+      const myMethodVar = myMethod?.var;
       expect(myMethodVar).toBeDefined();
 
       const methodX = Object.values(myMethodVar).find(
-        (v: any) => v.name.type === "identifier" && v.name.name === "x",
+        (v) => v.name.type === "identifier" && v.name.name === "x",
       );
       expect(methodX).toBeDefined();
     } finally {
@@ -113,39 +119,42 @@ describe("analyser class handling", () => {
       );
 
       const file = graph.files["/ClassMembersTest.tsx"];
-      const myClass: any = Object.values(file!.var).find(
+      const myClass = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "MyClass",
       );
 
+      if (myClass?.kind !== "class")
+        throw new Error("MyClass should be a class");
+
       expect(myClass).toBeDefined();
-      expect(myClass.superClass).toBeDefined();
-      expect(myClass.superClass.name).toBe("Base");
+      expect(myClass?.superClass).toBeDefined();
+      expect(myClass?.superClass?.name).toBe("Base");
 
       const myClassVar = myClass.var;
 
       const myProp = Object.values(myClassVar).find(
-        (v: any) => v.name.name === "myProp",
+        (v) => v.name.type === "identifier" && v.name.name === "myProp",
       );
       expect(myProp).toBeDefined();
-      expect((myProp as any).memberKind).toBe("property");
+      expect(myProp?.memberKind).toBe("property");
 
       const staticProp = Object.values(myClassVar).find(
-        (v: any) => v.name.name === "staticProp",
+        (v) => v.name.type === "identifier" && v.name.name === "staticProp",
       );
       expect(staticProp).toBeDefined();
-      expect((staticProp as any).isStatic).toBe(true);
+      expect(staticProp?.isStatic).toBe(true);
 
       const constructor = Object.values(myClassVar).find(
-        (v: any) => v.name.name === "constructor",
+        (v) => v.name.type === "identifier" && v.name.name === "constructor",
       );
       expect(constructor).toBeDefined();
-      expect((constructor as any).memberKind).toBe("constructor");
+      expect(constructor?.memberKind).toBe("constructor");
 
       const myMethod = Object.values(myClassVar).find(
-        (v: any) => v.name.name === "myMethod",
+        (v) => v.name.type === "identifier" && v.name.name === "myMethod",
       );
       expect(myMethod).toBeDefined();
-      expect((myMethod as any).memberKind).toBe("method");
+      expect(myMethod?.memberKind).toBe("method");
     } finally {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);

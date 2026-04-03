@@ -10,7 +10,7 @@ import type { TypeData } from "@nexiq/shared";
 import { getExpressionData } from "./type/helper.ts";
 
 export function extractStateKeys(
-  node: t.Node | null,
+  node: t.Node | null | undefined,
   scope: traverse.Scope,
   depth = 0,
 ): { name: string; type?: TypeData }[] {
@@ -22,7 +22,11 @@ export function extractStateKeys(
         const typeData = t.isExpression(p.value)
           ? (getExpressionData(p.value) as TypeData)
           : undefined;
-        keys.push({ name: p.key.name, type: typeData });
+        if (typeData) {
+          keys.push({ name: p.key.name, type: typeData });
+        } else {
+          keys.push({ name: p.key.name });
+        }
       } else if (t.isSpreadElement(p)) {
         if (t.isIdentifier(p.argument)) {
           const binding = scope.getBinding(p.argument.name);
@@ -197,7 +201,6 @@ export default function ClassDeclaration(
         contexts: [],
         dependencies: {},
         var: {},
-        children: {},
         loc,
         scope,
         async: false,

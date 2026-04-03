@@ -12,7 +12,7 @@ import {
   type GraphViewTask,
   type TaskContext,
   getTaskData,
-} from "../index.js";
+} from "../index.ts";
 
 export const componentTask: GraphViewTask = {
   id: "component-structure",
@@ -325,7 +325,9 @@ export const componentTask: GraphViewTask = {
 
         // Check if this symbol is a ref belonging to a component
         if (entity.kind === "ref") {
-          const componentScope = data.scopes.find((s) => s.id === symbol.scope_id);
+          const componentScope = data.scopes.find(
+            (s) => s.id === symbol.scope_id,
+          );
           if (componentScope) {
             const refsComboId = `${componentScope.id}:refs-group`;
             if (combos.some((c) => c.id === refsComboId)) {

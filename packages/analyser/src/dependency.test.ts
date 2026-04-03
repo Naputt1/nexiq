@@ -45,7 +45,7 @@ describe("dependency resolution", () => {
     if (!returnVar) throw new Error("JSX variable not found");
     if (returnVar.type !== "jsx") throw new Error("JSX variable not found");
 
-    const childRender = Object.values(returnVar.render?.children).find(
+    const childRender = Object.values(returnVar.render?.children ?? {}).find(
       (r) => r.tag === "Child",
     );
     expect(childRender).toBeDefined();

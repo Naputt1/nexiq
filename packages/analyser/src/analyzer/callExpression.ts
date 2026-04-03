@@ -5,6 +5,7 @@ import { extractStateKeys, getStartLoc } from "./classDeclaration.ts";
 import {
   isClassComponentVariable,
   isMethodVariable,
+  isScope,
 } from "../db/variable/type.ts";
 import { Variable } from "../db/variable/variable.ts";
 import { generateFn } from "../utils/babel.ts";
@@ -15,6 +16,7 @@ import {
 } from "@nexiq/shared/component.ts";
 import { getReactHookInfo } from "../utils.ts";
 import assert from "assert";
+import { Scope } from "../db/variable/scope.ts";
 
 export default function CallExpression(
   componentDB: ComponentDB,
@@ -153,13 +155,18 @@ export default function CallExpression(
       ) {
         const file = componentDB.getFile(fileName);
         const loc = getStartLoc(callee);
-        let component: Variable | undefined = file.var.findDeepestVariable(loc);
+        let component: Variable | Scope | undefined =
+          file.var.findDeepestVariable(loc);
         if (component && isMethodVariable(component)) {
           component = component.parent;
         }
 
-        if (component && isClassComponentVariable(component)) {
-          const keys = extractStateKeys(args[0] as any, nodePath.scope);
+        if (
+          component &&
+          !isScope(component) &&
+          isClassComponentVariable(component)
+        ) {
+          const keys = extractStateKeys(args[0], nodePath.scope);
           for (const key of keys) {
             componentDB.addStateVariable(
               fileName,

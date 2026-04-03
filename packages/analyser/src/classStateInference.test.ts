@@ -37,33 +37,39 @@ describe("analyser class state inference", () => {
 
       const myComponent = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "MyComponent",
-      ) as any;
+      );
+      if (myComponent?.kind !== "component")
+        throw new Error("MyComponent should be a component");
       expect(myComponent).toBeDefined();
-      expect(myComponent.states).toBeDefined();
+      expect(myComponent?.states).toBeDefined();
 
       // count and name should be in states
       const stateVars = Object.values(myComponent.var).filter(
-        (v) => (v as any).kind === "state",
+        (v) => v.kind === "state",
       );
       expect(
-        stateVars.find((v) => (v.name as any).name === "count"),
+        stateVars.find(
+          (v) => v.name.type == "identifier" && v.name.name === "count",
+        ),
       ).toBeDefined();
       expect(
-        stateVars.find((v) => (v.name as any).name === "name"),
+        stateVars.find(
+          (v) => v.name.type == "identifier" && v.name.name === "name",
+        ),
       ).toBeDefined();
 
       const countVar = stateVars.find(
-        (v) => (v.name as any).name === "count",
-      ) as any;
-      expect(countVar.stateType).toEqual({
+        (v) => v.name.type == "identifier" && v.name.name === "count",
+      );
+      expect(countVar?.stateType).toEqual({
         type: "literal-type",
         literal: { type: "number", value: 0 },
       });
 
       const nameVar = stateVars.find(
-        (v) => (v.name as any).name === "name",
-      ) as any;
-      expect(nameVar.stateType).toEqual({
+        (v) => v.name.type == "identifier" && v.name.name === "name",
+      );
+      expect(nameVar?.stateType).toEqual({
         type: "literal-type",
         literal: { type: "string", value: "test" },
       });
@@ -102,20 +108,26 @@ describe("analyser class state inference", () => {
       const myComponent = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "MyComponent",
       );
-      const stateVars = Object.values(myComponent.var).filter(
-        (v) => (v as any).kind === "state",
+      if (myComponent?.kind !== "component")
+        throw new Error("MyComponent should be a component");
+      const stateVars = Object.values(myComponent?.var ?? {}).filter(
+        (v) => v.kind === "state",
       );
       expect(
-        stateVars.find((v) => (v.name as any).name === "active"),
+        stateVars.find(
+          (v) => v.name.type == "identifier" && v.name.name === "active",
+        ),
       ).toBeDefined();
       expect(
-        stateVars.find((v) => (v.name as any).name === "count"),
+        stateVars.find(
+          (v) => v.name.type == "identifier" && v.name.name === "count",
+        ),
       ).toBeDefined();
 
       const activeVar = stateVars.find(
-        (v) => (v.name as any).name === "active",
-      ) as any;
-      expect(activeVar.stateType).toEqual({
+        (v) => v.name.type == "identifier" && v.name.name === "active",
+      );
+      expect(activeVar?.stateType).toEqual({
         type: "literal-type",
         literal: { type: "boolean", value: true },
       });
@@ -152,23 +164,30 @@ describe("analyser class state inference", () => {
 
       const myComponent = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "MyComponent",
-      ) as any;
+      );
+      if (myComponent?.kind !== "component")
+        throw new Error("MyComponent should be a component");
       const myMethod =
         myComponent.var[
           Object.keys(myComponent.var).find(
-            (k) => myComponent.var[k].name.name === "myMethod",
+            (k) =>
+              myComponent?.var[k]?.name.type == "identifier" &&
+              myComponent.var[k].name.name === "myMethod",
           )!
         ];
 
       const stateVar = Object.values(myComponent.var).find(
-        (v) => (v as any).kind === "state" && (v as any).name.name === "count",
-      ) as any;
+        (v) =>
+          v.kind === "state" &&
+          v.name.type == "identifier" &&
+          v.name.name === "count",
+      );
 
       // Check relations
       const relations = file!.relations;
-      const setRelation = relations.find(
+      const setRelation = relations?.find(
         (r) =>
-          r.from_id === myMethod.id &&
+          r.from_id === myMethod?.id &&
           r.to_id === stateVar!.id &&
           r.kind === "usage-write",
       );

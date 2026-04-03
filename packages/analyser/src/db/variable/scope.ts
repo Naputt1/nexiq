@@ -18,6 +18,8 @@ export class Scope {
   private nameToId = new Map<string, string>();
   private prevIds = new Map<string, string>();
 
+  type = "scope";
+
   constructor(
     public parent?: Scope,
     public owner?: Variable,
@@ -59,7 +61,7 @@ export class Scope {
           const inner = v.var.findDeepestVariable(loc);
           if (inner) return inner;
 
-          return v as any;
+          return v as BaseFunctionVariable<VarKind>;
         }
       }
     }
