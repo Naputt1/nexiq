@@ -1,5 +1,5 @@
-import type { FuncParam } from "./object.ts";
-import type { TypeData, TypeDataLiteralBody } from "./primitive.ts";
+import type { FuncParam } from "./object.js";
+import type { TypeData, TypeDataLiteralBody } from "./primitive.js";
 
 export interface TypeDataFunctionParameterBase {
   optional?: boolean;

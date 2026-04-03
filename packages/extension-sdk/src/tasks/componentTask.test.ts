@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { componentTask } from "./componentTask.ts";
+import { componentTask } from "./componentTask.js";
 import {
   type DatabaseData,
   type GraphViewResult,
@@ -7,7 +7,7 @@ import {
   type GraphNodeData,
   type GraphComboData,
   type GraphArrowData,
-} from "../index.ts";
+} from "../index.js";
 
 describe("componentTask", () => {
   const mockData: DatabaseData = {

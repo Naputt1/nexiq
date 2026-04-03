@@ -12,7 +12,7 @@ import {
   type GraphViewTask,
   type TaskContext,
   getTaskData,
-} from "../index.ts";
+} from "../index.js";
 
 export const componentTask: GraphViewTask = {
   id: "component-structure",

@@ -1,5 +1,5 @@
-import type { VariableName } from "./component.ts";
-import type { GitFileDiff, GitDiffHunk } from "./types/git.ts";
+import type { VariableName } from "./component.js";
+import type { GitFileDiff, GitDiffHunk } from "./types/git.js";
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 

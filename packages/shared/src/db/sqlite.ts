@@ -13,7 +13,7 @@ import type {
   ExportRow,
   PackageRow,
   PackageDependencyRow,
-} from "../index.ts";
+} from "../index.js";
 
 export class SqliteDB {
   public db: Database;
