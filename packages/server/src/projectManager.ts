@@ -20,7 +20,7 @@ import {
   type ComponentFileVar,
   type UIItemState,
 } from "@nexiq/shared";
-import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/shared";
+import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/analyser";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";

@@ -10,12 +10,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@nexiq/analyser": ["../analyser/dist/index.ts"],
+      "@nexiq/analyser": ["../analyser/dist/index.d.ts"],
       "@nexiq/analyser/*": ["../analyser/dist/*"],
-      "@nexiq/shared": ["../shared/dist/index.ts"],
-      "@nexiq/shared/db": ["../shared/dist/db/index.ts"],
+      "@nexiq/shared": ["../shared/dist/index.d.ts"],
+      "@nexiq/shared/db": ["../shared/dist/db/sqlite.d.ts"],
       "@nexiq/shared/*": ["../shared/dist/*"],
-      "@nexiq/extension-sdk": ["../extension-sdk/dist/index.ts"],
+      "@nexiq/extension-sdk": ["../extension-sdk/dist/index.d.ts"],
       "@nexiq/extension-sdk/*": ["../extension-sdk/dist/*"]
     }
   }
