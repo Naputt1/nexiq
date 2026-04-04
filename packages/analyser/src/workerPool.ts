@@ -1,16 +1,10 @@
 import { Worker } from "node:worker_threads";
 import { pathToFileURL } from "node:url";
-import type { FileTaskMessage } from "./types.ts";
-
-export interface WorkerParams {
-  filePath: string;
-  srcDir: string;
-  viteAliases: Record<string, string>;
-  packageJsonData: Record<string, unknown>;
-  runId?: string;
-}
-
-export type WorkerMessage = FileTaskMessage;
+import type {
+  AnalyzerWorkerRequest,
+  AnalyzerWorkerResponse,
+  WorkerSessionConfig,
+} from "./types.ts";
 
 /**
  * A fixed-size pool of persistent worker threads.
@@ -26,19 +20,23 @@ export type WorkerMessage = FileTaskMessage;
 export class WorkerPool {
   private workers: { worker: Worker; idle: boolean }[] = [];
   private taskQueue: {
-    task: WorkerParams;
-    resolve: (val: WorkerMessage) => void;
+    task: AnalyzerWorkerRequest;
+    resolve: (val: AnalyzerWorkerResponse) => void;
     reject: (err: Error) => void;
   }[] = [];
   private currentTasks = new Map<
     Worker,
-    { resolve: (val: WorkerMessage) => void; reject: (err: Error) => void }
+    {
+      resolve: (val: AnalyzerWorkerResponse) => void;
+      reject: (err: Error) => void;
+    }
   >();
   private isTerminating = false;
 
   constructor(
     private size: number,
     private workerScript: string,
+    private workerData?: WorkerSessionConfig,
   ) {
     for (let i = 0; i < size; i++) {
       this.spawnWorker();
@@ -69,6 +67,7 @@ export class WorkerPool {
       stderr: true,
       execArgv: this.buildExecArgv(),
       env: { ...process.env },
+      workerData: this.workerData,
     });
 
     worker.stdout.on("data", (data) => {
@@ -78,7 +77,7 @@ export class WorkerPool {
       process.stderr.write(`[Worker ${worker.threadId}] ${data}`);
     });
 
-    worker.on("message", (msg: WorkerMessage) =>
+    worker.on("message", (msg: AnalyzerWorkerResponse) =>
       this.onWorkerMessage(worker, msg),
     );
     worker.on("error", (err) => this.onWorkerDied(worker, err));
@@ -94,7 +93,7 @@ export class WorkerPool {
     this.workers.push({ worker, idle: true });
   }
 
-  private onWorkerMessage(worker: Worker, msg: WorkerMessage) {
+  private onWorkerMessage(worker: Worker, msg: AnalyzerWorkerResponse) {
     const workerInfo = this.workers.find((w) => w.worker === worker);
     if (!workerInfo) return;
 
@@ -159,7 +158,7 @@ export class WorkerPool {
     this.nextTask();
   }
 
-  public runTask(task: WorkerParams): Promise<WorkerMessage> {
+  public runTask(task: AnalyzerWorkerRequest): Promise<AnalyzerWorkerResponse> {
     return new Promise((resolve, reject) => {
       this.taskQueue.push({ task, resolve, reject });
       this.nextTask();
@@ -173,7 +172,7 @@ export class WorkerPool {
       idleWorker.idle = false;
       this.currentTasks.set(idleWorker.worker, { resolve, reject });
       console.log(
-        `[WorkerPool] Task assigned to Worker ${idleWorker.worker.threadId}: ${task.filePath}`,
+        `[WorkerPool] Task assigned to Worker ${idleWorker.worker.threadId}: ${task.filePaths.length} files`,
       );
       idleWorker.worker.postMessage(task);
     }

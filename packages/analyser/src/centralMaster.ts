@@ -50,6 +50,16 @@ async function runWithConcurrency<T>(
   await Promise.all(runners);
 }
 
+function getEffectiveFileWorkerThreads(
+  requestedThreads: number | undefined,
+  packageConcurrency: number,
+) {
+  const cpuCount = Math.max(1, os.cpus().length);
+  const requested = requestedThreads ?? cpuCount;
+  const concurrencyCap = Math.max(1, Math.floor(cpuCount / packageConcurrency));
+  return Math.max(1, Math.min(requested, concurrencyCap));
+}
+
 function getPackageDbPath(packageDbDir: string, packagePath: string) {
   const safe = packagePath.replace(/[^a-zA-Z0-9_-]/g, "_");
   return path.join(packageDbDir, `${safe}.sqlite`);
@@ -1070,6 +1080,13 @@ export class CentralMaster {
       }
     >();
     const workspaceScopes = getWorkspaceScopes(packages.map((pkg) => pkg.name));
+    const packageConcurrency =
+      this.options.packageConcurrency ||
+      Math.max(1, Math.floor(os.cpus().length / 2));
+    const effectiveFileWorkerThreads = getEffectiveFileWorkerThreads(
+      this.options.fileWorkerThreads,
+      packageConcurrency,
+    );
 
     workspaceDb.beginWorkspaceRun({
       id: runId,
@@ -1081,8 +1098,7 @@ export class CentralMaster {
     try {
       await runWithConcurrency(
         packages,
-        this.options.packageConcurrency ||
-          Math.max(1, Math.floor(os.cpus().length / 2)),
+        packageConcurrency,
         async (pkg) => {
           const packageJson = new PackageJson(pkg.path);
           const dbPath = getPackageDbPath(packageDbDir, pkg.path);
@@ -1095,7 +1111,7 @@ export class CentralMaster {
               packageJson,
               cacheData: undefined,
               sqlite,
-              threads: this.options.fileWorkerThreads,
+              threads: effectiveFileWorkerThreads,
             });
             const summary = await master.analyzePackage();
             summaries.push({

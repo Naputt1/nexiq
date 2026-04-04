@@ -1,4 +1,4 @@
-import { parentPort, threadId } from "node:worker_threads";
+import { parentPort, threadId, workerData } from "node:worker_threads";
 
 console.error("Worker process starting...");
 
@@ -32,20 +32,20 @@ import ReturnStatement from "./analyzer/returnStatement.ts";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
-import type { FileTaskMessage, FileTaskSuccessMessage } from "./types.ts";
+import type {
+  AnalyzerWorkerRequest,
+  AnalyzerWorkerResponse,
+  FileTaskMessage,
+  FileTaskSuccessMessage,
+  WorkerSessionConfig,
+} from "./types.ts";
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 
-interface WorkerParams {
-  filePath: string;
-  srcDir: string;
-  viteAliases: Record<string, string>;
-  packageJsonData: Record<string, unknown>;
-  runId?: string;
-}
+const sessionConfig = (workerData || {}) as WorkerSessionConfig;
 
-async function analyzeFile(params: WorkerParams) {
-  const { filePath, srcDir, viteAliases, packageJsonData } = params;
+async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
+  const { srcDir, viteAliases, packageJsonData } = config;
   const fileName = filePath;
   const fullPath = resolvePath(srcDir, filePath);
 
@@ -106,44 +106,57 @@ async function analyzeFile(params: WorkerParams) {
 }
 
 if (parentPort) {
-  parentPort.on("message", async (params: WorkerParams) => {
-    const { filePath } = params;
-    console.log(`[Worker ${threadId}] Received task: ${filePath}`);
-    try {
-      console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
-      const { fileData, resolveTasks } = await analyzeFile(params);
-      console.log(`[Worker ${threadId}] Analysis complete for: ${filePath}`);
-      const message: FileTaskSuccessMessage = {
-        type: "file_success",
-        filePath: params.filePath,
-        result: fileData,
-        resolveTasks,
-      };
-      parentPort!.postMessage(message);
-    } catch (error) {
-      console.error(`[Worker ${threadId}] Error analyzing ${filePath}:`, error);
-      if (error instanceof Error) {
-        console.error(error.stack);
+  parentPort.on("message", async (request: AnalyzerWorkerRequest) => {
+    const results: FileTaskMessage[] = [];
+    console.log(
+      `[Worker ${threadId}] Received batch: ${request.filePaths.length} files`,
+    );
+
+    for (const filePath of request.filePaths) {
+      try {
+        console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
+        const { fileData, resolveTasks } = await analyzeFile(
+          filePath,
+          sessionConfig,
+        );
+        const message: FileTaskSuccessMessage = {
+          type: "file_success",
+          filePath,
+          result: fileData,
+          resolveTasks,
+        };
+        results.push(message);
+      } catch (error) {
+        console.error(`[Worker ${threadId}] Error analyzing ${filePath}:`, error);
+        if (error instanceof Error) {
+          console.error(error.stack);
+        }
+        const err = error as Error & {
+          code?: string;
+          loc?: { line?: number; column?: number };
+          pos?: number;
+        };
+        const isParseError =
+          err?.name === "SyntaxError" ||
+          (typeof err?.message === "string" &&
+            err.message.includes("Unexpected"));
+        const message: FileTaskMessage = {
+          type: isParseError ? "file_parse_error" : "file_extract_error",
+          filePath,
+          error: err instanceof Error ? err.message : String(error),
+          stack: err instanceof Error ? err.stack : undefined,
+          line: err?.loc?.line,
+          column: err?.loc?.column,
+          parser: "babel",
+        };
+        results.push(message);
       }
-      const err = error as Error & {
-        code?: string;
-        loc?: { line?: number; column?: number };
-        pos?: number;
-      };
-      const isParseError =
-        err?.name === "SyntaxError" ||
-        (typeof err?.message === "string" &&
-          err.message.includes("Unexpected"));
-      const message: FileTaskMessage = {
-        type: isParseError ? "file_parse_error" : "file_extract_error",
-        filePath: params.filePath,
-        error: err instanceof Error ? err.message : String(error),
-        stack: err instanceof Error ? err.stack : undefined,
-        line: err?.loc?.line,
-        column: err?.loc?.column,
-        parser: "babel",
-      };
-      parentPort!.postMessage(message);
     }
+
+    const response: AnalyzerWorkerResponse = {
+      type: "batch_result",
+      results,
+    };
+    parentPort!.postMessage(response);
   });
 }
