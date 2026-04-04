@@ -38,6 +38,10 @@ export interface AppStateData {
       width?: number;
       height?: number;
     };
+    bottom?: {
+      isOpen?: boolean;
+      height?: number;
+    };
   };
 }
 
