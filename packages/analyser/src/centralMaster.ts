@@ -12,7 +12,7 @@ import type {
   TypeDataDeclare,
   WorkspacePackageRow,
 } from "@nexiq/shared";
-import { discoverWorkspacePackages } from "@nexiq/shared";
+import { discoverWorkspacePackages } from "./workspace.ts";
 import { getFiles, getViteConfig } from "./analyzer/utils.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import { SqliteDB } from "./db/sqlite.ts";

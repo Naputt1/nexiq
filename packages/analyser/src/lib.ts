@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { JsonData, NexiqConfig } from "@nexiq/shared";
-import { getWorkspacePatterns } from "@nexiq/shared";
+import { getWorkspacePatterns } from "./workspace.ts";
 import analyzeFiles from "./analyzer/index.ts";
 import { getFiles, getViteConfig } from "./analyzer/utils.ts";
 import { CentralMaster } from "./centralMaster.ts";

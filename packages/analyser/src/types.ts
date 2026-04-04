@@ -13,7 +13,7 @@ import type {
   WorkspacePackageRow,
   WorkspaceRunRow,
 } from "@nexiq/shared";
-import type { WorkspacePackageInfo } from "@nexiq/shared/workspace";
+import type { WorkspacePackageInfo } from "./workspace.ts";
 
 export type PackageJson = {
   dependencies: Record<string, string>;

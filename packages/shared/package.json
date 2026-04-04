@@ -14,10 +14,6 @@
     "./db": {
       "types": "./dist/db/sqlite.d.ts",
       "import": "./dist/db/sqlite.js"
-    },
-    "./workspace": {
-      "types": "./dist/workspace.d.ts",
-      "import": "./dist/workspace.js"
     }
   },
   "scripts": {
@@ -39,14 +35,9 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
-  "dependencies": {
-    "fast-glob": "^3.3.3",
-    "js-yaml": "^4.1.1"
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.5.0",
     "better-sqlite3": "^12.8.0",
     "eslint": "^10.1.0",
