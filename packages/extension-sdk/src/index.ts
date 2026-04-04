@@ -383,6 +383,18 @@ export interface TaskContext {
    * Optional pre-loaded snapshot data, for backward compatibility or when already available.
    */
   snapshotData?: DatabaseData;
+  /**
+   * Request-scoped cache for aggregated task data so multiple tasks do not reread SQLite.
+   */
+  taskDataCache?: DatabaseData;
+  /**
+   * Optional stage profiler provided by the caller.
+   */
+  profileStage?: (
+    name: string,
+    startedAt: number,
+    detail?: string,
+  ) => void | Promise<void>;
 }
 
 /**
@@ -390,14 +402,18 @@ export interface TaskContext {
  * It handles workspace databases and qualifies IDs to avoid collisions.
  */
 export function getTaskData(context: TaskContext): DatabaseData {
-  const { db, snapshotData, analysisPaths } = context;
+  const { db, snapshotData, analysisPaths, taskDataCache } = context;
 
   if (snapshotData) {
     return snapshotData;
   }
 
+  if (taskDataCache) {
+    return taskDataCache;
+  }
+
   if (!db) {
-    return {
+    const empty = {
       files: [],
       entities: [],
       scopes: [],
@@ -406,14 +422,20 @@ export function getTaskData(context: TaskContext): DatabaseData {
       exports: [],
       relations: [],
     };
+    context.taskDataCache = empty;
+    return empty;
   }
 
-  const tableExists = (name: string) =>
-    !!db
-      .prepare(
-        "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?",
-      )
-      .get(name);
+  const existingTables = new Set(
+    (
+      db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type IN ('table', 'view')",
+        )
+        .all() as { name: string }[]
+    ).map((row) => row.name),
+  );
+  const tableExists = (name: string) => existingTables.has(name);
 
   if (tableExists("workspace_packages")) {
     const workspacePackages = db
@@ -453,12 +475,16 @@ export function getTaskData(context: TaskContext): DatabaseData {
         const pkgPrefix = `workspace:${pkg.package_id}:`;
         const pkgId = pkg.package_id;
 
-        const pkgTableExists = (name: string) =>
-          !!pkgDb
-            .prepare(
-              "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?",
-            )
-            .get(name);
+        const pkgExistingTables = new Set(
+          (
+            pkgDb
+              .prepare(
+                "SELECT name FROM sqlite_master WHERE type IN ('table', 'view')",
+              )
+              .all() as { name: string }[]
+          ).map((row) => row.name),
+        );
+        const pkgTableExists = (name: string) => pkgExistingTables.has(name);
 
         // 1. Packages & Dependencies
         const pkgRows = pkgTableExists("packages")
@@ -585,6 +611,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
       }
     });
 
+    context.taskDataCache = aggregated;
     return aggregated;
   }
 
@@ -593,7 +620,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
   const hasDeps = tableExists("package_dependencies");
   const hasExports = tableExists("exports");
 
-  return {
+  const singleProjectData = {
     packages: hasPackages
       ? (db.prepare("SELECT * FROM packages").all() as PackageRow[])
       : [],
@@ -612,6 +639,8 @@ export function getTaskData(context: TaskContext): DatabaseData {
       : [],
     relations: db.prepare("SELECT * FROM relations").all() as RelationRow[],
   };
+  context.taskDataCache = singleProjectData;
+  return singleProjectData;
 }
 
 /**

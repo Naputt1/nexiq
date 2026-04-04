@@ -36,6 +36,7 @@ import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
   DeferredResolveTask,
+  FileTaskMessage,
   FileRunStatus,
   PackageAnalysisSummary,
   WorkspaceAnalysisHandoff,
@@ -47,6 +48,8 @@ import { resolvePath } from "./utils/path.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const MIN_FILES_FOR_WORKERS = 24;
+const MIN_FILES_PER_WORKER = 8;
 
 function createRunId(prefix: string, scope: string) {
   const safeScope = scope.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -561,6 +564,69 @@ export class PackageMaster {
     };
   }
 
+  private shouldUseWorkerPool(fileCount: number) {
+    return (
+      this.threads > 1 &&
+      fileCount >= MIN_FILES_FOR_WORKERS &&
+      this.threads * MIN_FILES_PER_WORKER <= fileCount * 2
+    );
+  }
+
+  private getBatchSize(fileCount: number, workerCount: number) {
+    const target = Math.ceil(fileCount / Math.max(workerCount * 2, 1));
+    return Math.max(4, Math.min(24, target));
+  }
+
+  private processAnalyzedFileResult(
+    filePath: string,
+    message: FileTaskMessage,
+    succeededFiles: string[],
+  ) {
+    if (message.type === "file_success") {
+      const result = message.result;
+      this.componentDB.addFile(filePath, result);
+      this.componentDB.addResolveTasks(message.resolveTasks);
+      this.markFileStatus(filePath, "parsed", {
+        fileHash: result.hash,
+        fingerprint: result.fingerPrint,
+      });
+      if (this.sqlite) {
+        this.sqlite.saveFileResultsForRun(
+          this.runId,
+          {
+            ...result,
+            package_id: this.packageRow?.id,
+          },
+          this.packageRow?.id,
+        );
+      }
+      succeededFiles.push(filePath);
+      return false;
+    }
+
+    const stage =
+      message.type === "file_parse_error"
+        ? "parse"
+        : message.type === "worker_runtime_error"
+          ? "worker_runtime"
+          : "extract";
+    this.recordFileError(filePath, stage, message.error, {
+      line: message.line,
+      column: message.column,
+      stack: message.stack,
+      parser: message.parser,
+    });
+    this.markFileStatus(
+      filePath,
+      message.type === "worker_runtime_error"
+        ? "worker_crashed"
+        : stage === "parse"
+          ? "failed_parse"
+          : "failed_extract",
+    );
+    return true;
+  }
+
   public async analyzePackage(): Promise<PackageAnalysisSummary> {
     this.upsertPackageMetadata();
     this.startRun();
@@ -585,7 +651,7 @@ export class PackageMaster {
       this.markFileStatus(fullfileName, "pending");
     }
 
-    if (this.threads > 1 && filesToAnalyze.length > 0) {
+    if (this.shouldUseWorkerPool(filesToAnalyze.length)) {
       const ext = import.meta.url.endsWith(".ts") ? ".ts" : ".js";
       let workerScript = fileURLToPath(
         new URL(`./worker${ext}`, import.meta.url),
@@ -598,71 +664,64 @@ export class PackageMaster {
         workerScript = distWorker;
       }
 
-      const pool = new WorkerPool(this.threads, workerScript);
+      const pool = new WorkerPool(this.threads, workerScript, {
+        srcDir: this.srcDir,
+        viteAliases: this.viteAliases,
+        packageJsonData: this.packageJson.rawData,
+        runId: this.runId,
+      });
+      const batchSize = this.getBatchSize(filesToAnalyze.length, this.threads);
+      const batches: string[][] = [];
+      for (let index = 0; index < filesToAnalyze.length; index += batchSize) {
+        batches.push(filesToAnalyze.slice(index, index + batchSize));
+      }
 
       await Promise.all(
-        filesToAnalyze.map(async (filePath) => {
-          this.markFileStatus(filePath, "running");
+        batches.map(async (batch) => {
+          for (const filePath of batch) {
+            this.markFileStatus(filePath, "running");
+          }
           try {
-            const message = await pool.runTask({
-              filePath,
-              srcDir: this.srcDir,
-              viteAliases: this.viteAliases,
-              packageJsonData: this.packageJson.rawData,
-              runId: this.runId,
+            const response = await pool.runTask({
+              type: "analyze_files",
+              filePaths: batch,
             });
-
-            if (message.type === "file_success") {
-              const result = message.result;
-              this.componentDB.addFile(filePath, result);
-              this.componentDB.addResolveTasks(message.resolveTasks);
-              this.markFileStatus(filePath, "parsed", {
-                fileHash: result.hash,
-                fingerprint: result.fingerPrint,
-              });
-              if (this.sqlite) {
-                this.sqlite.saveFileResultsForRun(
-                  this.runId,
-                  {
-                    ...result,
-                    package_id: this.packageRow?.id,
-                  },
-                  this.packageRow?.id,
-                );
-              }
-              succeededFiles.push(filePath);
-              return;
-            }
-
-            filesFailed++;
-            const stage =
-              message.type === "file_parse_error"
-                ? "parse"
-                : message.type === "worker_runtime_error"
-                  ? "worker_runtime"
-                  : "extract";
-            this.recordFileError(filePath, stage, message.error, {
-              line: message.line,
-              column: message.column,
-              stack: message.stack,
-              parser: message.parser,
-            });
-            this.markFileStatus(
-              filePath,
-              message.type === "worker_runtime_error"
-                ? "worker_crashed"
-                : stage === "parse"
-                  ? "failed_parse"
-                  : "failed_extract",
+            const resultByFile = new Map(
+              response.results.map((item) => [item.filePath, item]),
             );
+
+            for (const filePath of batch) {
+              const message = resultByFile.get(filePath);
+              if (!message) {
+                filesFailed++;
+                this.recordFileError(
+                  filePath,
+                  "worker_runtime",
+                  "Worker batch did not return a result for file",
+                );
+                this.markFileStatus(filePath, "worker_crashed");
+                continue;
+              }
+              if (
+                this.processAnalyzedFileResult(
+                  filePath,
+                  message,
+                  succeededFiles,
+                )
+              ) {
+                filesFailed++;
+              }
+            }
           } catch (error) {
-            filesFailed++;
             const err =
               error instanceof Error ? error : new Error(String(error));
-            this.recordFileError(filePath, "worker_runtime", err.message, {
-              stack: err.stack,
-            });
-            this.markFileStatus(filePath, "worker_crashed");
+            for (const filePath of batch) {
+              filesFailed++;
+              this.recordFileError(filePath, "worker_runtime", err.message, {
+                stack: err.stack,
+              });
+              this.markFileStatus(filePath, "worker_crashed");
+            }
           }
         }),
       );

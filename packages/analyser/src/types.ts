@@ -147,6 +147,26 @@ export interface FileTaskErrorMessage {
 
 export type FileTaskMessage = FileTaskSuccessMessage | FileTaskErrorMessage;
 
+export interface WorkerSessionConfig {
+  srcDir: string;
+  viteAliases: Record<string, string>;
+  packageJsonData: Record<string, unknown>;
+  runId?: string | undefined;
+}
+
+export interface FileBatchTask {
+  type: "analyze_files";
+  filePaths: string[];
+}
+
+export interface FileBatchResultMessage {
+  type: "batch_result";
+  results: FileTaskMessage[];
+}
+
+export type AnalyzerWorkerRequest = FileBatchTask;
+export type AnalyzerWorkerResponse = FileBatchResultMessage;
+
 export type AnalysisRunRecord = AnalysisRunRow;
 export type FileRunStatusRecord = FileRunStatusRow;
 export type FileAnalysisErrorRecord = FileAnalysisErrorRow;
