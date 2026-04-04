@@ -357,7 +357,7 @@ export class SqliteDB extends BaseSqliteDB {
     this.db
       .prepare(
         `
-        INSERT INTO resolve_errors
+        INSERT OR IGNORE INTO resolve_errors
         (id, run_id, package_id, file_path, scope_id, entity_id, relation_kind, source_name, source_module, target_hint, resolver_stage, message, loc_line, loc_column, retry_count, created_at)
         VALUES (@id, @run_id, @package_id, @file_path, @scope_id, @entity_id, @relation_kind, @source_name, @source_module, @target_hint, @resolver_stage, @message, @loc_line, @loc_column, @retry_count, @created_at)
       `,
