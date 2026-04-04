@@ -1151,10 +1151,23 @@ export class ComponentDB {
     let retries = 0;
 
     while (this.resolveTasks.length > 0 && retries < maxRetries) {
+      const prevSize = this.resolveTasks.length;
       const currentTasks = [...this.resolveTasks];
       this.resolveTasks = [];
 
       for (const task of currentTasks) {
+        // Skip workspace-dependency hook tasks immediately — they are
+        // unresolvable within this package and should not re-queue.
+        if (task.type === "comResolveCallHook") {
+          const comImport = this.files.getImport(task.fileName, task.hook);
+          if (
+            comImport &&
+            this.isWorkspaceDependencyImport(comImport.source, task.fileName)
+          ) {
+            continue;
+          }
+        }
+
         const handler = ComponentDB.RESOLVE_HANDLERS[task.type] as (
           db: ComponentDB,
           task: ComponentDBResolve,
@@ -1167,40 +1180,35 @@ export class ComponentDB {
         }
       }
 
+      // Stagnation check: if no task was resolved this round, further
+      // iterations cannot help — exit early to avoid the 1000-retry spin.
+      if (this.resolveTasks.length >= prevSize) {
+        break;
+      }
+
       retries++;
     }
 
-    if (this.resolveTasks.length > 0) {
-      const remainingTasks: ComponentDBResolve[] = [];
-      for (const task of this.resolveTasks) {
-        if (task.type === "comResolveCallHook") {
-          const comImport = this.files.getImport(task.fileName, task.hook);
-          if (
-            comImport &&
-            this.isWorkspaceDependencyImport(comImport.source, task.fileName)
-          ) {
-            continue;
-          }
-        }
-        remainingTasks.push(task);
+    // Any tasks still queued are genuinely unresolvable.
+    this.unresolvedResolveTasks = [...this.resolveTasks];
+
+    if (this.unresolvedResolveTasks.length > 0) {
+      // Only warn if we actually exhausted retries (a true deep chain),
+      // not for the common case where tasks simply cannot be resolved locally.
+      if (retries >= maxRetries) {
+        console.warn(
+          "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
+          {
+            remainingTasks: this.unresolvedResolveTasks.length,
+            taskTypes: [
+              ...new Set(this.unresolvedResolveTasks.map((t) => t.type)),
+            ],
+          },
+        );
       }
-      this.resolveTasks = remainingTasks;
     }
 
-    if (retries >= maxRetries && this.resolveTasks.length > 0) {
-      this.unresolvedResolveTasks = [...this.resolveTasks];
-      console.warn(
-        "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
-        {
-          remainingTasks: this.resolveTasks.length,
-          taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
-        },
-      );
-
-      // debugger;
-    }
-
-    // this.resolveTasks = [];
+    this.resolveTasks = [];
     this.isResolve = false;
     return [...this.unresolvedResolveTasks];
   }

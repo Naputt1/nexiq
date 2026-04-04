@@ -386,11 +386,19 @@ export class PackageMaster {
 
     for (const task of unresolvedTasks) {
       const deferred = toDeferredResolveTask(task, this.packageRow?.id);
+      // Build a stable, unique ID from the task's intrinsic fields so that
+      // multiple tasks of the same type/file don't collide via Date.now().
+      const discriminator = [
+        deferred.filePath,
+        deferred.type,
+        deferred.sourceName ?? "",
+        deferred.locLine ?? "",
+        deferred.locColumn ?? "",
+      ]
+        .join(":")
+        .replace(/[^a-zA-Z0-9_-]/g, "_");
       this.sqlite.recordResolveError({
-        id: createRunId(
-          "resolve_error",
-          `${this.runId}:${deferred.filePath}:${deferred.type}`,
-        ),
+        id: `resolve_error:${this.runId}:${discriminator}`,
         run_id: this.runId,
         package_id: this.packageRow?.id || null,
         file_path: deferred.filePath,
