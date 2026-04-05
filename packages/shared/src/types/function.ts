@@ -7,14 +7,12 @@ export interface TypeDataFunctionParameterBase {
   decorator: never;
 }
 
-export interface TypeDataFunctionParameterName
-  extends TypeDataFunctionParameterBase {
+export interface TypeDataFunctionParameterName extends TypeDataFunctionParameterBase {
   name: string;
   body: TypeData;
 }
 
-export interface TypeDataFunctionParameterObject
-  extends TypeDataFunctionParameterBase {
+export interface TypeDataFunctionParameterObject extends TypeDataFunctionParameterBase {
   name: string;
   body: TypeDataLiteralBody[];
   properties: FuncParam[];

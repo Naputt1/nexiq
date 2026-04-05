@@ -1,6 +1,6 @@
 import type { MemoFileVarHook } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactWithCallbackVariable } from "./reactWithCallbackVariable.ts";
 
 export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
   constructor(
@@ -22,8 +22,6 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
 
   public load(data: MemoVariable) {
     super.load(data);
-
-    // TODO: handle merge
   }
 
   public getData(): MemoFileVarHook {

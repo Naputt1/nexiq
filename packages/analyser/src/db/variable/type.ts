@@ -1,19 +1,55 @@
-import type { ComponentVariable } from "./component.js";
-import type { Variable } from "./variable.js";
-import type { DataVariable } from "./dataVariable.js";
-import type { HookVariable } from "./hook.js";
-import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
-import type { ReactFunctionVariable } from "./reactFunctionVariable.js";
+import {
+  ComponentVariable,
+  ClassComponentVariable,
+  FunctionComponentVariable,
+} from "./component.ts";
+import type { Variable } from "./variable.ts";
+import type { DataVariable } from "./dataVariable.ts";
+import type { MethodVariable } from "./methodVariable.ts";
+import type { PropertyVariable } from "./propertyVariable.ts";
+import type { HookVariable } from "./hook.ts";
+import type { BaseFunctionVariable } from "./baseFunctionVariable.ts";
+import type { ReactFunctionVariable } from "./reactFunctionVariable.ts";
 import type { VarKind, VarType } from "@nexiq/shared";
-import type { StateVariable } from "./stateVariable.js";
-import type { MemoVariable } from "./memo.js";
-import type { RefVariable } from "./refVariable.js";
-import type { CallHookVariable } from "./callHookVariable.js";
-import type { JSXVariable } from "./jsx.js";
-import { CallbackVariable } from "./callbackVariable.js";
+import type { StateVariable } from "./stateVariable.ts";
+import type { MemoVariable } from "./memo.ts";
+import type { RefVariable } from "./refVariable.ts";
+import type { CallHookVariable } from "./callHookVariable.ts";
+import type { JSXVariable } from "./jsx.ts";
+import { CallbackVariable } from "./callbackVariable.ts";
+import { ClassVariable } from "./classVariable.ts";
+import { Scope } from "./scope.ts";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.kind === "component" && (v.type === "function" || v.type === "class");
+  return v.kind === "component";
+}
+
+export function isClassComponentVariable(
+  v: Variable,
+): v is ClassComponentVariable {
+  return v.kind === "component" && v.type === "class";
+}
+
+export function isFunctionComponentVariable(
+  v: Variable,
+): v is FunctionComponentVariable {
+  return v.kind === "component" && v.type === "function";
+}
+
+export function isClassVariable(
+  v: Variable,
+): v is ClassVariable | ClassComponentVariable {
+  return (
+    (v.kind === "class" && v.type === "data") || isClassComponentVariable(v)
+  );
+}
+
+export function isMethodVariable(v: Variable): v is MethodVariable {
+  return v.kind === "method" && v.type === "function";
+}
+
+export function isPropertyVariable(v: Variable): v is PropertyVariable {
+  return v.kind === "property" && v.type === "data";
 }
 
 export function isJSXVariable(v: Variable): v is JSXVariable {
@@ -62,4 +98,8 @@ export function isCallbackVariable(v: Variable): v is CallbackVariable {
 
 export function isRefVariable(v: Variable): v is RefVariable {
   return v.type === "data" && v.kind === "ref";
+}
+
+export function isScope(v: Variable | Scope): v is Scope {
+  return (v as Scope).type === "scope";
 }

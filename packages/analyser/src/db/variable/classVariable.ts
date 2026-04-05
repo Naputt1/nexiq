@@ -1,36 +1,64 @@
 import type {
-  ComponentFileVarBaseTypeFunction,
-  ComponentFileVarNormalFunction,
+  ComponentFileVarBase,
+  ComponentFileVarClass,
+  VariableScope,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
+import type { File } from "../fileDB.ts";
+import { Variable } from "./variable.ts";
+import { Scope } from "./scope.ts";
 
-export class ClassVariable extends BaseFunctionVariable<"normal"> {
+export class ClassVariable extends Variable<"data", "class"> {
+  public var: Scope;
+  public scope: VariableScope;
+  public superClass?: { id?: string; name: string } | undefined;
+
   constructor(
     options: Omit<
-      ComponentFileVarBaseTypeFunction<"normal">,
-      "var" | "components" | "type" | "kind" | "file" | "hash"
+      ComponentFileVarClass,
+      "var" | "type" | "kind" | "file" | "hash"
     >,
     file: File,
   ) {
-    super({ ...options, kind: "normal", type: "class" } as any, file); // eslint-disable-line @typescript-eslint/no-explicit-any
+    super(
+      { ...options, kind: "class", type: "data" } as Omit<
+        ComponentFileVarBase<"data", "class">,
+        "file" | "hash"
+      >,
+      file,
+    );
+    this.var = new Scope();
+    this.scope = options.scope;
+    this.superClass = options.superClass;
   }
 
   public load(data: ClassVariable) {
     super.load(data);
+
+    this.scope = data.scope || this.scope;
+    this.superClass = data.superClass || this.superClass;
   }
 
-  protected getBaseData(): ComponentFileVarBaseTypeFunction<"normal", "class"> {
+  protected getDataInternal() {
     return {
-      ...super.getBaseData(),
-      type: "class",
+      name: this.name,
+      var: this.var.getData(),
+      scope: this.scope,
+      superClass: this.superClass,
     };
   }
 
-  public getData(): ComponentFileVarNormalFunction {
+  protected getBaseData(): ComponentFileVarClass {
     return {
-      ...this.getBaseData(),
-      kind: "normal",
-    } as unknown as ComponentFileVarNormalFunction;
+      ...super.getBaseData(),
+      kind: "class",
+      type: "data",
+      var: this.var.getData(),
+      scope: this.scope,
+      superClass: this.superClass,
+    };
+  }
+
+  public getData(): ComponentFileVarClass {
+    return this.getBaseData();
   }
 }

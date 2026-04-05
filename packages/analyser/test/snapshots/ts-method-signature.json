@@ -3,6 +3,7 @@
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "2f2f40e381cb156a",
+      "package_id": "sample-ts-method-signature@1.0.0",
       "import": {
         "React": {
           "localName": "React",
@@ -74,6 +75,10 @@
               ],
               "return": {
                 "type": "void"
+              },
+              "loc": {
+                "line": 4,
+                "column": 2
               }
             },
             {
@@ -101,6 +106,10 @@
                 "type": "ref",
                 "refType": "named",
                 "name": "T"
+              },
+              "loc": {
+                "line": 5,
+                "column": 2
               }
             }
           ],
@@ -141,6 +150,10 @@
                 ],
                 "return": {
                   "type": "string"
+                },
+                "loc": {
+                  "line": 9,
+                  "column": 2
                 }
               }
             ]
@@ -167,7 +180,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "451e6c7943b0192c",
+          "hash": "a84867d0b23a5d9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -189,15 +202,26 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "2b619d8dd97d4218",
+              "hash": "36225f6de92dfee6",
               "dependencies": {},
               "loc": {
                 "line": 13,
                 "column": 9
               },
-              "tag": "div",
-              "props": [],
-              "children": {},
+              "render": {
+                "id": "div",
+                "instanceId": "de52e0c1bddf2ba7",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 13,
+                  "column": 9
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
               "srcId": "div"
             }
           },
@@ -212,48 +236,9 @@
             }
           },
           "async": false,
-          "return": {
-            "id": "ac19971c890d320a",
-            "name": {
-              "type": "identifier",
-              "name": "jsx@13:9",
-              "loc": {
-                "line": 13,
-                "column": 9
-              },
-              "id": "ad37c4ad8f35976c"
-            },
-            "kind": "normal",
-            "type": "jsx",
-            "file": "/src/App.tsx",
-            "hash": "2b619d8dd97d4218",
-            "dependencies": {},
-            "loc": {
-              "line": 13,
-              "column": 9
-            },
-            "tag": "div",
-            "props": [],
-            "children": {},
-            "srcId": "div"
-          },
-          "children": {
-            "de52e0c1bddf2ba7": {
-              "id": "div",
-              "instanceId": "de52e0c1bddf2ba7",
-              "tag": "div",
-              "dependencies": [],
-              "isDependency": false,
-              "loc": {
-                "line": 13,
-                "column": 9
-              },
-              "renderIndex": 0,
-              "kind": "jsx",
-              "children": {}
-            }
-          },
+          "return": "ac19971c890d320a",
           "states": [],
+          "refs": [],
           "props": [],
           "hooks": [],
           "effects": {},
@@ -261,7 +246,8 @@
           "contexts": [],
           "forwardRef": false
         }
-      }
+      },
+      "relations": []
     }
   },
   "edges": [

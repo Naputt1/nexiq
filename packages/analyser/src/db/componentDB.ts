@@ -5,49 +5,64 @@ import type {
   ComponentFileExport,
   JsonData,
   ComponentFileVar,
-  ComponentFileVarComponent,
   ComponentFileVarDependency,
   ComponentInfoRenderDependency,
   VariableLoc,
   ComponentInfoRender,
   ComponentFileVarHook,
-  ComponentFileVarJSX,
   EffectInfo,
   TypeDataDeclareInterface,
   TypeDataDeclareType,
   ComponentFile,
-  ComponentFileVarNormalFunction,
-  ComponentFileVarNormalData,
   Memo,
   RefData,
   VariableName,
   VarKind,
   FunctionReturn,
   ComponentDBResolve,
-  DistributiveOmit,
+  ComponentFileVarClass,
+  ComponentFileVarMethod,
+  ComponentFileVarBaseTypeFunction,
+  ComponentFileVarProperty,
+  ComponentFileVarNormal,
+  ComponentFileVarState,
+  ComponentFileVarFunctionComponent,
+  ComponentFileVarClassComponent,
+  TypeData,
+  PropData,
+  PropDataType,
+  ComponentFileVarJSX,
 } from "@nexiq/shared";
-import { FileDB } from "./fileDB.js";
-import type { PackageJson } from "./packageJson.js";
+import { FileDB } from "./fileDB.ts";
+import type { PackageJson } from "./packageJson.ts";
 import fs from "fs";
 import path from "path";
-import { ComponentVariable } from "./variable/component.js";
-import { DataVariable } from "./variable/dataVariable.js";
-import { JSXVariable } from "./variable/jsx.js";
-import type { Variable } from "./variable/variable.js";
+import {
+  ClassComponentVariable,
+  FunctionComponentVariable,
+} from "./variable/component.ts";
+import { DataVariable } from "./variable/dataVariable.ts";
+import { JSXVariable } from "./variable/jsx.ts";
+import type { Variable } from "./variable/variable.ts";
 import {
   isComponentVariable,
   isBaseFunctionVariable,
   isCallHookVariable,
   isJSXVariable,
   isReactFunctionVariable,
-} from "./variable/type.js";
-import { HookVariable } from "./variable/hook.js";
-import { FunctionVariable } from "./variable/functionVariable.js";
-import { ClassVariable } from "./variable/classVariable.js";
-import { getDeterministicId } from "../utils/hash.js";
-import { getVariableNameKey } from "../analyzer/pattern.js";
-import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.js";
-import { SqliteDB } from "./sqlite.js";
+  isClassComponentVariable,
+} from "./variable/type.ts";
+import { HookVariable } from "./variable/hook.ts";
+import { FunctionVariable } from "./variable/functionVariable.ts";
+import { ClassVariable } from "./variable/classVariable.ts";
+import { getDeterministicId } from "../utils/hash.ts";
+import { getVariableNameKey } from "../analyzer/pattern.ts";
+import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.ts";
+import { SqliteDB } from "./sqlite.ts";
+import { PropertyVariable } from "./variable/propertyVariable.ts";
+import { MethodVariable } from "./variable/methodVariable.ts";
+import { StateVariable } from "./variable/stateVariable.ts";
+import { resolvePath } from "../utils/path.ts";
 
 export type ComponentDBOptions = {
   packageJson: PackageJson;
@@ -62,6 +77,7 @@ export class ComponentDB {
   public sqlite: SqliteDB | undefined;
 
   private resolveTasks: ComponentDBResolve[];
+  private unresolvedResolveTasks: ComponentDBResolve[];
   private typesToResolve: Set<string>;
 
   private isResolve = false;
@@ -76,9 +92,10 @@ export class ComponentDB {
 
   constructor(options: ComponentDBOptions) {
     this.edges = [];
-    this.files = new FileDB(options.dir);
+    this.files = new FileDB(options.dir, options.packageJson);
 
     this.resolveTasks = [];
+    this.unresolvedResolveTasks = [];
     this.typesToResolve = new Set();
 
     this.packageJson = options.packageJson;
@@ -86,6 +103,11 @@ export class ComponentDB {
 
     this.dir = options.dir;
     this.sqlite = options.sqlite;
+  }
+
+  public clearStack() {
+    this.jsxStack = [];
+    this.renderInstanceStack = [];
   }
 
   public pushJSX(id: string) {
@@ -112,10 +134,18 @@ export class ComponentDB {
     return this.renderInstanceStack[this.renderInstanceStack.length - 1];
   }
 
-  public addComponent(
+  public getResolveTasks() {
+    return [...this.resolveTasks];
+  }
+
+  public addResolveTasks(tasks: ComponentDBResolve[]) {
+    this.resolveTasks.push(...tasks);
+  }
+
+  public addFunctionComponent(
     fileName: string,
     component: Omit<
-      ComponentFileVarComponent,
+      ComponentFileVarFunctionComponent,
       "id" | "kind" | "states" | "hash" | "file"
     >,
     declarationKind?:
@@ -126,27 +156,26 @@ export class ComponentDB {
       | "await using"
       | undefined,
   ) {
-    const file = this.files.get(fileName);
-
+    const file = this.files.get(fileName)!;
     const nameKey = getVariableNameKey(component.name);
+    const id = getDeterministicId(file.path, nameKey);
 
-    const id = this.files.addVariable(
-      fileName,
-      new ComponentVariable(
-        {
-          id: getDeterministicId(fileName, nameKey),
-          ...component,
-          states: [],
-          declarationKind,
-        },
-        file,
-      ),
+    const v = new FunctionComponentVariable(
+      {
+        id,
+        ...component,
+        states: [],
+        declarationKind,
+      },
+      file,
     );
 
-    if (this.files.resolveComPropsTsTypeID(id, fileName)) {
+    this.files.addVariable(fileName, v);
+
+    if (component.propType) {
       this.resolveTasks.push({
         type: "comPropsTsType",
-        fileName: fileName,
+        fileName,
         id,
       });
     }
@@ -154,9 +183,97 @@ export class ComponentDB {
     return id;
   }
 
+  public addClassComponent(
+    fileName: string,
+    component: Omit<
+      ComponentFileVarClassComponent,
+      "id" | "kind" | "states" | "hash" | "file"
+    >,
+    declarationKind?:
+      | "const"
+      | "let"
+      | "var"
+      | "using"
+      | "await using"
+      | undefined,
+  ) {
+    const file = this.files.get(fileName)!;
+    const nameKey = getVariableNameKey(component.name);
+    const id = getDeterministicId(file.path, nameKey);
+
+    assert(
+      component.name.type === "identifier",
+      "Class name should be an identifier",
+    );
+
+    const existingId = file.getVariableID(component.name.name);
+    if (existingId) {
+      const existing = file.var.get(existingId);
+      if (existing && isClassComponentVariable(existing)) {
+        return existing.id;
+      }
+    }
+
+    const v = new ClassComponentVariable(
+      {
+        id,
+        ...component,
+        states: [],
+        declarationKind,
+      },
+      file,
+    );
+
+    return file.addVariable(v);
+
+    if (component.propType) {
+      this.resolveTasks.push({
+        type: "comPropsTsType",
+        fileName,
+        id,
+      });
+    }
+
+    if (component.stateType) {
+      this.resolveTasks.push({
+        type: "comClassStateTsType",
+        fileName,
+        id,
+      });
+    }
+
+    return id;
+  }
+
+  // TODO: add stateType
+  public addStateVariable(
+    fileName: string,
+    componentId: string,
+    stateName: string,
+    loc: VariableLoc,
+    stateType?: TypeData,
+  ) {
+    const file = this.files.get(fileName);
+    file.addStateVariable(componentId, stateName, loc, stateType);
+  }
+
+  public addRefVariable(
+    fileName: string,
+    componentId: string,
+    refName: string,
+    loc: VariableLoc,
+    defaultData: PropDataType,
+  ) {
+    const file = this.files.get(fileName);
+    file.addRefVariable(componentId, refName, loc, defaultData);
+  }
+
   public addJSXVariable(
     fileName: string,
-    jsx: Omit<ComponentFileVarJSX, "id" | "kind" | "type" | "hash" | "file">,
+    jsx: Omit<
+      ComponentFileVarJSX,
+      "id" | "kind" | "type" | "hash" | "file" | "render" | "children"
+    >,
     declarationKind?:
       | "const"
       | "let"
@@ -175,6 +292,7 @@ export class ComponentDB {
         {
           id: getDeterministicId(fileName, nameKey),
           ...jsx,
+          render: null,
           declarationKind,
         },
         file,
@@ -216,7 +334,6 @@ export class ComponentDB {
         {
           id: getDeterministicId(fileName, nameKey),
           ...variable,
-          children: {},
           states: [],
           declarationKind,
         },
@@ -227,77 +344,108 @@ export class ComponentDB {
 
   public addVariable(
     fileName: string,
-    variable: DistributiveOmit<
+    variable: Omit<
       ComponentFileVar,
       "id" | "kind" | "var" | "children" | "file" | "hash" | "components"
     >,
-    kind?: VarKind,
-    declarationKind?:
+    kind: VarKind = "normal",
+    declarationKind:
       | "const"
       | "let"
       | "var"
       | "using"
-      | "await using"
-      | undefined,
+      | "await using" = "const",
   ) {
     const file = this.files.get(fileName);
 
     const nameKey = getVariableNameKey(variable.name);
 
     let v: Variable | undefined;
-    if (variable.type === "function") {
+    if (kind === "class") {
+      v = new ClassVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarClass,
+          "var" | "type" | "kind" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (kind === "method") {
+      v = new MethodVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarMethod,
+          "var" | "components" | "type" | "kind" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (kind === "property") {
+      v = new PropertyVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+        } as unknown as Omit<
+          ComponentFileVarProperty,
+          "kind" | "type" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (variable.type === "function") {
       v = new FunctionVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as unknown as Omit<
-            ComponentFileVarNormalFunction,
-            | "id"
-            | "kind"
-            | "var"
-            | "children"
-            | "file"
-            | "hash"
-            | "components"
-            | "type"
-          >),
-          children: {},
+          ...variable,
           declarationKind,
-        },
+        } as unknown as Omit<
+          ComponentFileVarBaseTypeFunction<"normal">,
+          "var" | "components" | "file" | "hash"
+        >,
         file,
       );
     } else if (variable.type === "class") {
       v = new ClassVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as unknown as Omit<
-            ComponentFileVarNormalFunction,
-            | "id"
-            | "kind"
-            | "var"
-            | "children"
-            | "file"
-            | "hash"
-            | "components"
-            | "type"
-          >),
-          children: {},
+          ...variable,
           declarationKind,
-        },
+        } as unknown as Omit<
+          ComponentFileVarClass,
+          "var" | "type" | "kind" | "file" | "hash"
+        >,
+        file,
+      );
+    } else if (kind === "state") {
+      v = new StateVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...variable,
+          declarationKind,
+          setter: "setState",
+        } as unknown as Omit<
+          ComponentFileVarState,
+          "kind" | "file" | "type" | "hash"
+        >,
         file,
       );
     } else if (variable.type === "data") {
-      assert(kind != null, "kind must be defined for data variable");
-
       v = new DataVariable(
         {
           id: getDeterministicId(fileName, nameKey),
-          ...(variable as Omit<
-            ComponentFileVarNormalData,
-            "id" | "kind" | "var" | "children" | "file" | "hash"
-          >),
+          ...variable,
           kind,
           declarationKind,
-        },
+          type: "data",
+        } as unknown as Omit<
+          ComponentFileVarNormal,
+          "kind" | "var" | "children" | "file" | "hash"
+        > & { kind?: VarKind },
         file,
       );
     }
@@ -321,7 +469,7 @@ export class ComponentDB {
     fileName: string,
     state: Parameters<ReactFunctionVariable["addState"]>[0],
   ) {
-    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    const component = this.files.getReactFunctionFromLoc(fileName, loc);
 
     if (component == null || !isReactFunctionVariable(component))
       return "no-parent";
@@ -334,7 +482,7 @@ export class ComponentDB {
     fileName: string,
     callHook: Parameters<ReactFunctionVariable["addCallHook"]>[0],
   ) {
-    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    const component = this.files.getReactFunctionFromLoc(fileName, loc);
 
     if (component == null || !isReactFunctionVariable(component))
       return "no-parent";
@@ -345,19 +493,29 @@ export class ComponentDB {
     const comImport = this.files.getImport(fileName, hookName);
 
     if (comImport?.source !== "react") {
-      const exportInfo = this._getExportId(fileName, hookName);
-      let hookId: string | null = null;
-
-      if (exportInfo) {
-        hookId = exportInfo.id;
-      } else {
-        hookId = this.getVariableID(hookName, fileName);
-      }
-
-      if (hookId) {
+      if (
+        comImport &&
+        this.isWorkspaceDependencyImport(comImport.source, fileName)
+      ) {
         const v = component.var.get(id);
         if (v && isCallHookVariable(v)) {
-          v.call.id = hookId;
+          v.call.unresolvedWorkspace = true;
+        }
+        return id;
+      }
+
+      const resolvedTarget = this.getResolvedHookTarget(fileName, hookName);
+
+      if (resolvedTarget?.hookId) {
+        const v = component.var.get(id);
+        if (v && isCallHookVariable(v)) {
+          v.call.id = resolvedTarget.hookId;
+          if (resolvedTarget.resolvedId) {
+            v.call.resolvedId = resolvedTarget.resolvedId;
+          }
+          if (resolvedTarget.unresolvedWorkspace) {
+            v.call.unresolvedWorkspace = true;
+          }
         }
       } else {
         if (this.isResolve) return id;
@@ -375,12 +533,22 @@ export class ComponentDB {
     return id;
   }
 
+  public comAddProp(loc: VariableLoc, fileName: string, prop: PropData) {
+    const component = this.files.getReactFunctionFromLoc(fileName, loc);
+
+    if (component == null || !isReactFunctionVariable(component)) return;
+
+    if (!component.props.some((p) => p.name === prop.name)) {
+      component.props.push(prop);
+    }
+  }
+
   public comAddRef(
     loc: VariableLoc,
     fileName: string,
     ref: Omit<RefData, "id"> & { name: VariableName },
   ) {
-    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    const component = this.files.getReactFunctionFromLoc(fileName, loc);
 
     if (component == null || !isReactFunctionVariable(component))
       return "no-parent";
@@ -404,16 +572,84 @@ export class ComponentDB {
     return this.files.addCallback(fileName, loc, callback);
   }
 
+  private isWorkspaceDependencyImport(source: string, fileName: string) {
+    const rawPackageName =
+      typeof this.packageJson.rawData.name === "string"
+        ? this.packageJson.rawData.name
+        : undefined;
+    const currentScope = rawPackageName?.startsWith("@")
+      ? rawPackageName.split("/")[0]
+      : undefined;
+    const sourceScope = source.startsWith("@")
+      ? source.split("/")[0]
+      : undefined;
+    const resolvedFileName = fileName.startsWith("/")
+      ? path.join(this.dir, fileName)
+      : resolvePath(this.dir, fileName);
+
+    return (
+      currentScope != null &&
+      sourceScope === currentScope &&
+      this.packageJson.isDependency(source, resolvedFileName)
+    );
+  }
+
+  private getResolvedHookTarget(fileName: string, hookName: string) {
+    const exportInfo = this._getExportId(fileName, hookName);
+    if (exportInfo) {
+      return {
+        hookId: exportInfo.id,
+        resolvedId: exportInfo.resolvedId,
+        unresolvedWorkspace: exportInfo.unresolvedWorkspace ? true : undefined,
+      };
+    }
+
+    const hookId = this.getVariableID(hookName, fileName);
+    if (hookId) {
+      return {
+        hookId,
+        resolvedId: undefined,
+        unresolvedWorkspace: undefined,
+      };
+    }
+
+    const comImport = this.files.getImport(fileName, hookName);
+    if (
+      comImport &&
+      this.isWorkspaceDependencyImport(comImport.source, fileName)
+    ) {
+      return {
+        hookId: comImport.localName,
+        resolvedId: comImport.resolvedId,
+        unresolvedWorkspace: comImport.unresolvedWorkspace ?? true,
+      };
+    }
+
+    return null;
+  }
+
   private _getExportId(
     fileName: string,
     name: string,
-  ): { id: string; isDependency: boolean } | null {
+  ): {
+    id: string;
+    isDependency: boolean;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  } | null {
     const comImport = this.files.getImport(fileName, name);
     if (!comImport) return null;
 
-    const isDependency = this.isDependency(comImport.source);
+    const isDependency = this.isDependency(comImport.source, fileName);
     if (isDependency) {
-      return { id: comImport.localName, isDependency: true };
+      return {
+        id: comImport.localName,
+        isDependency: true,
+        resolvedId: comImport.resolvedId,
+        unresolvedWorkspace:
+          comImport.unresolvedWorkspace ??
+          this.isWorkspaceDependencyImport(comImport.source, fileName),
+      };
     }
 
     if (this.files.has(comImport.source)) {
@@ -432,6 +668,7 @@ export class ComponentDB {
     loc: VariableLoc,
     fileName: string,
     hook: string,
+    parentId?: string,
   ) {
     const comImport = this.files.getImport(fileName, hook);
     if (comImport?.source === "react") return;
@@ -447,12 +684,17 @@ export class ComponentDB {
         fileName,
         hook,
         loc,
+        parentId,
       });
       return;
     }
 
-    const component = this.files.getHookInfoFromLoc(fileName, loc);
+    const component = this.files.getReactFunctionFromLoc(fileName, loc);
     if (component == null || !isReactFunctionVariable(component)) return;
+
+    if (exportInfo.isDependency && exportInfo.unresolvedWorkspace) {
+      return;
+    }
 
     component.addHook(exportInfo.id);
 
@@ -463,7 +705,7 @@ export class ComponentDB {
       [],
       loc,
       "hook",
-      this.getCurrentRenderInstance(),
+      parentId || this.getCurrentRenderInstance(),
     );
   }
 
@@ -527,27 +769,27 @@ export class ComponentDB {
       }
     }
 
+    const instanceId = getDeterministicId(`${tag}-${loc.line}-${loc.column}`);
+
     if (!srcId) {
       if (tag && tag[0] === tag[0]?.toLowerCase()) {
         srcId = tag;
       } else {
-        if (this.isResolve) return "";
-
-        this.addResolveTask({
-          type: "comAddRender",
-          fileName: fileName,
-          tag,
-          dependency,
-          loc,
-          parentId,
-        });
-        return "";
+        if (!this.isResolve) {
+          this.addResolveTask({
+            type: "comAddRender",
+            fileName: fileName,
+            tag,
+            dependency,
+            loc,
+            parentId,
+          });
+          return instanceId;
+        }
       }
     }
 
-    const instanceId = getDeterministicId(`${tag}-${loc.line}-${loc.column}`);
-
-    this.files.addRender(
+    const renderID = this.files.addRender(
       fileName,
       srcId,
       instanceId,
@@ -558,6 +800,19 @@ export class ComponentDB {
       kind,
       parentId,
     );
+
+    if (!renderID) {
+      if (!this.isResolve) {
+        this.addResolveTask({
+          type: "comAddRender",
+          fileName: fileName,
+          tag,
+          dependency,
+          loc,
+          parentId,
+        });
+      }
+    }
 
     return instanceId;
   }
@@ -631,7 +886,13 @@ export class ComponentDB {
         const isTag =
           (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
           render.id === "Fragment";
-        if (!render.isDependency && pId != null && !isTag) {
+        if (
+          render.id &&
+          render.id !== "" &&
+          !render.isDependency &&
+          pId != null &&
+          !isTag
+        ) {
           this.edges.push({
             from: render.id,
             to: pId,
@@ -639,6 +900,36 @@ export class ComponentDB {
           });
         }
         resolveRenders(render.children, pId);
+      }
+    };
+
+    //TODO: test and replace
+    const resolveRenders2 = (
+      render: ComponentInfoRender | null,
+      pId?: string,
+    ) => {
+      if (!render) return;
+      const isTag =
+        (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
+        render.id === "Fragment";
+      if (
+        render.id &&
+        render.id !== "" &&
+        !render.isDependency &&
+        pId != null &&
+        !isTag
+      ) {
+        this.edges.push({
+          from: render.id,
+          to: pId,
+          label: "render",
+        });
+      }
+
+      if (render.children) {
+        for (const child of Object.values(render.children)) {
+          resolveRenders2(child, pId);
+        }
       }
     };
 
@@ -660,14 +951,14 @@ export class ComponentDB {
             (returnVar.srcId &&
               returnVar.srcId[0] === returnVar.srcId[0]?.toLowerCase()) ||
             returnVar.srcId === "Fragment";
-          if (returnVar.srcId && !isTag) {
+          if (returnVar.srcId && returnVar.srcId !== "" && !isTag) {
             this.edges.push({
               from: returnVar.srcId,
               to: variable.id,
               label: "render",
             });
           }
-          resolveRenders(returnVar.children, variable.id);
+          resolveRenders2(returnVar.render, variable.id);
         } else if (
           typeof returnData !== "string" &&
           returnData.type === "ref"
@@ -710,7 +1001,7 @@ export class ComponentDB {
 
         if (typeof returnData !== "string" && returnData.type === "jsx") {
           const returnVar = returnData;
-          if (parent != null) {
+          if (parent != null && parent !== "") {
             this.edges.push({
               from: parent,
               to: returnVar.id,
@@ -720,7 +1011,7 @@ export class ComponentDB {
         }
       }
     } else if (isJSXVariable(variable)) {
-      if (parent != null) {
+      if (parent != null && parent !== "") {
         this.edges.push({
           from: parent,
           to: variable.id,
@@ -762,15 +1053,15 @@ export class ComponentDB {
 
   public getData(): JsonData {
     return {
-      src: path.resolve(this.dir),
+      src: resolvePath(this.dir),
       files: this.files.getData(),
       edges: this.getEdges(),
       resolve: this.resolveTasks,
     };
   }
 
-  private addResolveTask(resolve: ComponentDBResolve) {
-    this.resolveTasks.push(resolve);
+  public addResolveTask(task: ComponentDBResolve) {
+    this.resolveTasks.push(task);
   }
 
   private static RESOLVE_HANDLERS: {
@@ -790,23 +1081,41 @@ export class ComponentDB {
       );
     },
     comAddHook: (db, task) => {
-      db.comAddHook(task.name, task.loc, task.fileName, task.hook);
+      db.comAddHook(
+        task.name,
+        task.loc,
+        task.fileName,
+        task.hook,
+        task.parentId,
+      );
     },
     comResolveCallHook: (db, task) => {
-      const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
-      if (component && isReactFunctionVariable(component)) {
-        const exportInfo = db._getExportId(task.fileName, task.hook);
-        let hookId: string | null = null;
-        if (exportInfo) {
-          hookId = exportInfo.id;
-        } else {
-          hookId = db.getVariableID(task.hook, task.fileName);
-        }
+      const comImport = db.files.getImport(task.fileName, task.hook);
+      if (
+        comImport &&
+        db.isWorkspaceDependencyImport(comImport.source, task.fileName)
+      ) {
+        return true;
+      }
 
-        if (hookId) {
+      const component = db.files.getHookInfoFromLoc(task.fileName, task.loc);
+      const resolvedTarget = db.getResolvedHookTarget(task.fileName, task.hook);
+
+      if (resolvedTarget?.unresolvedWorkspace && !resolvedTarget.resolvedId) {
+        return true;
+      }
+
+      if (component && isReactFunctionVariable(component)) {
+        if (resolvedTarget?.hookId) {
           const v = component.var.get(task.id);
           if (v && isCallHookVariable(v)) {
-            v.call.id = hookId;
+            v.call.id = resolvedTarget.hookId;
+            if (resolvedTarget.resolvedId) {
+              v.call.resolvedId = resolvedTarget.resolvedId;
+            }
+            if (resolvedTarget.unresolvedWorkspace) {
+              v.call.unresolvedWorkspace = true;
+            }
           }
           return true;
         }
@@ -826,19 +1135,39 @@ export class ComponentDB {
     comPropsTsType: (db, task) => {
       return db.files.resolveComPropsTsTypeID(task.id, task.fileName);
     },
+    comClassStateTsType: (db, task) => {
+      return db.files.resolveComClassStateTsTypeID(task.id, task.fileName);
+    },
+    crossPackageImport: (_db, _task) => {
+      return false;
+    },
   };
 
   public resolve() {
     this.isResolve = true;
+    this.unresolvedResolveTasks = [];
 
     const maxRetries = 1000;
     let retries = 0;
 
     while (this.resolveTasks.length > 0 && retries < maxRetries) {
+      const prevSize = this.resolveTasks.length;
       const currentTasks = [...this.resolveTasks];
       this.resolveTasks = [];
 
       for (const task of currentTasks) {
+        // Skip workspace-dependency hook tasks immediately — they are
+        // unresolvable within this package and should not re-queue.
+        if (task.type === "comResolveCallHook") {
+          const comImport = this.files.getImport(task.fileName, task.hook);
+          if (
+            comImport &&
+            this.isWorkspaceDependencyImport(comImport.source, task.fileName)
+          ) {
+            continue;
+          }
+        }
+
         const handler = ComponentDB.RESOLVE_HANDLERS[task.type] as (
           db: ComponentDB,
           task: ComponentDBResolve,
@@ -851,27 +1180,48 @@ export class ComponentDB {
         }
       }
 
+      // Stagnation check: if no task was resolved this round, further
+      // iterations cannot help — exit early to avoid the 1000-retry spin.
+      if (this.resolveTasks.length >= prevSize) {
+        break;
+      }
+
       retries++;
     }
 
-    if (retries >= maxRetries && this.resolveTasks.length > 0) {
-      console.warn(
-        "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
-        {
-          remainingTasks: this.resolveTasks.length,
-          taskTypes: [...new Set(this.resolveTasks.map((t) => t.type))],
-        },
-      );
+    // Any tasks still queued are genuinely unresolvable.
+    this.unresolvedResolveTasks = [...this.resolveTasks];
 
-      // debugger;
+    if (this.unresolvedResolveTasks.length > 0) {
+      // Only warn if we actually exhausted retries (a true deep chain),
+      // not for the common case where tasks simply cannot be resolved locally.
+      if (retries >= maxRetries) {
+        console.warn(
+          "Resolution interrupted: suspected infinite loop or deep dependency chain in ComponentDB.resolve",
+          {
+            remainingTasks: this.unresolvedResolveTasks.length,
+            taskTypes: [
+              ...new Set(this.unresolvedResolveTasks.map((t) => t.type)),
+            ],
+          },
+        );
+      }
     }
 
-    // this.resolveTasks = [];
+    this.resolveTasks = [];
     this.isResolve = false;
+    return [...this.unresolvedResolveTasks];
   }
 
-  public isDependency(name: string): boolean {
-    return this.packageJson.isDependency(name);
+  public getUnresolvedResolveTasks() {
+    return [...this.unresolvedResolveTasks];
+  }
+
+  public isDependency(name: string, fileName?: string): boolean {
+    return this.packageJson.isDependency(
+      name,
+      fileName ? resolvePath(this.dir, fileName) : undefined,
+    );
   }
 
   public getImportFileName(name: string, fileName: string) {
@@ -880,7 +1230,7 @@ export class ComponentDB {
       const fileDir = path.dirname(fileName);
       source = path.join(fileDir, source);
       source = path.normalize(source);
-    } else if (!this.isDependency(source)) {
+    } else if (!this.isDependency(source, fileName)) {
       let isAliase = false;
       for (const alias in this.viteAliases) {
         if (source.startsWith(alias)) {

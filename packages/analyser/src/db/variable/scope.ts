@@ -4,19 +4,21 @@ import type {
   VariableScope,
   VarKind,
 } from "@nexiq/shared";
-import type { Variable } from "./variable.js";
-import { isBaseFunctionVariable } from "./type.js";
+import type { Variable } from "./variable.ts";
+import { isBaseFunctionVariable, isClassVariable } from "./type.ts";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
-} from "../../analyzer/pattern.js";
-import type { BaseFunctionVariable } from "./baseFunctionVariable.js";
+} from "../../analyzer/pattern.ts";
+import type { BaseFunctionVariable } from "./baseFunctionVariable.ts";
 
 export class Scope {
   private variables = new Map<string, Variable>();
   private nameToVariable = new Map<string, Variable>();
   private nameToId = new Map<string, string>();
   private prevIds = new Map<string, string>();
+
+  type = "scope";
 
   constructor(
     public parent?: Scope,
@@ -34,7 +36,7 @@ export class Scope {
 
   public findDeepestScope(loc: VariableLoc): Scope {
     for (const v of this.variables.values()) {
-      if (isBaseFunctionVariable(v)) {
+      if (isBaseFunctionVariable(v) || isClassVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
           return v.var.findDeepestScope(loc);
         }
@@ -53,6 +55,13 @@ export class Scope {
           if (inner) return inner;
 
           return v;
+        }
+      } else if (isClassVariable(v)) {
+        if (v.scope && Scope.isLocInScope(loc, v.scope)) {
+          const inner = v.var.findDeepestVariable(loc);
+          if (inner) return inner;
+
+          return v as BaseFunctionVariable<VarKind>;
         }
       }
     }
@@ -88,10 +97,13 @@ export class Scope {
       this.nameToId.set(id.name, id.id);
     }
 
-    if (this.owner && isBaseFunctionVariable(this.owner)) {
+    if (
+      this.owner &&
+      (isBaseFunctionVariable(this.owner) || isClassVariable(this.owner))
+    ) {
       v.parent = this.owner as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
-    if (isBaseFunctionVariable(v)) {
+    if (isBaseFunctionVariable(v) || isClassVariable(v)) {
       if (v.var) {
         v.var.parent = this;
         v.var.owner = v;
@@ -104,7 +116,10 @@ export class Scope {
     if (v) return v;
     if (recursive) {
       for (const value of this.variables.values()) {
-        if (isBaseFunctionVariable(value) && value.var) {
+        if (
+          (isBaseFunctionVariable(value) || isClassVariable(value)) &&
+          value.var
+        ) {
           v = value.var.get(id, true);
           if (v) return v;
         }
@@ -123,6 +138,18 @@ export class Scope {
     const id = this.nameToId.get(name);
     if (id) return id;
     return this.parent?.getIdByName(name);
+  }
+
+  public merge(other: Scope) {
+    for (const [id, v] of other.variables) {
+      if (!this.variables.has(id)) {
+        this.variables.set(id, v);
+        v.parent = this;
+      } else {
+        const existing = this.variables.get(id)!;
+        existing.load(v);
+      }
+    }
   }
 
   public values() {

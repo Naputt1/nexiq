@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -58,9 +58,7 @@ describe("analyser robustness", () => {
   });
 
   it("should handle circular dependencies without infinite loops", async () => {
-    const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "nexiq-circular-"),
-    );
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-circular-"));
     const srcDir = path.join(tmpDir, "src");
     fs.mkdirSync(srcDir);
 

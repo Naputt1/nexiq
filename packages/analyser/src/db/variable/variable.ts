@@ -8,8 +8,9 @@ import type {
   VarType,
   UIItemState,
 } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { getDeterministicId } from "../../utils/hash.js";
+import type { File } from "../fileDB.ts";
+import { getDeterministicId } from "../../utils/hash.ts";
+import { Scope } from "./scope.ts";
 
 export abstract class Variable<
   TType extends VarType = VarType,
@@ -27,12 +28,12 @@ export abstract class Variable<
     | "var"
     | "using"
     | "await using"
-    | undefined
-    | "using"
-    | "await using";
+    | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Variable<"function" | "class">;
+  parent?: Scope;
   loc: VariableLoc;
+  isStatic?: boolean | undefined;
+  memberKind?: string | undefined;
   ui?:
     | (UIItemState & {
         renders?: Record<string, UIItemState>;
@@ -53,6 +54,8 @@ export abstract class Variable<
     this.dependencies = data.dependencies;
     this.loc = data.loc;
     this.ui = data.ui;
+    this.isStatic = data.isStatic;
+    this.memberKind = data.memberKind;
 
     this.file = file;
   }
@@ -60,6 +63,8 @@ export abstract class Variable<
   public load(data: Variable<TType>) {
     this.type = data.type;
     this.declarationKind = data.declarationKind;
+    this.isStatic = data.isStatic;
+    this.memberKind = data.memberKind;
 
     // TODO: handle merge
     this.dependencies = data.dependencies;
@@ -86,6 +91,8 @@ export abstract class Variable<
       dependencies: this.dependencies,
       loc: this.loc,
       ui: this.ui,
+      isStatic: this.isStatic,
+      memberKind: this.memberKind,
     };
   }
 

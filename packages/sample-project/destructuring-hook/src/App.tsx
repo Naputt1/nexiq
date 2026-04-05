@@ -28,7 +28,9 @@ export const App = () => {
     error,
   } = useQuery();
 
-  useEffect(() => {}, [userTheme]);
+  useEffect(() => {
+    console.log(name);
+  }, [userTheme]);
 
   return (
     <div>

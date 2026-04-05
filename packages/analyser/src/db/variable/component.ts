@@ -1,12 +1,16 @@
-import type { ComponentFileVarComponent } from "@nexiq/shared";
+import type {
+  ComponentFileVarClassComponent,
+  ComponentFileVarComponent,
+  ComponentFileVarFunctionComponent,
+} from "@nexiq/shared";
 import type { TypeData } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactFunctionVariable } from "./reactFunctionVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactFunctionVariable } from "./reactFunctionVariable.ts";
 
-export class ComponentVariable<
+export abstract class ComponentVariable<
   TType extends "function" | "class" = "function" | "class",
 > extends ReactFunctionVariable<"component", TType> {
-  componentType: ComponentFileVarComponent["componentType"];
+  componentType: "Function" | "Class";
   propType: TypeData | undefined;
   contexts: string[];
   forwardRef: boolean;
@@ -35,12 +39,11 @@ export class ComponentVariable<
     super.load(data);
 
     this.kind = "component";
-    this.componentType = data.componentType;
-    this.propType = data.propType;
+    this.componentType = data.componentType || this.componentType;
+    this.propType = data.propType || this.propType;
 
-    // TODO: handle merge
-    this.contexts = data.contexts;
-    this.forwardRef = data.forwardRef;
+    this.contexts = data.contexts ? [...data.contexts] : this.contexts;
+    this.forwardRef = data.forwardRef ?? this.forwardRef;
   }
 
   public getData(): ComponentFileVarComponent {
@@ -64,6 +67,53 @@ export class ComponentVariable<
       componentType: this.componentType,
       contexts: this.contexts,
       forwardRef: this.forwardRef,
+    };
+  }
+}
+
+export class FunctionComponentVariable extends ComponentVariable<"function"> {
+  constructor(
+    options: Omit<
+      ComponentFileVarFunctionComponent,
+      "kind" | "var" | "components" | "hash" | "file"
+    >,
+    file: File,
+  ) {
+    super(options, file);
+  }
+}
+
+export class ClassComponentVariable extends ComponentVariable<"class"> {
+  stateType: TypeData | undefined;
+
+  constructor(
+    options: Omit<
+      ComponentFileVarClassComponent,
+      "kind" | "var" | "components" | "hash" | "file"
+    >,
+    file: File,
+  ) {
+    super(options, file);
+    this.stateType = options.stateType;
+  }
+
+  public load(data: ClassComponentVariable) {
+    super.load(data);
+    this.stateType = data.stateType || this.stateType;
+  }
+
+  public getData(): ComponentFileVarClassComponent {
+    const data = super.getData() as ComponentFileVarClassComponent;
+    if (this.stateType) {
+      data.stateType = this.stateType;
+    }
+    return data;
+  }
+
+  protected getDataInternal() {
+    return {
+      ...super.getDataInternal(),
+      stateType: this.stateType,
     };
   }
 }

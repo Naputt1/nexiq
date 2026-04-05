@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { analyzeProject } from "./index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { analyzeProject } from "./index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
-import type { SnapshotData } from "./types/test.js";
+import type { SnapshotData } from "./types/test.ts";
 
 describe("analyser snapshots", () => {
   const projects = [
@@ -19,6 +19,7 @@ describe("analyser snapshots", () => {
     "forward-ref",
     "destructured-export",
     "ts-method-signature",
+    "class-components",
   ];
 
   projects.forEach((projectName) => {
@@ -77,7 +78,7 @@ describe("analyser ignore patterns", () => {
 describe("analyser class components", () => {
   it("should identify class components", async () => {
     const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
-    
+
     // We'll mock a file with a class component
     const fileName = "ClassComp.tsx";
     const code = `
@@ -88,20 +89,22 @@ describe("analyser class components", () => {
         }
       }
     `;
-    
+
     // Create a temporary file
     const filePath = path.resolve(projectPath, fileName);
     fs.writeFileSync(filePath, code);
-    
+
     try {
       const result = await analyzeProject(projectPath);
       const file = result.files["/ClassComp.tsx"];
-      
+
       expect(file).toBeDefined();
-      const comp = Object.values(file!.var).find(v => v.name.type === 'identifier' && v.name.name === 'ClassComp');
+      const comp = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "ClassComp",
+      );
       expect(comp).toBeDefined();
-      expect(comp?.kind).toBe('component');
-      expect(comp?.type).toBe('class');
+      expect(comp?.kind).toBe("component");
+      expect(comp?.type).toBe("class");
     } finally {
       fs.unlinkSync(filePath);
     }

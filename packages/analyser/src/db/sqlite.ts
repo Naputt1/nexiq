@@ -2,24 +2,33 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import fs from "node:fs";
 import type {
+  AnalysisRunRow,
   ComponentFile,
   ComponentFileVar,
   ComponentInfoRender,
-  VariableName,
+  ExportRow,
+  FileAnalysisErrorRow,
   EntityRow,
+  PackageRow,
   RelationRow,
   RenderRow,
-  ExportRow,
+  ResolveErrorRow,
+  VariableName,
 } from "@nexiq/shared";
 import { SqliteDB as BaseSqliteDB } from "@nexiq/shared/db";
 import {
   getVariableNameKey,
   getPatternIdentifiers,
-} from "../analyzer/pattern.js";
+} from "../analyzer/pattern.ts";
+import type { FileRunStatus } from "../types.ts";
 
 export interface AnalyzedFileResult {
   file: ComponentFile;
 }
+
+type FileResultWithPackage = ComponentFile & {
+  package_id?: string | undefined;
+};
 
 export class SqliteDB extends BaseSqliteDB {
   constructor(dbPath: string, options: { readonly?: boolean } = {}) {
@@ -42,7 +51,7 @@ export class SqliteDB extends BaseSqliteDB {
       user_version: number;
     };
     const currentVersion = versionRow.user_version;
-    const targetVersion = 3;
+    const targetVersion = 5;
 
     if (currentVersion < targetVersion) {
       // Force recreation of affected tables to apply new schema/FK changes
@@ -53,6 +62,13 @@ export class SqliteDB extends BaseSqliteDB {
         DROP TABLE IF EXISTS symbols;
         DROP TABLE IF EXISTS scopes;
         DROP TABLE IF EXISTS entities;
+        DROP TABLE IF EXISTS files;
+        DROP TABLE IF EXISTS package_dependencies;
+        DROP TABLE IF EXISTS packages;
+        DROP TABLE IF EXISTS resolve_errors;
+        DROP TABLE IF EXISTS file_analysis_errors;
+        DROP TABLE IF EXISTS file_run_status;
+        DROP TABLE IF EXISTS analysis_runs;
         PRAGMA user_version = ${targetVersion};
       `);
     }
@@ -69,13 +85,96 @@ export class SqliteDB extends BaseSqliteDB {
     }
 
     this.db.exec(`
+      CREATE TABLE IF NOT EXISTS packages (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        version TEXT NOT NULL,
+        path TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS package_dependencies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        package_id TEXT NOT NULL,
+        dependency_name TEXT NOT NULL,
+        dependency_version TEXT NOT NULL,
+        is_dev BOOLEAN DEFAULT 0,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         path TEXT UNIQUE NOT NULL,
+        package_id TEXT,
         hash TEXT NOT NULL,
         fingerprint TEXT NOT NULL,
         default_export TEXT,
-        star_exports_json TEXT
+        star_exports_json TEXT,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS analysis_runs (
+        id TEXT PRIMARY KEY,
+        package_id TEXT,
+        src_dir TEXT NOT NULL,
+        status TEXT NOT NULL,
+        started_at TEXT NOT NULL,
+        finished_at TEXT,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS file_run_status (
+        id TEXT PRIMARY KEY,
+        run_id TEXT NOT NULL,
+        package_id TEXT,
+        file_path TEXT NOT NULL,
+        status TEXT NOT NULL,
+        started_at TEXT NOT NULL,
+        finished_at TEXT,
+        attempt INTEGER NOT NULL DEFAULT 1,
+        file_hash TEXT,
+        fingerprint TEXT,
+        FOREIGN KEY (run_id) REFERENCES analysis_runs (id) ON DELETE CASCADE,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS file_analysis_errors (
+        id TEXT PRIMARY KEY,
+        run_id TEXT NOT NULL,
+        package_id TEXT,
+        file_path TEXT NOT NULL,
+        stage TEXT NOT NULL,
+        error_code TEXT,
+        message TEXT NOT NULL,
+        line INTEGER,
+        column INTEGER,
+        stack TEXT,
+        parser TEXT,
+        file_hash TEXT,
+        fingerprint TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (run_id) REFERENCES analysis_runs (id) ON DELETE CASCADE,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS resolve_errors (
+        id TEXT PRIMARY KEY,
+        run_id TEXT NOT NULL,
+        package_id TEXT,
+        file_path TEXT NOT NULL,
+        scope_id TEXT,
+        entity_id TEXT,
+        relation_kind TEXT NOT NULL,
+        source_name TEXT,
+        source_module TEXT,
+        target_hint TEXT,
+        resolver_stage TEXT NOT NULL,
+        message TEXT NOT NULL,
+        loc_line INTEGER,
+        loc_column INTEGER,
+        retry_count INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (run_id) REFERENCES analysis_runs (id) ON DELETE CASCADE,
+        FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
       );
 
       CREATE TABLE IF NOT EXISTS entities (
@@ -159,7 +258,178 @@ export class SqliteDB extends BaseSqliteDB {
       CREATE INDEX IF NOT EXISTS idx_exports_scope ON exports (scope_id);
       CREATE INDEX IF NOT EXISTS idx_relations_from ON relations (from_id);
       CREATE INDEX IF NOT EXISTS idx_relations_to ON relations (to_id);
+      CREATE INDEX IF NOT EXISTS idx_files_package ON files (package_id);
+      CREATE INDEX IF NOT EXISTS idx_package_dependencies_package ON package_dependencies (package_id);
+      CREATE INDEX IF NOT EXISTS idx_analysis_runs_package ON analysis_runs (package_id);
+      CREATE INDEX IF NOT EXISTS idx_file_run_status_run ON file_run_status (run_id);
+      CREATE INDEX IF NOT EXISTS idx_file_run_status_file ON file_run_status (file_path);
+      CREATE INDEX IF NOT EXISTS idx_file_analysis_errors_run ON file_analysis_errors (run_id);
+      CREATE INDEX IF NOT EXISTS idx_resolve_errors_run ON resolve_errors (run_id);
     `);
+  }
+
+  public beginRun(
+    data: Omit<AnalysisRunRow, "finished_at"> & { finished_at?: string | null },
+  ) {
+    this.db
+      .prepare(
+        `
+        INSERT OR REPLACE INTO analysis_runs (id, package_id, src_dir, status, started_at, finished_at)
+        VALUES (@id, @package_id, @src_dir, @status, @started_at, @finished_at)
+      `,
+      )
+      .run({
+        ...data,
+        finished_at: data.finished_at ?? null,
+      });
+  }
+
+  public finishRun(
+    runId: string,
+    status: string,
+    finishedAt: string = new Date().toISOString(),
+  ) {
+    this.db
+      .prepare(
+        "UPDATE analysis_runs SET status = ?, finished_at = ? WHERE id = ?",
+      )
+      .run(status, finishedAt, runId);
+  }
+
+  public markFileStatus(data: {
+    id: string;
+    run_id: string;
+    package_id?: string | null;
+    file_path: string;
+    status: FileRunStatus;
+    started_at: string;
+    finished_at?: string | null;
+    attempt?: number;
+    file_hash?: string | null;
+    fingerprint?: string | null;
+  }) {
+    this.db
+      .prepare(
+        `
+        INSERT OR REPLACE INTO file_run_status
+        (id, run_id, package_id, file_path, status, started_at, finished_at, attempt, file_hash, fingerprint)
+        VALUES (@id, @run_id, @package_id, @file_path, @status, @started_at, @finished_at, @attempt, @file_hash, @fingerprint)
+      `,
+      )
+      .run({
+        ...data,
+        package_id: data.package_id ?? null,
+        finished_at: data.finished_at ?? null,
+        attempt: data.attempt ?? 1,
+        file_hash: data.file_hash ?? null,
+        fingerprint: data.fingerprint ?? null,
+      });
+  }
+
+  public recordFileAnalysisError(
+    data: Omit<FileAnalysisErrorRow, "created_at"> & { created_at?: string },
+  ) {
+    this.db
+      .prepare(
+        `
+        INSERT INTO file_analysis_errors
+        (id, run_id, package_id, file_path, stage, error_code, message, line, column, stack, parser, file_hash, fingerprint, created_at)
+        VALUES (@id, @run_id, @package_id, @file_path, @stage, @error_code, @message, @line, @column, @stack, @parser, @file_hash, @fingerprint, @created_at)
+      `,
+      )
+      .run({
+        ...data,
+        package_id: data.package_id ?? null,
+        error_code: data.error_code ?? null,
+        line: data.line ?? null,
+        column: data.column ?? null,
+        stack: data.stack ?? null,
+        parser: data.parser ?? null,
+        file_hash: data.file_hash ?? null,
+        fingerprint: data.fingerprint ?? null,
+        created_at: data.created_at ?? new Date().toISOString(),
+      });
+  }
+
+  public recordResolveError(
+    data: Omit<ResolveErrorRow, "created_at"> & { created_at?: string },
+  ) {
+    this.db
+      .prepare(
+        `
+        INSERT OR IGNORE INTO resolve_errors
+        (id, run_id, package_id, file_path, scope_id, entity_id, relation_kind, source_name, source_module, target_hint, resolver_stage, message, loc_line, loc_column, retry_count, created_at)
+        VALUES (@id, @run_id, @package_id, @file_path, @scope_id, @entity_id, @relation_kind, @source_name, @source_module, @target_hint, @resolver_stage, @message, @loc_line, @loc_column, @retry_count, @created_at)
+      `,
+      )
+      .run({
+        ...data,
+        package_id: data.package_id ?? null,
+        scope_id: data.scope_id ?? null,
+        entity_id: data.entity_id ?? null,
+        source_name: data.source_name ?? null,
+        source_module: data.source_module ?? null,
+        target_hint: data.target_hint ?? null,
+        loc_line: data.loc_line ?? null,
+        loc_column: data.loc_column ?? null,
+        retry_count: data.retry_count ?? 0,
+        created_at: data.created_at ?? new Date().toISOString(),
+      });
+  }
+
+  public getLatestSuccessfulFileResult(
+    filePath: string,
+  ): ComponentFile | undefined {
+    return this.loadFileResults(filePath);
+  }
+
+  public getFileErrorsForRun(runId: string, filePath?: string) {
+    const sql = filePath
+      ? "SELECT * FROM file_analysis_errors WHERE run_id = ? AND file_path = ?"
+      : "SELECT * FROM file_analysis_errors WHERE run_id = ?";
+    return this.db
+      .prepare(sql)
+      .all(
+        ...(filePath ? [runId, filePath] : [runId]),
+      ) as FileAnalysisErrorRow[];
+  }
+
+  public getResolveErrorsForRun(runId: string) {
+    return this.db
+      .prepare("SELECT * FROM resolve_errors WHERE run_id = ?")
+      .all(runId) as ResolveErrorRow[];
+  }
+
+  public insertPackage(data: PackageRow) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO packages (id, name, version, path)
+      VALUES (@id, @name, @version, @path)
+    `);
+    stmt.run(data);
+  }
+
+  public insertPackageDependency(data: {
+    package_id: string;
+    dependency_name: string;
+    dependency_version: string;
+    is_dev: boolean;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT INTO package_dependencies (package_id, dependency_name, dependency_version, is_dev)
+      VALUES (@package_id, @dependency_name, @dependency_version, @is_dev)
+    `);
+    stmt.run({
+      package_id: data.package_id,
+      dependency_name: data.dependency_name,
+      dependency_version: data.dependency_version,
+      is_dev: data.is_dev ? 1 : 0,
+    });
+  }
+
+  public clearPackageDependencies(packageId: string) {
+    this.db
+      .prepare("DELETE FROM package_dependencies WHERE package_id = ?")
+      .run(packageId);
   }
 
   private insertEntity(data: {
@@ -309,18 +579,19 @@ export class SqliteDB extends BaseSqliteDB {
     }
   }
 
-  public saveFileResults(fileData: ComponentFile) {
-    const transaction = this.db.transaction((data: ComponentFile) => {
+  public saveFileResults(fileData: FileResultWithPackage) {
+    const transaction = this.db.transaction((data: FileResultWithPackage) => {
       // 1. Insert/Update file
       this.db
         .prepare(
           `
-        INSERT OR REPLACE INTO files (path, hash, fingerprint, default_export, star_exports_json)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json)
+        VALUES (?, ?, ?, ?, ?, ?)
       `,
         )
         .run(
           data.path,
+          data.package_id || null,
           data.hash,
           data.fingerPrint,
           data.defaultExport,
@@ -337,6 +608,11 @@ export class SqliteDB extends BaseSqliteDB {
           "DELETE FROM relations WHERE from_id IN (SELECT e.id FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?)",
         )
         .run(fileId);
+      this.db
+        .prepare(
+          "DELETE FROM relations WHERE json_extract(data_json, '$.filePath') = ?",
+        )
+        .run(data.path);
       this.db
         .prepare(
           "DELETE FROM exports WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
@@ -457,9 +733,9 @@ export class SqliteDB extends BaseSqliteDB {
             .run(parentEntityId, v.id, "parent-child");
         }
 
-        // If it's a function/jsx, it has its own scope
+        // If it's a function/jsx/class, it has its own scope
         if (
-          (v.type === "function" || v.type === "jsx") &&
+          (v.type === "function" || v.type === "jsx" || v.type === "class") &&
           ("var" in v || "children" in v)
         ) {
           const newScopeId = `scope:block:${v.id}`;
@@ -527,9 +803,44 @@ export class SqliteDB extends BaseSqliteDB {
           data_json: JSON.stringify(type),
         });
       }
+
+      // 8. Insert persisted usage relations for this file
+      for (const relation of data.relations || []) {
+        this.db
+          .prepare(
+            "INSERT OR REPLACE INTO relations (from_id, to_id, kind, line, column, data_json) VALUES (?, ?, ?, ?, ?, ?)",
+          )
+          .run(
+            relation.from_id,
+            relation.to_id,
+            relation.kind,
+            relation.line ?? 0,
+            relation.column ?? 0,
+            relation.data_json ? JSON.stringify(relation.data_json) : null,
+          );
+      }
     });
 
     transaction(fileData);
+  }
+
+  public saveFileResultsForRun(
+    runId: string,
+    fileData: FileResultWithPackage,
+    packageId?: string,
+  ) {
+    this.saveFileResults(fileData);
+    this.markFileStatus({
+      id: `${runId}:${fileData.path}`,
+      run_id: runId,
+      package_id: packageId ?? fileData.package_id ?? null,
+      file_path: fileData.path,
+      status: "persisted",
+      started_at: new Date().toISOString(),
+      finished_at: new Date().toISOString(),
+      file_hash: fileData.hash,
+      fingerprint: fileData.fingerPrint,
+    });
   }
 
   private getVariableMetadata(v: ComponentFileVar) {
@@ -621,7 +932,7 @@ export class SqliteDB extends BaseSqliteDB {
         ...metadata,
       };
 
-      if (e.type === "function") {
+      if (e.type === "function" || e.type === "class") {
         varObj.var = {};
         varObj.children = {};
         varObj.scope = {
@@ -646,14 +957,36 @@ export class SqliteDB extends BaseSqliteDB {
     `,
       )
       .all(fileId) as RelationRow[];
+    const usageRelations = this.db
+      .prepare(
+        `
+      SELECT * FROM relations
+      WHERE json_extract(data_json, '$.filePath') = ?
+    `,
+      )
+      .all(filePath) as RelationRow[];
 
     for (const rel of relations) {
       const parent = varMap.get(rel.from_id);
       const child = varMap.get(rel.to_id);
-      if (parent && child && parent.type === "function" && parent.var) {
+      if (
+        parent &&
+        child &&
+        (parent.type === "function" || parent.type === "class") &&
+        parent.var
+      ) {
         parent.var[child.id] = child;
       }
     }
+
+    result.relations = usageRelations.map((rel) => ({
+      from_id: rel.from_id,
+      to_id: rel.to_id,
+      kind: rel.kind,
+      line: rel.line,
+      column: rel.column,
+      data_json: rel.data_json ? JSON.parse(rel.data_json) : null,
+    }));
 
     // Root variables
     const childIds = new Set(relations.map((r) => r.to_id));

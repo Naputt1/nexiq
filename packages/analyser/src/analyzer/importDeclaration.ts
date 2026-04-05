@@ -1,6 +1,6 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
+import type { ComponentDB } from "../db/componentDB.ts";
 
 export default function ImportDeclaration(
   componentDB: ComponentDB,
