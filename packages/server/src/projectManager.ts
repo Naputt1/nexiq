@@ -20,13 +20,12 @@ import {
   type ComponentFileVar,
   type UIItemState,
 } from "@nexiq/shared";
+import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/analyser";
 import type { Extension } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { simpleGit, type LogOptions } from "simple-git";
-import yaml from "js-yaml";
-import fg from "fast-glob";
 import tmp from "tmp";
 
 const execAsync = promisify(exec);
@@ -42,10 +41,6 @@ interface ExtendedSymbolRow extends SymbolRow {
 interface ExtendedRenderRow extends RenderRow {
   file: string;
   in_name: string | null;
-}
-
-export interface PnpmWorkspace {
-  packages?: string[];
 }
 
 export interface PackageJson {
@@ -98,8 +93,13 @@ export class ProjectManager {
   async openProject(
     projectPath: string,
     subProject?: string,
+    subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const key = subProject ? `${projectPath}:${subProject}` : projectPath;
+    const key = subProjects
+      ? `${projectPath}:multi:${subProjects.join(",")}`
+      : subProject
+        ? `${projectPath}:${subProject}`
+        : projectPath;
     if (this.projects.has(key)) {
       return this.projects.get(key)!;
     }
@@ -113,7 +113,11 @@ export class ProjectManager {
 
     const openPromise = (async () => {
       try {
-        const result = await this._openProjectInternal(projectPath, subProject);
+        const result = await this._openProjectInternal(
+          projectPath,
+          subProject,
+          subProjects,
+        );
         this.projects.set(key, result);
         return result;
       } finally {
@@ -128,10 +132,9 @@ export class ProjectManager {
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
+    subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     try {
       if (!fs.existsSync(cacheDir)) {
@@ -158,7 +161,9 @@ export class ProjectManager {
 
     if (fs.existsSync(configPath)) {
       try {
-        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        const config = JSON.parse(
+          fs.readFileSync(configPath, "utf-8"),
+        ) as NexiqConfig;
         ignorePatterns = config.ignorePatterns;
         extensionNames = config.extensions || [];
       } catch (e: unknown) {
@@ -170,11 +175,11 @@ export class ProjectManager {
     const extensions: Extension[] = [];
     for (const name of extensionNames) {
       try {
-        let loaded: unknown;
+        let loaded: Record<string, unknown>;
 
         try {
           // 1. Try importing by name (resolves from server's node_modules)
-          loaded = await import(name);
+          loaded = (await import(name)) as Record<string, unknown>;
         } catch (e: unknown) {
           // 2. Try importing relative to the project being analyzed
           const projectNodeModulesPath = path.join(
@@ -188,17 +193,19 @@ export class ProjectManager {
             const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
             const entry = pkg.module || pkg.main || "index.js";
             const fullPath = path.join(projectNodeModulesPath, entry);
-            loaded = await import(pathToFileURL(fullPath).href);
+            loaded = (await import(pathToFileURL(fullPath).href)) as Record<
+              string,
+              unknown
+            >;
           } else {
             throw e; // Rethrow original error if project-relative also fails
           }
         }
 
-        const extension = Object.values(
-          (loaded as Record<string, unknown>) || {},
-        ).find(
-          (val: unknown) => val && typeof val === "object" && "id" in val,
-        ) as Extension;
+        const extension = Object.values(loaded || {}).find(
+          (val: unknown): val is Extension =>
+            !!(val && typeof val === "object" && "id" in val),
+        );
 
         if (extension) {
           extensions.push(extension);
@@ -214,10 +221,16 @@ export class ProjectManager {
 
     console.error(`Analyzing project: ${analysisPath}`);
     const graph = await analyzeProject(
-      analysisPath,
-      cacheFile,
-      ignorePatterns,
-      sqlitePath,
+      subProjects && subProjects.length > 0 ? projectPath : analysisPath,
+      {
+        cacheFile,
+        ignorePatterns,
+        sqlitePath,
+        analysisPaths: subProjects?.map((p) =>
+          path.join(projectPath, p.replace(/^\/+/, "")),
+        ),
+        monorepo: subProjects && subProjects.length > 0 ? true : undefined,
+      },
     );
 
     fs.writeFileSync(cacheFile, JSON.stringify(graph, null, 2));
@@ -506,9 +519,7 @@ export class ProjectManager {
     const fileCache = new Map<string, string[]>();
     const results = [];
 
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
 
     for (const usage of allUsages) {
       const fullPath = path.resolve(
@@ -801,9 +812,7 @@ export class ProjectManager {
     if (locations.length === 0)
       return { error: `Symbol "${query}" not found.` };
 
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const results: {
       id: string;
       name: string;
@@ -940,7 +949,7 @@ export class ProjectManager {
 
   async readFile(projectPath: string, filePath: string, subProject?: string) {
     const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
+      ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
     const fullPath = path.resolve(
       analysisPath,
@@ -960,9 +969,7 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
 
     const isExcluded = (filePath: string) => {
       if (!exclude || exclude.length === 0) return false;
@@ -1010,9 +1017,7 @@ export class ProjectManager {
     error?: string;
     exitCode: number;
   }> {
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const dangerous = [
       "rm -rf",
       "mkfs",
@@ -1055,9 +1060,7 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     if (!project || !project.graph) return false;
 
-    const analysisPath = subProject
-      ? path.resolve(projectPath, subProject)
-      : projectPath;
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
     const cacheFile = path.join(
@@ -1188,9 +1191,10 @@ export class ProjectManager {
   }
 
   private _saveCache(project: ProjectInfo) {
-    const analysisPath = project.subProject
-      ? path.resolve(project.projectPath, project.subProject)
-      : project.projectPath;
+    const analysisPath = this.getAnalysisPath(
+      project.projectPath,
+      project.subProject,
+    );
     const cacheDir = path.join(analysisPath, ".nexiq", "cache");
     const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
     fs.writeFileSync(
@@ -1221,23 +1225,11 @@ export class ProjectManager {
         }
       }
 
-      const pnpmWorkspace = path.join(directoryPath, "pnpm-workspace.yaml");
       const packageJsonPath = path.join(directoryPath, "package.json");
+      const workspacePatterns = getWorkspacePatterns(directoryPath);
 
-      let workspacePatterns: string[] = [];
-
-      if (fs.existsSync(pnpmWorkspace)) {
+      if (workspacePatterns.length > 0) {
         status.isMonorepo = true;
-        try {
-          const doc = yaml.load(
-            fs.readFileSync(pnpmWorkspace, "utf-8"),
-          ) as PnpmWorkspace;
-          if (doc && doc.packages && Array.isArray(doc.packages)) {
-            workspacePatterns = doc.packages;
-          }
-        } catch (e: unknown) {
-          console.error("Error reading pnpm-workspace.yaml", e);
-        }
       } else if (fs.existsSync(packageJsonPath)) {
         try {
           const pkg = JSON.parse(
@@ -1245,14 +1237,6 @@ export class ProjectManager {
           ) as PackageJson;
           if (pkg.workspaces) {
             status.isMonorepo = true;
-            if (Array.isArray(pkg.workspaces)) {
-              workspacePatterns = pkg.workspaces;
-            } else if (
-              pkg.workspaces.packages &&
-              Array.isArray(pkg.workspaces.packages)
-            ) {
-              workspacePatterns = pkg.workspaces.packages;
-            }
           }
         } catch {
           // ignore
@@ -1261,30 +1245,13 @@ export class ProjectManager {
 
       if (status.isMonorepo && workspacePatterns.length > 0) {
         try {
-          const entries = await fg(
-            workspacePatterns.map((p) =>
-              p.endsWith("/") ? `${p}package.json` : `${p}/package.json`,
-            ),
-            {
-              cwd: directoryPath,
-              ignore: ["**/node_modules/**"],
-              absolute: true,
-            },
-          );
-
           const subProjects: SubProject[] = [];
+          const entries = await discoverWorkspacePackages(directoryPath);
           for (const entry of entries) {
-            try {
-              const pkg = JSON.parse(
-                fs.readFileSync(entry, "utf-8"),
-              ) as PackageJson;
-              subProjects.push({
-                name: pkg.name || path.basename(path.dirname(entry)),
-                path: path.dirname(entry),
-              });
-            } catch {
-              // ignore
-            }
+            subProjects.push({
+              name: entry.name,
+              path: entry.path,
+            });
           }
           status.subProjects = subProjects;
         } catch (e: unknown) {
@@ -1444,7 +1411,7 @@ export class ProjectManager {
     projectRoot: string,
     commitHash: string,
     subPath?: string,
-  ): Promise<DatabaseData> {
+  ): Promise<{ sqlitePath: string }> {
     const git = simpleGit(projectRoot);
     const resolvedHash = await git.revparse([commitHash]);
 
@@ -1461,10 +1428,7 @@ export class ProjectManager {
     const sqlitePath = path.join(commitCacheDir, `${cacheKey}.sqlite`);
 
     if (fs.existsSync(sqlitePath)) {
-      const sqlite = new SqliteDB(sqlitePath);
-      const data = sqlite.getAllData();
-      sqlite.close();
-      return data;
+      return { sqlitePath };
     }
 
     if (!fs.existsSync(commitCacheDir)) {
@@ -1500,10 +1464,7 @@ export class ProjectManager {
       }
 
       await analyzeProject(analysisPath, undefined, ignorePatterns, sqlitePath);
-      const sqlite = new SqliteDB(sqlitePath);
-      const data = sqlite.getAllData();
-      sqlite.close();
-      return data;
+      return { sqlitePath };
     } finally {
       tempDir.removeCallback();
     }
@@ -1646,5 +1607,18 @@ export class ProjectManager {
       if (project.db) project.db.close();
     }
     this.projects.clear();
+  }
+
+  private getAnalysisPath(projectPath: string, subProject?: string): string {
+    if (!subProject) return projectPath;
+    if (path.isAbsolute(subProject)) {
+      // If it's inside projectPath, we can still use it.
+      // If it's a subproject name like "/src", it might be absolute on Unix but intended as relative.
+      // The old behavior was to always join it.
+      if (subProject.startsWith(projectPath)) return subProject;
+      // Fallback for cases like "/src" which are absolute but we want relative
+      return path.join(projectPath, subProject.replace(/^\/+/, ""));
+    }
+    return path.join(projectPath, subProject.replace(/^\/+/, ""));
   }
 }

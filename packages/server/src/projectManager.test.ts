@@ -14,6 +14,12 @@ import Database from "better-sqlite3";
 
 vi.mock("node:fs");
 vi.mock("@parcel/watcher");
+vi.mock("@nexiq/test-extension", () => ({
+  default: { id: "test-ext" },
+}));
+vi.mock("@nexiq/fallback", () => ({
+  default: { id: "fallback-ext" },
+}));
 
 const createMockStmt = () => ({
   all: vi.fn(() => []),
@@ -33,9 +39,9 @@ vi.mock("@nexiq/analyser", () => ({
 }));
 
 vi.mock("@nexiq/analyser/db/sqlite", () => ({
-  SqliteDB: vi.fn().mockImplementation(() => ({
-    db: mockDb,
-    getAllData: vi.fn().mockReturnValue({
+  SqliteDB: vi.fn().mockImplementation(function (this: any) {
+    this.db = mockDb;
+    this.getAllData = vi.fn().mockReturnValue({
       files: [],
       entities: [],
       scopes: [],
@@ -43,9 +49,9 @@ vi.mock("@nexiq/analyser/db/sqlite", () => ({
       renders: [],
       exports: [],
       relations: [],
-    }),
-    close: () => mockDb.close(),
-  })),
+    });
+    this.close = () => mockDb.close();
+  }),
 }));
 
 vi.mock("better-sqlite3", () => {
@@ -84,9 +90,10 @@ describe("ProjectManager", () => {
     );
     expect(analyzeProject).toHaveBeenCalledWith(
       projectPath,
-      expect.any(String),
-      undefined,
-      expect.any(String),
+      expect.objectContaining({
+        cacheFile: expect.any(String),
+        sqlitePath: expect.any(String),
+      }),
     );
     expect(watcher.subscribe).toHaveBeenCalled();
   });
@@ -100,9 +107,43 @@ describe("ProjectManager", () => {
     const expectedAnalysisPath = path.resolve(projectPath, subProject);
     expect(analyzeProject).toHaveBeenCalledWith(
       expectedAnalysisPath,
-      expect.any(String),
-      undefined,
-      expect.any(String),
+      expect.objectContaining({
+        cacheFile: expect.any(String),
+        sqlitePath: expect.any(String),
+      }),
+    );
+  });
+
+  it("should handle subprojects starting with a slash correctly", async () => {
+    const projectPath = "/test/project";
+    const subProject = "/src";
+    const info = await projectManager.openProject(projectPath, subProject);
+
+    expect(info.subProject).toBe(subProject);
+    const expectedAnalysisPath = path.join(projectPath, "src");
+    expect(analyzeProject).toHaveBeenCalledWith(
+      expectedAnalysisPath,
+      expect.objectContaining({
+        cacheFile: expect.any(String),
+        sqlitePath: expect.any(String),
+      }),
+    );
+  });
+
+  it("should handle subProjects (plural) starting with a slash correctly", async () => {
+    const projectPath = "/test/project";
+    const subProjects = ["/packages/a", "packages/b"];
+    await projectManager.openProject(projectPath, undefined, subProjects);
+
+    expect(analyzeProject).toHaveBeenCalledWith(
+      projectPath,
+      expect.objectContaining({
+        analysisPaths: [
+          path.join(projectPath, "packages/a"),
+          path.join(projectPath, "packages/b"),
+        ],
+        monorepo: true,
+      }),
     );
   });
 
@@ -131,22 +172,16 @@ describe("ProjectManager", () => {
       }),
     );
 
-    // Mock dynamic import
-    vi.mock("@nexiq/test-extension", () => ({
-      default: { id: "test-ext" },
-    }));
-    vi.mock("@nexiq/fallback", () => ({
-      default: { id: "fallback-ext" },
-    }));
-
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await projectManager.openProject(projectPath);
 
     expect(analyzeProject).toHaveBeenCalledWith(
       projectPath,
-      expect.any(String),
-      ["*.test.ts"],
-      expect.any(String),
+      expect.objectContaining({
+        cacheFile: expect.any(String),
+        sqlitePath: expect.any(String),
+        ignorePatterns: ["*.test.ts"],
+      }),
     );
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("Loaded extension: test-ext"),
@@ -513,9 +548,10 @@ describe("ProjectManager", () => {
       expect(result).toBeDefined();
       expect(analyzeProject).toHaveBeenCalledWith(
         "/new-project",
-        expect.any(String),
-        undefined,
-        expect.any(String),
+        expect.objectContaining({
+          cacheFile: expect.any(String),
+          sqlitePath: expect.any(String),
+        }),
       );
     });
   });
@@ -770,9 +806,10 @@ describe("ProjectManager", () => {
       expect(loc).toEqual([]);
       expect(analyzeProject).toHaveBeenCalledWith(
         "/new-project",
-        expect.any(String),
-        undefined,
-        expect.any(String),
+        expect.objectContaining({
+          cacheFile: expect.any(String),
+          sqlitePath: expect.any(String),
+        }),
       );
     });
   });

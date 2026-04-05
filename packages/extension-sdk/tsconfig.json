@@ -12,11 +12,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@nexiq/shared": ["../shared/dist/index.d.ts"],
       "@nexiq/shared/*": ["../shared/dist/*"]
-    }
+    },
   },
   "include": ["src"]
 }

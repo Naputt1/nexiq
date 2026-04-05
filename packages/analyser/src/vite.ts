@@ -3,7 +3,7 @@ import path from "path";
 import * as parser from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { CallExpression, ObjectProperty } from "@babel/types";
-import { traverseFn } from "./utils/babel.js";
+import { traverseFn } from "./utils/babel.ts";
 
 export function getViteAliases(
   viteConfigFile?: string | null,
@@ -31,7 +31,7 @@ export function getViteAliases(
         const value = path.node.value;
         if (value?.type === "ObjectExpression") {
           value.properties.forEach((prop) => {
-            let key = "";
+            let key;
             let replacement = "";
             if (prop.type === "ObjectProperty") {
               const k = prop.key;
@@ -91,8 +91,16 @@ export function getTsConfigAliases(dir: string): Record<string, string> {
 
   try {
     const code = fs.readFileSync(tsconfigPath, "utf-8");
-    // Simple JSON parse (might need to handle comments in real world)
-    const tsconfig = JSON.parse(code);
+    // Strip comments and trailing commas before parsing
+    // Match strings or comments, only keep strings
+    const cleanedCode = code
+      .replace(
+        /("(?:\\.|[^\\"])*")|(\/\*[\s\S]*?\*\/|\/\/.*)/g,
+        (match, string) => string || "",
+      )
+      .replace(/,\s*([}\]])/g, "$1");
+
+    const tsconfig = JSON.parse(cleanedCode);
     const paths = tsconfig?.compilerOptions?.paths;
     if (!paths) return {};
 

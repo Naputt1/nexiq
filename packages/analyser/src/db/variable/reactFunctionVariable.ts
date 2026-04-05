@@ -11,21 +11,21 @@ import type {
   VariableName,
   VarType,
 } from "@nexiq/shared";
-import { BaseFunctionVariable } from "./baseFunctionVariable.js";
-import type { File } from "../fileDB.js";
-import { Variable } from "./variable.js";
-import { StateVariable } from "./stateVariable.js";
+import { BaseFunctionVariable } from "./baseFunctionVariable.ts";
+import type { File } from "../fileDB.ts";
+import { StateVariable } from "./stateVariable.ts";
 import {
   isCallbackVariable,
   isMemoVariable,
+  isReactFunctionVariable,
   isRefVariable,
   isStateVariable,
-} from "./type.js";
-import { MemoVariable } from "./memo.js";
-import { CallbackVariable } from "./callbackVariable.js";
-import { RefVariable } from "./refVariable.js";
-import { getVariableNameKey } from "../../analyzer/pattern.js";
-import { CallHookVariable } from "./callHookVariable.js";
+} from "./type.ts";
+import { MemoVariable } from "./memo.ts";
+import { CallbackVariable } from "./callbackVariable.ts";
+import { RefVariable } from "./refVariable.ts";
+import { getVariableNameKey } from "../../analyzer/pattern.ts";
+import { CallHookVariable } from "./callHookVariable.ts";
 
 export abstract class ReactFunctionVariable<
   TKind extends ReactFunctionVar = ReactFunctionVar,
@@ -249,7 +249,6 @@ export abstract class ReactFunctionVariable<
       {
         id: id,
         dependencies: {},
-        children: {},
         ...memo,
       },
       this.file,
@@ -273,7 +272,6 @@ export abstract class ReactFunctionVariable<
       {
         id: id,
         dependencies: {},
-        children: {},
         ...callback,
       },
       this.file,
@@ -394,7 +392,6 @@ export abstract class ReactFunctionVariable<
         }
       }
 
-      
       // debugger;
     }
   }
@@ -432,10 +429,20 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public load(data: Variable<TType, TKind>) {
+  public load(data: ReactFunctionVariable<TKind, TType>) {
     super.load(data);
-    if (data instanceof ReactFunctionVariable) {
-      this.propName = data.propName;
+
+    if (isReactFunctionVariable(data)) {
+      this.propName = data.propName || this.propName;
+      if (data.props.length > 0) {
+        this.props = [...data.props];
+      }
+      if (data.hooks.length > 0) {
+        this.hooks = [...data.hooks];
+      }
+      if (Object.keys(data.effects).length > 0) {
+        this.effects = { ...data.effects };
+      }
       this.syncSets();
     }
   }
@@ -444,6 +451,7 @@ export abstract class ReactFunctionVariable<
     return {
       ...super.getBaseData(),
       states: [...this.states],
+      refs: [...this.refs],
       props: this.props,
       propName: this.propName,
       hooks: this.hooks,
@@ -455,6 +463,7 @@ export abstract class ReactFunctionVariable<
     return {
       ...super.getDataInternal(),
       states: [...this.states],
+      refs: [...this.refs],
       props: this.props,
       propName: this.propName,
       hooks: this.hooks,

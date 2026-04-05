@@ -1,14 +1,9 @@
-import type {
-  ComponentFileVarJSX,
-  ComponentInfoRender,
-  ComponentInfoRenderDependency,
-} from "@nexiq/shared";
-import { Variable } from "./variable.js";
-import type { File } from "../fileDB.js";
+import type { ComponentFileVarJSX, ComponentInfoRender } from "@nexiq/shared";
+import { Variable } from "./variable.ts";
+import type { File } from "../fileDB.ts";
 
 export class JSXVariable extends Variable<"jsx", "normal"> {
-  tag: string;
-  props: ComponentInfoRenderDependency[];
+  render: ComponentInfoRender | null;
   children: Record<string, ComponentInfoRender>;
   srcId?: string | undefined;
 
@@ -17,18 +12,31 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
     file: File,
   ) {
     super({ ...options, kind: "normal", type: "jsx" }, file);
-    this.tag = options.tag;
-    this.props = options.props;
-    this.children = options.children || {};
+    this.render = options.render;
     this.srcId = options.srcId;
+
+    this.children = {};
+    if (this.render) {
+      this.__loadChildren(this.render);
+    }
+  }
+
+  private __loadChildren(render: ComponentInfoRender) {
+    this.children[render.id] = render;
+
+    if (render.children) {
+      for (const child of Object.values(render.children)) {
+        this.__loadChildren(child);
+      }
+    }
   }
 
   public load(data: JSXVariable) {
     super.load(data);
-    this.tag = data.tag;
-    this.props = data.props;
-    this.children = data.children;
-    this.srcId = data.srcId;
+
+    this.render = data.render || this.render;
+    this.children = data.children ? { ...data.children } : this.children;
+    this.srcId = data.srcId || this.srcId;
   }
 
   public getData(): ComponentFileVarJSX {
@@ -36,18 +44,14 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
       ...this.getBaseData(),
       type: "jsx",
       kind: "normal",
-      tag: this.tag,
-      props: this.props,
-      children: this.children,
+      render: this.render,
       srcId: this.srcId,
     };
   }
 
   protected getDataInternal() {
     return {
-      tag: this.tag,
-      props: this.props,
-      children: this.children,
+      render: this.render,
       srcId: this.srcId,
     };
   }

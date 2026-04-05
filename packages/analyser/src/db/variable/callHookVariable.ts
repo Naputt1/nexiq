@@ -1,9 +1,14 @@
 import type { ComponentFileVarCallHook } from "@nexiq/shared";
-import type { File } from "../fileDB.js";
-import { ReactVariable } from "./reactVariable.js";
+import type { File } from "../fileDB.ts";
+import { ReactVariable } from "./reactVariable.ts";
 
 export class CallHookVariable extends ReactVariable<"data", "hook"> {
-  call: { id: string; name: string };
+  call: {
+    id: string;
+    name: string;
+    resolvedId?: string | undefined;
+    unresolvedWorkspace?: boolean | undefined;
+  };
 
   constructor(
     options: Omit<ComponentFileVarCallHook, "kind" | "file" | "type">,
@@ -16,7 +21,7 @@ export class CallHookVariable extends ReactVariable<"data", "hook"> {
 
   public load(data: CallHookVariable) {
     super.load(data);
-
+    this.call = data.call || this.call;
     this.kind = "hook";
   }
 

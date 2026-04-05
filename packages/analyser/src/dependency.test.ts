@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
-import { PackageJson } from "./db/packageJson.js";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
+import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 
 describe("dependency resolution", () => {
@@ -35,17 +35,17 @@ describe("dependency resolution", () => {
       throw new Error("App should be a component");
 
     // Check Child render dependency
-    const returnVar = appVar.return;
-    expect(returnVar).toBeDefined();
-    if (
-      !returnVar ||
-      typeof returnVar === "string" ||
-      returnVar.type !== "jsx"
-    ) {
+    const returnID = appVar.return;
+    expect(returnID).toBeDefined();
+    if (!returnID || typeof returnID !== "string") {
       throw new Error("App return should be JSX");
     }
 
-    const childRender = Object.values(returnVar.children).find(
+    const returnVar = appVar.var[returnID];
+    if (!returnVar) throw new Error("JSX variable not found");
+    if (returnVar.type !== "jsx") throw new Error("JSX variable not found");
+
+    const childRender = Object.values(returnVar.render?.children ?? {}).find(
       (r) => r.tag === "Child",
     );
     expect(childRender).toBeDefined();

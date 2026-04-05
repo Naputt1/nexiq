@@ -1,7 +1,12 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/analyzer.ts", "src/index.ts", "src/worker.ts", "src/db/sqlite.ts"],
+  entry: [
+    "src/analyzer.ts",
+    "src/index.ts",
+    "src/worker.ts",
+    "src/db/sqlite.ts",
+  ],
   format: ["esm"],
   target: "node18",
   clean: true,

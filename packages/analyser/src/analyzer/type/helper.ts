@@ -6,6 +6,7 @@ import type {
   TypeDataImport,
   TypeDataLiteralBody,
   TypeDataLiteralBodyMethod,
+  TypeDataLiteralBodyProperty,
   TypeDataLiteralTypeLiteral,
   TypeDataRef,
   TypeDataTuple,
@@ -13,7 +14,7 @@ import type {
 import * as t from "@babel/types";
 import assert from "assert";
 import type { FuncParam, TypeDataParamFunction } from "@nexiq/shared";
-import { generateFn } from "../../utils/babel.js";
+import { generateFn } from "../../utils/babel.ts";
 
 function getTypeParameter(tsType: t.TSTypeParameter): TypeDataParamFunction {
   const data: TypeDataParamFunction = {
@@ -79,7 +80,6 @@ function getFuncParam(
             name: property.argument.name,
           });
         } else {
-          
           // debugger;
         }
       }
@@ -198,7 +198,6 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
   } else if (tsType.left.type === "TSQualifiedName") {
     id.push(...getQualifiedName(tsType.left));
   } else {
-    
     // debugger;
   }
 
@@ -218,11 +217,18 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
       return null;
     }
 
-    const body: TypeDataLiteralBody = {
+    const body: TypeDataLiteralBodyProperty = {
       signatureType: "property",
       name: member.key.name,
       type: getType(member.typeAnnotation.typeAnnotation),
     };
+
+    if (member.loc) {
+      body.loc = {
+        line: member.loc.start.line,
+        column: member.loc.start.column,
+      };
+    }
 
     if (member.optional) {
       body.optional = true;
@@ -264,6 +270,13 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
         ? getType(member.typeAnnotation.typeAnnotation)
         : { type: "void" },
     };
+
+    if (member.loc) {
+      body.loc = {
+        line: member.loc.start.line,
+        column: member.loc.start.column,
+      };
+    }
 
     if (member.optional) {
       body.optional = true;
@@ -364,7 +377,6 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        
         // debugger;
         assert(false, "invlid type reference");
       }
@@ -543,6 +555,22 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       } else {
         return { type: "any" };
       }
+    case "TSImportType": {
+      const typeData: TypeDataImport = {
+        type: "import",
+        name: tsType.argument.value,
+      };
+
+      if (tsType.qualifier) {
+        if (tsType.qualifier.type === "Identifier") {
+          typeData.qualifier = tsType.qualifier.name;
+        } else {
+          return { type: "any" };
+        }
+      }
+
+      return typeData;
+    }
     case "TSIntrinsicKeyword":
     case "TSObjectKeyword":
     case "TSSymbolKeyword":
@@ -557,7 +585,6 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
     case "TSMappedType":
     case "TSTemplateLiteralType":
     case "TSExpressionWithTypeArguments":
-    case "TSImportType":
       return { type: "any" };
     default:
       return {
@@ -584,7 +611,6 @@ function getMemberExpressionNames(
 }
 
 export function getExpressionData(expr: t.Expression): PropDataType | null {
-  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (expr.type) {
     case "BooleanLiteral":
       return {

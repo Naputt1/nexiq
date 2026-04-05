@@ -14,12 +14,20 @@ export interface ProjectStatus {
   subProjects: SubProject[];
 }
 
-export type GraphViewType = "component" | "file" | "router";
+export type GraphViewType = "component" | "file" | "router" | "package";
+
+export interface AppSelectionState {
+  type: "node" | "edge";
+  id: string;
+}
 
 export interface AppStateData {
-  selectedSubProject: string | null;
+  selectedSubProjects: string[];
   centeredItemId: string | null;
   selectedId: string | null;
+  selectedEdgeId?: string | null;
+  selectedItemType?: "node" | "edge" | null;
+  selected?: AppSelectionState | null;
   isSidebarOpen: boolean;
   activeTab: "projects" | "git";
   selectedCommit: string | null;
@@ -28,6 +36,10 @@ export interface AppStateData {
   sidebar: {
     right: {
       width?: number;
+      height?: number;
+    };
+    bottom?: {
+      isOpen?: boolean;
       height?: number;
     };
   };

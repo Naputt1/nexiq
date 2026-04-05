@@ -1,11 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { PackageJson } from "./db/packageJson.js";
-import analyzeFiles from "./analyzer/index.js";
-import { getFiles, getViteConfig } from "./analyzer/utils.js";
+import { PackageJson } from "./db/packageJson.ts";
+import analyzeFiles from "./analyzer/index.ts";
+import { getFiles, getViteConfig } from "./analyzer/utils.ts";
 import minimist from "minimist";
 import assert from "assert";
-import type { SnapshotData } from "./types/test.js";
+import type { SnapshotData } from "./types/test.ts";
+
+process.env.SNAPSHOT = "true";
 
 const args = minimist(process.argv.slice(2));
 
@@ -27,6 +29,7 @@ const samples = args._[0]
       "async-functions",
       "destructuring-dependency",
       "props-dot-dependency",
+      "class-components",
     ];
 
 export async function runSnapshot(sample: string) {

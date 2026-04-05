@@ -1,8 +1,9 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
-import type { ComponentDB } from "../db/componentDB.js";
-import { isJSXVariable } from "../db/variable/type.js";
-import { getExpressionData } from "./type/helper.js";
+import type { ComponentDB } from "../db/componentDB.ts";
+import { isJSXVariable } from "../db/variable/type.ts";
+import { getExpressionData } from "./type/helper.ts";
+import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
 
 export default function ArrowFunctionExpression(
   componentDB: ComponentDB,
@@ -50,31 +51,32 @@ export default function ArrowFunctionExpression(
         column: nodePath.node.loc!.start.column,
       };
 
-      componentDB.addVariable(
-        fileName,
-        {
-          name: {
-            type: "identifier",
-            name: `anonymous@${loc.line}:${loc.column}`,
-            loc: loc,
-            id: "",
-          },
-          type: "function",
+      const functionVariable: Omit<
+        ComponentFileVarBaseTypeFunction<"normal">,
+        "var" | "components" | "kind" | "file" | "hash" | "children" | "id"
+      > = {
+        name: {
+          type: "identifier",
+          name: `anonymous@${loc.line}:${loc.column}`,
           loc: loc,
-          scope: {
-            start: {
-              line: nodePath.node.loc!.start.line,
-              column: nodePath.node.loc!.start.column,
-            },
-            end: {
-              line: nodePath.node.loc!.end.line,
-              column: nodePath.node.loc!.end.column,
-            },
-          },
-          dependencies: {},
+          id: "",
         },
-        undefined,
-      );
+        type: "function",
+        loc: loc,
+        scope: {
+          start: {
+            line: nodePath.node.loc!.start.line,
+            column: nodePath.node.loc!.start.column,
+          },
+          end: {
+            line: nodePath.node.loc!.end.line,
+            column: nodePath.node.loc!.end.column,
+          },
+        },
+        dependencies: {},
+      };
+
+      componentDB.addVariable(fileName, functionVariable, undefined);
     },
     exit(nodePath) {
       const body = nodePath.node.body;
@@ -104,29 +106,34 @@ export default function ArrowFunctionExpression(
           column: body.loc!.start.column,
         };
 
+        const functionVariable: Omit<
+          ComponentFileVarBaseTypeFunction<"normal">,
+          "var" | "components" | "kind" | "file" | "hash" | "children" | "id"
+        > = {
+          name: {
+            type: "identifier",
+            name: `anonymous@${innerLoc.line}:${innerLoc.column}`,
+            loc: innerLoc,
+            id: "",
+          },
+          type: "function",
+          loc: innerLoc,
+          scope: {
+            start: {
+              line: body.loc!.start.line,
+              column: body.loc!.start.column,
+            },
+            end: {
+              line: body.loc!.end.line,
+              column: body.loc!.end.column,
+            },
+          },
+          dependencies: {},
+        };
+
         const id = componentDB.addVariable(
           fileName,
-          {
-            name: {
-              type: "identifier",
-              name: `anonymous@${innerLoc.line}:${innerLoc.column}`,
-              loc: innerLoc,
-              id: "",
-            },
-            type: "function",
-            loc: innerLoc,
-            scope: {
-              start: {
-                line: body.loc!.start.line,
-                column: body.loc!.start.column,
-              },
-              end: {
-                line: body.loc!.end.line,
-                column: body.loc!.end.column,
-              },
-            },
-            dependencies: {},
-          },
+          functionVariable,
           undefined,
         );
         componentDB.comSetReturn(fileName, loc, id);
