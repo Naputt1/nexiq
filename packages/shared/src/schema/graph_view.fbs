@@ -1,0 +1,71 @@
+namespace Nexiq.GraphView;
+
+enum ItemType : byte {
+  Package = 0,
+  Scope = 1,
+  Component = 2,
+  Hook = 3,
+  State = 4,
+  Memo = 5,
+  Callback = 6,
+  Ref = 7,
+  Effect = 8,
+  Prop = 9,
+  Render = 10,
+  RenderGroup = 11,
+  SourceGroup = 12,
+  PathGroup = 13
+}
+
+table Loc {
+  line:int;
+  column:int;
+}
+
+table GraphNode {
+  id:string;
+  type:ItemType;
+  name:string;
+  displayName:string;
+  comboId:string;
+  color:string;
+  radius:float;
+}
+
+table GraphCombo {
+  id:string;
+  type:ItemType;
+  name:string;
+  displayName:string;
+  parentId:string;
+  color:string;
+  radius:float;
+  collapsed:bool;
+}
+
+table GraphEdge {
+  id:string;
+  source:string;
+  target:string;
+  label:string;
+  kind:string;
+  category:string;
+}
+
+table GraphNodeDetail {
+  id:string;
+  fileName:string;
+  projectPath:string;
+  loc:Loc;
+  data_json:string;
+}
+
+table GraphView {
+  nodes:[GraphNode];
+  combos:[GraphCombo];
+  edges:[GraphEdge];
+  details:[GraphNodeDetail];
+}
+
+root_type GraphView;
+file_identifier "NXGV";

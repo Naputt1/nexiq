@@ -21,7 +21,7 @@ import {
   type UIItemState,
 } from "@nexiq/shared";
 import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/analyser";
-import type { Extension } from "@nexiq/extension-sdk";
+import type { Extension, GraphNodeDetail } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
@@ -56,6 +56,7 @@ export interface ProjectInfo {
   extensions: Extension[];
   sqlitePath: string;
   db?: SqliteDB;
+  nodeDetailCache: Map<string, GraphNodeDetail>;
 }
 
 export interface SymbolSearchResult {
@@ -242,6 +243,7 @@ export class ProjectManager {
       extensions,
       sqlitePath,
       db: new SqliteDB(sqlitePath),
+      nodeDetailCache: new Map<string, GraphNodeDetail>(),
     };
 
     // Set up watcher
@@ -283,6 +285,7 @@ export class ProjectManager {
 
                 if (projectInfo.db) projectInfo.db.close();
                 projectInfo.db = new SqliteDB(projectInfo.sqlitePath);
+                projectInfo.nodeDetailCache.clear();
 
                 console.error(
                   `Project ${analysisPath} re-analyzed successfully.`,
@@ -320,6 +323,71 @@ export class ProjectManager {
     }
 
     return projectInfo;
+  }
+
+  async getNodeDetail(
+    projectPath: string,
+    nodeId: string,
+  ): Promise<GraphNodeDetail | null> {
+    const project = this.projects.get(projectPath);
+    if (!project || !project.db) return null;
+
+    if (project.nodeDetailCache.has(nodeId)) {
+      return project.nodeDetailCache.get(nodeId)!;
+    }
+
+    // Try to find as symbol
+    const symbolResult = project.db.db
+      .prepare(
+        `SELECT 
+          s.id, s.name, s.path as pure_path, e.kind, e.type as componentType, e.line, e."column", e.data_json, f.path as fileName
+        FROM symbols s
+        JOIN entities e ON s.entity_id = e.id
+        JOIN scopes sc ON s.scope_id = sc.id
+        JOIN files f ON sc.file_id = f.id
+        WHERE s.id = ? OR ('workspace:' || ? || ':' || s.id) = ?`,
+      )
+      .get(nodeId, project.subProject || "", nodeId) as any;
+
+    if (symbolResult) {
+      const detail: GraphNodeDetail = {
+        id: nodeId,
+        name: symbolResult.name,
+        fileName: symbolResult.fileName,
+        projectPath: projectPath,
+        loc: { line: symbolResult.line || 0, column: symbolResult.column || 0 },
+        componentType: symbolResult.componentType,
+        raw: symbolResult.data_json ? JSON.parse(symbolResult.data_json) : undefined,
+      };
+      project.nodeDetailCache.set(nodeId, detail);
+      return detail;
+    }
+
+    // Try to find as render
+    const renderResult = project.db.db
+      .prepare(
+        `SELECT 
+          r.id, r.tag as name, r.line, r."column", r.data_json, f.path as fileName
+        FROM renders r
+        JOIN files f ON r.file_id = f.id
+        WHERE r.id = ? OR ('workspace:' || ? || ':' || r.id) = ?`,
+      )
+      .get(nodeId, project.subProject || "", nodeId) as any;
+
+    if (renderResult) {
+      const detail: GraphNodeDetail = {
+        id: nodeId,
+        name: renderResult.name,
+        fileName: renderResult.fileName,
+        projectPath: projectPath,
+        loc: { line: renderResult.line || 0, column: renderResult.column || 0 },
+        raw: renderResult.data_json ? JSON.parse(renderResult.data_json) : undefined,
+      };
+      project.nodeDetailCache.set(nodeId, detail);
+      return detail;
+    }
+
+    return null;
   }
 
   public async getDatabaseData(

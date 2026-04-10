@@ -8,6 +8,7 @@ import {
   type GraphComboData,
   type GraphArrowData,
   type GraphNodeData,
+  type GraphNodeDetail,
   type GraphViewResult,
   type GraphViewTask,
   type TaskContext,
@@ -21,6 +22,7 @@ export const componentTask: GraphViewTask = {
     const data = getTaskData(context);
     const combos: GraphComboData[] = [...result.combos];
     const nodes: GraphNodeData[] = [...result.nodes];
+    const details: Record<string, GraphNodeDetail> = { ...result.details };
     const edges: GraphArrowData[] = [...result.edges];
     const typeData = { ...result.typeData };
 
@@ -211,10 +213,14 @@ export const componentTask: GraphViewTask = {
           combo.label = { text: symbol.name };
           combo.displayName = symbol.name;
           combo.type = entity.kind;
-          combo.componentType = entity.type; // Extract "function" or "class"
-          combo.fileName = file;
-          combo.projectPath = projectPath;
-          combo.loc = { line: entity.line || 0, column: entity.column || 0 };
+
+          details[combo.id] = {
+            id: combo.id,
+            fileName: file,
+            projectPath: projectPath,
+            loc: { line: entity.line || 0, column: entity.column || 0 },
+            componentType: entity.type,
+          };
 
           // Handle effects for this component/hook
           if (entity.data_json) {
@@ -231,11 +237,15 @@ export const componentTask: GraphViewTask = {
                     label: { text: effectName },
                     combo: blockScope.id,
                     type: "effect",
+                    displayName: effectName,
+                  });
+
+                  details[effect.id] = {
+                    id: effect.id,
                     fileName: file,
                     projectPath: projectPath,
                     loc: { line: effect.loc.line, column: effect.loc.column },
-                    displayName: effectName,
-                  });
+                  };
 
                   if (effect.reactDeps) {
                     for (const dep of effect.reactDeps as ReactDependency[]) {
@@ -267,10 +277,14 @@ export const componentTask: GraphViewTask = {
                   combo: blockScope.id,
                   type: "props-group",
                   collapsed: true,
-                  fileName: file,
-                  projectPath: projectPath,
                   displayName: "Props",
                 });
+
+                details[propsComboId] = {
+                  id: propsComboId,
+                  fileName: file,
+                  projectPath: projectPath,
+                };
 
                 for (const prop of metadata.props) {
                   nodes.push({
@@ -279,13 +293,17 @@ export const componentTask: GraphViewTask = {
                     label: { text: prop.name },
                     combo: propsComboId,
                     type: "prop",
+                    displayName: prop.name,
+                  });
+
+                  details[prop.id] = {
+                    id: prop.id,
                     fileName: file,
                     projectPath: projectPath,
                     loc: prop.loc
                       ? { line: prop.loc.line, column: prop.loc.column }
                       : undefined,
-                    displayName: prop.name,
-                  });
+                  };
                 }
               }
 
@@ -302,10 +320,14 @@ export const componentTask: GraphViewTask = {
                   combo: blockScope.id,
                   type: "refs-group",
                   collapsed: true,
-                  fileName: file,
-                  projectPath: projectPath,
                   displayName: "Refs",
                 });
+
+                details[refsComboId] = {
+                  id: refsComboId,
+                  fileName: file,
+                  projectPath: projectPath,
+                };
               }
             } catch {
               // ignore
@@ -420,18 +442,32 @@ export const componentTask: GraphViewTask = {
           }
         }
 
+        const componentData = entity.data_json
+          ? JSON.parse(entity.data_json)
+          : {};
         nodes.push({
           id: symbol.id,
           name: symbol.name,
           label: { text: labelText },
           combo: parentComboId,
           type: entity.kind,
-          componentType: entity.type, // Extract "function" or "class"
+          displayName: symbol.name,
+          hasProps: componentData.props?.length > 0 || !!componentData.propType,
+          hasHooks: componentData.hooks?.length > 0,
+          hasChildren:
+            componentData.children &&
+            Object.keys(componentData.children).length > 0,
+          pureFileName: file,
+        });
+
+        details[symbol.id] = {
+          id: symbol.id,
           fileName: file,
           projectPath: projectPath,
           loc: { line: entity.line || 0, column: entity.column || 0 },
-          displayName: symbol.name,
-        });
+          componentType: entity.type,
+          raw: entity.data_json ? JSON.parse(entity.data_json) : undefined,
+        };
       }
     }
 
@@ -484,10 +520,14 @@ export const componentTask: GraphViewTask = {
         label: { text: labelText },
         combo: finalParentCombo,
         type: "render",
+        displayName: render.tag,
+      };
+
+      details[render.id] = {
+        id: render.id,
         fileName: file,
         projectPath: projectPath,
         loc: { line: render.line || 0, column: render.column || 0 },
-        displayName: render.tag,
       };
 
       // Renders are now nodes that stack within the component combo
@@ -518,11 +558,15 @@ export const componentTask: GraphViewTask = {
                 label: { text: prop.name },
                 combo: propsGroupId,
                 type: "prop",
+                displayName: prop.name,
+              });
+
+              details[propId] = {
+                id: propId,
                 fileName: file,
                 projectPath: projectPath,
                 loc: { line: render.line || 0, column: render.column || 0 },
-                displayName: prop.name,
-              });
+              };
 
               if (prop.valueId) {
                 const targetId =
@@ -637,6 +681,7 @@ export const componentTask: GraphViewTask = {
       nodes,
       combos,
       edges,
+      details: { ...result.details, ...details },
       typeData,
     };
   },

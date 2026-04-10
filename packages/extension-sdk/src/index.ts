@@ -301,25 +301,35 @@ export interface AppearanceOverride {
   expandedRadius?: number;
 }
 
+export interface GraphNodeDetail {
+  id: string;
+  projectPath?: string;
+  fileName?: string;
+  pureFileName?: string;
+  loc?: { line: number; column: number };
+  declarationKind?: "const" | "let" | "var" | "using" | "await using";
+  tag?: string;
+  componentType?: "function" | "class" | string | null;
+  raw?: ComponentFileVar;
+  [key: string]: unknown;
+}
+
 export interface GraphNodeData {
   id: string;
   name: VariableName | string;
   label?: { text: string; fill?: string };
   type?: string;
-  projectPath?: string;
-  fileName?: string;
-  pureFileName?: string;
-  loc?: { line: number; column: number };
   radius?: number;
   color?: string;
   combo?: string;
   gitStatus?: "added" | "modified" | "deleted";
-  declarationKind?: "const" | "let" | "var" | "using" | "await using";
   appearanceOverride?: AppearanceOverride;
-  tag?: string;
-  componentType?: "function" | "class" | string | null;
-  raw?: ComponentFileVar;
   displayName?: string;
+  hasProps?: boolean;
+  hasHooks?: boolean;
+  hasChildren?: boolean;
+  pureFileName?: string;
+  scope?: string;
   [key: string]: unknown;
 }
 
@@ -357,6 +367,7 @@ export interface useGraphProps {
 
 export interface GraphViewResult extends useGraphProps {
   typeData: Record<string, TypeDataDeclare>;
+  details?: Record<string, GraphNodeDetail>;
 }
 
 /**
@@ -665,6 +676,7 @@ export interface DetailSectionProps {
   graph: unknown; // GraphData instance
   projectPath: string;
   typeData: Record<string, TypeDataDeclare>;
+  detail?: GraphNodeDetail;
   onSelect?: (id: string) => void;
   renderNodes?: GraphNodeData[];
 }
