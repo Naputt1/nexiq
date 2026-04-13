@@ -1595,6 +1595,15 @@ export class BackendServer {
                 );
                 break;
               }
+              case "get_node_detail": {
+                const { projectPath, nodeId } = data.payload;
+                const detail = await this.projectManager.getNodeDetail(
+                  projectPath,
+                  nodeId,
+                );
+                this.sendResponse(ws, "node_detail", detail, data.requestId);
+                break;
+              }
               case "call_tool": {
                 const { name, arguments: args } = data.payload;
                 const result = await this.handleCallTool({

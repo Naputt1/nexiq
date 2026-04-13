@@ -5,7 +5,7 @@ import {
   type GraphViewTask,
   type TaskContext,
   getTaskData,
-} from "../index.js";
+} from "@nexiq/extension-sdk";
 
 /**
  * Task that applies Git status (added, modified, deleted) to nodes and combos.

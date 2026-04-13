@@ -18,6 +18,14 @@ on:
         description: 'Publish @nexiq/analyser'
         type: boolean
         default: false
+      component-extension:
+        description: 'Publish @nexiq/component-extension'
+        type: boolean
+        default: false
+      git-extension:
+        description: 'Publish @nexiq/git-extension'
+        type: boolean
+        default: false
       cli:
         description: 'Publish @nexiq/cli'
         type: boolean
@@ -54,6 +62,8 @@ jobs:
           pnpm --filter @nexiq/shared build
           pnpm --filter @nexiq/extension-sdk build
           pnpm --filter @nexiq/analyser build
+          pnpm --filter @nexiq/component-extension build
+          pnpm --filter @nexiq/git-extension build
           pnpm --filter @nexiq/cli build
 
       - name: Publish @nexiq/shared
@@ -80,6 +90,24 @@ jobs:
           inputs.all == true ||
           inputs.analyser == true
         run: pnpm --filter @nexiq/analyser publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nexiq/component-extension
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.component-extension == true
+        run: pnpm --filter @nexiq/component-extension publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nexiq/git-extension
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.git-extension == true
+        run: pnpm --filter @nexiq/git-extension publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -16,6 +16,8 @@ import type {
   RenderRow,
   ExportRow,
   RelationRow,
+  VariableScope,
+  VariableLoc,
 } from "@nexiq/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
@@ -25,6 +27,8 @@ export type {
   VariableName,
   DatabaseData,
   GraphViewType,
+  VariableScope,
+  VariableLoc,
 };
 
 export interface UsageOccurrence {
@@ -301,25 +305,35 @@ export interface AppearanceOverride {
   expandedRadius?: number;
 }
 
-export interface GraphNodeData {
+export interface GraphNodeDetail {
   id: string;
-  name: VariableName | string;
-  label?: { text: string; fill?: string };
-  type?: string;
   projectPath?: string;
   fileName?: string;
   pureFileName?: string;
-  loc?: { line: number; column: number };
+  loc?: VariableLoc;
+  declarationKind?: "const" | "let" | "var" | "using" | "await using";
+  tag?: string;
+  componentType?: "function" | "class" | string | null;
+  raw?: ComponentFileVar;
+  [key: string]: unknown;
+}
+
+export interface GraphNodeData {
+  id: string;
+  name: VariableName | string;
+  type?: string;
   radius?: number;
   color?: string;
   combo?: string;
   gitStatus?: "added" | "modified" | "deleted";
-  declarationKind?: "const" | "let" | "var" | "using" | "await using";
   appearanceOverride?: AppearanceOverride;
-  tag?: string;
-  componentType?: "function" | "class" | string | null;
-  raw?: ComponentFileVar;
   displayName?: string;
+  hasProps?: boolean;
+  hasHooks?: boolean;
+  hasChildren?: boolean;
+  pureFileName?: string;
+  scope?: VariableScope | string;
+  loc?: VariableLoc;
   [key: string]: unknown;
 }
 
@@ -336,7 +350,7 @@ export interface GraphArrowData {
   id: string;
   source: string;
   target: string;
-  label?: string;
+  name?: string;
   edgeKind?: string;
   category?: string;
   flowRole?: "direct" | "side-effect" | null;
@@ -357,6 +371,7 @@ export interface useGraphProps {
 
 export interface GraphViewResult extends useGraphProps {
   typeData: Record<string, TypeDataDeclare>;
+  details?: Record<string, GraphNodeDetail>;
 }
 
 /**
@@ -395,6 +410,14 @@ export interface TaskContext {
     startedAt: number,
     detail?: string,
   ) => void | Promise<void>;
+  /**
+   * Buffer for storing node, edge, and combo data in FlatBuffer format.
+   */
+  nodeDataBuffer?: SharedArrayBuffer;
+  /**
+   * Shared buffer for storing node details.
+   */
+  detailBuffer?: SharedArrayBuffer;
 }
 
 /**
@@ -656,7 +679,19 @@ export interface GraphViewTask {
    * @param context Context containing database and project information
    * @returns Updated GraphViewResult
    */
-  run: (result: GraphViewResult, context: TaskContext) => GraphViewResult;
+  run?: (result: GraphViewResult, context: TaskContext) => GraphViewResult;
+  /**
+   * Run the task using buffers for improved performance.
+   *
+   * @param nodeData Shared buffer for node/edge/combo data
+   * @param detailBuffer Shared buffer for node details
+   * @param context Context containing database and project information
+   */
+  runBuffer?: (
+    nodeData: SharedArrayBuffer,
+    detailBuffer: SharedArrayBuffer,
+    context: TaskContext,
+  ) => number | void;
 }
 
 export interface DetailSectionProps {
@@ -665,6 +700,7 @@ export interface DetailSectionProps {
   graph: unknown; // GraphData instance
   projectPath: string;
   typeData: Record<string, TypeDataDeclare>;
+  detail?: GraphNodeDetail;
   onSelect?: (id: string) => void;
   renderNodes?: GraphNodeData[];
 }
@@ -698,5 +734,4 @@ export interface Extension {
   mcpTools?: MCPTool[];
 }
 
-export * from "./tasks/componentTask.js";
-export * from "./tasks/gitTask.js";
+
