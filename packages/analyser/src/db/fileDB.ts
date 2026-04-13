@@ -1185,11 +1185,9 @@ export class FileDB {
 
     if (cache) {
       const res = file.hash !== cache.hash;
-      console.log("isFileChanged (cache exists):", filename, "changed =", res);
       return res;
     }
 
-    console.log("isFileChanged (no cache):", filename, "returning true");
     return true;
   }
 
