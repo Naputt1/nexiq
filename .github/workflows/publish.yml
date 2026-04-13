@@ -62,7 +62,7 @@ jobs:
           pnpm --filter @nexiq/shared build
           pnpm --filter @nexiq/extension-sdk build
           pnpm --filter @nexiq/analyser build
-          pnpm --filter @nexiq/component-extension build
+          pnpm --filter @nexiq/component-extension build:ts
           pnpm --filter @nexiq/git-extension build
           pnpm --filter @nexiq/cli build
 
