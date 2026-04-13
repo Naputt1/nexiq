@@ -1,0 +1,22 @@
+{
+  "name": "@nexiq/git-extension",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Git extension for nexiq",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@nexiq/extension-sdk": "workspace:*",
+    "@nexiq/shared": "workspace:*",
+    "simple-git": "^3.33.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.3.3"
+  }
+}
