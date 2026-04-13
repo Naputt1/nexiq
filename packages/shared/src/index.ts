@@ -285,3 +285,4 @@ export interface BenchmarkResult {
 export * from "./types/index.js";
 export * from "./component.js";
 export * from "./utils.js";
+export * as FlatBuffers from "./nexiq/graph-view.js";

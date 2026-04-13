@@ -13,7 +13,7 @@ import {
   type GraphViewTask,
   type TaskContext,
   getTaskData,
-} from "../index.js";
+} from "@nexiq/extension-sdk";
 
 export const componentTask: GraphViewTask = {
   id: "component-structure",
@@ -62,8 +62,8 @@ export const componentTask: GraphViewTask = {
 
     const addEdge = (edge: GraphArrowData) => {
       edges.push({
-        category: edge.category || edge.edgeKind || edge.label || "dependency",
-        edgeKind: edge.edgeKind || edge.label || "dependency",
+        category: edge.category || edge.edgeKind || edge.name || "dependency",
+        edgeKind: edge.edgeKind || edge.name || "dependency",
         ...edge,
       });
     };
@@ -76,7 +76,6 @@ export const componentTask: GraphViewTask = {
         combos.push({
           id: comboId,
           name: pkg?.name || packageId,
-          label: { text: pkg?.name || packageId },
           type: "package",
           collapsed: true,
         });
@@ -157,7 +156,6 @@ export const componentTask: GraphViewTask = {
       combos.push({
         id: scope.id,
         name: scope.kind,
-        label: { text: scope.kind },
         combo: parentComboId || undefined,
         type: "scope",
         collapsed: true,
@@ -210,9 +208,9 @@ export const componentTask: GraphViewTask = {
         // We update the combo created for this scope
         const combo = combos.find((c) => c.id === blockScope.id);
         if (combo) {
-          combo.label = { text: symbol.name };
           combo.displayName = symbol.name;
           combo.type = entity.kind;
+          combo.name = symbol.name;
 
           details[combo.id] = {
             id: combo.id,
@@ -234,7 +232,6 @@ export const componentTask: GraphViewTask = {
                   nodes.push({
                     id: effect.id,
                     name: effectName,
-                    label: { text: effectName },
                     combo: blockScope.id,
                     type: "effect",
                     displayName: effectName,
@@ -255,7 +252,7 @@ export const componentTask: GraphViewTask = {
                           id: `${targetId}-${effect.id}-effect-dep`,
                           source: targetId,
                           target: effect.id,
-                          label: "dependency",
+                          name: "dependency",
                           edgeKind: "dependency",
                           category: "dependency",
                         });
@@ -273,7 +270,6 @@ export const componentTask: GraphViewTask = {
                 combos.push({
                   id: propsComboId,
                   name: "Props",
-                  label: { text: "Props" },
                   combo: blockScope.id,
                   type: "props-group",
                   collapsed: true,
@@ -290,7 +286,6 @@ export const componentTask: GraphViewTask = {
                   nodes.push({
                     id: prop.id,
                     name: prop.name,
-                    label: { text: prop.name },
                     combo: propsComboId,
                     type: "prop",
                     displayName: prop.name,
@@ -316,7 +311,6 @@ export const componentTask: GraphViewTask = {
                 combos.push({
                   id: refsComboId,
                   name: "Refs",
-                  label: { text: "Refs" },
                   combo: blockScope.id,
                   type: "refs-group",
                   collapsed: true,
@@ -378,7 +372,6 @@ export const componentTask: GraphViewTask = {
                 combos.push({
                   id: sourceComboId,
                   name: sourceLabel,
-                  label: { text: sourceLabel },
                   combo: parentComboId,
                   type: "source-group",
                   collapsed: true,
@@ -398,7 +391,6 @@ export const componentTask: GraphViewTask = {
                   combos.push({
                     id: segmentId,
                     name: segment.toString(),
-                    label: { text: segment.toString() },
                     combo: parentComboId,
                     type: "path-group",
                     collapsed: true,
@@ -448,7 +440,6 @@ export const componentTask: GraphViewTask = {
         nodes.push({
           id: symbol.id,
           name: symbol.name,
-          label: { text: labelText },
           combo: parentComboId,
           type: entity.kind,
           displayName: symbol.name,
@@ -502,8 +493,7 @@ export const componentTask: GraphViewTask = {
         if (!combos.some((c) => c.id === renderGroupId)) {
           combos.push({
             id: renderGroupId,
-            name: "JSX",
-            label: { text: "JSX" },
+            name: "render",
             combo: parentCombo,
             type: "render-group",
             collapsed: true,
@@ -517,7 +507,6 @@ export const componentTask: GraphViewTask = {
       const commonData = {
         id: render.id,
         name: render.tag,
-        label: { text: labelText },
         combo: finalParentCombo,
         type: "render",
         displayName: render.tag,
@@ -544,7 +533,6 @@ export const componentTask: GraphViewTask = {
             combos.push({
               id: propsGroupId,
               name: "Props",
-              label: { text: "Props" },
               combo: render.id,
               type: "props-group",
               collapsed: true,
@@ -555,7 +543,6 @@ export const componentTask: GraphViewTask = {
               nodes.push({
                 id: propId,
                 name: prop.name,
-                label: { text: prop.name },
                 combo: propsGroupId,
                 type: "prop",
                 displayName: prop.name,
@@ -575,7 +562,7 @@ export const componentTask: GraphViewTask = {
                   id: `${targetId}-${propId}-prop-value`,
                   source: targetId,
                   target: propId,
-                  label: "value",
+                  name: "value",
                   edgeKind: "dependency",
                   category: "dependency",
                 });
@@ -646,7 +633,7 @@ export const componentTask: GraphViewTask = {
         id: edgeId,
         source: sourceId,
         target: targetId,
-        label: rel.kind,
+        name: rel.kind,
         edgeKind: rel.kind,
         category:
           rel.kind === "render" || rel.kind === "dependency"
@@ -660,7 +647,7 @@ export const componentTask: GraphViewTask = {
         id: usageEdge.id,
         source: usageEdge.source,
         target: usageEdge.target,
-        label: usageEdge.edgeKind,
+        name: usageEdge.edgeKind,
         edgeKind: usageEdge.edgeKind,
         category: usageEdge.category,
         usages: usageEdge.usages,
