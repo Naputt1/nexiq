@@ -3,35 +3,35 @@ name: Publish Packages
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       shared:
-        description: 'Publish @nexiq/shared'
+        description: "Publish @nexiq/shared"
         type: boolean
         default: false
       extension-sdk:
-        description: 'Publish @nexiq/extension-sdk'
+        description: "Publish @nexiq/extension-sdk"
         type: boolean
         default: false
       analyser:
-        description: 'Publish @nexiq/analyser'
+        description: "Publish @nexiq/analyser"
         type: boolean
         default: false
       component-extension:
-        description: 'Publish @nexiq/component-extension'
+        description: "Publish @nexiq/component-extension"
         type: boolean
         default: false
       git-extension:
-        description: 'Publish @nexiq/git-extension'
+        description: "Publish @nexiq/git-extension"
         type: boolean
         default: false
       cli:
-        description: 'Publish @nexiq/cli'
+        description: "Publish @nexiq/cli"
         type: boolean
         default: false
       all:
-        description: 'Publish all packages'
+        description: "Publish all packages"
         type: boolean
         default: false
 
@@ -48,8 +48,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -119,4 +119,3 @@ jobs:
         run: pnpm --filter @nexiq/cli publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
