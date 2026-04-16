@@ -1,5 +1,6 @@
 import type { Database } from "better-sqlite3";
 import fs from "node:fs";
+import path from "node:path";
 import type {
   TypeDataDeclare,
   ComponentFileVar,
@@ -403,6 +404,10 @@ export interface TaskContext {
    */
   taskDataCache?: DatabaseData;
   /**
+   * Path to the original Cache Database. Native Rust tasks use this to ATTACH the database directly.
+   */
+  cacheDbPath?: string;
+  /**
    * Optional stage profiler provided by the caller.
    */
   profileStage?: (
@@ -418,6 +423,10 @@ export interface TaskContext {
    * Shared buffer for storing node details.
    */
   detailBuffer?: SharedArrayBuffer;
+  /**
+   * Serialized SQLite database buffer containing both input data and output tables.
+   */
+  sqliteBuffer?: Uint8Array;
 }
 
 /**
@@ -425,7 +434,8 @@ export interface TaskContext {
  * It handles workspace databases and qualifies IDs to avoid collisions.
  */
 export function getTaskData(context: TaskContext): DatabaseData {
-  const { db, snapshotData, analysisPaths, taskDataCache } = context;
+  const { db, snapshotData, analysisPaths, taskDataCache, projectRoot } =
+    context;
 
   if (snapshotData) {
     return snapshotData;
@@ -453,7 +463,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
     (
       db
         .prepare(
-          "SELECT name FROM sqlite_master WHERE type IN ('table', 'view')",
+          "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') UNION SELECT name FROM sqlite_temp_master WHERE type IN ('table', 'view')",
         )
         .all() as { name: string }[]
     ).map((row) => row.name),
@@ -482,8 +492,15 @@ export function getTaskData(context: TaskContext): DatabaseData {
     };
 
     filteredPackages.forEach((pkg, index) => {
-      if (!fs.existsSync(pkg.db_path)) {
-        console.warn(`Package database not found at ${pkg.db_path}`);
+      let pkgDbPath = pkg.db_path;
+      if (!path.isAbsolute(pkgDbPath)) {
+        pkgDbPath = path.resolve(projectRoot, pkgDbPath);
+      }
+
+      if (!fs.existsSync(pkgDbPath)) {
+        console.warn(
+          `Package database not found at ${pkgDbPath} (original: ${pkg.db_path})`,
+        );
         return;
       }
 
@@ -492,7 +509,17 @@ export function getTaskData(context: TaskContext): DatabaseData {
         path: string,
         options?: { readonly?: boolean },
       ) => Database;
-      const pkgDb = new DbConstructor(pkg.db_path, { readonly: true });
+
+      let pkgDb: Database;
+      try {
+        pkgDb = new DbConstructor(pkgDbPath, { readonly: true });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        throw new Error(
+          `Extension SDK: Failed to open package database at ${pkgDbPath}: ${msg}`,
+        );
+      }
+
       try {
         const fileIdOffset = (index + 1) * 1000000;
         const pkgPrefix = `workspace:${pkg.package_id}:`;
@@ -672,6 +699,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
 export interface GraphViewTask {
   id: string;
   priority: number;
+  extensionPath?: string;
   /**
    * Run the task to update the graph result.
    *
@@ -692,6 +720,13 @@ export interface GraphViewTask {
     detailBuffer: SharedArrayBuffer,
     context: TaskContext,
   ) => number | void;
+  /**
+   * Run the task using an in-memory SQLite database.
+   * The database is expected to be initialized with input data and out_* tables.
+   */
+  runSqlite?: (
+    context: TaskContext,
+  ) => void | Promise<void> | Uint8Array | Promise<Uint8Array>;
 }
 
 export interface DetailSectionProps {
@@ -734,4 +769,52 @@ export interface Extension {
   mcpTools?: MCPTool[];
 }
 
+/**
+ * Initialize standard output tables in a SQLite database for extension results.
+ */
+export function initOutputTables(db: Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS out_nodes (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      type TEXT,
+      combo_id TEXT,
+      color TEXT,
+      radius REAL,
+      display_name TEXT,
+      git_status TEXT,
+      meta_json TEXT
+    );
+    CREATE TABLE IF NOT EXISTS out_edges (
+      id TEXT PRIMARY KEY,
+      source TEXT,
+      target TEXT,
+      name TEXT,
+      kind TEXT,
+      category TEXT,
+      meta_json TEXT
+    );
+    CREATE TABLE IF NOT EXISTS out_combos (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      type TEXT,
+      parent_id TEXT,
+      color TEXT,
+      radius REAL,
+      collapsed INTEGER,
+      display_name TEXT,
+      git_status TEXT,
+      meta_json TEXT
+    );
+    CREATE TABLE IF NOT EXISTS out_details (
+      id TEXT PRIMARY KEY,
+      file_name TEXT,
+      project_path TEXT,
+      line INTEGER,
+      column INTEGER,
+      data_json TEXT
+    );
+  `);
+}
 
+export type * from "./db.js";

@@ -2,23 +2,14 @@
 extern crate napi_derive;
 
 use napi::bindgen_prelude::*;
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use std::collections::{HashMap, HashSet};
-
-#[allow(warnings)]
-mod graph_view_generated;
-// Avoid glob import to prevent name collisions
-use graph_view_generated::nexiq::graph_view::{
-    GraphCombo as FBGraphCombo, GraphComboArgs, GraphEdge as FBGraphEdge, GraphEdgeArgs,
-    GraphNode as FBGraphNode, GraphNodeArgs, GraphNodeDetail as FBGraphNodeDetail,
-    GraphNodeDetailArgs, GraphView as FBGraphView, GraphViewArgs, Loc, LocArgs,
-};
 
 #[napi(object)]
 pub struct TaskContext {
     pub project_root: String,
-    pub sqlite_path: String,
     pub view_type: String,
+    pub cache_db_path: Option<String>,
 }
 
 struct PackageRow {
@@ -153,47 +144,56 @@ fn table_exists(conn: &Connection, table_name: &str) -> bool {
 }
 
 #[napi]
-pub fn run_component_task(
-    mut node_data_buffer: Buffer,
-    mut detail_buffer: Buffer,
-    context: TaskContext,
-) -> Result<u32> {
-    let sqlite_path = std::path::Path::new(&context.sqlite_path);
-    if sqlite_path.is_dir() {
-        return Err(Error::from_reason(format!(
-            "SQLite path is a directory, not a file: {}",
-            context.sqlite_path
-        )));
-    }
+pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
+    let cache_db_path = context.cache_db_path.ok_or_else(|| {
+        Error::from_reason("cache_db_path is required for native Rust task execution")
+    })?;
 
-    let conn = Connection::open(&context.sqlite_path)
-        .map_err(|e| Error::from_reason(format!("Failed to open SQLite: {}", e)))?;
+    // 1. Open an empty in-memory connection
+    let conn = Connection::open_in_memory()
+        .map_err(|e| Error::from_reason(format!("Failed to open in-memory SQLite: {}", e)))?;
 
-    // 1. Fetch data
-    let packages: Vec<PackageRow> = if table_exists(&conn, "packages") {
-        let mut stmt = conn
-            .prepare("SELECT id, name, version, path FROM packages")
-            .unwrap();
-        stmt.query_map([], |row| {
-            Ok(PackageRow {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                version: row.get(2)?,
-                path: row.get(3)?,
-            })
-        })
+    // 2. Attach the cache database read-only to avoid loading it into memory
+    conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
+        .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
+
+    // 3. Create TEMP views to map the attached 'source' schema into the default namespace,
+    //    meaning existing SQL queries can execute seamlessly without prefix changes.
+    let mut stmt = conn
+        .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
+        .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
+    let tables: Vec<String> = stmt
+        .query_map([], |row| row.get(0))
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    let files: Vec<FileRow> = if table_exists(&conn, "files") {
-        let mut stmt = conn
-            .prepare("SELECT id, path, package_id FROM files")
-            .unwrap();
-        stmt.query_map([], |row| {
+    for table in tables {
+        if !table.starts_with("sqlite_") && !table.starts_with("out_") {
+            let create_view_sql = format!(
+                "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
+                table, table
+            );
+            conn.execute(&create_view_sql, []).map_err(|e| {
+                Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
+            })?;
+        }
+    }
+
+    // 2. Ensure output tables exist (though wrapper should have done it)
+    conn.execute_batch(
+        "CREATE TABLE IF NOT EXISTS out_nodes (id TEXT PRIMARY KEY, name TEXT, type TEXT, combo_id TEXT, color TEXT, radius REAL, display_name TEXT, meta_json TEXT);
+         CREATE TABLE IF NOT EXISTS out_edges (id TEXT PRIMARY KEY, source TEXT, target TEXT, name TEXT, kind TEXT, category TEXT, meta_json TEXT);
+         CREATE TABLE IF NOT EXISTS out_combos (id TEXT PRIMARY KEY, name TEXT, type TEXT, parent_id TEXT, color TEXT, radius REAL, collapsed INTEGER, display_name TEXT, meta_json TEXT);
+         CREATE TABLE IF NOT EXISTS out_details (id TEXT PRIMARY KEY, file_name TEXT, project_path TEXT, line INTEGER, \"column\" INTEGER, data_json TEXT);"
+    ).map_err(|e| Error::from_reason(format!("Failed to create output tables: {}", e)))?;
+
+    // 3. Run logic (simplified version of the previous logic but writing to DB)
+    // Fetch necessary data
+    let files: Vec<FileRow> = conn
+        .prepare("SELECT id, path, package_id FROM files")
+        .unwrap()
+        .query_map([], |row| {
             Ok(FileRow {
                 id: row.get(0)?,
                 path: row.get(1)?,
@@ -202,18 +202,12 @@ pub fn run_component_task(
         })
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    let entities: Vec<EntityRow> = if table_exists(&conn, "entities") {
-        let mut stmt = conn
-            .prepare(
-                "SELECT id, scope_id, kind, name, type, line, \"column\", data_json FROM entities",
-            )
-            .unwrap();
-        stmt.query_map([], |row| {
+    let entities: Vec<EntityRow> = conn
+        .prepare("SELECT id, scope_id, kind, name, type, line, \"column\", data_json FROM entities")
+        .unwrap()
+        .query_map([], |row| {
             Ok(EntityRow {
                 id: row.get(0)?,
                 scope_id: row.get(1)?,
@@ -227,16 +221,12 @@ pub fn run_component_task(
         })
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    let symbols: Vec<SymbolRow> = if table_exists(&conn, "symbols") {
-        let mut stmt = conn
-            .prepare("SELECT id, entity_id, scope_id, name, path FROM symbols")
-            .unwrap();
-        stmt.query_map([], |row| {
+    let symbols: Vec<SymbolRow> = conn
+        .prepare("SELECT id, entity_id, scope_id, name, path FROM symbols")
+        .unwrap()
+        .query_map([], |row| {
             Ok(SymbolRow {
                 id: row.get(0)?,
                 entity_id: row.get(1)?,
@@ -247,16 +237,12 @@ pub fn run_component_task(
         })
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    let scopes: Vec<ScopeRow> = if table_exists(&conn, "scopes") {
-        let mut stmt = conn
-            .prepare("SELECT id, file_id, parent_id, kind, entity_id FROM scopes")
-            .unwrap();
-        stmt.query_map([], |row| {
+    let scopes: Vec<ScopeRow> = conn
+        .prepare("SELECT id, file_id, parent_id, kind, entity_id FROM scopes")
+        .unwrap()
+        .query_map([], |row| {
             Ok(ScopeRow {
                 id: row.get(0)?,
                 file_id: row.get(1)?,
@@ -267,16 +253,12 @@ pub fn run_component_task(
         })
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    let relations: Vec<RelationRow> = if table_exists(&conn, "relations") {
-        let mut stmt = conn
-            .prepare("SELECT from_id, to_id, kind, data_json FROM relations")
-            .unwrap();
-        stmt.query_map([], |row| {
+    let relations: Vec<RelationRow> = conn
+        .prepare("SELECT from_id, to_id, kind, data_json FROM relations")
+        .unwrap()
+        .query_map([], |row| {
             Ok(RelationRow {
                 from_id: row.get(0)?,
                 to_id: row.get(1)?,
@@ -286,17 +268,24 @@ pub fn run_component_task(
         })
         .unwrap()
         .filter_map(|r| r.ok())
-        .collect()
-    } else {
-        Vec::new()
-    };
+        .collect();
 
-    // 2. Logic Implementation
-    let mut node_list: Vec<LocalNode> = Vec::new();
-    let mut combo_list: Vec<LocalCombo> = Vec::new();
-    let mut edge_list: Vec<LocalEdge> = Vec::new();
-    let mut detail_list: Vec<LocalDetail> = Vec::new();
+    let packages: Vec<PackageRow> = conn
+        .prepare("SELECT id, name, version, path FROM packages")
+        .unwrap()
+        .query_map([], |row| {
+            Ok(PackageRow {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                version: row.get(2)?,
+                path: row.get(3)?,
+            })
+        })
+        .unwrap()
+        .filter_map(|r| r.ok())
+        .collect();
 
+    // Map logical structures (same logic as before)
     let package_path_map: HashMap<String, String> = packages
         .iter()
         .map(|p| (p.id.clone(), p.path.clone()))
@@ -319,281 +308,168 @@ pub fn run_component_task(
         .collect();
 
     let use_package_combos = packages.len() > 1;
-    let mut package_combo_added: HashSet<String> = HashSet::new();
-    let mut combo_map: HashMap<String, LocalCombo> = HashMap::new();
+    let mut added_combos = HashSet::new();
+    let mut added_nodes = HashSet::new();
 
-    // 1. Process Scopes into Combos First
-    // Skip module-kind scopes — they're file-level wrappers with no visual value;
-    // their children get re-parented to the package combo directly.
+    // Helper to insert results
+    let mut ins_node = conn.prepare("INSERT OR REPLACE INTO out_nodes (id, name, type, combo_id, color, radius, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
+    let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)").unwrap();
+    let mut ins_edge = conn.prepare("INSERT OR REPLACE INTO out_edges (id, source, target, name, kind, category, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)").unwrap();
+    let mut ins_detail = conn.prepare("INSERT OR REPLACE INTO out_details (id, file_name, project_path, line, \"column\", data_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").unwrap();
+
+    // 1. Scopes -> Combos
     for scope in &scopes {
         if scope.kind == "module" {
             continue;
         }
-
-        let mut parent_combo_id = scope.parent_id.clone().and_then(|pid| {
+        let mut parent_id = scope.parent_id.clone().and_then(|pid| {
             scopes
                 .iter()
                 .find(|s| s.id == pid && s.kind != "module")
                 .map(|_| pid)
         });
-
-        if parent_combo_id.is_none() && use_package_combos {
-            if let Some(file_info) = file_info_map.get(&scope.file_id) {
-                if let Some(pkg_id) = &file_info.package_id {
-                    let pkg_combo_id = format!("pkg-{}", pkg_id);
-                    parent_combo_id = Some(pkg_combo_id.clone());
-
-                    if !package_combo_added.contains(&pkg_combo_id) {
+        if parent_id.is_none() && use_package_combos {
+            if let Some(fi) = file_info_map.get(&scope.file_id) {
+                if let Some(pkg_id) = &fi.package_id {
+                    let pkg_cid = format!("package:{}", pkg_id);
+                    parent_id = Some(pkg_cid.clone());
+                    if !added_combos.contains(&pkg_cid) {
                         if let Some(pkg) = packages.iter().find(|p| p.id == *pkg_id) {
-                            combo_map.insert(
-                                pkg_combo_id.clone(),
-                                LocalCombo {
-                                    id: pkg_combo_id.clone(),
-                                    item_type: InternalItemType::Package,
-                                    name: pkg.name.clone(),
-                                    display_name: pkg.name.clone(),
-                                    parent_id: None,
-                                    color: None,
-                                    radius: None,
-                                    collapsed: true,
-                                },
-                            );
-                            package_combo_added.insert(pkg_combo_id);
+                            ins_combo
+                                .execute(params![
+                                    pkg_cid,
+                                    pkg.name,
+                                    "package",
+                                    None::<String>,
+                                    None::<String>,
+                                    24.0,
+                                    1,
+                                    pkg.name,
+                                    None::<String>
+                                ])
+                                .unwrap();
+                            added_combos.insert(pkg_cid);
                         }
                     }
                 }
             }
         }
-
-        combo_map.insert(
-            scope.id.clone(),
-            LocalCombo {
-                id: scope.id.clone(),
-                item_type: InternalItemType::Scope,
-                name: scope.kind.clone(),
-                display_name: scope.kind.clone(),
-                parent_id: parent_combo_id,
-                color: None,
-                radius: None,
-                collapsed: true,
-            },
-        );
+        ins_combo
+            .execute(params![
+                scope.id,
+                scope.kind,
+                "scope",
+                parent_id,
+                None::<String>,
+                18.0,
+                1,
+                None::<String>,
+                None::<String>
+            ])
+            .unwrap();
+        added_combos.insert(scope.id.clone());
     }
 
-    let mut automatic_jsx_entities = HashSet::new();
-    for symbol in &symbols {
-        if symbol.name.starts_with("jsx@") {
-            automatic_jsx_entities.insert(symbol.entity_id.clone());
-        }
-    }
-
+    // 2. Symbols -> Nodes/Combos
     for symbol in &symbols {
         if symbol.name.starts_with("jsx@") {
             continue;
         }
         let entity = entities.iter().find(|e| e.id == symbol.entity_id);
-        if entity.is_none() {
+        if entity.is_none() || entity.unwrap().kind == "import" {
             continue;
         }
         let entity = entity.unwrap();
-        if entity.kind == "import" {
-            continue;
-        }
 
         let scope = scopes.iter().find(|s| s.id == symbol.scope_id);
         let file_info = scope.and_then(|s| file_info_map.get(&s.file_id));
-
         let block_scope = scopes
             .iter()
             .find(|s| s.entity_id == Some(entity.id.clone()));
 
         if let Some(bs) = block_scope {
-            if let Some(combo) = combo_map.get_mut(&bs.id) {
-                combo.item_type = map_item_type(&entity.kind);
-                combo.name = symbol.name.clone();
-                combo.display_name = symbol.name.clone();
-            }
-            detail_list.push(LocalDetail {
-                id: bs.id.clone(),
-                file_name: file_info.map(|f| f.path.clone()),
-                project_path: file_info.and_then(|f| f.project_path.clone()),
-                line: entity.line.unwrap_or(0),
-                column: entity.column.unwrap_or(0),
-                data_json: entity.data_json.clone(),
-            });
+            // Update existing scope combo
+            conn.execute(
+                "UPDATE out_combos SET name = ?1, display_name = ?2, type = ?3 WHERE id = ?4",
+                params![symbol.name, symbol.name, entity.kind, bs.id],
+            )
+            .unwrap();
+            ins_detail
+                .execute(params![
+                    bs.id,
+                    file_info.map(|f| f.path.clone()),
+                    file_info.and_then(|f| f.project_path.clone()),
+                    entity.line.unwrap_or(0),
+                    entity.column.unwrap_or(0),
+                    entity.data_json
+                ])
+                .unwrap();
         } else {
-            let mut parent_combo_id = scope
+            let mut parent_id = scope
                 .filter(|s| s.kind != "module")
                 .map(|_| symbol.scope_id.clone());
-
-            if parent_combo_id.is_none() && use_package_combos {
+            if parent_id.is_none() && use_package_combos {
                 if let Some(fi) = file_info.as_ref() {
                     if let Some(pkg_id) = &fi.package_id {
-                        parent_combo_id = Some(format!("pkg-{}", pkg_id));
+                        parent_id = Some(format!("package:{}", pkg_id));
                     }
                 }
             }
-
-            node_list.push(LocalNode {
-                id: symbol.id.clone(),
-                item_type: map_item_type(&entity.kind),
-                name: symbol.name.clone(),
-                display_name: symbol.name.clone(),
-                combo_id: parent_combo_id,
-                color: None,
-                radius: None,
-            });
-            detail_list.push(LocalDetail {
-                id: symbol.id.clone(),
-                file_name: file_info.map(|f| f.path.clone()),
-                project_path: file_info.and_then(|f| f.project_path.clone()),
-                line: entity.line.unwrap_or(0),
-                column: entity.column.unwrap_or(0),
-                data_json: entity.data_json.clone(),
-            });
+            ins_node
+                .execute(params![
+                    symbol.id,
+                    symbol.name,
+                    entity.kind,
+                    parent_id,
+                    None::<String>,
+                    20.0,
+                    symbol.name,
+                    entity.data_json
+                ])
+                .unwrap();
+            ins_detail
+                .execute(params![
+                    symbol.id,
+                    file_info.map(|f| f.path.clone()),
+                    file_info.and_then(|f| f.project_path.clone()),
+                    entity.line.unwrap_or(0),
+                    entity.column.unwrap_or(0),
+                    entity.data_json
+                ])
+                .unwrap();
+            added_nodes.insert(symbol.id.clone());
         }
     }
 
-    combo_list.extend(combo_map.into_values());
-
-    // Edges
+    // 3. Relations -> Edges
     for rel in &relations {
         if rel.kind == "parent-child" {
             continue;
         }
-        edge_list.push(LocalEdge {
-            id: format!("{}-{}-{}", rel.from_id, rel.to_id, rel.kind),
-            source: rel.from_id.clone(),
-            target: rel.to_id.clone(),
-            name: rel.kind.clone(),
-            kind: rel.kind.clone(),
-            category: rel.kind.clone(),
-        });
+        ins_edge
+            .execute(params![
+                format!("{}-{}-{}", rel.from_id, rel.to_id, rel.kind),
+                rel.from_id,
+                rel.to_id,
+                rel.kind,
+                rel.kind,
+                rel.kind,
+                rel.data_json
+            ])
+            .unwrap();
     }
 
-    // 3. FlatBuffer Construction (Manual using Builder)
-    let mut builder = flatbuffers::FlatBufferBuilder::with_capacity(1024 * 1024);
-
-    // Convert Nodes
-    let mut fb_nodes = Vec::new();
-    for node in &node_list {
-        let id = builder.create_string(&node.id);
-        let name = builder.create_string(&node.name);
-        let display_name = builder.create_string(&node.display_name);
-        let combo_id = node.combo_id.as_ref().map(|c| builder.create_string(c));
-        let color = node.color.as_ref().map(|c| builder.create_string(c));
-
-        let mut args = GraphNodeArgs {
-            id: Some(id),
-            name: Some(name),
-            displayName: Some(display_name),
-            type_: graph_view_generated::nexiq::graph_view::ItemType(node.item_type as i8),
-            comboId: combo_id,
-            color: color,
-            radius: node.radius.unwrap_or(0.0),
-        };
-        fb_nodes.push(FBGraphNode::create(&mut builder, &args));
+    // 4. Serialize back to buffer
+    let mut size: i64 = 0;
+    unsafe {
+        let db = conn.handle();
+        let ptr =
+            rusqlite::ffi::sqlite3_serialize(db, b"main\0".as_ptr() as *const i8, &mut size, 0u32);
+        if ptr.is_null() {
+            return Err(Error::from_reason("sqlite3_serialize failed"));
+        }
+        let result_vec = std::slice::from_raw_parts(ptr, size as usize).to_vec();
+        rusqlite::ffi::sqlite3_free(ptr as *mut std::ffi::c_void);
+        Ok(Buffer::from(result_vec))
     }
-    let nodes_vector = builder.create_vector(&fb_nodes);
-
-    // Convert Combos
-    let mut fb_combos = Vec::new();
-    for combo in &combo_list {
-        let id = builder.create_string(&combo.id);
-        let name = builder.create_string(&combo.name);
-        let display_name = builder.create_string(&combo.display_name);
-        let parent_id = combo.parent_id.as_ref().map(|c| builder.create_string(c));
-        let color = combo.color.as_ref().map(|c| builder.create_string(c));
-
-        let args = GraphComboArgs {
-            id: Some(id),
-            name: Some(name),
-            displayName: Some(display_name),
-            type_: graph_view_generated::nexiq::graph_view::ItemType(combo.item_type as i8),
-            parentId: parent_id,
-            color: color,
-            radius: combo.radius.unwrap_or(0.0),
-            collapsed: combo.collapsed,
-        };
-        fb_combos.push(FBGraphCombo::create(&mut builder, &args));
-    }
-    let combos_vector = builder.create_vector(&fb_combos);
-
-    // Convert Edges
-    let mut fb_edges = Vec::new();
-    for edge in &edge_list {
-        let id = builder.create_string(&edge.id);
-        let source = builder.create_string(&edge.source);
-        let target = builder.create_string(&edge.target);
-        let name = builder.create_string(&edge.name);
-        let kind = builder.create_string(&edge.kind);
-        let category = builder.create_string(&edge.category);
-
-        let args = GraphEdgeArgs {
-            id: Some(id),
-            source: Some(source),
-            target: Some(target),
-            name: Some(name),
-            kind: Some(kind),
-            category: Some(category),
-        };
-        fb_edges.push(FBGraphEdge::create(&mut builder, &args));
-    }
-    let edges_vector = builder.create_vector(&fb_edges);
-
-    // Convert Details
-    let mut fb_details = Vec::new();
-    for detail in &detail_list {
-        let id = builder.create_string(&detail.id);
-        let file_name = detail.file_name.as_ref().map(|f| builder.create_string(f));
-        let project_path = detail
-            .project_path
-            .as_ref()
-            .map(|p| builder.create_string(p));
-        let data_json = detail.data_json.as_ref().map(|d| builder.create_string(d));
-
-        let loc_args = LocArgs {
-            line: detail.line,
-            column: detail.column,
-        };
-        let loc = Loc::create(&mut builder, &loc_args);
-
-        let args = GraphNodeDetailArgs {
-            id: Some(id),
-            fileName: file_name,
-            projectPath: project_path,
-            loc: Some(loc),
-            data_json: data_json,
-        };
-        fb_details.push(FBGraphNodeDetail::create(&mut builder, &args));
-    }
-    let details_vector = builder.create_vector(&fb_details);
-
-    let graph_view_args = GraphViewArgs {
-        nodes: Some(nodes_vector),
-        combos: Some(combos_vector),
-        edges: Some(edges_vector),
-        details: Some(details_vector),
-    };
-
-    let root = FBGraphView::create(&mut builder, &graph_view_args);
-    builder.finish(root, Some("NXGV"));
-
-    let finished_data = builder.finished_data();
-
-    if finished_data.len() > node_data_buffer.len() {
-        return Err(Error::from_reason(
-            "nodeDataBuffer is too small for FlatBuffer output!",
-        ));
-    }
-    node_data_buffer[..finished_data.len()].copy_from_slice(finished_data);
-
-    println!(
-        "Processed {} nodes, {} edges, {} combos into flatbuffer!",
-        node_list.len(),
-        edge_list.len(),
-        combo_list.len()
-    );
-
-    Ok(finished_data.len() as u32)
 }

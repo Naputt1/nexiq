@@ -310,6 +310,6 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { runComponentTask } = nativeBinding
+const { runComponentTaskSqlite } = nativeBinding
 
-module.exports.runComponentTask = runComponentTask
+module.exports.runComponentTaskSqlite = runComponentTaskSqlite

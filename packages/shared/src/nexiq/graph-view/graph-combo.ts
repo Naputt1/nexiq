@@ -73,8 +73,15 @@ collapsed():boolean {
   return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
 }
 
+gitStatus():string|null
+gitStatus(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+gitStatus(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 20);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startGraphCombo(builder:flatbuffers.Builder) {
-  builder.startObject(8);
+  builder.startObject(9);
 }
 
 static addId(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset) {
@@ -109,12 +116,16 @@ static addCollapsed(builder:flatbuffers.Builder, collapsed:boolean) {
   builder.addFieldInt8(7, +collapsed, +false);
 }
 
+static addGitStatus(builder:flatbuffers.Builder, gitStatusOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(8, gitStatusOffset, 0);
+}
+
 static endGraphCombo(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, parentIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, collapsed:boolean):flatbuffers.Offset {
+static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, parentIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, collapsed:boolean, gitStatusOffset:flatbuffers.Offset):flatbuffers.Offset {
   GraphCombo.startGraphCombo(builder);
   GraphCombo.addId(builder, idOffset);
   GraphCombo.addType(builder, type);
@@ -124,6 +135,7 @@ static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset
   GraphCombo.addColor(builder, colorOffset);
   GraphCombo.addRadius(builder, radius);
   GraphCombo.addCollapsed(builder, collapsed);
+  GraphCombo.addGitStatus(builder, gitStatusOffset);
   return GraphCombo.endGraphCombo(builder);
 }
 }

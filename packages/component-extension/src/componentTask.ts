@@ -672,4 +672,459 @@ export const componentTask: GraphViewTask = {
       typeData,
     };
   },
+  runSqlite: (context: TaskContext): void => {
+    const db = context.db;
+    if (!db) return;
+
+    const packages = db.prepare("SELECT * FROM packages").all() as any[];
+    const files = db.prepare("SELECT * FROM files").all() as any[];
+    const scopes = db.prepare("SELECT * FROM scopes").all() as any[];
+    const entities = db.prepare("SELECT * FROM entities").all() as any[];
+    const symbols = db.prepare("SELECT * FROM symbols").all() as any[];
+    const relations = db.prepare("SELECT * FROM relations").all() as any[];
+    const renders = db.prepare("SELECT * FROM renders").all() as any[];
+    const exports = db.prepare("SELECT * FROM exports").all() as any[];
+
+    const packagePathMap = new Map(packages.map((p) => [p.id, p.path]));
+    const fileInfoMap = new Map(
+      files.map((f) => [
+        f.id,
+        {
+          path: f.path,
+          packageId: f.package_id,
+          projectPath: f.package_id
+            ? packagePathMap.get(f.package_id)
+            : undefined,
+        },
+      ]),
+    );
+
+    const usePackageCombos = packages.length > 1;
+    const usageEdgeMap = new Map<
+      string,
+      {
+        id: string;
+        source: string;
+        target: string;
+        edgeKind: string;
+        category: string;
+        usages: UsageOccurrence[];
+      }
+    >();
+
+    const insertNode = db.prepare(`
+      INSERT INTO out_nodes (id, name, type, combo_id, color, radius, display_name, meta_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertEdge = db.prepare(`
+      INSERT INTO out_edges (id, source, target, name, kind, category, meta_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertCombo = db.prepare(`
+      INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, meta_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertDetail = db.prepare(`
+      INSERT INTO out_details (id, file_name, project_path, line, "column", data_json)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    const addedEdges = new Set<string>();
+    const addEdge = (edge: any) => {
+      const id = edge.id;
+      if (addedEdges.has(id)) return;
+      addedEdges.add(id);
+      insertEdge.run(
+        id,
+        edge.source,
+        edge.target,
+        edge.name || "dependency",
+        edge.edgeKind || edge.name || "dependency",
+        edge.category || edge.edgeKind || edge.name || "dependency",
+        edge.usages ? JSON.stringify(edge.usages) : null,
+      );
+    };
+
+    const addedCombos = new Set<string>();
+    const ensurePackageCombo = (packageId: string) => {
+      if (!usePackageCombos) return undefined;
+      const comboId = `package:${packageId}`;
+      if (!addedCombos.has(comboId)) {
+        const pkg = packages.find((p) => p.id === packageId);
+        insertCombo.run(
+          comboId,
+          pkg?.name || packageId,
+          "package",
+          null,
+          null,
+          24,
+          1,
+          pkg?.name || packageId,
+          null,
+        );
+        addedCombos.add(comboId);
+      }
+      return comboId;
+    };
+
+    // Identify automatic JSX symbols
+    const automaticJsxEntities = new Set<string>();
+    for (const symbol of symbols) {
+      if (symbol.name.startsWith("jsx@")) {
+        automaticJsxEntities.add(symbol.entity_id);
+      }
+    }
+
+    // Build Export Map
+    const exportMap = new Map<string, Map<string | null, string>>();
+    for (const exp of exports) {
+      const scope = scopes.find((s) => s.id === exp.scope_id);
+      if (!scope) continue;
+      const fileInfo = fileInfoMap.get(scope.file_id);
+      if (!fileInfo) continue;
+      if (!exportMap.has(fileInfo.path)) {
+        exportMap.set(fileInfo.path, new Map());
+      }
+      if (exp.symbol_id) {
+        exportMap
+          .get(fileInfo.path)!
+          .set(exp.is_default ? "default" : exp.name, exp.symbol_id);
+      }
+    }
+
+    // Build Redirection Map
+    const redirectionMap = new Map<string, string>();
+    for (const symbol of symbols) {
+      const entity = entities.find((e) => e.id === symbol.entity_id);
+      if (entity?.kind === "import" && entity.data_json) {
+        try {
+          const impData = JSON.parse(entity.data_json);
+          const targetSymbolId = exportMap
+            .get(impData.source)
+            ?.get(
+              impData.type === "default" ? "default" : impData.importedName,
+            );
+          if (targetSymbolId) redirectionMap.set(symbol.id, targetSymbolId);
+        } catch {}
+      }
+    }
+
+    // 1. Scopes
+    for (const scope of scopes) {
+      if (scope.kind === "module") continue;
+      if (addedCombos.has(scope.id)) continue;
+      if (scope.entity_id && automaticJsxEntities.has(scope.entity_id))
+        continue;
+
+      const parentScope = scopes.find((s) => s.id === scope.parent_id);
+      let parentComboId =
+        parentScope && parentScope.kind !== "module"
+          ? scope.parent_id
+          : undefined;
+      if (!parentComboId) {
+        const fileInfo = fileInfoMap.get(scope.file_id);
+        if (fileInfo?.packageId)
+          parentComboId = ensurePackageCombo(fileInfo.packageId);
+      }
+
+      insertCombo.run(
+        scope.id,
+        scope.kind,
+        "scope",
+        parentComboId || null,
+        null,
+        18,
+        1,
+        null,
+        null,
+      );
+      addedCombos.add(scope.id);
+    }
+
+    // 2. Symbols
+    const addedNodes = new Set<string>();
+    for (const symbol of symbols) {
+      if (addedNodes.has(symbol.id) || addedCombos.has(symbol.id)) continue;
+      if (symbol.name.startsWith("jsx@")) continue;
+
+      const entity = entities.find((e) => e.id === symbol.entity_id);
+      if (!entity || entity.kind === "import") continue;
+
+      // Skip state setters
+      if (entity.kind === "state" && symbol.path) {
+        try {
+          const pathArr = JSON.parse(symbol.path);
+          if (
+            Array.isArray(pathArr) &&
+            pathArr.length > 0 &&
+            pathArr[0] !== "0"
+          )
+            continue;
+        } catch {}
+      }
+
+      const scope = scopes.find((s) => s.id === symbol.scope_id);
+      const fileInfo = scope ? fileInfoMap.get(scope.file_id) : undefined;
+      const file = fileInfo?.path;
+      const projectPath = fileInfo?.projectPath;
+      const blockScope = scopes.find((s) => s.entity_id === entity.id);
+
+      if (blockScope) {
+        db.prepare(
+          "UPDATE out_combos SET display_name = ?, type = ?, name = ? WHERE id = ?",
+        ).run(symbol.name, entity.kind, symbol.name, blockScope.id);
+        insertDetail.run(
+          blockScope.id,
+          file,
+          projectPath,
+          entity.line || 0,
+          entity.column || 0,
+          entity.data_json,
+        );
+
+        // Metadata handling (effects, props, refs)
+        if (entity.data_json) {
+          try {
+            const meta = JSON.parse(entity.data_json);
+            if (meta.effects) {
+              for (const effect of Object.values(meta.effects as any)) {
+                const eff: any = effect;
+                const name = eff.name || "useEffect";
+                insertNode.run(
+                  eff.id,
+                  name,
+                  "effect",
+                  blockScope.id,
+                  null,
+                  14,
+                  name,
+                  null,
+                );
+                insertDetail.run(
+                  eff.id,
+                  file,
+                  projectPath,
+                  eff.loc.line,
+                  eff.loc.column,
+                  null,
+                );
+                if (eff.reactDeps) {
+                  for (const dep of eff.reactDeps) {
+                    const targetId = redirectionMap.get(dep.id) || dep.id;
+                    addEdge({
+                      id: `${targetId}-${eff.id}-effect-dep`,
+                      source: targetId,
+                      target: eff.id,
+                      name: "dependency",
+                    });
+                  }
+                }
+              }
+            }
+            if (meta.props?.length > 0) {
+              const pcId = `${blockScope.id}:props-group`;
+              insertCombo.run(
+                pcId,
+                "Props",
+                "props-group",
+                blockScope.id,
+                null,
+                18,
+                1,
+                "Props",
+                null,
+              );
+              insertDetail.run(pcId, file, projectPath, 0, 0, null);
+              addedCombos.add(pcId);
+              for (const prop of meta.props) {
+                insertNode.run(
+                  prop.id,
+                  prop.name,
+                  "prop",
+                  pcId,
+                  null,
+                  12,
+                  prop.name,
+                  null,
+                );
+                insertDetail.run(
+                  prop.id,
+                  file,
+                  projectPath,
+                  prop.loc?.line || 0,
+                  prop.loc?.column || 0,
+                  null,
+                );
+              }
+            }
+          } catch {}
+        }
+      } else {
+        let pcId =
+          scope && scope.kind !== "module" ? symbol.scope_id : undefined;
+        if (!pcId && fileInfo?.packageId)
+          pcId = ensurePackageCombo(fileInfo.packageId);
+
+        insertNode.run(
+          symbol.id,
+          symbol.name,
+          entity.kind,
+          pcId || null,
+          null,
+          20,
+          symbol.name,
+          entity.data_json,
+        );
+        insertDetail.run(
+          symbol.id,
+          file,
+          projectPath,
+          entity.line || 0,
+          entity.column || 0,
+          entity.data_json,
+        );
+        addedNodes.add(symbol.id);
+      }
+    }
+
+    // 3. Renders
+    for (const render of renders) {
+      if (addedNodes.has(render.id) || addedCombos.has(render.id)) continue;
+      const fileInfo = fileInfoMap.get(render.file_id);
+      const parentScope = scopes.find(
+        (s) => s.entity_id === render.parent_entity_id,
+      );
+      let pcId = render.parent_render_id ?? parentScope?.id;
+      if (!pcId && fileInfo?.packageId)
+        pcId = ensurePackageCombo(fileInfo.packageId);
+
+      if (parentScope?.id && !render.parent_render_id) {
+        const rgId = `render-group-${parentScope.id}`;
+        if (!addedCombos.has(rgId)) {
+          insertCombo.run(
+            rgId,
+            "render",
+            "render-group",
+            parentScope.id,
+            null,
+            18,
+            1,
+            "render",
+            null,
+          );
+          addedCombos.add(rgId);
+        }
+        pcId = rgId;
+      }
+
+      insertCombo.run(
+        render.id,
+        render.tag,
+        "render",
+        pcId || null,
+        null,
+        14,
+        1,
+        render.tag,
+        null,
+      );
+      insertDetail.run(
+        render.id,
+        fileInfo?.path,
+        fileInfo?.projectPath,
+        render.line || 0,
+        render.column || 0,
+        render.data_json,
+      );
+      addedCombos.add(render.id);
+
+      if (render.data_json) {
+        try {
+          const props = JSON.parse(render.data_json);
+          if (props?.length > 0) {
+            const rpgId = `${render.id}:props-group`;
+            insertCombo.run(
+              rpgId,
+              "Props",
+              "props-group",
+              render.id,
+              null,
+              16,
+              1,
+              "Props",
+              null,
+            );
+            addedCombos.add(rpgId);
+            for (const prop of props) {
+              const pId = `${render.id}:prop:${prop.name}`;
+              insertNode.run(
+                pId,
+                prop.name,
+                "prop",
+                rpgId,
+                null,
+                12,
+                prop.name,
+                null,
+              );
+              insertDetail.run(
+                pId,
+                fileInfo?.path,
+                fileInfo?.projectPath,
+                render.line || 0,
+                render.column || 0,
+                null,
+              );
+              if (prop.valueId) {
+                const tId = redirectionMap.get(prop.valueId) || prop.valueId;
+                addEdge({
+                  id: `${tId}-${pId}-prop-value`,
+                  source: tId,
+                  target: pId,
+                  name: "value",
+                });
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+
+    // 4. Relations
+    for (const rel of relations) {
+      if (rel.kind === "parent-child") continue;
+      const sId = redirectionMap.get(rel.from_id) || rel.from_id;
+      const tId = redirectionMap.get(rel.to_id) || rel.to_id;
+      if (rel.kind.startsWith("usage-")) {
+        const uid = `${sId}-${tId}-${rel.kind}`;
+        const usage = rel.data_json ? JSON.parse(rel.data_json) : undefined;
+        let entry = usageEdgeMap.get(uid);
+        if (!entry) {
+          entry = {
+            id: uid,
+            source: sId,
+            target: tId,
+            edgeKind: rel.kind,
+            category: rel.kind,
+            usages: [],
+          };
+          usageEdgeMap.set(uid, entry);
+        }
+        if (usage) entry.usages.push(usage);
+        continue;
+      }
+      addEdge({
+        id: `${sId}-${tId}-${rel.kind}`,
+        source: sId,
+        target: tId,
+        name: rel.kind,
+        edgeKind: rel.kind,
+        category: rel.kind,
+      });
+    }
+
+    for (const use of usageEdgeMap.values()) {
+      addEdge(use);
+    }
+  },
 };
