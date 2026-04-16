@@ -76,7 +76,8 @@ export interface GraphAppearance {
       | "ref"
       | "effect"
       | "prop"
-      | "render",
+      | "render"
+      | "variable",
       NodeAppearance
     >
   >;
@@ -115,6 +116,7 @@ export const DEFAULT_GRAPH_APPEARANCE: GraphAppearance = {
     effect: { color: "#eab308", radius: 14 },
     prop: { color: "#22c55e", radius: 12 },
     render: { color: "#2563eb", radius: 14 },
+    variable: { color: "#60a5fa", radius: 14 },
   },
   typeKeyword: "#c084fc",
   typeLiteral: "#fdba74",
@@ -284,6 +286,15 @@ export function normalizeGraphAppearance(
       radius:
         appearance?.nodes?.render?.radius ??
         DEFAULT_GRAPH_APPEARANCE.nodes?.render?.radius,
+    },
+    variable: {
+      ...DEFAULT_GRAPH_APPEARANCE.nodes?.variable,
+      color:
+        appearance?.nodes?.variable?.color ||
+        DEFAULT_GRAPH_APPEARANCE.nodes?.variable?.color,
+      radius:
+        appearance?.nodes?.variable?.radius ??
+        DEFAULT_GRAPH_APPEARANCE.nodes?.variable?.radius,
     },
   };
 

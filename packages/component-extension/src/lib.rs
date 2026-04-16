@@ -4,6 +4,7 @@ extern crate napi_derive;
 use napi::bindgen_prelude::*;
 use rusqlite::{params, Connection};
 use std::collections::{HashMap, HashSet};
+use rust_core::*;
 
 #[napi(object)]
 pub struct TaskContext {
@@ -12,136 +13,6 @@ pub struct TaskContext {
     pub cache_db_path: Option<String>,
 }
 
-struct PackageRow {
-    id: String,
-    name: String,
-    version: String,
-    path: String,
-}
-struct FileRow {
-    id: i32,
-    path: String,
-    package_id: Option<String>,
-}
-struct EntityRow {
-    id: String,
-    scope_id: String,
-    kind: String,
-    name: Option<String>,
-    item_type: Option<String>,
-    line: Option<i32>,
-    column: Option<i32>,
-    data_json: Option<String>,
-}
-struct SymbolRow {
-    id: String,
-    entity_id: String,
-    scope_id: String,
-    name: String,
-    path: Option<String>,
-}
-struct ScopeRow {
-    id: String,
-    file_id: i32,
-    parent_id: Option<String>,
-    kind: String,
-    entity_id: Option<String>,
-}
-struct RelationRow {
-    from_id: String,
-    to_id: String,
-    kind: String,
-    data_json: Option<String>,
-}
-struct FileInfo {
-    path: String,
-    package_id: Option<String>,
-    project_path: Option<String>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i8)]
-pub enum InternalItemType {
-    Package = 0,
-    Scope = 1,
-    Component = 2,
-    Hook = 3,
-    State = 4,
-    Memo = 5,
-    Callback = 6,
-    Ref = 7,
-    Effect = 8,
-    Prop = 9,
-    Render = 10,
-    RenderGroup = 11,
-    SourceGroup = 12,
-    PathGroup = 13,
-}
-
-struct LocalNode {
-    id: String,
-    item_type: InternalItemType,
-    name: String,
-    display_name: String,
-    combo_id: Option<String>,
-    color: Option<String>,
-    radius: Option<f32>,
-}
-struct LocalCombo {
-    id: String,
-    item_type: InternalItemType,
-    name: String,
-    display_name: String,
-    parent_id: Option<String>,
-    color: Option<String>,
-    radius: Option<f32>,
-    collapsed: bool,
-}
-struct LocalEdge {
-    id: String,
-    source: String,
-    target: String,
-    name: String,
-    kind: String,
-    category: String,
-}
-struct LocalDetail {
-    id: String,
-    file_name: Option<String>,
-    project_path: Option<String>,
-    line: i32,
-    column: i32,
-    data_json: Option<String>,
-}
-
-fn map_item_type(kind: &str) -> InternalItemType {
-    match kind {
-        "package" => InternalItemType::Package,
-        "scope" => InternalItemType::Scope,
-        "component" | "function" | "class" => InternalItemType::Component,
-        "hook" => InternalItemType::Hook,
-        "state" => InternalItemType::State,
-        "memo" => InternalItemType::Memo,
-        "callback" => InternalItemType::Callback,
-        "ref" => InternalItemType::Ref,
-        "effect" => InternalItemType::Effect,
-        "prop" => InternalItemType::Prop,
-        "render" => InternalItemType::Render,
-        "render-group" => InternalItemType::RenderGroup,
-        "source-group" => InternalItemType::SourceGroup,
-        "path-group" => InternalItemType::PathGroup,
-        _ => InternalItemType::Scope,
-    }
-}
-
-fn table_exists(conn: &Connection, table_name: &str) -> bool {
-    conn.query_row(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name=?1",
-        [table_name],
-        |_| Ok(()),
-    )
-    .is_ok()
-}
 
 #[napi]
 pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
@@ -284,6 +155,57 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         .unwrap()
         .filter_map(|r| r.ok())
         .collect();
+    let renders: Vec<RenderRow> = conn
+        .prepare("SELECT id, file_id, parent_entity_id, parent_render_id, symbol_id, tag, line, \"column\", data_json FROM renders")
+        .unwrap()
+        .query_map([], |row| {
+            Ok(RenderRow {
+                id: row.get(0)?,
+                file_id: row.get(1)?,
+                parent_entity_id: row.get(2)?,
+                parent_render_id: row.get(3)?,
+                symbol_id: row.get(4)?,
+                tag: row.get(5)?,
+                line: row.get(6)?,
+                column: row.get(7)?,
+                data_json: row.get(8)?,
+            })
+        })
+        .unwrap()
+        .filter_map(|r| r.ok())
+        .collect();
+
+    // --- Pre-processing: Redirection Map ---
+    let mut redirection_map: HashMap<String, String> = HashMap::new();
+    let mut export_map: HashMap<String, HashMap<String, String>> = HashMap::new(); // Map<file_path, Map<export_name, symbol_id>>
+
+    // Build export map
+    if table_exists(&conn, "exports") {
+        let mut exp_stmt = conn.prepare("SELECT e.name, s.id, f.path FROM exports e JOIN symbols s ON e.symbol_id = s.id JOIN scopes sc ON e.scope_id = sc.id JOIN files f ON sc.file_id = f.id").unwrap();
+        let exports_iter = exp_stmt.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))).unwrap();
+        for exp in exports_iter.filter_map(|r| r.ok()) {
+            export_map.entry(exp.2).or_default().insert(exp.0, exp.1);
+        }
+    }
+
+    // Build redirection map for imports
+    for sym in &symbols {
+        if let Some(entity) = entities.iter().find(|e| e.id == sym.entity_id) {
+            if entity.kind == "import" {
+                if let Some(dj) = &entity.data_json {
+                    if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                        if let (Some(source), Some(imported_name)) = (dj_json["source"].as_str(), dj_json["importedName"].as_str()) {
+                            if let Some(file_exports) = export_map.get(source) {
+                                if let Some(target_sym_id) = file_exports.get(imported_name) {
+                                    redirection_map.insert(sym.id.clone(), target_sym_id.clone());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Map logical structures (same logic as before)
     let package_path_map: HashMap<String, String> = packages
@@ -381,82 +303,265 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
         let entity = entity.unwrap();
 
+        // Skip state setters (index 1 of the state array) to avoid showing duplicate nodes
+        if entity.kind == "state" {
+            if let Some(path_str) = &symbol.path {
+                if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
+                    if let Some(path_arr) = path_json.as_array() {
+                        if !path_arr.is_empty() && path_arr[0] != "0" && path_arr[0] != 0 {
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
         let scope = scopes.iter().find(|s| s.id == symbol.scope_id);
         let file_info = scope.and_then(|s| file_info_map.get(&s.file_id));
         let block_scope = scopes
             .iter()
             .find(|s| s.entity_id == Some(entity.id.clone()));
 
-        if let Some(bs) = block_scope {
+        let mut pc_id = if let Some(bs) = block_scope {
             // Update existing scope combo
+            let combo_type = if entity.kind == "normal" { "variable" } else { &entity.kind };
             conn.execute(
                 "UPDATE out_combos SET name = ?1, display_name = ?2, type = ?3 WHERE id = ?4",
-                params![symbol.name, symbol.name, entity.kind, bs.id],
+                params![symbol.name, symbol.name, combo_type, bs.id],
             )
             .unwrap();
-            ins_detail
-                .execute(params![
-                    bs.id,
-                    file_info.map(|f| f.path.clone()),
-                    file_info.and_then(|f| f.project_path.clone()),
-                    entity.line.unwrap_or(0),
-                    entity.column.unwrap_or(0),
-                    entity.data_json
-                ])
-                .unwrap();
+            Some(bs.id.clone())
         } else {
-            let mut parent_id = scope
+            let mut pid = scope
                 .filter(|s| s.kind != "module")
                 .map(|_| symbol.scope_id.clone());
-            if parent_id.is_none() && use_package_combos {
+            if pid.is_none() && use_package_combos {
                 if let Some(fi) = file_info.as_ref() {
                     if let Some(pkg_id) = &fi.package_id {
-                        parent_id = Some(format!("package:{}", pkg_id));
+                        pid = Some(format!("package:{}", pkg_id));
                     }
                 }
             }
+            pid
+        };
+
+        // Source Combo for Hooks result
+        if entity.kind == "hook" {
+            let sc_id = format!("{}:source:{}", symbol.scope_id, entity.id);
+            if !added_combos.contains(&sc_id) {
+                ins_combo.execute(params![
+                    sc_id,
+                    symbol.name,
+                    "source-group",
+                    pc_id,
+                    None::<String>,
+                    16.0,
+                    1,
+                    symbol.name,
+                    None::<String>
+                ]).unwrap();
+                added_combos.insert(sc_id.clone());
+            }
+            pc_id = Some(sc_id);
+        }
+
+        // Path-based grouping (Destructuring)
+        if let Some(path_str) = &symbol.path {
+            if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
+                if let Some(path_arr) = path_json.as_array() {
+                    let mut current_parent = pc_id.clone();
+                    let mut path_prefix = if entity.kind == "hook" {
+                        format!("{}:path", pc_id.as_ref().unwrap())
+                    } else {
+                        format!("{}:path:{}", symbol.scope_id, symbol.id)
+                    };
+
+                    for (i, seg) in path_arr.iter().enumerate() {
+                        if i == path_arr.len() - 1 && entity.kind != "state" {
+                            break;
+                        }
+                        let seg_str = match seg {
+                            serde_json::Value::String(s) => s.clone(),
+                            serde_json::Value::Number(n) => n.to_string(),
+                            _ => continue,
+                        };
+                        
+                        // Skip index 0/1 for state arrays
+                        if entity.kind == "state" && (seg_str == "0" || seg_str == "1") {
+                            continue;
+                        }
+
+                        if i == path_arr.len() - 1 && entity.kind == "state" {
+                            break;
+                        }
+
+                        let group_id = format!("{}:{}", path_prefix, seg_str);
+                        if !added_combos.contains(&group_id) {
+                            ins_combo.execute(params![
+                                group_id,
+                                seg_str,
+                                "path-group",
+                                current_parent,
+                                None::<String>,
+                                14.0,
+                                1,
+                                seg_str,
+                                None::<String>
+                            ]).unwrap();
+                            added_combos.insert(group_id.clone());
+                        }
+                        current_parent = Some(group_id.clone());
+                        path_prefix = group_id;
+                    }
+                    pc_id = current_parent;
+                }
+            }
+        }
+
+        if block_scope.is_none() {
+            let node_type = if entity.kind == "normal" { "variable" } else { &entity.kind };
             ins_node
                 .execute(params![
                     symbol.id,
                     symbol.name,
-                    entity.kind,
-                    parent_id,
+                    node_type,
+                    pc_id,
                     None::<String>,
                     20.0,
                     symbol.name,
                     entity.data_json
                 ])
                 .unwrap();
-            ins_detail
-                .execute(params![
-                    symbol.id,
-                    file_info.map(|f| f.path.clone()),
-                    file_info.and_then(|f| f.project_path.clone()),
-                    entity.line.unwrap_or(0),
-                    entity.column.unwrap_or(0),
-                    entity.data_json
-                ])
-                .unwrap();
             added_nodes.insert(symbol.id.clone());
+        }
+
+        ins_detail
+            .execute(params![
+                block_scope.map(|s| s.id.clone()).unwrap_or(symbol.id.clone()),
+                file_info.map(|f| f.path.clone()),
+                file_info.and_then(|f| f.project_path.clone()),
+                entity.line.unwrap_or(0),
+                entity.column.unwrap_or(0),
+                entity.data_json
+            ])
+            .unwrap();
+    }
+
+    // 3. Renders
+    for render in &renders {
+        let file_info = file_info_map.get(&render.file_id);
+        let parent_scope = scopes
+            .iter()
+            .find(|s| s.entity_id == Some(render.parent_entity_id.clone()));
+
+        let mut pc_id = render
+            .parent_render_id
+            .clone()
+            .or(parent_scope.map(|s| s.id.clone()));
+
+        if pc_id.is_none() && use_package_combos {
+            if let Some(fi) = file_info.as_ref() {
+                if let Some(pkg_id) = &fi.package_id {
+                    pc_id = Some(format!("package:{}", pkg_id));
+                }
+            }
+        }
+
+        if let Some(ps) = parent_scope {
+            if render.parent_render_id.is_none() {
+                let rg_id = format!("render-group-{}", ps.id);
+                if !added_combos.contains(&rg_id) {
+                    conn.execute(
+                        "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                        params![rg_id, "render", "render-group", ps.id, None::<String>, 18.0, 1, "render"],
+                    ).unwrap();
+                    added_combos.insert(rg_id.clone());
+                }
+                pc_id = Some(rg_id);
+            }
+        }
+
+        conn.execute(
+            "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![render.id, render.tag, "render", pc_id, None::<String>, 14.0, 1, render.tag],
+        ).unwrap();
+
+        ins_detail.execute(params![
+            render.id,
+            file_info.map(|f| f.path.clone()),
+            file_info.and_then(|f| f.project_path.clone()),
+            render.line.unwrap_or(0),
+            render.column.unwrap_or(0),
+            render.data_json
+        ]).unwrap();
+
+        added_combos.insert(render.id.clone());
+    }
+
+    // 4. Hook Specific Nodes (Effects) and 5. Relations -> Edges
+    let mut edge_map: HashMap<String, (String, String, String, i32, Vec<serde_json::Value>)> = HashMap::new();
+
+    let mut add_edge_local = |source: &str, target: &str, kind: &str, name: &str, data: Option<&str>| {
+        let s = redirection_map.get(source).unwrap_or(&source.to_string()).clone();
+        let t = redirection_map.get(target).unwrap_or(&target.to_string()).clone();
+        let e_id = format!("{}-{}-{}", s, t, kind);
+        let entry = edge_map.entry(e_id).or_insert((s, t, kind.to_string(), 0, Vec::new()));
+        entry.3 += 1;
+        if let Some(d) = data {
+            if let Ok(j) = serde_json::from_str::<serde_json::Value>(d) {
+                entry.4.push(j);
+            }
+        }
+    };
+
+    // Generic Relations
+    for rel in &relations {
+        if rel.kind == "parent-child" { continue; }
+        add_edge_local(&rel.from_id, &rel.to_id, &rel.kind, &rel.kind, rel.data_json.as_deref());
+    }
+
+    // Hook metadata: Effects and ReactDeps
+    for entity in &entities {
+        if let Some(dj) = &entity.data_json {
+            if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                // useEffect / useLayoutEffect
+                if let Some(effects) = dj_json["effects"].as_object() {
+                    for (eff_id, eff_val) in effects {
+                        let eff_name = eff_val["name"].as_str().unwrap_or("useEffect");
+                        let line = eff_val["loc"]["line"].as_i64().unwrap_or(0) as i32;
+                        let col = eff_val["loc"]["column"].as_i64().unwrap_or(0) as i32;
+                        
+                        ins_node.execute(params![eff_id, eff_name, "effect", entity.scope_id, None::<String>, 14.0, eff_name, None::<String>]).unwrap();
+                        ins_detail.execute(params![eff_id, None::<String>, None::<String>, line, col, None::<String>]).unwrap();
+                        
+                        if let Some(deps) = eff_val["reactDeps"].as_array() {
+                            for dep in deps {
+                                if let Some(dep_id) = dep["id"].as_str() {
+                                    add_edge_local(dep_id, eff_id, "effect-dep", "dependency", None);
+                                }
+                            }
+                        }
+                    }
+                }
+                // reactDeps on hook result (useMemo / useCallback)
+                if let Some(deps) = dj_json["reactDeps"].as_array() {
+                    // Find the symbol associated with this entity
+                    if let Some(sym) = symbols.iter().find(|s| s.entity_id == entity.id) {
+                        for dep in deps {
+                            if let Some(dep_id) = dep["id"].as_str() {
+                                add_edge_local(dep_id, &sym.id, "react-dep", "dependency", None);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    // 3. Relations -> Edges
-    for rel in &relations {
-        if rel.kind == "parent-child" {
-            continue;
-        }
-        ins_edge
-            .execute(params![
-                format!("{}-{}-{}", rel.from_id, rel.to_id, rel.kind),
-                rel.from_id,
-                rel.to_id,
-                rel.kind,
-                rel.kind,
-                rel.kind,
-                rel.data_json
-            ])
-            .unwrap();
+    // Flush Edges
+    for (id, (source, target, kind, count, usages)) in edge_map {
+        let meta = if usages.is_empty() { None } else { Some(serde_json::json!({ "usageCount": count, "usages": usages }).to_string()) };
+        ins_edge.execute(params![id, source, target, kind, kind, kind, meta]).unwrap();
     }
 
     // 4. Serialize back to buffer
