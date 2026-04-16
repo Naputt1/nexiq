@@ -30,6 +30,7 @@ table GraphNode {
   comboId:string;
   color:string;
   radius:float;
+  gitStatus:string;
 }
 
 table GraphCombo {
@@ -41,6 +42,7 @@ table GraphCombo {
   color:string;
   radius:float;
   collapsed:bool;
+  gitStatus:string;
 }
 
 table GraphEdge {

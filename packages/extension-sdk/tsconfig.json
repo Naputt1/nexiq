@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "declaration": true,
+    "sourceMap": true,
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
@@ -12,6 +13,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
     "types": ["node"],
     "paths": {
       "@nexiq/shared": ["../shared/dist/index.d.ts"],

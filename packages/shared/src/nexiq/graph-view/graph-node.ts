@@ -68,8 +68,15 @@ radius():number {
   return offset ? this.bb!.readFloat32(this.bb_pos + offset) : 0.0;
 }
 
+gitStatus():string|null
+gitStatus(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+gitStatus(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 18);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startGraphNode(builder:flatbuffers.Builder) {
-  builder.startObject(7);
+  builder.startObject(8);
 }
 
 static addId(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset) {
@@ -100,12 +107,16 @@ static addRadius(builder:flatbuffers.Builder, radius:number) {
   builder.addFieldFloat32(6, radius, 0.0);
 }
 
+static addGitStatus(builder:flatbuffers.Builder, gitStatusOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(7, gitStatusOffset, 0);
+}
+
 static endGraphNode(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, comboIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number):flatbuffers.Offset {
+static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, comboIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, gitStatusOffset:flatbuffers.Offset):flatbuffers.Offset {
   GraphNode.startGraphNode(builder);
   GraphNode.addId(builder, idOffset);
   GraphNode.addType(builder, type);
@@ -114,6 +125,7 @@ static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset,
   GraphNode.addComboId(builder, comboIdOffset);
   GraphNode.addColor(builder, colorOffset);
   GraphNode.addRadius(builder, radius);
+  GraphNode.addGitStatus(builder, gitStatusOffset);
   return GraphNode.endGraphNode(builder);
 }
 }
