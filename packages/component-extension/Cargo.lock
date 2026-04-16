@@ -66,6 +66,7 @@ dependencies = [
  "napi-build",
  "napi-derive",
  "rusqlite",
+ "rust-core",
  "serde",
  "serde_json",
 ]
@@ -304,6 +305,15 @@ dependencies = [
  "hashlink",
  "libsqlite3-sys",
  "smallvec",
+]
+
+[[package]]
+name = "rust-core"
+version = "0.1.0"
+dependencies = [
+ "rusqlite",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

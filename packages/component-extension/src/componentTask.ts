@@ -1,3 +1,5 @@
+// legacy code, will be removed
+
 import {
   ComponentInfoRenderDependency,
   type EffectInfo,
@@ -441,7 +443,7 @@ export const componentTask: GraphViewTask = {
           id: symbol.id,
           name: symbol.name,
           combo: parentComboId,
-          type: entity.kind,
+          type: entity.kind === "normal" ? "variable" : entity.kind,
           displayName: symbol.name,
           hasProps: componentData.props?.length > 0 || !!componentData.propType,
           hasHooks: componentData.hooks?.length > 0,
@@ -872,7 +874,12 @@ export const componentTask: GraphViewTask = {
       if (blockScope) {
         db.prepare(
           "UPDATE out_combos SET display_name = ?, type = ?, name = ? WHERE id = ?",
-        ).run(symbol.name, entity.kind, symbol.name, blockScope.id);
+        ).run(
+          symbol.name,
+          entity.kind === "normal" ? "variable" : entity.kind,
+          symbol.name,
+          blockScope.id,
+        );
         insertDetail.run(
           blockScope.id,
           file,
@@ -968,7 +975,7 @@ export const componentTask: GraphViewTask = {
         insertNode.run(
           symbol.id,
           symbol.name,
-          entity.kind,
+          entity.kind === "normal" ? "variable" : entity.kind,
           pcId || null,
           null,
           20,

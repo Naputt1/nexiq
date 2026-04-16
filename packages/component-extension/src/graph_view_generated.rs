@@ -29,10 +29,10 @@ pub mod graph_view {
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 pub const ENUM_MIN_ITEM_TYPE: i8 = 0;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
-pub const ENUM_MAX_ITEM_TYPE: i8 = 13;
+pub const ENUM_MAX_ITEM_TYPE: i8 = 14;
 #[deprecated(since = "2.0.0", note = "Use associated constants instead. This will no longer be generated in 2021.")]
 #[allow(non_camel_case_types)]
-pub const ENUM_VALUES_ITEM_TYPE: [ItemType; 14] = [
+pub const ENUM_VALUES_ITEM_TYPE: [ItemType; 15] = [
   ItemType::Package,
   ItemType::Scope,
   ItemType::Component,
@@ -47,6 +47,7 @@ pub const ENUM_VALUES_ITEM_TYPE: [ItemType; 14] = [
   ItemType::RenderGroup,
   ItemType::SourceGroup,
   ItemType::PathGroup,
+  ItemType::Variable,
 ];
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -68,9 +69,10 @@ impl ItemType {
   pub const RenderGroup: Self = Self(11);
   pub const SourceGroup: Self = Self(12);
   pub const PathGroup: Self = Self(13);
+  pub const Variable: Self = Self(14);
 
   pub const ENUM_MIN: i8 = 0;
-  pub const ENUM_MAX: i8 = 13;
+  pub const ENUM_MAX: i8 = 14;
   pub const ENUM_VALUES: &'static [Self] = &[
     Self::Package,
     Self::Scope,
@@ -86,6 +88,7 @@ impl ItemType {
     Self::RenderGroup,
     Self::SourceGroup,
     Self::PathGroup,
+    Self::Variable,
   ];
   /// Returns the variant's name or "" if unknown.
   pub fn variant_name(self) -> Option<&'static str> {
@@ -104,6 +107,7 @@ impl ItemType {
       Self::RenderGroup => Some("RenderGroup"),
       Self::SourceGroup => Some("SourceGroup"),
       Self::PathGroup => Some("PathGroup"),
+      Self::Variable => Some("Variable"),
       _ => None,
     }
   }
