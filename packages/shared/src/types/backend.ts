@@ -4,7 +4,6 @@ import type {
   GitCommit,
   GitFileDiff,
   NexiqConfig,
-  AppStateData,
 } from "./index.js";
 
 export interface BackendRequestMap {
@@ -54,14 +53,6 @@ export interface BackendRequestMap {
       subProjects?: string[];
     };
     response: { sqlitePath: string };
-  };
-  read_state: {
-    payload: { projectPath: string };
-    response: unknown;
-  };
-  save_state: {
-    payload: { projectPath: string; state: AppStateData };
-    response: boolean;
   };
   call_tool: {
     payload: { name: string; arguments: Record<string, unknown> };

@@ -918,17 +918,5 @@ describe("ProjectManager", () => {
       expect(results.definitions[0].name).toBe("App");
       expect(results.externalUsages).toHaveLength(0);
     });
-
-    it("should save and read app state", async () => {
-      const state = { zoom: 1 };
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(state));
-
-      await projectManager.saveAppState(projectPath, state);
-      expect(fs.writeFileSync).toHaveBeenCalled();
-
-      const readState = await projectManager.readAppState(projectPath);
-      expect(readState).toEqual(state);
-    });
   });
 });

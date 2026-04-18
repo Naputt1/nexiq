@@ -1502,27 +1502,6 @@ export class BackendServer {
                 );
                 break;
               }
-              case "save_state": {
-                const { projectPath, state } = data.payload;
-                const success = await this.projectManager.saveAppState(
-                  projectPath,
-                  state,
-                );
-                this.sendResponse(
-                  ws,
-                  "state_saved",
-                  { success },
-                  data.requestId,
-                );
-                break;
-              }
-              case "read_state": {
-                const { projectPath } = data.payload;
-                const state =
-                  await this.projectManager.readAppState(projectPath);
-                this.sendResponse(ws, "state_data", state, data.requestId);
-                break;
-              }
               case "check_project_status": {
                 const { projectPath } = data.payload;
                 const status =

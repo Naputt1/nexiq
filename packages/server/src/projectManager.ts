@@ -1233,32 +1233,6 @@ export class ProjectManager {
     }
   }
 
-  async saveAppState(projectPath: string, state: unknown): Promise<boolean> {
-    try {
-      const dotDir = path.join(projectPath, ".nexiq");
-      if (!fs.existsSync(dotDir)) fs.mkdirSync(dotDir, { recursive: true });
-      fs.writeFileSync(
-        path.join(dotDir, "state.json"),
-        JSON.stringify(state, null, 2),
-      );
-      return true;
-    } catch (_error) {
-      return false;
-    }
-  }
-
-  async readAppState(projectPath: string): Promise<unknown> {
-    const statePath = path.join(projectPath, ".nexiq", "state.json");
-    if (fs.existsSync(statePath)) {
-      try {
-        return JSON.parse(fs.readFileSync(statePath, "utf-8"));
-      } catch (_e) {
-        // Ignore parsing errors
-      }
-    }
-    return null;
-  }
-
   private _saveCache(project: ProjectInfo) {
     const { cacheFile } = this.getProjectStoragePaths(
       project.projectPath,
