@@ -4,6 +4,7 @@ extern crate napi_derive;
 use napi::bindgen_prelude::*;
 use rusqlite::{params, Connection};
 use std::collections::{HashMap, HashSet};
+use std::path::Path;
 use rust_core::*;
 
 #[napi(object)]
@@ -24,34 +25,116 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     let conn = Connection::open_in_memory()
         .map_err(|e| Error::from_reason(format!("Failed to open in-memory SQLite: {}", e)))?;
 
-    // 2. Attach the cache database read-only to avoid loading it into memory
+    // 2. Attach the cache database read-only
     conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
         .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
 
-    // 3. Create TEMP views to map the attached 'source' schema into the default namespace,
-    //    meaning existing SQL queries can execute seamlessly without prefix changes.
-    let mut stmt = conn
-        .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
-        .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
-    let tables: Vec<String> = stmt
-        .query_map([], |row| row.get(0))
-        .unwrap()
-        .filter_map(|r| r.ok())
-        .collect();
+    // 3. Initialize data tables in main
+    conn.execute_batch(
+        "CREATE TABLE IF NOT EXISTS packages (id TEXT PRIMARY KEY, name TEXT NOT NULL, version TEXT, path TEXT NOT NULL);
+         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, package_id TEXT, hash TEXT NOT NULL, fingerprint TEXT NOT NULL, default_export TEXT, star_exports_json TEXT);
+         CREATE TABLE IF NOT EXISTS scopes (id TEXT PRIMARY KEY, file_id INTEGER NOT NULL, parent_id TEXT, kind TEXT NOT NULL, entity_id TEXT, data_json TEXT);
+         CREATE TABLE IF NOT EXISTS entities (id TEXT PRIMARY KEY, scope_id TEXT NOT NULL, kind TEXT NOT NULL, name TEXT, type TEXT, line INTEGER, column INTEGER, end_line INTEGER, end_column INTEGER, declaration_kind TEXT, data_json TEXT);
+         CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, scope_id TEXT NOT NULL, name TEXT NOT NULL, path TEXT, is_alias BOOLEAN DEFAULT 0, has_default BOOLEAN DEFAULT 0, data_json TEXT);
+         CREATE TABLE IF NOT EXISTS renders (id TEXT PRIMARY KEY, file_id INTEGER NOT NULL, parent_entity_id TEXT NOT NULL, parent_render_id TEXT, render_index INTEGER NOT NULL, tag TEXT NOT NULL, symbol_id TEXT, line INTEGER, column INTEGER, kind TEXT NOT NULL, data_json TEXT);
+         CREATE TABLE IF NOT EXISTS exports (id TEXT PRIMARY KEY, scope_id TEXT NOT NULL, symbol_id TEXT, entity_id TEXT, name TEXT, is_default BOOLEAN DEFAULT 0);
+         CREATE TABLE IF NOT EXISTS relations (from_id TEXT NOT NULL, to_id TEXT NOT NULL, kind TEXT NOT NULL, line INTEGER, column INTEGER, data_json TEXT, PRIMARY KEY (from_id, to_id, kind, line, column));"
+    ).map_err(|e| Error::from_reason(format!("Failed to create data tables: {}", e)))?;
 
-    for table in tables {
-        if !table.starts_with("sqlite_") && !table.starts_with("out_") {
-            let create_view_sql = format!(
-                "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
-                table, table
-            );
-            conn.execute(&create_view_sql, []).map_err(|e| {
-                Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
-            })?;
+    // 4. Aggregate data
+    let is_monorepo = conn.prepare("SELECT 1 FROM source.workspace_packages").is_ok();
+
+    if is_monorepo {
+        let mut stmt = conn.prepare("SELECT package_id, path, db_path, name, version FROM source.workspace_packages").unwrap();
+        let workspace_packages: Vec<(String, String, String, String, Option<String>)> = stmt.query_map([], |row| {
+            Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?))
+        }).unwrap().filter_map(|r| r.ok()).collect();
+
+        for (i, (pkg_id, pkg_path, db_path, name, version)) in workspace_packages.iter().enumerate() {
+            let offset = (i + 1) * 1000000;
+            let prefix = format!("workspace:{}:", pkg_id);
+            let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
+
+            let abs_db_path = if Path::new(db_path).is_absolute() {
+                db_path.clone()
+            } else {
+                Path::new(&context.project_root).join(db_path).to_str().unwrap().to_string()
+            };
+
+            if !Path::new(&abs_db_path).exists() {
+                continue;
+            }
+
+            let pkg_alias = format!("pkg_{}", i);
+            conn.execute(&format!("ATTACH DATABASE '{}' AS {}", abs_db_path, pkg_alias), []).unwrap();
+
+            let path_expr = if pkg_rel.is_empty() {
+                "path".to_string()
+            } else {
+                format!("'/{}' || CASE WHEN path LIKE '/%' THEN path ELSE '/' || path END", pkg_rel)
+            };
+
+            conn.execute_batch(&format!("
+                INSERT OR IGNORE INTO main.packages (id, name, version, path) VALUES ('{}', '{}', '{}', '{}');
+
+                INSERT OR IGNORE INTO main.files (id, path, package_id, hash, fingerprint, default_export, star_exports_json)
+                SELECT id + {}, {}, '{}', hash, fingerprint, default_export, star_exports_json FROM {}.files;
+
+                INSERT OR IGNORE INTO main.scopes (id, file_id, parent_id, kind, entity_id, data_json)
+                SELECT '{}' || id, file_id + {}, CASE WHEN parent_id IS NOT NULL THEN '{}' || parent_id ELSE NULL END, kind, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, data_json FROM {}.scopes;
+
+                INSERT OR IGNORE INTO main.entities (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
+                SELECT '{}' || id, '{}' || scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json FROM {}.entities;
+
+                INSERT OR IGNORE INTO main.symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
+                SELECT '{}' || id, '{}' || entity_id, '{}' || scope_id, name, path, is_alias, has_default, data_json FROM {}.symbols;
+
+                INSERT OR IGNORE INTO main.renders (id, file_id, parent_entity_id, parent_render_id, tag, symbol_id, line, column, kind, data_json)
+                SELECT '{}' || id, file_id + {}, '{}' || parent_entity_id, CASE WHEN parent_render_id IS NOT NULL THEN '{}' || parent_render_id ELSE NULL END, tag, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, line, column, kind, data_json FROM {}.renders;
+
+                INSERT OR IGNORE INTO main.exports (id, scope_id, symbol_id, entity_id, name, is_default)
+                SELECT '{}' || id, '{}' || scope_id, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, name, is_default FROM {}.exports;
+
+                INSERT OR IGNORE INTO main.relations (from_id, to_id, kind, line, column, data_json)
+                SELECT '{}' || from_id, '{}' || to_id, kind, line, column, data_json FROM {}.relations;
+            ", 
+                pkg_id, name, version.as_deref().unwrap_or("0.0.0"), pkg_path,
+                offset, path_expr, pkg_id, pkg_alias,
+                prefix, offset, prefix, prefix, pkg_alias,
+                prefix, prefix, pkg_alias,
+                prefix, prefix, prefix, pkg_alias,
+                prefix, offset, prefix, prefix, prefix, pkg_alias,
+                prefix, prefix, prefix, prefix, pkg_alias,
+                prefix, prefix, pkg_alias
+            )).unwrap();
+
+            conn.execute(&format!("DETACH DATABASE {}", pkg_alias), []).unwrap();
+        }
+    } else {
+        // Single project: Create TEMP views to map the attached 'source' schema into the default namespace
+        let mut stmt = conn
+            .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
+            .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
+        let tables: Vec<String> = stmt
+            .query_map([], |row| row.get(0))
+            .unwrap()
+            .filter_map(|r| r.ok())
+            .collect();
+
+        for table in tables {
+            if !table.starts_with("sqlite_") && !table.starts_with("out_") {
+                let create_view_sql = format!(
+                    "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
+                    table, table
+                );
+                conn.execute(&create_view_sql, []).map_err(|e| {
+                    Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
+                })?;
+            }
         }
     }
 
-    // 2. Ensure output tables exist (though wrapper should have done it)
+    // 5. Ensure output tables exist
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS out_nodes (id TEXT PRIMARY KEY, name TEXT, type TEXT, combo_id TEXT, color TEXT, radius REAL, display_name TEXT, meta_json TEXT);
          CREATE TABLE IF NOT EXISTS out_edges (id TEXT PRIMARY KEY, source TEXT, target TEXT, name TEXT, kind TEXT, category TEXT, meta_json TEXT);
@@ -59,7 +142,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
          CREATE TABLE IF NOT EXISTS out_details (id TEXT PRIMARY KEY, file_name TEXT, project_path TEXT, line INTEGER, \"column\" INTEGER, data_json TEXT);"
     ).map_err(|e| Error::from_reason(format!("Failed to create output tables: {}", e)))?;
 
-    // 3. Run logic (simplified version of the previous logic but writing to DB)
+    // 6. Run logic
     // Fetch necessary data
     let files: Vec<FileRow> = conn
         .prepare("SELECT id, path, package_id FROM files")
@@ -177,37 +260,29 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     // --- Pre-processing: Redirection Map ---
     let mut redirection_map: HashMap<String, String> = HashMap::new();
-    let mut export_map: HashMap<String, HashMap<String, String>> = HashMap::new(); // Map<file_path, Map<export_name, symbol_id>>
+    let mut export_map: HashMap<String, HashMap<String, String>> = HashMap::new(); // Map<file_path OR package_name, Map<export_name, symbol_id>>
 
     // Build export map
     if table_exists(&conn, "exports") {
-        let mut exp_stmt = conn.prepare("SELECT e.name, s.id, f.path FROM exports e JOIN symbols s ON e.symbol_id = s.id JOIN scopes sc ON e.scope_id = sc.id JOIN files f ON sc.file_id = f.id").unwrap();
-        let exports_iter = exp_stmt.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))).unwrap();
+        let mut exp_stmt = conn.prepare("SELECT e.name, s.id, f.path, p.name FROM exports e JOIN symbols s ON e.symbol_id = s.id JOIN scopes sc ON e.scope_id = sc.id JOIN files f ON sc.file_id = f.id LEFT JOIN packages p ON f.package_id = p.id").unwrap();
+        let exports_iter = exp_stmt.query_map([], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, Option<String>>(3)?,
+            ))
+        }).unwrap();
         for exp in exports_iter.filter_map(|r| r.ok()) {
-            export_map.entry(exp.2).or_default().insert(exp.0, exp.1);
-        }
-    }
-
-    // Build redirection map for imports
-    for sym in &symbols {
-        if let Some(entity) = entities.iter().find(|e| e.id == sym.entity_id) {
-            if entity.kind == "import" {
-                if let Some(dj) = &entity.data_json {
-                    if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
-                        if let (Some(source), Some(imported_name)) = (dj_json["source"].as_str(), dj_json["importedName"].as_str()) {
-                            if let Some(file_exports) = export_map.get(source) {
-                                if let Some(target_sym_id) = file_exports.get(imported_name) {
-                                    redirection_map.insert(sym.id.clone(), target_sym_id.clone());
-                                }
-                            }
-                        }
-                    }
-                }
+            let (exp_name, sym_id, file_path, pkg_name) = exp;
+            export_map.entry(file_path).or_default().insert(exp_name.clone(), sym_id.clone());
+            if let Some(name) = pkg_name {
+                export_map.entry(name).or_default().insert(exp_name, sym_id);
             }
         }
     }
 
-    // Map logical structures (same logic as before)
+    // Build redirection map for imports
     let package_path_map: HashMap<String, String> = packages
         .iter()
         .map(|p| (p.id.clone(), p.path.clone()))
@@ -229,6 +304,40 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         })
         .collect();
 
+    for sym in &symbols {
+        if let Some(entity) = entities.iter().find(|e| e.id == sym.entity_id) {
+            if entity.kind == "import" {
+                if let Some(dj) = &entity.data_json {
+                    if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                        if let (Some(source), Some(imported_name)) = (dj_json["source"].as_str(), dj_json["importedName"].as_str()) {
+                            let source_path = source.to_string();
+                            let mut target_sym_id = export_map.get(&source_path).and_then(|m| m.get(imported_name));
+
+                            // If not found and source is a package-relative path (starts with /), try to resolve it to root-relative
+                            if target_sym_id.is_none() && source_path.starts_with('/') {
+                                if let Some(scope) = scopes.iter().find(|s| s.id == sym.scope_id) {
+                                    if let Some(file_info) = file_info_map.get(&scope.file_id) {
+                                        if let Some(pkg_path) = &file_info.project_path {
+                                            let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
+                                            if !pkg_rel.is_empty() {
+                                                let resolved_path = format!("/{}/{}", pkg_rel, source_path.trim_start_matches('/'));
+                                                target_sym_id = export_map.get(&resolved_path).and_then(|m| m.get(imported_name));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if let Some(sym_id) = target_sym_id {
+                                redirection_map.insert(sym.id.clone(), sym_id.clone());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     let use_package_combos = packages.len() > 1;
     let mut added_combos = HashSet::new();
     let mut added_nodes = HashSet::new();
@@ -238,6 +347,25 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)").unwrap();
     let mut ins_edge = conn.prepare("INSERT OR REPLACE INTO out_edges (id, source, target, name, kind, category, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)").unwrap();
     let mut ins_detail = conn.prepare("INSERT OR REPLACE INTO out_details (id, file_name, project_path, line, \"column\", data_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").unwrap();
+
+    // 0. Pre-create Package Combos if multiple packages exist
+    if use_package_combos {
+        for pkg in &packages {
+            let pkg_cid = format!("package:{}", pkg.id);
+            ins_combo.execute(params![
+                pkg_cid,
+                pkg.name,
+                "package",
+                None::<String>,
+                None::<String>,
+                24.0,
+                1,
+                pkg.name,
+                None::<String>
+            ]).unwrap();
+            added_combos.insert(pkg_cid);
+        }
+    }
 
     // 1. Scopes -> Combos
     for scope in &scopes {
@@ -254,24 +382,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             if let Some(fi) = file_info_map.get(&scope.file_id) {
                 if let Some(pkg_id) = &fi.package_id {
                     let pkg_cid = format!("package:{}", pkg_id);
-                    parent_id = Some(pkg_cid.clone());
-                    if !added_combos.contains(&pkg_cid) {
-                        if let Some(pkg) = packages.iter().find(|p| p.id == *pkg_id) {
-                            ins_combo
-                                .execute(params![
-                                    pkg_cid,
-                                    pkg.name,
-                                    "package",
-                                    None::<String>,
-                                    None::<String>,
-                                    24.0,
-                                    1,
-                                    pkg.name,
-                                    None::<String>
-                                ])
-                                .unwrap();
-                            added_combos.insert(pkg_cid);
-                        }
+                    if added_combos.contains(&pkg_cid) {
+                        parent_id = Some(pkg_cid);
                     }
                 }
             }
@@ -338,7 +450,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             if pid.is_none() && use_package_combos {
                 if let Some(fi) = file_info.as_ref() {
                     if let Some(pkg_id) = &fi.package_id {
-                        pid = Some(format!("package:{}", pkg_id));
+                        let pkg_cid = format!("package:{}", pkg_id);
+                        if added_combos.contains(&pkg_cid) {
+                            pid = Some(pkg_cid);
+                        }
                     }
                 }
             }
@@ -462,7 +577,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         if pc_id.is_none() && use_package_combos {
             if let Some(fi) = file_info.as_ref() {
                 if let Some(pkg_id) = &fi.package_id {
-                    pc_id = Some(format!("package:{}", pkg_id));
+                    let pkg_cid = format!("package:{}", pkg_id);
+                    if added_combos.contains(&pkg_cid) {
+                        pc_id = Some(pkg_cid);
+                    }
                 }
             }
         }

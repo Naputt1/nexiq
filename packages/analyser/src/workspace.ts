@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import fg from "fast-glob";
+
 import yaml from "js-yaml";
 
 export interface WorkspacePackageInfo {
@@ -64,20 +64,65 @@ export async function discoverWorkspacePackages(
   rootDir: string,
 ): Promise<WorkspacePackageInfo[]> {
   const workspacePatterns = getWorkspacePatterns(rootDir);
-  if (workspacePatterns.length === 0) {
-    return [];
+
+  const packageJsonFiles: string[] = [];
+
+  function walk(dir: string, currentDepth: number) {
+    if (currentDepth > 4) return;
+    let files: string[];
+    try {
+      files = fs.readdirSync(dir);
+    } catch {
+      return;
+    }
+
+    for (const file of files) {
+      if (file === "node_modules" || file.startsWith(".")) {
+        continue;
+      }
+      const fullPath = path.join(dir, file);
+      let stat;
+      try {
+        stat = fs.statSync(fullPath);
+      } catch {
+        continue;
+      }
+      if (stat.isDirectory()) {
+        walk(fullPath, currentDepth + 1);
+      } else if (stat.isFile() && file === "package.json") {
+        packageJsonFiles.push(fullPath);
+      }
+    }
   }
 
-  const entries = await fg(
-    workspacePatterns.map((pattern) =>
-      pattern.endsWith("/") ? `${pattern}package.json` : `${pattern}/package.json`,
-    ),
-    {
-      cwd: rootDir,
-      ignore: ["**/node_modules/**"],
-      absolute: true,
-    },
-  );
+  walk(rootDir, 0);
+
+  const regexPatterns = workspacePatterns.map((pattern) => {
+    const target = pattern.endsWith("/")
+      ? `${pattern}package.json`
+      : `${pattern}/package.json`;
+    const regexStr = target
+      .replace(/\./g, "\\.")
+      .replace(/\*\*/g, ".*")
+      .replace(/\*/g, "[^/]+");
+    return new RegExp(`^${regexStr}$`);
+  });
+
+  const entries = packageJsonFiles.filter((file) => {
+    const posixFile = file.replace(/\\/g, "/");
+    const rootPosix = rootDir.replace(/\\/g, "/");
+
+    let relPath = posixFile;
+    if (posixFile.startsWith(rootPosix)) {
+      relPath = posixFile.slice(rootPosix.length);
+      if (relPath.startsWith("/")) {
+        relPath = relPath.slice(1);
+      }
+    }
+
+    const matches = regexPatterns.some((rx) => rx.test(relPath));
+    return matches;
+  });
 
   const packages: WorkspacePackageInfo[] = [];
   for (const entry of entries) {
@@ -95,7 +140,7 @@ export async function discoverWorkspacePackages(
       }
       packages.push(packageInfo);
     } catch {
-      // ignore invalid package.json files
+      console.error(`Failed to parse package.json at ${entry}`);
     }
   }
 

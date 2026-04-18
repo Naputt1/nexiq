@@ -6,6 +6,7 @@ export default defineConfig({
     "src/index.ts",
     "src/worker.ts",
     "src/db/sqlite.ts",
+    "src/analyze-project.ts",
   ],
   format: ["esm"],
   target: "node18",

@@ -4,7 +4,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "pnpm --filter analyser run build",
+      "command": "pnpm -r build",
       "group": "build",
       "problemMatcher": []
     }

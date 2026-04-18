@@ -24,7 +24,6 @@
     "@nexiq/shared": "workspace:*",
     "@parcel/watcher": "^2.5.6",
     "better-sqlite3": "^12.8.0",
-    "fast-glob": "^3.3.3",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.2.5",
     "simple-git": "^3.33.0",

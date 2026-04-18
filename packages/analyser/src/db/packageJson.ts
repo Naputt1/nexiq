@@ -22,7 +22,20 @@ export class PackageJson {
     if (initialData) {
       this.dataCache.set(this.rootDir, initialData as PackageJsonData);
     } else {
-      this.loadPackageJson(this.rootDir);
+      const data = this.loadPackageJson(this.rootDir);
+      if (!data) {
+        // Search upwards for the nearest package.json if not found in rootDir
+        let currentDir = path.dirname(this.rootDir);
+        while (currentDir !== path.dirname(currentDir)) {
+          const found = this.loadPackageJson(currentDir);
+          if (found) {
+            // Also associate rootDir with this package data so rawData/getPackageIdForFile work
+            this.dataCache.set(this.rootDir, found);
+            break;
+          }
+          currentDir = path.dirname(currentDir);
+        }
+      }
     }
   }
 

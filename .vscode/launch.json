@@ -365,6 +365,52 @@
       "env": {
         "FULL_DEBUG": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "analyzeProject",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyze-project.js",
+      "args": [
+        "./packages/sample-project/simple",
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--threads",
+        "2",
+        "--sqlite",
+        "./out/sqlite.db"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "all sub project",
+      "program": "${workspaceFolder}/packages/analyser/dist/analyze-project.js",
+      "args": [
+        ".",  
+        "./out/graph.json",
+        "./packages/ui/public/graph.json",
+        "--no-cache",
+        "--threads",
+        "2",
+        "--sqlite",
+        "./out/sqlite.db"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "env": {
+        "FULL_DEBUG": "true"
+      }
     }
   ]
 }
