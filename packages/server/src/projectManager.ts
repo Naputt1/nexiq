@@ -20,7 +20,10 @@ import {
   type ComponentFileVar,
   type UIItemState,
 } from "@nexiq/shared";
-import { discoverWorkspacePackages, getWorkspacePatterns } from "@nexiq/analyser";
+import {
+  discoverWorkspacePackages,
+  getWorkspacePatterns,
+} from "@nexiq/analyser";
 import type { Extension, GraphNodeDetail } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
 import { exec } from "node:child_process";
@@ -102,7 +105,23 @@ export class ProjectManager {
         ? `${projectPath}:${subProject}`
         : projectPath;
     if (this.projects.has(key)) {
-      return this.projects.get(key)!;
+      const project = this.projects.get(key)!;
+      // Robustness check: if the database file is gone or the handle is broken, re-open
+      let isHealthy = fs.existsSync(project.sqlitePath);
+      if (isHealthy && project.db) {
+        try {
+          project.db.db.prepare("SELECT 1").get();
+        } catch (e) {
+          console.error(`Database handle broken for ${key}, re-opening...`, e);
+          isHealthy = false;
+        }
+      }
+
+      if (isHealthy) {
+        return project;
+      }
+      console.error(`Project health check failed for ${key}, re-opening...`);
+      this.projects.delete(key);
     }
 
     if (this.pendingProjects.has(key)) {
@@ -130,18 +149,28 @@ export class ProjectManager {
     return openPromise;
   }
 
+  private safeWriteFileSync(filePath: string, content: string | Buffer) {
+    try {
+      const dir = path.dirname(filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(filePath, content);
+    } catch (e) {
+      console.error(
+        `Failed to write to ${filePath}:`,
+        e instanceof Error ? e.message : "Unknown error",
+      );
+    }
+  }
+
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const {
-      analysisPath,
-      cacheRoot,
-      cacheDir,
-      cacheFile,
-      sqlitePath,
-    } = this.getProjectStoragePaths(projectPath, subProject, subProjects);
+    const { analysisPath, cacheRoot, cacheDir, cacheFile, sqlitePath } =
+      this.getProjectStoragePaths(projectPath, subProject, subProjects);
 
     const isMultiProject = subProjects && subProjects.length > 0;
 
@@ -218,7 +247,9 @@ export class ProjectManager {
       }
     }
 
-    console.error(`Analyzing project: ${cacheRoot} (Selection: ${analysisPath})`);
+    console.error(
+      `Analyzing project: ${cacheRoot} (Selection: ${analysisPath})`,
+    );
     const graph = await analyzeProject(
       subProjects && subProjects.length > 0 ? projectPath : analysisPath,
       {
@@ -232,7 +263,7 @@ export class ProjectManager {
       },
     );
 
-    fs.writeFileSync(cacheFile, JSON.stringify(graph, null, 2));
+    this.safeWriteFileSync(cacheFile, JSON.stringify(graph, null, 2));
 
     const projectInfo: ProjectInfo = {
       projectPath,
@@ -265,24 +296,19 @@ export class ProjectManager {
           });
 
           if (hasRelevantChange) {
-            console.error(
-              `Changes detected in ${cacheRoot}, re-analyzing...`,
-            );
-            analyzeProject(
-              isMultiProject ? projectPath : analysisPath,
-              {
-                cacheFile,
-                ignorePatterns,
-                sqlitePath: projectInfo.sqlitePath,
-                analysisPaths: subProjects?.map((p) =>
-                  path.join(projectPath, p.replace(/^\/+/, "")),
-                ),
-                monorepo: isMultiProject ? true : undefined,
-              },
-            )
+            console.error(`Changes detected in ${cacheRoot}, re-analyzing...`);
+            analyzeProject(isMultiProject ? projectPath : analysisPath, {
+              cacheFile,
+              ignorePatterns,
+              sqlitePath: projectInfo.sqlitePath,
+              analysisPaths: subProjects?.map((p) =>
+                path.join(projectPath, p.replace(/^\/+/, "")),
+              ),
+              monorepo: isMultiProject ? true : undefined,
+            })
               .then((newGraph: JsonData) => {
                 projectInfo.graph = newGraph;
-                fs.writeFileSync(
+                this.safeWriteFileSync(
                   cacheFile,
                   JSON.stringify(projectInfo.graph, null, 2),
                 );
@@ -291,9 +317,7 @@ export class ProjectManager {
                 projectInfo.db = new SqliteDB(projectInfo.sqlitePath);
                 projectInfo.nodeDetailCache.clear();
 
-                console.error(
-                  `Project ${cacheRoot} re-analyzed successfully.`,
-                );
+                console.error(`Project ${cacheRoot} re-analyzed successfully.`);
               })
               .catch((reAnalyzeError: Error) => {
                 console.error(
@@ -361,7 +385,9 @@ export class ProjectManager {
         projectPath: projectPath,
         loc: { line: symbolResult.line || 0, column: symbolResult.column || 0 },
         componentType: symbolResult.componentType,
-        raw: symbolResult.data_json ? JSON.parse(symbolResult.data_json) : undefined,
+        raw: symbolResult.data_json
+          ? JSON.parse(symbolResult.data_json)
+          : undefined,
       };
       project.nodeDetailCache.set(nodeId, detail);
       return detail;
@@ -385,7 +411,9 @@ export class ProjectManager {
         fileName: renderResult.fileName,
         projectPath: projectPath,
         loc: { line: renderResult.line || 0, column: renderResult.column || 0 },
-        raw: renderResult.data_json ? JSON.parse(renderResult.data_json) : undefined,
+        raw: renderResult.data_json
+          ? JSON.parse(renderResult.data_json)
+          : undefined,
       };
       project.nodeDetailCache.set(nodeId, detail);
       return detail;
@@ -1132,10 +1160,10 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     if (!project || !project.graph) return false;
 
-    const {
-      analysisPath,
-      cacheFile,
-    } = this.getProjectStoragePaths(projectPath, subProject);
+    const { analysisPath, cacheFile } = this.getProjectStoragePaths(
+      projectPath,
+      subProject,
+    );
 
     try {
       // Helper to apply positions recursively
@@ -1225,7 +1253,7 @@ export class ProjectManager {
         }
       }
 
-      fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
+      this.safeWriteFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
       return true;
     } catch (e) {
       console.error("Failed to update graph positions", e);
@@ -1238,7 +1266,7 @@ export class ProjectManager {
       project.projectPath,
       project.subProject,
     );
-    fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
+    this.safeWriteFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
   }
 
   async checkProjectStatus(directoryPath: string): Promise<ProjectStatus> {
@@ -1328,7 +1356,7 @@ export class ProjectManager {
       }
 
       const configContent = JSON.stringify(config, null, 2);
-      fs.writeFileSync(configPath, configContent);
+      this.safeWriteFileSync(configPath, configContent);
 
       const patternsChanged =
         JSON.stringify(oldConfig?.ignorePatterns) !==

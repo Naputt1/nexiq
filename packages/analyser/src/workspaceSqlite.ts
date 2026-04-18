@@ -12,7 +12,36 @@ export class WorkspaceSqliteDB extends BaseSqliteDB {
       }
     }
 
-    super(new Database(dbPath, options));
+    let db: Database.Database;
+    try {
+      db = new Database(dbPath, options);
+      // Try a simple pragma to verify the database is valid
+      db.pragma("user_version");
+    } catch (e: unknown) {
+      if (options.readonly) {
+        throw e;
+      }
+      console.warn(
+        `Failed to open or verify Workspace SQLite database at ${dbPath}, deleting and recreating:`,
+        e instanceof Error ? e.message : "Unknown error",
+      );
+      try {
+        if (fs.existsSync(dbPath)) {
+          fs.unlinkSync(dbPath);
+          // Also delete -shm and -wal if they exist
+          if (fs.existsSync(`${dbPath}-shm`)) fs.unlinkSync(`${dbPath}-shm`);
+          if (fs.existsSync(`${dbPath}-wal`)) fs.unlinkSync(`${dbPath}-wal`);
+        }
+      } catch (unlinkError) {
+        console.error(
+          `Failed to delete corrupted workspace database at ${dbPath}:`,
+          unlinkError instanceof Error ? unlinkError.message : "Unknown error",
+        );
+      }
+      db = new Database(dbPath, options);
+    }
+
+    super(db);
     this.initSchema();
   }
 
