@@ -17,8 +17,6 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
-  type ComponentFileVar,
-  type UIItemState,
 } from "@nexiq/shared";
 import {
   discoverWorkspacePackages,
@@ -366,7 +364,20 @@ export class ProjectManager {
 
     // Try to find as symbol
     const symbolResult = project.db.db
-      .prepare(
+      .prepare<
+        [string, string, string],
+        {
+          id: string;
+          name: string;
+          pure_path: string;
+          kind: string;
+          componentType: string;
+          line: number;
+          column: number;
+          data_json: string;
+          fileName: string;
+        }
+      >(
         `SELECT 
           s.id, s.name, s.path as pure_path, e.kind, e.type as componentType, e.line, e."column", e.data_json, f.path as fileName
         FROM symbols s
@@ -375,7 +386,7 @@ export class ProjectManager {
         JOIN files f ON sc.file_id = f.id
         WHERE s.id = ? OR ('workspace:' || ? || ':' || s.id) = ?`,
       )
-      .get(nodeId, project.subProject || "", nodeId) as any;
+      .get(nodeId, project.subProject || "", nodeId);
 
     if (symbolResult) {
       const detail: GraphNodeDetail = {
@@ -395,14 +406,24 @@ export class ProjectManager {
 
     // Try to find as render
     const renderResult = project.db.db
-      .prepare(
+      .prepare<
+        [string, string, string],
+        {
+          id: string;
+          name: string;
+          line: number;
+          column: number;
+          data_json: string;
+          fileName: string;
+        }
+      >(
         `SELECT 
           r.id, r.tag as name, r.line, r."column", r.data_json, f.path as fileName
         FROM renders r
         JOIN files f ON r.file_id = f.id
         WHERE r.id = ? OR ('workspace:' || ? || ':' || r.id) = ?`,
       )
-      .get(nodeId, project.subProject || "", nodeId) as any;
+      .get(nodeId, project.subProject || "", nodeId);
 
     if (renderResult) {
       const detail: GraphNodeDetail = {
@@ -1151,116 +1172,6 @@ export class ProjectManager {
     }
   }
 
-  async updateGraphPosition(
-    projectPath: string,
-    subProject: string | undefined,
-    positions: Record<string, UIItemState>,
-    contextId?: string,
-  ): Promise<boolean> {
-    const project = await this.openProject(projectPath, subProject);
-    if (!project || !project.graph) return false;
-
-    const { analysisPath, cacheFile } = this.getProjectStoragePaths(
-      projectPath,
-      subProject,
-    );
-
-    try {
-      // Helper to apply positions recursively
-      const applyUIState = (
-        item: ComponentFileVar,
-        stateMap: Record<string, UIItemState>,
-      ) => {
-        const state = stateMap[item.id];
-        if (state) {
-          if (!item.ui) item.ui = { x: 0, y: 0 };
-          item.ui.x = state.x;
-          item.ui.y = state.y;
-          if (state.radius !== undefined) item.ui.radius = state.radius;
-          if (state.collapsedRadius !== undefined)
-            item.ui.collapsedRadius = state.collapsedRadius;
-          if (state.expandedRadius !== undefined)
-            item.ui.expandedRadius = state.expandedRadius;
-          if (state.collapsed !== undefined)
-            item.ui.collapsed = state.collapsed;
-
-          const isCombo =
-            item.kind === "component" ||
-            (item.kind === "hook" && item.type === "function");
-
-          if (contextId && item.id === contextId) {
-            item.ui.isLayoutCalculated = true;
-          } else if (contextId === "root") {
-            if (!isCombo) item.ui.isLayoutCalculated = true;
-          } else if (contextId) {
-            if (!isCombo) item.ui.isLayoutCalculated = true;
-          } else if (state.isLayoutCalculated !== undefined) {
-            item.ui.isLayoutCalculated = state.isLayoutCalculated;
-          }
-        }
-
-        // Apply to sub-items
-        const renderComboId = `${item.id}-render`;
-        const renderPrefix = `${item.id}-render-`;
-        const varPrefix = `${item.id}:`;
-
-        for (const [id, subState] of Object.entries(stateMap)) {
-          if (
-            id === renderComboId ||
-            id.startsWith(renderPrefix) ||
-            id.startsWith(varPrefix)
-          ) {
-            if (!item.ui) item.ui = { x: 0, y: 0 };
-
-            if (id === renderComboId || id.startsWith(renderPrefix)) {
-              if (!item.ui.renders) item.ui.renders = {};
-              item.ui.renders[id] = {
-                x: subState.x,
-                y: subState.y,
-                radius: subState.radius,
-                collapsedRadius: subState.collapsedRadius,
-                expandedRadius: subState.expandedRadius,
-                isLayoutCalculated:
-                  contextId === id ? true : subState.isLayoutCalculated,
-                collapsed: subState.collapsed,
-              };
-            } else {
-              if (!item.ui.vars) item.ui.vars = {};
-              item.ui.vars[id] = {
-                x: subState.x,
-                y: subState.y,
-                radius: subState.radius,
-                collapsedRadius: subState.collapsedRadius,
-                expandedRadius: subState.expandedRadius,
-                isLayoutCalculated:
-                  contextId === id ? true : subState.isLayoutCalculated,
-                collapsed: subState.collapsed,
-              };
-            }
-          }
-        }
-
-        if ("var" in item && item.var) {
-          for (const v of Object.values(item.var)) {
-            applyUIState(v, stateMap);
-          }
-        }
-      };
-
-      for (const file of Object.values(project.graph.files)) {
-        for (const variable of Object.values(file.var)) {
-          applyUIState(variable, positions);
-        }
-      }
-
-      this.safeWriteFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
-      return true;
-    } catch (e) {
-      console.error("Failed to update graph positions", e);
-      return false;
-    }
-  }
-
   private _saveCache(project: ProjectInfo) {
     const { cacheFile } = this.getProjectStoragePaths(
       project.projectPath,
@@ -1405,7 +1316,7 @@ export class ProjectManager {
   ): Promise<GitCommit[]> {
     const git = simpleGit(projectRoot);
 
-    let limit = 50;
+    let limit: number;
     let pathFilter: string | undefined;
 
     if (typeof options === "number") {

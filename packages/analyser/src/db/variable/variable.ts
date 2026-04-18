@@ -6,7 +6,6 @@ import type {
   VariableName,
   VarKind,
   VarType,
-  UIItemState,
 } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { getDeterministicId } from "../../utils/hash.ts";
@@ -34,12 +33,6 @@ export abstract class Variable<
   loc: VariableLoc;
   isStatic?: boolean | undefined;
   memberKind?: string | undefined;
-  ui?:
-    | (UIItemState & {
-        renders?: Record<string, UIItemState>;
-        vars?: Record<string, UIItemState>;
-      })
-    | undefined;
 
   constructor(
     data: Omit<ComponentFileVarBase<TType, TKind>, "file" | "hash">,
@@ -53,7 +46,6 @@ export abstract class Variable<
     this.declarationKind = data.declarationKind;
     this.dependencies = data.dependencies;
     this.loc = data.loc;
-    this.ui = data.ui;
     this.isStatic = data.isStatic;
     this.memberKind = data.memberKind;
 
@@ -70,9 +62,6 @@ export abstract class Variable<
     this.dependencies = data.dependencies;
 
     this.loc = data.loc;
-    if (data.ui) {
-      this.ui = data.ui;
-    }
   }
 
   protected getBaseData(): ComponentFileVarBase<TType, TKind> {
@@ -90,7 +79,6 @@ export abstract class Variable<
       declarationKind: this.declarationKind,
       dependencies: this.dependencies,
       loc: this.loc,
-      ui: this.ui,
       isStatic: this.isStatic,
       memberKind: this.memberKind,
     };
