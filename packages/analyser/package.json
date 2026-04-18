@@ -40,9 +40,9 @@
     "@nexiq/shared": "workspace:*",
     "@node-rs/xxhash": "^1.7.6",
     "better-sqlite3": "^12.8.0",
-    "fast-glob": "^3.3.3",
     "glob": "^13.0.6",
     "js-yaml": "^4.1.1",
+    "minimatch": "^10.0.0",
     "minimist": "^1.2.8",
     "seedrandom": "^3.0.5"
   },

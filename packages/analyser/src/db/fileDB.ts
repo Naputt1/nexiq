@@ -1084,7 +1084,7 @@ export class File {
     // if (instanceId == "feb679a1fc1ff92") debugger;
     // if (instanceId == "3dae6ab5a27c881f") debugger;
 
-    if (instanceId == "bb9ce3377a9a0a19") debugger;
+    // if (instanceId == "bb9ce3377a9a0a19") debugger;
 
     if (isJSXVariable(variable) && !variable.render) {
       variable.render = newRender;

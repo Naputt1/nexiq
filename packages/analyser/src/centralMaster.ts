@@ -875,6 +875,39 @@ function rewriteTypeDataRefTargets(
   }
 }
 
+function rewriteFileEntityData(file: ComponentFile, context: TypeRewriteContext) {
+  // 1. Remap imports
+  for (const imp of Object.values(file.import || {})) {
+    const targetExportId = context.resolvedImportTargets.get(
+      `${context.sourceFilePath}:${imp.localName}`,
+    );
+    if (targetExportId) {
+      imp.resolvedId = targetExportId;
+    }
+  }
+
+  // 2. Recursively remap hook calls in variables
+  const walk = (v: ComponentFileVar) => {
+    if (v.kind === "hook" && "call" in v && v.call) {
+      const targetExportId = context.resolvedImportTargets.get(
+        `${context.sourceFilePath}:${v.call.name}`,
+      );
+      if (targetExportId) {
+        v.call.resolvedId = targetExportId;
+      }
+    }
+    if ("var" in v && v.var) {
+      for (const nested of Object.values(v.var)) {
+        walk(nested);
+      }
+    }
+  };
+
+  for (const variable of Object.values(file.var || {})) {
+    walk(variable);
+  }
+}
+
 function rewriteFileTypeRefTargets(
   file: ComponentFile,
   context: TypeRewriteContext,
@@ -1406,6 +1439,17 @@ export class CentralMaster {
         }
 
         const seenTypeErrors = new Set<string>();
+        rewriteFileEntityData(file, {
+          resolvedImportTargets: canonicalImportResolutions,
+          namespaceBindings,
+          packageByName,
+          workspaceScopes,
+          sourceFilePath: file.path,
+          sourcePackageId: owner.packageId,
+          sourcePackageName: owner.packageName,
+          onUnresolved: () => {},
+        });
+
         rewriteFileTypeRefTargets(file, {
           resolvedImportTargets: canonicalImportResolutions,
           namespaceBindings,

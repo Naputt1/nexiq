@@ -1,5 +1,6 @@
 // legacy code, will be removed
 
+import path from "node:path";
 import {
   ComponentInfoRenderDependency,
   type EffectInfo,
@@ -95,6 +96,8 @@ export const componentTask: GraphViewTask = {
 
     // Build Export Map: Map<filePath, Map<exportName, symbolId>>
     const exportMap = new Map<string, Map<string | null, string>>();
+    const packageIdToName = new Map(packages.map((p) => [p.id, p.name]));
+
     for (const exp of data.exports) {
       const scope = data.scopes.find((s) => s.id === exp.scope_id);
       if (!scope) continue;
@@ -105,10 +108,20 @@ export const componentTask: GraphViewTask = {
       if (!exportMap.has(filePath)) {
         exportMap.set(filePath, new Map());
       }
+      const expName = exp.is_default ? "default" : exp.name;
       if (exp.symbol_id) {
-        exportMap
-          .get(filePath)!
-          .set(exp.is_default ? "default" : exp.name, exp.symbol_id);
+        exportMap.get(filePath)!.set(expName, exp.symbol_id);
+
+        // Also index by package name for cross-package imports
+        const packageName = packageIdToName.get(fileInfo.packageId!);
+        if (packageName) {
+          if (!exportMap.has(packageName)) {
+            exportMap.set(packageName, new Map());
+          }
+          // Note: In case of collisions within a package, the last export wins.
+          // This is a reasonable heuristic for package-level imports.
+          exportMap.get(packageName)!.set(expName, exp.symbol_id);
+        }
       }
     }
 
@@ -119,11 +132,38 @@ export const componentTask: GraphViewTask = {
       if (entity?.kind === "import" && entity.data_json) {
         try {
           const impData = JSON.parse(entity.data_json);
-          const sourcePath = impData.source;
+          let sourcePath = impData.source;
           const importedName =
             impData.type === "default" ? "default" : impData.importedName;
 
-          const targetSymbolId = exportMap.get(sourcePath)?.get(importedName);
+          let targetSymbolId = exportMap.get(sourcePath)?.get(importedName);
+
+          // If not found and source is a package-relative path (starts with /), try to resolve it to root-relative
+          if (
+            !targetSymbolId &&
+            sourcePath.startsWith("/") &&
+            context.projectRoot
+          ) {
+            const scope = data.scopes.find((s) => s.id === symbol.scope_id);
+            const fileInfo = scope ? fileInfoMap.get(scope.file_id) : undefined;
+            const pkg = fileInfo?.packageId
+              ? packages.find((p) => p.id === fileInfo.packageId)
+              : undefined;
+
+            if (pkg) {
+              const absPkgPath = path.isAbsolute(pkg.path)
+                ? pkg.path
+                : path.resolve(context.projectRoot, pkg.path);
+              const absFilePath = path.join(absPkgPath, sourcePath.slice(1));
+              const resolvedPath =
+                "/" +
+                path
+                  .relative(context.projectRoot, absFilePath)
+                  .replaceAll(path.sep, "/");
+              targetSymbolId = exportMap.get(resolvedPath)?.get(importedName);
+            }
+          }
+
           if (targetSymbolId) {
             redirectionMap.set(symbol.id, targetSymbolId);
           }
@@ -779,18 +819,30 @@ export const componentTask: GraphViewTask = {
 
     // Build Export Map
     const exportMap = new Map<string, Map<string | null, string>>();
+    const packageIdToName = new Map(packages.map((p) => [p.id, p.name]));
+
     for (const exp of exports) {
       const scope = scopes.find((s) => s.id === exp.scope_id);
       if (!scope) continue;
       const fileInfo = fileInfoMap.get(scope.file_id);
       if (!fileInfo) continue;
-      if (!exportMap.has(fileInfo.path)) {
-        exportMap.set(fileInfo.path, new Map());
+      const filePath = fileInfo.path;
+
+      if (!exportMap.has(filePath)) {
+        exportMap.set(filePath, new Map());
       }
+      const expName = exp.is_default ? "default" : exp.name;
       if (exp.symbol_id) {
-        exportMap
-          .get(fileInfo.path)!
-          .set(exp.is_default ? "default" : exp.name, exp.symbol_id);
+        exportMap.get(filePath)!.set(expName, exp.symbol_id);
+
+        // Also index by package name for cross-package imports
+        const packageName = packageIdToName.get(fileInfo.packageId!);
+        if (packageName) {
+          if (!exportMap.has(packageName)) {
+            exportMap.set(packageName, new Map());
+          }
+          exportMap.get(packageName)!.set(expName, exp.symbol_id);
+        }
       }
     }
 
@@ -801,11 +853,38 @@ export const componentTask: GraphViewTask = {
       if (entity?.kind === "import" && entity.data_json) {
         try {
           const impData = JSON.parse(entity.data_json);
-          const targetSymbolId = exportMap
-            .get(impData.source)
-            ?.get(
-              impData.type === "default" ? "default" : impData.importedName,
-            );
+          let sourcePath = impData.source;
+          const importedName =
+            impData.type === "default" ? "default" : impData.importedName;
+
+          let targetSymbolId = exportMap.get(sourcePath)?.get(importedName);
+
+          // If not found and source is a package-relative path (starts with /), try to resolve it to root-relative
+          if (
+            !targetSymbolId &&
+            sourcePath.startsWith("/") &&
+            context.projectRoot
+          ) {
+            const scope = scopes.find((s) => s.id === symbol.scope_id);
+            const fileInfo = scope ? fileInfoMap.get(scope.file_id) : undefined;
+            const pkg = fileInfo?.packageId
+              ? packages.find((p) => p.id === fileInfo.packageId)
+              : undefined;
+
+            if (pkg) {
+              const absPkgPath = path.isAbsolute(pkg.path)
+                ? pkg.path
+                : path.resolve(context.projectRoot, pkg.path);
+              const absFilePath = path.join(absPkgPath, sourcePath.slice(1));
+              const resolvedPath =
+                "/" +
+                path
+                  .relative(context.projectRoot, absFilePath)
+                  .replaceAll(path.sep, "/");
+              targetSymbolId = exportMap.get(resolvedPath)?.get(importedName);
+            }
+          }
+
           if (targetSymbolId) redirectionMap.set(symbol.id, targetSymbolId);
         } catch {}
       }

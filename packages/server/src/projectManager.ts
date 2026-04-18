@@ -135,8 +135,16 @@ export class ProjectManager {
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
-    const analysisPath = this.getAnalysisPath(projectPath, subProject);
-    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
+    const {
+      analysisPath,
+      cacheRoot,
+      cacheDir,
+      cacheFile,
+      sqlitePath,
+    } = this.getProjectStoragePaths(projectPath, subProject, subProjects);
+
+    const isMultiProject = subProjects && subProjects.length > 0;
+
     try {
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true });
@@ -145,18 +153,8 @@ export class ProjectManager {
       console.warn(`Failed to create cache directory at ${cacheDir}:`, e);
     }
 
-    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
-    const cacheFile = path.join(
-      cacheDir,
-      `${path.basename(analysisPath)}-${pathHash}.json`,
-    );
-    const sqlitePath = path.join(
-      cacheDir,
-      `${path.basename(analysisPath)}-${pathHash}.sqlite`,
-    );
-
     // Load config
-    const configPath = path.join(analysisPath, "nexiq.config.json");
+    const configPath = path.join(cacheRoot, "nexiq.config.json");
     let ignorePatterns: string[] | undefined;
     let extensionNames: string[] = [];
 
@@ -184,7 +182,7 @@ export class ProjectManager {
         } catch (e: unknown) {
           // 2. Try importing relative to the project being analyzed
           const projectNodeModulesPath = path.join(
-            analysisPath,
+            cacheRoot,
             "node_modules",
             name,
           );
@@ -220,7 +218,7 @@ export class ProjectManager {
       }
     }
 
-    console.error(`Analyzing project: ${analysisPath}`);
+    console.error(`Analyzing project: ${cacheRoot} (Selection: ${analysisPath})`);
     const graph = await analyzeProject(
       subProjects && subProjects.length > 0 ? projectPath : analysisPath,
       {
@@ -249,10 +247,10 @@ export class ProjectManager {
     // Set up watcher
     try {
       const subscription = await watcher.subscribe(
-        analysisPath,
+        cacheRoot,
         (err, events) => {
           if (err) {
-            console.error(`Watcher error for ${analysisPath}:`, err);
+            console.error(`Watcher error for ${cacheRoot}:`, err);
             return;
           }
 
@@ -268,13 +266,19 @@ export class ProjectManager {
 
           if (hasRelevantChange) {
             console.error(
-              `Changes detected in ${analysisPath}, re-analyzing...`,
+              `Changes detected in ${cacheRoot}, re-analyzing...`,
             );
             analyzeProject(
-              analysisPath,
-              cacheFile,
-              ignorePatterns,
-              projectInfo.sqlitePath,
+              isMultiProject ? projectPath : analysisPath,
+              {
+                cacheFile,
+                ignorePatterns,
+                sqlitePath: projectInfo.sqlitePath,
+                analysisPaths: subProjects?.map((p) =>
+                  path.join(projectPath, p.replace(/^\/+/, "")),
+                ),
+                monorepo: isMultiProject ? true : undefined,
+              },
             )
               .then((newGraph: JsonData) => {
                 projectInfo.graph = newGraph;
@@ -288,12 +292,12 @@ export class ProjectManager {
                 projectInfo.nodeDetailCache.clear();
 
                 console.error(
-                  `Project ${analysisPath} re-analyzed successfully.`,
+                  `Project ${cacheRoot} re-analyzed successfully.`,
                 );
               })
               .catch((reAnalyzeError: Error) => {
                 console.error(
-                  `Re-analysis failed for ${analysisPath}:`,
+                  `Re-analysis failed for ${cacheRoot}:`,
                   reAnalyzeError,
                 );
               });
@@ -1128,13 +1132,10 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
     if (!project || !project.graph) return false;
 
-    const analysisPath = this.getAnalysisPath(projectPath, subProject);
-    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
-    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
-    const cacheFile = path.join(
-      cacheDir,
-      `${path.basename(analysisPath)}-${pathHash}.json`,
-    );
+    const {
+      analysisPath,
+      cacheFile,
+    } = this.getProjectStoragePaths(projectPath, subProject);
 
     try {
       // Helper to apply positions recursively
@@ -1259,16 +1260,11 @@ export class ProjectManager {
   }
 
   private _saveCache(project: ProjectInfo) {
-    const analysisPath = this.getAnalysisPath(
+    const { cacheFile } = this.getProjectStoragePaths(
       project.projectPath,
       project.subProject,
     );
-    const cacheDir = path.join(analysisPath, ".nexiq", "cache");
-    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
-    fs.writeFileSync(
-      path.join(cacheDir, `${path.basename(analysisPath)}-${pathHash}.json`),
-      JSON.stringify(project.graph, null, 2),
-    );
+    fs.writeFileSync(cacheFile, JSON.stringify(project.graph, null, 2));
   }
 
   async checkProjectStatus(directoryPath: string): Promise<ProjectStatus> {
@@ -1365,7 +1361,7 @@ export class ProjectManager {
         JSON.stringify(config.ignorePatterns);
 
       if (patternsChanged) {
-        const cacheDir = path.join(directoryPath, ".nexiq", "cache");
+        const { cacheDir } = this.getProjectStoragePaths(directoryPath);
         if (fs.existsSync(cacheDir)) {
           const files = fs.readdirSync(cacheDir);
           for (const file of files) {
@@ -1681,12 +1677,45 @@ export class ProjectManager {
     if (!subProject) return projectPath;
     if (path.isAbsolute(subProject)) {
       // If it's inside projectPath, we can still use it.
-      // If it's a subproject name like "/src", it might be absolute on Unix but intended as relative.
-      // The old behavior was to always join it.
       if (subProject.startsWith(projectPath)) return subProject;
       // Fallback for cases like "/src" which are absolute but we want relative
       return path.join(projectPath, subProject.replace(/^\/+/, ""));
     }
     return path.join(projectPath, subProject.replace(/^\/+/, ""));
+  }
+
+  private getProjectStoragePaths(
+    projectPath: string,
+    subProject?: string,
+    subProjects?: string[],
+  ) {
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
+    const isMultiProject =
+      (subProjects && subProjects.length > 0) ||
+      (subProject && subProject.includes(","));
+
+    // For monorepos/multi-project, we store in the workspace root.
+    const cacheRoot = isMultiProject ? projectPath : analysisPath;
+    const cacheDir = path.join(cacheRoot, ".nexiq", "cache");
+
+    // Create a stable hash of the selection
+    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
+
+    // Ensure safe filename length
+    let safeBaseName = "workspace";
+    if (!isMultiProject) {
+      const base = path.basename(analysisPath);
+      safeBaseName = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50);
+    }
+
+    return {
+      analysisPath,
+      cacheRoot,
+      cacheDir,
+      cacheFile: path.join(cacheDir, `${safeBaseName}-${pathHash}.json`),
+      sqlitePath: path.join(cacheDir, `${safeBaseName}-${pathHash}.sqlite`),
+      pathHash,
+      isMultiProject,
+    };
   }
 }

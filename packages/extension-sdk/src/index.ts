@@ -579,11 +579,29 @@ export function getTaskData(context: TaskContext): DatabaseData {
         // 2. Files
         const fRows = pkgDb.prepare("SELECT * FROM files").all() as FileRow[];
         aggregated.files.push(
-          ...fRows.map((f) => ({
-            ...f,
-            id: f.id + fileIdOffset,
-            package_id: f.package_id || pkgId,
-          })),
+          ...fRows.map((f) => {
+            let relativePath = f.path;
+            if (projectRoot && pkg.path) {
+              const absPkgPath = path.isAbsolute(pkg.path)
+                ? pkg.path
+                : path.resolve(projectRoot, pkg.path);
+              const absFilePath = path.join(
+                absPkgPath,
+                f.path.startsWith("/") ? f.path.slice(1) : f.path,
+              );
+              relativePath =
+                "/" +
+                path
+                  .relative(projectRoot, absFilePath)
+                  .replaceAll(path.sep, "/");
+            }
+            return {
+              ...f,
+              id: f.id + fileIdOffset,
+              package_id: f.package_id || pkgId,
+              path: relativePath,
+            };
+          }),
         );
 
         // 3. Scopes
