@@ -96,7 +96,9 @@ function toRootRelativePath(
   filePath: string,
 ) {
   const withoutLeadingSlash = filePath.replace(/^\//, "");
-  return `/${path.relative(workspaceRoot, path.join(packageDir, withoutLeadingSlash)).replaceAll(path.sep, "/")}`;
+  return path
+    .relative(workspaceRoot, path.join(packageDir, withoutLeadingSlash))
+    .replaceAll(path.sep, "/");
 }
 
 function createCrossPackageResolveTask(
@@ -875,7 +877,10 @@ function rewriteTypeDataRefTargets(
   }
 }
 
-function rewriteFileEntityData(file: ComponentFile, context: TypeRewriteContext) {
+function rewriteFileEntityData(
+  file: ComponentFile,
+  context: TypeRewriteContext,
+) {
   // 1. Remap imports
   for (const imp of Object.values(file.import || {})) {
     const targetExportId = context.resolvedImportTargets.get(
@@ -1129,39 +1134,35 @@ export class CentralMaster {
     });
 
     try {
-      await runWithConcurrency(
-        packages,
-        packageConcurrency,
-        async (pkg) => {
-          const packageJson = new PackageJson(pkg.path);
-          const dbPath = getPackageDbPath(packageDbDir, pkg.path);
-          const sqlite = new SqliteDB(dbPath);
-          try {
-            const master = new PackageMaster({
-              srcDir: pkg.path,
-              viteConfigPath: getViteConfig(pkg.path),
-              files: getFiles(pkg.path, this.options.ignorePatterns || []),
-              packageJson,
-              cacheData: undefined,
-              sqlite,
-              threads: effectiveFileWorkerThreads,
-            });
-            const summary = await master.analyzePackage();
-            summaries.push({
-              ...summary,
-              dbPath,
-            });
-            packageDirById.set(summary.packageId, pkg.path);
-            packageByName.set(summary.packageName, {
-              packageId: summary.packageId,
-              handoff: summary.workspaceHandoff,
-              srcDir: pkg.path,
-            });
-          } finally {
-            sqlite.close();
-          }
-        },
-      );
+      await runWithConcurrency(packages, packageConcurrency, async (pkg) => {
+        const packageJson = new PackageJson(pkg.path);
+        const dbPath = getPackageDbPath(packageDbDir, pkg.path);
+        const sqlite = new SqliteDB(dbPath);
+        try {
+          const master = new PackageMaster({
+            srcDir: pkg.path,
+            viteConfigPath: getViteConfig(pkg.path),
+            files: getFiles(pkg.path, this.options.ignorePatterns || []),
+            packageJson,
+            cacheData: undefined,
+            sqlite,
+            threads: effectiveFileWorkerThreads,
+          });
+          const summary = await master.analyzePackage();
+          summaries.push({
+            ...summary,
+            dbPath,
+          });
+          packageDirById.set(summary.packageId, pkg.path);
+          packageByName.set(summary.packageName, {
+            packageId: summary.packageId,
+            handoff: summary.workspaceHandoff,
+            srcDir: pkg.path,
+          });
+        } finally {
+          sqlite.close();
+        }
+      });
 
       // Sequential database updates to avoid better-sqlite3 transaction conflicts
       for (const summary of summaries) {
