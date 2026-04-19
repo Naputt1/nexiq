@@ -335,7 +335,7 @@ export class PackageMaster {
       id: createStatusId(this.runId, filePath),
       run_id: this.runId,
       package_id: this.packageRow?.id || null,
-      file_path: `/${filePath}`.replace("//", "/"),
+      file_path: filePath.replaceAll(path.sep, "/"),
       status,
       started_at: overrides.startedAt || this.startedAt,
       finished_at:
@@ -369,7 +369,7 @@ export class PackageMaster {
       id: createRunId("file_error", `${this.runId}:${filePath}:${stage}`),
       run_id: this.runId,
       package_id: this.packageRow?.id || null,
-      file_path: `/${filePath}`.replace("//", "/"),
+      file_path: filePath.replaceAll(path.sep, "/"),
       stage,
       error_code: null,
       message: error,
