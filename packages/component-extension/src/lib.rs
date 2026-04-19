@@ -3,9 +3,9 @@ extern crate napi_derive;
 
 use napi::bindgen_prelude::*;
 use rusqlite::{params, Connection};
+use rust_core::*;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use rust_core::*;
 
 #[napi(object)]
 pub struct TaskContext {
@@ -13,7 +13,6 @@ pub struct TaskContext {
     pub view_type: String,
     pub cache_db_path: Option<String>,
 }
-
 
 #[napi]
 pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
@@ -42,15 +41,32 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     ).map_err(|e| Error::from_reason(format!("Failed to create data tables: {}", e)))?;
 
     // 4. Aggregate data
-    let is_monorepo = conn.prepare("SELECT 1 FROM source.workspace_packages").is_ok();
+    let is_monorepo = conn
+        .prepare("SELECT 1 FROM source.workspace_packages")
+        .is_ok();
 
     if is_monorepo {
-        let mut stmt = conn.prepare("SELECT package_id, path, db_path, name, version FROM source.workspace_packages").unwrap();
-        let workspace_packages: Vec<(String, String, String, String, Option<String>)> = stmt.query_map([], |row| {
-            Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?))
-        }).unwrap().filter_map(|r| r.ok()).collect();
+        let mut stmt = conn
+            .prepare(
+                "SELECT package_id, path, db_path, name, version FROM source.workspace_packages",
+            )
+            .unwrap();
+        let workspace_packages: Vec<(String, String, String, String, Option<String>)> = stmt
+            .query_map([], |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                ))
+            })
+            .unwrap()
+            .filter_map(|r| r.ok())
+            .collect();
 
-        for (i, (pkg_id, pkg_path, db_path, name, version)) in workspace_packages.iter().enumerate() {
+        for (i, (pkg_id, pkg_path, db_path, name, version)) in workspace_packages.iter().enumerate()
+        {
             let offset = (i + 1) * 1000000;
             let prefix = format!("workspace:{}:", pkg_id);
             let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
@@ -58,7 +74,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             let abs_db_path = if Path::new(db_path).is_absolute() {
                 db_path.clone()
             } else {
-                Path::new(&context.project_root).join(db_path).to_str().unwrap().to_string()
+                Path::new(&context.project_root)
+                    .join(db_path)
+                    .to_str()
+                    .unwrap()
+                    .to_string()
             };
 
             if !Path::new(&abs_db_path).exists() {
@@ -66,12 +86,19 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             }
 
             let pkg_alias = format!("pkg_{}", i);
-            conn.execute(&format!("ATTACH DATABASE '{}' AS {}", abs_db_path, pkg_alias), []).unwrap();
+            conn.execute(
+                &format!("ATTACH DATABASE '{}' AS {}", abs_db_path, pkg_alias),
+                [],
+            )
+            .unwrap();
 
             let path_expr = if pkg_rel.is_empty() {
                 "path".to_string()
             } else {
-                format!("'/{}' || CASE WHEN path LIKE '/%' THEN path ELSE '/' || path END", pkg_rel)
+                format!(
+                    "'/{}' || CASE WHEN path LIKE '/%' THEN path ELSE '/' || path END",
+                    pkg_rel
+                )
             };
 
             conn.execute_batch(&format!("
@@ -108,7 +135,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                 prefix, prefix, pkg_alias
             )).unwrap();
 
-            conn.execute(&format!("DETACH DATABASE {}", pkg_alias), []).unwrap();
+            conn.execute(&format!("DETACH DATABASE {}", pkg_alias), [])
+                .unwrap();
         }
     } else {
         // Single project: Create TEMP views to map the attached 'source' schema into the default namespace
@@ -265,17 +293,22 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     // Build export map
     if table_exists(&conn, "exports") {
         let mut exp_stmt = conn.prepare("SELECT e.name, s.id, f.path, p.name FROM exports e JOIN symbols s ON e.symbol_id = s.id JOIN scopes sc ON e.scope_id = sc.id JOIN files f ON sc.file_id = f.id LEFT JOIN packages p ON f.package_id = p.id").unwrap();
-        let exports_iter = exp_stmt.query_map([], |row| {
-            Ok((
-                row.get::<_, String>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, String>(2)?,
-                row.get::<_, Option<String>>(3)?,
-            ))
-        }).unwrap();
+        let exports_iter = exp_stmt
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, Option<String>>(3)?,
+                ))
+            })
+            .unwrap();
         for exp in exports_iter.filter_map(|r| r.ok()) {
             let (exp_name, sym_id, file_path, pkg_name) = exp;
-            export_map.entry(file_path).or_default().insert(exp_name.clone(), sym_id.clone());
+            export_map
+                .entry(file_path)
+                .or_default()
+                .insert(exp_name.clone(), sym_id.clone());
             if let Some(name) = pkg_name {
                 export_map.entry(name).or_default().insert(exp_name, sym_id);
             }
@@ -309,19 +342,31 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             if entity.kind == "import" {
                 if let Some(dj) = &entity.data_json {
                     if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
-                        if let (Some(source), Some(imported_name)) = (dj_json["source"].as_str(), dj_json["importedName"].as_str()) {
+                        if let (Some(source), Some(imported_name)) =
+                            (dj_json["source"].as_str(), dj_json["importedName"].as_str())
+                        {
                             let source_path = source.to_string();
-                            let mut target_sym_id = export_map.get(&source_path).and_then(|m| m.get(imported_name));
+                            let mut target_sym_id = export_map
+                                .get(&source_path)
+                                .and_then(|m| m.get(imported_name));
 
                             // If not found and source is a package-relative path (starts with /), try to resolve it to root-relative
                             if target_sym_id.is_none() && source_path.starts_with('/') {
                                 if let Some(scope) = scopes.iter().find(|s| s.id == sym.scope_id) {
                                     if let Some(file_info) = file_info_map.get(&scope.file_id) {
                                         if let Some(pkg_path) = &file_info.project_path {
-                                            let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
+                                            let pkg_rel = pkg_path
+                                                .trim_start_matches('/')
+                                                .trim_end_matches('/');
                                             if !pkg_rel.is_empty() {
-                                                let resolved_path = format!("/{}/{}", pkg_rel, source_path.trim_start_matches('/'));
-                                                target_sym_id = export_map.get(&resolved_path).and_then(|m| m.get(imported_name));
+                                                let resolved_path = format!(
+                                                    "/{}/{}",
+                                                    pkg_rel,
+                                                    source_path.trim_start_matches('/')
+                                                );
+                                                target_sym_id = export_map
+                                                    .get(&resolved_path)
+                                                    .and_then(|m| m.get(imported_name));
                                             }
                                         }
                                     }
@@ -352,17 +397,19 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     if use_package_combos {
         for pkg in &packages {
             let pkg_cid = format!("package:{}", pkg.id);
-            ins_combo.execute(params![
-                pkg_cid,
-                pkg.name,
-                "package",
-                None::<String>,
-                None::<String>,
-                24.0,
-                1,
-                pkg.name,
-                None::<String>
-            ]).unwrap();
+            ins_combo
+                .execute(params![
+                    pkg_cid,
+                    pkg.name,
+                    "package",
+                    None::<String>,
+                    None::<String>,
+                    24.0,
+                    1,
+                    pkg.name,
+                    None::<String>
+                ])
+                .unwrap();
             added_combos.insert(pkg_cid);
         }
     }
@@ -436,7 +483,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
         let mut pc_id = if let Some(bs) = block_scope {
             // Update existing scope combo
-            let combo_type = if entity.kind == "normal" { "variable" } else { &entity.kind };
+            let combo_type = if entity.kind == "normal" {
+                "variable"
+            } else {
+                &entity.kind
+            };
             conn.execute(
                 "UPDATE out_combos SET name = ?1, display_name = ?2, type = ?3 WHERE id = ?4",
                 params![symbol.name, symbol.name, combo_type, bs.id],
@@ -464,17 +515,19 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         if entity.kind == "hook" {
             let sc_id = format!("{}:source:{}", symbol.scope_id, entity.id);
             if !added_combos.contains(&sc_id) {
-                ins_combo.execute(params![
-                    sc_id,
-                    symbol.name,
-                    "source-group",
-                    pc_id,
-                    None::<String>,
-                    16.0,
-                    1,
-                    symbol.name,
-                    None::<String>
-                ]).unwrap();
+                ins_combo
+                    .execute(params![
+                        sc_id,
+                        symbol.name,
+                        "source-group",
+                        pc_id,
+                        None::<String>,
+                        16.0,
+                        1,
+                        symbol.name,
+                        None::<String>
+                    ])
+                    .unwrap();
                 added_combos.insert(sc_id.clone());
             }
             pc_id = Some(sc_id);
@@ -500,7 +553,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                             serde_json::Value::Number(n) => n.to_string(),
                             _ => continue,
                         };
-                        
+
                         // Skip index 0/1 for state arrays
                         if entity.kind == "state" && (seg_str == "0" || seg_str == "1") {
                             continue;
@@ -512,17 +565,19 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
                         let group_id = format!("{}:{}", path_prefix, seg_str);
                         if !added_combos.contains(&group_id) {
-                            ins_combo.execute(params![
-                                group_id,
-                                seg_str,
-                                "path-group",
-                                current_parent,
-                                None::<String>,
-                                14.0,
-                                1,
-                                seg_str,
-                                None::<String>
-                            ]).unwrap();
+                            ins_combo
+                                .execute(params![
+                                    group_id,
+                                    seg_str,
+                                    "path-group",
+                                    current_parent,
+                                    None::<String>,
+                                    14.0,
+                                    1,
+                                    seg_str,
+                                    None::<String>
+                                ])
+                                .unwrap();
                             added_combos.insert(group_id.clone());
                         }
                         current_parent = Some(group_id.clone());
@@ -534,7 +589,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
 
         if block_scope.is_none() {
-            let node_type = if entity.kind == "normal" { "variable" } else { &entity.kind };
+            let node_type = if entity.kind == "normal" {
+                "variable"
+            } else {
+                &entity.kind
+            };
             ins_node
                 .execute(params![
                     symbol.id,
@@ -552,7 +611,9 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
         ins_detail
             .execute(params![
-                block_scope.map(|s| s.id.clone()).unwrap_or(symbol.id.clone()),
+                block_scope
+                    .map(|s| s.id.clone())
+                    .unwrap_or(symbol.id.clone()),
                 file_info.map(|f| f.path.clone()),
                 file_info.and_then(|f| f.project_path.clone()),
                 entity.line.unwrap_or(0),
@@ -604,58 +665,129 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             params![render.id, render.tag, "render", pc_id, None::<String>, 14.0, 1, render.tag],
         ).unwrap();
 
-        ins_detail.execute(params![
-            render.id,
-            file_info.map(|f| f.path.clone()),
-            file_info.and_then(|f| f.project_path.clone()),
-            render.line.unwrap_or(0),
-            render.column.unwrap_or(0),
-            render.data_json
-        ]).unwrap();
+        ins_detail
+            .execute(params![
+                render.id,
+                file_info.map(|f| f.path.clone()),
+                file_info.and_then(|f| f.project_path.clone()),
+                render.line.unwrap_or(0),
+                render.column.unwrap_or(0),
+                render.data_json
+            ])
+            .unwrap();
 
         added_combos.insert(render.id.clone());
     }
 
     // 4. Hook Specific Nodes (Effects) and 5. Relations -> Edges
-    let mut edge_map: HashMap<String, (String, String, String, i32, Vec<serde_json::Value>)> = HashMap::new();
+    let mut edge_map: HashMap<String, (String, String, String, i32, Vec<serde_json::Value>)> =
+        HashMap::new();
 
-    let mut add_edge_local = |source: &str, target: &str, kind: &str, name: &str, data: Option<&str>| {
-        let s = redirection_map.get(source).unwrap_or(&source.to_string()).clone();
-        let t = redirection_map.get(target).unwrap_or(&target.to_string()).clone();
-        let e_id = format!("{}-{}-{}", s, t, kind);
-        let entry = edge_map.entry(e_id).or_insert((s, t, kind.to_string(), 0, Vec::new()));
-        entry.3 += 1;
-        if let Some(d) = data {
-            if let Ok(j) = serde_json::from_str::<serde_json::Value>(d) {
-                entry.4.push(j);
+    let mut add_edge_local =
+        |source: &str, target: &str, kind: &str, name: &str, data: Option<&str>| {
+            let s = redirection_map
+                .get(source)
+                .unwrap_or(&source.to_string())
+                .clone();
+            let t = redirection_map
+                .get(target)
+                .unwrap_or(&target.to_string())
+                .clone();
+            let e_id = format!("{}-{}-{}", s, t, kind);
+            let entry = edge_map
+                .entry(e_id)
+                .or_insert((s, t, kind.to_string(), 0, Vec::new()));
+            entry.3 += 1;
+            if let Some(d) = data {
+                if let Ok(j) = serde_json::from_str::<serde_json::Value>(d) {
+                    entry.4.push(j);
+                }
             }
-        }
-    };
+        };
 
     // Generic Relations
     for rel in &relations {
-        if rel.kind == "parent-child" { continue; }
-        add_edge_local(&rel.from_id, &rel.to_id, &rel.kind, &rel.kind, rel.data_json.as_deref());
+        if rel.kind == "parent-child" {
+            continue;
+        }
+        add_edge_local(
+            &rel.from_id,
+            &rel.to_id,
+            &rel.kind,
+            &rel.kind,
+            rel.data_json.as_deref(),
+        );
     }
 
     // Hook metadata: Effects and ReactDeps
     for entity in &entities {
+        // Find the prefix for monorepos
+        let prefix = if entity.id.starts_with("workspace:") {
+            let parts: Vec<&str> = entity.id.split(':').collect();
+            if parts.len() >= 3 {
+                format!("{}:{}:", parts[0], parts[1])
+            } else {
+                "".to_string()
+            }
+        } else {
+            "".to_string()
+        };
+
         if let Some(dj) = &entity.data_json {
             if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
                 // useEffect / useLayoutEffect
                 if let Some(effects) = dj_json["effects"].as_object() {
-                    for (eff_id, eff_val) in effects {
+                    for (eff_id_raw, eff_val) in effects {
+                        let eff_id = format!("{}{}", prefix, eff_id_raw);
                         let eff_name = eff_val["name"].as_str().unwrap_or("useEffect");
                         let line = eff_val["loc"]["line"].as_i64().unwrap_or(0) as i32;
                         let col = eff_val["loc"]["column"].as_i64().unwrap_or(0) as i32;
-                        
-                        ins_node.execute(params![eff_id, eff_name, "effect", entity.scope_id, None::<String>, 14.0, eff_name, None::<String>]).unwrap();
-                        ins_detail.execute(params![eff_id, None::<String>, None::<String>, line, col, None::<String>]).unwrap();
-                        
+
+                        // Use block scope of the parent component/hook as combo_id
+                        let combo_id = scopes
+                            .iter()
+                            .find(|s| s.entity_id == Some(entity.id.clone()))
+                            .map(|s| s.id.clone())
+                            .unwrap_or_else(|| entity.scope_id.clone());
+
+                        ins_node
+                            .execute(params![
+                                eff_id,
+                                eff_name,
+                                "effect",
+                                combo_id,
+                                None::<String>,
+                                14.0,
+                                eff_name,
+                                None::<String>
+                            ])
+                            .unwrap();
+
+                        let scope = scopes.iter().find(|s| s.id == entity.scope_id);
+                        let file_info = scope.and_then(|s| file_info_map.get(&s.file_id));
+
+                        ins_detail
+                            .execute(params![
+                                eff_id,
+                                file_info.map(|f| f.path.clone()),
+                                file_info.and_then(|f| f.project_path.clone()),
+                                line,
+                                col,
+                                None::<String>
+                            ])
+                            .unwrap();
+
                         if let Some(deps) = eff_val["reactDeps"].as_array() {
                             for dep in deps {
-                                if let Some(dep_id) = dep["id"].as_str() {
-                                    add_edge_local(dep_id, eff_id, "effect-dep", "dependency", None);
+                                if let Some(dep_id_raw) = dep["id"].as_str() {
+                                    let dep_id = format!("{}{}", prefix, dep_id_raw);
+                                    add_edge_local(
+                                        &dep_id,
+                                        &eff_id,
+                                        "effect-dep",
+                                        "dependency",
+                                        None,
+                                    );
                                 }
                             }
                         }
@@ -666,8 +798,9 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                     // Find the symbol associated with this entity
                     if let Some(sym) = symbols.iter().find(|s| s.entity_id == entity.id) {
                         for dep in deps {
-                            if let Some(dep_id) = dep["id"].as_str() {
-                                add_edge_local(dep_id, &sym.id, "react-dep", "dependency", None);
+                            if let Some(dep_id_raw) = dep["id"].as_str() {
+                                let dep_id = format!("{}{}", prefix, dep_id_raw);
+                                add_edge_local(&dep_id, &sym.id, "react-dep", "dependency", None);
                             }
                         }
                     }
@@ -678,8 +811,14 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     // Flush Edges
     for (id, (source, target, kind, count, usages)) in edge_map {
-        let meta = if usages.is_empty() { None } else { Some(serde_json::json!({ "usageCount": count, "usages": usages }).to_string()) };
-        ins_edge.execute(params![id, source, target, kind, kind, kind, meta]).unwrap();
+        let meta = if usages.is_empty() {
+            None
+        } else {
+            Some(serde_json::json!({ "usageCount": count, "usages": usages }).to_string())
+        };
+        ins_edge
+            .execute(params![id, source, target, kind, kind, kind, meta])
+            .unwrap();
     }
 
     // 4. Serialize back to buffer
