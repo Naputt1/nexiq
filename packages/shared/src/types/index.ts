@@ -31,6 +31,7 @@ export interface AppStateData {
   isSidebarOpen: boolean;
   activeTab: "projects" | "git";
   selectedCommit: string | null;
+  gitComparisonEnabled?: boolean;
   viewport?: { x: number; y: number; zoom: number } | null;
   view?: GraphViewType;
   sidebar: {

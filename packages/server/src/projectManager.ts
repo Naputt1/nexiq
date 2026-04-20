@@ -1387,15 +1387,15 @@ export class ProjectManager {
   async gitAnalyzeCommit(
     projectRoot: string,
     commitHash: string,
-    subPath?: string,
+    subProject?: string,
   ): Promise<{ sqlitePath: string }> {
     const git = simpleGit(projectRoot);
     const resolvedHash = await git.revparse([commitHash]);
 
-    const relativeSubPath = subPath
-      ? path.isAbsolute(subPath)
-        ? path.relative(projectRoot, subPath)
-        : subPath
+    const relativeSubPath = subProject
+      ? path.isAbsolute(subProject)
+        ? path.relative(projectRoot, subProject)
+        : subProject
       : undefined;
 
     const cacheKey = relativeSubPath

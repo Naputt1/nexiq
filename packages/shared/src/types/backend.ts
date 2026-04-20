@@ -43,7 +43,7 @@ export interface BackendRequestMap {
     response: GitFileDiff[];
   };
   git_analyze_commit: {
-    payload: { projectPath: string; commitHash: string; subPath?: string };
+    payload: { projectPath: string; commitHash: string; subProject?: string };
     response: { sqlitePath: string };
   };
   open_project: {

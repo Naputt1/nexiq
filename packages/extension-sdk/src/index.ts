@@ -691,7 +691,10 @@ export function getTaskData(context: TaskContext): DatabaseData {
     });
 
     context.taskDataCache = aggregated;
-    return aggregated;
+    return {
+      ...aggregated,
+      diff: context.snapshotData?.diff || context.taskDataCache?.diff,
+    };
   }
 
   // Single project database fallback
@@ -717,6 +720,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
       ? (db.prepare("SELECT * FROM exports").all() as ExportRow[])
       : [],
     relations: db.prepare("SELECT * FROM relations").all() as RelationRow[],
+    diff: context.snapshotData?.diff || context.taskDataCache?.diff,
   };
   context.taskDataCache = singleProjectData;
   return singleProjectData;

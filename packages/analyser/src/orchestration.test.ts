@@ -408,8 +408,8 @@ describe("analyser orchestration", () => {
     expect(
       importEdges.every(
         (edge) =>
-          edge.to.includes("/packages/pkg-a/src/index.tsx") &&
-          edge.from.includes("/packages/"),
+          edge.to.includes("@workspace/pkg-a") &&
+          edge.from.includes("workspace:"),
       ),
     ).toBe(true);
   });
