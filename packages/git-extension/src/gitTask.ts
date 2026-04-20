@@ -1,7 +1,4 @@
 import {
-  type GraphComboData,
-  type GraphNodeData,
-  type GraphViewResult,
   type GraphViewTask,
   type TaskContext,
   getTaskData,
@@ -14,70 +11,6 @@ import {
 export const gitTask: GraphViewTask = {
   id: "git-status",
   priority: 100, // Run late to ensure all nodes/combos are present
-  run: (result: GraphViewResult, context: TaskContext): GraphViewResult => {
-    const data = getTaskData(context);
-    const { added = [], modified = [], deleted = [] } = data.diff || {};
-
-    // Skip if no diff data
-    if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
-      return result;
-    }
-
-    const combos = [...result.combos];
-    const nodes = [...result.nodes];
-
-    const applyStatus = (item: GraphComboData | GraphNodeData) => {
-      // Find the base ID for mapping (e.g., stripping '-render-instanceId')
-      let baseId = item.id;
-      if (item.id.includes("-render-")) {
-        baseId = item.id.split("-render-")[0]!;
-      } else if (item.id.includes("-props")) {
-        baseId = item.id.split("-props")[0]!;
-      } else if (item.id.includes(":")) {
-        // Handle virtual variables (parent:id)
-        baseId = item.id.split(":")[0]!;
-      }
-
-      if (added.includes(item.id) || added.includes(baseId)) {
-        item.gitStatus = "added";
-      } else if (modified.includes(item.id) || modified.includes(baseId)) {
-        item.gitStatus = "modified";
-      } else if (deleted.includes(item.id) || deleted.includes(baseId)) {
-        item.gitStatus = "deleted";
-      }
-    };
-
-    nodes.forEach(applyStatus);
-    combos.forEach(applyStatus);
-
-    // Aggregate statuses for specialized combos (like 'props')
-    combos.forEach((combo) => {
-      if (combo.id.endsWith("-props")) {
-        const childStatuses = [
-          ...nodes.filter((n) => n.combo === combo.id).map((n) => n.gitStatus),
-          ...combos.filter((c) => c.combo === combo.id).map((c) => c.gitStatus),
-        ].filter(Boolean);
-
-        if (childStatuses.length > 0) {
-          const unique = new Set(childStatuses);
-          if (unique.size === 1) {
-            combo.gitStatus = childStatuses[0] as
-              | "added"
-              | "modified"
-              | "deleted";
-          } else {
-            combo.gitStatus = "modified";
-          }
-        }
-      }
-    });
-
-    return {
-      ...result,
-      nodes,
-      combos,
-    };
-  },
   runSqlite: (context: TaskContext): void => {
     const db = context.db;
     if (!db) return;
@@ -101,14 +34,40 @@ export const gitTask: GraphViewTask = {
     const apply = (id: string, status: string) => {
       // Find base ID logic (stripping render-instance etc)
       let baseId = id;
-      if (id.includes("-render-")) baseId = id.split("-render-")[0]!;
-      else if (id.includes("-props")) baseId = id.split("-props")[0]!;
-      else if (id.includes(":")) baseId = id.split(":")[0]!;
+      if (id.includes("-render-")) {
+        baseId = id.split("-render-")[0]!;
+      } else if (id.includes("-props")) {
+        baseId = id.split("-props")[0]!;
+      } else if (id.includes(":prop:")) {
+        baseId = id.split(":prop:")[0]!;
+      } else if (id.includes(":")) {
+        if (id.startsWith("workspace:")) {
+          const parts = id.split(":");
+          if (parts.length > 3) {
+            baseId = parts.slice(0, -1).join(":");
+          }
+        } else {
+          baseId = id.split(":")[0]!;
+        }
+      }
 
-      const patterns = [id, `${baseId}%`];
+      const patterns = [id];
+      // Only use LIKE pattern if baseId is actually different and not just a monorepo prefix
+      if (
+        baseId !== id &&
+        (!id.startsWith("workspace:") || baseId.split(":").length > 2)
+      ) {
+        patterns.push(`${baseId}%`);
+      }
+
       for (const p of patterns) {
-        updateStatus.run(status, p, p);
-        updateComboStatus.run(status, p, p);
+        if (p.includes("%")) {
+          updateStatus.run(status, "", p);
+          updateComboStatus.run(status, "", p);
+        } else {
+          updateStatus.run(status, p, "");
+          updateComboStatus.run(status, p, "");
+        }
       }
     };
 

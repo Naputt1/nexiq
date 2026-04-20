@@ -96,9 +96,10 @@ function toRootRelativePath(
   filePath: string,
 ) {
   const withoutLeadingSlash = filePath.replace(/^\//, "");
-  return path
+  const relative = path
     .relative(workspaceRoot, path.join(packageDir, withoutLeadingSlash))
     .replaceAll(path.sep, "/");
+  return relative.startsWith("/") ? relative : `/${relative}`;
 }
 
 function createCrossPackageResolveTask(
@@ -276,8 +277,8 @@ type TypeRewriteContext = {
   ) => void;
 };
 
-function qualifyGraphId(filePath: string, id: string) {
-  return `workspace:${filePath}:${id}`;
+function qualifyGraphId(packageId: string, id: string) {
+  return `workspace:${packageId}:${id}`;
 }
 
 function sortReplacements(replacements: Iterable<StringReplacement>) {
@@ -412,7 +413,7 @@ function buildPackageGraphRemapContext(
     addGlobalId(file.path, canonicalPath);
 
     for (const oldId of fileLocalIds) {
-      const qualifiedId = qualifyGraphId(canonicalPath, oldId);
+      const qualifiedId = qualifyGraphId(summary.packageId, oldId);
       replacements.set(oldId, qualifiedId);
       addGlobalId(oldId, qualifiedId);
     }

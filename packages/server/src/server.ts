@@ -1560,11 +1560,11 @@ export class BackendServer {
                 break;
               }
               case "git_analyze_commit": {
-                const { projectPath, commitHash, subPath } = data.payload;
+                const { projectPath, commitHash, subProject } = data.payload;
                 const snapshot = await this.projectManager.gitAnalyzeCommit(
                   projectPath,
                   commitHash,
-                  subPath,
+                  subProject,
                 );
                 this.sendResponse(
                   ws,
