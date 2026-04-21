@@ -18,6 +18,7 @@ import {
   isForwardRefRefUsed,
   isRefUsed,
   getReactHookInfo,
+  getNestedFunctionArgumentPath,
 } from "../utils.ts";
 import assert from "assert";
 import { getProps } from "./propExtractor.ts";
@@ -417,6 +418,64 @@ export default function VariableDeclarator(
                 name: pattern,
                 type: "data",
                 dependencies,
+                loc,
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalData,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              "normal",
+              declarationKind,
+            );
+          }
+        } else if (init?.type === "CallExpression") {
+          const wrappedFnPath = getNestedFunctionArgumentPath(
+            nodePath.get("init") as traverse.NodePath<t.CallExpression>,
+          );
+
+          if (wrappedFnPath) {
+            const scopeTarget =
+              wrappedFnPath.node.body.type === "BlockStatement"
+                ? wrappedFnPath.node.body
+                : wrappedFnPath.node;
+            assert(scopeTarget.loc != null, "Function body loc not found");
+
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies: extractDependencies(init),
+                type: "function",
+                loc,
+                scope: {
+                  start: {
+                    line: scopeTarget.loc.start.line,
+                    column: scopeTarget.loc.start.column,
+                  },
+                  end: {
+                    line: scopeTarget.loc.end.line,
+                    column: scopeTarget.loc.end.column,
+                  },
+                },
+                async: wrappedFnPath.node.async,
+                children: {},
+                var: {},
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalFunction,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              undefined,
+              declarationKind,
+            );
+          } else {
+            const dependencies = extractDependencies(init);
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies,
+                type: "data",
                 loc,
                 parentId: pParentId,
               } as Omit<

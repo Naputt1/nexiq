@@ -2,6 +2,7 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.ts";
 import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
+import { getAssignedCallWrapperInfo } from "../utils.ts";
 
 export default function FunctionExpression(
   componentDB: ComponentDB,
@@ -10,6 +11,7 @@ export default function FunctionExpression(
   return {
     enter(nodePath) {
       if (nodePath.parentPath.isVariableDeclarator()) return;
+      if (getAssignedCallWrapperInfo(nodePath)) return;
       if (nodePath.parentPath.isCallExpression()) {
         const callee = nodePath.parentPath.node.callee;
         if (

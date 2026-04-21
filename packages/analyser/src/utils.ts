@@ -64,6 +64,86 @@ export function getReactHookInfo(
   return null;
 }
 
+export function getCalleeName(
+  callee: t.CallExpression["callee"],
+): string | undefined {
+  if (t.isIdentifier(callee)) {
+    return callee.name;
+  }
+
+  if (t.isMemberExpression(callee) && t.isIdentifier(callee.property)) {
+    return callee.property.name;
+  }
+
+  return undefined;
+}
+
+export function getAssignedCallWrapperInfo(
+  path: NodePath<t.ArrowFunctionExpression | t.FunctionExpression>,
+): { calleeName?: string } | null {
+  if (path.isFunctionExpression() && path.node.id) {
+    return null;
+  }
+
+  let current: NodePath = path;
+  let currentCallPath: NodePath<t.CallExpression> | null = null;
+
+  while (current.parentPath?.isCallExpression()) {
+    const parentCallPath = current.parentPath as NodePath<t.CallExpression>;
+    const argPaths = parentCallPath.get("arguments");
+    const isArgument = Array.isArray(argPaths)
+      ? argPaths.some((argPath) => argPath === current)
+      : false;
+
+    if (!isArgument) break;
+
+    currentCallPath = parentCallPath;
+    current = parentCallPath;
+  }
+
+  if (!currentCallPath || !current.parentPath?.isVariableDeclarator()) {
+    return null;
+  }
+
+  const calleeName = getCalleeName(currentCallPath.node.callee);
+  if (
+    calleeName == null ||
+    (calleeName !== "debounce" && !calleeName.startsWith("use"))
+  ) {
+    return null;
+  }
+
+  return {
+    calleeName,
+  };
+}
+
+export function getNestedFunctionArgumentPath(
+  callPath: NodePath<t.CallExpression>,
+):
+  | NodePath<t.ArrowFunctionExpression | t.FunctionExpression>
+  | undefined {
+  for (const argPath of callPath.get("arguments")) {
+    if (
+      argPath.isArrowFunctionExpression() ||
+      argPath.isFunctionExpression()
+    ) {
+      return argPath as NodePath<
+        t.ArrowFunctionExpression | t.FunctionExpression
+      >;
+    }
+
+    if (argPath.isCallExpression()) {
+      const nested = getNestedFunctionArgumentPath(
+        argPath as NodePath<t.CallExpression>,
+      );
+      if (nested) return nested;
+    }
+  }
+
+  return undefined;
+}
+
 export function returnJSX(node: Node): boolean {
   if (
     node.type != "FunctionDeclaration" &&
