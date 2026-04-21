@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.ts";
 import { PackageJson } from "./db/packageJson.ts";
+import { File } from "./db/fileDB.ts";
+import { FunctionVariable } from "./db/variable/functionVariable.ts";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -88,5 +90,59 @@ describe("analyser robustness", () => {
 
     expect(graph.edges.length).toBeGreaterThan(0);
     fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it("should tolerate serialized function scopes during variable merges", () => {
+    const file = new File();
+    file.path = "/src/App.tsx";
+
+    const existing = new FunctionVariable(
+      {
+        id: "fn-id",
+        name: {
+          type: "identifier",
+          name: "handler",
+          id: "fn-id",
+          loc: { line: 1, column: 0 },
+        },
+        dependencies: {},
+        loc: { line: 1, column: 0 },
+        scope: {
+          start: { line: 1, column: 0 },
+          end: { line: 3, column: 1 },
+        },
+      },
+      file,
+    );
+
+    const incoming = {
+      id: "fn-id",
+      name: {
+        type: "identifier",
+        name: "handler",
+        id: "fn-id",
+        loc: { line: 1, column: 0 },
+      },
+      kind: "normal",
+      type: "function",
+      dependencies: {},
+      loc: { line: 1, column: 0 },
+      scope: {
+        start: { line: 1, column: 0 },
+        end: { line: 3, column: 1 },
+      },
+      var: {},
+      children: {},
+      load: () => undefined,
+      getData: () => {
+        throw new Error("not needed in test");
+      },
+      getDataInternal: () => undefined,
+      getBaseData: () => {
+        throw new Error("not needed in test");
+      },
+    } as unknown as FunctionVariable;
+
+    expect(() => existing.load(incoming)).not.toThrow();
   });
 });
