@@ -51,6 +51,7 @@ pub struct SymbolRow {
     pub scope_id: String,
     pub name: String,
     pub path: Option<String>,
+    pub is_alias: bool,
 }
 
 pub struct ScopeRow {

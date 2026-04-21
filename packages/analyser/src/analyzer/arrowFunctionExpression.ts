@@ -4,6 +4,7 @@ import type { ComponentDB } from "../db/componentDB.ts";
 import { isJSXVariable } from "../db/variable/type.ts";
 import { getExpressionData } from "./type/helper.ts";
 import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
+import { getAssignedCallWrapperInfo } from "../utils.ts";
 
 export default function ArrowFunctionExpression(
   componentDB: ComponentDB,
@@ -12,6 +13,7 @@ export default function ArrowFunctionExpression(
   return {
     enter(nodePath) {
       if (nodePath.parentPath.isVariableDeclarator()) return;
+      if (getAssignedCallWrapperInfo(nodePath)) return;
       if (nodePath.parentPath.isCallExpression()) {
         const callee = nodePath.parentPath.node.callee;
         if (

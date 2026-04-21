@@ -53,9 +53,9 @@ describe("Rust Component Task", () => {
             CREATE TABLE files (id INTEGER PRIMARY KEY, path TEXT, package_id TEXT, hash TEXT, fingerprint TEXT);
             CREATE TABLE entities (id TEXT PRIMARY KEY, scope_id TEXT, kind TEXT, name TEXT, type TEXT, line INTEGER, column INTEGER, data_json TEXT);
             CREATE TABLE scopes (id TEXT PRIMARY KEY, file_id INTEGER, parent_id TEXT, kind TEXT, entity_id TEXT);
-            CREATE TABLE symbols (id TEXT PRIMARY KEY, entity_id TEXT, scope_id TEXT, name TEXT, path TEXT);
+            CREATE TABLE symbols (id TEXT PRIMARY KEY, entity_id TEXT, scope_id TEXT, name TEXT, path TEXT, is_alias INTEGER DEFAULT 0, has_default INTEGER DEFAULT 0, data_json TEXT);
             CREATE TABLE renders (id TEXT PRIMARY KEY, file_id INTEGER, parent_entity_id TEXT, parent_render_id TEXT, symbol_id TEXT, tag TEXT, line INTEGER, column INTEGER, kind TEXT, data_json TEXT);
-            CREATE TABLE relations (from_id TEXT, to_id TEXT, kind TEXT, data_json TEXT);
+            CREATE TABLE relations (from_id TEXT, to_id TEXT, kind TEXT, line INTEGER, column INTEGER, data_json TEXT);
             CREATE TABLE exports (id TEXT PRIMARY KEY, scope_id TEXT, symbol_id TEXT, entity_id TEXT, name TEXT, is_default INTEGER);
 
             INSERT INTO packages (id, name, version, path) VALUES ('pkg-1', 'test-pkg', '1.0.0', '/root');
@@ -287,5 +287,88 @@ describe("Rust Component Task", () => {
     );
     expect(edge).toBeDefined();
     expect(edge?.kind).toBe("effect-dep");
+  });
+
+  it("should not create a source group for non-alias single-segment hook selector paths", () => {
+    db.exec(`
+            INSERT INTO entities (id, scope_id, kind, name, type, data_json) VALUES ('e-selector', 's-module', 'hook', 'selectedSubProjects', 'data', '{"call":{"name":"useAppStateStore"}}');
+            INSERT INTO scopes (id, file_id, parent_id, kind, entity_id) VALUES ('s-app-block', 1, 's-module', 'block', NULL);
+            INSERT INTO symbols (id, entity_id, scope_id, name, path, is_alias) VALUES ('sym-selector', 'e-selector', 's-app-block', 'selectedSubProjects', '["selectedSubProjects"]', 0);
+        `);
+
+    db.close();
+    const snapshot = materializeSqliteBuffer(
+      runComponentTaskSqlite({
+        projectRoot: "/root",
+        viewType: "component",
+        cacheDbPath: dbPath,
+      }) as Buffer,
+    );
+
+    const sourceCombo = snapshot.combos.find(
+      (c: OutCombo) => c.id === "s-app-block:source:e-selector",
+    );
+    expect(sourceCombo).toBeUndefined();
+
+    const selectorNode = snapshot.nodes.find(
+      (n: OutNode) => n.id === "sym-selector",
+    );
+    expect(selectorNode?.combo).toBe("s-app-block");
+  });
+
+  it("should use the caller name when a real hook source group is created", () => {
+    db.exec(`
+            INSERT INTO entities (id, scope_id, kind, name, type, data_json) VALUES ('e-selector', 's-module', 'hook', 'selectedSubProjects', 'data', '{"call":{"name":"useAppStateStore"}}');
+            INSERT INTO scopes (id, file_id, parent_id, kind, entity_id) VALUES ('s-app-block', 1, 's-module', 'block', NULL);
+            INSERT INTO symbols (id, entity_id, scope_id, name, path, is_alias) VALUES ('sym-selector', 'e-selector', 's-app-block', 'selectedSubProjects', '["data","selectedSubProjects"]', 1);
+        `);
+
+    db.close();
+    const snapshot = materializeSqliteBuffer(
+      runComponentTaskSqlite({
+        projectRoot: "/root",
+        viewType: "component",
+        cacheDbPath: dbPath,
+      }) as Buffer,
+    );
+
+    const sourceCombo = snapshot.combos.find(
+      (c: OutCombo) => c.id === "s-app-block:source:e-selector",
+    );
+    expect(sourceCombo).toBeDefined();
+    expect(sourceCombo?.name).toBe("useAppStateStore");
+  });
+
+  it("should redirect cross-package imports using package names", () => {
+    db.exec(`
+            INSERT INTO packages (id, name, version, path) VALUES ('pkg-2', '@workspace/pkg-b', '1.0.0', 'packages/pkg-b');
+            INSERT INTO files (id, path, package_id, hash, fingerprint) VALUES (2, '/packages/pkg-b/src/Comp.tsx', 'pkg-2', 'h2', 'f2');
+            INSERT INTO scopes (id, file_id, parent_id, kind, entity_id) VALUES ('workspace:pkg-b:s-comp-module', 2, NULL, 'module', NULL);
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('workspace:pkg-b:e-comp', 'workspace:pkg-b:s-comp-module', 'component', 'Comp', 'function');
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('workspace:pkg-b:sym-comp', 'workspace:pkg-b:e-comp', 'workspace:pkg-b:s-comp-module', 'Comp');
+            INSERT INTO exports (id, scope_id, symbol_id, entity_id, name, is_default) VALUES ('workspace:pkg-b:exp-1', 'workspace:pkg-b:s-comp-module', 'workspace:pkg-b:sym-comp', 'workspace:pkg-b:e-comp', 'Comp', 0);
+
+            INSERT INTO entities (id, scope_id, kind, name, type, data_json) VALUES ('workspace:pkg-a:e-import', 's-module', 'import', 'Comp', 'data', '{"source":"@workspace/pkg-b","importedName":"Comp","type":"named"}');
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('workspace:pkg-a:sym-import', 'workspace:pkg-a:e-import', 's-module', 'Comp');
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('workspace:pkg-a:e-caller', 's-module', 'component', 'caller', 'function');
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('workspace:pkg-a:sym-caller', 'workspace:pkg-a:e-caller', 's-module', 'caller');
+            INSERT INTO relations (from_id, to_id, kind, line, column, data_json) VALUES ('workspace:pkg-a:sym-caller', 'workspace:pkg-a:sym-import', 'usage-call', 10, 5, NULL);
+        `);
+
+    db.close();
+    const snapshot = materializeSqliteBuffer(
+      runComponentTaskSqlite({
+        projectRoot: "/root",
+        viewType: "component",
+        cacheDbPath: dbPath,
+      }) as Buffer,
+    );
+
+    const usageEdge = snapshot.edges.find(
+      (e: OutEdge) => e.kind === "usage-call",
+    );
+    expect(usageEdge).toBeDefined();
+    expect(usageEdge?.source).toBe("workspace:pkg-a:sym-caller");
+    expect(usageEdge?.target).toBe("workspace:pkg-b:sym-comp");
   });
 });

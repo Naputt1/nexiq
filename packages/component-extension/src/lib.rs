@@ -206,7 +206,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         .collect();
 
     let symbols: Vec<SymbolRow> = conn
-        .prepare("SELECT id, entity_id, scope_id, name, path FROM symbols")
+        .prepare("SELECT id, entity_id, scope_id, name, path, is_alias FROM symbols")
         .unwrap()
         .query_map([], |row| {
             Ok(SymbolRow {
@@ -215,6 +215,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                 scope_id: row.get(2)?,
                 name: row.get(3)?,
                 path: row.get(4)?,
+                is_alias: row.get(5)?,
             })
         })
         .unwrap()
@@ -387,6 +388,34 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     let mut added_combos = HashSet::new();
     let mut added_nodes = HashSet::new();
 
+    let get_source_group_label = |entity: &EntityRow| -> String {
+        let mut label = entity
+            .name
+            .clone()
+            .unwrap_or_else(|| entity.kind.clone());
+
+        if let Some(dj) = &entity.data_json {
+            if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                if entity.kind == "hook" {
+                    if let Some(call_name) = dj_json["call"]["name"].as_str() {
+                        return call_name.to_string();
+                    }
+                }
+
+                if let Some(dependencies) = dj_json["dependencies"].as_object() {
+                    for dependency in dependencies.values() {
+                        if let Some(dep_name) = dependency["name"].as_str() {
+                            label = dep_name.to_string();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        label
+    };
+
     // Helper to insert results
     let mut ins_node = conn.prepare("INSERT OR REPLACE INTO out_nodes (id, name, type, combo_id, color, radius, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
     let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)").unwrap();
@@ -511,34 +540,38 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             pid
         };
 
-        // Source Combo for Hooks result
-        if entity.kind == "hook" {
-            let sc_id = format!("{}:source:{}", symbol.scope_id, entity.id);
-            if !added_combos.contains(&sc_id) {
-                ins_combo
-                    .execute(params![
-                        sc_id,
-                        symbol.name,
-                        "source-group",
-                        pc_id,
-                        None::<String>,
-                        16.0,
-                        1,
-                        symbol.name,
-                        None::<String>
-                    ])
-                    .unwrap();
-                added_combos.insert(sc_id.clone());
-            }
-            pc_id = Some(sc_id);
-        }
-
         // Path-based grouping (Destructuring)
         if let Some(path_str) = &symbol.path {
             if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
                 if let Some(path_arr) = path_json.as_array() {
+                    let should_create_source_group = entity.kind == "hook"
+                        && !path_arr.is_empty()
+                        && (symbol.is_alias || path_arr.len() > 1);
+
+                    if should_create_source_group {
+                        let sc_id = format!("{}:source:{}", symbol.scope_id, entity.id);
+                        if !added_combos.contains(&sc_id) {
+                            let source_label = get_source_group_label(entity);
+                            ins_combo
+                                .execute(params![
+                                    sc_id,
+                                    source_label,
+                                    "source-group",
+                                    pc_id,
+                                    None::<String>,
+                                    16.0,
+                                    1,
+                                    source_label,
+                                    None::<String>
+                                ])
+                                .unwrap();
+                            added_combos.insert(sc_id.clone());
+                        }
+                        pc_id = Some(sc_id);
+                    }
+
                     let mut current_parent = pc_id.clone();
-                    let mut path_prefix = if entity.kind == "hook" {
+                    let mut path_prefix = if should_create_source_group {
                         format!("{}:path", pc_id.as_ref().unwrap())
                     } else {
                         format!("{}:path:{}", symbol.scope_id, symbol.id)
@@ -684,7 +717,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         HashMap::new();
 
     let mut add_edge_local =
-        |source: &str, target: &str, kind: &str, name: &str, data: Option<&str>| {
+        |source: &str, target: &str, kind: &str, _name: &str, data: Option<&str>| {
             let s = redirection_map
                 .get(source)
                 .unwrap_or(&source.to_string())

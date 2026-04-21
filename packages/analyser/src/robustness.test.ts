@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import analyzeFiles from "./analyzer/index.ts";
 import { PackageJson } from "./db/packageJson.ts";
+import { ComponentDB } from "./db/componentDB.ts";
 import { File } from "./db/fileDB.ts";
 import { FunctionVariable } from "./db/variable/functionVariable.ts";
 import path from "path";
@@ -144,5 +145,53 @@ describe("analyser robustness", () => {
     } as unknown as FunctionVariable;
 
     expect(() => existing.load(incoming)).not.toThrow();
+  });
+
+  it("should tolerate function variables with missing nested scopes during dependency resolution", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-resolve-"));
+    const sourceFile = path.join(tmpDir, "App.tsx");
+    fs.writeFileSync(sourceFile, "export const App = () => null;");
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "resolve-test" }),
+    );
+
+    try {
+      const componentDB = new ComponentDB({
+        packageJson: new PackageJson(tmpDir),
+        viteAliases: {},
+        dir: tmpDir,
+        sqlite: undefined,
+      });
+
+      componentDB.addFile("/App.tsx");
+      const id = componentDB.addVariable(
+        "/App.tsx",
+        {
+          name: {
+            type: "identifier",
+            name: "handler",
+            id: "handler",
+            loc: { line: 1, column: 13 },
+          },
+          type: "function",
+          dependencies: {},
+          loc: { line: 1, column: 13 },
+          scope: {
+            start: { line: 1, column: 13 },
+            end: { line: 1, column: 27 },
+          },
+          var: {},
+          children: {},
+        } as any,
+      );
+
+      const runtimeHandler = componentDB.getFile("/App.tsx").var.get(id, true) as any;
+      runtimeHandler.var = undefined;
+
+      expect(() => componentDB.resolveDependency()).not.toThrow();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });

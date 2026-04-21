@@ -4,8 +4,8 @@ import type { GraphViewTask, TaskContext } from "@nexiq/extension-sdk";
 const require = createRequire(import.meta.url);
 const { runComponentTaskSqlite } = require("../index.cjs");
 
-export const componentRustTask: GraphViewTask = {
-  id: "component-structure-rust",
+export const componentTask: GraphViewTask = {
+  id: "component-structure",
   priority: 10,
   runSqlite: (context: TaskContext) => {
     if (!context.db) return;
@@ -25,3 +25,5 @@ export const componentRustTask: GraphViewTask = {
     }
   },
 };
+
+export const componentRustTask = componentTask;

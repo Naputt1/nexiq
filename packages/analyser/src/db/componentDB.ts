@@ -1023,6 +1023,10 @@ export class ComponentDB {
 
     // Handle nested var iteration (Map or Record)
     if (isBaseFunctionVariable(variable)) {
+      if (!variable.var || typeof variable.var.values !== "function") {
+        return;
+      }
+
       for (const innerVar of variable.var.values()) {
         this._resolveDependency(
           innerVar,
