@@ -140,7 +140,21 @@ export class Scope {
     return this.parent?.getIdByName(name);
   }
 
-  public merge(other: Scope) {
+  public merge(other?: Scope | Record<string, ComponentFileVar>) {
+    if (!other) return;
+
+    if (!(other instanceof Scope)) {
+      for (const variable of Object.values(other)) {
+        const existing = this.variables.get(variable.id);
+        if (existing) {
+          continue;
+        }
+
+        this.prevIds.set(getVariableNameKey(variable.name), variable.id);
+      }
+      return;
+    }
+
     for (const [id, v] of other.variables) {
       if (!this.variables.has(id)) {
         this.variables.set(id, v);
