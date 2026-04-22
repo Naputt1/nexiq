@@ -15,7 +15,9 @@ export function getVariableComponentName(
   if (path == null) return null;
   if (typeof path.findParent !== "function") return null;
 
-  const pathWithLoc = path as { loc?: { start: VariableLoc; end: VariableLoc } | null };
+  const pathWithLoc = path as {
+    loc?: { start: VariableLoc; end: VariableLoc } | null;
+  };
 
   if (loc && pathWithLoc.loc == null) {
     pathWithLoc.loc = {
@@ -27,6 +29,8 @@ export function getVariableComponentName(
   const compPath = path.findParent(
     (p) =>
       p.isFunctionDeclaration() ||
+      p.isArrowFunctionExpression() ||
+      p.isFunctionExpression() ||
       (p.isVariableDeclarator() &&
         t.isIdentifier(p.node.id) &&
         (t.isArrowFunctionExpression(p.node.init) ||
@@ -67,18 +71,25 @@ export function getVariableComponentName(
           column: start.column,
         },
       };
+    } else if (
+      compPath.isArrowFunctionExpression() ||
+      compPath.isFunctionExpression()
+    ) {
+      const start = compPath.node.loc?.start;
+      if (start == null) {
+        return null;
+      }
+
+      // Anonymous function, use location as "name" or placeholder
+      return {
+        name: `anonymous@${start.line}:${start.column}`,
+        loc: {
+          line: start.line,
+          column: start.column,
+        },
+      };
     }
   }
-
-  // const id = path.node.id;
-  // if (t.isIdentifier(id)) {
-  //   return id.name;
-  // }
-  // if (t.isArrayPattern(id)) {
-  //   if (t.isIdentifier(id.elements[0])) {
-  //     return id.elements[0].name;
-  //   }
-  // }
 
   return null;
 }

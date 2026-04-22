@@ -32,6 +32,17 @@ const samples = args._[0]
       "class-components",
     ];
 
+export function normalize(data: SnapshotData): SnapshotData {
+  const normalized: SnapshotData = JSON.parse(JSON.stringify(data));
+  delete normalized.src;
+  if (normalized.files) {
+    for (const file of Object.values(normalized.files)) {
+      delete file.fingerPrint;
+    }
+  }
+  return normalized;
+}
+
 export async function runSnapshot(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
@@ -69,17 +80,15 @@ export async function runSnapshot(sample: string) {
     undefined,
     1,
   );
-  delete graph.src;
-  for (const file of Object.values(graph.files)) {
-    delete file.fingerPrint;
-  }
+
+  const normalized = normalize(graph);
 
   fs.mkdirSync(path.dirname(PUBLIC_FILE), { recursive: true });
-  fs.writeFileSync(PUBLIC_FILE, JSON.stringify(graph, null, 2));
+  fs.writeFileSync(PUBLIC_FILE, JSON.stringify(normalized, null, 2));
   console.log(`Graph written to ${PUBLIC_FILE}`);
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
-  fs.writeFileSync(OUT_FILE, JSON.stringify(graph, null, 2));
+  fs.writeFileSync(OUT_FILE, JSON.stringify(normalized, null, 2));
   console.log(`Graph written to ${OUT_FILE}`);
 }
 

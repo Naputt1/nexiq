@@ -561,7 +561,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "ebb986b94dab2594",
+          "hash": "9e4d7c72ff2e66f3",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -691,6 +691,10 @@
               "name": "initialValue",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 30
+              },
               "hash": "9f760feb8a0dfe2e"
             }
           ],
@@ -787,7 +791,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "eee7795b55979fe7",
+          "hash": "9efe7d513df17768",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -915,6 +919,10 @@
               "name": "ref",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 20,
+                "column": 35
+              },
               "hash": "e9ceb2c440128b84"
             },
             {
@@ -922,6 +930,10 @@
               "name": "handler",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 20,
+                "column": 45
+              },
               "hash": "ccdee2445dd6b143"
             }
           ],
@@ -959,6 +971,22 @@
           }
         }
       },
+      "blockScopes": [
+        {
+          "id": "6ff6c197ebf684e7",
+          "parentId": "scope:block:8ceb6354f84f126b",
+          "scope": {
+            "start": {
+              "line": 23,
+              "column": 62
+            },
+            "end": {
+              "line": 25,
+              "column": 7
+            }
+          }
+        }
+      ],
       "relations": [
         {
           "from_id": "7a755d146a3ba89a",
@@ -1248,10 +1276,10 @@
             },
             "id": "9774cca0cd00f3f1"
           },
-          "kind": "normal",
-          "type": "data",
+          "kind": "component",
+          "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "820722f17e2bc483",
+          "hash": "4c6c1c80949b494c",
           "declarationKind": "const",
           "dependencies": {
             "4716edcf0db0eac9": {
@@ -1262,29 +1290,6 @@
           "loc": {
             "line": 3,
             "column": 13
-          },
-          "children": {}
-        },
-        "6272a2db9d3159ee": {
-          "id": "6272a2db9d3159ee",
-          "name": {
-            "type": "identifier",
-            "name": "anonymous@3:38",
-            "loc": {
-              "line": 3,
-              "column": 38
-            },
-            "id": ""
-          },
-          "kind": "normal",
-          "type": "function",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "8161bdbdfe13717d",
-          "declarationKind": "const",
-          "dependencies": {},
-          "loc": {
-            "line": 3,
-            "column": 38
           },
           "var": {
             "d4a8299cd2018f84": {
@@ -1332,6 +1337,60 @@
           "scope": {
             "start": {
               "line": 3,
+              "column": 84
+            },
+            "end": {
+              "line": 5,
+              "column": 1
+            }
+          },
+          "async": false,
+          "states": [],
+          "refs": [],
+          "props": [
+            {
+              "id": "7cb39a3350cd7439:prop:name",
+              "name": "name",
+              "type": "string",
+              "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 58
+              },
+              "hash": "d6cb0c7f2bbde4ba"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
+        },
+        "6272a2db9d3159ee": {
+          "id": "6272a2db9d3159ee",
+          "name": {
+            "type": "identifier",
+            "name": "anonymous@3:38",
+            "loc": {
+              "line": 3,
+              "column": 38
+            },
+            "id": ""
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/HocForwardRef.tsx",
+          "hash": "55ea907bd911f1e",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 38
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 3,
               "column": 38
             },
             "end": {
@@ -1355,7 +1414,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "2d51137f3afe27ab",
+          "hash": "2c10bedc46384da2",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1435,6 +1494,10 @@
               "name": "props",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 7,
+                "column": 82
+              },
               "hash": "c913f4018cd56103"
             },
             {
@@ -1442,6 +1505,10 @@
               "name": "ref",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 7,
+                "column": 89
+              },
               "hash": "e9ceb2c440128b84"
             }
           ],
@@ -1579,10 +1646,10 @@
             },
             "id": "49b1bcbdee900b8b"
           },
-          "kind": "normal",
-          "type": "data",
+          "kind": "component",
+          "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "5dc74c515382cb22",
+          "hash": "7d0423a72e3bd8de",
           "declarationKind": "const",
           "dependencies": {
             "738a200726547e84": {
@@ -1594,65 +1661,77 @@
             "line": 18,
             "column": 13
           },
-          "children": {}
-        },
-        "93fc570c17202318": {
-          "id": "93fc570c17202318",
-          "name": {
-            "type": "identifier",
-            "name": "anonymous@18:44",
-            "loc": {
-              "line": 18,
-              "column": 44
-            },
-            "id": ""
-          },
-          "kind": "normal",
-          "type": "function",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "9decd28076433eb3",
-          "declarationKind": "const",
-          "dependencies": {},
-          "loc": {
-            "line": 18,
-            "column": 44
-          },
           "var": {
-            "960a42af71306bce": {
-              "id": "960a42af71306bce",
+            "93fc570c17202318": {
+              "id": "93fc570c17202318",
               "name": {
                 "type": "identifier",
-                "name": "jsx@18:50",
+                "name": "anonymous@18:44",
                 "loc": {
                   "line": 18,
-                  "column": 50
+                  "column": 44
                 },
-                "id": "45ede0627ee475b0"
+                "id": ""
               },
               "kind": "normal",
-              "type": "jsx",
+              "type": "function",
               "file": "/src/HocForwardRef.tsx",
-              "hash": "64882aefd9476fa",
+              "hash": "9decd28076433eb3",
+              "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 18,
-                "column": 50
+                "column": 44
               },
-              "render": {
-                "id": "div",
-                "instanceId": "c4ee89101abd45df",
-                "tag": "div",
-                "dependencies": [],
-                "isDependency": false,
-                "loc": {
+              "var": {
+                "960a42af71306bce": {
+                  "id": "960a42af71306bce",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@18:50",
+                    "loc": {
+                      "line": 18,
+                      "column": 50
+                    },
+                    "id": "45ede0627ee475b0"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/HocForwardRef.tsx",
+                  "hash": "64882aefd9476fa",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 18,
+                    "column": 50
+                  },
+                  "render": {
+                    "id": "div",
+                    "instanceId": "c4ee89101abd45df",
+                    "tag": "div",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 18,
+                      "column": 50
+                    },
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "srcId": "div"
+                }
+              },
+              "scope": {
+                "start": {
                   "line": 18,
-                  "column": 50
+                  "column": 44
                 },
-                "renderIndex": 0,
-                "kind": "jsx",
-                "children": {}
+                "end": {
+                  "line": 18,
+                  "column": 68
+                }
               },
-              "srcId": "div"
+              "return": "960a42af71306bce"
             }
           },
           "scope": {
@@ -1665,7 +1744,15 @@
               "column": 68
             }
           },
-          "return": "960a42af71306bce"
+          "async": false,
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": [],
+          "forwardRef": false
         }
       },
       "relations": [
@@ -1681,7 +1768,7 @@
             "line": 3,
             "column": 33,
             "ownerId": "7cb39a3350cd7439",
-            "ownerKind": "normal",
+            "ownerKind": "component",
             "displayLabel": "memo"
           }
         },
@@ -1750,7 +1837,7 @@
             "line": 18,
             "column": 32,
             "ownerId": "8b20080379f3a04b",
-            "ownerKind": "normal",
+            "ownerKind": "component",
             "displayLabel": "withLogging"
           }
         }
@@ -1802,7 +1889,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "5a3dbc14339e7d42",
+          "hash": "582d8457417e44e2",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1977,6 +2064,10 @@
               "name": "title",
               "type": "string",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 37
+              },
               "hash": "b034ee30ef5f566a"
             },
             {
@@ -1984,6 +2075,10 @@
               "name": "items",
               "type": "string[]",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 44
+              },
               "hash": "4456340d7d91f5de"
             }
           ],
@@ -2589,7 +2684,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "f8ed62cb3121a71",
+          "hash": "99ad1f05d8e00cde",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2716,6 +2811,10 @@
               "name": "location",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 47,
+                "column": 33
+              },
               "hash": "f9b96b0e64700ceb"
             }
           ],
@@ -3023,7 +3122,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "31644209be825f73",
+          "hash": "25c1619edbbe70c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3109,6 +3208,10 @@
               "name": "children",
               "type": "React.ReactNode",
               "kind": "prop",
+              "loc": {
+                "line": 5,
+                "column": 29
+              },
               "hash": "77586bd2881e5282"
             }
           ],
@@ -3984,8 +4087,23 @@
       "label": "render"
     },
     {
+      "from": "7cb39a3350cd7439",
+      "to": "d4a8299cd2018f84",
+      "label": "render"
+    },
+    {
       "from": "66105c08a1f70b91",
       "to": "247f5cfd69d48323",
+      "label": "render"
+    },
+    {
+      "from": "8b20080379f3a04b",
+      "to": "960a42af71306bce",
+      "label": "render"
+    },
+    {
+      "from": "8b20080379f3a04b",
+      "to": "960a42af71306bce",
       "label": "render"
     },
     {
@@ -4070,6 +4188,16 @@
     },
     {
       "from": "div",
+      "to": "7cb39a3350cd7439",
+      "label": "render"
+    },
+    {
+      "from": "d4a8299cd2018f84",
+      "to": "c354ecdc24a77d5",
+      "label": "hook"
+    },
+    {
+      "from": "div",
       "to": "66105c08a1f70b91",
       "label": "render"
     },
@@ -4077,6 +4205,11 @@
       "from": "247f5cfd69d48323",
       "to": "abce141911553a78",
       "label": "hook"
+    },
+    {
+      "from": "div",
+      "to": "8b20080379f3a04b",
+      "label": "render"
     },
     {
       "from": "div",

@@ -203,7 +203,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "95ef2d2cc0f60b19",
+          "hash": "a93f45d510332159",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -267,6 +267,10 @@
               "name": "user",
               "type": "{\n  name: string;\n}",
               "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 24
+              },
               "hash": "43e778a48c712350"
             }
           ],

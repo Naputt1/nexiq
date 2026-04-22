@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
@@ -77,9 +76,9 @@ describe("monorepo collision handling", () => {
     // In our implementation, we updated getTaskData and the UI aggregation.
     // The CentralMaster already used root-relative paths for its merged output.
     // Let's verify if our fix in getTaskData works by mocking a TaskContext.
-    const { getTaskData } = await import("../../extension-sdk/src/index.ts");
+    const { getTaskData } = await import("@nexiq/extension-sdk");
     const data = getTaskData({
-      db: centralDb as any,
+      db: centralDb,
       projectRoot: rootDir,
       viewType: "component",
     });

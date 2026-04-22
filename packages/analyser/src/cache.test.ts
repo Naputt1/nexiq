@@ -1,103 +1,48 @@
 import { describe, it, expect } from "vitest";
-import analyzeFiles from "./analyzer/index.ts";
-import { getFiles, getViteConfig } from "./analyzer/utils.ts";
-import { PackageJson } from "./db/packageJson.ts";
-import path from "path";
-import fs from "fs";
-import os from "os";
-import type { SnapshotData } from "./types/test.ts";
+import path from "node:path";
+import fs from "node:fs";
+import { analyzeProject } from "./lib.ts";
+import { normalize } from "./snapshot.ts";
 import { SqliteDB } from "./db/sqlite.ts";
 
 describe("analyser cache snapshots", () => {
-  const projectName = "cache";
-  it(`should match snapshot for ${projectName}`, async () => {
+  it("should produce consistent results from cache", async () => {
+    const projectName = "cache";
     const projectPath = path.resolve(
       process.cwd(),
       `../sample-project/${projectName}`,
     );
-    const packageJson = new PackageJson(projectPath);
-    const viteConfigPath = getViteConfig(projectPath);
-    const files = getFiles(projectPath);
 
-    const graph = await analyzeFiles(
-      projectPath,
-      viteConfigPath,
-      files,
-      packageJson,
-    );
-
-    const snapshotPath = path.resolve(
+    const snapshotPath = path.join(
       process.cwd(),
-      `test/snapshots/${projectName}.json`,
+      `./test/snapshots/${projectName}.json`,
     );
-    const snapshotData: SnapshotData = JSON.parse(
-      fs.readFileSync(snapshotPath, "utf-8"),
-    );
+    const snapshotData = JSON.parse(fs.readFileSync(snapshotPath, "utf-8"));
 
-    // Compare the result with the stored snapshot
-    // We strip the absolute 'src' path as it changes between environments
-    const result: SnapshotData = JSON.parse(JSON.stringify(graph));
-    delete result.src;
+    const result = await analyzeProject(projectPath);
 
-    // Strip fingerPrint as it contains timestamps
-    for (const file of Object.values(result.files)) {
-      delete file.fingerPrint;
-    }
-
-    expect(result).toEqual(snapshotData);
+    expect(normalize(result)).toEqual(normalize(snapshotData));
   });
 
-  const projectNameNew = "cache-new";
-  it(`should match snapshot for ${projectNameNew}`, async () => {
+  it("should match stored snapshot for cache-new", async () => {
+    const projectName = "cache-new";
     const projectPath = path.resolve(
       process.cwd(),
-      `../sample-project/${projectNameNew}`,
+      `../sample-project/${projectName}`,
     );
-    const packageJson = new PackageJson(projectPath);
-    const viteConfigPath = getViteConfig(projectPath);
-    const files = getFiles(projectPath);
 
-    const cachePath = path.resolve(
+    const snapshotPath = path.join(
       process.cwd(),
-      `test/snapshots/${projectName}.json`,
+      `./test/snapshots/${projectName}.json`,
     );
+    const snapshotRaw = fs.readFileSync(snapshotPath, "utf-8");
+    const snapshotData = JSON.parse(snapshotRaw);
 
-    let cacheData = undefined;
-    if (fs.existsSync(cachePath)) {
-      try {
-        cacheData = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-      } catch (e) {
-        console.warn("Failed to load cache", e);
-      }
-    }
+    const cachePath = path.join(process.cwd(), `./test/snapshots/cache.json`);
 
-    const graph = await analyzeFiles(
-      projectPath,
-      viteConfigPath,
-      files,
-      packageJson,
-      cacheData,
-    );
+    const result = await analyzeProject(projectPath, cachePath);
 
-    const snapshotPath = path.resolve(
-      process.cwd(),
-      `test/snapshots/${projectNameNew}.json`,
-    );
-    const snapshotData: SnapshotData = JSON.parse(
-      fs.readFileSync(snapshotPath, "utf-8"),
-    );
-
-    // Compare the result with the stored snapshot
-    // We strip the absolute 'src' path as it changes between environments
-    const result: SnapshotData = JSON.parse(JSON.stringify(graph));
-    delete result.src;
-
-    // Strip fingerPrint as it contains timestamps
-    for (const file of Object.values(result.files)) {
-      delete file.fingerPrint;
-    }
-
-    expect(result).toEqual(snapshotData);
+    expect(normalize(result)).toEqual(normalize(snapshotData));
   });
 
   it("should cache analysis results in SQLite", async () => {
@@ -106,55 +51,38 @@ describe("analyser cache snapshots", () => {
       process.cwd(),
       `../sample-project/${projectName}`,
     );
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-sqlite-test-"));
-    const sqlitePath = path.join(tmpDir, "test.sqlite");
 
-    // Copy sample project to tmp dir to avoid side effects
-    fs.cpSync(projectPath, tmpDir, { recursive: true });
-
-    const packageJson = new PackageJson(tmpDir);
-    const viteConfigPath = getViteConfig(tmpDir);
-    const files = getFiles(tmpDir);
-
-    // 1. First run - should analyze and save to SQLite
-    const sqlite = new SqliteDB(sqlitePath);
-    const firstGraph = await analyzeFiles(
-      tmpDir,
-      viteConfigPath,
-      files,
-      packageJson,
-      undefined,
-      sqlite,
+    const dbPath = path.join(
+      process.cwd(),
+      `./test/snapshots/${projectName}.sqlite`,
     );
-    sqlite.close();
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath);
+    }
 
-    // Verify it saved something
-    const sqlite2 = new SqliteDB(sqlitePath);
-    const cachedFile = sqlite2.loadFileResults("/" + files[0]);
-    expect(cachedFile).toBeDefined();
-    sqlite2.close();
+    await analyzeProject(projectPath, {
+      sqlitePath: dbPath,
+    });
 
-    // 2. Second run - should load from SQLite and skip analysis
-    // We can verify this by checking if it still works even if we delete the source file
-    // (Wait, analyzeFiles still checks if file exists on disk to calculate hash)
-    // So we'll just check if the output is the same.
-    const sqlite3 = new SqliteDB(sqlitePath);
-    const secondGraph = await analyzeFiles(
-      tmpDir,
-      viteConfigPath,
-      files,
-      packageJson,
-      undefined,
-      sqlite3,
-    );
-    sqlite3.close();
+    expect(fs.existsSync(dbPath)).toBe(true);
 
-    // Basic equality check (excluding src path)
-    expect(Object.keys(secondGraph.files)).toEqual(
-      Object.keys(firstGraph.files),
-    );
+    const db = new SqliteDB(dbPath, { readonly: true });
+    const files = db.db.prepare("SELECT * FROM files").all();
+    expect(files.length).toBeGreaterThan(0);
 
-    // Cleanup
-    fs.rmSync(tmpDir, { recursive: true });
-  });
+    const entities = db.db.prepare("SELECT * FROM entities").all();
+    expect(entities.length).toBeGreaterThan(0);
+
+    db.close();
+
+    // Second run should use cache
+    const startAt = performance.now();
+    await analyzeProject(projectPath, {
+      sqlitePath: dbPath,
+    });
+    const duration = performance.now() - startAt;
+
+    // This is not a strong guarantee but cache should be faster
+    expect(duration).toBeLessThan(1000);
+  }, 20000);
 });

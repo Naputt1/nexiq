@@ -40,7 +40,8 @@
     "paths": {
       "@nexiq/shared": ["../shared/dist/index.d.ts"],
       "@nexiq/shared/db": ["../shared/dist/db/index.d.ts"],
-      "@nexiq/shared/*": ["../shared/dist/*"]
+      "@nexiq/shared/*": ["../shared/dist/*"],
+      "@nexiq/extension-sdk": ["../extension-sdk/dist/index.d.ts"]
     },
     "allowImportingTsExtensions": true,
     "experimentalDecorators": true,

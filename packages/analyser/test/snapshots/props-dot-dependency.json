@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "346a72e545aac3a3",
+          "hash": "c3d530edd2674030",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -242,18 +242,15 @@
           "refs": [],
           "props": [
             {
-              "id": "d3a4c6ed6b965219:prop:expanded",
-              "name": "expanded",
-              "type": "boolean",
+              "id": "d3a4c6ed6b965219:prop:props",
+              "name": "props",
+              "type": "any",
               "kind": "prop",
-              "hash": "a18f4756a15cecef"
-            },
-            {
-              "id": "d3a4c6ed6b965219:prop:children",
-              "name": "children",
-              "type": "React.ReactNode",
-              "kind": "prop",
-              "hash": "77586bd2881e5282"
+              "loc": {
+                "line": 3,
+                "column": 33
+              },
+              "hash": "c913f4018cd56103"
             }
           ],
           "propName": "props",
@@ -278,7 +275,7 @@
               },
               "reactDeps": [
                 {
-                  "id": "d3a4c6ed6b965219:prop:expanded",
+                  "id": "d3a4c6ed6b965219:prop:props",
                   "name": "props.expanded"
                 }
               ]
@@ -289,6 +286,22 @@
           "forwardRef": false
         }
       },
+      "blockScopes": [
+        {
+          "id": "441d2e52ba30100c",
+          "parentId": "scope:block:d3a4c6ed6b965219",
+          "scope": {
+            "start": {
+              "line": 12,
+              "column": 24
+            },
+            "end": {
+              "line": 14,
+              "column": 5
+            }
+          }
+        }
+      ],
       "relations": [
         {
           "from_id": "symbol:import:/index.tsx:React",

@@ -33,6 +33,7 @@ import FunctionExpression from "./analyzer/functionExpression.ts";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
+import BlockScope from "./analyzer/blockScope.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
   DeferredResolveTask,
@@ -465,6 +466,7 @@ export class PackageMaster {
         fileName,
       ),
       AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
+      ...BlockScope(this.componentDB, fileName),
     });
 
     this.componentDB.clearStack();

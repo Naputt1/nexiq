@@ -1634,7 +1634,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "637071c34f6b1a7b",
+          "hash": "65b889915311ca49",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1699,6 +1699,10 @@
               "name": "title",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 90,
+                "column": 47
+              },
               "hash": "238c42a88fe5a785"
             }
           ],
@@ -1727,7 +1731,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "e49897a60fbf8a4b",
+          "hash": "260220a2ea48aaf5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1790,22 +1794,34 @@
             {
               "id": "90e2b1081177c79d:prop:title",
               "name": "title",
-              "type": "any",
+              "type": "string",
               "kind": "prop",
-              "hash": "238c42a88fe5a785"
+              "loc": {
+                "line": 103,
+                "column": 2
+              },
+              "hash": "b034ee30ef5f566a"
             },
             {
               "id": "90e2b1081177c79d:prop:items",
               "name": "items",
-              "type": "any",
+              "type": "string[]",
               "kind": "prop",
-              "hash": "8d18cedb2fd9d9a0"
+              "loc": {
+                "line": 104,
+                "column": 2
+              },
+              "hash": "4456340d7d91f5de"
             },
             {
               "id": "90e2b1081177c79d:prop:props",
               "name": "props",
               "type": "any",
               "kind": "spread",
+              "loc": {
+                "line": 105,
+                "column": 5
+              },
               "hash": "4495b8899bc413ae"
             },
             {
@@ -2076,7 +2092,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "f3abeb8bf89fe3c7",
+          "hash": "6ea1b275a3bcdea3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2139,16 +2155,24 @@
             {
               "id": "c6fb8be07af7c236:prop:title",
               "name": "title",
-              "type": "any",
+              "type": "string",
               "kind": "prop",
-              "hash": "238c42a88fe5a785"
+              "loc": {
+                "line": 110,
+                "column": 37
+              },
+              "hash": "b034ee30ef5f566a"
             },
             {
               "id": "c6fb8be07af7c236:prop:items",
               "name": "items",
-              "type": "any",
+              "type": "string[]",
               "kind": "prop",
-              "hash": "8d18cedb2fd9d9a0"
+              "loc": {
+                "line": 110,
+                "column": 44
+              },
+              "hash": "4456340d7d91f5de"
             }
           ],
           "hooks": [],
@@ -2171,7 +2195,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "aa69e28a897068bb",
+          "hash": "7b721539039d66d9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2329,16 +2353,24 @@
             {
               "id": "80b1b60c7d127de5:prop:title",
               "name": "title",
-              "type": "any",
+              "type": "string",
               "kind": "prop",
-              "hash": "238c42a88fe5a785"
+              "loc": {
+                "line": 114,
+                "column": 54
+              },
+              "hash": "b034ee30ef5f566a"
             },
             {
               "id": "80b1b60c7d127de5:prop:items",
               "name": "items",
-              "type": "any",
+              "type": "string[]",
               "kind": "prop",
-              "hash": "8d18cedb2fd9d9a0"
+              "loc": {
+                "line": 114,
+                "column": 61
+              },
+              "hash": "4456340d7d91f5de"
             }
           ],
           "hooks": [],
@@ -2361,7 +2393,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "4a15e42c8e613335",
+          "hash": "665097b21a71efbf",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2518,16 +2550,24 @@
             {
               "id": "f51adcb408401731:prop:title",
               "name": "title",
-              "type": "any",
+              "type": "string",
               "kind": "prop",
-              "hash": "238c42a88fe5a785"
+              "loc": {
+                "line": 127,
+                "column": 36
+              },
+              "hash": "b034ee30ef5f566a"
             },
             {
               "id": "f51adcb408401731:prop:items",
               "name": "items",
-              "type": "any",
+              "type": "string[]",
               "kind": "prop",
-              "hash": "8d18cedb2fd9d9a0"
+              "loc": {
+                "line": 127,
+                "column": 43
+              },
+              "hash": "4456340d7d91f5de"
             }
           ],
           "hooks": [],
@@ -2811,7 +2851,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "4ff1af537d7f776e",
+          "hash": "a3a4dcaaf46e5db",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2971,6 +3011,10 @@
               "name": "title",
               "type": "string",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 2
+              },
               "hash": "b034ee30ef5f566a"
             },
             {
@@ -2978,6 +3022,10 @@
               "name": "items",
               "type": "string[]",
               "kind": "prop",
+              "loc": {
+                "line": 5,
+                "column": 2
+              },
               "hash": "4456340d7d91f5de"
             }
           ],

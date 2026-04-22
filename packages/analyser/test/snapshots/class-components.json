@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "f13b774cfd1ced23",
+          "hash": "82ec2307d24e935b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -109,6 +109,10 @@
               "name": "title",
               "type": "string",
               "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 18
+              },
               "hash": "b034ee30ef5f566a"
             }
           ],
@@ -132,7 +136,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "6ec1dc60a5416f84",
+          "hash": "859758705656104f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -214,6 +218,10 @@
               "name": "children",
               "type": "React.ReactNode",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 16
+              },
               "hash": "77586bd2881e5282"
             }
           ],
@@ -615,7 +623,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "e355ca872b9bcc70",
+          "hash": "9661ff6388a6faa7",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -838,7 +846,19 @@
             "85f4419ef29e0cd2"
           ],
           "refs": [],
-          "props": [],
+          "props": [
+            {
+              "id": "b04033a58b519d57:prop:initialCount",
+              "name": "initialCount",
+              "type": "any",
+              "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 2
+              },
+              "hash": "e63f5b7c817c00f8"
+            }
+          ],
           "propName": "this.props",
           "hooks": [],
           "effects": {},
@@ -848,12 +868,12 @@
           "propType": {
             "type": "ref",
             "refType": "named",
-            "name": "Props"
+            "name": "2684d1d02241411c"
           },
           "stateType": {
             "type": "ref",
             "refType": "named",
-            "name": "State"
+            "name": "a00746f16103c07"
           }
         }
       },
@@ -1348,6 +1368,22 @@
           "forwardRef": false
         }
       },
+      "blockScopes": [
+        {
+          "id": "9558304a5fa84de3",
+          "parentId": "scope:block:a625e5b6c2cd147",
+          "scope": {
+            "start": {
+              "line": 11,
+              "column": 46
+            },
+            "end": {
+              "line": 13,
+              "column": 5
+            }
+          }
+        }
+      ],
       "relations": [
         {
           "from_id": "symbol:import:/src/NewFeatures.tsx:React",

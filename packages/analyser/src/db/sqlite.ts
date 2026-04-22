@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "node:fs";
 import type {
   AnalysisRunRow,
+  ComponentFileBlockScope,
   ComponentFile,
   ComponentFileVar,
   ComponentInfoRender,
@@ -49,10 +50,6 @@ export class SqliteDB extends BaseSqliteDB {
       if (options.readonly) {
         throw e;
       }
-      console.warn(
-        `Failed to open or verify SQLite database at ${dbPath}, deleting and recreating:`,
-        e instanceof Error ? e.message : "Unknown error",
-      );
       try {
         if (fs.existsSync(dbPath)) {
           fs.unlinkSync(dbPath);
@@ -661,6 +658,20 @@ export class SqliteDB extends BaseSqliteDB {
         kind: "module",
       });
 
+      const blockScopes = new Map<string, ComponentFileBlockScope>();
+      for (const blockScope of data.blockScopes || []) {
+        blockScopes.set(blockScope.id, blockScope);
+      }
+      for (const blockScope of data.blockScopes || []) {
+        this.insertScope({
+          id: blockScope.id,
+          file_id: fileId,
+          parent_id: blockScope.parentId || moduleScopeId,
+          kind: "block",
+          data_json: JSON.stringify(blockScope.scope),
+        });
+      }
+
       // 3. Insert Imports as entities and symbols
       for (const imp of Object.values(data.import)) {
         const impId = `entity:import:${data.path}:${imp.localName}`;
@@ -721,12 +732,36 @@ export class SqliteDB extends BaseSqliteDB {
         currentScopeId: string,
         parentEntityId?: string,
       ) => {
+        let effectiveScopeId = currentScopeId;
+        let matchedScopeId: string | undefined;
+        let matchedSpan = Number.MAX_SAFE_INTEGER;
+        for (const blockScope of blockScopes.values()) {
+          if (blockScope.parentId !== currentScopeId) continue;
+          const { start, end } = blockScope.scope;
+          const inScope =
+            (v.loc.line > start.line ||
+              (v.loc.line === start.line && v.loc.column >= start.column)) &&
+            (v.loc.line < end.line ||
+              (v.loc.line === end.line && v.loc.column <= end.column));
+          if (!inScope) continue;
+
+          const span =
+            (end.line - start.line) * 10_000 + (end.column - start.column);
+          if (span < matchedSpan) {
+            matchedSpan = span;
+            matchedScopeId = blockScope.id;
+          }
+        }
+        if (matchedScopeId) {
+          effectiveScopeId = matchedScopeId;
+        }
+
         const nameStr = getVariableNameKey(v.name);
         const scope = "scope" in v ? v.scope : undefined;
 
         this.insertEntity({
           id: v.id,
-          scope_id: currentScopeId,
+          scope_id: effectiveScopeId,
           kind: v.kind,
           name: nameStr,
           type: v.type,
@@ -744,7 +779,7 @@ export class SqliteDB extends BaseSqliteDB {
           this.insertSymbol({
             id: ident.id,
             entity_id: v.id,
-            scope_id: currentScopeId,
+            scope_id: effectiveScopeId,
             name: ident.name,
             path: ident.path.length > 0 ? JSON.stringify(ident.path) : null,
             is_alias: ident.isAlias,
@@ -769,14 +804,58 @@ export class SqliteDB extends BaseSqliteDB {
           this.insertScope({
             id: newScopeId,
             file_id: fileId,
-            parent_id: currentScopeId,
+            parent_id: effectiveScopeId,
             kind: "block",
             entity_id: v.id,
+            data_json: scope ? JSON.stringify(scope) : null,
           });
 
           if ("var" in v) {
             for (const childVar of Object.values(v.var || {})) {
               insertVariable(childVar, newScopeId, v.id);
+            }
+          }
+
+          if (
+            (v.kind === "component" || v.kind === "hook") &&
+            "props" in v &&
+            Array.isArray(v.props)
+          ) {
+            const insertProp = (
+              prop: (typeof v.props)[number],
+              pathSegments: string[] = [],
+            ) => {
+              this.insertEntity({
+                id: prop.id,
+                scope_id: newScopeId,
+                kind: "prop",
+                name: prop.name,
+                type: "data",
+                line: prop.loc?.line ?? null,
+                column: prop.loc?.column ?? null,
+                data_json: JSON.stringify({
+                  type: prop.type,
+                  kind: prop.kind,
+                  defaultValue: prop.defaultValue,
+                }),
+              });
+
+              this.insertSymbol({
+                id: `symbol:${prop.id}`,
+                entity_id: prop.id,
+                scope_id: newScopeId,
+                name: prop.name,
+                path:
+                  pathSegments.length > 0 ? JSON.stringify(pathSegments) : null,
+              });
+
+              for (const childProp of prop.props || []) {
+                insertProp(childProp, [...pathSegments, childProp.name]);
+              }
+            };
+
+            for (const prop of v.props) {
+              insertProp(prop);
             }
           }
 
@@ -944,7 +1023,7 @@ export class SqliteDB extends BaseSqliteDB {
 
     // First pass: Create variable objects
     for (const e of entities) {
-      if (["import", "type"].includes(e.kind)) continue;
+      if (["import", "type", "prop"].includes(e.kind)) continue;
 
       const metadata = JSON.parse(e.data_json || "{}");
       const varObj = {

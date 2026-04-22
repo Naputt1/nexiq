@@ -1,4 +1,5 @@
 import type {
+  ComponentFileBlockScope,
   ComponentFileVar,
   VariableLoc,
   VariableScope,
@@ -14,6 +15,7 @@ import type { BaseFunctionVariable } from "./baseFunctionVariable.ts";
 
 export class Scope {
   private variables = new Map<string, Variable>();
+  private childScopes: Scope[] = [];
   private nameToVariable = new Map<string, Variable>();
   private nameToId = new Map<string, string>();
   private prevIds = new Map<string, string>();
@@ -23,6 +25,8 @@ export class Scope {
   constructor(
     public parent?: Scope,
     public owner?: Variable,
+    public blockId?: string,
+    public loc?: VariableScope,
   ) {}
 
   public static isLocInScope(loc: VariableLoc, scope: VariableScope): boolean {
@@ -35,6 +39,12 @@ export class Scope {
   }
 
   public findDeepestScope(loc: VariableLoc): Scope {
+    for (const childScope of this.childScopes) {
+      if (childScope.loc && Scope.isLocInScope(loc, childScope.loc)) {
+        return childScope.findDeepestScope(loc);
+      }
+    }
+
     for (const v of this.variables.values()) {
       if (isBaseFunctionVariable(v) || isClassVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
@@ -48,25 +58,28 @@ export class Scope {
   public findDeepestVariable(
     loc: VariableLoc,
   ): BaseFunctionVariable<VarKind> | undefined {
+    let deepest: BaseFunctionVariable<VarKind> | undefined;
+
     for (const v of this.variables.values()) {
       if (isBaseFunctionVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
           const inner = v.var.findDeepestVariable(loc);
           if (inner) return inner;
 
-          return v;
+          // If no inner match, this is a candidate
+          deepest = v;
         }
       } else if (isClassVariable(v)) {
         if (v.scope && Scope.isLocInScope(loc, v.scope)) {
           const inner = v.var.findDeepestVariable(loc);
           if (inner) return inner;
 
-          return v as BaseFunctionVariable<VarKind>;
+          deepest = v as BaseFunctionVariable<VarKind>;
         }
       }
     }
 
-    return undefined;
+    return deepest;
   }
 
   public initPrevIds(vars: Record<string, ComponentFileVar>) {
@@ -111,10 +124,37 @@ export class Scope {
     }
   }
 
+  public addChildScope(scope: Scope) {
+    const existing = this.childScopes.find(
+      (child) => child.blockId && child.blockId === scope.blockId,
+    );
+    if (existing) {
+      return existing;
+    }
+
+    this.childScopes.push(scope);
+    this.childScopes.sort((a, b) => {
+      const aStart = a.loc?.start.line ?? 0;
+      const bStart = b.loc?.start.line ?? 0;
+      if (aStart !== bStart) return aStart - bStart;
+      return (a.loc?.start.column ?? 0) - (b.loc?.start.column ?? 0);
+    });
+    return scope;
+  }
+
+  public getChildScopes() {
+    return this.childScopes.values();
+  }
+
   public get(id: string, recursive = false): Variable | undefined {
     let v = this.variables.get(id);
     if (v) return v;
     if (recursive) {
+      for (const childScope of this.childScopes) {
+        v = childScope.get(id, true);
+        if (v) return v;
+      }
+
       for (const value of this.variables.values()) {
         if (
           (isBaseFunctionVariable(value) || isClassVariable(value)) &&
@@ -175,6 +215,40 @@ export class Scope {
     for (const [id, v] of this.variables) {
       data[id] = v.getData();
     }
+    return data;
+  }
+
+  public getBlockScopes(): ComponentFileBlockScope[] {
+    const data: ComponentFileBlockScope[] = [];
+
+    for (const variable of this.variables.values()) {
+      if (
+        (isBaseFunctionVariable(variable) || isClassVariable(variable)) &&
+        variable.var
+      ) {
+        data.push(...variable.var.getBlockScopes());
+      }
+    }
+
+    for (const childScope of this.childScopes) {
+      if (childScope.blockId && childScope.loc) {
+        let parentId: string | undefined;
+        if (childScope.parent?.blockId) {
+          parentId = childScope.parent.blockId;
+        } else if (childScope.parent?.owner) {
+          parentId = `scope:block:${childScope.parent.owner.id}`;
+        }
+
+        data.push({
+          id: childScope.blockId,
+          parentId,
+          scope: childScope.loc,
+        });
+      }
+
+      data.push(...childScope.getBlockScopes());
+    }
+
     return data;
   }
 }
