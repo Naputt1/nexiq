@@ -41,6 +41,7 @@ import type {
 } from "./types.ts";
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
+import BlockScope from "./analyzer/blockScope.ts";
 
 const sessionConfig = (workerData || {}) as WorkerSessionConfig;
 
@@ -84,6 +85,7 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
     TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
     AssignmentExpression: AssignmentExpression(componentDB, fileName),
+    ...BlockScope(componentDB, fileName),
   });
 
   extractFileUsages(ast, componentDB, filePath);
@@ -127,7 +129,10 @@ if (parentPort) {
         };
         results.push(message);
       } catch (error) {
-        console.error(`[Worker ${threadId}] Error analyzing ${filePath}:`, error);
+        console.error(
+          `[Worker ${threadId}] Error analyzing ${filePath}:`,
+          error,
+        );
         if (error instanceof Error) {
           console.error(error.stack);
         }

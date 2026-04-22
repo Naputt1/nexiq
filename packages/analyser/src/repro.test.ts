@@ -7,9 +7,8 @@ import os from "os";
 
 describe("repro stack overflow", () => {
   it("should not crash on circular object spread", async () => {
-    const projectPath = path.resolve(
-      process.cwd(),
-      "../sample-project/class-components",
+    const projectPath = fs.mkdtempSync(
+      path.join(os.tmpdir(), "nexiq-repro-circular-"),
     );
     const fileName = "Repro.tsx";
     const code = `
@@ -24,19 +23,14 @@ describe("repro stack overflow", () => {
       }
     `;
 
-    if (!fs.existsSync(projectPath)) {
-      fs.mkdirSync(projectPath, { recursive: true });
-    }
-    const filePath = path.resolve(projectPath, fileName);
+    const filePath = path.join(projectPath, fileName);
     fs.writeFileSync(filePath, code);
 
-    const pkgJsonPath = path.resolve(projectPath, "package.json");
-    if (!fs.existsSync(pkgJsonPath)) {
-      fs.writeFileSync(
-        pkgJsonPath,
-        JSON.stringify({ name: "repro", version: "1.0.0" }),
-      );
-    }
+    const pkgJsonPath = path.join(projectPath, "package.json");
+    fs.writeFileSync(
+      pkgJsonPath,
+      JSON.stringify({ name: "repro", version: "1.0.0" }),
+    );
 
     try {
       const packageJson = new PackageJson(projectPath);
@@ -145,28 +139,25 @@ describe("wrapper function analysis", () => {
         return undefined;
       };
 
-      const demo = findVariableByName(
-        file!.var as Record<string, any>,
-        "Demo",
-      );
+      const demo = findVariableByName(file!.var, "Demo");
       expect(demo).toBeDefined();
       expect("var" in demo!).toBe(true);
 
       const selectedSubProjects = findVariableByName(
-        (demo! as { var: Record<string, any> }).var,
+        demo!.var,
         "selectedSubProjects",
       );
       expect(selectedSubProjects?.kind).toBe("hook");
       expect(selectedSubProjects?.type).toBe("data");
 
-      const savePositions = findVariableByName(
-        (demo! as { var: Record<string, any> }).var,
-        "savePositions",
-      );
+      const savePositions = findVariableByName(demo!.var, "savePositions");
       expect(savePositions?.kind).toBe("normal");
       expect(savePositions?.type).toBe("function");
 
-      const collectNames = (vars: Record<string, any>, names: string[] = []) => {
+      const collectNames = (
+        vars: Record<string, any>,
+        names: string[] = [],
+      ) => {
         for (const variable of Object.values(vars)) {
           if (
             variable.name &&
@@ -188,6 +179,65 @@ describe("wrapper function analysis", () => {
         name.startsWith("anonymous@"),
       );
       expect(anonymousNames.length).toBe(1);
+    } finally {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      if (fs.existsSync(pkgJsonPath)) fs.unlinkSync(pkgJsonPath);
+      if (fs.existsSync(projectPath)) fs.rmdirSync(projectPath);
+    }
+  });
+
+  it("treats top-level wrapped components as functions and preserves props", async () => {
+    const projectPath = fs.mkdtempSync(
+      path.join(os.tmpdir(), "nexiq-wrapper-component-"),
+    );
+    const fileName = "WrappedComponent.tsx";
+    const code = `
+      import React, { memo } from "react";
+
+      type Props = { title: string };
+
+      export const Wrapped = memo(function WrappedInner(props: Props) {
+        return <div>{props.title}</div>;
+      });
+    `;
+
+    const filePath = path.resolve(projectPath, fileName);
+    const pkgJsonPath = path.resolve(projectPath, "package.json");
+
+    try {
+      fs.writeFileSync(
+        pkgJsonPath,
+        JSON.stringify({ name: "wrapper-component", version: "1.0.0" }),
+      );
+      fs.writeFileSync(filePath, code);
+
+      const packageJson = new PackageJson(projectPath);
+      const graph = await analyzeFiles(
+        projectPath,
+        null,
+        [fileName],
+        packageJson,
+        undefined,
+        undefined,
+        1,
+      );
+
+      const file = graph.files["/WrappedComponent.tsx"];
+      const wrapped = Object.values(file!.var).find(
+        (variable: any) => variable.name?.name === "Wrapped",
+      ) as any;
+
+      expect(wrapped).toBeDefined();
+      expect(wrapped.type).toBe("function");
+      expect(wrapped.kind).toBe("component");
+      expect(wrapped.props).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "props",
+            kind: "prop",
+          }),
+        ]),
+      );
     } finally {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       if (fs.existsSync(pkgJsonPath)) fs.unlinkSync(pkgJsonPath);

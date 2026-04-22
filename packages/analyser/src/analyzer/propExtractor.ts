@@ -38,6 +38,12 @@ function resolveTypeMembers(
           member.typeAnnotation?.typeAnnotation ?? t.anyTypeAnnotation(),
         ).code,
         kind: "prop" as const,
+        loc: member.key.loc
+          ? {
+              line: member.key.loc.start.line,
+              column: member.key.loc.start.column,
+            }
+          : undefined,
       };
       props.push({
         id: componentId
@@ -66,7 +72,13 @@ function resolveType(
   if (t.isTSTypeReference(typeAnnotation)) {
     if (t.isIdentifier(typeAnnotation.typeName)) {
       const name = typeAnnotation.typeName.name;
-      const binding = scope.getBinding(name);
+      let currentScope: traverse.Scope | null = scope;
+      let binding: ReturnType<traverse.Scope["getBinding"]> | undefined;
+
+      while (currentScope && !binding) {
+        binding = currentScope.getBinding(name);
+        currentScope = currentScope.parent;
+      }
 
       if (binding) {
         if (binding.path.isTSTypeAliasDeclaration()) {
@@ -79,6 +91,36 @@ function resolveType(
         } else if (binding.path.isTSInterfaceDeclaration()) {
           // Interfaces might extend others, but let's handle basic body first
           return resolveTypeMembers(binding.path.node.body, scope, componentId);
+        }
+      }
+
+      let programPath = scope.path;
+      while (programPath.parentPath) {
+        programPath = programPath.parentPath;
+      }
+
+      if (programPath.isProgram()) {
+        for (const statement of programPath.get("body")) {
+          if (
+            statement.isTSTypeAliasDeclaration() &&
+            t.isIdentifier(statement.node.id) &&
+            statement.node.id.name === name
+          ) {
+            return resolveType(
+              statement.node.typeAnnotation as t.TSType,
+              scope,
+              depth + 1,
+              componentId,
+            );
+          }
+
+          if (
+            statement.isTSInterfaceDeclaration() &&
+            t.isIdentifier(statement.node.id) &&
+            statement.node.id.name === name
+          ) {
+            return resolveTypeMembers(statement.node.body, scope, componentId);
+          }
         }
       }
     }
@@ -116,6 +158,12 @@ export function extractFromPattern(
               type: "any",
               kind: "prop" as const,
               defaultValue,
+              loc: value.loc
+                ? {
+                    line: value.loc.start.line,
+                    column: value.loc.start.column,
+                  }
+                : undefined,
             };
             props.push({
               id: componentId
@@ -132,10 +180,16 @@ export function extractFromPattern(
               kind: "prop" as const,
               props: nestedProps,
               defaultValue,
+              loc: property.key.loc
+                ? {
+                    line: property.key.loc.start.line,
+                    column: property.key.loc.start.column,
+                  }
+                : undefined,
             };
             props.push({
               id: componentId
-                ? `${componentId}:prop:${propBase.name}`
+                ? `${componentId}:prop:${propName}`
                 : getDeterministicId(propName),
               ...propBase,
               hash: getPropHash(propBase),
@@ -148,6 +202,12 @@ export function extractFromPattern(
             name: property.argument.name,
             type: "any",
             kind: "spread" as const,
+            loc: property.argument.loc
+              ? {
+                  line: property.argument.loc.start.line,
+                  column: property.argument.loc.start.column,
+                }
+              : undefined,
           };
           props.push({
             id: componentId
@@ -170,10 +230,16 @@ export function extractFromPattern(
       name: pattern.name,
       type: "any",
       kind: "prop" as const,
+      loc: pattern.loc
+        ? {
+            line: pattern.loc.start.line,
+            column: pattern.loc.start.column,
+          }
+        : undefined,
     };
     props.push({
       id: componentId
-        ? `${componentId}:prop:${propBase.name}`
+        ? `${componentId}:prop:${pattern.name}`
         : getDeterministicId(pattern.name),
       ...propBase,
       hash: getPropHash(propBase),
@@ -191,8 +257,29 @@ export function getProps(
   componentId?: string,
 ): { props: PropData[]; propName?: string | undefined } {
   let propName: string | undefined;
+  const props: PropData[] = [];
 
-  // 1. Check React.FC<Props> on the variable declarator (if provided)
+  // 1. Extract base props from parameters (this gives us the usage locations)
+  const params = path.get("params");
+  const paramsArray = Array.isArray(params) ? params : [];
+
+  for (const [index, propsParams] of paramsArray.entries()) {
+    if (
+      propsParams.isIdentifier() ||
+      propsParams.isObjectPattern() ||
+      propsParams.isAssignmentPattern()
+    ) {
+      if (index === 0 && propsParams.isIdentifier()) {
+        propName = propsParams.node.name;
+      }
+      props.push(...extractFromPattern(propsParams.node as t.LVal, componentId));
+    }
+  }
+
+  // 2. Try to enrich with type information
+  let resolvedFromType: PropData[] = [];
+
+  // 2a. Check React.FC<Props> on the variable declarator
   if (variableDeclaratorId) {
     const id = variableDeclaratorId;
     if (
@@ -202,7 +289,6 @@ export function getProps(
     ) {
       const typeRef = id.typeAnnotation.typeAnnotation;
       if (t.isTSTypeReference(typeRef)) {
-        // Check for FC or React.FC
         let isFC = false;
         if (
           t.isIdentifier(typeRef.typeName) &&
@@ -228,40 +314,20 @@ export function getProps(
           typeRef.typeParameters.params.length > 0
         ) {
           const propsType = typeRef.typeParameters.params[0];
-          const resolved = resolveType(
+          resolvedFromType = resolveType(
             propsType as t.TSType,
             path.scope,
             0,
             componentId,
           );
-          if (resolved.length > 0) {
-            const params = path.get("params");
-            const firstParam = params[0];
-            if (firstParam && firstParam.isIdentifier()) {
-              propName = firstParam.node.name;
-            }
-            return { props: resolved, propName };
-          }
         }
       }
     }
   }
 
-  // 2. Check inline type on function params
-  const props: PropData[] = [];
-  const params = path.get("params");
-  const paramsArray = Array.isArray(params) ? params : [];
-
-  for (const [index, propsParams] of paramsArray.entries()) {
-    if (
-      propsParams.isIdentifier() ||
-      propsParams.isObjectPattern() ||
-      propsParams.isAssignmentPattern()
-    ) {
-      if (index === 0 && propsParams.isIdentifier()) {
-        propName = propsParams.node.name;
-      }
-
+  // 2b. Check inline type on function params if not resolved yet
+  if (resolvedFromType.length === 0) {
+    for (const propsParams of paramsArray) {
       let node: t.LVal = propsParams.node as t.LVal;
       if (t.isAssignmentPattern(node)) {
         node = node.left;
@@ -275,22 +341,37 @@ export function getProps(
         node.typeAnnotation &&
         t.isTSTypeAnnotation(node.typeAnnotation)
       ) {
-        const resolved = resolveType(
+        resolvedFromType = resolveType(
           node.typeAnnotation.typeAnnotation,
           path.scope,
           0,
           componentId,
         );
-        if (resolved.length > 0) {
-          props.push(...resolved);
-          continue;
-        }
+        if (resolvedFromType.length > 0) break;
       }
+    }
+  }
 
-      // 3. Fallback: Destructured names with 'any'
-      props.push(
-        ...extractFromPattern(propsParams.node as t.LVal, componentId),
-      );
+  // 3. Merge resolved types into extracted props (keeping parameter locations)
+  if (resolvedFromType.length > 0) {
+    // If no props extracted (e.g. `const Comp = (props: Props) => ...`)
+    if (props.length === 0) {
+      return { props: resolvedFromType, propName };
+    }
+
+    // Map of name -> type info
+    const typeMap = new Map(resolvedFromType.map((p) => [p.name, p]));
+
+    for (const prop of props) {
+      const typeInfo = typeMap.get(prop.name);
+      if (typeInfo) {
+        prop.type = typeInfo.type;
+        if (typeInfo.props) {
+          prop.props = typeInfo.props;
+        }
+        // Update hash after enriching
+        prop.hash = getPropHash(prop);
+      }
     }
   }
 

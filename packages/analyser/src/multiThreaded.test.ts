@@ -137,9 +137,11 @@ describe("analyser multi-threaded consistency", () => {
         );
         expect(renderMethod).toBeDefined();
 
-        // Verify children (renders) are not empty in the render method
-        const children = (renderMethod as any).children;
-        expect(Object.keys(children).length).toBeGreaterThan(0);
+        // Verify renders are present in the global edges
+        const renderEdges = multiThreadedGraph.edges.filter(
+          (e) => (e.from === (renderMethod as any).id || e.from === classComp!.id) && e.label === "render",
+        );
+        expect(renderEdges.length).toBeGreaterThan(0);
       }
     });
 

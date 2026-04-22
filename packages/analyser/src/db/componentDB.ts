@@ -32,6 +32,7 @@ import type {
   PropData,
   PropDataType,
   ComponentFileVarJSX,
+  VariableScope,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.ts";
 import type { PackageJson } from "./packageJson.ts";
@@ -224,13 +225,13 @@ export class ComponentDB {
       file,
     );
 
-    return file.addVariable(v);
+    const insertedId = file.addVariable(v);
 
     if (component.propType) {
       this.resolveTasks.push({
         type: "comPropsTsType",
         fileName,
-        id,
+        id: insertedId,
       });
     }
 
@@ -238,11 +239,11 @@ export class ComponentDB {
       this.resolveTasks.push({
         type: "comClassStateTsType",
         fileName,
-        id,
+        id: insertedId,
       });
     }
 
-    return id;
+    return insertedId;
   }
 
   // TODO: add stateType
@@ -717,6 +718,11 @@ export class ComponentDB {
     const file = this.files.get(fileName);
 
     file.addEffect(loc, effect);
+  }
+
+  public addBlockScope(fileName: string, scope: VariableScope) {
+    const file = this.files.get(fileName);
+    file.addBlockScope(scope);
   }
 
   public comSetReturn(

@@ -58,10 +58,10 @@ export interface ComponentInfoRender extends ComponentLoc {
 
 export interface EffectInfo extends ComponentLoc, ReactDependencies {
   id: string;
-  name?: string;
-  scope?: VariableScope;
-  file?: string;
-  kind?: "effect";
+  name?: string | undefined;
+  scope?: VariableScope | undefined;
+  file?: string | undefined;
+  kind?: "effect" | undefined;
 }
 
 export interface PropData {
@@ -70,10 +70,10 @@ export interface PropData {
   type: string;
   kind: "prop" | "spread";
   props?: PropData[];
-  hash?: string;
+  hash?: string | undefined;
   gitStatus?: "added" | "modified" | "deleted";
-  file?: string;
-  loc?: VariableLoc;
+  file?: string | undefined;
+  loc?: VariableLoc | undefined;
   defaultValue?: PropDataType | undefined;
 }
 
@@ -168,6 +168,12 @@ export interface VariableScope {
   start: VariableLoc;
   end: VariableLoc;
 }
+
+export type ComponentFileBlockScope = {
+  id: string;
+  parentId?: string | undefined;
+  scope: VariableScope;
+};
 
 export type VarType = "function" | "data" | "jsx" | "class";
 
@@ -488,6 +494,7 @@ export type ComponentFile = {
   defaultExport: string | null;
   tsTypes: Record<string, TypeDataDeclare>;
   var: Record<string, ComponentFileVar>;
+  blockScopes?: ComponentFileBlockScope[] | undefined;
   relations?: ComponentRelation[] | undefined;
   package_id?: string | undefined;
 };

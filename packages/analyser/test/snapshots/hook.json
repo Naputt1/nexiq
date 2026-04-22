@@ -74,7 +74,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "1d4123ae3c4e15d7",
+          "hash": "edbdd7a89e74e549",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -206,7 +206,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/various-imports.tsx",
-              "hash": "68f4977af0eb264c",
+              "hash": "8e6994b920f5fe93",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -224,13 +224,6 @@
                 }
               },
               "async": false,
-              "return": {
-                "type": "literal-type",
-                "literal": {
-                  "type": "number",
-                  "value": 0
-                }
-              },
               "reactDeps": []
             },
             "88bd806ba1a2143e": {
@@ -247,7 +240,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/various-imports.tsx",
-              "hash": "da52c5e3ea19d321",
+              "hash": "a4cceea12a02ce02",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -263,6 +256,13 @@
                 "end": {
                   "line": 9,
                   "column": 27
+                }
+              },
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "number",
+                  "value": 0
                 }
               }
             },
@@ -848,7 +848,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "d68346a055536f83",
+          "hash": "70614638a828fba7",
           "dependencies": {},
           "loc": {
             "line": 42,
@@ -918,6 +918,10 @@
               "name": "val",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 42,
+                "column": 21
+              },
               "hash": "1a09e77650ac089d"
             }
           ],
@@ -2778,6 +2782,36 @@
           "forwardRef": false
         }
       },
+      "blockScopes": [
+        {
+          "id": "31d5a510bf1ac5a7",
+          "parentId": "scope:block:3720d9d904fa2467:callback:doSearch",
+          "scope": {
+            "start": {
+              "line": 31,
+              "column": 18
+            },
+            "end": {
+              "line": 33,
+              "column": 5
+            }
+          }
+        },
+        {
+          "id": "db4719ec2097b79a",
+          "parentId": "scope:block:3720d9d904fa2467:callback:doSearch",
+          "scope": {
+            "start": {
+              "line": 33,
+              "column": 11
+            },
+            "end": {
+              "line": 35,
+              "column": 5
+            }
+          }
+        }
+      ],
       "relations": [
         {
           "from_id": "89091d73d3a537b1",
@@ -3204,7 +3238,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "167f3891193dcd6b",
+          "hash": "21b66d252ce8bde0",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -3288,6 +3322,10 @@
               "name": "initialValue",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 30
+              },
               "hash": "9f760feb8a0dfe2e"
             }
           ],

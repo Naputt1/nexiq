@@ -43,6 +43,7 @@ import type {
   TypeDataLiteralBodyProperty,
   PropDataType,
   ComponentFileVarRef,
+  VariableScope,
 } from "@nexiq/shared";
 import type { Variable } from "./variable/variable.ts";
 import {
@@ -254,6 +255,30 @@ export class File {
 
     for (const variable of Object.values(data.var || {})) {
       this.loadVariable(variable);
+    }
+
+    const blockScopes = [...(data.blockScopes || [])].sort((a, b) => {
+      const aSpan =
+        (a.scope.end.line - a.scope.start.line) * 10_000 +
+        (a.scope.end.column - a.scope.start.column);
+      const bSpan =
+        (b.scope.end.line - b.scope.start.line) * 10_000 +
+        (b.scope.end.column - b.scope.start.column);
+      return bSpan - aSpan;
+    });
+    const scopeMap = new Map<string, Scope>();
+    for (const blockScope of blockScopes) {
+      const parentScope =
+        (blockScope.parentId && scopeMap.get(blockScope.parentId)) ||
+        this.var.findDeepestScope(blockScope.scope.start);
+      const scope = new Scope(
+        parentScope,
+        undefined,
+        blockScope.id,
+        blockScope.scope,
+      );
+      parentScope.addChildScope(scope);
+      scopeMap.set(blockScope.id, scope);
     }
 
     for (const importData of Object.values(data.import || {})) {
@@ -681,6 +706,7 @@ export class File {
   }
 
   public getData(): ComponentFile {
+    const blockScopes = this.var.getBlockScopes();
     return {
       path: this.path,
       fingerPrint: this.fingerPrint,
@@ -692,8 +718,21 @@ export class File {
       defaultExport: this.defaultExport,
       tsTypes: Object.fromEntries(this.tsTypes),
       var: this.var.getData(),
+      ...(blockScopes.length > 0 ? { blockScopes } : {}),
       relations: this.relations,
     };
+  }
+
+  public addBlockScope(scope: VariableScope) {
+    const parentScope = this.var.findDeepestScope(scope.start);
+    const id = getDeterministicId(
+      this.path,
+      "block-scope",
+      `${scope.start.line}:${scope.start.column}:${scope.end.line}:${scope.end.column}`,
+    );
+    return parentScope.addChildScope(
+      new Scope(parentScope, undefined, id, scope),
+    );
   }
 
   public addVariableDependency(

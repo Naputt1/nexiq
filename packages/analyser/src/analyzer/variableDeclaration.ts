@@ -297,6 +297,122 @@ export default function VariableDeclarator(
           return currentId;
         }
 
+        if (init?.type === "CallExpression") {
+          const wrappedFnPath = getNestedFunctionArgumentPath(
+            nodePath.get("init") as traverse.NodePath<t.CallExpression>,
+          );
+
+          if (wrappedFnPath) {
+            const wrappedFn = wrappedFnPath.node;
+            const scopeTarget =
+              wrappedFn.body.type === "BlockStatement"
+                ? wrappedFn.body
+                : wrappedFn;
+            assert(scopeTarget.loc != null, "Function body loc not found");
+
+            const scope = {
+              start: {
+                line: scopeTarget.loc.start.line,
+                column: scopeTarget.loc.start.column,
+              },
+              end: {
+                line: scopeTarget.loc.end.line,
+                column: scopeTarget.loc.end.column,
+              },
+            };
+
+            if (returnJSX(wrappedFn)) {
+              const { props, propName } = getProps(
+                wrappedFnPath,
+                pId,
+                componentId,
+              );
+              currentId = componentDB.addFunctionComponent(
+                fileName,
+                {
+                  name: pattern,
+                  type: "function",
+                  componentType: "Function",
+                  hooks: [],
+                  refs: [],
+                  props,
+                  propName,
+                  contexts: [],
+                  dependencies: extractDependencies(init),
+                  var: {},
+                  children: {},
+                  loc,
+                  scope,
+                  async: wrappedFn.async,
+                  effects: {},
+                  forwardRef: isForwardRefCall(init, componentDB, fileName)
+                    ? isForwardRefRefUsed(wrappedFnPath)
+                    : isRefUsed(wrappedFnPath),
+                  parentId: pParentId,
+                } as Omit<
+                  ComponentFileVarFunctionComponent,
+                  "id" | "kind" | "states" | "hash" | "file"
+                >,
+                declarationKind,
+              );
+              return currentId;
+            }
+
+            if (isHook(name)) {
+              const { props, propName } = getProps(
+                wrappedFnPath,
+                pId,
+                componentId,
+              );
+              currentId = componentDB.addHook(
+                fileName,
+                {
+                  name: pattern,
+                  dependencies: extractDependencies(init),
+                  type: "function",
+                  loc,
+                  scope,
+                  async: wrappedFn.async,
+                  props,
+                  propName,
+                  effects: {},
+                  hooks: [],
+                  refs: [],
+                  children: {},
+                  var: {},
+                  parentId: pParentId,
+                } as Omit<
+                  ComponentFileVarHook,
+                  "kind" | "id" | "var" | "states" | "hash" | "file"
+                >,
+                declarationKind,
+              );
+              return currentId;
+            }
+
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies: extractDependencies(init),
+                type: "function",
+                loc,
+                scope,
+                async: wrappedFn.async,
+                children: {},
+                var: {},
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalFunction,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              undefined,
+              declarationKind,
+            );
+            return currentId;
+          }
+        }
+
         if (nodePath.scope.block.type === "Program") {
           if (
             init?.type === "ArrowFunctionExpression" ||

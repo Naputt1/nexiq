@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "8472912eb5120c47",
+          "hash": "a742888feb3f3096",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -109,6 +109,10 @@
               "name": "prop",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 3,
+                "column": 17
+              },
               "hash": "190e951a40da0a2b"
             }
           ],
@@ -132,7 +136,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "4abbcabde05b2137",
+          "hash": "81508169b20c0899",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -212,6 +216,10 @@
               "name": "children",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 18
+              },
               "hash": "ff601f5e72cf1428"
             },
             {
@@ -219,6 +227,10 @@
               "name": "prop",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 28
+              },
               "hash": "190e951a40da0a2b"
             }
           ],
@@ -242,7 +254,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "2b6e4f9e7ea717bf",
+          "hash": "9c9a21428c819cd3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -408,7 +420,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "b58fbb5ba61acf36",
+              "hash": "9f7c95d3df199dfd",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -478,6 +490,10 @@
                   "name": "children",
                   "type": "any",
                   "kind": "prop",
+                  "loc": {
+                    "line": 14,
+                    "column": 24
+                  },
                   "hash": "ff601f5e72cf1428"
                 }
               ],

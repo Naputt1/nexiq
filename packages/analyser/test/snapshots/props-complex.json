@@ -160,7 +160,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "5cb4dbb2f35de9fa",
+          "hash": "128bf6216a06cb52",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -319,6 +319,10 @@
               "name": "a",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 15,
+                "column": 2
+              },
               "hash": "7b4f711815f3c819"
             },
             {
@@ -332,6 +336,10 @@
                   "name": "x",
                   "type": "any",
                   "kind": "prop",
+                  "loc": {
+                    "line": 16,
+                    "column": 7
+                  },
                   "hash": "d219a1297e37127d"
                 },
                 {
@@ -339,6 +347,10 @@
                   "name": "rename",
                   "type": "any",
                   "kind": "prop",
+                  "loc": {
+                    "line": 16,
+                    "column": 13
+                  },
                   "hash": "ae999b01b5fb9295"
                 },
                 {
@@ -346,9 +358,17 @@
                   "name": "restInner",
                   "type": "any",
                   "kind": "spread",
+                  "loc": {
+                    "line": 16,
+                    "column": 24
+                  },
                   "hash": "d68e40250380211f"
                 }
               ],
+              "loc": {
+                "line": 16,
+                "column": 2
+              },
               "hash": "a513527c2c02d974"
             },
             {
@@ -362,6 +382,10 @@
                   "type": "string",
                   "value": "default"
                 }
+              },
+              "loc": {
+                "line": 17,
+                "column": 2
               },
               "hash": "d2e4ce4f0ee2e4d1"
             },
@@ -377,6 +401,10 @@
                   "value": false
                 }
               },
+              "loc": {
+                "line": 18,
+                "column": 2
+              },
               "hash": "b674965281eab9a1"
             },
             {
@@ -391,6 +419,10 @@
                   "value": 0
                 }
               },
+              "loc": {
+                "line": 19,
+                "column": 2
+              },
               "hash": "d950bb762c84b4fa"
             },
             {
@@ -401,6 +433,10 @@
               "defaultValue": {
                 "type": "literal-array",
                 "elements": []
+              },
+              "loc": {
+                "line": 20,
+                "column": 2
               },
               "hash": "18941f3d2ef20b20"
             },
@@ -421,6 +457,10 @@
                   }
                 }
               },
+              "loc": {
+                "line": 21,
+                "column": 2
+              },
               "hash": "80c2132641adc243"
             },
             {
@@ -433,6 +473,10 @@
                 "refType": "named",
                 "name": "a"
               },
+              "loc": {
+                "line": 22,
+                "column": 2
+              },
               "hash": "c0cfcf767e86b3b5"
             },
             {
@@ -440,6 +484,10 @@
               "name": "restOuter",
               "type": "any",
               "kind": "spread",
+              "loc": {
+                "line": 23,
+                "column": 5
+              },
               "hash": "393b5866216153e6"
             }
           ],

@@ -46,7 +46,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "b5a966bcab9a4023",
+          "hash": "fe8a2437ea9a6922",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -108,6 +108,10 @@
               "name": "fn",
               "type": "any",
               "kind": "prop",
+              "loc": {
+                "line": 4,
+                "column": 21
+              },
               "hash": "e52b884c9876efdb"
             }
           ],
@@ -129,7 +133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "c9177b94df136313",
+          "hash": "46367a78a9c2b73",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -160,47 +164,6 @@
               "call": {
                 "id": "b3b83d0e8e708509",
                 "name": "useSelector"
-              }
-            },
-            "33fd1016c5f45012": {
-              "id": "33fd1016c5f45012",
-              "name": {
-                "type": "identifier",
-                "name": "anonymous@15:29",
-                "loc": {
-                  "line": 15,
-                  "column": 29
-                },
-                "id": ""
-              },
-              "kind": "normal",
-              "type": "function",
-              "file": "/index.tsx",
-              "hash": "d30e5d8dd39d335e",
-              "declarationKind": "const",
-              "dependencies": {},
-              "loc": {
-                "line": 15,
-                "column": 29
-              },
-              "var": {},
-              "scope": {
-                "start": {
-                  "line": 15,
-                  "column": 29
-                },
-                "end": {
-                  "line": 15,
-                  "column": 57
-                }
-              },
-              "return": {
-                "type": "ref",
-                "refType": "qualified",
-                "names": [
-                  "state",
-                  "thread"
-                ]
               }
             },
             "1981986fd63b9d23": {
@@ -416,27 +379,6 @@
             "ownerId": "ba1bf171ca67c6dd",
             "ownerKind": "component",
             "displayLabel": "useSelector"
-          }
-        },
-        {
-          "from_id": "ba1bf171ca67c6dd",
-          "to_id": "33fd1016c5f45012",
-          "kind": "usage-read",
-          "line": 15,
-          "column": 45,
-          "data_json": {
-            "usageId": "d79c26b4aa22981c",
-            "filePath": "/index.tsx",
-            "line": 15,
-            "column": 45,
-            "ownerId": "33fd1016c5f45012",
-            "ownerKind": "normal",
-            "accessPath": [
-              "thread"
-            ],
-            "isOptional": false,
-            "isComputed": false,
-            "displayLabel": "state.thread"
           }
         },
         {

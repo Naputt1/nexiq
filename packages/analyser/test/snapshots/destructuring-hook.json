@@ -31,7 +31,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Other.tsx",
-          "hash": "3863fffa341a8edb",
+          "hash": "9851b7bfd4d7350d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -112,6 +112,10 @@
               "name": "loading",
               "type": "boolean",
               "kind": "prop",
+              "loc": {
+                "line": 1,
+                "column": 24
+              },
               "hash": "729e2262cd7465d6"
             }
           ],
@@ -155,7 +159,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "5d777a4686d8f5fc",
+          "hash": "eeb795d6c82a97ef",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -225,6 +229,10 @@
               "name": "data",
               "type": "string",
               "kind": "prop",
+              "loc": {
+                "line": 1,
+                "column": 24
+              },
               "hash": "613703bbf4eb9912"
             }
           ],
@@ -999,7 +1007,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ea47ab9a2357ebfe",
+          "hash": "4cf5bcaad88b4d3e",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1069,6 +1077,10 @@
               "name": "data",
               "type": "string",
               "kind": "prop",
+              "loc": {
+                "line": 49,
+                "column": 17
+              },
               "hash": "613703bbf4eb9912"
             }
           ],
@@ -1092,7 +1104,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "9f206e1f78c1998c",
+          "hash": "6f48fd1234fb89a4",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1173,6 +1185,10 @@
               "name": "loading",
               "type": "boolean",
               "kind": "prop",
+              "loc": {
+                "line": 50,
+                "column": 17
+              },
               "hash": "729e2262cd7465d6"
             }
           ],

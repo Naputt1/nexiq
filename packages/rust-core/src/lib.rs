@@ -60,6 +60,7 @@ pub struct ScopeRow {
     pub parent_id: Option<String>,
     pub kind: String,
     pub entity_id: Option<String>,
+    pub data_json: Option<String>,
 }
 
 pub struct RelationRow {

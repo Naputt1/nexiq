@@ -222,8 +222,8 @@ export interface ExportRow {
 }
 
 export type DatabaseData = {
-  packages?: PackageRow[];
-  package_dependencies?: PackageDependencyRow[];
+  packages?: PackageRow[] | undefined;
+  package_dependencies?: PackageDependencyRow[] | undefined;
   files: FileRow[];
   entities: EntityRow[];
   scopes: ScopeRow[];
@@ -231,11 +231,11 @@ export type DatabaseData = {
   renders: RenderRow[];
   exports: ExportRow[];
   relations: RelationRow[];
-  analysis_runs?: AnalysisRunRow[];
-  file_run_status?: FileRunStatusRow[];
-  file_analysis_errors?: FileAnalysisErrorRow[];
-  resolve_errors?: ResolveErrorRow[];
-  diff?: AnalyzedDiff;
+  analysis_runs?: AnalysisRunRow[] | undefined;
+  file_run_status?: FileRunStatusRow[] | undefined;
+  file_analysis_errors?: FileAnalysisErrorRow[] | undefined;
+  resolve_errors?: ResolveErrorRow[] | undefined;
+  diff?: AnalyzedDiff | undefined;
 };
 
 export type AnalyzedDiff = {

@@ -164,12 +164,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     // 5. Ensure output tables exist
     conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS out_nodes (id TEXT PRIMARY KEY, name TEXT, type TEXT, combo_id TEXT, color TEXT, radius REAL, display_name TEXT, meta_json TEXT);
+        "CREATE TABLE IF NOT EXISTS out_nodes (id TEXT PRIMARY KEY, name TEXT, type TEXT, combo_id TEXT, color TEXT, radius REAL, display_name TEXT, git_status TEXT, meta_json TEXT);
          CREATE TABLE IF NOT EXISTS out_edges (id TEXT PRIMARY KEY, source TEXT, target TEXT, name TEXT, kind TEXT, category TEXT, meta_json TEXT);
-         CREATE TABLE IF NOT EXISTS out_combos (id TEXT PRIMARY KEY, name TEXT, type TEXT, parent_id TEXT, color TEXT, radius REAL, collapsed INTEGER, display_name TEXT, meta_json TEXT);
+         CREATE TABLE IF NOT EXISTS out_combos (id TEXT PRIMARY KEY, name TEXT, type TEXT, parent_id TEXT, color TEXT, radius REAL, collapsed INTEGER, display_name TEXT, git_status TEXT, meta_json TEXT);
          CREATE TABLE IF NOT EXISTS out_details (id TEXT PRIMARY KEY, file_name TEXT, project_path TEXT, line INTEGER, \"column\" INTEGER, data_json TEXT);"
     ).map_err(|e| Error::from_reason(format!("Failed to create output tables: {}", e)))?;
-
     // 6. Run logic
     // Fetch necessary data
     let files: Vec<FileRow> = conn
@@ -223,7 +222,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         .collect();
 
     let scopes: Vec<ScopeRow> = conn
-        .prepare("SELECT id, file_id, parent_id, kind, entity_id FROM scopes")
+        .prepare("SELECT id, file_id, parent_id, kind, entity_id, data_json FROM scopes")
         .unwrap()
         .query_map([], |row| {
             Ok(ScopeRow {
@@ -232,6 +231,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                 parent_id: row.get(2)?,
                 kind: row.get(3)?,
                 entity_id: row.get(4)?,
+                data_json: row.get(5)?,
             })
         })
         .unwrap()
@@ -384,15 +384,91 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
     }
 
+    // --- Pre-processing: Effect Scopes ---
+    let scope_file_map: HashMap<String, i32> = scopes.iter().map(|s| (s.id.clone(), s.file_id)).collect();
+    let mut effect_scopes: Vec<(String, i32, i32, i32, i32, i32)> = Vec::new();
+    for entity in &entities {
+        let prefix = if entity.id.starts_with("workspace:") {
+            let parts: Vec<&str> = entity.id.split(':').collect();
+            if parts.len() >= 3 {
+                format!("{}:{}:", parts[0], parts[1])
+            } else {
+                "".to_string()
+            }
+        } else {
+            "".to_string()
+        };
+
+        if let Some(dj) = &entity.data_json {
+            if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                if let Some(effects) = dj_json["effects"].as_object() {
+                    for (eff_id_raw, eff_val) in effects {
+                        if let Some(scope) = eff_val["scope"].as_object() {
+                            let start_line = scope["start"]["line"].as_i64().unwrap_or(0) as i32;
+                            let start_col = scope["start"]["column"].as_i64().unwrap_or(0) as i32;
+                            let end_line = scope["end"]["line"].as_i64().unwrap_or(0) as i32;
+                            let end_col = scope["end"]["column"].as_i64().unwrap_or(0) as i32;
+
+                            let eff_id = format!("{}{}", prefix, eff_id_raw);
+                            let file_id = scope_file_map.get(&entity.scope_id).cloned().unwrap_or(0);
+                            effect_scopes.push((eff_id, file_id, start_line, start_col, end_line, end_col));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     let use_package_combos = packages.len() > 1;
     let mut added_combos = HashSet::new();
     let mut added_nodes = HashSet::new();
 
+    let mut edge_map: HashMap<String, (String, String, String, i32, Vec<serde_json::Value>)> =
+        HashMap::new();
+
+    let mut var_parent_map: HashMap<String, Option<String>> = HashMap::new();
+
+    let mut add_edge_local = |source: &str,
+                              target: &str,
+                              kind: &str,
+                              _name: &str,
+                              data: Option<&str>,
+                              redirection_map: &HashMap<String, String>,
+                              var_parent_map: &HashMap<String, Option<String>>,
+                              edge_map: &mut HashMap<
+        String,
+        (String, String, String, i32, Vec<serde_json::Value>),
+    >| {
+        let s = redirection_map
+            .get(source)
+            .unwrap_or(&source.to_string())
+            .clone();
+        let t = redirection_map
+            .get(target)
+            .unwrap_or(&target.to_string())
+            .clone();
+
+        // Skip edge if the source is already a child of the target combo
+        if let Some(parent_id) = var_parent_map.get(&s).and_then(|p| p.as_ref()) {
+            if parent_id == &t {
+                return;
+            }
+        }
+
+        let e_id = format!("{}-{}-{}", s, t, kind);
+        let entry = edge_map
+            .entry(e_id)
+            .or_insert((s, t, kind.to_string(), 0, Vec::new()));
+        entry.3 += 1;
+        if let Some(d) = data {
+            if let Ok(j) = serde_json::from_str::<serde_json::Value>(d) {
+                entry.4.push(j);
+            }
+        }
+    };
+
     let get_source_group_label = |entity: &EntityRow| -> String {
-        let mut label = entity
-            .name
-            .clone()
-            .unwrap_or_else(|| entity.kind.clone());
+        let mut label = entity.name.clone().unwrap_or_else(|| entity.kind.clone());
 
         if let Some(dj) = &entity.data_json {
             if let Ok(dj_json) = serde_json::from_str::<serde_json::Value>(dj) {
@@ -417,8 +493,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     };
 
     // Helper to insert results
-    let mut ins_node = conn.prepare("INSERT OR REPLACE INTO out_nodes (id, name, type, combo_id, color, radius, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
-    let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)").unwrap();
+    let mut ins_node = conn.prepare("INSERT OR REPLACE INTO out_nodes (id, name, type, combo_id, color, radius, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)").unwrap();
+    let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)").unwrap();
     let mut ins_edge = conn.prepare("INSERT OR REPLACE INTO out_edges (id, source, target, name, kind, category, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)").unwrap();
     let mut ins_detail = conn.prepare("INSERT OR REPLACE INTO out_details (id, file_name, project_path, line, \"column\", data_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").unwrap();
 
@@ -429,13 +505,14 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             ins_combo
                 .execute(params![
                     pkg_cid,
-                    pkg.name,
+                    pkg.id.clone(),
                     "package",
                     None::<String>,
                     None::<String>,
                     24.0,
                     1,
-                    pkg.name,
+                    pkg.id.clone(),
+                    None::<String>,
                     None::<String>
                 ])
                 .unwrap();
@@ -467,12 +544,13 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         ins_combo
             .execute(params![
                 scope.id,
-                scope.kind,
+                scope.id.clone(),
                 "scope",
                 parent_id,
                 None::<String>,
                 18.0,
                 1,
+                scope.id.clone(),
                 None::<String>,
                 None::<String>
             ])
@@ -540,6 +618,72 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             pid
         };
 
+        // Only group 'normal' variables into effects.
+        // Also check that it's NOT a function variable (likely has its own scope)
+        if entity.kind == "normal" && entity.item_type.as_deref() == Some("data") {
+            let symbol_file_id = scope.map(|s| s.file_id).unwrap_or(0);
+            if let Some(effect) = effect_scopes.iter().find(|(_, eff_file_id, sl, sc, el, ec)| {
+                if *eff_file_id != symbol_file_id {
+                    return false;
+                }
+                let line = entity.line.unwrap_or(0);
+                let col = entity.column.unwrap_or(0);
+
+                // Refine: Check if the variable'S DECLARATION scope is within the effect scope.
+                if let Some(s) = scope {
+                    if let Some(dj) = &s.data_json {
+                        if let Ok(s_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                            if let (Some(start), Some(end)) =
+                                (s_json["start"].as_object(), s_json["end"].as_object())
+                            {
+                                let s_line = start["line"].as_i64().unwrap_or(0) as i32;
+                                let e_line = end["line"].as_i64().unwrap_or(0) as i32;
+
+                                // Variable's scope must be inside effect's scope
+                                if s_line >= *sl && e_line <= *el {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if line > *sl && line < *el {
+                    return true;
+                }
+                if line == *sl && line == *el {
+                    return col >= *sc && col <= *ec;
+                }
+                if line == *sl {
+                    return col >= *sc;
+                }
+                if line == *el {
+                    return col <= *ec;
+                }
+
+                false
+            }) {
+                pc_id = Some(effect.0.clone());
+            }
+        }
+
+        if entity.kind == "prop" {
+            // Find the parent component combo ID.
+            // A prop's scope_id is the component's scope ID.
+            let pid = symbol.scope_id.clone();
+            let props_cid = format!("{}-props", pid);
+            if !added_combos.contains(&props_cid) {
+                conn.execute(
+                    "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                    params![props_cid, "props", "prop", pid.clone(), None::<String>, 12.0, 1, "props", None::<String>, None::<String>],
+                ).unwrap();
+                added_combos.insert(props_cid.clone());
+            }
+            pc_id = Some(props_cid);
+        }
+
+        var_parent_map.insert(symbol.id.clone(), pc_id.clone());
+
         // Path-based grouping (Destructuring)
         if let Some(path_str) = &symbol.path {
             if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
@@ -562,6 +706,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                     16.0,
                                     1,
                                     source_label,
+                                    None::<String>,
                                     None::<String>
                                 ])
                                 .unwrap();
@@ -608,6 +753,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                     14.0,
                                     1,
                                     seg_str,
+                                    None::<String>,
                                     None::<String>
                                 ])
                                 .unwrap();
@@ -634,9 +780,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                     node_type,
                     pc_id,
                     None::<String>,
-                    20.0,
+                    14.0,
                     symbol.name,
-                    entity.data_json
+                    None::<String>,
+                    None::<String>
                 ])
                 .unwrap();
             added_nodes.insert(symbol.id.clone());
@@ -684,8 +831,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                 let rg_id = format!("render-group-{}", ps.id);
                 if !added_combos.contains(&rg_id) {
                     conn.execute(
-                        "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-                        params![rg_id, "render", "render-group", ps.id, None::<String>, 18.0, 1, "render"],
+                        "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                        params![rg_id, "render", "render-group", ps.id, None::<String>, 18.0, 1, "render", None::<String>, None::<String>],
                     ).unwrap();
                     added_combos.insert(rg_id.clone());
                 }
@@ -694,8 +841,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
 
         conn.execute(
-            "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-            params![render.id, render.tag, "render", pc_id, None::<String>, 14.0, 1, render.tag],
+            "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            params![render.id, render.tag, "render", pc_id, None::<String>, 14.0, 1, render.tag, None::<String>, None::<String>],
         ).unwrap();
 
         ins_detail
@@ -713,31 +860,6 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     }
 
     // 4. Hook Specific Nodes (Effects) and 5. Relations -> Edges
-    let mut edge_map: HashMap<String, (String, String, String, i32, Vec<serde_json::Value>)> =
-        HashMap::new();
-
-    let mut add_edge_local =
-        |source: &str, target: &str, kind: &str, _name: &str, data: Option<&str>| {
-            let s = redirection_map
-                .get(source)
-                .unwrap_or(&source.to_string())
-                .clone();
-            let t = redirection_map
-                .get(target)
-                .unwrap_or(&target.to_string())
-                .clone();
-            let e_id = format!("{}-{}-{}", s, t, kind);
-            let entry = edge_map
-                .entry(e_id)
-                .or_insert((s, t, kind.to_string(), 0, Vec::new()));
-            entry.3 += 1;
-            if let Some(d) = data {
-                if let Ok(j) = serde_json::from_str::<serde_json::Value>(d) {
-                    entry.4.push(j);
-                }
-            }
-        };
-
     // Generic Relations
     for rel in &relations {
         if rel.kind == "parent-child" {
@@ -749,6 +871,9 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             &rel.kind,
             &rel.kind,
             rel.data_json.as_deref(),
+            &redirection_map,
+            &var_parent_map,
+            &mut edge_map,
         );
     }
 
@@ -783,7 +908,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                             .map(|s| s.id.clone())
                             .unwrap_or_else(|| entity.scope_id.clone());
 
-                        ins_node
+                        ins_combo
                             .execute(params![
                                 eff_id,
                                 eff_name,
@@ -791,10 +916,13 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                 combo_id,
                                 None::<String>,
                                 14.0,
+                                1, // collapsed
                                 eff_name,
+                                None::<String>,
                                 None::<String>
                             ])
                             .unwrap();
+                        added_combos.insert(eff_id.clone());
 
                         let scope = scopes.iter().find(|s| s.id == entity.scope_id);
                         let file_info = scope.and_then(|s| file_info_map.get(&s.file_id));
@@ -817,9 +945,12 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                     add_edge_local(
                                         &dep_id,
                                         &eff_id,
-                                        "effect-dep",
-                                        "dependency",
+                                        "usage-read",
+                                        "usage-read",
                                         None,
+                                        &redirection_map,
+                                        &var_parent_map,
+                                        &mut edge_map,
                                     );
                                 }
                             }
@@ -833,8 +964,16 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                         for dep in deps {
                             if let Some(dep_id_raw) = dep["id"].as_str() {
                                 let dep_id = format!("{}{}", prefix, dep_id_raw);
-                                add_edge_local(&dep_id, &sym.id, "react-dep", "dependency", None);
-                            }
+                                add_edge_local(
+                                   &dep_id,
+                                   &sym.id,
+                                   "react-dep",
+                                   "dependency",
+                                   None,
+                                   &redirection_map,
+                                   &var_parent_map,
+                                   &mut edge_map,
+                                );                            }
                         }
                     }
                 }
