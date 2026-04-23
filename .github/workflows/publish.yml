@@ -26,6 +26,10 @@ on:
         description: "Publish @nexiq/git-extension"
         type: boolean
         default: false
+      file-extension:
+        description: "Publish @nexiq/file-extension"
+        type: boolean
+        default: false
       cli:
         description: "Publish @nexiq/cli (Server)"
         type: boolean
@@ -68,6 +72,7 @@ jobs:
           pnpm --filter @nexiq/analyser build
           pnpm --filter @nexiq/component-extension build:ts
           pnpm --filter @nexiq/git-extension build
+          pnpm --filter @nexiq/file-extension build
           pnpm --filter @nexiq/cli build
           pnpm --filter nexiq-cli build
 
@@ -113,6 +118,15 @@ jobs:
           inputs.all == true ||
           inputs.git-extension == true
         run: pnpm --filter @nexiq/git-extension publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nexiq/file-extension
+        if: |
+          github.event_name == 'push' ||
+          inputs.all == true ||
+          inputs.file-extension == true
+        run: pnpm --filter @nexiq/file-extension publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
