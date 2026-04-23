@@ -38,10 +38,10 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@nexiq/shared": ["../shared/dist/index.d.ts"],
-      "@nexiq/shared/db": ["../shared/dist/db/index.d.ts"],
-      "@nexiq/shared/*": ["../shared/dist/*"],
-      "@nexiq/extension-sdk": ["../extension-sdk/dist/index.d.ts"]
+      "@nexiq/shared": ["../shared/src/index.ts"],
+      "@nexiq/shared/db": ["../shared/src/db/sqlite.ts"],
+      "@nexiq/shared/*": ["../shared/src/*"],
+      "@nexiq/extension-sdk": ["../extension-sdk/src/index.ts"]
     },
     "allowImportingTsExtensions": true,
     "experimentalDecorators": true,
