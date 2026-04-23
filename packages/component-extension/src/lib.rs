@@ -595,9 +595,24 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             } else {
                 &entity.kind
             };
+
+            let is_memo = entity
+                .data_json
+                .as_ref()
+                .and_then(|dj| serde_json::from_str::<serde_json::Value>(dj).ok())
+                .and_then(|v| v.get("memo").and_then(|m| m.as_bool()))
+                .unwrap_or(false)
+                || entity.kind == "memo";
+
+            let display_name = if is_memo {
+                format!("{} (memo)", symbol.name)
+            } else {
+                symbol.name.clone()
+            };
+
             conn.execute(
                 "UPDATE out_combos SET name = ?1, display_name = ?2, type = ?3 WHERE id = ?4",
-                params![symbol.name, symbol.name, combo_type, bs.id],
+                params![symbol.name, display_name, combo_type, bs.id],
             )
             .unwrap();
             Some(bs.id.clone())
@@ -773,6 +788,21 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             } else {
                 &entity.kind
             };
+
+            let is_memo = entity
+                .data_json
+                .as_ref()
+                .and_then(|dj| serde_json::from_str::<serde_json::Value>(dj).ok())
+                .and_then(|v| v.get("memo").and_then(|m| m.as_bool()))
+                .unwrap_or(false)
+                || entity.kind == "memo";
+
+            let display_name = if is_memo {
+                format!("{} (memo)", symbol.name)
+            } else {
+                symbol.name.clone()
+            };
+
             ins_node
                 .execute(params![
                     symbol.id,
@@ -781,7 +811,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                     pc_id,
                     None::<String>,
                     14.0,
-                    symbol.name,
+                    display_name,
                     None::<String>,
                     None::<String>
                 ])

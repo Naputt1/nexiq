@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "a742888feb3f3096",
+          "hash": "78ba632a7349080e",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -119,8 +119,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "7c128c607822e129": {
           "id": "7c128c607822e129",
@@ -136,7 +135,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "81508169b20c0899",
+          "hash": "95e77cb76ee01595",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -237,8 +236,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "311c554b828f67a5": {
           "id": "311c554b828f67a5",
@@ -254,7 +252,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "9c9a21428c819cd3",
+          "hash": "875a533c5143c9de",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -420,7 +418,7 @@
               "kind": "component",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "9f7c95d3df199dfd",
+              "hash": "90f808f3e2b08182",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -500,8 +498,7 @@
               "hooks": [],
               "effects": {},
               "componentType": "Function",
-              "contexts": [],
-              "forwardRef": false
+              "contexts": []
             },
             "5558f68a9e93a311": {
               "id": "5558f68a9e93a311",
@@ -825,8 +822,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

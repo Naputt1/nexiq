@@ -71,7 +71,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "b6a6e6d6d5c1f6ad",
+          "hash": "e7ce3ba3925b574d",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -133,8 +133,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "392d90eb38cc43b0": {
           "id": "392d90eb38cc43b0",
@@ -229,7 +228,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "9746a0a9d5cdfc3d",
+          "hash": "aa237034501c6a9c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -251,7 +250,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "f07810dcb8253bc4",
+              "hash": "1cec845dbf3453b",
               "dependencies": {},
               "loc": {
                 "line": 20,
@@ -269,6 +268,11 @@
                 }
               },
               "async": true,
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": []
             },
             "f708b44afe0a51a5:memo:asyncValue": {
@@ -285,7 +289,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "755a53d73a0846b0",
+              "hash": "38eac265c680c457",
               "dependencies": {},
               "loc": {
                 "line": 25,
@@ -303,6 +307,11 @@
                 }
               },
               "async": true,
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": []
             },
             "3f4cbd9f7c2f6867": {
@@ -417,8 +426,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

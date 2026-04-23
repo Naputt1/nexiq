@@ -139,7 +139,9 @@ describe("analyser multi-threaded consistency", () => {
 
         // Verify renders are present in the global edges
         const renderEdges = multiThreadedGraph.edges.filter(
-          (e) => (e.from === (renderMethod as any).id || e.from === classComp!.id) && e.label === "render",
+          (e) =>
+            (e.from === (renderMethod as any).id || e.from === classComp!.id) &&
+            e.label === "render",
         );
         expect(renderEdges.length).toBeGreaterThan(0);
       }

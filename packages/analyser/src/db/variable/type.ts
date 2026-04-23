@@ -1,4 +1,4 @@
-import {
+import type {
   ComponentVariable,
   ClassComponentVariable,
   FunctionComponentVariable,
@@ -16,24 +16,34 @@ import type { MemoVariable } from "./memo.ts";
 import type { RefVariable } from "./refVariable.ts";
 import type { CallHookVariable } from "./callHookVariable.ts";
 import type { JSXVariable } from "./jsx.ts";
-import { CallbackVariable } from "./callbackVariable.ts";
-import { ClassVariable } from "./classVariable.ts";
-import { Scope } from "./scope.ts";
+import type { CallbackVariable } from "./callbackVariable.ts";
+import type { ClassVariable } from "./classVariable.ts";
+import type { Scope } from "./scope.ts";
+
+import {
+  isComponentVariable as _isComponentVariable,
+  isHookVariable as _isHookVariable,
+  isMemoVariable as _isMemoVariable,
+  isCallbackVariable as _isCallbackVariable,
+  isReactFunctionVariable as _isReactFunctionVariable,
+  isStateVariable as _isStateVariable,
+  isRefVariable as _isRefVariable,
+} from "./guards.ts";
 
 export function isComponentVariable(v: Variable): v is ComponentVariable {
-  return v.kind === "component";
+  return _isComponentVariable(v);
 }
 
 export function isClassComponentVariable(
   v: Variable,
 ): v is ClassComponentVariable {
-  return v.kind === "component" && v.type === "class";
+  return _isComponentVariable(v) && v.type === "class";
 }
 
 export function isFunctionComponentVariable(
   v: Variable,
 ): v is FunctionComponentVariable {
-  return v.kind === "component" && v.type === "function";
+  return _isComponentVariable(v) && v.type === "function";
 }
 
 export function isClassVariable(
@@ -57,7 +67,7 @@ export function isJSXVariable(v: Variable): v is JSXVariable {
 }
 
 export function isHookVariable(v: Variable): v is HookVariable {
-  return v.kind === "hook" && v.type === "function";
+  return _isHookVariable(v);
 }
 
 export function isCallHookVariable(v: Variable): v is CallHookVariable {
@@ -67,7 +77,7 @@ export function isCallHookVariable(v: Variable): v is CallHookVariable {
 export function isReactFunctionVariable(
   v: Variable,
 ): v is ReactFunctionVariable {
-  return isComponentVariable(v) || isHookVariable(v);
+  return _isReactFunctionVariable(v);
 }
 
 export function isNormalVariable(v: Variable): v is DataVariable {
@@ -85,19 +95,19 @@ export function isDataVariable(v: Variable): v is DataVariable {
 }
 
 export function isStateVariable(v: Variable): v is StateVariable {
-  return v.type === "data" && v.kind === "state";
+  return _isStateVariable(v);
 }
 
 export function isMemoVariable(v: Variable): v is MemoVariable {
-  return v.type === "function" && v.kind === "memo";
+  return _isMemoVariable(v);
 }
 
 export function isCallbackVariable(v: Variable): v is CallbackVariable {
-  return v.type === "function" && v.kind === "callback";
+  return _isCallbackVariable(v);
 }
 
 export function isRefVariable(v: Variable): v is RefVariable {
-  return v.type === "data" && v.kind === "ref";
+  return _isRefVariable(v);
 }
 
 export function isScope(v: Variable | Scope): v is Scope {

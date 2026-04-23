@@ -133,7 +133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "46367a78a9c2b73",
+          "hash": "f8d8129624efbd4c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -260,7 +260,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "90e14e27f25dd412",
+              "hash": "39710f7994edd6f",
               "dependencies": {},
               "loc": {
                 "line": 21,
@@ -278,6 +278,11 @@
                 }
               },
               "async": false,
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": [
                 {
                   "id": "1981986fd63b9d23:841e96e73f3a4bc0",
@@ -360,8 +365,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

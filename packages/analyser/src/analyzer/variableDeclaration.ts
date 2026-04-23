@@ -19,6 +19,7 @@ import {
   isRefUsed,
   getReactHookInfo,
   getNestedFunctionArgumentPath,
+  isMemoCall,
 } from "../utils.ts";
 import assert from "assert";
 import { getProps } from "./propExtractor.ts";
@@ -216,6 +217,9 @@ export default function VariableDeclarator(
             forwardRef: isForwardRef
               ? isForwardRefRefUsed(innerFnPath)
               : isRefUsed(innerFnPath),
+            ...(init && t.isCallExpression(init) && isMemoCall(init, componentDB, fileName)
+              ? { memo: true }
+              : {}),
           };
 
           if (pId.typeAnnotation?.type === "TSTypeAnnotation") {
@@ -348,6 +352,7 @@ export default function VariableDeclarator(
                   forwardRef: isForwardRefCall(init, componentDB, fileName)
                     ? isForwardRefRefUsed(wrappedFnPath)
                     : isRefUsed(wrappedFnPath),
+                  memo: isMemoCall(init, componentDB, fileName),
                   parentId: pParentId,
                 } as Omit<
                   ComponentFileVarFunctionComponent,
@@ -464,6 +469,7 @@ export default function VariableDeclarator(
                       | t.FunctionExpression
                     >,
                   ),
+                  memo: false,
                   parentId: pParentId,
                 } as Omit<
                   ComponentFileVarFunctionComponent,

@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "82ec2307d24e935b",
+          "hash": "f8a6bccfe463b93",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -119,8 +119,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "f7066f914897672a": {
           "id": "f7066f914897672a",
@@ -136,7 +135,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "859758705656104f",
+          "hash": "7072000ef2457409",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -228,8 +227,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "356f4e007a7b8c08": {
           "id": "356f4e007a7b8c08",
@@ -245,7 +243,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "54b2d3b671b9181",
+          "hash": "ae6d6074299b1f74",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -308,8 +306,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "df67c87f23fed77c": {
           "id": "df67c87f23fed77c",
@@ -325,7 +322,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/StaticComponents.tsx",
-          "hash": "1c4891d33623c58",
+          "hash": "b6445e67acd90025",
           "dependencies": {},
           "loc": {
             "line": 9,
@@ -462,8 +459,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Class",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -623,7 +619,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "9661ff6388a6faa7",
+          "hash": "2871a8ed18d6ff78",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -864,7 +860,6 @@
           "effects": {},
           "componentType": "Class",
           "contexts": [],
-          "forwardRef": false,
           "propType": {
             "type": "ref",
             "refType": "named",
@@ -1106,7 +1101,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NewFeatures.tsx",
-          "hash": "452067ee27c14415",
+          "hash": "3266c361afa15d03",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1364,8 +1359,7 @@
             }
           },
           "componentType": "Class",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "blockScopes": [
@@ -1505,7 +1499,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "eb5e7380820ebc5a",
+          "hash": "6b6eb8d30ba6185f",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1806,8 +1800,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Class",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -1936,7 +1929,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/ArrowRender.tsx",
-          "hash": "b35d6700208358fa",
+          "hash": "7441b0db1381ba63",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2078,8 +2071,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Class",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -2166,7 +2158,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "23e622b01ea04e35",
+          "hash": "fd08e6af1edcbcf3",
           "dependencies": {},
           "loc": {
             "line": 6,
@@ -2401,8 +2393,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

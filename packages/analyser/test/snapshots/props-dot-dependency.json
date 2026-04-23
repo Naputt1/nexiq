@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "c3d530edd2674030",
+          "hash": "a45a2446fe277e99",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -282,8 +282,7 @@
             }
           },
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "blockScopes": [

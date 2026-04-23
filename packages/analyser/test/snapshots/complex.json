@@ -93,7 +93,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "bccf3931fb300fdb",
+          "hash": "24c512c2a78724ee",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -156,8 +156,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "a19fd7017beb07a8": {
           "id": "a19fd7017beb07a8",
@@ -173,7 +172,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "bc0798f2cd3e1e5b",
+          "hash": "aac0a5bdf12e5361",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -251,8 +250,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "c933ac8b20ff268e": {
           "id": "c933ac8b20ff268e",
@@ -268,7 +266,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "27a3d0e5a7ddbf90",
+          "hash": "8022bb6363c73b99",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -331,8 +329,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "6826ec85ac9962e0": {
           "id": "6826ec85ac9962e0",
@@ -348,7 +345,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Nested.tsx",
-          "hash": "d9f6a3ade8215137",
+          "hash": "3a2e8656bb1cf776",
           "dependencies": {},
           "loc": {
             "line": 16,
@@ -441,8 +438,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -561,7 +557,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "9e4d7c72ff2e66f3",
+          "hash": "df0f6999a1658243",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -637,7 +633,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "95dd061f64c421e5",
+              "hash": "a86a2b197248a3fa",
               "dependencies": {},
               "loc": {
                 "line": 6,
@@ -662,6 +658,11 @@
                   "value": "value * 2"
                 }
               },
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": [
                 {
                   "id": "7a755d146a3ba89a:state:[value, setValue]:fb7a7292c24a9964",
@@ -1279,7 +1280,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "4c6c1c80949b494c",
+          "hash": "42a0b9c093a66ce1",
           "declarationKind": "const",
           "dependencies": {
             "4716edcf0db0eac9": {
@@ -1345,6 +1346,7 @@
             }
           },
           "async": false,
+          "return": "d4a8299cd2018f84",
           "states": [],
           "refs": [],
           "props": [
@@ -1364,41 +1366,7 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false
-        },
-        "6272a2db9d3159ee": {
-          "id": "6272a2db9d3159ee",
-          "name": {
-            "type": "identifier",
-            "name": "anonymous@3:38",
-            "loc": {
-              "line": 3,
-              "column": 38
-            },
-            "id": ""
-          },
-          "kind": "normal",
-          "type": "function",
-          "file": "/src/HocForwardRef.tsx",
-          "hash": "55ea907bd911f1e",
-          "declarationKind": "const",
-          "dependencies": {},
-          "loc": {
-            "line": 3,
-            "column": 38
-          },
-          "var": {},
-          "scope": {
-            "start": {
-              "line": 3,
-              "column": 38
-            },
-            "end": {
-              "line": 5,
-              "column": 1
-            }
-          },
-          "return": "d4a8299cd2018f84"
+          "memo": true
         },
         "66105c08a1f70b91": {
           "id": "66105c08a1f70b91",
@@ -1649,7 +1617,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/HocForwardRef.tsx",
-          "hash": "7d0423a72e3bd8de",
+          "hash": "12f1abf559492b4e",
           "declarationKind": "const",
           "dependencies": {
             "738a200726547e84": {
@@ -1751,8 +1719,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -1889,7 +1856,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "582d8457417e44e2",
+          "hash": "239a9b03ee5d9adf",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2085,8 +2052,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -2167,7 +2133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "e922cf3f898c89d2",
+          "hash": "35d1ea4887ee505f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2230,8 +2196,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "e38009d8920a967c": {
           "id": "e38009d8920a967c",
@@ -2247,7 +2212,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "244655ba36b75f52",
+          "hash": "98302c19f755d1ff",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2326,8 +2291,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "c9b0f178ddc8d164": {
           "id": "c9b0f178ddc8d164",
@@ -2343,7 +2307,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "c60be30f41b6ed4a",
+          "hash": "2cf1821f7077d94a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2422,8 +2386,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "5a51946d93053e40": {
           "id": "5a51946d93053e40",
@@ -2439,7 +2402,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "93d685a2400ff5c3",
+          "hash": "f1d53994469c06d1",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2543,8 +2506,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "f72daa2fc6a75495": {
           "id": "f72daa2fc6a75495",
@@ -2684,7 +2646,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "99ad1f05d8e00cde",
+          "hash": "79b397e281f4cee9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2846,8 +2808,7 @@
             }
           },
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -3122,7 +3083,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "25c1619edbbe70c",
+          "hash": "fc6bebf927d4f709",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3218,8 +3179,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "922ba1247fc0dd3d": {
           "id": "922ba1247fc0dd3d",
@@ -3235,7 +3195,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "66bddfdcb47a1c77",
+          "hash": "e955d1ada0e64efe",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3323,8 +3283,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -3517,7 +3476,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/ComplexApp.tsx",
-          "hash": "8ec4996ede7d8f48",
+          "hash": "a08a45fd0841488f",
           "dependencies": {},
           "loc": {
             "line": 8,
@@ -3865,8 +3824,7 @@
           ],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

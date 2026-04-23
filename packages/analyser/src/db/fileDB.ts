@@ -1397,7 +1397,8 @@ export class FileDB {
     loc: VariableLoc,
   ): ReactFunctionVariable | undefined {
     const file = this.get(fileName);
-    return file.getReactFunctionFromLoc(loc);
+
+    return file?.getReactFunctionFromLoc(loc);
   }
 
   public getComponentFromLoc(

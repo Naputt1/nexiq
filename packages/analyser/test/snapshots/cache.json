@@ -203,7 +203,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "a93f45d510332159",
+          "hash": "4d2e17549592670c",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -277,8 +277,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": []
@@ -418,7 +417,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "2e886e9391604c3b",
+          "hash": "10dcea7c5662bb9c",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -1028,8 +1027,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -1274,7 +1272,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "376d105d1dd5e623",
+          "hash": "711828848eda9049",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1337,8 +1335,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": []
@@ -1374,7 +1371,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "8cfa2f4f12320899",
+          "hash": "b450fe53bb545ddf",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -1436,8 +1433,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": []

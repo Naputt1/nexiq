@@ -1634,7 +1634,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "65b889915311ca49",
+          "hash": "64069af7f2e805ff",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1710,7 +1710,6 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false,
           "propType": {
             "type": "ref",
             "refType": "named",
@@ -1731,7 +1730,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "260220a2ea48aaf5",
+          "hash": "dd85ded628080cf",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2071,7 +2070,6 @@
           "effects": {},
           "componentType": "Function",
           "contexts": [],
-          "forwardRef": false,
           "propType": {
             "type": "ref",
             "refType": "named",
@@ -2092,7 +2090,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "6ea1b275a3bcdea3",
+          "hash": "e76da27cbf6041b7",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2178,8 +2176,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "80b1b60c7d127de5": {
           "id": "80b1b60c7d127de5",
@@ -2195,7 +2192,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "7b721539039d66d9",
+          "hash": "5b8898feffbf7fdb",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2376,8 +2373,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "f51adcb408401731": {
           "id": "f51adcb408401731",
@@ -2393,7 +2389,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "665097b21a71efbf",
+          "hash": "49885ac97122dd8e",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2573,8 +2569,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -2851,7 +2846,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "a3a4dcaaf46e5db",
+          "hash": "30bb4bf0a6575904",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3032,8 +3027,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": []
@@ -3098,7 +3092,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "4f2bcfc9386846a8",
+          "hash": "56f9ff274853d0d8",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -3211,8 +3205,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
