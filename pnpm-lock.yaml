@@ -249,6 +249,40 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@types/node@25.5.0)(@vitest/ui@4.1.2)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(tsx@4.21.0))
 
+  packages/cli:
+    dependencies:
+      '@nexiq/cli':
+        specifier: workspace:*
+        version: link:../server
+      ink:
+        specifier: ^4.4.1
+        version: 4.4.1(@types/react@18.3.28)(react@18.3.1)
+      ink-spinner:
+        specifier: ^5.0.0
+        version: 5.0.0(ink@4.4.1(@types/react@18.3.28)(react@18.3.1))(react@18.3.1)
+      meow:
+        specifier: ^13.2.0
+        version: 13.2.0
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      ws:
+        specifier: ^8.20.0
+        version: 8.20.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
+      '@types/react':
+        specifier: ^18.3.23
+        version: 18.3.28
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.15.18)(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(typescript@6.0.2)
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/component-extension:
     dependencies:
       '@nexiq/extension-sdk':
@@ -342,40 +376,6 @@ importers:
       '@types/node':
         specifier: ^25.5.0
         version: 25.5.0
-      typescript:
-        specifier: ^6.0.2
-        version: 6.0.2
-
-  packages/nexiq-cli:
-    dependencies:
-      '@nexiq/cli':
-        specifier: workspace:*
-        version: link:../server
-      ink:
-        specifier: ^4.4.1
-        version: 4.4.1(@types/react@18.3.28)(react@18.3.1)
-      ink-spinner:
-        specifier: ^5.0.0
-        version: 5.0.0(ink@4.4.1(@types/react@18.3.28)(react@18.3.1))(react@18.3.1)
-      meow:
-        specifier: ^13.2.0
-        version: 13.2.0
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      ws:
-        specifier: ^8.20.0
-        version: 8.20.0
-    devDependencies:
-      '@types/node':
-        specifier: ^25.5.0
-        version: 25.5.0
-      '@types/react':
-        specifier: ^18.3.23
-        version: 18.3.28
-      tsup:
-        specifier: ^8.5.1
-        version: 8.5.1(@swc/core@1.15.18)(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
