@@ -95,6 +95,11 @@ export class PackageJson {
     if (!pkg) return null;
     const { name, version } = pkg.data;
     if (name && version) return `${name}@${version}`;
+    
+    if (pkg.dir.startsWith(this.rootDir)) {
+      const rel = path.relative(this.rootDir, pkg.dir).replace(/\\/g, "/");
+      return rel === "" ? "." : rel;
+    }
     return pkg.dir; // fallback to path
   }
 
