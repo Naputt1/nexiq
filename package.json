@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=@nexiq/cli dev",
+    "dev:server": "pnpm --filter=@nexiq/server dev",
+    "dev:cli": "pnpm --filter=@nexiq/cli dev",
     "test:analyze": "pnpm --filter=@nexiq/analyser test",
     "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
     "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",

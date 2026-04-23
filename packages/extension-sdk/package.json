@@ -1,6 +1,6 @@
 {
   "name": "@nexiq/extension-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SDK for creating nexiq extensions",
   "type": "module",
   "main": "dist/index.js",

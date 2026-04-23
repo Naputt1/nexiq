@@ -55,10 +55,10 @@ export function resolveServerDist(): string | null {
     return siblingPath;
   }
 
-  // 3. Resolve from installed @nexiq/cli package
+  // 3. Resolve from installed @nexiq/server package
   try {
     const require = createRequire(import.meta.url || `file://${process.cwd()}/index.js`);
-    const resolved = require.resolve("@nexiq/cli");
+    const resolved = require.resolve("@nexiq/server");
     if (fs.existsSync(resolved)) return resolved;
   } catch {
     // not installed

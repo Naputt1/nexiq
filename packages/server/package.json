@@ -1,6 +1,7 @@
 {
-  "name": "@nexiq/cli",
+  "name": "@nexiq/server",
   "version": "1.0.1",
+  "private": true,
   "description": "Short and powerful React component dependency analysis",
   "type": "module",
   "main": "dist/index.js",

@@ -251,7 +251,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@nexiq/cli':
+      '@nexiq/server':
         specifier: workspace:*
         version: link:../server
       ink:
@@ -357,28 +357,6 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@types/node@25.5.0)(@vitest/ui@4.1.2)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(tsx@4.21.0))
-
-  packages/git-extension:
-    dependencies:
-      '@nexiq/extension-sdk':
-        specifier: workspace:*
-        version: link:../extension-sdk
-      '@nexiq/shared':
-        specifier: workspace:*
-        version: link:../shared
-      simple-git:
-        specifier: ^3.33.0
-        version: 3.33.0
-    devDependencies:
-      '@types/better-sqlite3':
-        specifier: ^7.6.13
-        version: 7.6.13
-      '@types/node':
-        specifier: ^25.5.0
-        version: 25.5.0
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
 
   packages/sample-project/async-functions:
     dependencies:
