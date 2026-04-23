@@ -6,8 +6,9 @@ export { ProjectManager, BackendServer };
 
 // If this file is run directly (e.g., pnpm start)
 if (import.meta.url === `file://${process.argv[1]}`) {
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;
   const projectManager = new ProjectManager();
-  const server = new BackendServer(projectManager);
+  const server = new BackendServer(projectManager, port);
 
   const main = async () => {
     const transport = new StdioServerTransport();
