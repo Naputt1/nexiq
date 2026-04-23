@@ -1,5 +1,6 @@
 {
   "name": "@nexiq/analyser",
+  "private": true,
   "type": "module",
   "version": "1.0.1",
   "description": "",
@@ -14,10 +15,6 @@
       "types": "./dist/db/sqlite.d.ts",
       "import": "./dist/db/sqlite.js"
     }
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
   },
   "scripts": {
     "build": "tsup",

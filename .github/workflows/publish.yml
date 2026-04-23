@@ -14,10 +14,6 @@ on:
         description: "Publish @nexiq/extension-sdk"
         type: boolean
         default: false
-      analyser:
-        description: "Publish @nexiq/analyser"
-        type: boolean
-        default: false
       component-extension:
         description: "Publish @nexiq/component-extension"
         type: boolean
@@ -31,11 +27,7 @@ on:
         type: boolean
         default: false
       cli:
-        description: "Publish @nexiq/cli (Server)"
-        type: boolean
-        default: false
-      nexiq-cli:
-        description: "Publish nexiq-cli (Terminal UI)"
+        description: "Publish @nexiq/cli (Terminal UI)"
         type: boolean
         default: false
       all:
@@ -70,11 +62,11 @@ jobs:
           pnpm --filter @nexiq/shared build
           pnpm --filter @nexiq/extension-sdk build
           pnpm --filter @nexiq/analyser build
+          pnpm --filter @nexiq/server build
           pnpm --filter @nexiq/component-extension build:ts
           pnpm --filter @nexiq/git-extension build
           pnpm --filter @nexiq/file-extension build
           pnpm --filter @nexiq/cli build
-          pnpm --filter nexiq-cli build
 
       - name: Publish @nexiq/shared
         if: |
@@ -91,15 +83,6 @@ jobs:
           inputs.all == true ||
           inputs.extension-sdk == true
         run: pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @nexiq/analyser
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.analyser == true
-        run: pnpm --filter @nexiq/analyser publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -136,14 +119,5 @@ jobs:
           inputs.all == true ||
           inputs.cli == true
         run: pnpm --filter @nexiq/cli publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish nexiq-cli
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.nexiq-cli == true
-        run: pnpm --filter nexiq-cli publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

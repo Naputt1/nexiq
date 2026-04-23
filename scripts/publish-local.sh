@@ -14,9 +14,8 @@ echo "Building all packages..."
 pnpm --filter @nexiq/shared build
 pnpm --filter @nexiq/extension-sdk build
 pnpm --filter @nexiq/analyser build
+pnpm --filter @nexiq/server build
 pnpm --filter @nexiq/cli build
-# pnpm --filter @nexiq/tanstack-query-extension build
-# pnpm --filter @nexiq/tanstack-router-extension build
 
 echo "Publishing packages..."
 
@@ -26,7 +25,6 @@ echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
 
 pnpm --filter @nexiq/shared publish --no-git-checks --access public
 pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public
-pnpm --filter @nexiq/analyser publish --no-git-checks --access public
 pnpm --filter @nexiq/cli publish --no-git-checks --access public
 
 # Cleanup

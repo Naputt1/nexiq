@@ -12,7 +12,8 @@
 ## How The Packages Fit Together
 
 - `@nexiq/analyser` parses projects and produces the component and dependency graph data.
-- `@nexiq/cli` runs the backend server and project management layer, including MCP and WebSocket support.
+- `@nexiq/server` runs the backend server and project management layer, including MCP and WebSocket support.
+- `@nexiq/cli` is the command-line interface for managing and interacting with the nexiq server.
 - `@nexiq/shared` contains shared types, utilities, and database helpers used across the stack.
 - `@nexiq/extension-sdk` provides the extension interface for adding custom tasks and tooling around nexiq.
 
@@ -37,6 +38,7 @@ pnpm install
 ```bash
 pnpm build:analyze
 pnpm dev:server
+pnpm dev:cli
 pnpm test:analyze
 pnpm typecheck
 ```
@@ -49,6 +51,8 @@ Useful commands exposed by the main packages:
 pnpm --filter=@nexiq/analyser build
 pnpm --filter=@nexiq/analyser start
 pnpm --filter=@nexiq/analyser snapshot
+pnpm --filter=@nexiq/server dev
+pnpm --filter=@nexiq/server start
 pnpm --filter=@nexiq/cli dev
 pnpm --filter=@nexiq/cli start
 ```
@@ -56,6 +60,7 @@ pnpm --filter=@nexiq/cli start
 ## Main Scripts
 
 - `pnpm dev:server` starts the backend server package in development mode.
+- `pnpm dev:cli` starts the terminal CLI in development mode.
 - `pnpm build:analyze` builds the analyser package.
 - `pnpm test:analyze` runs the analyser test suite.
 - `pnpm snapshot:analyze` builds the analyser and generates snapshot output.

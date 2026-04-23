@@ -1,6 +1,6 @@
 {
-  "name": "nexiq-cli",
-  "version": "1.0.0",
+  "name": "@nexiq/cli",
+  "version": "1.0.2",
   "description": "CLI for the nexiq React analysis server",
   "type": "module",
   "bin": {
@@ -17,7 +17,7 @@
     "start": "node dist/cli.js"
   },
   "dependencies": {
-    "@nexiq/cli": "workspace:*",
+    "@nexiq/server": "workspace:*",
     "ink": "^4.4.1",
     "ink-spinner": "^5.0.0",
     "meow": "^13.2.0",
