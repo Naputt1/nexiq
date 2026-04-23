@@ -37,5 +37,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build dependencies
+        run: |
+          pnpm --filter @nexiq/shared build
+          pnpm --filter @nexiq/extension-sdk build
+
       - name: Run Analyser Tests
-        run: pnpm --filter analyser test
+        run: pnpm --filter @nexiq/analyser test

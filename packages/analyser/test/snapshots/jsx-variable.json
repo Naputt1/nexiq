@@ -3,7 +3,7 @@
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "63e5fad14263c51f",
-      "package_id": "/Users/naputt/code/nexiq/nexiq/packages/sample-project/jsx-variable",
+      "package_id": ".",
       "import": {
         "React": {
           "localName": "React",

@@ -3,7 +3,7 @@
     "/src/Other.tsx": {
       "path": "/src/Other.tsx",
       "hash": "517955c581130d1",
-      "package_id": "/Users/naputt/code/nexiq/nexiq/packages/sample-project/destructuring-hook",
+      "package_id": ".",
       "import": {},
       "export": {
         "Other": {
@@ -130,7 +130,7 @@
     "/src/Child.tsx": {
       "path": "/src/Child.tsx",
       "hash": "6c6906d11ed75daa",
-      "package_id": "/Users/naputt/code/nexiq/nexiq/packages/sample-project/destructuring-hook",
+      "package_id": ".",
       "import": {},
       "export": {
         "Child": {
@@ -246,7 +246,7 @@
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "3c5d3187fc3ab482",
-      "package_id": "/Users/naputt/code/nexiq/nexiq/packages/sample-project/destructuring-hook",
+      "package_id": ".",
       "import": {
         "useState": {
           "localName": "useState",

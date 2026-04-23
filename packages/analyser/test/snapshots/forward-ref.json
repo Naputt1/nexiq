@@ -3,7 +3,7 @@
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "7f25885cb834d433",
-      "package_id": "/Users/naputt/code/nexiq/nexiq/packages/sample-project/forward-ref",
+      "package_id": ".",
       "import": {
         "React": {
           "localName": "React",
