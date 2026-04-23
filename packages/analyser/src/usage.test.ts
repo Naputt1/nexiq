@@ -4,12 +4,16 @@ import { getViteConfig } from "./analyzer/utils.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
 describe("usage extraction", () => {
   it("normalizes setState calls back to the state node", async () => {
-    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-usage-test-1-"));
+    const pkgJsonPath = path.resolve(tempDir, "package.json");
+    fs.writeFileSync(pkgJsonPath, JSON.stringify({ name: "usage-test-1", version: "1.0.0" }));
+
     const fileName = "UsageStateTest.tsx";
-    const filePath = path.resolve(projectPath, fileName);
+    const filePath = path.resolve(tempDir, fileName);
 
     fs.writeFileSync(
       filePath,
@@ -25,10 +29,10 @@ describe("usage extraction", () => {
     );
 
     try {
-      const packageJson = new PackageJson(projectPath);
+      const packageJson = new PackageJson(tempDir);
       const graph = await analyzeFiles(
-        projectPath,
-        getViteConfig(projectPath),
+        tempDir,
+        null,
         [fileName],
         packageJson,
       );
@@ -47,16 +51,19 @@ describe("usage extraction", () => {
       );
       expect(readRelation).toBeDefined();
     } finally {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      if (fs.existsSync(pkgJsonPath)) fs.unlinkSync(pkgJsonPath);
+      if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
     }
   });
 
   it("captures effect reads and JSX prop usages with the correct owners", async () => {
-    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-usage-test-2-"));
+    const pkgJsonPath = path.resolve(tempDir, "package.json");
+    fs.writeFileSync(pkgJsonPath, JSON.stringify({ name: "usage-test-2", version: "1.0.0" }));
+
     const fileName = "UsageEffectAndJsxTest.tsx";
-    const filePath = path.resolve(projectPath, fileName);
+    const filePath = path.resolve(tempDir, fileName);
 
     fs.writeFileSync(
       filePath,
@@ -80,10 +87,10 @@ describe("usage extraction", () => {
     );
 
     try {
-      const packageJson = new PackageJson(projectPath);
+      const packageJson = new PackageJson(tempDir);
       const graph = await analyzeFiles(
-        projectPath,
-        getViteConfig(projectPath),
+        tempDir,
+        null,
         [fileName],
         packageJson,
       );
@@ -124,9 +131,9 @@ describe("usage extraction", () => {
       );
       expect(jsxRenderCall).toBeDefined();
     } finally {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      if (fs.existsSync(pkgJsonPath)) fs.unlinkSync(pkgJsonPath);
+      if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
     }
   });
 });

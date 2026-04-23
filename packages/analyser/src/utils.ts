@@ -331,6 +331,60 @@ export function isForwardRefCall(
   return res;
 }
 
+export function isMemoCall(
+  call: t.CallExpression,
+  componentDB: ComponentDB,
+  fileName: string,
+): boolean {
+  const callee = call.callee;
+  const file = componentDB.getFile(fileName);
+  if (!file) return false;
+
+  const res = (function () {
+    if (t.isIdentifier(callee)) {
+      const comImport = file.import.get(callee.name);
+      if (comImport?.source === "react") {
+        if (comImport.type === "named" && comImport.importedName === "memo") {
+          return true;
+        }
+      }
+      // Handle aliased memo via import tracking
+      for (const imp of file.import.values()) {
+        if (
+          imp.source === "react" &&
+          imp.importedName === "memo" &&
+          imp.localName === callee.name
+        ) {
+          return true;
+        }
+      }
+    } else if (t.isMemberExpression(callee)) {
+      if (t.isIdentifier(callee.property) && callee.property.name === "memo") {
+        if (t.isIdentifier(callee.object)) {
+          const objName = callee.object.name;
+          const comImport = file.import.get(objName);
+
+          if (comImport?.source === "react") {
+            if (
+              comImport.type === "default" ||
+              comImport.type === "namespace"
+            ) {
+              return true;
+            }
+          }
+
+          if (objName === "React") {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  })();
+
+  return res;
+}
+
 export function containsJSX(nodePath: NodePath): boolean {
   let found = false;
 

@@ -180,7 +180,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "a84867d0b23a5d9",
+          "hash": "b56761bedce4a65d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -243,8 +243,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": []

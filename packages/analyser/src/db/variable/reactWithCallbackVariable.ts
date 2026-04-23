@@ -4,13 +4,14 @@ import type {
   ReactWithCallbackVar,
   VarType,
 } from "@nexiq/shared";
-import { BaseFunctionVariable } from "./baseFunctionVariable.ts";
+import { ReactFunctionVariable } from "./reactFunctionVariable.ts";
 import type { File } from "../fileDB.ts";
+import { isCallbackVariable, isMemoVariable } from "./type.ts";
 
 export abstract class ReactWithCallbackVariable<
   TKind extends ReactWithCallbackVar = ReactWithCallbackVar,
   TType extends VarType = "function",
-> extends BaseFunctionVariable<TKind, TType> {
+> extends ReactFunctionVariable<TKind, TType> {
   reactDeps: ReactDependency[];
 
   constructor(
@@ -20,15 +21,27 @@ export abstract class ReactWithCallbackVariable<
     >,
     file: File,
   ) {
-    super(options as any, file); // eslint-disable-line @typescript-eslint/no-explicit-any
+    super(
+      {
+        ...options,
+        states: [],
+        hooks: [],
+        effects: {},
+        props: [],
+        refs: [],
+      },
+      file,
+    );
 
     this.reactDeps = options.reactDeps;
   }
 
-  public load(data: ReactWithCallbackVariable<TKind, TType>) {
+  public load(data: ReactFunctionVariable<TKind, TType>) {
     super.load(data);
 
-    this.reactDeps = data.reactDeps ? [...data.reactDeps] : this.reactDeps;
+    if (isMemoVariable(data) || isCallbackVariable(data)) {
+      this.reactDeps = data.reactDeps ? [...data.reactDeps] : this.reactDeps;
+    }
   }
 
   protected getBaseData(): ComponentFileVarReactWithCallback<TKind, TType> {

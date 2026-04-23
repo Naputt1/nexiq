@@ -19,7 +19,8 @@ export default function FunctionExpression(
           (callee.name === "useCallback" ||
             callee.name === "useMemo" ||
             callee.name === "useEffect" ||
-            callee.name === "forwardRef")
+            callee.name === "forwardRef" ||
+            callee.name === "memo")
         ) {
           return;
         }
@@ -27,7 +28,8 @@ export default function FunctionExpression(
         if (t.isMemberExpression(callee)) {
           if (
             t.isIdentifier(callee.property) &&
-            callee.property.name === "forwardRef"
+            (callee.property.name === "forwardRef" ||
+              callee.property.name === "memo")
           ) {
             return;
           }

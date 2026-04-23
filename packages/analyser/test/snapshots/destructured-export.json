@@ -145,7 +145,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "bb7930c0a77709cd",
+          "hash": "73f56755551ced50",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -235,8 +235,7 @@
           ],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [

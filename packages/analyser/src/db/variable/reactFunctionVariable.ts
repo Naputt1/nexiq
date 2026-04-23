@@ -5,7 +5,7 @@ import type {
   PropData,
   PropDataType,
   ReactDependency,
-  ReactFunctionVar,
+  ReactVarKind,
   RefData,
   TypeDataRef,
   VariableName,
@@ -21,14 +21,15 @@ import {
   isRefVariable,
   isStateVariable,
 } from "./type.ts";
-import { MemoVariable } from "./memo.ts";
-import { CallbackVariable } from "./callbackVariable.ts";
+import type { MemoVariable } from "./memo.ts";
+import type { CallbackVariable } from "./callbackVariable.ts";
 import { RefVariable } from "./refVariable.ts";
+import { VariableRegistry } from "./registry.ts";
 import { getVariableNameKey } from "../../analyzer/pattern.ts";
 import { CallHookVariable } from "./callHookVariable.ts";
 
 export abstract class ReactFunctionVariable<
-  TKind extends ReactFunctionVar = ReactFunctionVar,
+  TKind extends ReactVarKind = ReactVarKind,
   TType extends VarType = "function",
 > extends BaseFunctionVariable<TKind, TType> {
   states: Set<string> = new Set();
@@ -245,10 +246,15 @@ export abstract class ReactFunctionVariable<
 
     this.resolveReactDependencies(memo.reactDeps);
 
-    const memoVariablle = new MemoVariable(
+    const memoVariablle = new VariableRegistry.MemoVariable!(
       {
-        id: id,
+        id,
         dependencies: {},
+        states: [],
+        refs: [],
+        props: [],
+        hooks: [],
+        effects: {},
         ...memo,
       },
       this.file,
@@ -268,19 +274,24 @@ export abstract class ReactFunctionVariable<
 
     this.resolveReactDependencies(callback.reactDeps);
 
-    const callbackVariable = new CallbackVariable(
+    const callbackVariablle = new VariableRegistry.CallbackVariable!(
       {
-        id: id,
+        id,
         dependencies: {},
+        states: [],
+        refs: [],
+        props: [],
+        hooks: [],
+        effects: {},
         ...callback,
       },
       this.file,
     );
 
-    this.var.add(callbackVariable);
+    this.var.add(callbackVariablle);
     this.callbacks.add(id);
 
-    return callbackVariable;
+    return callbackVariablle;
   }
 
   public addHook(hook: string) {

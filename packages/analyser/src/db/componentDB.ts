@@ -33,6 +33,8 @@ import type {
   PropDataType,
   ComponentFileVarJSX,
   VariableScope,
+  ComponentFileVarCallback,
+  MemoFileVarHook,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.ts";
 import type { PackageJson } from "./packageJson.ts";
@@ -57,6 +59,8 @@ import { HookVariable } from "./variable/hook.ts";
 import { FunctionVariable } from "./variable/functionVariable.ts";
 import { ClassVariable } from "./variable/classVariable.ts";
 import { getDeterministicId } from "../utils/hash.ts";
+import { MemoVariable } from "./variable/memo.ts";
+import { CallbackVariable } from "./variable/callbackVariable.ts";
 import { getVariableNameKey } from "../analyzer/pattern.ts";
 import type { ReactFunctionVariable } from "./variable/reactFunctionVariable.ts";
 import { SqliteDB } from "./sqlite.ts";
@@ -64,6 +68,10 @@ import { PropertyVariable } from "./variable/propertyVariable.ts";
 import { MethodVariable } from "./variable/methodVariable.ts";
 import { StateVariable } from "./variable/stateVariable.ts";
 import { resolvePath } from "../utils/path.ts";
+import { VariableRegistry } from "./variable/registry.ts";
+
+VariableRegistry.MemoVariable = MemoVariable;
+VariableRegistry.CallbackVariable = CallbackVariable;
 
 export type ComponentDBOptions = {
   packageJson: PackageJson;
@@ -396,6 +404,26 @@ export class ComponentDB {
           ComponentFileVarProperty,
           "kind" | "type" | "file" | "hash"
         >,
+        file,
+      );
+    } else if (kind === "memo") {
+      v = new MemoVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...(variable as Omit<MemoFileVarHook, "id">),
+          reactDeps: (variable as MemoFileVarHook).reactDeps || [],
+          declarationKind,
+        },
+        file,
+      );
+    } else if (kind === "callback") {
+      v = new CallbackVariable(
+        {
+          id: getDeterministicId(fileName, nameKey),
+          ...(variable as Omit<ComponentFileVarCallback, "id">),
+          reactDeps: (variable as ComponentFileVarCallback).reactDeps || [],
+          declarationKind,
+        },
         file,
       );
     } else if (variable.type === "function") {

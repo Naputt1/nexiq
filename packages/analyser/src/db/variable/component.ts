@@ -14,6 +14,7 @@ export abstract class ComponentVariable<
   propType: TypeData | undefined;
   contexts: string[];
   forwardRef: boolean;
+  memo: boolean;
 
   constructor(
     options: Omit<
@@ -33,6 +34,7 @@ export abstract class ComponentVariable<
     this.propType = options.propType;
     this.contexts = options.contexts;
     this.forwardRef = options.forwardRef ?? false;
+    this.memo = options.memo ?? false;
   }
 
   public load(data: ComponentVariable<TType>) {
@@ -44,15 +46,23 @@ export abstract class ComponentVariable<
 
     this.contexts = data.contexts ? [...data.contexts] : this.contexts;
     this.forwardRef = data.forwardRef ?? this.forwardRef;
+    this.memo = data.memo ?? this.memo;
   }
 
   public getData(): ComponentFileVarComponent {
-    const data: ComponentFileVarComponent = {
+    const data = {
       ...this.getBaseData(),
       componentType: this.componentType,
       contexts: this.contexts,
-      forwardRef: this.forwardRef,
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as ComponentFileVarComponent;
+
+    if (this.forwardRef) {
+      data.forwardRef = this.forwardRef;
+    }
+
+    if (this.memo) {
+      data.memo = this.memo;
+    }
 
     if (this.propType) {
       data.propType = this.propType;
@@ -66,7 +76,8 @@ export abstract class ComponentVariable<
       ...super.getDataInternal(),
       componentType: this.componentType,
       contexts: this.contexts,
-      forwardRef: this.forwardRef,
+      ...(this.forwardRef ? { forwardRef: this.forwardRef } : {}),
+      ...(this.memo ? { memo: this.memo } : {}),
     };
   }
 }

@@ -74,7 +74,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "edbdd7a89e74e549",
+          "hash": "1c9ea1663bab9e05",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -206,7 +206,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/various-imports.tsx",
-              "hash": "8e6994b920f5fe93",
+              "hash": "61710530efc307fb",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -224,6 +224,11 @@
                 }
               },
               "async": false,
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": []
             },
             "88bd806ba1a2143e": {
@@ -831,8 +836,7 @@
             }
           },
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "ca5148857c1605b1": {
           "id": "ca5148857c1605b1",
@@ -1391,7 +1395,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "d88253867ed3e02a",
+          "hash": "114cb4399616aa21",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1555,7 +1559,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/effectt.tsx",
-              "hash": "19512758ffedb646",
+              "hash": "cc331f14b34f19c1",
               "dependencies": {},
               "loc": {
                 "line": 9,
@@ -1580,6 +1584,11 @@
                   "value": "state * 2"
                 }
               },
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": [
                 {
                   "id": "66289b593d160656:state:[state, setState]:29d89519f557177e",
@@ -1785,8 +1794,7 @@
             }
           },
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "relations": [
@@ -2068,7 +2076,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "2f6ac89ff99e70f4",
+          "hash": "e54c62333e6eb01b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2145,7 +2153,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/src/callback.tsx",
-              "hash": "65477053ec5a921a",
+              "hash": "5ebbf8f15e755693",
               "dependencies": {},
               "loc": {
                 "line": 7,
@@ -2205,6 +2213,11 @@
               },
               "async": false,
               "return": "796ee767ef37c1f6",
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": [
                 {
                   "id": "89091d73d3a537b1:state:[count, setCount]:10de422fa6270553",
@@ -2347,8 +2360,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         },
         "a9ce6602c7457bf9": {
           "id": "a9ce6602c7457bf9",
@@ -2517,7 +2529,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "459ce94bb3bb8a51",
+          "hash": "c96d7f272f8bad1",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2617,7 +2629,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/src/callback.tsx",
-              "hash": "8d7eddd0e6f0d8e6",
+              "hash": "85cbbab1af7cf7e4",
               "dependencies": {
                 "a0d88febff80e8ff": {
                   "id": "a0d88febff80e8ff",
@@ -2664,6 +2676,11 @@
                 }
               },
               "async": true,
+              "states": [],
+              "refs": [],
+              "props": [],
+              "hooks": [],
+              "effects": {},
               "reactDeps": [
                 {
                   "id": "2fbf3e1dc861668f",
@@ -2778,8 +2795,7 @@
           "hooks": [],
           "effects": {},
           "componentType": "Function",
-          "contexts": [],
-          "forwardRef": false
+          "contexts": []
         }
       },
       "blockScopes": [

@@ -98,6 +98,7 @@ export type HookInfo = ReactFunctionInfoBase;
 export interface ComponentInfoBase {
   contexts: string[];
   forwardRef?: boolean;
+  memo?: boolean;
 }
 
 export interface FunctionComponentInfo
@@ -302,7 +303,9 @@ export type ReactDependencies = {
 export type ComponentFileVarReactWithCallback<
   TKind extends ReactVarKind,
   TType extends VarType = "function",
-> = ComponentFileVarBaseTypeFunction<TKind, TType> & ReactDependencies;
+> = ComponentFileVarBaseTypeFunction<TKind, TType> &
+  ReactDependencies &
+  ReactFunctionInfoBase;
 
 export type ComponentFileVarFunctionComponent = ComponentFileVarReactFunction<
   "component",
