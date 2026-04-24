@@ -67,6 +67,12 @@ export async function discoverWorkspacePackages(
 
   const packageJsonFiles: string[] = [];
 
+  // Always include the root package.json if it exists
+  const rootPackageJson = path.join(rootDir, "package.json");
+  if (fs.existsSync(rootPackageJson)) {
+    packageJsonFiles.push(rootPackageJson);
+  }
+
   function walk(dir: string, currentDepth: number) {
     if (currentDepth > 4) return;
     let files: string[];
@@ -90,7 +96,10 @@ export async function discoverWorkspacePackages(
       if (stat.isDirectory()) {
         walk(fullPath, currentDepth + 1);
       } else if (stat.isFile() && file === "package.json") {
-        packageJsonFiles.push(fullPath);
+        // Avoid adding root again if we already added it above
+        if (fullPath !== rootPackageJson) {
+          packageJsonFiles.push(fullPath);
+        }
       }
     }
   }
@@ -98,9 +107,15 @@ export async function discoverWorkspacePackages(
   walk(rootDir, 0);
 
   const regexPatterns = workspacePatterns.map((pattern) => {
-    const target = pattern.endsWith("/")
-      ? `${pattern}package.json`
-      : `${pattern}/package.json`;
+    let target = pattern;
+    if (target === ".") {
+      target = "package.json";
+    } else {
+      target = pattern.endsWith("/")
+        ? `${pattern}package.json`
+        : `${pattern}/package.json`;
+    }
+
     const regexStr = target
       .replace(/\./g, "\\.")
       .replace(/\*\*/g, ".*")

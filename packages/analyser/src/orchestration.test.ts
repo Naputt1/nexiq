@@ -178,6 +178,70 @@ describe("analyser orchestration", () => {
     expect(graph.edges.some((edge) => edge.label === "import")).toBe(true);
   });
 
+  it("handles monorepo analysis with a root package ('.')", async () => {
+    const rootDir = createTempDir("nexiq-monorepo-root-");
+    const packageDbDir = path.join(rootDir, ".nexiq", "packages");
+    const centralDbPath = path.join(rootDir, ".nexiq", "workspace.sqlite");
+
+    writeJson(path.join(rootDir, "package.json"), {
+      name: "@workspace/root",
+      version: "1.0.0",
+      dependencies: {
+        "@workspace/pkg-a": "1.0.0",
+      },
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "pnpm-workspace.yaml"),
+      "packages:\n  - '.'\n  - 'packages/*'\n",
+    );
+
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src", "App.tsx"),
+      "import { Shared } from '@workspace/pkg-a'; export const App = () => <Shared />;",
+    );
+
+    writeJson(path.join(rootDir, "packages", "pkg-a", "package.json"), {
+      name: "@workspace/pkg-a",
+      version: "1.0.0",
+    });
+    fs.mkdirSync(path.join(rootDir, "packages", "pkg-a", "src"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(rootDir, "packages", "pkg-a", "src", "index.tsx"),
+      "export const Shared = () => <div>shared</div>;",
+    );
+
+    const graph = await analyzeProject(rootDir, {
+      monorepo: true,
+      packageDbDir,
+      centralSqlitePath: centralDbPath,
+      fileWorkerThreads: 1,
+      packageConcurrency: 1,
+    });
+
+    expect(graph.files["/src/App.tsx"]).toBeDefined();
+    expect(graph.files["/packages/pkg-a/src/index.tsx"]).toBeDefined();
+
+    // Verify cross-package edge
+    const edge = graph.edges.find(
+      (e) =>
+        e.label === "render" &&
+        e.from.includes("@workspace/pkg-a") &&
+        e.to.includes("@workspace/root"),
+    );
+    expect(edge).toBeDefined();
+
+    const centralDb = new Database(centralDbPath, { readonly: true });
+    const workspacePackages = centralDb
+      .prepare("SELECT * FROM workspace_packages")
+      .all() as { package_id: string }[];
+    centralDb.close();
+
+    expect(workspacePackages).toHaveLength(2);
+  });
+
   it("resolves default imports from workspace package exports", async () => {
     const rootDir = createTempDir("nexiq-monorepo-default-");
     const centralDbPath = path.join(rootDir, ".nexiq", "workspace.sqlite");
