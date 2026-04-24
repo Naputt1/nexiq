@@ -1461,7 +1461,7 @@ export class BackendServer {
         }
       });
 
-      console.error(`React Map backend started on ws://localhost:${this.port}`);
+      console.error(`React Map backend started on ws://127.0.0.1:${this.port}`);
 
       this.wss.on("connection", (ws) => {
         this.uiConnections++;
@@ -1641,7 +1641,7 @@ export class BackendServer {
 
     await this.mcpServer.connect(transport);
     console.error(
-      `React Map MCP server running on stdio and ws://localhost:${this.port}`,
+      `React Map MCP server running on stdio and ws://127.0.0.1:${this.port}`,
     );
 
     // Initial check after 10s to see if anyone connected

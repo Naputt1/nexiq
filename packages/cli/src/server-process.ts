@@ -46,7 +46,7 @@ export function resolveServerDist(): string | null {
 
   const siblingPath = path.resolve(
     currentDir,
-    "../../..", // dist/cli.js -> dist -> nexiq-cli -> packages -> nexiq root
+    "../../..", // dist/cli.js -> dist -> cli -> packages -> nexiq root
     "server",
     "dist",
     "index.js",
@@ -90,7 +90,7 @@ export async function isPortOpen(port: number, host = "127.0.0.1"): Promise<bool
 
 export async function isServerAlive(port: number = BACKEND_PORT): Promise<boolean> {
   return new Promise((resolve) => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`);
     const timeout = setTimeout(() => {
       ws.terminate();
       resolve(false);
