@@ -32,7 +32,57 @@ on:
         default: false
 
 jobs:
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            build: pnpm --filter @nexiq/component-extension build:rs --target x86_64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: pnpm --filter @nexiq/component-extension build:rs --target aarch64-apple-darwin
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            build: pnpm --filter @nexiq/component-extension build:rs --target x86_64-unknown-linux-gnu
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            build: pnpm --filter @nexiq/component-extension build:rs --target x86_64-pc-windows-msvc
+
+    name: Build Native (${{ matrix.settings.target }})
+    runs-on: ${{ matrix.settings.host }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.target }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Native Binary
+        run: ${{ matrix.settings.build }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.settings.target }}
+          path: nexiq/packages/component-extension/*.node
+          if-no-files-found: error
+
   publish:
+    needs: build-native
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,6 +102,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: nexiq/packages/component-extension/artifacts
+
+      - name: Move artifacts to component-extension
+        run: |
+          find nexiq/packages/component-extension/artifacts -name "*.node" -exec mv {} nexiq/packages/component-extension/ \;
+          ls -l nexiq/packages/component-extension/*.node
 
       - name: Build Packages
         run: |
