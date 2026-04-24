@@ -10,7 +10,8 @@
     "index.cjs"
   ],
   "scripts": {
-    "build:rs": "napi build --platform --release && (mv index.js index.cjs || true)",
+    "build:rs": "napi build --platform --release",
+    "postbuild:rs": "mv index.js index.cjs || true",
     "build:debug": "napi build --platform",
     "build:ts": "tsc",
     "build": "pnpm build:rs && pnpm build:ts",
