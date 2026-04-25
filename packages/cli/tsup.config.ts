@@ -1,11 +1,15 @@
 import { defineConfig } from "tsup";
 
-export default defineConfig({
+export default defineConfig((options) => ({
   entry: ["src/cli.tsx"],
   format: ["esm"],
   target: "node18",
   clean: true,
+  minify: true,
   dts: false,
+  define: {
+    "process.env.MODE": JSON.stringify(options.env?.MODE || "production"),
+  },
   banner: {
     js: `#!/usr/bin/env node
 import { createRequire as __createRequire } from 'node:module';
@@ -20,11 +24,11 @@ const require = __createRequire(import.meta.url);
     "react-dom",
     "react-reconciler",
     "meow",
-    "signal-exit"
+    "signal-exit",
   ],
   // Exclude node built-ins and problematic native/peer deps
   external: [
-    "ws", 
+    "ws",
     "react-devtools-core",
     "yoga-layout",
     "yoga-wasm-web",
@@ -40,6 +44,6 @@ const require = __createRequire(import.meta.url);
     "path",
     "stream",
     "url",
-    "util"
-  ], 
-});
+    "util",
+  ],
+}));

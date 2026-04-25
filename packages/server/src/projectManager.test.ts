@@ -98,6 +98,43 @@ describe("ProjectManager", () => {
     expect(watcher.subscribe).toHaveBeenCalled();
   });
 
+  it("should NOT write JSON cache in production mode", async () => {
+    vi.stubEnv("MODE", "production");
+    try {
+      const projectPath = "/test/project-prod";
+      await projectManager.openProject(projectPath);
+
+      // Should still call analyzeProject
+      expect(analyzeProject).toHaveBeenCalled();
+
+      // Should NOT call writeFileSync for the .json file
+      const writeCalls = vi.mocked(fs.writeFileSync).mock.calls;
+      const jsonWriteCall = writeCalls.find(
+        (call) => typeof call[0] === "string" && call[0].endsWith(".json"),
+      );
+      expect(jsonWriteCall).toBeUndefined();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("should write JSON cache in non-production mode", async () => {
+    vi.stubEnv("MODE", "development");
+    try {
+      const projectPath = "/test/project-dev";
+      await projectManager.openProject(projectPath);
+
+      // Should call writeFileSync for the .json file
+      const writeCalls = vi.mocked(fs.writeFileSync).mock.calls;
+      const jsonWriteCall = writeCalls.find(
+        (call) => typeof call[0] === "string" && call[0].endsWith(".json"),
+      );
+      expect(jsonWriteCall).toBeDefined();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("should handle subprojects correctly", async () => {
     const projectPath = "/test/project";
     const subProject = "packages/app";

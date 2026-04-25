@@ -122,6 +122,8 @@ jobs:
           pnpm --filter @nexiq/component-extension build:ts
           pnpm --filter @nexiq/file-extension build
           pnpm --filter @nexiq/cli build
+        env:
+          MODE: production
 
       - name: Publish @nexiq/shared
         if: |

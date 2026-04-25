@@ -261,7 +261,9 @@ export class ProjectManager {
       },
     );
 
-    this.safeWriteFileSync(cacheFile, JSON.stringify(graph, null, 2));
+    if (process.env.MODE !== "production") {
+      this.safeWriteFileSync(cacheFile, JSON.stringify(graph, null, 2));
+    }
 
     const projectInfo: ProjectInfo = {
       projectPath,
@@ -306,10 +308,12 @@ export class ProjectManager {
             })
               .then((newGraph: JsonData) => {
                 projectInfo.graph = newGraph;
-                this.safeWriteFileSync(
-                  cacheFile,
-                  JSON.stringify(projectInfo.graph, null, 2),
-                );
+                if (process.env.MODE !== "production") {
+                  this.safeWriteFileSync(
+                    cacheFile,
+                    JSON.stringify(projectInfo.graph, null, 2),
+                  );
+                }
 
                 if (projectInfo.db) projectInfo.db.close();
                 projectInfo.db = new SqliteDB(projectInfo.sqlitePath);
@@ -1173,6 +1177,9 @@ export class ProjectManager {
   }
 
   private _saveCache(project: ProjectInfo) {
+    if (process.env.MODE === "production") {
+      return;
+    }
     const { cacheFile } = this.getProjectStoragePaths(
       project.projectPath,
       project.subProject,
