@@ -15,7 +15,7 @@ export class CallbackVariable extends ReactWithCallbackVariable<"callback"> {
         ...options,
         kind: "callback",
         type: "function",
-      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      } as Omit<ComponentFileVarCallback, "var" | "components" | "file">,
       file,
     );
   }

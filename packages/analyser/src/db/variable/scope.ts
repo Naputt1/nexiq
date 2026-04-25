@@ -114,7 +114,7 @@ export class Scope {
       this.owner &&
       (isBaseFunctionVariable(this.owner) || isClassVariable(this.owner))
     ) {
-      v.parent = this.owner as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      v.parent = this.owner;
     }
     if (isBaseFunctionVariable(v) || isClassVariable(v)) {
       if (v.var) {

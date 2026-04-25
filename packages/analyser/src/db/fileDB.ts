@@ -456,6 +456,11 @@ export class File {
 
     this.locIdsMap.set(this.getLocalId(variable), variable);
 
+    // Set the scope ID for faster DB insertion later
+    if (scope.blockId) {
+      variable.scopeId = scope.blockId;
+    }
+
     scope.add(variable);
 
     return variable.id;

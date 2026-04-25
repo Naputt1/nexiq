@@ -57,16 +57,183 @@ export class SqliteDB extends BaseSqliteDB {
           if (fs.existsSync(`${dbPath}-shm`)) fs.unlinkSync(`${dbPath}-shm`);
           if (fs.existsSync(`${dbPath}-wal`)) fs.unlinkSync(`${dbPath}-wal`);
         }
-      } catch (unlinkError) {
-        console.error(
-          `Failed to delete corrupted database at ${dbPath}:`,
-          unlinkError instanceof Error ? unlinkError.message : "Unknown error",
-        );
+      } catch {
+        // ignore unlink error
       }
       db = new Database(dbPath, options);
     }
     super(db);
+    this.db.pragma("synchronous = OFF");
+    this.db.pragma("temp_store = MEMORY");
     this.initSchema();
+    this.initStatements();
+  }
+
+  private insertEntityStmt!: Database.Statement;
+  private insertScopeStmt!: Database.Statement;
+  private insertSymbolStmt!: Database.Statement;
+  private insertRenderStmt!: Database.Statement;
+  private insertExportStmt!: Database.Statement;
+  private insertFileStmt!: Database.Statement;
+  private deleteRelationsByScopeStmt!: Database.Statement;
+  private deleteRelationsByPathStmt!: Database.Statement;
+  private deleteExportsStmt!: Database.Statement;
+  private deleteRendersStmt!: Database.Statement;
+  private deleteSymbolsStmt!: Database.Statement;
+  private deleteScopesStmt!: Database.Statement;
+  private insertParentRelationStmt!: Database.Statement;
+  private insertRelationStmt!: Database.Statement;
+  private saveFileResultsTransaction!: Database.Transaction;
+
+  private initStatements() {
+    this.insertEntityStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO entities 
+      (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
+      VALUES (@id, @scope_id, @kind, @name, @type, @line, @column, @end_line, @end_column, @declaration_kind, @data_json)
+    `);
+
+    this.insertScopeStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO scopes (id, file_id, parent_id, kind, entity_id, data_json)
+      VALUES (@id, @file_id, @parent_id, @kind, @entity_id, @data_json)
+    `);
+
+    this.insertSymbolStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
+      VALUES (@id, @entity_id, @scope_id, @name, @path, @is_alias, @has_default, @data_json)
+    `);
+
+    this.insertRenderStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO renders (id, file_id, parent_entity_id, parent_render_id, render_index, tag, symbol_id, line, column, kind, data_json)
+      VALUES (@id, @file_id, @parent_entity_id, @parent_render_id, @render_index, @tag, @symbol_id, @line, @column, @kind, @data_json)
+    `);
+
+    this.insertExportStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO exports (id, scope_id, symbol_id, entity_id, name, is_default)
+      VALUES (@id, @scope_id, @symbol_id, @entity_id, @name, @is_default)
+    `);
+
+    this.insertFileStmt = this.db.prepare(`
+      INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    this.deleteRelationsByScopeStmt = this.db.prepare(
+      "DELETE FROM relations WHERE from_id IN (SELECT e.id FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?)",
+    );
+
+    this.deleteRelationsByPathStmt = this.db.prepare(
+      "DELETE FROM relations WHERE json_extract(data_json, '$.filePath') = ?",
+    );
+
+    this.deleteExportsStmt = this.db.prepare(
+      "DELETE FROM exports WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
+    );
+
+    this.deleteRendersStmt = this.db.prepare(
+      "DELETE FROM renders WHERE file_id = ?",
+    );
+
+    this.deleteSymbolsStmt = this.db.prepare(
+      "DELETE FROM symbols WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
+    );
+
+    this.deleteScopesStmt = this.db.prepare(
+      "DELETE FROM scopes WHERE file_id = ?",
+    );
+
+    this.insertParentRelationStmt = this.db.prepare(
+      "INSERT OR REPLACE INTO relations (file_id, from_id, to_id, kind) VALUES (?, ?, ?, ?)",
+    );
+
+    this.insertRelationStmt = this.db.prepare(
+      "INSERT OR REPLACE INTO relations (file_id, from_id, to_id, kind, line, column, data_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    );
+
+    this.saveFileResultsTransaction = this.db.transaction(
+      (data: FileResultWithPackage) => {
+        // 1. Insert/Update file
+        const info = this.insertFileStmt.run(
+          data.path,
+          data.package_id || null,
+          data.hash,
+          data.fingerPrint,
+          data.defaultExport,
+          JSON.stringify(data.starExports || []),
+        );
+
+        const fileId = info.lastInsertRowid as number;
+        // In SQLite, INSERT OR REPLACE is a DELETE followed by an INSERT.
+        // Since we have ON DELETE CASCADE on files -> scopes -> (entities, symbols, exports)
+        // and files -> renders and files -> relations, ALL old data for this file
+        // is automatically deleted by the REPLACE above.
+
+        // 2. Create module scope
+        const moduleScopeId = `scope:module:${data.path}`;
+        this.insertScope({
+          id: moduleScopeId,
+          file_id: fileId,
+          kind: "module",
+        });
+
+        const blockScopes = new Map<string, ComponentFileBlockScope>();
+        for (const blockScope of data.blockScopes || []) {
+          blockScopes.set(blockScope.id, blockScope);
+        }
+        for (const blockScope of data.blockScopes || []) {
+          this.insertScope({
+            id: blockScope.id,
+            file_id: fileId,
+            parent_id: blockScope.parentId || moduleScopeId,
+            kind: "block",
+            data_json: JSON.stringify(blockScope.scope),
+          });
+        }
+
+        // 3. Insert Imports as entities and symbols
+        for (const imp of Object.values(data.import)) {
+          const impId = `entity:import:${data.path}:${imp.localName}`;
+          this.insertEntity({
+            id: impId,
+            scope_id: moduleScopeId,
+            kind: "import",
+            name: imp.localName,
+            type: "data",
+            data_json: JSON.stringify(imp),
+          });
+
+          this.insertSymbol({
+            id: `symbol:import:${data.path}:${imp.localName}`,
+            entity_id: impId,
+            scope_id: moduleScopeId,
+            name: imp.localName,
+            is_alias: imp.localName !== imp.importedName,
+          });
+        }
+
+        // 4. Insert variables and their scopes (includes renders and hooks recursively)
+        for (const variable of Object.values(data.var)) {
+          this.recursiveInsertVariable(
+            variable,
+            fileId,
+            moduleScopeId,
+            blockScopes,
+          );
+        }
+
+        // 5. Insert persisted usage relations for this file
+        for (const relation of data.relations || []) {
+          this.insertRelationStmt.run(
+            fileId,
+            relation.from_id,
+            relation.to_id,
+            relation.kind,
+            relation.line ?? 0,
+            relation.column ?? 0,
+            relation.data_json ? JSON.stringify(relation.data_json) : null,
+          );
+        }
+      },
+    );
   }
 
   private initSchema() {
@@ -75,7 +242,7 @@ export class SqliteDB extends BaseSqliteDB {
       user_version: number;
     };
     const currentVersion = versionRow.user_version;
-    const targetVersion = 5;
+    const targetVersion = 7;
 
     if (currentVersion < targetVersion) {
       // Force recreation of affected tables to apply new schema/FK changes
@@ -264,13 +431,15 @@ export class SqliteDB extends BaseSqliteDB {
       );
 
       CREATE TABLE IF NOT EXISTS relations (
+        file_id INTEGER, -- Optional, for cascading deletes
         from_id TEXT NOT NULL, -- Can be symbol_id or entity_id depending on context
         to_id TEXT NOT NULL,
         kind TEXT NOT NULL,
         line INTEGER,
         column INTEGER,
         data_json TEXT,
-        PRIMARY KEY (from_id, to_id, kind, line, column)
+        PRIMARY KEY (from_id, to_id, kind, line, column),
+        FOREIGN KEY (file_id) REFERENCES files (id) ON DELETE CASCADE
       );
 
       CREATE INDEX IF NOT EXISTS idx_entities_scope ON entities (scope_id);
@@ -279,9 +448,11 @@ export class SqliteDB extends BaseSqliteDB {
       CREATE INDEX IF NOT EXISTS idx_symbols_entity ON symbols (entity_id);
       CREATE INDEX IF NOT EXISTS idx_renders_parent ON renders (parent_entity_id);
       CREATE INDEX IF NOT EXISTS idx_renders_hierarchy ON renders (parent_render_id);
+      CREATE INDEX IF NOT EXISTS idx_renders_file ON renders (file_id);
       CREATE INDEX IF NOT EXISTS idx_exports_scope ON exports (scope_id);
       CREATE INDEX IF NOT EXISTS idx_relations_from ON relations (from_id);
       CREATE INDEX IF NOT EXISTS idx_relations_to ON relations (to_id);
+      CREATE INDEX IF NOT EXISTS idx_relations_file ON relations (file_id);
       CREATE INDEX IF NOT EXISTS idx_files_package ON files (package_id);
       CREATE INDEX IF NOT EXISTS idx_package_dependencies_package ON package_dependencies (package_id);
       CREATE INDEX IF NOT EXISTS idx_analysis_runs_package ON analysis_runs (package_id);
@@ -469,12 +640,6 @@ export class SqliteDB extends BaseSqliteDB {
     declaration_kind?: string | null | undefined;
     data_json?: string | null;
   }) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO entities 
-      (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
-      VALUES (@id, @scope_id, @kind, @name, @type, @line, @column, @end_line, @end_column, @declaration_kind, @data_json)
-    `);
-
     const nameStr =
       typeof data.name === "string" ? data.name : getVariableNameKey(data.name);
     const params = {
@@ -491,7 +656,7 @@ export class SqliteDB extends BaseSqliteDB {
       data_json: data.data_json || null,
     };
 
-    stmt.run(params);
+    this.insertEntityStmt.run(params);
   }
 
   private insertScope(data: {
@@ -502,11 +667,7 @@ export class SqliteDB extends BaseSqliteDB {
     entity_id?: string | null;
     data_json?: string | null;
   }) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO scopes (id, file_id, parent_id, kind, entity_id, data_json)
-      VALUES (@id, @file_id, @parent_id, @kind, @entity_id, @data_json)
-    `);
-    stmt.run({
+    this.insertScopeStmt.run({
       id: data.id,
       file_id: data.file_id,
       parent_id: data.parent_id || null,
@@ -526,11 +687,7 @@ export class SqliteDB extends BaseSqliteDB {
     has_default?: boolean;
     data_json?: string | null;
   }) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
-      VALUES (@id, @entity_id, @scope_id, @name, @path, @is_alias, @has_default, @data_json)
-    `);
-    stmt.run({
+    this.insertSymbolStmt.run({
       id: data.id,
       entity_id: data.entity_id,
       scope_id: data.scope_id,
@@ -555,11 +712,7 @@ export class SqliteDB extends BaseSqliteDB {
     kind: string;
     data_json?: string | null;
   }) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO renders (id, file_id, parent_entity_id, parent_render_id, render_index, tag, symbol_id, line, column, kind, data_json)
-      VALUES (@id, @file_id, @parent_entity_id, @parent_render_id, @render_index, @tag, @symbol_id, @line, @column, @kind, @data_json)
-    `);
-    stmt.run({
+    this.insertRenderStmt.run({
       id: data.id,
       file_id: data.file_id,
       parent_entity_id: data.parent_entity_id,
@@ -582,11 +735,7 @@ export class SqliteDB extends BaseSqliteDB {
     name?: string | null;
     is_default?: boolean;
   }) {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO exports (id, scope_id, symbol_id, entity_id, name, is_default)
-      VALUES (@id, @scope_id, @symbol_id, @entity_id, @name, @is_default)
-    `);
-    stmt.run({
+    this.insertExportStmt.run({
       id: data.id,
       scope_id: data.scope_id,
       symbol_id: data.symbol_id || null,
@@ -604,330 +753,7 @@ export class SqliteDB extends BaseSqliteDB {
   }
 
   public saveFileResults(fileData: FileResultWithPackage) {
-    const transaction = this.db.transaction((data: FileResultWithPackage) => {
-      // 1. Insert/Update file
-      this.db
-        .prepare(
-          `
-        INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `,
-        )
-        .run(
-          data.path,
-          data.package_id || null,
-          data.hash,
-          data.fingerPrint,
-          data.defaultExport,
-          JSON.stringify(data.starExports || []),
-        );
-
-      const file = this.getFileByPath(data.path);
-      if (!file) return;
-      const fileId = file.id;
-
-      // Clean up old data for this file
-      this.db
-        .prepare(
-          "DELETE FROM relations WHERE from_id IN (SELECT e.id FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?)",
-        )
-        .run(fileId);
-      this.db
-        .prepare(
-          "DELETE FROM relations WHERE json_extract(data_json, '$.filePath') = ?",
-        )
-        .run(data.path);
-      this.db
-        .prepare(
-          "DELETE FROM exports WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
-        )
-        .run(fileId);
-      this.db.prepare("DELETE FROM renders WHERE file_id = ?").run(fileId);
-      this.db
-        .prepare(
-          "DELETE FROM symbols WHERE scope_id IN (SELECT id FROM scopes WHERE file_id = ?)",
-        )
-        .run(fileId);
-      this.db.prepare("DELETE FROM scopes WHERE file_id = ?").run(fileId);
-
-      // 2. Create module scope
-      const moduleScopeId = `scope:module:${data.path}`;
-      this.insertScope({
-        id: moduleScopeId,
-        file_id: fileId,
-        kind: "module",
-      });
-
-      const blockScopes = new Map<string, ComponentFileBlockScope>();
-      for (const blockScope of data.blockScopes || []) {
-        blockScopes.set(blockScope.id, blockScope);
-      }
-      for (const blockScope of data.blockScopes || []) {
-        this.insertScope({
-          id: blockScope.id,
-          file_id: fileId,
-          parent_id: blockScope.parentId || moduleScopeId,
-          kind: "block",
-          data_json: JSON.stringify(blockScope.scope),
-        });
-      }
-
-      // 3. Insert Imports as entities and symbols
-      for (const imp of Object.values(data.import)) {
-        const impId = `entity:import:${data.path}:${imp.localName}`;
-        this.insertEntity({
-          id: impId,
-          scope_id: moduleScopeId,
-          kind: "import",
-          name: imp.localName,
-          type: "data",
-          data_json: JSON.stringify(imp),
-        });
-
-        this.insertSymbol({
-          id: `symbol:import:${data.path}:${imp.localName}`,
-          entity_id: impId,
-          scope_id: moduleScopeId,
-          name: imp.localName,
-          is_alias: imp.localName !== imp.importedName,
-        });
-      }
-
-      // 4. Helper for recursive variable and render insertion
-      const insertRender = (
-        render: ComponentInfoRender,
-        parentEntityId: string,
-        currentScopeId: string,
-        parentRenderId?: string,
-      ) => {
-        this.insertRender({
-          id: render.instanceId,
-          file_id: fileId,
-          parent_entity_id: parentEntityId,
-          parent_render_id: parentRenderId || null,
-          render_index: render.renderIndex,
-          tag: render.tag,
-          symbol_id: render.id,
-          line: render.loc.line,
-          column: render.loc.column,
-          kind: render.kind,
-          data_json: JSON.stringify({
-            dependencies: render.dependencies,
-            isDependency: render.isDependency,
-          }),
-        });
-
-        for (const child of Object.values(render.children || {})) {
-          insertRender(
-            child,
-            parentEntityId,
-            currentScopeId,
-            render.instanceId,
-          );
-        }
-      };
-
-      const insertVariable = (
-        v: ComponentFileVar,
-        currentScopeId: string,
-        parentEntityId?: string,
-      ) => {
-        let effectiveScopeId = currentScopeId;
-        let matchedScopeId: string | undefined;
-        let matchedSpan = Number.MAX_SAFE_INTEGER;
-        for (const blockScope of blockScopes.values()) {
-          if (blockScope.parentId !== currentScopeId) continue;
-          const { start, end } = blockScope.scope;
-          const inScope =
-            (v.loc.line > start.line ||
-              (v.loc.line === start.line && v.loc.column >= start.column)) &&
-            (v.loc.line < end.line ||
-              (v.loc.line === end.line && v.loc.column <= end.column));
-          if (!inScope) continue;
-
-          const span =
-            (end.line - start.line) * 10_000 + (end.column - start.column);
-          if (span < matchedSpan) {
-            matchedSpan = span;
-            matchedScopeId = blockScope.id;
-          }
-        }
-        if (matchedScopeId) {
-          effectiveScopeId = matchedScopeId;
-        }
-
-        const nameStr = getVariableNameKey(v.name);
-        const scope = "scope" in v ? v.scope : undefined;
-
-        this.insertEntity({
-          id: v.id,
-          scope_id: effectiveScopeId,
-          kind: v.kind,
-          name: nameStr,
-          type: v.type,
-          line: v.loc.line,
-          column: v.loc.column,
-          end_line: scope?.end?.line,
-          end_column: scope?.end?.column,
-          declaration_kind: v.declarationKind,
-          data_json: JSON.stringify(this.getVariableMetadata(v)),
-        });
-
-        // Index all names in the pattern as symbols
-        const identifiers = getPatternIdentifiers(v.name, v.id);
-        for (const ident of identifiers) {
-          this.insertSymbol({
-            id: ident.id,
-            entity_id: v.id,
-            scope_id: effectiveScopeId,
-            name: ident.name,
-            path: ident.path.length > 0 ? JSON.stringify(ident.path) : null,
-            is_alias: ident.isAlias,
-            has_default: ident.hasDefault,
-          });
-        }
-
-        if (parentEntityId) {
-          this.db
-            .prepare(
-              "INSERT OR REPLACE INTO relations (from_id, to_id, kind) VALUES (?, ?, ?)",
-            )
-            .run(parentEntityId, v.id, "parent-child");
-        }
-
-        // If it's a function/jsx/class, it has its own scope
-        if (
-          (v.type === "function" || v.type === "jsx" || v.type === "class") &&
-          ("var" in v || "children" in v)
-        ) {
-          const newScopeId = `scope:block:${v.id}`;
-          this.insertScope({
-            id: newScopeId,
-            file_id: fileId,
-            parent_id: effectiveScopeId,
-            kind: "block",
-            entity_id: v.id,
-            data_json: scope ? JSON.stringify(scope) : null,
-          });
-
-          if ("var" in v) {
-            for (const childVar of Object.values(v.var || {})) {
-              insertVariable(childVar, newScopeId, v.id);
-            }
-          }
-
-          if (
-            (v.kind === "component" || v.kind === "hook") &&
-            "props" in v &&
-            Array.isArray(v.props)
-          ) {
-            const insertProp = (
-              prop: (typeof v.props)[number],
-              pathSegments: string[] = [],
-            ) => {
-              this.insertEntity({
-                id: prop.id,
-                scope_id: newScopeId,
-                kind: "prop",
-                name: prop.name,
-                type: "data",
-                line: prop.loc?.line ?? null,
-                column: prop.loc?.column ?? null,
-                data_json: JSON.stringify({
-                  type: prop.type,
-                  kind: prop.kind,
-                  defaultValue: prop.defaultValue,
-                }),
-              });
-
-              this.insertSymbol({
-                id: `symbol:${prop.id}`,
-                entity_id: prop.id,
-                scope_id: newScopeId,
-                name: prop.name,
-                path:
-                  pathSegments.length > 0 ? JSON.stringify(pathSegments) : null,
-              });
-
-              for (const childProp of prop.props || []) {
-                insertProp(childProp, [...pathSegments, childProp.name]);
-              }
-            };
-
-            for (const prop of v.props) {
-              insertProp(prop);
-            }
-          }
-
-          if ("children" in v) {
-            for (const render of Object.values(v.children || {})) {
-              if (!render.parentId) {
-                insertRender(render, v.id, newScopeId);
-              }
-            }
-          }
-        }
-      };
-
-      // 5. Insert Variables (recursive)
-      for (const v of Object.values(data.var)) {
-        insertVariable(v, moduleScopeId);
-      }
-
-      // 6. Insert Exports
-      for (const exp of Object.values(data.export)) {
-        // Find if this export refers to a symbol we just added
-        let symbolId: string | undefined;
-        let entityId: string | undefined = exp.id;
-
-        if (exp.type === "named") {
-          // Typically points to a variable in the same file
-          const varId = `entity:${data.path}:${exp.name}`;
-          entityId = varId;
-          symbolId = `symbol:${data.path}:${exp.name}`;
-        }
-
-        this.insertExport({
-          id: `export:${data.path}:${exp.name}`,
-          scope_id: moduleScopeId,
-          entity_id: entityId ?? null,
-          symbol_id: symbolId ?? null,
-          name: exp.name,
-          is_default: exp.type === "default",
-        });
-      }
-
-      // 7. Insert TS Types
-      for (const type of Object.values(data.tsTypes)) {
-        this.insertEntity({
-          id: type.id,
-          scope_id: moduleScopeId,
-          kind: "type",
-          name: type.name,
-          line: type.loc.line,
-          column: type.loc.column,
-          data_json: JSON.stringify(type),
-        });
-      }
-
-      // 8. Insert persisted usage relations for this file
-      for (const relation of data.relations || []) {
-        this.db
-          .prepare(
-            "INSERT OR REPLACE INTO relations (from_id, to_id, kind, line, column, data_json) VALUES (?, ?, ?, ?, ?, ?)",
-          )
-          .run(
-            relation.from_id,
-            relation.to_id,
-            relation.kind,
-            relation.line ?? 0,
-            relation.column ?? 0,
-            relation.data_json ? JSON.stringify(relation.data_json) : null,
-          );
-      }
-    });
-
-    transaction(fileData);
+    this.saveFileResultsTransaction(fileData);
   }
 
   public saveFileResultsForRun(
@@ -957,8 +783,15 @@ export class SqliteDB extends BaseSqliteDB {
       kind: _kind,
       type: _type,
       loc: _loc,
+      scopeId: _scopeId,
+      // @ts-ignore
+      var: _var,
+      // @ts-ignore
+      children: _children,
+      // @ts-ignore
+      props: _props,
       ...rest
-    } = v;
+    } = v as unknown as Record<string, unknown>;
     return rest;
   }
 
@@ -1144,14 +977,195 @@ export class SqliteDB extends BaseSqliteDB {
     return result;
   }
 
+  private recursiveInsertRender(
+    render: ComponentInfoRender,
+    fileId: number,
+    parentEntityId: string,
+    currentScopeId: string,
+    parentRenderId?: string,
+  ) {
+    this.insertRender({
+      id: render.instanceId,
+      file_id: fileId,
+      parent_entity_id: parentEntityId,
+      parent_render_id: parentRenderId || null,
+      render_index: render.renderIndex,
+      tag: render.tag,
+      symbol_id: render.id,
+      line: render.loc.line,
+      column: render.loc.column,
+      kind: render.kind,
+      data_json: JSON.stringify({
+        dependencies: render.dependencies,
+        isDependency: render.isDependency,
+      }),
+    });
+
+    for (const child of Object.values(render.children || {})) {
+      this.recursiveInsertRender(
+        child,
+        fileId,
+        parentEntityId,
+        currentScopeId,
+        render.instanceId,
+      );
+    }
+  }
+
+  private recursiveInsertVariable(
+    v: ComponentFileVar,
+    fileId: number,
+    moduleScopeId: string,
+    blockScopes: Map<string, ComponentFileBlockScope>,
+    parentEntityId?: string,
+  ) {
+    const scope = v.scopeId ? blockScopes.get(v.scopeId) : undefined;
+    const effectiveScopeId = scope ? scope.id : moduleScopeId;
+
+    let nameStr = "";
+    if (typeof v.name === "string") {
+      nameStr = v.name;
+    } else if (v.name && typeof v.name === "object") {
+      if (v.name.type === "identifier") {
+        nameStr = v.name.name;
+      } else {
+        nameStr = JSON.stringify(v.name);
+      }
+    }
+
+    this.insertEntity({
+      id: v.id,
+      scope_id: effectiveScopeId,
+      kind: v.kind,
+      name: nameStr,
+      type: v.type,
+      line: v.loc.line,
+      column: v.loc.column,
+      end_line: scope?.scope.end.line,
+      end_column: scope?.scope.end.column,
+      declaration_kind: v.declarationKind,
+      data_json: JSON.stringify(this.getVariableMetadata(v)),
+    });
+
+    // Index all names in the pattern as symbols
+    const identifiers = getPatternIdentifiers(v.name, v.id);
+    for (const ident of identifiers) {
+      this.insertSymbol({
+        id: ident.id,
+        entity_id: v.id,
+        scope_id: effectiveScopeId,
+        name: ident.name,
+        path: ident.path.length > 0 ? JSON.stringify(ident.path) : null,
+        is_alias: ident.isAlias,
+        has_default: ident.hasDefault,
+      });
+    }
+
+    if (parentEntityId) {
+      this.insertParentRelationStmt.run(
+        fileId,
+        parentEntityId,
+        v.id,
+        "parent-child",
+      );
+    }
+
+    const vKind = v.kind as string;
+    // If it's a function/jsx/class/component/hook, it has its own scope
+    if (
+      v.type === "function" ||
+      v.type === "jsx" ||
+      v.type === "class" ||
+      vKind === "component" ||
+      vKind === "hook" ||
+      vKind === "memo" ||
+      vKind === "callback"
+    ) {
+      const entityScopeId = `scope:entity:${v.id}`;
+      this.insertScope({
+        id: entityScopeId,
+        file_id: fileId,
+        parent_id: effectiveScopeId,
+        kind: "block",
+        entity_id: v.id,
+        data_json: "scope" in v ? JSON.stringify(v.scope) : null,
+      });
+
+      if (
+        (v.kind === "component" || v.kind === "hook") &&
+        "props" in v &&
+        Array.isArray(v.props)
+      ) {
+        const insertProp = (
+          prop: (typeof v.props)[number],
+          pathSegments: string[] = [],
+        ) => {
+          this.insertEntity({
+            id: prop.id,
+            scope_id: entityScopeId,
+            kind: "prop",
+            name: prop.name,
+            type: "data",
+            line: prop.loc?.line ?? null,
+            column: prop.loc?.column ?? null,
+            data_json: JSON.stringify({
+              type: prop.type,
+              kind: prop.kind,
+              defaultValue: prop.defaultValue,
+            }),
+          });
+
+          this.insertSymbol({
+            id: `symbol:${prop.id}`,
+            entity_id: prop.id,
+            scope_id: entityScopeId,
+            name: prop.name,
+            path: pathSegments.length > 0 ? JSON.stringify(pathSegments) : null,
+          });
+
+          for (const childProp of prop.props || []) {
+            insertProp(childProp, [...pathSegments, childProp.name]);
+          }
+        };
+
+        for (const prop of v.props) {
+          insertProp(prop);
+        }
+      }
+
+      if ("var" in v && v.var) {
+        for (const childVar of Object.values(v.var)) {
+          this.recursiveInsertVariable(
+            childVar,
+            fileId,
+            moduleScopeId,
+            blockScopes,
+            v.id,
+          );
+        }
+      }
+
+      if ("children" in v && v.children) {
+        for (const childRender of Object.values(v.children)) {
+          this.recursiveInsertRender(childRender, fileId, v.id, entityScopeId);
+        }
+      }
+    }
+  }
+
   public saveEdges(edges: { from: string; to: string; label: string }[]) {
     const transaction = this.db.transaction(
       (edgeList: { from: string; to: string; label: string }[]) => {
-        const stmt = this.db.prepare(
-          "INSERT OR IGNORE INTO relations (from_id, to_id, kind, line, column) VALUES (?, ?, ?, 0, 0)",
-        );
         for (const edge of edgeList) {
-          stmt.run(edge.from, edge.to, edge.label);
+          this.insertRelationStmt.run(
+            null,
+            edge.from,
+            edge.to,
+            edge.label,
+            0,
+            0,
+            null,
+          );
         }
       },
     );
