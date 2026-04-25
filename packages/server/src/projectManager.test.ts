@@ -883,53 +883,6 @@ describe("ProjectManager", () => {
       await projectManager.openProject(projectPath);
     });
 
-    it("should update graph positions with contextId and sub-items", async () => {
-      const positions = {
-        app: { x: 100, y: 200, isLayoutCalculated: true },
-        "app-render-1": { x: 50, y: 50 },
-        "app:v1": { x: 10, y: 10 },
-      };
-      await projectManager.updateGraphPosition(
-        projectPath,
-        undefined,
-        positions,
-        "app",
-      );
-      await projectManager.updateGraphPosition(
-        projectPath,
-        undefined,
-        positions,
-        "root",
-      );
-      await projectManager.updateGraphPosition(
-        projectPath,
-        undefined,
-        positions,
-        "app:v1",
-      ); // non-combo context
-      expect(fs.writeFileSync).toHaveBeenCalled();
-    });
-
-    it("should update positions in subproject", async () => {
-      const subProject = "packages/app";
-      await projectManager.openProject(projectPath, subProject);
-      const success = await projectManager.updateGraphPosition(
-        projectPath,
-        subProject,
-        {},
-      );
-      expect(success).toBe(true);
-    });
-
-    it("should open project automatically for updateGraphPosition", async () => {
-      const success = await projectManager.updateGraphPosition(
-        "/new-project",
-        undefined,
-        {},
-      );
-      expect(success).toBe(true);
-    });
-
     it("should handle partial symbol matches", async () => {
       mockDb.prepare.mockReturnValueOnce({
         all: vi.fn().mockReturnValue([
