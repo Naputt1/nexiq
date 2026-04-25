@@ -229,6 +229,9 @@ function resolveImportAgainstExports(
 }
 
 function cloneFile(file: ComponentFile): ComponentFile {
+  if (process.env.MODE !== "test") {
+    return file;
+  }
   return JSON.parse(JSON.stringify(file)) as ComponentFile;
 }
 
@@ -289,6 +292,10 @@ function applyStringReplacements(
   value: string,
   replacements: StringReplacement[],
 ) {
+  // This is only for tests and is very slow, so we should only include it in test
+  if (process.env.MODE !== "test") {
+    return value;
+  }
   if (replacements.length === 0) {
     return value;
   }
@@ -314,6 +321,9 @@ function applyStringReplacements(
 }
 
 function remapJsonValue<T>(value: T, replacements: StringReplacement[]): T {
+  if (process.env.MODE !== "test" || replacements.length === 0) {
+    return value;
+  }
   return JSON.parse(
     applyStringReplacements(JSON.stringify(value), replacements),
   ) as T;
@@ -399,6 +409,8 @@ function buildPackageGraphRemapContext(
     }
   };
 
+  const isTest = process.env.MODE === "test";
+
   for (const file of Object.values(summary.graph.files)) {
     const canonicalPath = toRootRelativePath(
       workspaceRoot,
@@ -407,23 +419,28 @@ function buildPackageGraphRemapContext(
     );
     canonicalPathByFile.set(file.path, canonicalPath);
 
-    const fileLocalIds = collectFileLocalGraphIds(file);
-    const replacements = new Map<string, string>();
-    replacements.set(file.path, canonicalPath);
-    addGlobalId(file.path, canonicalPath);
+    if (isTest) {
+      const fileLocalIds = collectFileLocalGraphIds(file);
+      const replacements = new Map<string, string>();
+      replacements.set(file.path, canonicalPath);
+      addGlobalId(file.path, canonicalPath);
 
-    for (const oldId of fileLocalIds) {
-      const qualifiedId = qualifyGraphId(summary.packageId, oldId);
-      replacements.set(oldId, qualifiedId);
-      addGlobalId(oldId, qualifiedId);
+      for (const oldId of fileLocalIds) {
+        const qualifiedId = qualifyGraphId(summary.packageId, oldId);
+        replacements.set(oldId, qualifiedId);
+        addGlobalId(oldId, qualifiedId);
+      }
+
+      fileReplacementsByPath.set(
+        file.path,
+        sortReplacements(
+          Array.from(replacements.entries()).map(([from, to]) => ({
+            from,
+            to,
+          })),
+        ),
+      );
     }
-
-    fileReplacementsByPath.set(
-      file.path,
-      sortReplacements(
-        Array.from(replacements.entries()).map(([from, to]) => ({ from, to })),
-      ),
-    );
   }
 
   return {
@@ -993,6 +1010,8 @@ export class CentralMaster {
       resolve: [],
     };
 
+    const isTest = process.env.MODE === "test";
+
     for (const summary of summaries) {
       const packageDir =
         packageDirById.get(summary.packageId) || summary.srcDir;
@@ -1001,36 +1020,49 @@ export class CentralMaster {
         packageDir,
         summary,
       );
-      const globalReplacements = sortReplacements(
-        Array.from(remapContext.globalIdMap.entries()).map(([from, to]) => ({
-          from,
-          to,
-        })),
-      );
 
       for (const file of Object.values(summary.graph.files)) {
         const mergedKey =
           remapContext.canonicalPathByFile.get(file.path) || file.path;
-        const fileReplacements =
-          remapContext.fileReplacementsByPath.get(file.path) || [];
-        merged.files[mergedKey] = remapJsonValue(cloneFile(file), [
-          ...fileReplacements,
-          ...globalReplacements,
-        ]);
+
+        if (isTest) {
+          const globalReplacements = sortReplacements(
+            Array.from(remapContext.globalIdMap.entries()).map(
+              ([from, to]) => ({
+                from,
+                to,
+              }),
+            ),
+          );
+          const fileReplacements =
+            remapContext.fileReplacementsByPath.get(file.path) || [];
+
+          merged.files[mergedKey] = remapJsonValue(cloneFile(file), [
+            ...fileReplacements,
+            ...globalReplacements,
+          ]);
+        } else {
+          merged.files[mergedKey] = file;
+        }
       }
 
-      merged.edges.push(
-        ...summary.graph.edges.map((edge) => ({
-          ...edge,
-          from: remapContext.globalIdMap.get(edge.from) || edge.from,
-          to: remapContext.globalIdMap.get(edge.to) || edge.to,
-        })),
-      );
-      merged.resolve.push(
-        ...summary.graph.resolve.map((task) =>
-          remapResolveTask(task, remapContext),
-        ),
-      );
+      if (isTest) {
+        merged.edges.push(
+          ...summary.graph.edges.map((edge) => ({
+            ...edge,
+            from: remapContext.globalIdMap.get(edge.from) || edge.from,
+            to: remapContext.globalIdMap.get(edge.to) || edge.to,
+          })),
+        );
+        merged.resolve.push(
+          ...summary.graph.resolve.map((task) =>
+            remapResolveTask(task, remapContext),
+          ),
+        );
+      } else {
+        merged.edges.push(...summary.graph.edges);
+        merged.resolve.push(...summary.graph.resolve);
+      }
     }
 
     return merged;

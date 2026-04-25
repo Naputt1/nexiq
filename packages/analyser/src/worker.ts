@@ -98,9 +98,11 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     file.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
   }
   const fileData = file!.getData();
-  console.error(
-    `[Worker ${threadId}] Found ${Object.keys(fileData.var).length} top-level components/variables in ${filePath}`,
-  );
+  if (process.env.MODE === "development") {
+    console.error(
+      `[Worker ${threadId}] Found ${Object.keys(fileData.var).length} top-level components/variables in ${filePath}`,
+    );
+  }
   return {
     fileData,
     resolveTasks: componentDB.getResolveTasks(),
@@ -110,13 +112,17 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
 if (parentPort) {
   parentPort.on("message", async (request: AnalyzerWorkerRequest) => {
     const results: FileTaskMessage[] = [];
-    console.log(
-      `[Worker ${threadId}] Received batch: ${request.filePaths.length} files`,
-    );
+    if (process.env.MODE === "development") {
+      console.log(
+        `[Worker ${threadId}] Received batch: ${request.filePaths.length} files`,
+      );
+    }
 
     for (const filePath of request.filePaths) {
       try {
-        console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
+        if (process.env.MODE === "development") {
+          console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
+        }
         const { fileData, resolveTasks } = await analyzeFile(
           filePath,
           sessionConfig,
