@@ -1,4 +1,8 @@
-import type { ComponentFileVarCallHook } from "@nexiq/shared";
+import type {
+  ComponentFileVarCallHook,
+  DBBatch,
+  CallHookMetadata,
+} from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { ReactVariable } from "./reactVariable.ts";
 
@@ -19,7 +23,7 @@ export class CallHookVariable extends ReactVariable<"data", "hook"> {
     this.call = options.call;
   }
 
-  public load(data: CallHookVariable) {
+  public load(data: Partial<ComponentFileVarCallHook>) {
     super.load(data);
     this.call = data.call || this.call;
     this.kind = "hook";
@@ -37,5 +41,13 @@ export class CallHookVariable extends ReactVariable<"data", "hook"> {
       name: this.name,
       call: this.call,
     };
+  }
+
+  public toDBRow(batch: DBBatch, scopeId: string): void {
+    const row = this.getBaseRow(scopeId);
+    row.data_json = JSON.stringify({
+      call: this.call,
+    } as CallHookMetadata);
+    batch.entities.add(row);
   }
 }

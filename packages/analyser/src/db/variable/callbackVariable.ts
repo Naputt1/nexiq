@@ -20,7 +20,7 @@ export class CallbackVariable extends ReactWithCallbackVariable<"callback"> {
     );
   }
 
-  public load(data: CallbackVariable) {
+  public load(data: Partial<ComponentFileVarCallback>) {
     super.load(data);
 
     // TODO: handle merge

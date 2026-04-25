@@ -144,7 +144,11 @@ describe("analyser robustness", () => {
       },
     } as unknown as FunctionVariable;
 
-    expect(() => existing.load(incoming)).not.toThrow();
+    expect(() =>
+      existing.load(
+        incoming as unknown as Partial<ReturnType<typeof existing.getData>>,
+      ),
+    ).not.toThrow();
   });
 
   it("should tolerate function variables with missing nested scopes during dependency resolution", () => {
@@ -165,28 +169,27 @@ describe("analyser robustness", () => {
       });
 
       componentDB.addFile("/App.tsx");
-      const id = componentDB.addVariable(
-        "/App.tsx",
-        {
-          name: {
-            type: "identifier",
-            name: "handler",
-            id: "handler",
-            loc: { line: 1, column: 13 },
-          },
-          type: "function",
-          dependencies: {},
+      const id = componentDB.addVariable("/App.tsx", {
+        name: {
+          type: "identifier",
+          name: "handler",
+          id: "handler",
           loc: { line: 1, column: 13 },
-          scope: {
-            start: { line: 1, column: 13 },
-            end: { line: 1, column: 27 },
-          },
-          var: {},
-          children: {},
-        } as any,
-      );
+        },
+        type: "function",
+        dependencies: {},
+        loc: { line: 1, column: 13 },
+        scope: {
+          start: { line: 1, column: 13 },
+          end: { line: 1, column: 27 },
+        },
+        var: {},
+        children: {},
+      } as any);
 
-      const runtimeHandler = componentDB.getFile("/App.tsx").var.get(id, true) as any;
+      const runtimeHandler = componentDB
+        .getFile("/App.tsx")
+        .var.get(id, true) as any;
       runtimeHandler.var = undefined;
 
       expect(() => componentDB.resolveDependency()).not.toThrow();

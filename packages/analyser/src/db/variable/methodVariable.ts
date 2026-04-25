@@ -22,7 +22,7 @@ export class MethodVariable extends BaseFunctionVariable<"method", "function"> {
     );
   }
 
-  public load(data: MethodVariable) {
+  public load(data: Partial<ComponentFileVarMethod>) {
     super.load(data);
   }
 
@@ -36,5 +36,9 @@ export class MethodVariable extends BaseFunctionVariable<"method", "function"> {
 
   public getData(): ComponentFileVarMethod {
     return this.getBaseData();
+  }
+
+  protected getDataInternal() {
+    return super.getDataInternal();
   }
 }

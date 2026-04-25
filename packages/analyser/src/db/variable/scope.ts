@@ -4,6 +4,7 @@ import type {
   VariableLoc,
   VariableScope,
   VarKind,
+  DBBatch,
 } from "@nexiq/shared";
 import type { Variable } from "./variable.ts";
 import { isBaseFunctionVariable, isClassVariable } from "./type.ts";
@@ -201,7 +202,7 @@ export class Scope {
         v.parent = this;
       } else {
         const existing = this.variables.get(id)!;
-        existing.load(v);
+        existing.merge(v as Parameters<typeof existing.merge>[0]);
       }
     }
   }
@@ -250,5 +251,49 @@ export class Scope {
     }
 
     return data;
+  }
+
+  public toDBRow(
+    batch: DBBatch,
+    scopeId: string,
+    _parentScopeId: string | null,
+  ): void {
+    // 1. Process variables in this scope
+    for (const v of this.variables.values()) {
+      v.toDBRow(batch, scopeId);
+    }
+
+    // 2. Process symbol mappings in this scope
+    for (const [name, v] of this.nameToVariable) {
+      const symbolId = this.nameToId.get(name)!;
+      batch.symbols.add({
+        id: symbolId,
+        entity_id: v.id,
+        scope_id: scopeId,
+        name,
+        path: null,
+        is_alias: symbolId !== v.id ? 1 : 0,
+        has_default: 0,
+        data_json: null,
+      });
+    }
+
+    // 3. Process child scopes (blocks)
+    for (const childScope of this.childScopes) {
+      if (childScope.blockId && childScope.loc) {
+        batch.scopes.add({
+          id: childScope.blockId,
+          file_id: 0, // Placeholder
+          parent_id: scopeId,
+          kind: "block",
+          entity_id: null,
+          data_json: JSON.stringify(childScope.loc),
+        });
+        childScope.toDBRow(batch, childScope.blockId, scopeId);
+      } else {
+        // Nested scope without blockId (shouldn't happen often but let's be safe)
+        childScope.toDBRow(batch, scopeId, _parentScopeId);
+      }
+    }
   }
 }

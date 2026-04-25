@@ -17,7 +17,7 @@ export abstract class ReactVariable<
     super(options, file);
   }
 
-  public load(data: ReactVariable<TType, TKind>) {
+  public load(data: Partial<ComponentFileVarReact<TType, TKind>>) {
     super.load(data);
   }
 

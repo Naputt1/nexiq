@@ -6,10 +6,13 @@ import type {
   VariableName,
   VarKind,
   VarType,
+  DBBatch,
+  EntityRow,
 } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { getDeterministicId } from "../../utils/hash.ts";
 import { Scope } from "./scope.ts";
+import { getVariableNameKey } from "../../analyzer/pattern.ts";
 
 export abstract class Variable<
   TType extends VarType = VarType,
@@ -54,17 +57,31 @@ export abstract class Variable<
     this.file = file;
   }
 
-  public load(data: Variable<TType>) {
-    this.type = data.type;
-    this.declarationKind = data.declarationKind;
-    this.isStatic = data.isStatic;
-    this.memberKind = data.memberKind;
+  public load(data: Partial<ComponentFileVarBase<TType, TKind>>) {
+    this.type = (data.type as TType) ?? this.type;
+    this.declarationKind = data.declarationKind ?? this.declarationKind;
+    this.isStatic = data.isStatic ?? this.isStatic;
+    this.memberKind = data.memberKind ?? this.memberKind;
 
     // TODO: handle merge
-    this.dependencies = data.dependencies;
+    this.dependencies = data.dependencies ?? this.dependencies;
 
-    this.loc = data.loc;
-    this.scopeId = data.scopeId;
+    this.loc = data.loc ?? this.loc;
+    this.scopeId = data.scopeId ?? this.scopeId;
+  }
+
+  /**
+   * Merge state from another Variable of the same kind.
+   * Used by Scope when deduplicating variables across threads.
+   */
+  public merge(other: Variable<TType, TKind>) {
+    this.type = other.type ?? this.type;
+    this.declarationKind = other.declarationKind ?? this.declarationKind;
+    this.isStatic = other.isStatic ?? this.isStatic;
+    this.memberKind = other.memberKind ?? this.memberKind;
+    this.dependencies = other.dependencies ?? this.dependencies;
+    this.loc = other.loc ?? this.loc;
+    this.scopeId = other.scopeId ?? this.scopeId;
   }
 
   protected getBaseData(): ComponentFileVarBase<TType, TKind> {
@@ -91,4 +108,22 @@ export abstract class Variable<
   protected abstract getDataInternal(): unknown;
 
   public abstract getData(): ComponentFileVar;
+
+  public abstract toDBRow(batch: DBBatch, scopeId: string): void;
+
+  protected getBaseRow(scopeId: string): EntityRow {
+    return {
+      id: this.id,
+      scope_id: scopeId,
+      kind: this.kind,
+      name: getVariableNameKey(this.name),
+      type: this.type,
+      line: this.loc.line,
+      column: this.loc.column,
+      end_line: null,
+      end_column: null,
+      declaration_kind: this.declarationKind ?? null,
+      data_json: null,
+    };
+  }
 }

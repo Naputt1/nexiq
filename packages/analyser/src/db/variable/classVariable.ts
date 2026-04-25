@@ -2,6 +2,8 @@ import type {
   ComponentFileVarBase,
   ComponentFileVarClass,
   VariableScope,
+  DBBatch,
+  ClassMetadata,
 } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { Variable } from "./variable.ts";
@@ -31,7 +33,7 @@ export class ClassVariable extends Variable<"data", "class"> {
     this.superClass = options.superClass;
   }
 
-  public load(data: ClassVariable) {
+  public load(data: Partial<ComponentFileVarClass>) {
     super.load(data);
 
     this.scope = data.scope || this.scope;
@@ -60,5 +62,25 @@ export class ClassVariable extends Variable<"data", "class"> {
 
   public getData(): ComponentFileVarClass {
     return this.getBaseData();
+  }
+
+  public toDBRow(batch: DBBatch, scopeId: string): void {
+    const row = this.getBaseRow(scopeId);
+    row.data_json = JSON.stringify({
+      superClass: this.superClass,
+    } as ClassMetadata);
+    batch.entities.add(row);
+
+    const innerScopeId = `scope:block:${this.id}`;
+    batch.scopes.add({
+      id: innerScopeId,
+      file_id: 0,
+      parent_id: scopeId,
+      kind: "class",
+      entity_id: this.id,
+      data_json: JSON.stringify(this.scope),
+    });
+
+    this.var.toDBRow(batch, innerScopeId, scopeId);
   }
 }

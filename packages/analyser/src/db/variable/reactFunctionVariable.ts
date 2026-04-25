@@ -10,6 +10,8 @@ import type {
   TypeDataRef,
   VariableName,
   VarType,
+  HookMetadata,
+  DBBatch,
 } from "@nexiq/shared";
 import { BaseFunctionVariable } from "./baseFunctionVariable.ts";
 import type { File } from "../fileDB.ts";
@@ -17,7 +19,6 @@ import { StateVariable } from "./stateVariable.ts";
 import {
   isCallbackVariable,
   isMemoVariable,
-  isReactFunctionVariable,
   isRefVariable,
   isStateVariable,
 } from "./type.ts";
@@ -440,22 +441,20 @@ export abstract class ReactFunctionVariable<
     }
   }
 
-  public load(data: ReactFunctionVariable<TKind, TType>) {
+  public load(data: Partial<ComponentFileVarReactFunction<TKind, TType>>) {
     super.load(data);
 
-    if (isReactFunctionVariable(data)) {
-      this.propName = data.propName || this.propName;
-      if (data.props.length > 0) {
-        this.props = [...data.props];
-      }
-      if (data.hooks.length > 0) {
-        this.hooks = [...data.hooks];
-      }
-      if (Object.keys(data.effects).length > 0) {
-        this.effects = { ...data.effects };
-      }
-      this.syncSets();
+    this.propName = data.propName || this.propName;
+    if (data.props && data.props.length > 0) {
+      this.props = [...data.props];
     }
+    if (data.hooks && data.hooks.length > 0) {
+      this.hooks = [...data.hooks];
+    }
+    if (data.effects && Object.keys(data.effects).length > 0) {
+      this.effects = { ...data.effects };
+    }
+    this.syncSets();
   }
 
   protected getBaseData(): ComponentFileVarReactFunction<TKind, TType> {
@@ -470,15 +469,61 @@ export abstract class ReactFunctionVariable<
     };
   }
 
-  protected getDataInternal() {
+  protected getMetadata(): HookMetadata {
     return {
-      ...super.getDataInternal(),
       states: [...this.states],
       refs: [...this.refs],
       props: this.props,
+      params: this.props, // Use props as params for now
+      ...(this.async !== undefined ? { async: this.async } : {}),
       propName: this.propName,
       hooks: this.hooks,
       effects: this.effects,
     };
+  }
+
+  public override toDBRow(batch: DBBatch, scopeId: string): void {
+    super.toDBRow(batch, scopeId);
+
+    const innerScopeId = `scope:block:${this.id}`;
+
+    const insertProp = (prop: PropData, pathSegments: string[] = []) => {
+      batch.entities.add({
+        id: prop.id,
+        scope_id: innerScopeId,
+        kind: "prop",
+        name: prop.name,
+        type: "data",
+        line: prop.loc?.line ?? null,
+        column: prop.loc?.column ?? null,
+        end_line: null,
+        end_column: null,
+        declaration_kind: null,
+        data_json: JSON.stringify({
+          type: prop.type,
+          kind: prop.kind,
+          defaultValue: prop.defaultValue,
+        }),
+      });
+
+      batch.symbols.add({
+        id: `symbol:${prop.id}`,
+        entity_id: prop.id,
+        scope_id: innerScopeId,
+        name: prop.name,
+        path: pathSegments.length > 0 ? JSON.stringify(pathSegments) : null,
+        is_alias: 0,
+        has_default: 0,
+        data_json: null,
+      });
+
+      for (const childProp of prop.props || []) {
+        insertProp(childProp, [...pathSegments, childProp.name]);
+      }
+    };
+
+    for (const prop of this.props) {
+      insertProp(prop);
+    }
   }
 }

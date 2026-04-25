@@ -3,10 +3,11 @@ import type {
   ReactDependency,
   ReactWithCallbackVar,
   VarType,
+  MemoMetadata,
+  CallbackMetadata,
 } from "@nexiq/shared";
 import { ReactFunctionVariable } from "./reactFunctionVariable.ts";
 import type { File } from "../fileDB.ts";
-import { isCallbackVariable, isMemoVariable } from "./type.ts";
 
 export abstract class ReactWithCallbackVariable<
   TKind extends ReactWithCallbackVar = ReactWithCallbackVar,
@@ -36,17 +37,32 @@ export abstract class ReactWithCallbackVariable<
     this.reactDeps = options.reactDeps;
   }
 
-  public load(data: ReactFunctionVariable<TKind, TType>) {
+  public load(data: Partial<ComponentFileVarReactWithCallback<TKind, TType>>) {
     super.load(data);
 
-    if (isMemoVariable(data) || isCallbackVariable(data)) {
-      this.reactDeps = data.reactDeps ? [...data.reactDeps] : this.reactDeps;
+    if (data.reactDeps) {
+      this.reactDeps = [...data.reactDeps];
     }
+  }
+  protected getMetadata(): MemoMetadata | CallbackMetadata {
+    return {
+      ...super.getMetadata(),
+      reactDeps: this.reactDeps,
+      scope: this.scope,
+      ...(this.async !== undefined ? { async: this.async } : {}),
+    };
   }
 
   protected getBaseData(): ComponentFileVarReactWithCallback<TKind, TType> {
     return {
       ...super.getBaseData(),
+      reactDeps: this.reactDeps,
+    };
+  }
+
+  protected getDataInternal() {
+    return {
+      ...super.getDataInternal(),
       reactDeps: this.reactDeps,
     };
   }

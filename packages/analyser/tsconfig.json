@@ -3,6 +3,7 @@
   "compilerOptions": {
     // File Layout
     "outDir": "./dist",
+    "rootDir": "../../",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",

@@ -13,14 +13,16 @@ export class HookVariable extends ReactFunctionVariable<"hook"> {
     super({ ...options, kind: "hook", type: "function" }, file);
   }
 
-  public load(data: HookVariable) {
+  public load(data: Partial<ComponentFileVarHook>) {
     super.load(data);
     this.kind = "hook";
   }
 
   public getData(): ComponentFileVarHook {
-    return {
-      ...super.getBaseData(),
-    } as ComponentFileVarHook;
+    return this.getBaseData() as ComponentFileVarHook;
+  }
+
+  protected getDataInternal() {
+    return super.getDataInternal();
   }
 }

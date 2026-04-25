@@ -31,7 +31,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Other.tsx",
-          "hash": "8b6d38a3b40e0676",
+          "hash": "3318c3b16a255a53",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -158,7 +158,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "454b252e783e5e23",
+          "hash": "e6faf806ad55b805",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -331,7 +331,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "96c7f1d788ad5af2",
+          "hash": "528f9cbb93dd884a",
           "dependencies": {},
           "loc": {
             "line": 5,
@@ -352,7 +352,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "a915c5737b2d783d",
+              "hash": "9e6363636ae67637",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -412,7 +412,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "de71afcaa3119996",
+          "hash": "adfda33339634357",
           "dependencies": {},
           "loc": {
             "line": 9,
@@ -494,7 +494,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "d82906f4b72b90c1",
+          "hash": "3bb287d9433c4f3d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1004,7 +1004,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "505d052ec69ba87f",
+          "hash": "3880546857332ecd",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1100,7 +1100,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "268c9e7d2298528e",
+          "hash": "d2c9ac6b1f216a0c",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {

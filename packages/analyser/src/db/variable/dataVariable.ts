@@ -3,6 +3,7 @@ import type {
   ComponentFileVarNormalData,
   ComponentInfoRender,
   VarKind,
+  DBBatch,
 } from "@nexiq/shared";
 import { Variable } from "./variable.ts";
 import type { File } from "../fileDB.ts";
@@ -21,10 +22,10 @@ export class DataVariable extends Variable<"data"> {
     this.children = {};
   }
 
-  public load(data: DataVariable) {
+  public load(data: Partial<ComponentFileVarNormalData>) {
     super.load(data);
 
-    this.type = data.type;
+    if (data.type !== undefined) this.type = data.type;
     if (data.children) {
       this.children = { ...data.children };
     }
@@ -51,5 +52,13 @@ export class DataVariable extends Variable<"data"> {
       name: this.name,
       children: this.children,
     };
+  }
+
+  public toDBRow(batch: DBBatch, scopeId: string): void {
+    const row = this.getBaseRow(scopeId);
+    row.data_json = JSON.stringify({
+      children: this.children,
+    });
+    batch.entities.add(row);
   }
 }

@@ -203,7 +203,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Child.tsx",
-          "hash": "4d2e17549592670c",
+          "hash": "854978d6028725d",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -417,7 +417,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "10dcea7c5662bb9c",
+          "hash": "a83f685df8b82859",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -945,7 +945,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "def0fd8e5e43bece",
+              "hash": "9e7b6204a2889886",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -967,7 +967,7 @@
                   "kind": "normal",
                   "type": "function",
                   "file": "/src/App.tsx",
-                  "hash": "e93088c36cdae65c",
+                  "hash": "7e0d98b2fac1e30c",
                   "declarationKind": "const",
                   "dependencies": {},
                   "loc": {
@@ -1272,7 +1272,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/var.tsx",
-          "hash": "711828848eda9049",
+          "hash": "3ee85492804f506a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1371,7 +1371,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/export/func.tsx",
-          "hash": "b450fe53bb545ddf",
+          "hash": "2b7aaf6c1380850d",
           "dependencies": {},
           "loc": {
             "line": 1,
@@ -1469,7 +1469,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/export/express.tsx",
-          "hash": "3a562bac7bf5d4b9",
+          "hash": "e8d09244c55870b5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1491,7 +1491,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/export/express.tsx",
-              "hash": "e020e0000feb1a09",
+              "hash": "bcec3097942f33d5",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1596,7 +1596,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/export/arrow.tsx",
-          "hash": "6a4a64984732ac2c",
+          "hash": "6e9c226961b340fd",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
