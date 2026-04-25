@@ -29,8 +29,9 @@ export abstract class Variable<
     | "await using"
     | undefined;
   dependencies: Record<string, ComponentFileVarDependency>;
-  parent?: Scope;
+  parent?: Variable | Scope;
   loc: VariableLoc;
+  scopeId?: string | undefined;
   isStatic?: boolean | undefined;
   memberKind?: string | undefined;
 
@@ -46,6 +47,7 @@ export abstract class Variable<
     this.declarationKind = data.declarationKind;
     this.dependencies = data.dependencies;
     this.loc = data.loc;
+    this.scopeId = data.scopeId;
     this.isStatic = data.isStatic;
     this.memberKind = data.memberKind;
 
@@ -62,6 +64,7 @@ export abstract class Variable<
     this.dependencies = data.dependencies;
 
     this.loc = data.loc;
+    this.scopeId = data.scopeId;
   }
 
   protected getBaseData(): ComponentFileVarBase<TType, TKind> {
@@ -79,6 +82,7 @@ export abstract class Variable<
       declarationKind: this.declarationKind,
       dependencies: this.dependencies,
       loc: this.loc,
+      scopeId: this.scopeId,
       isStatic: this.isStatic,
       memberKind: this.memberKind,
     };

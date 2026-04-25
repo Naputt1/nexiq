@@ -576,7 +576,7 @@ export class PackageMaster {
 
   private getBatchSize(fileCount: number, workerCount: number) {
     const target = Math.ceil(fileCount / Math.max(workerCount * 2, 1));
-    return Math.max(4, Math.min(24, target));
+    return Math.max(4, Math.min(100, target));
   }
 
   private processAnalyzedFileResult(
@@ -692,26 +692,44 @@ export class PackageMaster {
               response.results.map((item) => [item.filePath, item]),
             );
 
-            for (const filePath of batch) {
-              const message = resultByFile.get(filePath);
-              if (!message) {
-                filesFailed++;
-                this.recordFileError(
-                  filePath,
-                  "worker_runtime",
-                  "Worker batch did not return a result for file",
-                );
-                this.markFileStatus(filePath, "worker_crashed");
-                continue;
+            const processBatch = this.sqlite?.db.transaction(() => {
+              for (const filePath of batch) {
+                const message = resultByFile.get(filePath);
+                if (!message) {
+                  filesFailed++;
+                  this.recordFileError(
+                    filePath,
+                    "worker_runtime",
+                    "Worker batch did not return a result for file",
+                  );
+                  this.markFileStatus(filePath, "worker_crashed");
+                  continue;
+                }
+                if (
+                  this.processAnalyzedFileResult(
+                    filePath,
+                    message,
+                    succeededFiles,
+                  )
+                ) {
+                  filesFailed++;
+                }
               }
-              if (
-                this.processAnalyzedFileResult(
-                  filePath,
-                  message,
-                  succeededFiles,
-                )
-              ) {
-                filesFailed++;
+            });
+
+            if (processBatch) {
+              processBatch();
+            } else {
+              // Fallback if no sqlite (though unlikely in this path)
+              for (const filePath of batch) {
+                const message = resultByFile.get(filePath);
+                if (message) {
+                  this.processAnalyzedFileResult(
+                    filePath,
+                    message,
+                    succeededFiles,
+                  );
+                }
               }
             }
           } catch (error) {

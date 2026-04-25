@@ -235,6 +235,7 @@ interface ComponentFileVarBaseType<TType extends VarType> {
   file: string;
   hash?: string | undefined;
   parentId?: string | undefined;
+  scopeId?: string | undefined;
   declarationKind?:
     | "const"
     | "let"

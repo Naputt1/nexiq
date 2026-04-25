@@ -1,4 +1,4 @@
-import type { Database } from "better-sqlite3";
+import type { Database, Statement } from "better-sqlite3";
 import type {
   AnalysisRunRow,
   FileRunStatusRow,
@@ -22,12 +22,20 @@ export class SqliteDB {
     this.db = db;
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
+    this.db.pragma("synchronous = NORMAL");
+    this.db.pragma("temp_store = MEMORY");
+    this.db.pragma("cache_size = -64000"); // 64MB cache
+    this.db.pragma("mmap_size = 2000000000"); // 2GB mmap
   }
 
+  private getFileByPathStmt?: Statement;
   public getFileByPath(filePath: string): FileRow | undefined {
-    return this.db
-      .prepare("SELECT * FROM files WHERE path = ?")
-      .get(filePath) as FileRow | undefined;
+    if (!this.getFileByPathStmt) {
+      this.getFileByPathStmt = this.db.prepare(
+        "SELECT * FROM files WHERE path = ?",
+      );
+    }
+    return this.getFileByPathStmt.get(filePath) as FileRow | undefined;
   }
 
   public getEdges(): { from: string; to: string; label: string }[] {

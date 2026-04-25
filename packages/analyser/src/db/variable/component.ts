@@ -2,6 +2,7 @@ import type {
   ComponentFileVarClassComponent,
   ComponentFileVarComponent,
   ComponentFileVarFunctionComponent,
+  ComponentFileVarReactFunction,
 } from "@nexiq/shared";
 import type { TypeData } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
@@ -25,7 +26,10 @@ export abstract class ComponentVariable<
   ) {
     super(
       {
-        ...(options as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+        ...(options as unknown as Omit<
+          ComponentFileVarReactFunction<"component", TType>,
+          "var" | "components" | "file"
+        >),
         kind: "component",
       },
       file,

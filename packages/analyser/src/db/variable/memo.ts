@@ -15,7 +15,7 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
         ...options,
         kind: "memo",
         type: "function",
-      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      } as Omit<MemoFileVarHook, "var" | "components" | "file">,
       file,
     );
   }
