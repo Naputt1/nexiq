@@ -3,6 +3,7 @@ import type {
   ComponentFileVarComponent,
   ComponentFileVarFunctionComponent,
   ComponentFileVarReactFunction,
+  ComponentMetadata,
 } from "@nexiq/shared";
 import type { TypeData } from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
@@ -41,16 +42,20 @@ export abstract class ComponentVariable<
     this.memo = options.memo ?? false;
   }
 
-  public load(data: ComponentVariable<TType>) {
+  public load(
+    data: Partial<ComponentFileVarReactFunction<"component", TType>>,
+  ) {
     super.load(data);
 
     this.kind = "component";
-    this.componentType = data.componentType || this.componentType;
-    this.propType = data.propType || this.propType;
-
-    this.contexts = data.contexts ? [...data.contexts] : this.contexts;
-    this.forwardRef = data.forwardRef ?? this.forwardRef;
-    this.memo = data.memo ?? this.memo;
+    const d = data as Partial<
+      ComponentFileVarFunctionComponent | ComponentFileVarClassComponent
+    >;
+    if (d.componentType) this.componentType = d.componentType;
+    if (d.propType) this.propType = d.propType;
+    if (d.contexts) this.contexts = [...d.contexts];
+    if (d.forwardRef !== undefined) this.forwardRef = d.forwardRef;
+    if (d.memo !== undefined) this.memo = d.memo;
   }
 
   public getData(): ComponentFileVarComponent {
@@ -75,13 +80,26 @@ export abstract class ComponentVariable<
     return data;
   }
 
+  protected getMetadata(): ComponentMetadata {
+    const meta = {
+      ...super.getMetadata(),
+      componentType: this.componentType,
+      contexts: this.contexts,
+    } as ComponentMetadata;
+    if (this.forwardRef !== undefined) meta.forwardRef = this.forwardRef;
+    if (this.memo !== undefined) meta.memo = this.memo;
+    if (this.propType !== undefined) meta.propType = this.propType;
+    return meta;
+  }
+
   protected getDataInternal() {
     return {
       ...super.getDataInternal(),
       componentType: this.componentType,
       contexts: this.contexts,
-      ...(this.forwardRef ? { forwardRef: this.forwardRef } : {}),
-      ...(this.memo ? { memo: this.memo } : {}),
+      forwardRef: this.forwardRef,
+      memo: this.memo,
+      propType: this.propType,
     };
   }
 }
@@ -112,7 +130,7 @@ export class ClassComponentVariable extends ComponentVariable<"class"> {
     this.stateType = options.stateType;
   }
 
-  public load(data: ClassComponentVariable) {
+  public load(data: Partial<ComponentFileVarClassComponent>) {
     super.load(data);
     this.stateType = data.stateType || this.stateType;
   }
@@ -123,6 +141,13 @@ export class ClassComponentVariable extends ComponentVariable<"class"> {
       data.stateType = this.stateType;
     }
     return data;
+  }
+
+  protected getMetadata(): ComponentMetadata {
+    return {
+      ...super.getMetadata(),
+      ...(this.stateType ? { stateType: this.stateType } : {}),
+    };
   }
 
   protected getDataInternal() {

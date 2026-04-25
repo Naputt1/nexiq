@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "f8a6bccfe463b93",
+          "hash": "543398fd30f51f2d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -135,7 +135,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "7072000ef2457409",
+          "hash": "203bdc074522aaec",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -243,7 +243,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "ae6d6074299b1f74",
+          "hash": "caaf94f79917da40",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -322,7 +322,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/StaticComponents.tsx",
-          "hash": "b6445e67acd90025",
+          "hash": "ae7c4cfc368191ae",
           "dependencies": {},
           "loc": {
             "line": 9,
@@ -415,7 +415,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/StaticComponents.tsx",
-              "hash": "5753fc9fce24d971",
+              "hash": "56124e768e679d02",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -619,7 +619,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "2871a8ed18d6ff78",
+          "hash": "402cf96bf9409ad5",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -640,7 +640,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/SimpleClass.tsx",
-              "hash": "340135836b68d64",
+              "hash": "bdb7bff9be79b405",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -722,7 +722,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/SimpleClass.tsx",
-              "hash": "533f1d1e70384bde",
+              "hash": "f9268a13c7e10c75",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -744,7 +744,7 @@
                   "kind": "normal",
                   "type": "function",
                   "file": "/src/SimpleClass.tsx",
-                  "hash": "806eb476396bab58",
+                  "hash": "5407209fa47c1bb8",
                   "declarationKind": "const",
                   "dependencies": {},
                   "loc": {
@@ -801,7 +801,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/SimpleClass.tsx",
-              "hash": "2e5965b27330cba8",
+              "hash": "4dca4e0311c8e25",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1101,7 +1101,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NewFeatures.tsx",
-          "hash": "3266c361afa15d03",
+          "hash": "80512193d3479159",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1146,7 +1146,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NewFeatures.tsx",
-              "hash": "523d2f16391b37de",
+              "hash": "ebf6afbd1249b537",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1182,7 +1182,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NewFeatures.tsx",
-              "hash": "4678f4c1b08710ab",
+              "hash": "1cd87836a104ce7f",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1218,7 +1218,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NewFeatures.tsx",
-              "hash": "ea19fea9e9645d80",
+              "hash": "124f9ebdc1f9faa",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1499,7 +1499,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "6b6eb8d30ba6185f",
+          "hash": "4de8d2911d6abba1",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1520,7 +1520,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "dadac5c93cbd608a",
+              "hash": "e8f582a518801147",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1610,7 +1610,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "560aa4742a306666",
+              "hash": "b7967525a3f83a26",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1699,7 +1699,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "deec7008f4a0ed24",
+              "hash": "4a2fab685f054423",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1746,7 +1746,7 @@
                   "kind": "normal",
                   "type": "function",
                   "file": "/src/NestedRender.tsx",
-                  "hash": "763a50e2837e041b",
+                  "hash": "86a08f92c7c16ea7",
                   "declarationKind": "const",
                   "dependencies": {},
                   "loc": {
@@ -1929,7 +1929,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/ArrowRender.tsx",
-          "hash": "7441b0db1381ba63",
+          "hash": "f8dc60962dc6c5a9",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2028,7 +2028,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/ArrowRender.tsx",
-              "hash": "c3b1f27539701045",
+              "hash": "acbaab630111c1d8",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -2158,7 +2158,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "fd08e6af1edcbcf3",
+          "hash": "9b8f4fb35f5b8bf6",
           "dependencies": {},
           "loc": {
             "line": 6,

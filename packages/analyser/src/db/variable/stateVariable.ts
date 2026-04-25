@@ -1,4 +1,9 @@
-import type { ComponentFileVarState, TypeData } from "@nexiq/shared";
+import type {
+  ComponentFileVarState,
+  TypeData,
+  DBBatch,
+  StateMetadata,
+} from "@nexiq/shared";
 import type { File } from "../fileDB.ts";
 import { ReactVariable } from "./reactVariable.ts";
 
@@ -16,7 +21,7 @@ export class StateVariable extends ReactVariable<"data", "state"> {
     this.stateType = options.stateType;
   }
 
-  public load(data: StateVariable) {
+  public load(data: Partial<ComponentFileVarState>) {
     super.load(data);
 
     this.setter = data.setter || this.setter;
@@ -47,5 +52,14 @@ export class StateVariable extends ReactVariable<"data", "state"> {
       setter: this.setter,
       stateType: this.stateType,
     };
+  }
+
+  public toDBRow(batch: DBBatch, scopeId: string): void {
+    const row = this.getBaseRow(scopeId);
+    row.data_json = JSON.stringify({
+      setter: this.setter,
+      stateType: this.stateType,
+    } as StateMetadata);
+    batch.entities.add(row);
   }
 }

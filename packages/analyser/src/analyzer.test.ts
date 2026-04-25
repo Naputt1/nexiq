@@ -59,6 +59,13 @@ describe("analyser snapshots", () => {
         delete file.fingerPrint;
       }
 
+      delete snapshotData.src;
+      if (snapshotData.files) {
+        for (const file of Object.values(snapshotData.files)) {
+          delete file.fingerPrint;
+        }
+      }
+      
       expect(result).toEqual(snapshotData);
     });
   });

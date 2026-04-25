@@ -20,7 +20,7 @@ export class MemoVariable extends ReactWithCallbackVariable<"memo"> {
     );
   }
 
-  public load(data: MemoVariable) {
+  public load(data: Partial<MemoFileVarHook>) {
     super.load(data);
   }
 

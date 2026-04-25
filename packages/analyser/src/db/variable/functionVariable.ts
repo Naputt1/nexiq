@@ -16,7 +16,7 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
     super({ ...options, kind: "normal", type: "function" }, file);
   }
 
-  public load(data: FunctionVariable) {
+  public load(data: Partial<ComponentFileVarFunction>) {
     super.load(data);
   }
 
@@ -28,9 +28,10 @@ export class FunctionVariable extends BaseFunctionVariable<"normal"> {
   }
 
   public getData(): ComponentFileVarFunction {
-    return {
-      ...this.getBaseData(),
-      kind: "normal",
-    } as ComponentFileVarFunction;
+    return this.getBaseData() as ComponentFileVarFunction;
+  }
+
+  protected getDataInternal() {
+    return super.getDataInternal();
   }
 }

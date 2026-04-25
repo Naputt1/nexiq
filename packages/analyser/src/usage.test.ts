@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import analyzeFiles from "./analyzer/index.ts";
-import { getViteConfig } from "./analyzer/utils.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
@@ -8,9 +7,14 @@ import os from "os";
 
 describe("usage extraction", () => {
   it("normalizes setState calls back to the state node", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-usage-test-1-"));
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "nexiq-usage-test-1-"),
+    );
     const pkgJsonPath = path.resolve(tempDir, "package.json");
-    fs.writeFileSync(pkgJsonPath, JSON.stringify({ name: "usage-test-1", version: "1.0.0" }));
+    fs.writeFileSync(
+      pkgJsonPath,
+      JSON.stringify({ name: "usage-test-1", version: "1.0.0" }),
+    );
 
     const fileName = "UsageStateTest.tsx";
     const filePath = path.resolve(tempDir, fileName);
@@ -30,12 +34,7 @@ describe("usage extraction", () => {
 
     try {
       const packageJson = new PackageJson(tempDir);
-      const graph = await analyzeFiles(
-        tempDir,
-        null,
-        [fileName],
-        packageJson,
-      );
+      const graph = await analyzeFiles(tempDir, null, [fileName], packageJson);
 
       const file = graph.files[`/${fileName}`];
       expect(file?.relations).toBeDefined();
@@ -58,9 +57,14 @@ describe("usage extraction", () => {
   });
 
   it("captures effect reads and JSX prop usages with the correct owners", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-usage-test-2-"));
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "nexiq-usage-test-2-"),
+    );
     const pkgJsonPath = path.resolve(tempDir, "package.json");
-    fs.writeFileSync(pkgJsonPath, JSON.stringify({ name: "usage-test-2", version: "1.0.0" }));
+    fs.writeFileSync(
+      pkgJsonPath,
+      JSON.stringify({ name: "usage-test-2", version: "1.0.0" }),
+    );
 
     const fileName = "UsageEffectAndJsxTest.tsx";
     const filePath = path.resolve(tempDir, fileName);
@@ -88,12 +92,7 @@ describe("usage extraction", () => {
 
     try {
       const packageJson = new PackageJson(tempDir);
-      const graph = await analyzeFiles(
-        tempDir,
-        null,
-        [fileName],
-        packageJson,
-      );
+      const graph = await analyzeFiles(tempDir, null, [fileName], packageJson);
 
       const file = graph.files[`/${fileName}`];
       expect(file?.relations).toBeDefined();

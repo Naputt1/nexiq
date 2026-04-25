@@ -479,6 +479,71 @@ export type IResolveCrossPackageImport = {
   message?: string | undefined;
 };
 
+export interface StateMetadata {
+  setter?: string;
+  stateType?: TypeData;
+}
+
+export interface CallHookMetadata {
+  call: {
+    id: string;
+    name: string;
+    resolvedId?: string;
+    unresolvedWorkspace?: boolean;
+  };
+}
+
+export interface RefMetadata {
+  defaultData: PropDataType;
+}
+
+export interface HookMetadata extends HookInfo, FunctionMetadata {}
+
+export interface CallbackMetadata extends ReactDependencies, HookMetadata {
+  scope: VariableScope;
+  async?: boolean;
+}
+
+export interface MemoMetadata extends ReactDependencies, HookMetadata {
+  scope: VariableScope;
+  async?: boolean;
+}
+
+export interface FunctionMetadata {
+  params: PropData[];
+  returnType?: TypeData;
+  async?: boolean;
+  generator?: boolean;
+}
+
+export interface ClassMetadata {
+  superClass?: { id?: string; name: string };
+}
+
+export interface JSXMetadata {
+  srcId?: string;
+}
+
+export interface ComponentMetadata extends ComponentInfoBase, HookMetadata {
+  componentType: "Function" | "Class";
+  propType?: TypeData;
+  stateType?: TypeData; // For class components
+}
+
+export type EntityMetadata =
+  | StateMetadata
+  | CallHookMetadata
+  | RefMetadata
+  | HookMetadata
+  | CallbackMetadata
+  | MemoMetadata
+  | FunctionMetadata
+  | ClassMetadata
+  | JSXMetadata
+  | ComponentMetadata
+  | Record<string, unknown>;
+
+
 export type ComponentDBResolve =
   | IResolveAddRender
   | IResolveAddHook

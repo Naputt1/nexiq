@@ -3,7 +3,6 @@ import path from "node:path";
 import fs from "node:fs";
 import type {
   AnalysisRunRow,
-  ComponentFileBlockScope,
   ComponentFile,
   ComponentFileVar,
   ComponentInfoRender,
@@ -14,14 +13,15 @@ import type {
   RelationRow,
   RenderRow,
   ResolveErrorRow,
-  VariableName,
+  DBBatch,
+  SymbolRow,
+  ScopeRow,
+  VariableNamePattern,
 } from "@nexiq/shared";
 import { SqliteDB as BaseSqliteDB } from "@nexiq/shared/db";
-import {
-  getVariableNameKey,
-  getPatternIdentifiers,
-} from "../analyzer/pattern.ts";
+import { getVariableNameKey } from "../analyzer/pattern.ts";
 import type { FileRunStatus } from "../types.ts";
+import { File } from "./fileDB.ts";
 
 export interface AnalyzedFileResult {
   file: ComponentFile;
@@ -150,88 +150,37 @@ export class SqliteDB extends BaseSqliteDB {
     );
 
     this.saveFileResultsTransaction = this.db.transaction(
-      (data: FileResultWithPackage) => {
+      (data: FileResultWithPackage | File) => {
+        let file: File;
+        if (data instanceof File) {
+          file = data;
+        } else {
+          file = new File();
+          file.load(data, true);
+        }
+
         // 1. Insert/Update file
         const info = this.insertFileStmt.run(
-          data.path,
-          data.package_id || null,
-          data.hash,
-          data.fingerPrint,
-          data.defaultExport,
-          JSON.stringify(data.starExports || []),
+          file.path,
+          file.package_id || null,
+          file.hash,
+          file.fingerPrint,
+          file.defaultExport,
+          JSON.stringify(file.starExports),
         );
 
         const fileId = info.lastInsertRowid as number;
-        // In SQLite, INSERT OR REPLACE is a DELETE followed by an INSERT.
-        // Since we have ON DELETE CASCADE on files -> scopes -> (entities, symbols, exports)
-        // and files -> renders and files -> relations, ALL old data for this file
-        // is automatically deleted by the REPLACE above.
 
-        // 2. Create module scope
-        const moduleScopeId = `scope:module:${data.path}`;
-        this.insertScope({
-          id: moduleScopeId,
-          file_id: fileId,
-          kind: "module",
-        });
-
-        const blockScopes = new Map<string, ComponentFileBlockScope>();
-        for (const blockScope of data.blockScopes || []) {
-          blockScopes.set(blockScope.id, blockScope);
-        }
-        for (const blockScope of data.blockScopes || []) {
-          this.insertScope({
-            id: blockScope.id,
-            file_id: fileId,
-            parent_id: blockScope.parentId || moduleScopeId,
-            kind: "block",
-            data_json: JSON.stringify(blockScope.scope),
-          });
-        }
-
-        // 3. Insert Imports as entities and symbols
-        for (const imp of Object.values(data.import)) {
-          const impId = `entity:import:${data.path}:${imp.localName}`;
-          this.insertEntity({
-            id: impId,
-            scope_id: moduleScopeId,
-            kind: "import",
-            name: imp.localName,
-            type: "data",
-            data_json: JSON.stringify(imp),
-          });
-
-          this.insertSymbol({
-            id: `symbol:import:${data.path}:${imp.localName}`,
-            entity_id: impId,
-            scope_id: moduleScopeId,
-            name: imp.localName,
-            is_alias: imp.localName !== imp.importedName,
-          });
-        }
-
-        // 4. Insert variables and their scopes (includes renders and hooks recursively)
-        for (const variable of Object.values(data.var)) {
-          this.recursiveInsertVariable(
-            variable,
-            fileId,
-            moduleScopeId,
-            blockScopes,
-          );
-        }
-
-        // 5. Insert persisted usage relations for this file
-        for (const relation of data.relations || []) {
-          this.insertRelationStmt.run(
-            fileId,
-            relation.from_id,
-            relation.to_id,
-            relation.kind,
-            relation.line ?? 0,
-            relation.column ?? 0,
-            relation.data_json ? JSON.stringify(relation.data_json) : null,
-          );
-        }
+        const batch: DBBatch = {
+          entities: new Set(),
+          scopes: new Set(),
+          symbols: new Set(),
+          renders: new Set(),
+          exports: new Set(),
+          relations: new Set(),
+        };
+        file.toDBRow(batch);
+        this.processBatch(fileId, batch);
       },
     );
   }
@@ -627,21 +576,16 @@ export class SqliteDB extends BaseSqliteDB {
       .run(packageId);
   }
 
-  private insertEntity(data: {
-    id: string;
-    scope_id: string;
-    kind: string;
-    name: VariableName | string;
-    type?: string | null;
-    line?: number | null | undefined;
-    column?: number | null | undefined;
-    end_line?: number | null | undefined;
-    end_column?: number | null | undefined;
-    declaration_kind?: string | null | undefined;
-    data_json?: string | null;
-  }) {
-    const nameStr =
-      typeof data.name === "string" ? data.name : getVariableNameKey(data.name);
+  private insertEntity(
+    data: Omit<EntityRow, "name"> & {
+      name: VariableNamePattern | string | null;
+    },
+  ) {
+    const nameStr = !data.name
+      ? ""
+      : typeof data.name === "string"
+        ? data.name
+        : getVariableNameKey(data.name);
     const params = {
       id: data.id,
       scope_id: data.scope_id,
@@ -659,14 +603,7 @@ export class SqliteDB extends BaseSqliteDB {
     this.insertEntityStmt.run(params);
   }
 
-  private insertScope(data: {
-    id: string;
-    file_id: number;
-    parent_id?: string | null;
-    kind: "module" | "block";
-    entity_id?: string | null;
-    data_json?: string | null;
-  }) {
+  private insertScope(data: ScopeRow) {
     this.insertScopeStmt.run({
       id: data.id,
       file_id: data.file_id,
@@ -677,16 +614,7 @@ export class SqliteDB extends BaseSqliteDB {
     });
   }
 
-  private insertSymbol(data: {
-    id: string;
-    entity_id: string;
-    scope_id: string;
-    name: string;
-    path?: string | null;
-    is_alias?: boolean;
-    has_default?: boolean;
-    data_json?: string | null;
-  }) {
+  private insertSymbol(data: SymbolRow) {
     this.insertSymbolStmt.run({
       id: data.id,
       entity_id: data.entity_id,
@@ -699,19 +627,7 @@ export class SqliteDB extends BaseSqliteDB {
     });
   }
 
-  private insertRender(data: {
-    id: string;
-    file_id: number;
-    parent_entity_id: string;
-    parent_render_id?: string | null;
-    render_index: number;
-    tag: string;
-    symbol_id?: string | null;
-    line?: number | null;
-    column?: number | null;
-    kind: string;
-    data_json?: string | null;
-  }) {
+  private insertRender(data: RenderRow) {
     this.insertRenderStmt.run({
       id: data.id,
       file_id: data.file_id,
@@ -727,14 +643,7 @@ export class SqliteDB extends BaseSqliteDB {
     });
   }
 
-  private insertExport(data: {
-    id: string;
-    scope_id: string;
-    symbol_id?: string | null;
-    entity_id?: string | null;
-    name?: string | null;
-    is_default?: boolean;
-  }) {
+  private insertExport(data: ExportRow) {
     this.insertExportStmt.run({
       id: data.id,
       scope_id: data.scope_id,
@@ -752,13 +661,47 @@ export class SqliteDB extends BaseSqliteDB {
     }
   }
 
-  public saveFileResults(fileData: FileResultWithPackage) {
+  public saveFileResults(fileData: FileResultWithPackage | File) {
     this.saveFileResultsTransaction(fileData);
+  }
+
+  private processBatch(fileId: number, batch: DBBatch) {
+    for (const scope of batch.scopes) {
+      this.insertScope({ ...scope, file_id: fileId });
+    }
+    for (const entity of batch.entities) {
+      this.insertEntity({
+        ...entity,
+        data_json:
+          entity.data_json ??
+          (entity.metadata ? JSON.stringify(entity.metadata) : null),
+      });
+    }
+    for (const symbol of batch.symbols) {
+      this.insertSymbol(symbol);
+    }
+    for (const render of batch.renders) {
+      this.insertRender({ ...render, file_id: fileId });
+    }
+    for (const exp of batch.exports) {
+      this.insertExport(exp);
+    }
+    for (const rel of batch.relations) {
+      this.insertRelationStmt.run(
+        fileId,
+        rel.from_id,
+        rel.to_id,
+        rel.kind,
+        rel.line ?? 0,
+        rel.column ?? 0,
+        rel.data_json ? JSON.stringify(rel.data_json) : null,
+      );
+    }
   }
 
   public saveFileResultsForRun(
     runId: string,
-    fileData: FileResultWithPackage,
+    fileData: FileResultWithPackage | File,
     packageId?: string,
   ) {
     this.saveFileResults(fileData);
@@ -773,26 +716,6 @@ export class SqliteDB extends BaseSqliteDB {
       file_hash: fileData.hash,
       fingerprint: fileData.fingerPrint,
     });
-  }
-
-  private getVariableMetadata(v: ComponentFileVar) {
-    const {
-      id: _id,
-      name: _name,
-      file: _file,
-      kind: _kind,
-      type: _type,
-      loc: _loc,
-      scopeId: _scopeId,
-      // @ts-ignore
-      var: _var,
-      // @ts-ignore
-      children: _children,
-      // @ts-ignore
-      props: _props,
-      ...rest
-    } = v as unknown as Record<string, unknown>;
-    return rest;
   }
 
   public loadFileResults(filePath: string): ComponentFile | undefined {
@@ -975,182 +898,6 @@ export class SqliteDB extends BaseSqliteDB {
     }
 
     return result;
-  }
-
-  private recursiveInsertRender(
-    render: ComponentInfoRender,
-    fileId: number,
-    parentEntityId: string,
-    currentScopeId: string,
-    parentRenderId?: string,
-  ) {
-    this.insertRender({
-      id: render.instanceId,
-      file_id: fileId,
-      parent_entity_id: parentEntityId,
-      parent_render_id: parentRenderId || null,
-      render_index: render.renderIndex,
-      tag: render.tag,
-      symbol_id: render.id,
-      line: render.loc.line,
-      column: render.loc.column,
-      kind: render.kind,
-      data_json: JSON.stringify({
-        dependencies: render.dependencies,
-        isDependency: render.isDependency,
-      }),
-    });
-
-    for (const child of Object.values(render.children || {})) {
-      this.recursiveInsertRender(
-        child,
-        fileId,
-        parentEntityId,
-        currentScopeId,
-        render.instanceId,
-      );
-    }
-  }
-
-  private recursiveInsertVariable(
-    v: ComponentFileVar,
-    fileId: number,
-    moduleScopeId: string,
-    blockScopes: Map<string, ComponentFileBlockScope>,
-    parentEntityId?: string,
-  ) {
-    const scope = v.scopeId ? blockScopes.get(v.scopeId) : undefined;
-    const effectiveScopeId = scope ? scope.id : moduleScopeId;
-
-    let nameStr = "";
-    if (typeof v.name === "string") {
-      nameStr = v.name;
-    } else if (v.name && typeof v.name === "object") {
-      if (v.name.type === "identifier") {
-        nameStr = v.name.name;
-      } else {
-        nameStr = JSON.stringify(v.name);
-      }
-    }
-
-    this.insertEntity({
-      id: v.id,
-      scope_id: effectiveScopeId,
-      kind: v.kind,
-      name: nameStr,
-      type: v.type,
-      line: v.loc.line,
-      column: v.loc.column,
-      end_line: scope?.scope.end.line,
-      end_column: scope?.scope.end.column,
-      declaration_kind: v.declarationKind,
-      data_json: JSON.stringify(this.getVariableMetadata(v)),
-    });
-
-    // Index all names in the pattern as symbols
-    const identifiers = getPatternIdentifiers(v.name, v.id);
-    for (const ident of identifiers) {
-      this.insertSymbol({
-        id: ident.id,
-        entity_id: v.id,
-        scope_id: effectiveScopeId,
-        name: ident.name,
-        path: ident.path.length > 0 ? JSON.stringify(ident.path) : null,
-        is_alias: ident.isAlias,
-        has_default: ident.hasDefault,
-      });
-    }
-
-    if (parentEntityId) {
-      this.insertParentRelationStmt.run(
-        fileId,
-        parentEntityId,
-        v.id,
-        "parent-child",
-      );
-    }
-
-    const vKind = v.kind as string;
-    // If it's a function/jsx/class/component/hook, it has its own scope
-    if (
-      v.type === "function" ||
-      v.type === "jsx" ||
-      v.type === "class" ||
-      vKind === "component" ||
-      vKind === "hook" ||
-      vKind === "memo" ||
-      vKind === "callback"
-    ) {
-      const entityScopeId = `scope:entity:${v.id}`;
-      this.insertScope({
-        id: entityScopeId,
-        file_id: fileId,
-        parent_id: effectiveScopeId,
-        kind: "block",
-        entity_id: v.id,
-        data_json: "scope" in v ? JSON.stringify(v.scope) : null,
-      });
-
-      if (
-        (v.kind === "component" || v.kind === "hook") &&
-        "props" in v &&
-        Array.isArray(v.props)
-      ) {
-        const insertProp = (
-          prop: (typeof v.props)[number],
-          pathSegments: string[] = [],
-        ) => {
-          this.insertEntity({
-            id: prop.id,
-            scope_id: entityScopeId,
-            kind: "prop",
-            name: prop.name,
-            type: "data",
-            line: prop.loc?.line ?? null,
-            column: prop.loc?.column ?? null,
-            data_json: JSON.stringify({
-              type: prop.type,
-              kind: prop.kind,
-              defaultValue: prop.defaultValue,
-            }),
-          });
-
-          this.insertSymbol({
-            id: `symbol:${prop.id}`,
-            entity_id: prop.id,
-            scope_id: entityScopeId,
-            name: prop.name,
-            path: pathSegments.length > 0 ? JSON.stringify(pathSegments) : null,
-          });
-
-          for (const childProp of prop.props || []) {
-            insertProp(childProp, [...pathSegments, childProp.name]);
-          }
-        };
-
-        for (const prop of v.props) {
-          insertProp(prop);
-        }
-      }
-
-      if ("var" in v && v.var) {
-        for (const childVar of Object.values(v.var)) {
-          this.recursiveInsertVariable(
-            childVar,
-            fileId,
-            moduleScopeId,
-            blockScopes,
-            v.id,
-          );
-        }
-      }
-
-      if ("children" in v && v.children) {
-        for (const childRender of Object.values(v.children)) {
-          this.recursiveInsertRender(childRender, fileId, v.id, entityScopeId);
-        }
-      }
-    }
   }
 
   public saveEdges(edges: { from: string; to: string; label: string }[]) {

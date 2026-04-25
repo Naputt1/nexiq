@@ -14,6 +14,7 @@ import type { PackageJson as PackageJsonStore } from "./db/packageJson.ts";
 import { SqliteDB } from "./db/sqlite.ts";
 import { WorkerPool } from "./workerPool.ts";
 import { parseCode } from "./analyzer/utils.ts";
+import { File as AnalyserFile } from "./db/fileDB.ts";
 import type { File } from "@babel/types";
 import { traverseFn } from "./utils/babel.ts";
 import ImportDeclaration from "./analyzer/importDeclaration.ts";
@@ -425,7 +426,7 @@ export class PackageMaster {
     }
   }
 
-  private runSingleThreadedAnalysis(fileName: string): ComponentFile {
+  private runSingleThreadedAnalysis(fileName: string): AnalyserFile {
     this.componentDB.clearStack();
     const code = fs.readFileSync(resolvePath(this.srcDir, fileName), "utf-8");
     const ast: File = parseCode(code);
@@ -478,8 +479,7 @@ export class PackageMaster {
         resolvePath(this.srcDir, fileName),
       ) || undefined;
 
-    const result = file.getData();
-    return result;
+    return file;
   }
 
   private buildDependencies(): WorkspacePackageDependency[] {
@@ -592,13 +592,12 @@ export class PackageMaster {
         fileHash: result.hash,
         fingerprint: result.fingerPrint,
       });
-      if (this.sqlite) {
+      const file = this.componentDB.getFile(filePath);
+      if (this.sqlite && file) {
+        file.package_id = this.packageRow?.id;
         this.sqlite.saveFileResultsForRun(
           this.runId,
-          {
-            ...result,
-            package_id: this.packageRow?.id,
-          },
+          file,
           this.packageRow?.id,
         );
       }
@@ -757,12 +756,12 @@ export class PackageMaster {
             fingerprint: result.fingerPrint,
           });
           if (this.sqlite) {
+            if (this.packageRow?.id) {
+              result.package_id = this.packageRow.id;
+            }
             this.sqlite.saveFileResultsForRun(
               this.runId,
-              {
-                ...result,
-                package_id: this.packageRow?.id,
-              },
+              result,
               this.packageRow?.id,
             );
           }

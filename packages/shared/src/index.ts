@@ -5,6 +5,7 @@ import type {
   EffectInfo,
   ComponentDBResolve,
   RelationKind,
+  EntityMetadata,
 } from "./component.js";
 
 export type DataEdge = {
@@ -28,27 +29,28 @@ export interface PackageDependencyRow {
   is_dev: boolean;
 }
 
-export interface EntityRow {
+export interface EntityRow<TMetadata extends EntityMetadata = EntityMetadata> {
   id: string;
   scope_id: string;
   kind: string; // 'component', 'hook', 'function', 'class', 'variable', 'import', 'jsx', etc.
   name: string | null;
-  type: string | null;
-  line: number | null;
-  column: number | null;
-  end_line: number | null;
-  end_column: number | null;
-  declaration_kind: string | null;
-  data_json: string | null;
+  type?: string | null;
+  line?: number | null;
+  column?: number | null;
+  end_line?: number | null;
+  end_column?: number | null;
+  declaration_kind?: string | null;
+  data_json?: string | null;
+  metadata?: TMetadata;
 }
 
 export interface ScopeRow {
   id: string;
   file_id: number;
-  parent_id: string | null;
+  parent_id?: string | null;
   kind: string; // 'module', 'block'
-  entity_id: string | null;
-  data_json: string | null;
+  entity_id?: string | null;
+  data_json?: string | null;
 }
 
 export interface SymbolRow {
@@ -56,10 +58,10 @@ export interface SymbolRow {
   entity_id: string;
   scope_id: string;
   name: string;
-  path: string | null;
+  path?: string | null;
   is_alias: number;
   has_default: number;
-  data_json: string | null;
+  data_json?: string | null;
 }
 
 export interface RenderRow {
@@ -219,6 +221,15 @@ export interface ExportRow {
   entity_id: string | null;
   name: string | null;
   is_default: number;
+}
+
+export interface DBBatch {
+  entities: Set<EntityRow>;
+  scopes: Set<ScopeRow>;
+  symbols: Set<SymbolRow>;
+  renders: Set<RenderRow>;
+  exports: Set<ExportRow>;
+  relations: Set<RelationRow>;
 }
 
 export type DatabaseData = {

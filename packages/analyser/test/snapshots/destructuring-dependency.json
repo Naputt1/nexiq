@@ -46,7 +46,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "fe8a2437ea9a6922",
+          "hash": "60b1200262ce6ecb",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -133,7 +133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "f8d8129624efbd4c",
+          "hash": "cafcde58efb4c85a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -260,7 +260,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "39710f7994edd6f",
+              "hash": "4dd8641a5a0c4738",
               "dependencies": {},
               "loc": {
                 "line": 21,

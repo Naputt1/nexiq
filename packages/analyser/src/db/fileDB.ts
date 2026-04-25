@@ -44,6 +44,7 @@ import type {
   PropDataType,
   ComponentFileVarRef,
   VariableScope,
+  DBBatch,
 } from "@nexiq/shared";
 import type { Variable } from "./variable/variable.ts";
 import {
@@ -147,6 +148,47 @@ export class File {
     this.relations = [];
   }
 
+  public toDBRow(batch: DBBatch): void {
+    const moduleScopeId = `scope:module:${this.path}`;
+
+    // 1. Module scope
+    batch.scopes.add({
+      id: moduleScopeId,
+      file_id: 0,
+      parent_id: null,
+      kind: "module",
+      entity_id: null,
+      data_json: null,
+    });
+
+    // 2. Variables and child scopes
+    this.var.toDBRow(batch, moduleScopeId, null);
+
+    // 3. Exports
+    for (const ex of Object.values(this.export)) {
+      batch.exports.add({
+        id: ex.id,
+        scope_id: moduleScopeId,
+        symbol_id: null,
+        entity_id: ex.id,
+        name: ex.name,
+        is_default: ex.type === "default" ? 1 : 0,
+      });
+    }
+
+    // 4. Relations
+    for (const rel of this.relations) {
+      batch.relations.add({
+        from_id: rel.from_id,
+        to_id: rel.to_id,
+        kind: rel.kind,
+        line: rel.line ?? null,
+        column: rel.column ?? null,
+        data_json: null,
+      });
+    }
+  }
+
   private loadRender(render: ComponentInfoRender) {
     this.renderInstanceMap.set(render.instanceId, render);
     for (const child of Object.values(render.children || {})) {
@@ -228,7 +270,7 @@ export class File {
     }
 
     if (existing) {
-      existing.load(v);
+      existing.merge(v as Parameters<typeof existing.merge>[0]);
       v = existing;
     }
 
@@ -429,7 +471,7 @@ export class File {
   public addVariable(variable: Variable): string {
     const existing = this.getVariable(variable.loc);
     if (existing && existing.kind === variable.kind) {
-      existing.load(variable);
+      existing.merge(variable as Parameters<typeof existing.merge>[0]);
       return existing.id;
     }
 
@@ -450,7 +492,7 @@ export class File {
     const id = variable.id;
     const oldVar = scope.get(id);
     if (oldVar && oldVar.kind === variable.kind) {
-      oldVar.load(variable);
+      oldVar.merge(variable as Parameters<typeof oldVar.merge>[0]);
       variable = oldVar;
     }
 
