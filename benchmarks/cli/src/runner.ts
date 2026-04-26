@@ -12,8 +12,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "../../..");
+const PACKAGE_ROOT = path.resolve(__dirname, "..");
 
+// Load .env from root first, then override with package-local .env if it exists
 dotenv.config({ path: path.join(REPO_ROOT, ".env") });
+dotenv.config({ path: path.join(PACKAGE_ROOT, ".env"), override: true });
 
 // --- Types ---
 
@@ -205,9 +208,15 @@ export class OpenRouterClient implements LlmClient {
     public name: string,
     public displayName: string,
   ) {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        "Missing OPENROUTER_API_KEY. Please set it in a .env file (root or benchmarks/cli/.env).",
+      );
+    }
     this.openai = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
-      apiKey: process.env.OPENROUTER_API_KEY,
+      apiKey: apiKey,
       defaultHeaders: {
         "HTTP-Referer": "https://github.com/google-gemini/nexiq",
         "X-Title": "Nexiq Benchmark",
