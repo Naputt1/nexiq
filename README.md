@@ -2,6 +2,44 @@
 
 `nexiq` is the analysis and backend core for exploring React component relationships, project structure, and extension-powered graph workflows.
 
+## Nexiq UI
+
+The companion desktop application for `nexiq` provides an interactive graph visualization of your codebase.
+
+- **Repository**: [Naputt1/nexiq-ui](https://github.com/Naputt1/nexiq-ui)
+- Renders interactive component dependency graphs.
+- Provides deep-dive views for props, hooks, and project structure.
+- Integrates with the backend server via WebSockets.
+
+## Installation
+
+You can install the `nexiq` CLI globally via npm:
+
+```bash
+npm install -g @nexiq/cli
+```
+
+Once installed, you can use the `nexiq` command to manage the background analysis server.
+
+## Model Context Protocol (MCP)
+
+`nexiq` implements the [Model Context Protocol](https://modelcontextprotocol.io/), allowing LLMs like Claude to navigate and understand your React codebase.
+
+### Configuration for Claude Desktop
+
+Add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "nexiq": {
+      "command": "nexiq",
+      "args": ["start", "--foreground"]
+    }
+  }
+}
+```
+
 ## Key Features
 
 - Analyze React and TypeScript codebases into graph data that can be inspected or consumed by other tools.
@@ -17,30 +55,30 @@
 - `@nexiq/shared` contains shared types, utilities, and database helpers used across the stack.
 - `@nexiq/extension-sdk` provides the extension interface for adding custom tasks and tooling around nexiq.
 
-This repository is the backend half of the larger nexiq workflow. The desktop app in the sibling `nexiq-ui` repository consumes the server and shared packages from this monorepo to render interactive graph views.
-
-## Quick Start
+## Development
 
 ### Requirements
 
 - Node.js
 - `pnpm` 10+
 
-### Install
+### Install Dependencies
 
 ```bash
-cd nexiq
 pnpm install
 ```
 
 ### Common Commands
 
 ```bash
-pnpm build:analyze
-pnpm dev:server
-pnpm dev:cli
-pnpm test:analyze
-pnpm typecheck
+pnpm build:analyze       # Build the analyser package
+pnpm dev:server           # Run the server in dev mode
+pnpm dev:cli              # Run the CLI in dev mode
+pnpm test:analyze         # Run analyser tests
+pnpm snapshot:analyze     # Update analyser snapshots
+pnpm benchmark            # Run performance benchmarks
+pnpm typecheck            # Run type-checking across workspace
+pnpm lint                 # Run linting with autofix
 ```
 
 ### Package-Level Entry Commands
@@ -56,18 +94,6 @@ pnpm --filter=@nexiq/server start
 pnpm --filter=@nexiq/cli dev
 pnpm --filter=@nexiq/cli start
 ```
-
-## Main Scripts
-
-- `pnpm dev:server` starts the backend server package in development mode.
-- `pnpm dev:cli` starts the terminal CLI in development mode.
-- `pnpm build:analyze` builds the analyser package.
-- `pnpm test:analyze` runs the analyser test suite.
-- `pnpm snapshot:analyze` builds the analyser and generates snapshot output.
-- `pnpm benchmark` runs the CLI benchmark package.
-- `pnpm benchmark:view` starts the benchmark viewer.
-- `pnpm typecheck` runs type-checking across the workspace.
-- `pnpm lint` runs linting across the workspace with autofix enabled.
 
 ## Extensions
 
@@ -94,19 +120,3 @@ export default myExtension;
 ```
 
 For more detail, see [DOCS/EXTENSIONS.md](./DOCS/EXTENSIONS.md).
-
-## Works With `nexiq-ui`
-
-The sibling `nexiq-ui` repository provides the desktop interface for browsing the analysis data produced here.
-
-- `nexiq-ui` resolves local dependencies from `../nexiq/packages/...`
-- the Electron app starts or connects to the backend server package
-- shared types and extension contracts flow between both repositories
-
-If you are developing the UI locally, build the relevant packages in this repo first so the app can resolve the expected outputs.
-
-## Development Notes
-
-- This is a pnpm workspace with packages under `packages/*` plus benchmark and sample-project folders.
-- Some workflows assume the sample projects in `packages/sample-project/*` are available for local analysis and testing.
-- The backend server starts an MCP stdio transport and a WebSocket server, which is how the desktop app connects during local development.
