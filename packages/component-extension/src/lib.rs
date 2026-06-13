@@ -385,7 +385,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     }
 
     // --- Pre-processing: Effect Scopes ---
-    let scope_file_map: HashMap<String, i32> = scopes.iter().map(|s| (s.id.clone(), s.file_id)).collect();
+    let scope_file_map: HashMap<String, i32> =
+        scopes.iter().map(|s| (s.id.clone(), s.file_id)).collect();
     let mut effect_scopes: Vec<(String, i32, i32, i32, i32, i32)> = Vec::new();
     for entity in &entities {
         let prefix = if entity.id.starts_with("workspace:") {
@@ -410,8 +411,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                             let end_col = scope["end"]["column"].as_i64().unwrap_or(0) as i32;
 
                             let eff_id = format!("{}{}", prefix, eff_id_raw);
-                            let file_id = scope_file_map.get(&entity.scope_id).cloned().unwrap_or(0);
-                            effect_scopes.push((eff_id, file_id, start_line, start_col, end_line, end_col));
+                            let file_id =
+                                scope_file_map.get(&entity.scope_id).cloned().unwrap_or(0);
+                            effect_scopes
+                                .push((eff_id, file_id, start_line, start_col, end_line, end_col));
                         }
                     }
                 }
@@ -569,7 +572,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
         let entity = entity.unwrap();
 
-        // Skip state setters (index 1 of the state array) to avoid showing duplicate nodes
+        // Skip state entity-level names and setters — only show the state value (index 0)
         if entity.kind == "state" {
             if let Some(path_str) = &symbol.path {
                 if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
@@ -579,6 +582,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                         }
                     }
                 }
+            } else {
+                continue;
             }
         }
 
@@ -637,47 +642,50 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         // Also check that it's NOT a function variable (likely has its own scope)
         if entity.kind == "normal" && entity.item_type.as_deref() == Some("data") {
             let symbol_file_id = scope.map(|s| s.file_id).unwrap_or(0);
-            if let Some(effect) = effect_scopes.iter().find(|(_, eff_file_id, sl, sc, el, ec)| {
-                if *eff_file_id != symbol_file_id {
-                    return false;
-                }
-                let line = entity.line.unwrap_or(0);
-                let col = entity.column.unwrap_or(0);
+            if let Some(effect) = effect_scopes
+                .iter()
+                .find(|(_, eff_file_id, sl, sc, el, ec)| {
+                    if *eff_file_id != symbol_file_id {
+                        return false;
+                    }
+                    let line = entity.line.unwrap_or(0);
+                    let col = entity.column.unwrap_or(0);
 
-                // Refine: Check if the variable'S DECLARATION scope is within the effect scope.
-                if let Some(s) = scope {
-                    if let Some(dj) = &s.data_json {
-                        if let Ok(s_json) = serde_json::from_str::<serde_json::Value>(dj) {
-                            if let (Some(start), Some(end)) =
-                                (s_json["start"].as_object(), s_json["end"].as_object())
-                            {
-                                let s_line = start["line"].as_i64().unwrap_or(0) as i32;
-                                let e_line = end["line"].as_i64().unwrap_or(0) as i32;
+                    // Refine: Check if the variable'S DECLARATION scope is within the effect scope.
+                    if let Some(s) = scope {
+                        if let Some(dj) = &s.data_json {
+                            if let Ok(s_json) = serde_json::from_str::<serde_json::Value>(dj) {
+                                if let (Some(start), Some(end)) =
+                                    (s_json["start"].as_object(), s_json["end"].as_object())
+                                {
+                                    let s_line = start["line"].as_i64().unwrap_or(0) as i32;
+                                    let e_line = end["line"].as_i64().unwrap_or(0) as i32;
 
-                                // Variable's scope must be inside effect's scope
-                                if s_line >= *sl && e_line <= *el {
-                                    return true;
+                                    // Variable's scope must be inside effect's scope
+                                    if s_line >= *sl && e_line <= *el {
+                                        return true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if line > *sl && line < *el {
-                    return true;
-                }
-                if line == *sl && line == *el {
-                    return col >= *sc && col <= *ec;
-                }
-                if line == *sl {
-                    return col >= *sc;
-                }
-                if line == *el {
-                    return col <= *ec;
-                }
+                    if line > *sl && line < *el {
+                        return true;
+                    }
+                    if line == *sl && line == *el {
+                        return col >= *sc && col <= *ec;
+                    }
+                    if line == *sl {
+                        return col >= *sc;
+                    }
+                    if line == *el {
+                        return col <= *ec;
+                    }
 
-                false
-            }) {
+                    false
+                })
+            {
                 pc_id = Some(effect.0.clone());
             }
         }
@@ -995,15 +1003,16 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                             if let Some(dep_id_raw) = dep["id"].as_str() {
                                 let dep_id = format!("{}{}", prefix, dep_id_raw);
                                 add_edge_local(
-                                   &dep_id,
-                                   &sym.id,
-                                   "react-dep",
-                                   "dependency",
-                                   None,
-                                   &redirection_map,
-                                   &var_parent_map,
-                                   &mut edge_map,
-                                );                            }
+                                    &dep_id,
+                                    &sym.id,
+                                    "react-dep",
+                                    "dependency",
+                                    None,
+                                    &redirection_map,
+                                    &var_parent_map,
+                                    &mut edge_map,
+                                );
+                            }
                         }
                     }
                 }

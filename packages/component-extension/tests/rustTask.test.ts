@@ -52,7 +52,7 @@ describe("Rust Component Task", () => {
             CREATE TABLE packages (id TEXT PRIMARY KEY, name TEXT, version TEXT, path TEXT);
             CREATE TABLE files (id INTEGER PRIMARY KEY, path TEXT, package_id TEXT, hash TEXT, fingerprint TEXT);
             CREATE TABLE entities (id TEXT PRIMARY KEY, scope_id TEXT, kind TEXT, name TEXT, type TEXT, line INTEGER, column INTEGER, data_json TEXT);
-            CREATE TABLE scopes (id TEXT PRIMARY KEY, file_id INTEGER, parent_id TEXT, kind TEXT, entity_id TEXT);
+            CREATE TABLE scopes (id TEXT PRIMARY KEY, file_id INTEGER, parent_id TEXT, kind TEXT, entity_id TEXT, data_json TEXT);
             CREATE TABLE symbols (id TEXT PRIMARY KEY, entity_id TEXT, scope_id TEXT, name TEXT, path TEXT, is_alias INTEGER DEFAULT 0, has_default INTEGER DEFAULT 0, data_json TEXT);
             CREATE TABLE renders (id TEXT PRIMARY KEY, file_id INTEGER, parent_entity_id TEXT, parent_render_id TEXT, symbol_id TEXT, tag TEXT, line INTEGER, column INTEGER, kind TEXT, data_json TEXT);
             CREATE TABLE relations (from_id TEXT, to_id TEXT, kind TEXT, line INTEGER, column INTEGER, data_json TEXT);
@@ -266,7 +266,7 @@ describe("Rust Component Task", () => {
             );
             INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('sym-app', 'e-app', 's-module', 'App');
             INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('e-dep', 's-module', 'state', 'count', 'data');
-            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('sym-dep', 'e-dep', 's-module', 'count');
+            INSERT INTO symbols (id, entity_id, scope_id, name, path) VALUES ('sym-dep', 'e-dep', 's-module', 'count', '[]');
         `);
 
     db.close();
@@ -278,15 +278,17 @@ describe("Rust Component Task", () => {
       }) as Buffer,
     );
 
-    const effectNode = snapshot.nodes.find((n: OutNode) => n.id === "eff-1");
-    expect(effectNode).toBeDefined();
-    expect(effectNode?.type).toBe("effect");
+    const effectCombo = snapshot.combos.find(
+      (c: OutCombo) => c.id === "eff-1",
+    );
+    expect(effectCombo).toBeDefined();
+    expect(effectCombo?.type).toBe("effect");
 
     const edge = snapshot.edges.find(
       (e: OutEdge) => e.target === "eff-1" && e.source === "sym-dep",
     );
     expect(edge).toBeDefined();
-    expect(edge?.kind).toBe("effect-dep");
+    expect(edge?.kind).toBe("usage-read");
   });
 
   it("should not create a source group for non-alias single-segment hook selector paths", () => {
