@@ -8,3 +8,10 @@ ignoredBuiltDependencies:
   - "@swc/core"
 
 strictPeerDependencies: false
+
+allowBuilds:
+  "@node-rs/xxhash": true
+  "@parcel/watcher": true
+  "better-sqlite3": true
+  "bson": true
+  "esbuild": true
