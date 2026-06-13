@@ -118,6 +118,78 @@ describe("Rust Component Task", () => {
     expect(stateNodes[0].name).toBe("count");
   });
 
+  it("should only show the state value and hide entity-level name and setter", () => {
+    db.exec(`
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('e-state', 's-module', 'state', '[count, setCount]', 'function');
+            -- Entity-level pattern name - should be filtered (path is null)
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('sym-pattern', 'e-state', 's-module', '[count, setCount]');
+            -- State variable (index 0) - should be shown
+            INSERT INTO symbols (id, entity_id, scope_id, name, path) VALUES ('sym-state', 'e-state', 's-module', 'count', '[0]');
+            -- State setter (index 1) - should be filtered
+            INSERT INTO symbols (id, entity_id, scope_id, name, path) VALUES ('sym-setter', 'e-state', 's-module', 'setCount', '[1]');
+        `);
+
+    const context = {
+      projectRoot: "/root",
+      viewType: "component",
+      cacheDbPath: dbPath,
+    };
+
+    db.close();
+    const resultBuffer = runComponentTaskSqlite(context);
+    const snapshot = materializeSqliteBuffer(resultBuffer as Buffer);
+
+    // Only count should appear
+    const stateNodes = snapshot.nodes.filter(
+      (n: OutNode) =>
+        n.name === "count" ||
+        n.name === "setCount" ||
+        n.name === "[count, setCount]",
+    );
+    expect(stateNodes.length).toBe(1);
+    expect(stateNodes[0].name).toBe("count");
+
+    // Entity-level name and setter should not appear
+    expect(
+      snapshot.nodes.find((n: OutNode) => n.name === "[count, setCount]"),
+    ).toBeUndefined();
+    expect(
+      snapshot.nodes.find((n: OutNode) => n.name === "setCount"),
+    ).toBeUndefined();
+  });
+
+  it("should redirect state setter call relations to the state value symbol", () => {
+    db.exec(`
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('e-caller', 's-module', 'component', 'Caller', 'function');
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('sym-caller', 'e-caller', 's-module', 'Caller');
+
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('e-state', 's-module', 'state', 'count', 'function');
+            INSERT INTO symbols (id, entity_id, scope_id, name, path) VALUES ('sym-state', 'e-state', 's-module', 'count', '[0]');
+            INSERT INTO symbols (id, entity_id, scope_id, name, path) VALUES ('sym-setter', 'e-state', 's-module', 'setCount', '[1]');
+
+            -- usage-call from component to setCount should be redirected to count
+            INSERT INTO relations (from_id, to_id, kind) VALUES ('sym-caller', 'sym-setter', 'usage-call');
+        `);
+
+    const context = {
+      projectRoot: "/root",
+      viewType: "component",
+      cacheDbPath: dbPath,
+    };
+
+    db.close();
+    const resultBuffer = runComponentTaskSqlite(context);
+    const snapshot = materializeSqliteBuffer(resultBuffer as Buffer);
+
+    // Edge target should be sym-state (the value), not sym-setter (the setter)
+    const edge = snapshot.edges.find(
+      (e: OutEdge) => e.source === "sym-caller",
+    );
+    expect(edge).toBeDefined();
+    expect(edge?.target).toBe("sym-state");
+    expect(edge?.kind).toBe("usage-call");
+  });
+
   it("should process JSX renders into render groups and combos", () => {
     db.exec(`
             -- Component
