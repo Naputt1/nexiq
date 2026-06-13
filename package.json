@@ -5,15 +5,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm --filter=@nexiq/server dev",
-    "dev:cli": "pnpm --filter=@nexiq/cli dev",
-    "test:analyze": "pnpm --filter=@nexiq/analyser test",
-    "snapshot:analyze": "pnpm --filter=@nexiq/analyser snapshot",
-    "benchmark": "pnpm --filter=@nexiq/benchmark-cli start",
-    "benchmark:view": "pnpm --filter=viewer dev",
-    "build:analyze": "pnpm --filter=@nexiq/analyser build",
-    "typecheck": "pnpm -r run typecheck",
-    "lint": "pnpm -r run lint --fix"
+    "build": "turbo run build --filter=@nexiq/* --filter=viewer --filter=@nexiq/benchmark-cli",
+    "dev:server": "turbo run dev --filter=@nexiq/server",
+    "dev:cli": "turbo run dev --filter=@nexiq/cli",
+    "test": "turbo run test",
+    "test:analyze": "turbo run test --filter=@nexiq/analyser",
+    "snapshot:analyze": "turbo run snapshot --filter=@nexiq/analyser",
+    "benchmark": "turbo run start --filter=@nexiq/benchmark-cli",
+    "benchmark:view": "turbo run dev --filter=viewer",
+    "build:analyze": "turbo run build --filter=@nexiq/analyser",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,7 @@
     "dotenv": "^17.4.2",
     "openai": "^6.34.0",
     "tiktoken": "^1.0.22",
+    "turbo": "^2.9.18",
     "zod": "^4.3.6"
   }
 }
