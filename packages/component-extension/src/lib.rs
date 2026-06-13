@@ -562,6 +562,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     }
 
     // 2. Symbols -> Nodes/Combos
+    let mut state_value_map: HashMap<String, String> = HashMap::new();
     for symbol in &symbols {
         if symbol.name.starts_with("jsx@") {
             continue;
@@ -573,18 +574,27 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         let entity = entity.unwrap();
 
         // Skip state entity-level names and setters — only show the state value (index 0)
+        // Redirect edges from skipped state symbols to the value symbol
         if entity.kind == "state" {
             if let Some(path_str) = &symbol.path {
                 if let Ok(path_json) = serde_json::from_str::<serde_json::Value>(path_str) {
                     if let Some(path_arr) = path_json.as_array() {
                         if !path_arr.is_empty() && path_arr[0] != "0" && path_arr[0] != 0 {
+                            if let Some(value_sym_id) = state_value_map.get(&entity.id) {
+                                redirection_map.insert(symbol.id.clone(), value_sym_id.clone());
+                            }
                             continue;
                         }
                     }
                 }
             } else {
+                if let Some(value_sym_id) = state_value_map.get(&entity.id) {
+                    redirection_map.insert(symbol.id.clone(), value_sym_id.clone());
+                }
                 continue;
             }
+            // Record the value symbol for this state entity
+            state_value_map.insert(entity.id.clone(), symbol.id.clone());
         }
 
         let scope = scopes.iter().find(|s| s.id == symbol.scope_id);

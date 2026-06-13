@@ -13,6 +13,12 @@ function App() {
   const [count, setCount] = useState(0);
   const [user] = useState<User>({ name: "Alice" });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const changeCount = () => {
+    if (count == null) return;
+    setCount(count + 1);
+  };
+
   return (
     <>
       <div>
