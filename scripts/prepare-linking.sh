@@ -22,14 +22,14 @@ pnpm --filter "@nexiq/cli" build
 
 echo "Linking CLI globally..."
 cd "$ROOT_DIR/packages/cli"
-pnpm link --global
+pnpm link
 
-echo "Preparing other packages for linking..."
-# These packages will be available for linking by the UI repository
+echo "Preparing other packages for global linking..."
+
 packages=("shared" "extension-sdk" "analyser" "server")
 
 for pkg in "${packages[@]}"; do
-  echo "Linking $pkg..."
+  echo "Linking $pkg globally..."
   cd "$ROOT_DIR/packages/$pkg"
   pnpm link
 done
