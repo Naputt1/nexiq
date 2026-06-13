@@ -19,6 +19,7 @@ export class Scope {
   private childScopes: Scope[] = [];
   private nameToVariable = new Map<string, Variable>();
   private nameToId = new Map<string, string>();
+  private nameToPath = new Map<string, string[]>();
   private prevIds = new Map<string, string>();
 
   type = "scope";
@@ -109,6 +110,7 @@ export class Scope {
     for (const id of identifiers) {
       this.nameToVariable.set(id.name, v);
       this.nameToId.set(id.name, id.id);
+      this.nameToPath.set(id.name, id.path);
     }
 
     if (
@@ -266,12 +268,13 @@ export class Scope {
     // 2. Process symbol mappings in this scope
     for (const [name, v] of this.nameToVariable) {
       const symbolId = this.nameToId.get(name)!;
+      const path = this.nameToPath.get(name);
       batch.symbols.add({
         id: symbolId,
         entity_id: v.id,
         scope_id: scopeId,
         name,
-        path: null,
+        path: path ? JSON.stringify(path) : null,
         is_alias: symbolId !== v.id ? 1 : 0,
         has_default: 0,
         data_json: null,
