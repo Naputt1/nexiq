@@ -6,6 +6,7 @@ import type {
 } from "@nexiq/shared";
 import { Variable } from "./variable.ts";
 import type { File } from "../fileDB.ts";
+import { isScope } from "./type.ts";
 
 export class JSXVariable extends Variable<"jsx", "normal"> {
   render: ComponentInfoRender | null;
@@ -80,7 +81,8 @@ export class JSXVariable extends Variable<"jsx", "normal"> {
     batch.renders.add({
       id: render.id,
       file_id: 0,
-      parent_entity_id: this.id,
+      parent_entity_id:
+        this.parent && !isScope(this.parent) ? this.parent.id : this.id,
       parent_render_id: parentRenderId,
       render_index: render.renderIndex,
       tag: render.tag,
