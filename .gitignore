@@ -171,6 +171,7 @@ benchmarks/snapshots/run_shell_command/
 benchmarks/snapshots/multi_replace_file_content/
 benchmarks/snapshots/find_files/
 
+.turbo
 index.*.node
 *.zip
 test-*.sqlite
