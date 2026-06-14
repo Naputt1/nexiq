@@ -4,9 +4,6 @@ packages:
   - benchmarks/viewer
   - benchmarks/cli
 
-ignoredBuiltDependencies:
-  - "@swc/core"
-
 strictPeerDependencies: false
 
 allowBuilds:
@@ -15,3 +12,4 @@ allowBuilds:
   "better-sqlite3": true
   "bson": true
   "esbuild": true
+  '@swc/core': false
