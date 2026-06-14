@@ -619,7 +619,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "402cf96bf9409ad5",
+          "hash": "8443e9e2ab164019",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -717,12 +717,12 @@
                   "line": 19,
                   "column": 14
                 },
-                "id": ""
+                "id": "629a149fafb6bd8c"
               },
               "kind": "normal",
               "type": "function",
               "file": "/src/SimpleClass.tsx",
-              "hash": "f9268a13c7e10c75",
+              "hash": "d7fe9160d1951f3c",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -739,7 +739,7 @@
                       "line": 20,
                       "column": 18
                     },
-                    "id": ""
+                    "id": "20c3012e4d5adf62"
                   },
                   "kind": "normal",
                   "type": "function",
@@ -1499,7 +1499,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "4de8d2911d6abba1",
+          "hash": "7a8ce334d1560e79",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1699,7 +1699,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "4a2fab685f054423",
+              "hash": "b11a0e8998e486eb",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1741,7 +1741,7 @@
                       "line": 21,
                       "column": 23
                     },
-                    "id": ""
+                    "id": "e3091fd7de759abb"
                   },
                   "kind": "normal",
                   "type": "function",
@@ -1929,7 +1929,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/ArrowRender.tsx",
-          "hash": "f8dc60962dc6c5a9",
+          "hash": "7dab120c0171044b",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2023,7 +2023,7 @@
                   "line": 6,
                   "column": 11
                 },
-                "id": ""
+                "id": "845ae415098b9744"
               },
               "kind": "normal",
               "type": "function",

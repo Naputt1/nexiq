@@ -3,6 +3,7 @@ import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.ts";
 import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
 import { getAssignedCallWrapperInfo } from "../utils.ts";
+import { getDeterministicId } from "../utils/hash.ts";
 
 export default function FunctionExpression(
   componentDB: ComponentDB,
@@ -61,7 +62,7 @@ export default function FunctionExpression(
           type: "identifier",
           name: `anonymous@${loc.line}:${loc.column}`,
           loc: loc,
-          id: "",
+          id: getDeterministicId(`anonymous@${loc.line}:${loc.column}`),
         },
         type: "function",
         loc: loc,

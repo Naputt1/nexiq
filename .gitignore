@@ -175,3 +175,4 @@ benchmarks/snapshots/find_files/
 index.*.node
 *.zip
 test-*.sqlite
+.opencode/
