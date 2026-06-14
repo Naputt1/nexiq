@@ -1006,9 +1006,9 @@ export class ComponentDB {
         if (typeof returnData !== "string" && returnData.type === "jsx") {
           const returnVar = returnData;
           const isTag =
-            (returnVar.srcId &&
-              returnVar.srcId[0] === returnVar.srcId[0]?.toLowerCase()) ||
-            returnVar.srcId === "Fragment";
+            (returnVar.render?.tag &&
+              returnVar.render.tag[0] === returnVar.render.tag[0]?.toLowerCase()) ||
+            returnVar.render?.tag === "Fragment";
           if (returnVar.srcId && returnVar.srcId !== "" && !isTag) {
             this.edges.push({
               from: returnVar.srcId,

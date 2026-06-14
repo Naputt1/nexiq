@@ -634,11 +634,16 @@ export class File {
     ) => {
       for (const render of Object.values(children || {})) {
         if (!render) continue;
-        edges.push({
-          from: render.id,
-          to: toId,
-          label: "render",
-        });
+        const isTag =
+          (render.tag && render.tag[0] === render.tag[0]?.toLowerCase()) ||
+          render.tag === "Fragment";
+        if (!isTag) {
+          edges.push({
+            from: render.id,
+            to: toId,
+            label: "render",
+          });
+        }
         if (render.children) {
           resolveRenders(render.children, toId);
         }

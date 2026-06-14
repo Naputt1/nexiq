@@ -238,6 +238,15 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         .filter_map(|r| r.ok())
         .collect();
 
+    let scope_redirect: HashMap<String, String> = scopes
+        .iter()
+        .filter_map(|s| {
+            s.entity_id
+                .as_ref()
+                .map(|eid| (eid.clone(), s.id.clone()))
+        })
+        .collect();
+
     let relations: Vec<RelationRow> = conn
         .prepare("SELECT from_id, to_id, kind, data_json FROM relations")
         .unwrap()
@@ -431,25 +440,33 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     let mut var_parent_map: HashMap<String, Option<String>> = HashMap::new();
 
-    let mut add_edge_local = |source: &str,
+    let add_edge_local = |source: &str,
                               target: &str,
                               kind: &str,
                               _name: &str,
                               data: Option<&str>,
                               redirection_map: &HashMap<String, String>,
+                              scope_redirect: &HashMap<String, String>,
+                              added_combos: &HashSet<String>,
                               var_parent_map: &HashMap<String, Option<String>>,
                               edge_map: &mut HashMap<
         String,
         (String, String, String, i32, Vec<serde_json::Value>),
     >| {
-        let s = redirection_map
+        let s0 = redirection_map
             .get(source)
             .unwrap_or(&source.to_string())
             .clone();
-        let t = redirection_map
+        let s = if added_combos.contains(&s0) {
+            s0
+        } else {
+            scope_redirect.get(&s0).unwrap_or(&s0).clone()
+        };
+        let t0 = redirection_map
             .get(target)
             .unwrap_or(&target.to_string())
             .clone();
+        let t = scope_redirect.get(&t0).unwrap_or(&t0).clone();
 
         // Skip edge if the source is already a child of the target combo
         if let Some(parent_id) = var_parent_map.get(&s).and_then(|p| p.as_ref()) {
@@ -920,6 +937,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             &rel.kind,
             rel.data_json.as_deref(),
             &redirection_map,
+            &scope_redirect,
+            &added_combos,
             &var_parent_map,
             &mut edge_map,
         );
@@ -997,6 +1016,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                         "usage-read",
                                         None,
                                         &redirection_map,
+                                        &scope_redirect,
+                                        &added_combos,
                                         &var_parent_map,
                                         &mut edge_map,
                                     );
@@ -1019,6 +1040,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                     "dependency",
                                     None,
                                     &redirection_map,
+                                    &scope_redirect,
+                                    &added_combos,
                                     &var_parent_map,
                                     &mut edge_map,
                                 );
@@ -1026,6 +1049,49 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Dedup render edges: remove if source combo is inside target's combo tree
+    // For each removed edge where source has a scope combo, add scope→source edge
+    let render_ids: Vec<String> = edge_map
+        .iter()
+        .filter(|(_, (_, _, k, _, _))| k == "render")
+        .map(|(id, _)| id.clone())
+        .collect();
+
+    for e_id in render_ids {
+        let entry = edge_map.remove(&e_id);
+        if let Some((source, target, kind, count, usages)) = entry {
+            let mut redundant = false;
+            if added_combos.contains(&source) && added_combos.contains(&target) {
+                let mut current: Option<String> = Some(source.clone());
+                while let Some(c) = current.as_deref() {
+                    if c == target {
+                        redundant = true;
+                        break;
+                    }
+                    current = conn
+                        .query_row(
+                            "SELECT parent_id FROM out_combos WHERE id = ?1",
+                            params![c],
+                            |row| row.get::<_, Option<String>>(0),
+                        )
+                        .ok()
+                        .flatten();
+                }
+            }
+            if redundant {
+                if let Some(scope_combo) = scope_redirect.get(&source) {
+                    let new_id = format!("{}-{}-{}", scope_combo, &source, &kind);
+                    edge_map.insert(
+                        new_id,
+                        (scope_combo.clone(), source.clone(), kind.clone(), count, usages),
+                    );
+                }
+            } else {
+                edge_map.insert(e_id, (source, target, kind, count, usages));
             }
         }
     }
