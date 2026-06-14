@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -46,6 +46,7 @@
     "typescript-eslint": "^8.58.0"
   },
   "dependencies": {
-    "flatbuffers": "^25.9.23"
+    "flatbuffers": "^25.9.23",
+    "vitest": "^4.1.2"
   }
 }
