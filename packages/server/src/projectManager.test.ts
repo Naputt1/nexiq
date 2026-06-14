@@ -25,6 +25,7 @@ const createMockStmt = () => ({
   all: vi.fn(() => []),
   get: vi.fn(() => undefined),
   run: vi.fn(() => ({ changes: 0 })),
+  prepare: vi.fn(() => createMockStmt()),
 });
 
 const mockDb = {
@@ -187,6 +188,10 @@ describe("ProjectManager", () => {
   it("should return cached project if already open", async () => {
     const projectPath = "/test/project";
     const info1 = await projectManager.openProject(projectPath);
+    vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
+      if ((p as string).includes(info1.sqlitePath)) return true;
+      return false;
+    });
     const info2 = await projectManager.openProject(projectPath);
 
     expect(info1).toBe(info2);
@@ -714,8 +719,9 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol location", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
+      mockDb.prepare.mockImplementationOnce(() => {
+        const s = createMockStmt();
+        s.all.mockReturnValue([
           {
             id: "app-id",
             name: "App",
@@ -725,8 +731,9 @@ describe("ProjectManager", () => {
             kind: "component",
             type: "function",
           },
-        ]),
-      } as unknown as Database.Statement);
+        ]);
+        return s as unknown as Database.Statement;
+      });
       const loc = await projectManager.getSymbolLocation(projectPath, "App");
       expect(loc).toHaveLength(1);
       expect(loc[0].file).toBe("/src/App.tsx");
@@ -734,19 +741,23 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol content", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "app-id",
-            name: "App",
-            file: "/src/App.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            type: "function",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
       const fileContent =
         "export const App = () => {\n  return <div>App</div>\n}";
       vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
@@ -766,19 +777,23 @@ describe("ProjectManager", () => {
 
     it("should get symbol content from subproject", async () => {
       const subProject = "packages/app";
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "app-id",
-            name: "App",
-            file: "/src/App.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            type: "function",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
       await projectManager.openProject(projectPath, subProject);
 
       const fileContent = "export const App = () => {}";
@@ -799,19 +814,23 @@ describe("ProjectManager", () => {
     });
 
     it("should handle missing file on disk for content", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "app-id",
-            name: "App",
-            file: "/src/App.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            type: "function",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([
+            {
+              id: "app-id",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
       vi.mocked(fs.existsSync).mockImplementation((p: string | fs.PathLike) => {
         const s = p as string;
         if (s.includes(".nexiq/cache")) return true;
@@ -825,9 +844,11 @@ describe("ProjectManager", () => {
     });
 
     it("should return error if symbol not found for content", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementationOnce(() => {
+        const s = createMockStmt();
+        s.all.mockReturnValue([]);
+        return s as unknown as Database.Statement;
+      });
       const result = (await projectManager.getSymbolContent(
         projectPath,
         "NonExistent",
@@ -836,9 +857,11 @@ describe("ProjectManager", () => {
     });
 
     it("should open project automatically for getSymbolLocation", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementationOnce(() => {
+        const s = createMockStmt();
+        s.all.mockReturnValue([]);
+        return s as unknown as Database.Statement;
+      });
       const loc = await projectManager.getSymbolLocation("/new-project", "App");
       expect(loc).toEqual([]);
       expect(analyzeProject).toHaveBeenCalledWith(
@@ -884,8 +907,9 @@ describe("ProjectManager", () => {
     });
 
     it("should handle partial symbol matches", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
+      mockDb.prepare.mockImplementationOnce(() => {
+        const s = createMockStmt();
+        s.all.mockReturnValue([
           {
             id: "app",
             name: "App",
@@ -896,8 +920,9 @@ describe("ProjectManager", () => {
             type: "function",
             props_json: "[]",
           },
-        ]),
-      } as unknown as Database.Statement);
+        ]);
+        return s as unknown as Database.Statement;
+      });
       const results = await projectManager.findSymbol(
         projectPath,
         "Ap",

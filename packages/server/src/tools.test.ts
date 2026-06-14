@@ -97,11 +97,15 @@ describe("MCP Tools Integration", () => {
 
   describe("get_symbol_info", () => {
     it("should return definitions only by default", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
-        }]),
-      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([{
+            id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
       const data = JSON.parse(result.content[0].text);
@@ -113,19 +117,19 @@ describe("MCP Tools Integration", () => {
     });
 
     it("should include usages and location when requested", async () => {
-      // 1. Definition call
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
-        }]),
-      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-      
-      // 2. Usages call
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          tag: "Button", file: "/src/App.tsx", line: 20, column: 8, kind: "jsx", in_name: "App"
-        }]),
-      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([{
+            id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
+          }]);
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([{
+            tag: "Button", file: "/src/App.tsx", line: 20, column: 8, kind: "jsx", in_name: "App"
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "Button", usages: true, loc: true 
@@ -139,14 +143,17 @@ describe("MCP Tools Integration", () => {
     });
 
     it("should handle external usages fallback", async () => {
-      // 1. Definition call (empty)
-      mockDb.prepare.mockReturnValueOnce({ all: vi.fn().mockReturnValue([]) } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-      // 2. External Usages call
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          tag: "div", file: "/src/App.tsx", line: 5, column: 5, kind: "jsx"
-        }]),
-      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([]);
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([{
+            tag: "div", file: "/src/App.tsx", line: 5, column: 5, kind: "jsx"
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "div", usages: true 
@@ -159,11 +166,15 @@ describe("MCP Tools Integration", () => {
     });
 
     it("should handle non-strict matching", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([{
-          id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
-        }]),
-      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([{
+            id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "But", strict: false 
@@ -203,29 +214,24 @@ describe("MCP Tools Integration", () => {
     expect(data.files[0].exports).toBeDefined();
   });
 
-  it("get_component_hierarchy: should return rendered and renderedBy", async () => {
-    // 1. Start component call
-    mockDb.prepare.mockReturnValueOnce({
-      all: vi.fn().mockReturnValue([{ id: "app-id", name: "App", file: "/src/App.tsx" }]),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-    // 2. renderedBy call
-    mockDb.prepare.mockReturnValueOnce({
-      all: vi.fn().mockReturnValue([{ id: "root-id", name: "Root", file: "/src/index.tsx" }]),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-    // 3. sym call (App)
-    mockDb.prepare.mockReturnValueOnce({
-      get: vi.fn().mockReturnValue({ id: "app-id", name: "App" }),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-    // 4. children call (App renders)
-    mockDb.prepare.mockReturnValueOnce({
-      all: vi.fn().mockReturnValue([{ tag: "Button", symbol_id: "btn-id", file: "/src/App.tsx" }]),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-    // 5. sym call (Button)
-    mockDb.prepare.mockReturnValueOnce({
-      get: vi.fn().mockReturnValue({ id: "btn-id", name: "Button" }),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-    // 6. children call (Button renders - empty)
-    mockDb.prepare.mockReturnValueOnce({ all: vi.fn().mockReturnValue([]) } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    it("get_component_hierarchy: should return rendered and renderedBy", async () => {
+      let symGetCalls = 0;
+      let renderChildrenCalls = 0;
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("AND e.kind = 'component'")) {
+          s.all.mockReturnValue([{ id: "app-id", name: "App", file: "/src/App.tsx" }]);
+        } else if (sql.includes("WHERE r.tag = ? OR r.symbol_id IN")) {
+          s.all.mockReturnValue([{ id: "root-id", name: "Root", file: "/src/index.tsx" }]);
+        } else if (sql.includes("SELECT * FROM symbols WHERE id = ?")) {
+          symGetCalls++;
+          s.get.mockReturnValue(symGetCalls === 1 ? { id: "app-id", name: "App" } : { id: "btn-id", name: "Button" });
+        } else if (sql.includes("parent_entity_id = (SELECT entity_id FROM symbols WHERE id = ?)")) {
+          renderChildrenCalls++;
+          s.all.mockReturnValue(renderChildrenCalls === 1 ? [{ tag: "Button", symbol_id: "btn-id", file: "/src/App.tsx" }] : []);
+        }
+        return s as unknown as Database.Statement;
+      });
 
     const result = await server.handleCallTool({ name: "get_component_hierarchy", args: { projectPath, componentName: "App" } });
     const data = JSON.parse(result.content[0].text);
@@ -237,11 +243,15 @@ describe("MCP Tools Integration", () => {
   });
 
   it("get_symbol_location: should return file and line", async () => {
-    mockDb.prepare.mockReturnValueOnce({
-      all: vi.fn().mockReturnValue([{
-        id: "id1", name: "App", file: "/src/App.tsx", line: 5, column: 1, kind: "component", type: "function"
-      }]),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    mockDb.prepare.mockImplementation((sql: string) => {
+      const s = createMockStmt();
+      if (sql.includes("FROM symbols s")) {
+        s.all.mockReturnValue([{
+          id: "id1", name: "App", file: "/src/App.tsx", line: 5, column: 1, kind: "component", type: "function"
+        }]);
+      }
+      return s as unknown as Database.Statement;
+    });
 
     const result = await server.handleCallTool({ name: "get_symbol_location", args: { projectPath, query: "App" } });
     const locs = JSON.parse(result.content[0].text);
@@ -250,12 +260,15 @@ describe("MCP Tools Integration", () => {
   });
 
   it("get_symbol_content: should return source code line", async () => {
-    // 1. Location call
-    mockDb.prepare.mockReturnValueOnce({
-      all: vi.fn().mockReturnValue([{
-        id: "id1", name: "App", file: "/src/App.tsx", line: 2, column: 1, kind: "component", type: "function"
-      }]),
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    mockDb.prepare.mockImplementation((sql: string) => {
+      const s = createMockStmt();
+      if (sql.includes("FROM symbols s")) {
+        s.all.mockReturnValue([{
+          id: "id1", name: "App", file: "/src/App.tsx", line: 2, column: 1, kind: "component", type: "function"
+        }]);
+      }
+      return s as unknown as Database.Statement;
+    });
     
     vi.mocked(fs.readFileSync).mockReturnValue(`line 1
 export const App = () => {}
