@@ -784,7 +784,7 @@ export class ComponentDB {
     let isDependency = false;
 
     if (tag === "Fragment") {
-      srcId = "Fragment";
+      srcId = `${fileName}:Fragment:${loc.line}:${loc.column}`;
     } else {
       const v = this.files.getHookInfoFromLoc(fileName, loc);
       if (v && isBaseFunctionVariable(v)) {
@@ -807,11 +807,11 @@ export class ComponentDB {
       }
     }
 
-    const instanceId = getDeterministicId(`${tag}-${loc.line}-${loc.column}`);
+    const instanceId = getDeterministicId(`${fileName}-${tag}-${loc.line}-${loc.column}`);
 
     if (!srcId) {
       if (tag && tag[0] === tag[0]?.toLowerCase()) {
-        srcId = tag;
+        srcId = `${fileName}:${tag}:${loc.line}:${loc.column}`;
       } else if (tag && tag.includes(".")) {
         srcId = getDeterministicId(tag);
       } else {
@@ -942,8 +942,8 @@ export class ComponentDB {
       for (const render of Object.values(children || {})) {
         if (!render) continue;
         const isTag =
-          (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
-          render.id === "Fragment";
+          (render.tag && render.tag[0] === render.tag[0]?.toLowerCase()) ||
+          render.tag === "Fragment";
         if (
           render.id &&
           render.id !== "" &&
@@ -968,8 +968,8 @@ export class ComponentDB {
     ) => {
       if (!render) return;
       const isTag =
-        (render.id && render.id[0] === render.id[0]?.toLowerCase()) ||
-        render.id === "Fragment";
+        (render.tag && render.tag[0] === render.tag[0]?.toLowerCase()) ||
+        render.tag === "Fragment";
       if (
         render.id &&
         render.id !== "" &&
