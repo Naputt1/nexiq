@@ -99,26 +99,30 @@ describe("Token Optimization Tools", () => {
   describe("get_symbol_info with filtering", () => {
     it("should exclude test files by default", async () => {
       // Definition in a test file (which should be filtered out by default)
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "sym-1",
-            name: "Button",
-            file: "/src/Button.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-          },
-          {
-            id: "sym-2",
-            name: "Button",
-            file: "/src/Button.test.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([
+            {
+              id: "sym-1",
+              name: "Button",
+              file: "/src/Button.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+            },
+            {
+              id: "sym-2",
+              name: "Button",
+              file: "/src/Button.test.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({
         name: "get_symbol_info",
@@ -131,26 +135,30 @@ describe("Token Optimization Tools", () => {
     });
 
     it("should allow custom exclude patterns", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "sym-1",
-            name: "Button",
-            file: "/src/Button.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-          },
-          {
-            id: "sym-2",
-            name: "Button",
-            file: "/src/components/Button.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([
+            {
+              id: "sym-1",
+              name: "Button",
+              file: "/src/Button.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+            },
+            {
+              id: "sym-2",
+              name: "Button",
+              file: "/src/components/Button.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({
         name: "get_symbol_info",
@@ -183,33 +191,33 @@ describe("Token Optimization Tools", () => {
 
   describe("get_symbol_usages_with_context", () => {
     it("should return usages with source code context", async () => {
-      // 1. Definition call
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "btn-1",
-            name: "Button",
-            file: "/src/Button.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-          },
-        ]),
-      } as unknown as Database.Statement);
-
-      // 2. Usages call
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            tag: "Button",
-            file: "/src/App.tsx",
-            line: 3,
-            column: 10,
-            kind: "jsx",
-            in_name: "App",
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([
+            {
+              id: "btn-1",
+              name: "Button",
+              file: "/src/Button.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+            },
+          ]);
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([
+            {
+              tag: "Button",
+              file: "/src/App.tsx",
+              line: 3,
+              column: 10,
+              kind: "jsx",
+              in_name: "App",
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       vi.mocked(fs.readFileSync)
         .mockReturnValue(`import { Button } from './Button';
@@ -237,21 +245,25 @@ export const App = () => {
 
   describe("get_prop_definitions", () => {
     it("should return clean prop summary", async () => {
-      mockDb.prepare.mockReturnValueOnce({
-        all: vi.fn().mockReturnValue([
-          {
-            id: "btn-1",
-            name: "Button",
-            file: "/src/Button.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            data_json: JSON.stringify({
-              props: [{ name: "label", type: "string" }],
-            }),
-          },
-        ]),
-      } as unknown as Database.Statement);
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([
+            {
+              id: "btn-1",
+              name: "Button",
+              file: "/src/Button.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              data_json: JSON.stringify({
+                props: [{ name: "label", type: "string" }],
+              }),
+            },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = await server.handleCallTool({
         name: "get_prop_definitions",

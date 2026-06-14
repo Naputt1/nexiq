@@ -730,7 +730,7 @@ describe("BackendServer", () => {
           payload: {
             projectPath: "/test",
             commitHash: "HEAD",
-            subPath: "packages/app",
+            subProject: "packages/app",
           },
           requestId: "req-git",
         }),
