@@ -5,6 +5,7 @@ import { isJSXVariable } from "../db/variable/type.ts";
 import { getExpressionData } from "./type/helper.ts";
 import { ComponentFileVarBaseTypeFunction } from "@nexiq/shared";
 import { getAssignedCallWrapperInfo } from "../utils.ts";
+import { getDeterministicId } from "../utils/hash.ts";
 
 export default function ArrowFunctionExpression(
   componentDB: ComponentDB,
@@ -63,7 +64,7 @@ export default function ArrowFunctionExpression(
           type: "identifier",
           name: `anonymous@${loc.line}:${loc.column}`,
           loc: loc,
-          id: "",
+          id: getDeterministicId(`anonymous@${loc.line}:${loc.column}`),
         },
         type: "function",
         loc: loc,
@@ -118,7 +119,7 @@ export default function ArrowFunctionExpression(
             type: "identifier",
             name: `anonymous@${innerLoc.line}:${innerLoc.column}`,
             loc: innerLoc,
-            id: "",
+            id: getDeterministicId(`anonymous@${innerLoc.line}:${innerLoc.column}`),
           },
           type: "function",
           loc: innerLoc,

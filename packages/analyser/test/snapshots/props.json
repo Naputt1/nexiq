@@ -2192,7 +2192,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "15954159a6299600",
+          "hash": "ca09383d36004565",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2307,7 +2307,7 @@
                   "line": 119,
                   "column": 19
                 },
-                "id": ""
+                "id": "2e4bd8313f4b6d17"
               },
               "kind": "normal",
               "type": "function",
@@ -2389,7 +2389,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "84d18f6b0fc4f069",
+          "hash": "67b55d5d12c8acb9",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2503,7 +2503,7 @@
                   "line": 132,
                   "column": 19
                 },
-                "id": ""
+                "id": "55c79e5a735aaa33"
               },
               "kind": "normal",
               "type": "function",
@@ -2846,7 +2846,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "938149f7236d5cce",
+          "hash": "7c6c38a09dbaad7e",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2961,7 +2961,7 @@
                   "line": 14,
                   "column": 19
                 },
-                "id": ""
+                "id": "1f45f66ee8a6adbc"
               },
               "kind": "normal",
               "type": "function",

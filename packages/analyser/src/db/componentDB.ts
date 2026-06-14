@@ -783,11 +783,7 @@ export class ComponentDB {
     let srcId = "";
     let isDependency = false;
 
-    const exportInfo = this._getExportId(fileName, tag);
-    if (exportInfo) {
-      srcId = exportInfo.id;
-      isDependency = exportInfo.isDependency;
-    } else if (tag === "Fragment") {
+    if (tag === "Fragment") {
       srcId = "Fragment";
     } else {
       const v = this.files.getHookInfoFromLoc(fileName, loc);
@@ -801,6 +797,14 @@ export class ComponentDB {
       if (!srcId) {
         srcId = this.getVariableID(tag, fileName) ?? "";
       }
+
+      if (!srcId) {
+        const exportInfo = this._getExportId(fileName, tag);
+        if (exportInfo) {
+          srcId = exportInfo.id;
+          isDependency = exportInfo.isDependency;
+        }
+      }
     }
 
     const instanceId = getDeterministicId(`${tag}-${loc.line}-${loc.column}`);
@@ -808,6 +812,8 @@ export class ComponentDB {
     if (!srcId) {
       if (tag && tag[0] === tag[0]?.toLowerCase()) {
         srcId = tag;
+      } else if (tag && tag.includes(".")) {
+        srcId = getDeterministicId(tag);
       } else {
         if (!this.isResolve) {
           this.addResolveTask({
@@ -845,6 +851,24 @@ export class ComponentDB {
           loc,
           parentId,
         });
+      }
+    }
+
+    if (renderID && tag.includes(".")) {
+      const baseName = tag.split(".")[0]!;
+      const baseId = this.getVariableID(baseName, fileName);
+      if (baseId) {
+        const file = this.files.get(fileName);
+        if (file) {
+          file.relations.push({
+            from_id: baseId,
+            to_id: srcId,
+            kind: "usage-read",
+            line: loc.line,
+            column: loc.column,
+            data_json: null,
+          });
+        }
       }
     }
 

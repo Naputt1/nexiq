@@ -105,6 +105,18 @@ export default function JSXElement(
         };
 
         const dependency: ComponentInfoRenderDependency[] = [];
+
+        if (opening.type === "JSXMemberExpression") {
+          const baseName = generateFn(opening.object).code;
+          const baseId = componentDB.getVariableID(baseName, fileName);
+          if (baseId) {
+            dependency.push({
+              id: baseId,
+              name: baseName,
+            });
+          }
+        }
+
         for (const prop of nodePath.node.openingElement.attributes) {
           if (
             prop.type === "JSXAttribute" &&
