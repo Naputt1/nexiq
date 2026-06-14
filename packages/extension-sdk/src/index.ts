@@ -19,6 +19,10 @@ import type {
   RelationRow,
   VariableScope,
   VariableLoc,
+  PropData,
+  TypeData,
+  TypeDataParam,
+  ComponentInfoRender,
 } from "@nexiq/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
@@ -30,6 +34,10 @@ export type {
   GraphViewType,
   VariableScope,
   VariableLoc,
+  PropData,
+  TypeData,
+  TypeDataParam,
+  ComponentInfoRender,
 };
 
 export interface UsageOccurrence {
@@ -327,6 +335,30 @@ export interface GraphNodeDetail {
   tag?: string;
   componentType?: "function" | "class" | string | null;
   raw?: ComponentFileVar;
+  scope?: VariableScope | string;
+  props?: PropData[];
+  propData?: PropData;
+  propType?: TypeData;
+  type?:
+    | "component"
+    | "hook"
+    | "type"
+    | "interface"
+    | "state"
+    | "render"
+    | "effect"
+    | "memo"
+    | "callback"
+    | "ref"
+    | "prop"
+    | "jsx"
+    | "normal"
+    | (string & {});
+  typeParams?: TypeDataParam[];
+  extends?: string[];
+  children?: Record<string, ComponentInfoRender>;
+  hooks?: string[];
+  gitStatus?: "added" | "modified" | "deleted";
   [key: string]: unknown;
 }
 
@@ -340,12 +372,6 @@ export interface GraphNodeData {
   gitStatus?: "added" | "modified" | "deleted";
   appearanceOverride?: AppearanceOverride;
   displayName?: string;
-  hasProps?: boolean;
-  hasHooks?: boolean;
-  hasChildren?: boolean;
-  pureFileName?: string;
-  scope?: VariableScope | string;
-  loc?: VariableLoc;
   [key: string]: unknown;
 }
 
@@ -762,10 +788,10 @@ export interface GraphViewTask {
   ) => void | Promise<void> | Uint8Array | Promise<Uint8Array>;
 }
 
-export interface DetailSectionProps {
+export interface DetailSectionProps<TGraph = unknown> {
   selectedId: string;
   item: GraphNodeData | GraphComboData;
-  graph: unknown; // GraphData instance
+  graph: TGraph;
   projectPath: string;
   typeData: Record<string, TypeDataDeclare>;
   detail?: GraphNodeDetail;
@@ -773,12 +799,15 @@ export interface DetailSectionProps {
   renderNodes?: GraphNodeData[];
 }
 
-export interface DetailSection {
+export interface DetailSection<TGraph = unknown> {
   id: string;
   title: string;
   priority: number;
-  component: React.ComponentType<DetailSectionProps>;
-  shouldShow: (item: GraphNodeData | GraphComboData, detail?: GraphNodeDetail) => boolean;
+  component: React.ComponentType<DetailSectionProps<TGraph>>;
+  shouldShow: (
+    item: GraphNodeData | GraphComboData,
+    detail?: GraphNodeDetail,
+  ) => boolean;
   defaultOpen?: boolean;
 }
 
@@ -795,10 +824,10 @@ export interface MCPTool {
   handler: (args: MCPToolHandlerArgs) => Promise<unknown>;
 }
 
-export interface Extension {
+export interface Extension<TGraph = unknown> {
   id: string;
   viewTasks?: Record<string, GraphViewTask[]>; // Mapping of GraphViewType to tasks
-  detailSections?: DetailSection[];
+  detailSections?: DetailSection<TGraph>[];
   mcpTools?: MCPTool[];
 }
 
