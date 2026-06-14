@@ -778,7 +778,7 @@ export interface DetailSection {
   title: string;
   priority: number;
   component: React.ComponentType<DetailSectionProps>;
-  shouldShow: (item: GraphNodeData | GraphComboData) => boolean;
+  shouldShow: (item: GraphNodeData | GraphComboData, detail?: GraphNodeDetail) => boolean;
   defaultOpen?: boolean;
 }
 
