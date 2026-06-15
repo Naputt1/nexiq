@@ -581,6 +581,22 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     // 2. Symbols -> Nodes/Combos
     let mut state_value_map: HashMap<String, String> = HashMap::new();
+
+    // Pre-scan: identify hook entities that have destructured children (path-bearing symbols).
+    // These entities will be wrapped in a source-group combo by the path-grouping logic below,
+    // making a standalone node for the entity's own symbol redundant.
+    let mut hook_entities_with_paths: HashSet<String> = HashSet::new();
+    for symbol in &symbols {
+        if let Some(path_str) = &symbol.path {
+            if !path_str.is_empty()
+                && path_str != "[]"
+                && entities.iter().any(|e| e.id == symbol.entity_id && e.kind == "hook")
+            {
+                hook_entities_with_paths.insert(symbol.entity_id.clone());
+            }
+        }
+    }
+
     for symbol in &symbols {
         if symbol.name.starts_with("jsx@") {
             continue;
@@ -819,40 +835,49 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         }
 
         if block_scope.is_none() {
-            let node_type = if entity.kind == "normal" {
-                "variable"
-            } else {
-                &entity.kind
-            };
+            // Skip standalone nodes for hook entities whose destructured children
+            // already produce a source-group combo with a better display label
+            // (e.g. "{ t }" is redundant when a "useTranslation" source-group
+            // with child "t" already exists).
+            let has_source_group = entity.kind == "hook"
+                && hook_entities_with_paths.contains(&entity.id);
 
-            let is_memo = entity
-                .data_json
-                .as_ref()
-                .and_then(|dj| serde_json::from_str::<serde_json::Value>(dj).ok())
-                .and_then(|v| v.get("memo").and_then(|m| m.as_bool()))
-                .unwrap_or(false)
-                || entity.kind == "memo";
+            if !has_source_group {
+                let node_type = if entity.kind == "normal" {
+                    "variable"
+                } else {
+                    &entity.kind
+                };
 
-            let display_name = if is_memo {
-                format!("{} (memo)", symbol.name)
-            } else {
-                symbol.name.clone()
-            };
+                let is_memo = entity
+                    .data_json
+                    .as_ref()
+                    .and_then(|dj| serde_json::from_str::<serde_json::Value>(dj).ok())
+                    .and_then(|v| v.get("memo").and_then(|m| m.as_bool()))
+                    .unwrap_or(false)
+                    || entity.kind == "memo";
 
-            ins_node
-                .execute(params![
-                    symbol.id,
-                    symbol.name,
-                    node_type,
-                    pc_id,
-                    None::<String>,
-                    14.0,
-                    display_name,
-                    None::<String>,
-                    None::<String>
-                ])
-                .unwrap();
-            added_nodes.insert(symbol.id.clone());
+                let display_name = if is_memo {
+                    format!("{} (memo)", symbol.name)
+                } else {
+                    symbol.name.clone()
+                };
+
+                ins_node
+                    .execute(params![
+                        symbol.id,
+                        symbol.name,
+                        node_type,
+                        pc_id,
+                        None::<String>,
+                        14.0,
+                        display_name,
+                        None::<String>,
+                        None::<String>
+                    ])
+                    .unwrap();
+                added_nodes.insert(symbol.id.clone());
+            }
         }
 
         ins_detail
