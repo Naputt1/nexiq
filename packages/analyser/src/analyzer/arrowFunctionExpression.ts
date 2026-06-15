@@ -51,6 +51,42 @@ export default function ArrowFunctionExpression(
         }
       }
 
+      if (
+        nodePath.parentPath.isJSXExpressionContainer() &&
+        nodePath.parentPath.parentPath?.isJSXAttribute()
+      ) {
+        const jsxAttrPath = nodePath.parentPath.parentPath;
+        const attrName = jsxAttrPath.node.name;
+        if (t.isJSXIdentifier(attrName) && attrName.loc?.start) {
+          const attrLoc = {
+            line: attrName.loc.start.line,
+            column: attrName.loc.start.column,
+          };
+          const attrId = getDeterministicId(
+            fileName,
+            `${attrName.name}@${attrLoc.line}:${attrLoc.column}`,
+          );
+
+          const parentRenderId = componentDB.getCurrentRenderInstance();
+          if (parentRenderId) {
+            const file = componentDB.getFile(fileName);
+            file.addRender(
+              attrId,
+              getDeterministicId(
+                `${fileName}-${attrName.name}-${attrLoc.line}-${attrLoc.column}`,
+              ),
+              attrName.name,
+              [],
+              false,
+              attrLoc,
+              "attribute",
+              parentRenderId,
+            );
+          }
+        }
+        return;
+      }
+
       const loc = {
         line: nodePath.node.loc!.start.line,
         column: nodePath.node.loc!.start.column,
@@ -84,6 +120,12 @@ export default function ArrowFunctionExpression(
       componentDB.addVariable(fileName, functionVariable, undefined);
     },
     exit(nodePath) {
+      if (
+        nodePath.parentPath.isJSXExpressionContainer() &&
+        nodePath.parentPath.parentPath?.isJSXAttribute()
+      ) {
+        return;
+      }
       const body = nodePath.node.body;
       if (body.type === "BlockStatement") return;
 
@@ -119,7 +161,9 @@ export default function ArrowFunctionExpression(
             type: "identifier",
             name: `anonymous@${innerLoc.line}:${innerLoc.column}`,
             loc: innerLoc,
-            id: getDeterministicId(`anonymous@${innerLoc.line}:${innerLoc.column}`),
+            id: getDeterministicId(
+              `anonymous@${innerLoc.line}:${innerLoc.column}`,
+            ),
           },
           type: "function",
           loc: innerLoc,

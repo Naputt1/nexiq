@@ -52,7 +52,7 @@ export interface ComponentInfoRender extends ComponentLoc {
   dependencies: ComponentInfoRenderDependency[];
   isDependency?: boolean | undefined;
   renderIndex: number;
-  kind: "jsx" | "ternary" | "loop" | "expression" | "hook" | "call";
+  kind: "jsx" | "ternary" | "loop" | "expression" | "hook" | "call" | "attribute";
   children: Record<string, ComponentInfoRender>;
 }
 
@@ -185,7 +185,7 @@ export type ReactVarKind =
   | ReactFunctionVar
   | ReactStateVar
   | ReactWithCallbackVar;
-export type VarKind = "normal" | "class" | "method" | "property" | ReactVarKind;
+export type VarKind = "normal" | "class" | "method" | "property" | "attribute" | ReactVarKind;
 
 export type VariableNamePattern =
   | { type: "identifier"; name: string; loc: VariableLoc; id: string }
