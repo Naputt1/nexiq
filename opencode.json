@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "sqlite_test_cache": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-sqlite",
+        "--db-path",
+        "./packages/sample-project/simple/.nexiq/cache/simple-2f557365.sqlite"
+      ],
+      "enabled": false
+    },
+    "sqlite_test_debug_component_extension": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-sqlite",
+        "--db-path",
+        "./packages/sample-project/simple/.nexiq/debug/component-structure.sqlite"
+      ],
+      "enabled": false
+    }
+  }
+}
