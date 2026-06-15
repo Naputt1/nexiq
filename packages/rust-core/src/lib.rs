@@ -19,6 +19,7 @@ pub enum InternalItemType {
     SourceGroup = 12,
     PathGroup = 13,
     Variable = 14,
+    Attribute = 15,
 }
 
 pub struct PackageRow {
@@ -77,6 +78,7 @@ pub struct RenderRow {
     pub parent_render_id: Option<String>,
     pub symbol_id: Option<String>,
     pub tag: String,
+    pub kind: String,
     pub line: Option<i32>,
     pub column: Option<i32>,
     pub data_json: Option<String>,
@@ -105,6 +107,7 @@ pub fn map_item_type(kind: &str) -> InternalItemType {
         "source-group" => InternalItemType::SourceGroup,
         "path-group" => InternalItemType::PathGroup,
         "normal" | "variable" => InternalItemType::Variable,
+        "attribute" => InternalItemType::Attribute,
         _ => InternalItemType::Scope,
     }
 }

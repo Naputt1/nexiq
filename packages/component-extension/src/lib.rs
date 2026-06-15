@@ -277,7 +277,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         .filter_map(|r| r.ok())
         .collect();
     let renders: Vec<RenderRow> = conn
-        .prepare("SELECT id, file_id, parent_entity_id, parent_render_id, symbol_id, tag, line, \"column\", data_json FROM renders")
+        .prepare("SELECT id, file_id, parent_entity_id, parent_render_id, symbol_id, tag, kind, line, \"column\", data_json FROM renders")
         .unwrap()
         .query_map([], |row| {
             Ok(RenderRow {
@@ -287,9 +287,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                 parent_render_id: row.get(3)?,
                 symbol_id: row.get(4)?,
                 tag: row.get(5)?,
-                line: row.get(6)?,
-                column: row.get(7)?,
-                data_json: row.get(8)?,
+                kind: row.get(6)?,
+                line: row.get(7)?,
+                column: row.get(8)?,
+                data_json: row.get(9)?,
             })
         })
         .unwrap()
@@ -905,9 +906,14 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             }
         }
 
+        let combo_type = match render.kind.as_str() {
+            "attribute" => "attribute",
+            _ => "render",
+        };
+
         conn.execute(
             "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-            params![render.id, render.tag, "render", pc_id, None::<String>, 14.0, 1, render.tag, None::<String>, None::<String>],
+            params![render.id, render.tag, combo_type, pc_id, None::<String>, 14.0, 1, render.tag, None::<String>, None::<String>],
         ).unwrap();
 
         ins_detail

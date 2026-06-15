@@ -34,6 +34,38 @@ function getOwnerVariable(
   path: traverse.NodePath,
   fileDb: import("../db/fileDB.ts").File,
 ): Variable | undefined {
+  const fnExprPath = path.findParent(
+    (candidate) =>
+      candidate.isArrowFunctionExpression() || candidate.isFunctionExpression(),
+  );
+
+  if (fnExprPath) {
+    const loc = getStartLoc(fnExprPath.node);
+
+    if (loc) {
+      const jsxAttrPath = fnExprPath.findParent((candidate) =>
+        candidate.isJSXAttribute(),
+      );
+
+      if (jsxAttrPath?.isJSXAttribute()) {
+        const attrName = jsxAttrPath.node.name;
+
+        if (t.isJSXIdentifier(attrName) && attrName.loc?.start) {
+          const attrId = getDeterministicId(
+            fileDb.path,
+            `${attrName.name}@${attrName.loc.start.line}:${attrName.loc.start.column}`,
+          );
+          return { id: attrId, kind: "attribute" } as unknown as Variable;
+        }
+      }
+
+      const fnOwner = fileDb.getVariable(loc);
+      if (fnOwner) {
+        return fnOwner;
+      }
+    }
+  }
+
   const jsxPath = path.findParent(
     (candidate) => candidate.isJSXElement() || candidate.isJSXFragment(),
   );

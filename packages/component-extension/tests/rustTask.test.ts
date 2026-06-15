@@ -227,6 +227,35 @@ describe("Rust Component Task", () => {
     expect(renderItem?.combo).toBe(renderGroup?.id);
   });
 
+  it("should process attribute renders with type=attribute", () => {
+    db.exec(`
+            -- Component
+            INSERT INTO entities (id, scope_id, kind, name, type) VALUES ('e-app', 's-module', 'component', 'App', 'function');
+            INSERT INTO symbols (id, entity_id, scope_id, name) VALUES ('sym-app', 'e-app', 's-module', 'App');
+            INSERT INTO scopes (id, file_id, parent_id, kind, entity_id) VALUES ('s-app-block', 1, 's-module', 'block', 'e-app');
+
+            -- Attribute render (with parent_render_id)
+            INSERT INTO renders (id, file_id, parent_entity_id, parent_render_id, tag, kind) VALUES ('r-attr', 1, 'e-app', 'r-parent', 'onClick', 'attribute');
+        `);
+
+    const context = {
+      projectRoot: "/root",
+      viewType: "component",
+      cacheDbPath: dbPath,
+    };
+
+    db.close();
+    const resultBuffer = runComponentTaskSqlite(context);
+    const snapshot = materializeSqliteBuffer(resultBuffer as Buffer);
+
+    // Check for attribute combo
+    const attrCombo = snapshot.combos.find(
+      (c: OutCombo) => c.type === "attribute",
+    );
+    expect(attrCombo).toBeDefined();
+    expect(attrCombo?.name).toBe("onClick");
+  });
+
   it("should hide import nodes and redirect relations", () => {
     db.exec(`
             -- File 2 with export

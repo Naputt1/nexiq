@@ -15,5 +15,6 @@ export enum ItemType {
   RenderGroup = 11,
   SourceGroup = 12,
   PathGroup = 13,
-  Variable = 14
+  Variable = 14,
+  Attribute = 15
 }
