@@ -5,5 +5,5 @@ export { GraphEdge } from './graph-view/graph-edge.js';
 export { GraphNode } from './graph-view/graph-node.js';
 export { GraphNodeDetail } from './graph-view/graph-node-detail.js';
 export { GraphView } from './graph-view/graph-view.js';
-export { ItemType } from './graph-view/item-type.js';
+export { ItemType, itemTypeToString, stringToItemType } from './graph-view/item-type.js';
 export { Loc } from './graph-view/loc.js';
