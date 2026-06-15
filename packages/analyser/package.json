@@ -17,6 +17,7 @@
     }
   },
   "scripts": {
+    "prepare": "pnpm rebuild better-sqlite3",
     "build": "tsup",
     "dev": "tsup --watch --onSuccess \"node dist/analyzer.js ./sample-project ./out/graph.json\"",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
