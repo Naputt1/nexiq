@@ -18,3 +18,86 @@ export enum ItemType {
   Variable = 14,
   Attribute = 15
 }
+
+function normalizeTypeString(type: string): string {
+  return type.toLowerCase().replace(/-/g, "").replace(/group$/, "group");
+}
+
+export function itemTypeToString(type: ItemType): string {
+  switch (type) {
+    case ItemType.Package:
+      return "package";
+    case ItemType.Scope:
+      return "scope";
+    case ItemType.Component:
+      return "component";
+    case ItemType.Hook:
+      return "hook";
+    case ItemType.State:
+      return "state";
+    case ItemType.Memo:
+      return "memo";
+    case ItemType.Callback:
+      return "callback";
+    case ItemType.Ref:
+      return "ref";
+    case ItemType.Effect:
+      return "effect";
+    case ItemType.Prop:
+      return "prop";
+    case ItemType.Render:
+      return "render";
+    case ItemType.RenderGroup:
+      return "render-group";
+    case ItemType.SourceGroup:
+      return "source-group";
+    case ItemType.PathGroup:
+      return "path-group";
+    case ItemType.Variable:
+      return "variable";
+    case ItemType.Attribute:
+      return "attribute";
+  }
+}
+
+export function stringToItemType(type: string | undefined): ItemType {
+  if (!type) return ItemType.Scope;
+  const t = normalizeTypeString(type);
+  switch (t) {
+    case "package":
+      return ItemType.Package;
+    case "scope":
+      return ItemType.Scope;
+    case "component":
+      return ItemType.Component;
+    case "hook":
+      return ItemType.Hook;
+    case "state":
+      return ItemType.State;
+    case "memo":
+      return ItemType.Memo;
+    case "callback":
+      return ItemType.Callback;
+    case "ref":
+      return ItemType.Ref;
+    case "effect":
+      return ItemType.Effect;
+    case "prop":
+      return ItemType.Prop;
+    case "render":
+      return ItemType.Render;
+    case "rendergroup":
+      return ItemType.RenderGroup;
+    case "sourcegroup":
+      return ItemType.SourceGroup;
+    case "pathgroup":
+      return ItemType.PathGroup;
+    case "variable":
+    case "normal":
+      return ItemType.Variable;
+    case "attribute":
+      return ItemType.Attribute;
+    default:
+      return ItemType.Scope;
+  }
+}

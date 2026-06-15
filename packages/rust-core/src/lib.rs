@@ -1,27 +1,7 @@
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[repr(i8)]
-pub enum InternalItemType {
-    Package = 0,
-    Scope = 1,
-    Component = 2,
-    Hook = 3,
-    State = 4,
-    Memo = 5,
-    Callback = 6,
-    Ref = 7,
-    Effect = 8,
-    Prop = 9,
-    Render = 10,
-    RenderGroup = 11,
-    SourceGroup = 12,
-    PathGroup = 13,
-    Variable = 14,
-    Attribute = 15,
-}
-
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PackageRow {
     pub id: String,
     pub name: String,
@@ -88,28 +68,6 @@ pub struct FileInfo {
     pub path: String,
     pub package_id: Option<String>,
     pub project_path: Option<String>,
-}
-
-pub fn map_item_type(kind: &str) -> InternalItemType {
-    match kind {
-        "package" => InternalItemType::Package,
-        "scope" => InternalItemType::Scope,
-        "component" | "function" | "class" => InternalItemType::Component,
-        "hook" => InternalItemType::Hook,
-        "state" => InternalItemType::State,
-        "memo" => InternalItemType::Memo,
-        "callback" => InternalItemType::Callback,
-        "ref" => InternalItemType::Ref,
-        "effect" => InternalItemType::Effect,
-        "prop" => InternalItemType::Prop,
-        "render" => InternalItemType::Render,
-        "render-group" => InternalItemType::RenderGroup,
-        "source-group" => InternalItemType::SourceGroup,
-        "path-group" => InternalItemType::PathGroup,
-        "normal" | "variable" => InternalItemType::Variable,
-        "attribute" => InternalItemType::Attribute,
-        _ => InternalItemType::Scope,
-    }
 }
 
 pub fn table_exists(conn: &Connection, name: &str) -> bool {
