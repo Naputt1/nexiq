@@ -53,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "2a37b1d1b27ec7dc",
+          "hash": "1863e7a1d12d4810",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -184,15 +184,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "3aa4f253a9c8046e",
+              "hash": "80b580dae03b9087",
               "dependencies": {},
               "loc": {
                 "line": 18,
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "5f0e31d008fbd978",
+                "id": "/index.tsx:div:18:4",
+                "instanceId": "2392a68f3bd5431b",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -203,9 +203,9 @@
                 "renderIndex": 0,
                 "kind": "jsx",
                 "children": {
-                  "a8fb3b190b2a4b77": {
+                  "a15b0c53042dc8fe": {
                     "id": "",
-                    "instanceId": "a8fb3b190b2a4b77",
+                    "instanceId": "a15b0c53042dc8fe",
                     "tag": "Ternary",
                     "dependencies": [],
                     "isDependency": false,
@@ -213,14 +213,14 @@
                       "line": 19,
                       "column": 7
                     },
-                    "parentId": "5f0e31d008fbd978",
+                    "parentId": "2392a68f3bd5431b",
                     "renderIndex": 0,
                     "kind": "jsx",
                     "children": {}
                   }
                 }
               },
-              "srcId": "div"
+              "srcId": "/index.tsx:div:18:4"
             }
           },
           "scope": {
@@ -484,11 +484,6 @@
     {
       "from": "d3a4c6ed6b965219",
       "to": "23e8ac41bdcd4b3d",
-      "label": "render"
-    },
-    {
-      "from": "div",
-      "to": "d3a4c6ed6b965219",
       "label": "render"
     },
     {

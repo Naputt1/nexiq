@@ -39,7 +39,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "543398fd30f51f2d",
+          "hash": "c72efcea2a3d54d3",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -61,7 +61,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/StaticComponents.tsx",
-              "hash": "eca44dcb6fcb80a4",
+              "hash": "e518199a09835c4b",
               "dependencies": {
                 "96050a97f611a0d5": {
                   "id": "96050a97f611a0d5",
@@ -73,8 +73,8 @@
                 "column": 49
               },
               "render": {
-                "id": "h3",
-                "instanceId": "7d6fce36b5918df7",
+                "id": "/src/StaticComponents.tsx:h3:3:49",
+                "instanceId": "dec204fde43b8ac9",
                 "tag": "h3",
                 "dependencies": [],
                 "isDependency": false,
@@ -86,7 +86,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "h3"
+              "srcId": "/src/StaticComponents.tsx:h3:3:49"
             }
           },
           "scope": {
@@ -135,7 +135,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "203bdc074522aaec",
+          "hash": "bd78e2a16e35c4a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -157,7 +157,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/StaticComponents.tsx",
-              "hash": "31d3aca47ed0cf8c",
+              "hash": "4b84e95583ab0018",
               "dependencies": {
                 "645990c74ae7d7da": {
                   "id": "645990c74ae7d7da",
@@ -169,8 +169,8 @@
                 "column": 2
               },
               "render": {
-                "id": "div",
-                "instanceId": "7522acb7d4e337da",
+                "id": "/src/StaticComponents.tsx:div:5:2",
+                "instanceId": "a241072ae680387c",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -194,7 +194,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/src/StaticComponents.tsx:div:5:2"
             }
           },
           "scope": {
@@ -243,7 +243,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/StaticComponents.tsx",
-          "hash": "caaf94f79917da40",
+          "hash": "bbb1dade514b5949",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -265,15 +265,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/StaticComponents.tsx",
-              "hash": "60d4783337daf0c4",
+              "hash": "2aa11e8d8a93c835",
               "dependencies": {},
               "loc": {
                 "line": 7,
                 "column": 21
               },
               "render": {
-                "id": "footer",
-                "instanceId": "7dcce0828aaf326d",
+                "id": "/src/StaticComponents.tsx:footer:7:21",
+                "instanceId": "c0236c67a4c6de43",
                 "tag": "footer",
                 "dependencies": [],
                 "isDependency": false,
@@ -285,7 +285,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "footer"
+              "srcId": "/src/StaticComponents.tsx:footer:7:21"
             }
           },
           "scope": {
@@ -1001,35 +1001,35 @@
           }
         },
         {
-          "from_id": "1a3b38e2da4e7e96",
+          "from_id": "26ea4eaf9920e399",
           "to_id": "85f4419ef29e0cd2",
           "kind": "usage-write",
           "line": 20,
           "column": 32,
           "data_json": {
-            "usageId": "781436392f5fe5d",
+            "usageId": "f32550714d362c73",
             "filePath": "/src/SimpleClass.tsx",
             "line": 20,
             "column": 32,
-            "ownerId": "1a3b38e2da4e7e96",
-            "ownerKind": "property",
+            "ownerId": "26ea4eaf9920e399",
+            "ownerKind": "normal",
             "hiddenIntermediate": "state-setter",
             "displayLabel": "count"
           }
         },
         {
-          "from_id": "1a3b38e2da4e7e96",
+          "from_id": "26ea4eaf9920e399",
           "to_id": "b04033a58b519d57",
           "kind": "usage-call",
           "line": 20,
           "column": 4,
           "data_json": {
-            "usageId": "c4cd09aab7b17e64",
+            "usageId": "30aa7662a268977d",
             "filePath": "/src/SimpleClass.tsx",
             "line": 20,
             "column": 4,
-            "ownerId": "1a3b38e2da4e7e96",
-            "ownerKind": "property",
+            "ownerId": "26ea4eaf9920e399",
+            "ownerKind": "normal",
             "accessPath": [
               "setState"
             ],
@@ -1041,17 +1041,17 @@
         },
         {
           "from_id": "b04033a58b519d57",
-          "to_id": "1a3b38e2da4e7e96",
+          "to_id": "c72aa38611c6678a",
           "kind": "usage-read",
           "line": 20,
           "column": 39,
           "data_json": {
-            "usageId": "38fabe8141bf52a3",
+            "usageId": "e534972b24e647e9",
             "filePath": "/src/SimpleClass.tsx",
             "line": 20,
             "column": 39,
-            "ownerId": "1a3b38e2da4e7e96",
-            "ownerKind": "property",
+            "ownerId": "c72aa38611c6678a",
+            "ownerKind": "normal",
             "accessPath": [
               "count"
             ],
@@ -1423,6 +1423,38 @@
         },
         {
           "from_id": "d9915c39ffcb5dfe:fe02ef32071ba1d3",
+          "to_id": "d9915c39ffcb5dfe",
+          "kind": "usage-read",
+          "line": 17,
+          "column": 12,
+          "data_json": {
+            "usageId": "ca72322600a88e5e",
+            "filePath": "/src/NewFeatures.tsx",
+            "line": 17,
+            "column": 12,
+            "ownerId": "d9915c39ffcb5dfe",
+            "ownerKind": "normal",
+            "displayLabel": "user"
+          }
+        },
+        {
+          "from_id": "d9915c39ffcb5dfe:f1582c1660a1c09d",
+          "to_id": "d9915c39ffcb5dfe",
+          "kind": "usage-read",
+          "line": 17,
+          "column": 18,
+          "data_json": {
+            "usageId": "936fa611ef6751d7",
+            "filePath": "/src/NewFeatures.tsx",
+            "line": 17,
+            "column": 18,
+            "ownerId": "d9915c39ffcb5dfe",
+            "ownerKind": "normal",
+            "displayLabel": "age"
+          }
+        },
+        {
+          "from_id": "d9915c39ffcb5dfe:fe02ef32071ba1d3",
           "to_id": "65060d6a4d19c2fe",
           "kind": "usage-read",
           "line": 20,
@@ -1499,7 +1531,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "7a8ce334d1560e79",
+          "hash": "95147ba697f9c0a",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1520,7 +1552,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "e8f582a518801147",
+              "hash": "c0a0e1e2e459d431",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1544,15 +1576,15 @@
                   "kind": "normal",
                   "type": "jsx",
                   "file": "/src/NestedRender.tsx",
-                  "hash": "22c532414d1b87d8",
+                  "hash": "4fcbe888389e4689",
                   "dependencies": {},
                   "loc": {
                     "line": 6,
                     "column": 6
                   },
                   "render": {
-                    "id": "header",
-                    "instanceId": "a3ebe135aac4cc9",
+                    "id": "/src/NestedRender.tsx:header:6:6",
+                    "instanceId": "34b390788f732de5",
                     "tag": "header",
                     "dependencies": [],
                     "isDependency": false,
@@ -1563,9 +1595,9 @@
                     "renderIndex": 0,
                     "kind": "jsx",
                     "children": {
-                      "a3447c879cff1866": {
-                        "id": "h1",
-                        "instanceId": "a3447c879cff1866",
+                      "47c595ff67529393": {
+                        "id": "/src/NestedRender.tsx:h1:7:8",
+                        "instanceId": "47c595ff67529393",
                         "tag": "h1",
                         "dependencies": [],
                         "isDependency": false,
@@ -1573,14 +1605,14 @@
                           "line": 7,
                           "column": 8
                         },
-                        "parentId": "a3ebe135aac4cc9",
+                        "parentId": "34b390788f732de5",
                         "renderIndex": 0,
                         "kind": "jsx",
                         "children": {}
                       }
                     }
                   },
-                  "srcId": "header"
+                  "srcId": "/src/NestedRender.tsx:header:6:6"
                 }
               },
               "scope": {
@@ -1610,7 +1642,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "b7967525a3f83a26",
+              "hash": "5843fd30ab5e2fb5",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1634,7 +1666,7 @@
                   "kind": "normal",
                   "type": "jsx",
                   "file": "/src/NestedRender.tsx",
-                  "hash": "f1e1204dfc513f55",
+                  "hash": "c76be3ccc806b8f9",
                   "dependencies": {
                     "6ca8f7b0f03f9e41": {
                       "id": "6ca8f7b0f03f9e41",
@@ -1646,8 +1678,8 @@
                     "column": 11
                   },
                   "render": {
-                    "id": "li",
-                    "instanceId": "ebf1599573859d97",
+                    "id": "/src/NestedRender.tsx:li:13:11",
+                    "instanceId": "9a1608fff77fd8e5",
                     "tag": "li",
                     "dependencies": [
                       {
@@ -1669,7 +1701,7 @@
                     "kind": "jsx",
                     "children": {}
                   },
-                  "srcId": "li"
+                  "srcId": "/src/NestedRender.tsx:li:13:11"
                 }
               },
               "scope": {
@@ -1868,18 +1900,18 @@
           }
         },
         {
-          "from_id": "3ed6fc8598190293",
+          "from_id": "a0f710993bd94f66",
           "to_id": "12695fca083c92d1",
           "kind": "usage-call",
           "line": 21,
           "column": 33,
           "data_json": {
-            "usageId": "49c8de6d04cfc65e",
+            "usageId": "c3450225c0411de9",
             "filePath": "/src/NestedRender.tsx",
             "line": 21,
             "column": 33,
-            "ownerId": "3ed6fc8598190293",
-            "ownerKind": "method",
+            "ownerId": "a0f710993bd94f66",
+            "ownerKind": "normal",
             "accessPath": [
               "renderItem"
             ],
@@ -2158,7 +2190,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "9b8f4fb35f5b8bf6",
+          "hash": "2124b15d8e25ee14",
           "dependencies": {},
           "loc": {
             "line": 6,
@@ -2179,15 +2211,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "4f7b40fe55541886",
+              "hash": "2d599a6313c2926d",
               "dependencies": {},
               "loc": {
                 "line": 8,
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "9d94b2b6509639ce",
+                "id": "/src/App.tsx:div:8:4",
+                "instanceId": "2669a73f24a343f8",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -2210,9 +2242,9 @@
                 "renderIndex": 0,
                 "kind": "jsx",
                 "children": {
-                  "bcb1272b9bf684b2": {
-                    "id": "h1",
-                    "instanceId": "bcb1272b9bf684b2",
+                  "3cebcb67c823bb04": {
+                    "id": "/src/App.tsx:h1:9:6",
+                    "instanceId": "3cebcb67c823bb04",
                     "tag": "h1",
                     "dependencies": [],
                     "isDependency": false,
@@ -2220,14 +2252,14 @@
                       "line": 9,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 0,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "6812a6336ac809a7": {
+                  "92728163ad75a1fd": {
                     "id": "b04033a58b519d57",
-                    "instanceId": "6812a6336ac809a7",
+                    "instanceId": "92728163ad75a1fd",
                     "tag": "SimpleClass",
                     "dependencies": [
                       {
@@ -2247,14 +2279,14 @@
                       "line": 10,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 1,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "c7587f044a3bd1f7": {
-                    "id": "hr",
-                    "instanceId": "c7587f044a3bd1f7",
+                  "d557a599e10724a4": {
+                    "id": "/src/App.tsx:hr:11:6",
+                    "instanceId": "d557a599e10724a4",
                     "tag": "hr",
                     "dependencies": [],
                     "isDependency": false,
@@ -2262,14 +2294,14 @@
                       "line": 11,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 2,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "265fb99d255339ec": {
+                  "5d4f2666f56d4733": {
                     "id": "df67c87f23fed77c",
-                    "instanceId": "265fb99d255339ec",
+                    "instanceId": "5d4f2666f56d4733",
                     "tag": "StaticComponents",
                     "dependencies": [
                       {
@@ -2289,13 +2321,13 @@
                       "line": 12,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 3,
                     "kind": "jsx",
                     "children": {
-                      "42e017153eaeb49f": {
-                        "id": "p",
-                        "instanceId": "42e017153eaeb49f",
+                      "417bca6305507df6": {
+                        "id": "/src/App.tsx:p:13:8",
+                        "instanceId": "417bca6305507df6",
                         "tag": "p",
                         "dependencies": [],
                         "isDependency": false,
@@ -2303,16 +2335,16 @@
                           "line": 13,
                           "column": 8
                         },
-                        "parentId": "265fb99d255339ec",
+                        "parentId": "5d4f2666f56d4733",
                         "renderIndex": 0,
                         "kind": "jsx",
                         "children": {}
                       }
                     }
                   },
-                  "8e5910cee7f6dc59": {
-                    "id": "hr",
-                    "instanceId": "8e5910cee7f6dc59",
+                  "f5b8ca1f58db829b": {
+                    "id": "/src/App.tsx:hr:15:6",
+                    "instanceId": "f5b8ca1f58db829b",
                     "tag": "hr",
                     "dependencies": [],
                     "isDependency": false,
@@ -2320,14 +2352,14 @@
                       "line": 15,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 4,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "2f757c274842c65e": {
+                  "51d746ff6778b307": {
                     "id": "f6e530a81c178cd2",
-                    "instanceId": "2f757c274842c65e",
+                    "instanceId": "51d746ff6778b307",
                     "tag": "NestedRender",
                     "dependencies": [],
                     "isDependency": false,
@@ -2335,14 +2367,14 @@
                       "line": 16,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 5,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "1d3ef015f7505941": {
-                    "id": "hr",
-                    "instanceId": "1d3ef015f7505941",
+                  "fe9096a8099d586d": {
+                    "id": "/src/App.tsx:hr:17:6",
+                    "instanceId": "fe9096a8099d586d",
                     "tag": "hr",
                     "dependencies": [],
                     "isDependency": false,
@@ -2350,14 +2382,14 @@
                       "line": 17,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 6,
                     "kind": "jsx",
                     "children": {}
                   },
-                  "361e1a5e1289b5d9": {
+                  "48c1969b4f503e0f": {
                     "id": "216167f81fcb87bd",
-                    "instanceId": "361e1a5e1289b5d9",
+                    "instanceId": "48c1969b4f503e0f",
                     "tag": "ArrowRender",
                     "dependencies": [],
                     "isDependency": false,
@@ -2365,14 +2397,14 @@
                       "line": 18,
                       "column": 6
                     },
-                    "parentId": "9d94b2b6509639ce",
+                    "parentId": "2669a73f24a343f8",
                     "renderIndex": 7,
                     "kind": "jsx",
                     "children": {}
                   }
                 }
               },
-              "srcId": "div"
+              "srcId": "/src/App.tsx:div:8:4"
             }
           },
           "scope": {
@@ -2491,72 +2523,7 @@
       "label": "render"
     },
     {
-      "from": "311c554b828f67a5",
-      "to": "1c68783e81f4ad97",
-      "label": "render"
-    },
-    {
-      "from": "h3",
-      "to": "67ab56c21d437e71",
-      "label": "render"
-    },
-    {
-      "from": "f358aecd5ab85cf9",
-      "to": "96050a97f611a0d5",
-      "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "f7066f914897672a",
-      "label": "render"
-    },
-    {
-      "from": "10d0f1bd0be05b5c",
-      "to": "645990c74ae7d7da",
-      "label": "hook"
-    },
-    {
-      "from": "footer",
-      "to": "356f4e007a7b8c08",
-      "label": "render"
-    },
-    {
-      "from": "header",
-      "to": "f6e530a81c178cd2",
-      "label": "render"
-    },
-    {
-      "from": "h1",
-      "to": "f6e530a81c178cd2",
-      "label": "render"
-    },
-    {
-      "from": "li",
-      "to": "f6e530a81c178cd2",
-      "label": "render"
-    },
-    {
-      "from": "6cb608ecad02c76d",
-      "to": "6ca8f7b0f03f9e41",
-      "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "h1",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "b04033a58b519d57",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "hr",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -2566,12 +2533,27 @@
       "label": "render"
     },
     {
-      "from": "p",
+      "from": "f6e530a81c178cd2",
       "to": "311c554b828f67a5",
       "label": "render"
     },
     {
-      "from": "hr",
+      "from": "216167f81fcb87bd",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "1c68783e81f4ad97",
+      "label": "render"
+    },
+    {
+      "from": "b04033a58b519d57",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "df67c87f23fed77c",
       "to": "311c554b828f67a5",
       "label": "render"
     },
@@ -2581,7 +2563,37 @@
       "label": "render"
     },
     {
-      "from": "hr",
+      "from": "216167f81fcb87bd",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "f358aecd5ab85cf9",
+      "to": "96050a97f611a0d5",
+      "label": "hook"
+    },
+    {
+      "from": "10d0f1bd0be05b5c",
+      "to": "645990c74ae7d7da",
+      "label": "hook"
+    },
+    {
+      "from": "6cb608ecad02c76d",
+      "to": "6ca8f7b0f03f9e41",
+      "label": "hook"
+    },
+    {
+      "from": "b04033a58b519d57",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "df67c87f23fed77c",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "f6e530a81c178cd2",
       "to": "311c554b828f67a5",
       "label": "render"
     },

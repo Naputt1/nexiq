@@ -104,7 +104,24 @@
           }
         }
       },
-      "relations": []
+      "relations": [
+        {
+          "from_id": "bcb4ad80b9e65abc:bf9fba8fcba32833",
+          "to_id": "bcb4ad80b9e65abc",
+          "kind": "usage-read",
+          "line": 1,
+          "column": 15,
+          "data_json": {
+            "usageId": "515e79ead20b859e",
+            "filePath": "/src/auth.tsx",
+            "line": 1,
+            "column": 15,
+            "ownerId": "bcb4ad80b9e65abc",
+            "ownerKind": "normal",
+            "displayLabel": "useUser"
+          }
+        }
+      ]
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
@@ -145,7 +162,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "cdd9edbfa622d0bd",
+          "hash": "b365ece3540fa96b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -192,15 +209,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "9ff8383c5520bd8c",
+              "hash": "6454b1e5500b14d1",
               "dependencies": {},
               "loc": {
                 "line": 5,
                 "column": 9
               },
               "render": {
-                "id": "div",
-                "instanceId": "ca8cdcf6cdf8e769",
+                "id": "/src/App.tsx:div:5:9",
+                "instanceId": "b2e108291b626c5c",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -212,7 +229,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/src/App.tsx:div:5:9"
             }
           },
           "scope": {
@@ -240,18 +257,18 @@
       },
       "relations": [
         {
-          "from_id": "311c554b828f67a5",
+          "from_id": "311c554b828f67a5:callhook:useUser:4:8",
           "to_id": "symbol:import:/src/App.tsx:useUser",
           "kind": "usage-call",
           "line": 4,
           "column": 15,
           "data_json": {
-            "usageId": "3b0187ae561893af",
+            "usageId": "6a096325e0a417e5",
             "filePath": "/src/App.tsx",
             "line": 4,
             "column": 15,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "311c554b828f67a5:callhook:useUser:4:8",
+            "ownerKind": "hook",
             "displayLabel": "useUser"
           }
         },
@@ -294,11 +311,6 @@
       "from": "311c554b828f67a5:callhook:useUser:4:8",
       "to": "bcb4ad80b9e65abc",
       "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "311c554b828f67a5",
-      "label": "render"
     }
   ],
   "resolve": []

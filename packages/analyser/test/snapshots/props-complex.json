@@ -160,7 +160,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "3ae5e31a1b996132",
+          "hash": "98ccc8a5dda1ff69",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -263,7 +263,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "119694046dc89547",
+              "hash": "226759406f1b3515",
               "dependencies": {
                 "e6c632b61e964e1f": {
                   "id": "e6c632b61e964e1f",
@@ -279,8 +279,8 @@
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "9be1ac48bcec2adc",
+                "id": "/src/App.tsx:div:57:4",
+                "instanceId": "69f13c2a3ecfe46",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -292,7 +292,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/src/App.tsx:div:57:4"
             }
           },
           "scope": {
@@ -671,6 +671,22 @@
           "from_id": "dc80f04b65eb748d",
           "to_id": "c03f8e59d14c727c",
           "kind": "usage-read",
+          "line": 15,
+          "column": 2,
+          "data_json": {
+            "usageId": "4c98a6d8e1ee0478",
+            "filePath": "/src/App.tsx",
+            "line": 15,
+            "column": 2,
+            "ownerId": "c03f8e59d14c727c",
+            "ownerKind": "component",
+            "displayLabel": "a"
+          }
+        },
+        {
+          "from_id": "dc80f04b65eb748d",
+          "to_id": "c03f8e59d14c727c",
+          "kind": "usage-read",
           "line": 22,
           "column": 15,
           "data_json": {
@@ -988,11 +1004,6 @@
     {
       "from": "c03f8e59d14c727c",
       "to": "486f8c03b42afb2f",
-      "label": "render"
-    },
-    {
-      "from": "div",
-      "to": "c03f8e59d14c727c",
       "label": "render"
     },
     {
