@@ -839,8 +839,10 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             // already produce a source-group combo with a better display label
             // (e.g. "{ t }" is redundant when a "useTranslation" source-group
             // with child "t" already exists).
+            let is_entity_level = symbol.path.is_none();
             let has_source_group = entity.kind == "hook"
-                && hook_entities_with_paths.contains(&entity.id);
+                && hook_entities_with_paths.contains(&entity.id)
+                && is_entity_level;
 
             if !has_source_group {
                 let node_type = if entity.kind == "normal" {
