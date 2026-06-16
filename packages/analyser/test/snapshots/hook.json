@@ -74,7 +74,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/various-imports.tsx",
-          "hash": "f13f0d369076dd81",
+          "hash": "d82f7ad960f9b403",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -712,7 +712,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/various-imports.tsx",
-              "hash": "f1eb904ecf03adf4",
+              "hash": "b88e37bb048b78db",
               "dependencies": {
                 "9a275e3f454930d1": {
                   "id": "9a275e3f454930d1",
@@ -748,8 +748,8 @@
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "e7cb34f4a2416234",
+                "id": "/src/various-imports.tsx:div:36:4",
+                "instanceId": "517eb834c52fcf9d",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -761,7 +761,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/src/various-imports.tsx:div:36:4"
             }
           },
           "scope": {
@@ -1101,17 +1101,17 @@
         },
         {
           "from_id": "65338fa51b33f878:state:[s2, setS2]:8012e9b35bccd1e8",
-          "to_id": "65338fa51b33f878",
+          "to_id": "64209f81507de2f5",
           "kind": "usage-read",
           "line": 18,
           "column": 16,
           "data_json": {
-            "usageId": "2d7fe528d4fd193f",
+            "usageId": "eb1892c0164a1912",
             "filePath": "/src/various-imports.tsx",
             "line": 18,
             "column": 16,
-            "ownerId": "65338fa51b33f878",
-            "ownerKind": "component",
+            "ownerId": "64209f81507de2f5",
+            "ownerKind": "normal",
             "displayLabel": "s2"
           }
         },
@@ -1133,17 +1133,17 @@
         },
         {
           "from_id": "7ac4ac2602a40350",
-          "to_id": "65338fa51b33f878",
+          "to_id": "65338fa51b33f878:callhook:useState:26:8",
           "kind": "usage-read",
           "line": 26,
           "column": 22,
           "data_json": {
-            "usageId": "79ce822e61237c27",
+            "usageId": "e9c09b1b4f98e1be",
             "filePath": "/src/various-imports.tsx",
             "line": 26,
             "column": 22,
-            "ownerId": "65338fa51b33f878",
-            "ownerKind": "component",
+            "ownerId": "65338fa51b33f878:callhook:useState:26:8",
+            "ownerKind": "hook",
             "accessPath": [
               "useState"
             ],
@@ -1175,17 +1175,17 @@
         },
         {
           "from_id": "65338fa51b33f878:callhook:useState:26:8:58ec5910fa01eab8",
-          "to_id": "65338fa51b33f878",
+          "to_id": "a2cb370c07a44b77",
           "kind": "usage-read",
           "line": 29,
           "column": 16,
           "data_json": {
-            "usageId": "e392c55a56f1fc13",
+            "usageId": "a43b250e46e3ddb7",
             "filePath": "/src/various-imports.tsx",
             "line": 29,
             "column": 16,
-            "ownerId": "65338fa51b33f878",
-            "ownerKind": "component",
+            "ownerId": "a2cb370c07a44b77",
+            "ownerKind": "normal",
             "displayLabel": "s5"
           }
         },
@@ -1206,18 +1206,18 @@
           }
         },
         {
-          "from_id": "65338fa51b33f878",
+          "from_id": "65338fa51b33f878:callhook:useFakeHook:33:8",
           "to_id": "ca5148857c1605b1",
           "kind": "usage-call",
           "line": 33,
           "column": 22,
           "data_json": {
-            "usageId": "f0df1a33202be5d8",
+            "usageId": "5e2d8b6ed173030e",
             "filePath": "/src/various-imports.tsx",
             "line": 33,
             "column": 22,
-            "ownerId": "65338fa51b33f878",
-            "ownerKind": "component",
+            "ownerId": "65338fa51b33f878:callhook:useFakeHook:33:8",
+            "ownerKind": "hook",
             "displayLabel": "useFakeHook"
           }
         },
@@ -1395,7 +1395,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/effectt.tsx",
-          "hash": "222a2452c03b1844",
+          "hash": "bc5f0901c2252967",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1690,15 +1690,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/effectt.tsx",
-              "hash": "fbcecbce3cf1b045",
+              "hash": "d83b87295ce9ff9f",
               "dependencies": {},
               "loc": {
                 "line": 19,
                 "column": 9
               },
               "render": {
-                "id": "div",
-                "instanceId": "2852bf996e078264",
+                "id": "/src/effectt.tsx:div:19:9",
+                "instanceId": "b58236e8faf71648",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -1710,7 +1710,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/src/effectt.tsx:div:19:9"
             }
           },
           "scope": {
@@ -1831,18 +1831,18 @@
           }
         },
         {
-          "from_id": "66289b593d160656",
+          "from_id": "66289b593d160656:callhook:useCustomHook:7:8",
           "to_id": "symbol:import:/src/effectt.tsx:useCustomHook",
           "kind": "usage-call",
           "line": 7,
           "column": 30,
           "data_json": {
-            "usageId": "47bd75c7ae5b4f2a",
+            "usageId": "79b40df30a677e82",
             "filePath": "/src/effectt.tsx",
             "line": 7,
             "column": 30,
-            "ownerId": "66289b593d160656",
-            "ownerKind": "component",
+            "ownerId": "66289b593d160656:callhook:useCustomHook:7:8",
+            "ownerKind": "hook",
             "displayLabel": "useCustomHook"
           }
         },
@@ -2076,7 +2076,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "16d18a2133b985a0",
+          "hash": "63eaa489224fa277",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2267,7 +2267,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/callback.tsx",
-              "hash": "4bc44c9093cd665b",
+              "hash": "92d004ccb53eb2e4",
               "dependencies": {
                 "810a33751161c4f1": {
                   "id": "810a33751161c4f1",
@@ -2279,8 +2279,8 @@
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "75ffcedcb5500059",
+                "id": "/src/callback.tsx:div:14:4",
+                "instanceId": "c64791032123f921",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -2302,42 +2302,25 @@
                 },
                 "renderIndex": 0,
                 "kind": "jsx",
-                "children": {}
-              },
-              "srcId": "div"
-            },
-            "5027e0e34540f39c": {
-              "id": "5027e0e34540f39c",
-              "name": {
-                "type": "identifier",
-                "name": "anonymous@14:18",
-                "loc": {
-                  "line": 14,
-                  "column": 18
-                },
-                "id": "f46160775c61f0f4"
-              },
-              "kind": "normal",
-              "type": "function",
-              "file": "/src/callback.tsx",
-              "hash": "a5378f0c313d04a4",
-              "declarationKind": "const",
-              "dependencies": {},
-              "loc": {
-                "line": 14,
-                "column": 18
-              },
-              "var": {},
-              "scope": {
-                "start": {
-                  "line": 14,
-                  "column": 18
-                },
-                "end": {
-                  "line": 14,
-                  "column": 43
+                "children": {
+                  "5ae1d6f128de5979": {
+                    "id": "b467437c6d4d1f03",
+                    "instanceId": "5ae1d6f128de5979",
+                    "tag": "onClick",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 14,
+                      "column": 9
+                    },
+                    "parentId": "c64791032123f921",
+                    "renderIndex": 0,
+                    "kind": "attribute",
+                    "children": {}
+                  }
                 }
-              }
+              },
+              "srcId": "/src/callback.tsx:div:14:4"
             }
           },
           "scope": {
@@ -2529,7 +2512,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/callback.tsx",
-          "hash": "d682fbe304439bcd",
+          "hash": "99f0e7c15440fd1f",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2702,7 +2685,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/callback.tsx",
-              "hash": "b3f51826aea2d9c8",
+              "hash": "fe94b647ec92e091",
               "dependencies": {
                 "283ba57e642caca1": {
                   "id": "283ba57e642caca1",
@@ -2714,8 +2697,8 @@
                 "column": 9
               },
               "render": {
-                "id": "div",
-                "instanceId": "878c706b4ce348f6",
+                "id": "/src/callback.tsx:div:38:9",
+                "instanceId": "aff877137359b961",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -2737,42 +2720,25 @@
                 },
                 "renderIndex": 0,
                 "kind": "jsx",
-                "children": {}
-              },
-              "srcId": "div"
-            },
-            "a89b144420b6c4ec": {
-              "id": "a89b144420b6c4ec",
-              "name": {
-                "type": "identifier",
-                "name": "anonymous@38:23",
-                "loc": {
-                  "line": 38,
-                  "column": 23
-                },
-                "id": "794d4ac1947f989d"
-              },
-              "kind": "normal",
-              "type": "function",
-              "file": "/src/callback.tsx",
-              "hash": "314d3f48cf024c02",
-              "declarationKind": "const",
-              "dependencies": {},
-              "loc": {
-                "line": 38,
-                "column": 23
-              },
-              "var": {},
-              "scope": {
-                "start": {
-                  "line": 38,
-                  "column": 23
-                },
-                "end": {
-                  "line": 38,
-                  "column": 45
+                "children": {
+                  "7f57d34291329e23": {
+                    "id": "d9c287d823385cd3",
+                    "instanceId": "7f57d34291329e23",
+                    "tag": "onClick",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 38,
+                      "column": 14
+                    },
+                    "parentId": "aff877137359b961",
+                    "renderIndex": 0,
+                    "kind": "attribute",
+                    "children": {}
+                  }
                 }
-              }
+              },
+              "srcId": "/src/callback.tsx:div:38:9"
             }
           },
           "scope": {
@@ -2863,17 +2829,17 @@
         },
         {
           "from_id": "89091d73d3a537b1:state:[count, setCount]:10de422fa6270553",
-          "to_id": "89091d73d3a537b1:callback:getIncrementer",
+          "to_id": "796ee767ef37c1f6",
           "kind": "usage-read",
           "line": 8,
           "column": 31,
           "data_json": {
-            "usageId": "a1bb04c60053dc88",
+            "usageId": "5b263c61419920aa",
             "filePath": "/src/callback.tsx",
             "line": 8,
             "column": 31,
-            "ownerId": "89091d73d3a537b1:callback:getIncrementer",
-            "ownerKind": "callback",
+            "ownerId": "796ee767ef37c1f6",
+            "ownerKind": "normal",
             "displayLabel": "count"
           }
         },
@@ -2910,18 +2876,18 @@
           }
         },
         {
-          "from_id": "bf1b66ac05fc1c35",
+          "from_id": "b467437c6d4d1f03",
           "to_id": "c73afbab14592018",
           "kind": "usage-call",
           "line": 14,
           "column": 36,
           "data_json": {
-            "usageId": "e13758d19b69f9ba",
+            "usageId": "96c3a784912a7428",
             "filePath": "/src/callback.tsx",
             "line": 14,
             "column": 36,
-            "ownerId": "bf1b66ac05fc1c35",
-            "ownerKind": "normal",
+            "ownerId": "b467437c6d4d1f03",
+            "ownerKind": "attribute",
             "displayLabel": "inc"
           }
         },
@@ -3169,18 +3135,18 @@
           }
         },
         {
-          "from_id": "9e9757cc8d09428",
+          "from_id": "d9c287d823385cd3",
           "to_id": "3720d9d904fa2467:callback:doSearch",
           "kind": "usage-call",
           "line": 38,
           "column": 29,
           "data_json": {
-            "usageId": "c43c2a98fb424668",
+            "usageId": "22be579b8868da70",
             "filePath": "/src/callback.tsx",
             "line": 38,
             "column": 29,
-            "ownerId": "9e9757cc8d09428",
-            "ownerKind": "normal",
+            "ownerId": "d9c287d823385cd3",
+            "ownerKind": "attribute",
             "displayLabel": "doSearch"
           }
         },
@@ -3553,11 +3519,6 @@
       "label": "hook"
     },
     {
-      "from": "div",
-      "to": "65338fa51b33f878",
-      "label": "render"
-    },
-    {
       "from": "92f295c8f0b6b743",
       "to": "9a275e3f454930d1",
       "label": "hook"
@@ -3603,19 +3564,9 @@
       "label": "hook"
     },
     {
-      "from": "div",
-      "to": "66289b593d160656",
-      "label": "render"
-    },
-    {
       "from": "c73afbab14592018",
       "to": "80f9b53b75265994",
       "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "89091d73d3a537b1",
-      "label": "render"
     },
     {
       "from": "bf1b66ac05fc1c35",
@@ -3626,11 +3577,6 @@
       "from": "3720d9d904fa2467:callback:doSearch",
       "to": "a0d88febff80e8ff",
       "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "3720d9d904fa2467",
-      "label": "render"
     },
     {
       "from": "9e9757cc8d09428",

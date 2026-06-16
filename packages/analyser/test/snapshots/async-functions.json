@@ -71,7 +71,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "942528b13d5c11e8",
+          "hash": "3cf5e3d7dac1aa20",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -92,15 +92,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "974f15417c2c531d",
+              "hash": "bb6aa93c1c865587",
               "dependencies": {},
               "loc": {
                 "line": 5,
                 "column": 9
               },
               "render": {
-                "id": "div",
-                "instanceId": "ca8cdcf6cdf8e769",
+                "id": "/index.tsx:div:5:9",
+                "instanceId": "cb690ac777f2a4ee",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -112,7 +112,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/index.tsx:div:5:9"
             }
           },
           "scope": {
@@ -228,7 +228,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "5ec86e2827d46b9f",
+          "hash": "f12eb846ad5c732a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -369,15 +369,15 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "cd0239cba3980836",
+              "hash": "8a25f53667c496e0",
               "dependencies": {},
               "loc": {
                 "line": 35,
                 "column": 4
               },
               "render": {
-                "id": "div",
-                "instanceId": "e986972aebebf2f",
+                "id": "/index.tsx:div:35:4",
+                "instanceId": "9a371aa087b7460",
                 "tag": "div",
                 "dependencies": [],
                 "isDependency": false,
@@ -388,9 +388,9 @@
                 "renderIndex": 0,
                 "kind": "jsx",
                 "children": {
-                  "9e0c0e22b77680b4": {
+                  "3379c1b0af95ab3a": {
                     "id": "3a012224bc5a1fc6",
-                    "instanceId": "9e0c0e22b77680b4",
+                    "instanceId": "3379c1b0af95ab3a",
                     "tag": "AsyncComponent",
                     "dependencies": [],
                     "isDependency": false,
@@ -398,14 +398,14 @@
                       "line": 36,
                       "column": 6
                     },
-                    "parentId": "e986972aebebf2f",
+                    "parentId": "9a371aa087b7460",
                     "renderIndex": 0,
                     "kind": "jsx",
                     "children": {}
                   }
                 }
               },
-              "srcId": "div"
+              "srcId": "/index.tsx:div:35:4"
             }
           },
           "scope": {
@@ -488,17 +488,17 @@
       "label": "render"
     },
     {
+      "from": "3a012224bc5a1fc6",
+      "to": "f708b44afe0a51a5",
+      "label": "render"
+    },
+    {
       "from": "f708b44afe0a51a5",
       "to": "ccebff9beb262ca9",
       "label": "render"
     },
     {
-      "from": "div",
-      "to": "3a012224bc5a1fc6",
-      "label": "render"
-    },
-    {
-      "from": "div",
+      "from": "3a012224bc5a1fc6",
       "to": "f708b44afe0a51a5",
       "label": "render"
     },

@@ -133,7 +133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "cafcde58efb4c85a",
+          "hash": "881b169d11c2f5d8",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -308,7 +308,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/index.tsx",
-              "hash": "1fb108db158b7d76",
+              "hash": "7e4a84c89c9b2f19",
               "dependencies": {
                 "9ac06b202649e60f": {
                   "id": "9ac06b202649e60f",
@@ -320,8 +320,8 @@
                 "column": 9
               },
               "render": {
-                "id": "div",
-                "instanceId": "7709f763261dd73a",
+                "id": "/index.tsx:div:28:9",
+                "instanceId": "f36bbca3a815fbb1",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -344,7 +344,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "div"
+              "srcId": "/index.tsx:div:28:9"
             }
           },
           "scope": {
@@ -370,19 +370,40 @@
       },
       "relations": [
         {
-          "from_id": "ba1bf171ca67c6dd",
+          "from_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
           "to_id": "b3b83d0e8e708509",
           "kind": "usage-call",
           "line": 15,
           "column": 17,
           "data_json": {
-            "usageId": "eaa8bb2a9aa4e524",
+            "usageId": "b23b5f9181329b30",
             "filePath": "/index.tsx",
             "line": 15,
             "column": 17,
-            "ownerId": "ba1bf171ca67c6dd",
-            "ownerKind": "component",
+            "ownerId": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+            "ownerKind": "hook",
             "displayLabel": "useSelector"
+          }
+        },
+        {
+          "from_id": "ba1bf171ca67c6dd",
+          "to_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 45,
+          "data_json": {
+            "usageId": "538085815ca6de7a",
+            "filePath": "/index.tsx",
+            "line": 15,
+            "column": 45,
+            "ownerId": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+            "ownerKind": "hook",
+            "accessPath": [
+              "thread"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "state.thread"
           }
         },
         {
@@ -515,11 +536,6 @@
       "from": "1981986fd63b9d23",
       "to": "27f5be35fc906e3d",
       "label": "hook"
-    },
-    {
-      "from": "div",
-      "to": "ba1bf171ca67c6dd",
-      "label": "render"
     },
     {
       "from": "7cd77b33010ba84d",
