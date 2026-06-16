@@ -486,7 +486,7 @@ export class File {
     // Otherwise, we respect the ID already set on the variable (e.g. deterministic state IDs)
     // and only fallback to generating a generic one if no ID is present.
     else if (!variable.id) {
-      variable.id = getDeterministicId(this.path, nameKey);
+      variable.id = getDeterministicId(this.path, nameKey, `${variable.loc.line}:${variable.loc.column}`);
     }
 
     const id = variable.id;

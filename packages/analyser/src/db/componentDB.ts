@@ -466,7 +466,7 @@ export class ComponentDB {
     } else if (variable.type === "data") {
       v = new DataVariable(
         {
-          id: getDeterministicId(fileName, nameKey),
+          id: getDeterministicId(fileName, nameKey, `${variable.loc.line}:${variable.loc.column}`),
           ...variable,
           kind,
           declarationKind,
