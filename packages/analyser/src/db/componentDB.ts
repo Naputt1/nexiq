@@ -516,7 +516,7 @@ export class ComponentDB {
     if (component == null || !isReactFunctionVariable(component))
       return "no-parent";
 
-    const id = component.addCallHook(callHook);
+    const id = this.files.addCallHook(fileName, loc, callHook);
 
     const hookName = callHook.call.name;
     const comImport = this.files.getImport(fileName, hookName);
@@ -807,7 +807,9 @@ export class ComponentDB {
       }
     }
 
-    const instanceId = getDeterministicId(`${fileName}-${tag}-${loc.line}-${loc.column}`);
+    const instanceId = getDeterministicId(
+      `${fileName}-${tag}-${loc.line}-${loc.column}`,
+    );
 
     if (!srcId) {
       if (tag && tag[0] === tag[0]?.toLowerCase()) {
@@ -1007,7 +1009,8 @@ export class ComponentDB {
           const returnVar = returnData;
           const isTag =
             (returnVar.render?.tag &&
-              returnVar.render.tag[0] === returnVar.render.tag[0]?.toLowerCase()) ||
+              returnVar.render.tag[0] ===
+                returnVar.render.tag[0]?.toLowerCase()) ||
             returnVar.render?.tag === "Fragment";
           if (returnVar.srcId && returnVar.srcId !== "" && !isTag) {
             this.edges.push({
