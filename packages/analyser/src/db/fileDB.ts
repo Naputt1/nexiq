@@ -536,6 +536,23 @@ export class File {
     return variable.id;
   }
 
+  public addCallHook(
+    loc: VariableLoc,
+    callHook: Parameters<ReactFunctionVariable["addCallHook"]>[0],
+  ) {
+    const component = this.getHookInfoFromLoc(loc);
+    if (component == null || !isReactFunctionVariable(component))
+      return "no-parent";
+
+    const id = component.addCallHook(callHook);
+    const variable = component.var.get(id);
+    if (variable) {
+      this.locIdsMap.set(this.getLocalId(variable), variable);
+    }
+
+    return id;
+  }
+
   private __getEdgesRaw(
     variable: ComponentFileVarComponent | ComponentFileVarHook,
   ): DataEdge[] {
@@ -1410,6 +1427,16 @@ export class FileDB {
     return file.addCallback(loc, {
       ...callback,
     });
+  }
+
+  public addCallHook(
+    fileName: string,
+    loc: VariableLoc,
+    callHook: Parameters<File["addCallHook"]>[1],
+  ) {
+    const file = this.get(fileName);
+
+    return file.addCallHook(loc, callHook);
   }
 
   public getComponent(

@@ -430,7 +430,12 @@ export function extractFileUsages(
 
   traverseFn(ast, {
     Identifier(path) {
-      if (!path.isReferencedIdentifier()) return;
+      // Compute before isReferencedIdentifier narrows the type
+      const isShorthandProp =
+        path.parentPath.isObjectProperty() && path.parentPath.node.shorthand;
+      if (!path.isReferencedIdentifier() && !isShorthandProp) {
+        return;
+      }
       if (shouldSkipReferencedIdentifier(path)) return;
 
       const loc = getStartLoc(path.node);
