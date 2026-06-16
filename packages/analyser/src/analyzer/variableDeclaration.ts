@@ -613,19 +613,35 @@ export default function VariableDeclarator(
             nodePath.scope.block.type === "FunctionDeclaration" &&
             nodePath.scope.block.id?.type === "Identifier"
           ) {
+            assert(init.loc != null, "Function loc not found");
+            const scope = {
+              start: {
+                line: init.loc.start.line,
+                column: init.loc.start.column,
+              },
+              end: {
+                line: init.loc.end.line,
+                column: init.loc.end.column,
+              },
+            };
+
             currentId = componentDB.addVariable(
               fileName,
               {
                 name: pattern,
                 dependencies: {},
-                type: "data",
+                type: "function",
                 loc,
+                scope,
+                async: init.async,
+                children: {},
+                var: {},
                 parentId: pParentId,
               } as Omit<
-                ComponentFileVarNormalData,
+                ComponentFileVarNormalFunction,
                 "kind" | "file" | "id" | "var" | "hash"
               >,
-              "normal",
+              undefined,
               declarationKind,
             );
           } else if (nodePath.scope.block.type === "ArrowFunctionExpression") {

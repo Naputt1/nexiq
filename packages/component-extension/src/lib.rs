@@ -846,7 +846,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
             if !has_source_group {
                 let node_type = if entity.kind == "normal" {
-                    "variable"
+                    if entity.item_type.as_deref() == Some("function") {
+                        "function"
+                    } else {
+                        "variable"
+                    }
                 } else {
                     &entity.kind
                 };
