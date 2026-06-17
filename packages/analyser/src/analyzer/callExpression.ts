@@ -8,7 +8,6 @@ import {
   isScope,
 } from "../db/variable/type.ts";
 import { Variable } from "../db/variable/variable.ts";
-import { generateFn } from "../utils/babel.ts";
 import {
   ReactDependency,
   VariableLoc,
@@ -17,6 +16,56 @@ import {
 import { getReactHookInfo } from "../utils.ts";
 import assert from "assert";
 import { Scope } from "../db/variable/scope.ts";
+
+function getJSXTagName(expr: t.Expression | null | undefined): string | undefined {
+  if (!expr) return undefined;
+  if (expr.type === "JSXElement" && expr.openingElement.name.type === "JSXIdentifier") {
+    return expr.openingElement.name.name;
+  }
+  if (expr.type === "JSXFragment") {
+    return "Fragment";
+  }
+  if (expr.type === "ParenthesizedExpression") {
+    return getJSXTagName(expr.expression);
+  }
+  return undefined;
+}
+
+function isImportFromSource(
+  componentDB: ComponentDB,
+  fileName: string,
+  localName: string,
+  source: string,
+): boolean {
+  const file = componentDB.getFile(fileName);
+  if (!file) return false;
+  const imp = file.import.get(localName);
+  return imp?.source === source;
+}
+
+function isCreateRootMemberExpression(
+  callee: t.MemberExpression,
+  componentDB: ComponentDB,
+  fileName: string,
+): boolean {
+  if (!t.isIdentifier(callee.property, { name: "createRoot" })) return false;
+  if (t.isIdentifier(callee.object)) {
+    return isImportFromSource(componentDB, fileName, callee.object.name, "react-dom/client");
+  }
+  return false;
+}
+
+function isHydrateRootMemberExpression(
+  callee: t.MemberExpression,
+  componentDB: ComponentDB,
+  fileName: string,
+): boolean {
+  if (!t.isIdentifier(callee.property, { name: "hydrateRoot" })) return false;
+  if (t.isIdentifier(callee.object)) {
+    return isImportFromSource(componentDB, fileName, callee.object.name, "react-dom/client");
+  }
+  return false;
+}
 
 export default function CallExpression(
   componentDB: ComponentDB,
@@ -176,6 +225,46 @@ export default function CallExpression(
               key.type,
             );
           }
+        }
+      }
+
+      // Detect React entry points: createRoot(...).render(jsx), ReactDOM.createRoot(...).render(jsx), hydrateRoot(...)
+      if (nodePath.node.loc?.start) {
+        const loc = {
+          line: nodePath.node.loc.start.line,
+          column: nodePath.node.loc.start.column,
+        };
+
+        // Pattern: createRoot(...).render(jsx)  or  ReactDOM.createRoot(...).render(jsx)
+        if (
+          t.isMemberExpression(callee) &&
+          t.isIdentifier(callee.property, { name: "render" }) &&
+          t.isCallExpression(callee.object)
+        ) {
+          const innerCallee = callee.object.callee;
+          const component = getJSXTagName(args[0]);
+
+          if (t.isIdentifier(innerCallee) && innerCallee.name === "createRoot" &&
+            isImportFromSource(componentDB, fileName, "createRoot", "react-dom/client")) {
+            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, component });
+          } else if (
+            t.isMemberExpression(innerCallee) &&
+            isCreateRootMemberExpression(innerCallee, componentDB, fileName)
+          ) {
+            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, component });
+          }
+        }
+
+        // Pattern: hydrateRoot(container, jsx)  or  ReactDOM.hydrateRoot(container, jsx)
+        const component = getJSXTagName(args.length > 1 ? args[1] : undefined);
+        if (t.isIdentifier(callee) && callee.name === "hydrateRoot" &&
+          isImportFromSource(componentDB, fileName, "hydrateRoot", "react-dom/client")) {
+          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, component });
+        } else if (
+          t.isMemberExpression(callee) &&
+          isHydrateRootMemberExpression(callee, componentDB, fileName)
+        ) {
+          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, component });
         }
       }
     },

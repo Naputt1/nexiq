@@ -1101,7 +1101,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NewFeatures.tsx",
-          "hash": "80512193d3479159",
+          "hash": "5e76b933808474a5",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1218,7 +1218,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NewFeatures.tsx",
-              "hash": "124f9ebdc1f9faa",
+              "hash": "695af8a0a1be3336",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1228,8 +1228,8 @@
               "isStatic": false,
               "memberKind": "method",
               "var": {
-                "d9915c39ffcb5dfe": {
-                  "id": "d9915c39ffcb5dfe",
+                "11f30b49e6287a45": {
+                  "id": "11f30b49e6287a45",
                   "name": {
                     "type": "object",
                     "properties": [
@@ -1422,45 +1422,45 @@
           }
         },
         {
-          "from_id": "d9915c39ffcb5dfe:fe02ef32071ba1d3",
-          "to_id": "d9915c39ffcb5dfe",
+          "from_id": "11f30b49e6287a45:fe02ef32071ba1d3",
+          "to_id": "11f30b49e6287a45",
           "kind": "usage-read",
           "line": 17,
           "column": 12,
           "data_json": {
-            "usageId": "ca72322600a88e5e",
+            "usageId": "1e337910c276c4b9",
             "filePath": "/src/NewFeatures.tsx",
             "line": 17,
             "column": 12,
-            "ownerId": "d9915c39ffcb5dfe",
+            "ownerId": "11f30b49e6287a45",
             "ownerKind": "normal",
             "displayLabel": "user"
           }
         },
         {
-          "from_id": "d9915c39ffcb5dfe:f1582c1660a1c09d",
-          "to_id": "d9915c39ffcb5dfe",
+          "from_id": "11f30b49e6287a45:f1582c1660a1c09d",
+          "to_id": "11f30b49e6287a45",
           "kind": "usage-read",
           "line": 17,
           "column": 18,
           "data_json": {
-            "usageId": "936fa611ef6751d7",
+            "usageId": "56263ff6b840d297",
             "filePath": "/src/NewFeatures.tsx",
             "line": 17,
             "column": 18,
-            "ownerId": "d9915c39ffcb5dfe",
+            "ownerId": "11f30b49e6287a45",
             "ownerKind": "normal",
             "displayLabel": "age"
           }
         },
         {
-          "from_id": "d9915c39ffcb5dfe:fe02ef32071ba1d3",
+          "from_id": "11f30b49e6287a45:fe02ef32071ba1d3",
           "to_id": "65060d6a4d19c2fe",
           "kind": "usage-read",
           "line": 20,
           "column": 13,
           "data_json": {
-            "usageId": "82f778091a792008",
+            "usageId": "718f1e772007fde0",
             "filePath": "/src/NewFeatures.tsx",
             "line": 20,
             "column": 13,
@@ -1475,13 +1475,13 @@
           }
         },
         {
-          "from_id": "d9915c39ffcb5dfe:f1582c1660a1c09d",
+          "from_id": "11f30b49e6287a45:f1582c1660a1c09d",
           "to_id": "65060d6a4d19c2fe",
           "kind": "usage-read",
           "line": 21,
           "column": 17,
           "data_json": {
-            "usageId": "3433fe3b7c4ba988",
+            "usageId": "1a55feb251c830d8",
             "filePath": "/src/NewFeatures.tsx",
             "line": 21,
             "column": 17,
@@ -1531,7 +1531,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "95147ba697f9c0a",
+          "hash": "f468e130dca87f33",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -1731,7 +1731,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "b11a0e8998e486eb",
+              "hash": "8ceaff68c6267974",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1741,8 +1741,8 @@
               "isStatic": false,
               "memberKind": "method",
               "var": {
-                "f4f8b36a5a5f0b05": {
-                  "id": "f4f8b36a5a5f0b05",
+                "19971513f190189d": {
+                  "id": "19971513f190189d",
                   "name": {
                     "type": "identifier",
                     "name": "items",
@@ -1879,13 +1879,13 @@
           }
         },
         {
-          "from_id": "f4f8b36a5a5f0b05",
+          "from_id": "19971513f190189d",
           "to_id": "3ed6fc8598190293",
           "kind": "usage-read",
           "line": 21,
           "column": 13,
           "data_json": {
-            "usageId": "6ebf4bca28372b50",
+            "usageId": "eb6db1ae51df2942",
             "filePath": "/src/NestedRender.tsx",
             "line": 21,
             "column": 13,

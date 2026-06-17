@@ -113,8 +113,8 @@ export class SqliteDB extends BaseSqliteDB {
     `);
 
     this.insertFileStmt = this.db.prepare(`
-      INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO files (path, package_id, hash, fingerprint, default_export, star_exports_json, entry_point)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
     this.deleteRelationsByScopeStmt = this.db.prepare(
@@ -167,6 +167,7 @@ export class SqliteDB extends BaseSqliteDB {
           file.fingerPrint,
           file.defaultExport,
           JSON.stringify(file.starExports),
+          file.entryPoint ? JSON.stringify(file.entryPoint) : null,
         );
 
         const fileId = info.lastInsertRowid as number;
@@ -191,7 +192,7 @@ export class SqliteDB extends BaseSqliteDB {
       user_version: number;
     };
     const currentVersion = versionRow.user_version;
-    const targetVersion = 7;
+    const targetVersion = 8;
 
     if (currentVersion < targetVersion) {
       // Force recreation of affected tables to apply new schema/FK changes
@@ -249,6 +250,7 @@ export class SqliteDB extends BaseSqliteDB {
         fingerprint TEXT NOT NULL,
         default_export TEXT,
         star_exports_json TEXT,
+        entry_point TEXT,
         FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
       );
 
@@ -747,6 +749,7 @@ export class SqliteDB extends BaseSqliteDB {
       export: {},
       tsTypes: {},
       var: {},
+      ...(fileRow.entry_point ? { entryPoint: JSON.parse(fileRow.entry_point) } : {}),
     };
 
     const entityMap = new Map<string, EntityRow>();

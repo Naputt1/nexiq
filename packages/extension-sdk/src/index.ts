@@ -86,7 +86,8 @@ export interface GraphAppearance {
       | "prop"
       | "render"
       | "variable"
-      | "attribute",
+      | "attribute"
+      | "entry",
       NodeAppearance
     >
   >;
@@ -127,6 +128,7 @@ export const DEFAULT_GRAPH_APPEARANCE: GraphAppearance = {
     render: { color: "#2563eb", radius: 14 },
     variable: { color: "#60a5fa", radius: 14 },
     attribute: { color: "#f59e0b", radius: 14 },
+    entry: { color: "#22c55e", radius: 20 },
   },
   typeKeyword: "#c084fc",
   typeLiteral: "#fdba74",

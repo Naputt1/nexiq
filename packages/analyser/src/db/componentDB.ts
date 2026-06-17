@@ -3,6 +3,7 @@ import type {
   ComponentFileImport,
   DataEdge,
   ComponentFileExport,
+  EntryPoint,
   JsonData,
   ComponentFileVar,
   ComponentFileVarDependency,
@@ -879,6 +880,10 @@ export class ComponentDB {
 
   public addFile(file: string, cache?: ComponentFile) {
     return this.files.add(file, cache);
+  }
+
+  public setEntryPoint(fileName: string, entryPoint: EntryPoint) {
+    this.files.setEntryPoint(fileName, entryPoint);
   }
 
   public getFile(fileName: string) {

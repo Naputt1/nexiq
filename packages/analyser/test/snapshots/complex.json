@@ -2077,7 +2077,6 @@
     "/src/Deep.tsx": {
       "path": "/src/Deep.tsx",
       "hash": "7e5283f1c9810c6d",
-      "package_id": "sample-complex@0.0.0",
       "import": {
         "React": {
           "localName": "React",
@@ -2107,12 +2106,6 @@
           "type": "named",
           "exportKind": "value",
           "id": "5a51946d93053e40"
-        },
-        "DeepDependency": {
-          "name": "DeepDependency",
-          "type": "named",
-          "exportKind": "value",
-          "id": "7732b08b7377499b"
         }
       },
       "starExports": [],
@@ -2646,7 +2639,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "89be04c372704db6",
+          "hash": "d4a9f208edc95532",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2708,47 +2701,6 @@
                 "line": 48,
                 "column": 8
               }
-            },
-            "27b1cf33c59e6e3c": {
-              "id": "27b1cf33c59e6e3c",
-              "name": {
-                "type": "identifier",
-                "name": "jsx@52:9",
-                "loc": {
-                  "line": 52,
-                  "column": 9
-                },
-                "id": "17cdd3e6db083244"
-              },
-              "kind": "normal",
-              "type": "jsx",
-              "file": "/src/Deep.tsx",
-              "hash": "2b577b8930616d04",
-              "dependencies": {
-                "d3e5386bdcf2966d": {
-                  "id": "d3e5386bdcf2966d",
-                  "name": "progress"
-                }
-              },
-              "loc": {
-                "line": 52,
-                "column": 9
-              },
-              "render": {
-                "id": "/src/Deep.tsx:div:52:9",
-                "instanceId": "b9c4e75400254706",
-                "tag": "div",
-                "dependencies": [],
-                "isDependency": false,
-                "loc": {
-                  "line": 52,
-                  "column": 9
-                },
-                "renderIndex": 0,
-                "kind": "jsx",
-                "children": {}
-              },
-              "srcId": "/src/Deep.tsx:div:52:9"
             }
           },
           "scope": {
@@ -2762,7 +2714,6 @@
             }
           },
           "async": false,
-          "return": "27b1cf33c59e6e3c",
           "states": [
             "7732b08b7377499b:state:[progress, setProgress]"
           ],
@@ -2781,214 +2732,12 @@
             }
           ],
           "hooks": [],
-          "effects": {
-            "7732b08b7377499b:effect:49:2": {
-              "id": "7732b08b7377499b:effect:49:2",
-              "name": "useEffect",
-              "scope": {
-                "start": {
-                  "line": 49,
-                  "column": 18
-                },
-                "end": {
-                  "line": 51,
-                  "column": 3
-                }
-              },
-              "loc": {
-                "line": 49,
-                "column": 2
-              },
-              "reactDeps": [
-                {
-                  "id": "7732b08b7377499b:prop:location",
-                  "name": "location?.pathname"
-                }
-              ]
-            }
-          },
+          "effects": {},
           "componentType": "Function",
           "contexts": []
         }
       },
-      "relations": [
-        {
-          "from_id": "e38009d8920a967c",
-          "to_id": "b995f1131187f14d",
-          "kind": "usage-render-call",
-          "line": 11,
-          "column": 7,
-          "data_json": {
-            "usageId": "df956fa2d4bfae81",
-            "filePath": "/src/Deep.tsx",
-            "line": 11,
-            "column": 7,
-            "ownerId": "e38009d8920a967c",
-            "ownerKind": "component",
-            "displayLabel": "DeepLevel3"
-          }
-        },
-        {
-          "from_id": "c9b0f178ddc8d164",
-          "to_id": "e38009d8920a967c",
-          "kind": "usage-render-call",
-          "line": 20,
-          "column": 7,
-          "data_json": {
-            "usageId": "b9b52dd3faa4ba63",
-            "filePath": "/src/Deep.tsx",
-            "line": 20,
-            "column": 7,
-            "ownerId": "c9b0f178ddc8d164",
-            "ownerKind": "component",
-            "displayLabel": "DeepLevel2"
-          }
-        },
-        {
-          "from_id": "5a51946d93053e40:callhook:useDeep1:26:8",
-          "to_id": "8f8962cbd9809746",
-          "kind": "usage-call",
-          "line": 26,
-          "column": 15,
-          "data_json": {
-            "usageId": "6ae93a702c85992a",
-            "filePath": "/src/Deep.tsx",
-            "line": 26,
-            "column": 15,
-            "ownerId": "5a51946d93053e40:callhook:useDeep1:26:8",
-            "ownerKind": "hook",
-            "displayLabel": "useDeep1"
-          }
-        },
-        {
-          "from_id": "5a51946d93053e40",
-          "to_id": "c9b0f178ddc8d164",
-          "kind": "usage-render-call",
-          "line": 29,
-          "column": 7,
-          "data_json": {
-            "usageId": "211d6c38b3d75ca7",
-            "filePath": "/src/Deep.tsx",
-            "line": 29,
-            "column": 7,
-            "ownerId": "5a51946d93053e40",
-            "ownerKind": "component",
-            "displayLabel": "DeepLevel1"
-          }
-        },
-        {
-          "from_id": "5a51946d93053e40:callhook:useDeep1:26:8",
-          "to_id": "220501f851971291",
-          "kind": "usage-read",
-          "line": 30,
-          "column": 7,
-          "data_json": {
-            "usageId": "e0b0e74b1309c16f",
-            "filePath": "/src/Deep.tsx",
-            "line": 30,
-            "column": 7,
-            "ownerId": "220501f851971291",
-            "ownerKind": "normal",
-            "displayLabel": "data"
-          }
-        },
-        {
-          "from_id": "85b9973ad997cda",
-          "to_id": "f72daa2fc6a75495",
-          "kind": "usage-call",
-          "line": 40,
-          "column": 9,
-          "data_json": {
-            "usageId": "110fcab1eb140ea4",
-            "filePath": "/src/Deep.tsx",
-            "line": 40,
-            "column": 9,
-            "ownerId": "85b9973ad997cda",
-            "ownerKind": "hook",
-            "displayLabel": "useDeep3"
-          }
-        },
-        {
-          "from_id": "8f8962cbd9809746",
-          "to_id": "85b9973ad997cda",
-          "kind": "usage-call",
-          "line": 44,
-          "column": 9,
-          "data_json": {
-            "usageId": "6a554caa9d3782f7",
-            "filePath": "/src/Deep.tsx",
-            "line": 44,
-            "column": 9,
-            "ownerId": "8f8962cbd9809746",
-            "ownerKind": "hook",
-            "displayLabel": "useDeep2"
-          }
-        },
-        {
-          "from_id": "7732b08b7377499b",
-          "to_id": "symbol:import:/src/Deep.tsx:useState",
-          "kind": "usage-call",
-          "line": 48,
-          "column": 34,
-          "data_json": {
-            "usageId": "90ed2289897f0320",
-            "filePath": "/src/Deep.tsx",
-            "line": 48,
-            "column": 34,
-            "ownerId": "7732b08b7377499b",
-            "ownerKind": "component",
-            "displayLabel": "useState"
-          }
-        },
-        {
-          "from_id": "7732b08b7377499b:effect:49:2",
-          "to_id": "symbol:import:/src/Deep.tsx:useEffect",
-          "kind": "usage-call",
-          "line": 49,
-          "column": 2,
-          "data_json": {
-            "usageId": "5a07ad1ad78b6df8",
-            "filePath": "/src/Deep.tsx",
-            "line": 49,
-            "column": 2,
-            "ownerId": "7732b08b7377499b:effect:49:2",
-            "ownerKind": "effect",
-            "displayLabel": "useEffect"
-          }
-        },
-        {
-          "from_id": "7732b08b7377499b:effect:49:2",
-          "to_id": "7732b08b7377499b:state:[progress, setProgress]:51f01b2b07e307f2",
-          "kind": "usage-call",
-          "line": 50,
-          "column": 4,
-          "data_json": {
-            "usageId": "37190f826ad5f2ab",
-            "filePath": "/src/Deep.tsx",
-            "line": 50,
-            "column": 4,
-            "ownerId": "7732b08b7377499b:effect:49:2",
-            "ownerKind": "effect",
-            "displayLabel": "setProgress"
-          }
-        },
-        {
-          "from_id": "7732b08b7377499b:state:[progress, setProgress]:f3893d22eedac210",
-          "to_id": "27b1cf33c59e6e3c",
-          "kind": "usage-read",
-          "line": 52,
-          "column": 15,
-          "data_json": {
-            "usageId": "b48943dc72015633",
-            "filePath": "/src/Deep.tsx",
-            "line": 52,
-            "column": 15,
-            "ownerId": "27b1cf33c59e6e3c",
-            "ownerKind": "normal",
-            "displayLabel": "progress"
-          }
-        }
-      ]
+      "relations": []
     },
     "/src/Context.tsx": {
       "path": "/src/Context.tsx",
@@ -3022,7 +2771,7 @@
           "name": "MyContext",
           "type": "named",
           "exportKind": "value",
-          "id": "f151b03626e3635f"
+          "id": "b3379aa31af9888"
         },
         "MyProvider": {
           "name": "MyProvider",
@@ -3041,8 +2790,8 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "f151b03626e3635f": {
-          "id": "f151b03626e3635f",
+        "b3379aa31af9888": {
+          "id": "b3379aa31af9888",
           "name": {
             "type": "identifier",
             "name": "MyContext",
@@ -3083,7 +2832,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "6d015394debef83b",
+          "hash": "8cbfd9593f82f853",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3105,7 +2854,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Context.tsx",
-              "hash": "49f4fa39b889ab3e",
+              "hash": "d42d8c6412818433",
               "dependencies": {
                 "645990c74ae7d7da": {
                   "id": "645990c74ae7d7da",
@@ -3122,7 +2871,7 @@
                 "tag": "MyContext.Provider",
                 "dependencies": [
                   {
-                    "id": "f151b03626e3635f",
+                    "id": "b3379aa31af9888",
                     "name": "MyContext"
                   },
                   {
@@ -3293,7 +3042,7 @@
       },
       "relations": [
         {
-          "from_id": "f151b03626e3635f",
+          "from_id": "b3379aa31af9888",
           "to_id": "594797dc519fc7a3",
           "kind": "usage-read",
           "line": 7,
@@ -3301,17 +3050,17 @@
           "data_json": null
         },
         {
-          "from_id": "f151b03626e3635f",
+          "from_id": "b3379aa31af9888",
           "to_id": "symbol:import:/src/Context.tsx:createContext",
           "kind": "usage-call",
           "line": 3,
           "column": 25,
           "data_json": {
-            "usageId": "18ba013ab44eac83",
+            "usageId": "ba303af5a8b1d624",
             "filePath": "/src/Context.tsx",
             "line": 3,
             "column": 25,
-            "ownerId": "f151b03626e3635f",
+            "ownerId": "b3379aa31af9888",
             "ownerKind": "normal",
             "displayLabel": "createContext"
           }
@@ -3349,13 +3098,13 @@
           }
         },
         {
-          "from_id": "f151b03626e3635f",
+          "from_id": "b3379aa31af9888",
           "to_id": "922ba1247fc0dd3d:callhook:useContext:14:8",
           "kind": "usage-read",
           "line": 14,
           "column": 29,
           "data_json": {
-            "usageId": "4323d76f028b6da0",
+            "usageId": "d33472ac93d7fab1",
             "filePath": "/src/Context.tsx",
             "line": 14,
             "column": 29,
@@ -4156,11 +3905,6 @@
       "label": "render"
     },
     {
-      "from": "7732b08b7377499b",
-      "to": "27b1cf33c59e6e3c",
-      "label": "render"
-    },
-    {
       "from": "594797dc519fc7a3",
       "to": "cf259be6f1cb800b",
       "label": "render"
@@ -4319,11 +4063,6 @@
       "from": "c9b0f178ddc8d164",
       "to": "5a51946d93053e40",
       "label": "render"
-    },
-    {
-      "from": "27b1cf33c59e6e3c",
-      "to": "d3e5386bdcf2966d",
-      "label": "hook"
     },
     {
       "from": "594797dc519fc7a3",

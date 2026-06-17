@@ -31,7 +31,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     // 3. Initialize data tables in main
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS packages (id TEXT PRIMARY KEY, name TEXT NOT NULL, version TEXT, path TEXT NOT NULL);
-         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, package_id TEXT, hash TEXT NOT NULL, fingerprint TEXT NOT NULL, default_export TEXT, star_exports_json TEXT);
+         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, package_id TEXT, hash TEXT NOT NULL, fingerprint TEXT NOT NULL, default_export TEXT, star_exports_json TEXT, entry_point TEXT);
          CREATE TABLE IF NOT EXISTS scopes (id TEXT PRIMARY KEY, file_id INTEGER NOT NULL, parent_id TEXT, kind TEXT NOT NULL, entity_id TEXT, data_json TEXT);
          CREATE TABLE IF NOT EXISTS entities (id TEXT PRIMARY KEY, scope_id TEXT NOT NULL, kind TEXT NOT NULL, name TEXT, type TEXT, line INTEGER, column INTEGER, end_line INTEGER, end_column INTEGER, declaration_kind TEXT, data_json TEXT);
          CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, scope_id TEXT NOT NULL, name TEXT NOT NULL, path TEXT, is_alias BOOLEAN DEFAULT 0, has_default BOOLEAN DEFAULT 0, data_json TEXT);
@@ -104,8 +104,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             conn.execute_batch(&format!("
                 INSERT OR IGNORE INTO main.packages (id, name, version, path) VALUES ('{}', '{}', '{}', '{}');
 
-                INSERT OR IGNORE INTO main.files (id, path, package_id, hash, fingerprint, default_export, star_exports_json)
-                SELECT id + {}, {}, '{}', hash, fingerprint, default_export, star_exports_json FROM {}.files;
+                INSERT OR IGNORE INTO main.files (id, path, package_id, hash, fingerprint, default_export, star_exports_json, entry_point)
+                SELECT id + {}, {}, '{}', hash, fingerprint, default_export, star_exports_json, entry_point FROM {}.files;
 
                 INSERT OR IGNORE INTO main.scopes (id, file_id, parent_id, kind, entity_id, data_json)
                 SELECT '{}' || id, file_id + {}, CASE WHEN parent_id IS NOT NULL THEN '{}' || parent_id ELSE NULL END, kind, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, data_json FROM {}.scopes;
@@ -172,13 +172,14 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     // 6. Run logic
     // Fetch necessary data
     let files: Vec<FileRow> = conn
-        .prepare("SELECT id, path, package_id FROM files")
+        .prepare("SELECT id, path, package_id, entry_point FROM files")
         .unwrap()
         .query_map([], |row| {
             Ok(FileRow {
                 id: row.get(0)?,
                 path: row.get(1)?,
                 package_id: row.get(2)?,
+                entry_point: row.get(3)?,
             })
         })
         .unwrap()
@@ -343,9 +344,16 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                         .package_id
                         .as_ref()
                         .and_then(|id| package_path_map.get(id).cloned()),
+                    entry_point: f.entry_point.clone(),
                 },
             )
         })
+        .collect();
+
+    // Build entity_id -> scope_combo_id mapping for render edges
+    let entity_to_scope: HashMap<String, String> = scopes
+        .iter()
+        .filter_map(|s| s.entity_id.clone().map(|eid| (eid, s.id.clone())))
         .collect();
 
     for sym in &symbols {
@@ -469,10 +477,14 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             .clone();
         let t = scope_redirect.get(&t0).unwrap_or(&t0).clone();
 
-        // Skip edge if the source is already a child of the target combo
-        if let Some(parent_id) = var_parent_map.get(&s).and_then(|p| p.as_ref()) {
-            if parent_id == &t {
-                return;
+        // Skip edge if the source is already a child of the target combo.
+        // Only skip for non-combo sources (e.g., variables) — render combos
+        // that share an entity's ID should still get their arrow.
+        if !added_combos.contains(&s) {
+            if let Some(parent_id) = var_parent_map.get(&s).and_then(|p| p.as_ref()) {
+                if parent_id == &t {
+                    return;
+                }
             }
         }
 
@@ -518,6 +530,38 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
     let mut ins_combo = conn.prepare("INSERT OR REPLACE INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)").unwrap();
     let mut ins_edge = conn.prepare("INSERT OR REPLACE INTO out_edges (id, source, target, name, kind, category, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)").unwrap();
     let mut ins_detail = conn.prepare("INSERT OR REPLACE INTO out_details (id, file_name, project_path, line, \"column\", data_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").unwrap();
+
+    // Emit entry point combos and track them for render reparenting
+    let mut entry_combo_by_file: HashMap<i32, (String, Option<String>)> = HashMap::new();
+    for (file_id, file_info) in &file_info_map {
+        if let Some(ep) = &file_info.entry_point {
+            let ep_id = format!("entrypoint:{}", file_info.path.replace('/', "_"));
+            let root_component =
+                if let Ok(ep_val) = serde_json::from_str::<serde_json::Value>(ep) {
+                    ep_val["component"].as_str().map(|s| s.to_string())
+                } else {
+                    None
+                };
+
+            // Entry point combo
+            ins_combo
+                .execute(params![
+                    ep_id,
+                    "entry",
+                    "entry",
+                    None::<String>,
+                    None::<String>,
+                    18.0,
+                    0,
+                    "entry",
+                    None::<String>,
+                    Some(ep.clone()),
+                ])
+                .unwrap();
+
+            entry_combo_by_file.insert(*file_id, (ep_id, root_component));
+        }
+    }
 
     // 0. Pre-create Package Combos if multiple packages exist
     if use_package_combos {
@@ -923,8 +967,28 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             }
         }
 
-        if let Some(ps) = parent_scope {
-            if render.parent_render_id.is_none() {
+        if render.parent_render_id.is_none() {
+            // Check if this root render should be parented under an entry point
+            // instead of its parent scope (works even when parent_scope is None,
+            // e.g. for JSX inside createRoot(...).render(...))
+            let entry_override = entry_combo_by_file
+                .get(&render.file_id)
+                .filter(|(_, comp)| {
+                    comp.as_deref() == Some(render.tag.as_str())
+                })
+                .map(|(ep_id, _)| ep_id.clone());
+
+            if let Some(ep_id) = entry_override {
+                let rg_id = format!("render-group-{}", ep_id);
+                if !added_combos.contains(&rg_id) {
+                    conn.execute(
+                        "INSERT INTO out_combos (id, name, type, parent_id, color, radius, collapsed, display_name, git_status, meta_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                        params![rg_id, "render", "render-group", ep_id, None::<String>, 18.0, 1, "render", None::<String>, None::<String>],
+                    ).unwrap();
+                    added_combos.insert(rg_id.clone());
+                }
+                pc_id = Some(rg_id);
+            } else if let Some(ps) = parent_scope {
                 let rg_id = format!("render-group-{}", ps.id);
                 if !added_combos.contains(&rg_id) {
                     conn.execute(
@@ -959,6 +1023,16 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             .unwrap();
 
         added_combos.insert(render.id.clone());
+
+        // If the render's id matches a known entity, create an edge
+        // from the component's scope combo to the render combo
+        if let Some(scope_id) = entity_to_scope.get(&render.id) {
+            let e_id = format!("{}-{}-render", scope_id, &render.id);
+            edge_map.insert(
+                e_id,
+                (scope_id.clone(), render.id.clone(), "render".to_string(), 1, Vec::new()),
+            );
+        }
     }
 
     // 4. Hook Specific Nodes (Effects) and 5. Relations -> Edges
@@ -1147,6 +1221,9 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
     // 4. Serialize back to buffer
     let mut size: i64 = 0;
+    // Ensure no pending transactions before serialization
+    conn.execute_batch("COMMIT").ok();
+    conn.execute_batch("ROLLBACK").ok();
     unsafe {
         let db = conn.handle();
         let ptr =

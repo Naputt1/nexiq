@@ -1597,8 +1597,8 @@
         }
       },
       "var": {
-        "a9653880096e2e9e": {
-          "id": "a9653880096e2e9e",
+        "22c030afaa48ed8c": {
+          "id": "22c030afaa48ed8c",
           "name": {
             "type": "identifier",
             "name": "Test65",
@@ -2765,7 +2765,7 @@
           "kind": "normal",
           "type": "jsx",
           "file": "/src/main.tsx",
-          "hash": "707a5a0a009be891",
+          "hash": "3fae799c97da17bf",
           "dependencies": {},
           "loc": {
             "line": 7,
@@ -2783,7 +2783,23 @@
             },
             "renderIndex": 0,
             "kind": "jsx",
-            "children": {}
+            "children": {
+              "f08a3def5942bca7": {
+                "id": "311c554b828f67a5",
+                "instanceId": "f08a3def5942bca7",
+                "tag": "App",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 8,
+                  "column": 4
+                },
+                "parentId": "f9c4f1cb1f95d24b",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              }
+            }
           },
           "srcId": "StrictMode"
         }
@@ -2805,7 +2821,15 @@
             "displayLabel": "StrictMode"
           }
         }
-      ]
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 6,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
     },
     "/src/Destructuring.tsx": {
       "path": "/src/Destructuring.tsx",

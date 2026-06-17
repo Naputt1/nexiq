@@ -13,6 +13,7 @@ pub struct FileRow {
     pub id: i32,
     pub path: String,
     pub package_id: Option<String>,
+    pub entry_point: Option<String>,
 }
 
 pub struct EntityRow {
@@ -68,6 +69,7 @@ pub struct FileInfo {
     pub path: String,
     pub package_id: Option<String>,
     pub project_path: Option<String>,
+    pub entry_point: Option<String>,
 }
 
 pub fn table_exists(conn: &Connection, name: &str) -> bool {

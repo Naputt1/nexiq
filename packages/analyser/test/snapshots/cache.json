@@ -115,7 +115,7 @@
           "kind": "normal",
           "type": "jsx",
           "file": "/src/main.tsx",
-          "hash": "707a5a0a009be891",
+          "hash": "3fae799c97da17bf",
           "dependencies": {},
           "loc": {
             "line": 7,
@@ -133,7 +133,23 @@
             },
             "renderIndex": 0,
             "kind": "jsx",
-            "children": {}
+            "children": {
+              "f08a3def5942bca7": {
+                "id": "311c554b828f67a5",
+                "instanceId": "f08a3def5942bca7",
+                "tag": "App",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 8,
+                  "column": 4
+                },
+                "parentId": "f9c4f1cb1f95d24b",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              }
+            }
           },
           "srcId": "StrictMode"
         }
@@ -155,7 +171,15 @@
             "displayLabel": "StrictMode"
           }
         }
-      ]
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 6,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
     },
     "/src/Child.tsx": {
       "path": "/src/Child.tsx",
@@ -328,7 +352,7 @@
           "name": "UserContext",
           "type": "named",
           "exportKind": "value",
-          "id": "98862de8769484fd"
+          "id": "3b05a7ce5ff0d425"
         },
         "App": {
           "name": "App",
@@ -375,8 +399,8 @@
         }
       },
       "var": {
-        "98862de8769484fd": {
-          "id": "98862de8769484fd",
+        "3b05a7ce5ff0d425": {
+          "id": "3b05a7ce5ff0d425",
           "name": {
             "type": "identifier",
             "name": "UserContext",
@@ -417,7 +441,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "baeaa2a37a03c1c",
+          "hash": "d6457bc8103b873b",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -532,7 +556,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "c9c6b991e4b87d59",
+              "hash": "ffa8aa8e15ffb086",
               "dependencies": {
                 "79e8ab745e8da6a7": {
                   "id": "79e8ab745e8da6a7",
@@ -896,7 +920,7 @@
                     "tag": "UserContext.Provider",
                     "dependencies": [
                       {
-                        "id": "98862de8769484fd",
+                        "id": "3b05a7ce5ff0d425",
                         "name": "UserContext"
                       },
                       {
@@ -1018,7 +1042,7 @@
       },
       "relations": [
         {
-          "from_id": "98862de8769484fd",
+          "from_id": "3b05a7ce5ff0d425",
           "to_id": "2a486d3d9e6ca850",
           "kind": "usage-read",
           "line": 38,
@@ -1026,33 +1050,33 @@
           "data_json": null
         },
         {
-          "from_id": "98862de8769484fd",
+          "from_id": "3b05a7ce5ff0d425",
           "to_id": "symbol:import:/src/App.tsx:createContext",
           "kind": "usage-call",
           "line": 10,
           "column": 27,
           "data_json": {
-            "usageId": "ebff7af89a3c24ca",
+            "usageId": "da16b2f07bdefd7f",
             "filePath": "/src/App.tsx",
             "line": 10,
             "column": 27,
-            "ownerId": "98862de8769484fd",
+            "ownerId": "3b05a7ce5ff0d425",
             "ownerKind": "normal",
             "displayLabel": "createContext"
           }
         },
         {
           "from_id": "7ed7fa9f9cff307f",
-          "to_id": "98862de8769484fd",
+          "to_id": "3b05a7ce5ff0d425",
           "kind": "usage-read",
           "line": 10,
           "column": 41,
           "data_json": {
-            "usageId": "a92a3631d38e655b",
+            "usageId": "4a1bc59f1f03b656",
             "filePath": "/src/App.tsx",
             "line": 10,
             "column": 41,
-            "ownerId": "98862de8769484fd",
+            "ownerId": "3b05a7ce5ff0d425",
             "ownerKind": "normal",
             "displayLabel": "User"
           }
