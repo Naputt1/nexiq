@@ -32,6 +32,7 @@ export interface AppStateData {
   activeTab: "projects" | "git";
   selectedCommit: string | null;
   gitComparisonEnabled?: boolean;
+  locked?: boolean;
   viewport?: { x: number; y: number; zoom: number } | null;
   view?: GraphViewType;
   sidebar: {
