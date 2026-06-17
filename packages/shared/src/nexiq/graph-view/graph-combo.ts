@@ -80,8 +80,15 @@ gitStatus(optionalEncoding?:any):string|Uint8Array|null {
   return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
 }
 
+customType():string|null
+customType(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+customType(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 22);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startGraphCombo(builder:flatbuffers.Builder) {
-  builder.startObject(9);
+  builder.startObject(10);
 }
 
 static addId(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset) {
@@ -120,12 +127,16 @@ static addGitStatus(builder:flatbuffers.Builder, gitStatusOffset:flatbuffers.Off
   builder.addFieldOffset(8, gitStatusOffset, 0);
 }
 
+static addCustomType(builder:flatbuffers.Builder, customTypeOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(9, customTypeOffset, 0);
+}
+
 static endGraphCombo(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, parentIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, collapsed:boolean, gitStatusOffset:flatbuffers.Offset):flatbuffers.Offset {
+static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, parentIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, collapsed:boolean, gitStatusOffset:flatbuffers.Offset, customTypeOffset:flatbuffers.Offset):flatbuffers.Offset {
   GraphCombo.startGraphCombo(builder);
   GraphCombo.addId(builder, idOffset);
   GraphCombo.addType(builder, type);
@@ -136,6 +147,7 @@ static createGraphCombo(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset
   GraphCombo.addRadius(builder, radius);
   GraphCombo.addCollapsed(builder, collapsed);
   GraphCombo.addGitStatus(builder, gitStatusOffset);
+  GraphCombo.addCustomType(builder, customTypeOffset);
   return GraphCombo.endGraphCombo(builder);
 }
 }
