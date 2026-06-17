@@ -75,8 +75,15 @@ gitStatus(optionalEncoding?:any):string|Uint8Array|null {
   return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
 }
 
+customType():string|null
+customType(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
+customType(optionalEncoding?:any):string|Uint8Array|null {
+  const offset = this.bb!.__offset(this.bb_pos, 20);
+  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+}
+
 static startGraphNode(builder:flatbuffers.Builder) {
-  builder.startObject(8);
+  builder.startObject(9);
 }
 
 static addId(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset) {
@@ -111,12 +118,16 @@ static addGitStatus(builder:flatbuffers.Builder, gitStatusOffset:flatbuffers.Off
   builder.addFieldOffset(7, gitStatusOffset, 0);
 }
 
+static addCustomType(builder:flatbuffers.Builder, customTypeOffset:flatbuffers.Offset) {
+  builder.addFieldOffset(8, customTypeOffset, 0);
+}
+
 static endGraphNode(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, comboIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, gitStatusOffset:flatbuffers.Offset):flatbuffers.Offset {
+static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset, type:ItemType, nameOffset:flatbuffers.Offset, displayNameOffset:flatbuffers.Offset, comboIdOffset:flatbuffers.Offset, colorOffset:flatbuffers.Offset, radius:number, gitStatusOffset:flatbuffers.Offset, customTypeOffset:flatbuffers.Offset):flatbuffers.Offset {
   GraphNode.startGraphNode(builder);
   GraphNode.addId(builder, idOffset);
   GraphNode.addType(builder, type);
@@ -126,6 +137,7 @@ static createGraphNode(builder:flatbuffers.Builder, idOffset:flatbuffers.Offset,
   GraphNode.addColor(builder, colorOffset);
   GraphNode.addRadius(builder, radius);
   GraphNode.addGitStatus(builder, gitStatusOffset);
+  GraphNode.addCustomType(builder, customTypeOffset);
   return GraphNode.endGraphNode(builder);
 }
 }
