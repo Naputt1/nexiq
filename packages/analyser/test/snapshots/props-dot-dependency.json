@@ -3,6 +3,7 @@
     "/index.tsx": {
       "path": "/index.tsx",
       "hash": "f7768887b13db1c9",
+      "package_id": "props-props-dot-dependency@0.0.0",
       "import": {
         "React": {
           "localName": "React",
@@ -26,9 +27,16 @@
           "importKind": "value"
         }
       },
-      "export": {},
+      "export": {
+        "CardBody": {
+          "name": "CardBody",
+          "type": "default",
+          "exportKind": "component",
+          "id": "d3a4c6ed6b965219"
+        }
+      },
       "starExports": [],
-      "defaultExport": null,
+      "defaultExport": "CardBody",
       "tsTypes": {},
       "var": {
         "d3a4c6ed6b965219": {
@@ -45,7 +53,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "190a9bd0497e4c8f",
+          "hash": "1863e7a1d12d4810",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -161,6 +169,58 @@
                 "line": 8,
                 "column": 8
               }
+            },
+            "23e8ac41bdcd4b3d": {
+              "id": "23e8ac41bdcd4b3d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@18:4",
+                "loc": {
+                  "line": 18,
+                  "column": 4
+                },
+                "id": "5be092f6edc27045"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "80b580dae03b9087",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 4
+              },
+              "render": {
+                "id": "/index.tsx:div:18:4",
+                "instanceId": "2392a68f3bd5431b",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 18,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "a15b0c53042dc8fe": {
+                    "id": "",
+                    "instanceId": "a15b0c53042dc8fe",
+                    "tag": "Ternary",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 19,
+                      "column": 7
+                    },
+                    "parentId": "2392a68f3bd5431b",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  }
+                }
+              },
+              "srcId": "/index.tsx:div:18:4"
             }
           },
           "scope": {
@@ -174,6 +234,7 @@
             }
           },
           "async": false,
+          "return": "23e8ac41bdcd4b3d",
           "states": [
             "d3a4c6ed6b965219:state:[expanding, setExpanding]",
             "d3a4c6ed6b965219:state:[expanded, setExpanded]"
@@ -194,14 +255,242 @@
           ],
           "propName": "props",
           "hooks": [],
-          "effects": {},
+          "effects": {
+            "d3a4c6ed6b965219:effect:10:2": {
+              "id": "d3a4c6ed6b965219:effect:10:2",
+              "name": "useEffect",
+              "scope": {
+                "start": {
+                  "line": 10,
+                  "column": 18
+                },
+                "end": {
+                  "line": 15,
+                  "column": 3
+                }
+              },
+              "loc": {
+                "line": 10,
+                "column": 2
+              },
+              "reactDeps": [
+                {
+                  "id": "d3a4c6ed6b965219:prop:props",
+                  "name": "props.expanded"
+                }
+              ]
+            }
+          },
           "componentType": "Function",
           "contexts": []
         }
       },
-      "relations": []
+      "blockScopes": [
+        {
+          "id": "441d2e52ba30100c",
+          "parentId": "scope:block:d3a4c6ed6b965219",
+          "scope": {
+            "start": {
+              "line": 12,
+              "column": 24
+            },
+            "end": {
+              "line": 14,
+              "column": 5
+            }
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_id": "symbol:import:/index.tsx:React",
+          "to_id": "d3a4c6ed6b965219",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 12,
+          "data_json": {
+            "usageId": "8a8ca5ef78f40d5f",
+            "filePath": "/index.tsx",
+            "line": 5,
+            "column": 12,
+            "ownerId": "d3a4c6ed6b965219",
+            "ownerKind": "component",
+            "displayLabel": "React"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219",
+          "to_id": "symbol:import:/index.tsx:useState",
+          "kind": "usage-call",
+          "line": 7,
+          "column": 36,
+          "data_json": {
+            "usageId": "7938efb0c3fbffb3",
+            "filePath": "/index.tsx",
+            "line": 7,
+            "column": 36,
+            "ownerId": "d3a4c6ed6b965219",
+            "ownerKind": "component",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219",
+          "to_id": "symbol:import:/index.tsx:useState",
+          "kind": "usage-call",
+          "line": 8,
+          "column": 34,
+          "data_json": {
+            "usageId": "48559c06095537ec",
+            "filePath": "/index.tsx",
+            "line": 8,
+            "column": 34,
+            "ownerId": "d3a4c6ed6b965219",
+            "ownerKind": "component",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219:effect:10:2",
+          "to_id": "symbol:import:/index.tsx:useEffect",
+          "kind": "usage-call",
+          "line": 10,
+          "column": 2,
+          "data_json": {
+            "usageId": "97d6319e1c4d3100",
+            "filePath": "/index.tsx",
+            "line": 10,
+            "column": 2,
+            "ownerId": "d3a4c6ed6b965219:effect:10:2",
+            "ownerKind": "effect",
+            "displayLabel": "useEffect"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219:effect:10:2",
+          "to_id": "d3a4c6ed6b965219:state:[expanding, setExpanding]:c37c880036b5a510",
+          "kind": "usage-call",
+          "line": 11,
+          "column": 4,
+          "data_json": {
+            "usageId": "6e53543b5504a702",
+            "filePath": "/index.tsx",
+            "line": 11,
+            "column": 4,
+            "ownerId": "d3a4c6ed6b965219:effect:10:2",
+            "ownerKind": "effect",
+            "displayLabel": "setExpanding"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219",
+          "to_id": "d3a4c6ed6b965219:effect:10:2",
+          "kind": "usage-read",
+          "line": 12,
+          "column": 8,
+          "data_json": {
+            "usageId": "fa3af42c3829b2f0",
+            "filePath": "/index.tsx",
+            "line": 12,
+            "column": 8,
+            "ownerId": "d3a4c6ed6b965219:effect:10:2",
+            "ownerKind": "effect",
+            "accessPath": [
+              "expanded"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "props.expanded"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219:effect:10:2",
+          "to_id": "d3a4c6ed6b965219:state:[expanded, setExpanded]:126f78be5531ae2",
+          "kind": "usage-call",
+          "line": 13,
+          "column": 6,
+          "data_json": {
+            "usageId": "5f9502a715886da4",
+            "filePath": "/index.tsx",
+            "line": 13,
+            "column": 6,
+            "ownerId": "d3a4c6ed6b965219:effect:10:2",
+            "ownerKind": "effect",
+            "displayLabel": "setExpanded"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219",
+          "to_id": "d3a4c6ed6b965219:effect:10:2",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 6,
+          "data_json": {
+            "usageId": "d1d7411e30069ffb",
+            "filePath": "/index.tsx",
+            "line": 15,
+            "column": 6,
+            "ownerId": "d3a4c6ed6b965219:effect:10:2",
+            "ownerKind": "effect",
+            "accessPath": [
+              "expanded"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "props.expanded"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219:state:[expanded, setExpanded]:1e3a8fdd3788da37",
+          "to_id": "23e8ac41bdcd4b3d",
+          "kind": "usage-read",
+          "line": 19,
+          "column": 7,
+          "data_json": {
+            "usageId": "e3f19a3acff362d4",
+            "filePath": "/index.tsx",
+            "line": 19,
+            "column": 7,
+            "ownerId": "23e8ac41bdcd4b3d",
+            "ownerKind": "normal",
+            "displayLabel": "expanded"
+          }
+        },
+        {
+          "from_id": "d3a4c6ed6b965219",
+          "to_id": "23e8ac41bdcd4b3d",
+          "kind": "usage-read",
+          "line": 20,
+          "column": 7,
+          "data_json": {
+            "usageId": "14234437bcb2255",
+            "filePath": "/index.tsx",
+            "line": 20,
+            "column": 7,
+            "ownerId": "23e8ac41bdcd4b3d",
+            "ownerKind": "normal",
+            "accessPath": [
+              "children"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "props.children"
+          }
+        }
+      ]
     }
   },
-  "edges": [],
+  "edges": [
+    {
+      "from": "d3a4c6ed6b965219",
+      "to": "23e8ac41bdcd4b3d",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "d3a4c6ed6b965219",
+      "label": "render"
+    }
+  ],
   "resolve": []
 }
