@@ -2,7 +2,7 @@
 extern crate napi_derive;
 
 use napi::bindgen_prelude::*;
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OpenFlags};
 use rust_core::*;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -12,163 +12,188 @@ pub struct TaskContext {
     pub project_root: String,
     pub view_type: String,
     pub cache_db_path: Option<String>,
+    pub sqlite_buffer: Option<Buffer>,
 }
 
 #[napi]
 pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
-    let cache_db_path = context.cache_db_path.ok_or_else(|| {
-        Error::from_reason("cache_db_path is required for native Rust task execution")
-    })?;
+    // 1. Open an empty in-memory connection with SQLITE_OPEN_MEMORY flag
+    //    (required by sqlite3_deserialize).
+    let conn = Connection::open_with_flags(
+        ":memory:",
+        OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE | OpenFlags::SQLITE_OPEN_MEMORY,
+    )
+    .map_err(|e| Error::from_reason(format!("Failed to open in-memory SQLite: {}", e)))?;
 
-    // 1. Open an empty in-memory connection
-    let conn = Connection::open_in_memory()
-        .map_err(|e| Error::from_reason(format!("Failed to open in-memory SQLite: {}", e)))?;
-
-    // 2. Attach the cache database read-only
-    conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
-        .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
-
-    // 3. Initialize data tables in main
-    conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS packages (id TEXT PRIMARY KEY, name TEXT NOT NULL, version TEXT, path TEXT NOT NULL);
-         CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, package_id TEXT, hash TEXT NOT NULL, fingerprint TEXT NOT NULL, default_export TEXT, star_exports_json TEXT, entry_point TEXT);
-         CREATE TABLE IF NOT EXISTS scopes (id TEXT PRIMARY KEY, file_id INTEGER NOT NULL, parent_id TEXT, kind TEXT NOT NULL, entity_id TEXT, data_json TEXT);
-         CREATE TABLE IF NOT EXISTS entities (id TEXT PRIMARY KEY, scope_id TEXT NOT NULL, kind TEXT NOT NULL, name TEXT, type TEXT, line INTEGER, column INTEGER, end_line INTEGER, end_column INTEGER, declaration_kind TEXT, data_json TEXT);
-         CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, scope_id TEXT NOT NULL, name TEXT NOT NULL, path TEXT, is_alias BOOLEAN DEFAULT 0, has_default BOOLEAN DEFAULT 0, data_json TEXT);
-         CREATE TABLE IF NOT EXISTS renders (id TEXT PRIMARY KEY, file_id INTEGER NOT NULL, parent_entity_id TEXT NOT NULL, parent_render_id TEXT, render_index INTEGER NOT NULL, tag TEXT NOT NULL, symbol_id TEXT, line INTEGER, column INTEGER, kind TEXT NOT NULL, data_json TEXT);
-         CREATE TABLE IF NOT EXISTS exports (id TEXT PRIMARY KEY, scope_id TEXT NOT NULL, symbol_id TEXT, entity_id TEXT, name TEXT, is_default BOOLEAN DEFAULT 0);
-         CREATE TABLE IF NOT EXISTS relations (from_id TEXT NOT NULL, to_id TEXT NOT NULL, kind TEXT NOT NULL, line INTEGER, column INTEGER, data_json TEXT, PRIMARY KEY (from_id, to_id, kind, line, column));"
-    ).map_err(|e| Error::from_reason(format!("Failed to create data tables: {}", e)))?;
-
-    // 4. Aggregate data
-    let is_monorepo = conn
-        .prepare("SELECT 1 FROM source.workspace_packages")
-        .is_ok();
-
-    if is_monorepo {
-        let mut stmt = conn
-            .prepare(
-                "SELECT package_id, path, db_path, name, version FROM source.workspace_packages",
-            )
-            .unwrap();
-        let workspace_packages: Vec<(String, String, String, String, Option<String>)> = stmt
-            .query_map([], |row| {
-                Ok((
-                    row.get(0)?,
-                    row.get(1)?,
-                    row.get(2)?,
-                    row.get(3)?,
-                    row.get(4)?,
-                ))
-            })
-            .unwrap()
-            .filter_map(|r| r.ok())
-            .collect();
-
-        for (i, (pkg_id, pkg_path, db_path, name, version)) in workspace_packages.iter().enumerate()
-        {
-            let offset = (i + 1) * 1000000;
-            let prefix = format!("workspace:{}:", pkg_id);
-            let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
-
-            let abs_db_path = if Path::new(db_path).is_absolute() {
-                db_path.clone()
-            } else {
-                Path::new(&context.project_root)
-                    .join(db_path)
-                    .to_str()
-                    .unwrap()
-                    .to_string()
-            };
-
-            if !Path::new(&abs_db_path).exists() {
-                continue;
+    if let Some(ref sqlite_buffer) = context.sqlite_buffer {
+        // Fast path: deserialize the shared DB buffer from the JS orchestrator.
+        // The shared DB already has source tables + out_* tables populated,
+        // so we skip data aggregation and table creation entirely.
+        unsafe {
+            let db = conn.handle();
+            let size = sqlite_buffer.len() as i64;
+            let ptr = rusqlite::ffi::sqlite3_malloc64(size as u64);
+            if ptr.is_null() {
+                return Err(Error::from_reason(
+                    "Failed to allocate memory for sqlite3_deserialize",
+                ));
             }
-
-            let pkg_alias = format!("pkg_{}", i);
-            conn.execute(
-                &format!("ATTACH DATABASE '{}' AS {}", abs_db_path, pkg_alias),
-                [],
-            )
-            .unwrap();
-
-            let path_expr = if pkg_rel.is_empty() {
-                "path".to_string()
-            } else {
-                format!(
-                    "'/{}' || CASE WHEN path LIKE '/%' THEN path ELSE '/' || path END",
-                    pkg_rel
-                )
-            };
-
-            conn.execute_batch(&format!("
-                INSERT OR IGNORE INTO main.packages (id, name, version, path) VALUES ('{}', '{}', '{}', '{}');
-
-                INSERT OR IGNORE INTO main.files (id, path, package_id, hash, fingerprint, default_export, star_exports_json, entry_point)
-                SELECT id + {}, {}, '{}', hash, fingerprint, default_export, star_exports_json, entry_point FROM {}.files;
-
-                INSERT OR IGNORE INTO main.scopes (id, file_id, parent_id, kind, entity_id, data_json)
-                SELECT '{}' || id, file_id + {}, CASE WHEN parent_id IS NOT NULL THEN '{}' || parent_id ELSE NULL END, kind, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, data_json FROM {}.scopes;
-
-                INSERT OR IGNORE INTO main.entities (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
-                SELECT '{}' || id, '{}' || scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json FROM {}.entities;
-
-                INSERT OR IGNORE INTO main.symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
-                SELECT '{}' || id, '{}' || entity_id, '{}' || scope_id, name, path, is_alias, has_default, data_json FROM {}.symbols;
-
-                INSERT OR IGNORE INTO main.renders (id, file_id, parent_entity_id, parent_render_id, tag, symbol_id, line, column, kind, data_json)
-                SELECT '{}' || id, file_id + {}, '{}' || parent_entity_id, CASE WHEN parent_render_id IS NOT NULL THEN '{}' || parent_render_id ELSE NULL END, tag, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, line, column, kind, data_json FROM {}.renders;
-
-                INSERT OR IGNORE INTO main.exports (id, scope_id, symbol_id, entity_id, name, is_default)
-                SELECT '{}' || id, '{}' || scope_id, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, name, is_default FROM {}.exports;
-
-                INSERT OR IGNORE INTO main.relations (from_id, to_id, kind, line, column, data_json)
-                SELECT '{}' || from_id, '{}' || to_id, kind, line, column, data_json FROM {}.relations;
-            ", 
-                pkg_id, name, version.as_deref().unwrap_or("0.0.0"), pkg_path,
-                offset, path_expr, pkg_id, pkg_alias,
-                prefix, offset, prefix, prefix, pkg_alias,
-                prefix, prefix, pkg_alias,
-                prefix, prefix, prefix, pkg_alias,
-                prefix, offset, prefix, prefix, prefix, pkg_alias,
-                prefix, prefix, prefix, prefix, pkg_alias,
-                prefix, prefix, pkg_alias
-            )).unwrap();
-
-            conn.execute(&format!("DETACH DATABASE {}", pkg_alias), [])
-                .unwrap();
+            std::ptr::copy_nonoverlapping(sqlite_buffer.as_ptr(), ptr as *mut u8, size as usize);
+            let rc = rusqlite::ffi::sqlite3_deserialize(
+                db,
+                b"main\0".as_ptr() as *const i8,
+                ptr as *mut u8,
+                size,
+                size,
+                1 | 2,
+            );
+            if rc != 0 {
+                rusqlite::ffi::sqlite3_free(ptr as *mut std::ffi::c_void);
+                return Err(Error::from_reason(format!(
+                    "sqlite3_deserialize failed with code {}",
+                    rc
+                )));
+            }
         }
     } else {
-        // Single project: Create TEMP views to map the attached 'source' schema into the default namespace
-        let mut stmt = conn
-            .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
-            .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
-        let tables: Vec<String> = stmt
-            .query_map([], |row| row.get(0))
-            .unwrap()
-            .filter_map(|r| r.ok())
-            .collect();
+        let cache_db_path = context.cache_db_path.ok_or_else(|| {
+            Error::from_reason("cache_db_path is required for native Rust task execution")
+        })?;
 
-        for table in tables {
-            if !table.starts_with("sqlite_") && !table.starts_with("out_") {
-                let create_view_sql = format!(
-                    "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
-                    table, table
-                );
-                conn.execute(&create_view_sql, []).map_err(|e| {
-                    Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
-                })?;
+        // 2. Attach the cache database read-only
+        conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
+            .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
+
+        // 3. Initialize data tables in main
+        rust_core::init_data_tables(&conn)
+            .map_err(|e| Error::from_reason(format!("Failed to create data tables: {}", e)))?;
+
+        // 4. Aggregate data
+        let is_monorepo = conn
+            .prepare("SELECT 1 FROM source.workspace_packages")
+            .is_ok();
+
+        if is_monorepo {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT package_id, path, db_path, name, version FROM source.workspace_packages",
+                )
+                .unwrap();
+            let workspace_packages: Vec<(String, String, String, String, Option<String>)> = stmt
+                .query_map([], |row| {
+                    Ok((
+                        row.get(0)?,
+                        row.get(1)?,
+                        row.get(2)?,
+                        row.get(3)?,
+                        row.get(4)?,
+                    ))
+                })
+                .unwrap()
+                .filter_map(|r| r.ok())
+                .collect();
+
+            for (i, (pkg_id, pkg_path, db_path, name, version)) in workspace_packages.iter().enumerate()
+            {
+                let offset = (i + 1) * 1000000;
+                let prefix = format!("workspace:{}:", pkg_id);
+                let pkg_rel = pkg_path.trim_start_matches('/').trim_end_matches('/');
+
+                let abs_db_path = if Path::new(db_path).is_absolute() {
+                    db_path.clone()
+                } else {
+                    Path::new(&context.project_root)
+                        .join(db_path)
+                        .to_str()
+                        .unwrap()
+                        .to_string()
+                };
+
+                if !Path::new(&abs_db_path).exists() {
+                    continue;
+                }
+
+                let pkg_alias = format!("pkg_{}", i);
+                conn.execute(
+                    &format!("ATTACH DATABASE '{}' AS {}", abs_db_path, pkg_alias),
+                    [],
+                )
+                .unwrap();
+
+                let path_expr = if pkg_rel.is_empty() {
+                    "path".to_string()
+                } else {
+                    format!(
+                        "'/{}' || CASE WHEN path LIKE '/%' THEN path ELSE '/' || path END",
+                        pkg_rel
+                    )
+                };
+
+                conn.execute_batch(&format!("
+                    INSERT OR IGNORE INTO main.packages (id, name, version, path) VALUES ('{}', '{}', '{}', '{}');
+
+                    INSERT OR IGNORE INTO main.files (id, path, package_id, hash, fingerprint, default_export, star_exports_json, entry_point)
+                    SELECT id + {}, {}, '{}', hash, fingerprint, default_export, star_exports_json, entry_point FROM {}.files;
+
+                    INSERT OR IGNORE INTO main.scopes (id, file_id, parent_id, kind, entity_id, data_json)
+                    SELECT '{}' || id, file_id + {}, CASE WHEN parent_id IS NOT NULL THEN '{}' || parent_id ELSE NULL END, kind, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, data_json FROM {}.scopes;
+
+                    INSERT OR IGNORE INTO main.entities (id, scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json)
+                    SELECT '{}' || id, '{}' || scope_id, kind, name, type, line, column, end_line, end_column, declaration_kind, data_json FROM {}.entities;
+
+                    INSERT OR IGNORE INTO main.symbols (id, entity_id, scope_id, name, path, is_alias, has_default, data_json)
+                    SELECT '{}' || id, '{}' || entity_id, '{}' || scope_id, name, path, is_alias, has_default, data_json FROM {}.symbols;
+
+                    INSERT OR IGNORE INTO main.renders (id, file_id, parent_entity_id, parent_render_id, tag, symbol_id, line, column, kind, data_json)
+                    SELECT '{}' || id, file_id + {}, '{}' || parent_entity_id, CASE WHEN parent_render_id IS NOT NULL THEN '{}' || parent_render_id ELSE NULL END, tag, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, line, column, kind, data_json FROM {}.renders;
+
+                    INSERT OR IGNORE INTO main.exports (id, scope_id, symbol_id, entity_id, name, is_default)
+                    SELECT '{}' || id, '{}' || scope_id, CASE WHEN symbol_id IS NOT NULL THEN '{}' || symbol_id ELSE NULL END, CASE WHEN entity_id IS NOT NULL THEN '{}' || entity_id ELSE NULL END, name, is_default FROM {}.exports;
+
+                    INSERT OR IGNORE INTO main.relations (from_id, to_id, kind, line, column, data_json)
+                    SELECT '{}' || from_id, '{}' || to_id, kind, line, column, data_json FROM {}.relations;
+                ", 
+                    pkg_id, name, version.as_deref().unwrap_or("0.0.0"), pkg_path,
+                    offset, path_expr, pkg_id, pkg_alias,
+                    prefix, offset, prefix, prefix, pkg_alias,
+                    prefix, prefix, pkg_alias,
+                    prefix, prefix, prefix, pkg_alias,
+                    prefix, offset, prefix, prefix, prefix, pkg_alias,
+                    prefix, prefix, prefix, prefix, pkg_alias,
+                    prefix, prefix, pkg_alias
+                )).unwrap();
+
+                conn.execute(&format!("DETACH DATABASE {}", pkg_alias), [])
+                    .unwrap();
+            }
+        } else {
+            // Single project: Create TEMP views to map the attached 'source' schema into the default namespace
+            let mut stmt = conn
+                .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
+                .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
+            let tables: Vec<String> = stmt
+                .query_map([], |row| row.get(0))
+                .unwrap()
+                .filter_map(|r| r.ok())
+                .collect();
+
+            for table in tables {
+                if !table.starts_with("sqlite_") && !table.starts_with("out_") {
+                    let create_view_sql = format!(
+                        "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
+                        table, table
+                    );
+                    conn.execute(&create_view_sql, []).map_err(|e| {
+                        Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
+                    })?;
+                }
             }
         }
     }
 
     // 5. Ensure output tables exist
-    conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS out_nodes (id TEXT PRIMARY KEY, name TEXT, type TEXT, combo_id TEXT, color TEXT, radius REAL, display_name TEXT, git_status TEXT, meta_json TEXT);
-         CREATE TABLE IF NOT EXISTS out_edges (id TEXT PRIMARY KEY, source TEXT, target TEXT, name TEXT, kind TEXT, category TEXT, meta_json TEXT);
-         CREATE TABLE IF NOT EXISTS out_combos (id TEXT PRIMARY KEY, name TEXT, type TEXT, parent_id TEXT, color TEXT, radius REAL, collapsed INTEGER, display_name TEXT, git_status TEXT, meta_json TEXT);
-         CREATE TABLE IF NOT EXISTS out_details (id TEXT PRIMARY KEY, file_name TEXT, project_path TEXT, line INTEGER, \"column\" INTEGER, data_json TEXT);"
-    ).map_err(|e| Error::from_reason(format!("Failed to create output tables: {}", e)))?;
+    rust_core::init_output_tables(&conn)
+        .map_err(|e| Error::from_reason(format!("Failed to create output tables: {}", e)))?;
     // 6. Run logic
     // Fetch necessary data
     let files: Vec<FileRow> = conn

@@ -7,5 +7,6 @@ export interface TaskContext {
   projectRoot: string
   viewType: string
   cacheDbPath?: string
+  sqliteBuffer?: Buffer
 }
 export declare function runComponentTaskSqlite(context: TaskContext): Buffer

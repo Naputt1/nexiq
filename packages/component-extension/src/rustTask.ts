@@ -14,6 +14,7 @@ export const componentTask: GraphViewTask = {
       projectRoot: context.projectRoot || "",
       viewType: context.viewType || "component",
       cacheDbPath: context.cacheDbPath,
+      sqliteBuffer: context.sqliteBuffer,
     };
 
     // This calls into rust lib.rs > run_component_task_sqlite
