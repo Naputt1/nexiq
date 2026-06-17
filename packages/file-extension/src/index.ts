@@ -8,7 +8,6 @@ export * from "./packageTask.js";
 export const fileExtension: Extension = {
   id: "file-extension",
   viewTasks: {
-    component: [fileTask],
     file: [fileTask],
     package: [packageTask],
   },
