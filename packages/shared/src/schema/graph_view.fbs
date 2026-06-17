@@ -16,7 +16,9 @@ enum ItemType : byte {
   SourceGroup = 12,
   PathGroup = 13,
   Variable = 14,
-  Attribute = 15
+  Attribute = 15,
+  Entry = 16,
+  Custom = 17
 }
 
 table Loc {
@@ -33,6 +35,7 @@ table GraphNode {
   color:string;
   radius:float;
   gitStatus:string;
+  customType:string;
 }
 
 table GraphCombo {
@@ -45,6 +48,7 @@ table GraphCombo {
   radius:float;
   collapsed:bool;
   gitStatus:string;
+  customType:string;
 }
 
 table GraphEdge {

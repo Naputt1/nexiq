@@ -59,6 +59,17 @@ export interface NodeAppearance {
   radius?: number | undefined;
 }
 
+// Registry for custom node types registered by extensions.
+const customNodeAppearances = new Map<string, NodeAppearance>();
+
+export function registerNodeType(type: string, appearance: NodeAppearance): void {
+  customNodeAppearances.set(type, appearance);
+}
+
+export function getRegisteredNodeAppearance(type: string): NodeAppearance | undefined {
+  return customNodeAppearances.get(type);
+}
+
 export interface GraphAppearance {
   nodeHighlight?: string;
   comboHighlight?: string;
@@ -90,7 +101,7 @@ export interface GraphAppearance {
       | "entry",
       NodeAppearance
     >
-  >;
+  > & Record<string, NodeAppearance | undefined>;
   typeKeyword?: string;
   typeLiteral?: string;
   typeString?: string;
@@ -842,6 +853,7 @@ export interface Extension<TGraph = unknown> {
   viewTasks?: Record<string, GraphViewTask[]>; // Mapping of GraphViewType to tasks
   detailSections?: DetailSection<TGraph>[];
   mcpTools?: MCPTool[];
+  nodeTypes?: Record<string, NodeAppearance>; // Custom node types to register
 }
 
 /**
