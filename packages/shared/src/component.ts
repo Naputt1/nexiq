@@ -170,6 +170,14 @@ export interface VariableScope {
   end: VariableLoc;
 }
 
+export type EntryPointKind = "createRoot" | "hydrateRoot";
+
+export interface EntryPoint {
+  kind: EntryPointKind;
+  loc: VariableLoc;
+  component?: string;
+}
+
 export type ComponentFileBlockScope = {
   id: string;
   parentId?: string | undefined;
@@ -566,4 +574,5 @@ export type ComponentFile = {
   blockScopes?: ComponentFileBlockScope[] | undefined;
   relations?: ComponentRelation[] | undefined;
   package_id?: string | undefined;
+  entryPoint?: EntryPoint | undefined;
 };

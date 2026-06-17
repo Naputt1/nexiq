@@ -252,7 +252,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "43eb07a6c212e790",
+          "hash": "a263aa38fc07b9d9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -260,8 +260,8 @@
             "column": 13
           },
           "var": {
-            "8c693c9c0c2fe891": {
-              "id": "8c693c9c0c2fe891",
+            "35ff91be35a24b45": {
+              "id": "35ff91be35a24b45",
               "name": {
                 "type": "identifier",
                 "name": "x",
@@ -283,8 +283,8 @@
               },
               "children": {}
             },
-            "8193523605bdc018": {
-              "id": "8193523605bdc018",
+            "437522dd8752aa86": {
+              "id": "437522dd8752aa86",
               "name": {
                 "type": "identifier",
                 "name": "y",
@@ -306,8 +306,8 @@
               },
               "children": {}
             },
-            "b6d418d0db41990b": {
-              "id": "b6d418d0db41990b",
+            "1eb65fc87ae07c90": {
+              "id": "1eb65fc87ae07c90",
               "name": {
                 "type": "identifier",
                 "name": "z",
@@ -366,7 +366,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "76341cf74391a692",
+              "hash": "33522c4e9a1092ea",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -390,7 +390,7 @@
                       "refType": "named",
                       "name": "x"
                     },
-                    "valueId": "8c693c9c0c2fe891"
+                    "valueId": "35ff91be35a24b45"
                   }
                 ],
                 "isDependency": false,
@@ -601,7 +601,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "7bd96b648478a67",
+              "hash": "1a57cfcf58b767ed",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -637,7 +637,7 @@
                       "refType": "named",
                       "name": "x"
                     },
-                    "valueId": "8c693c9c0c2fe891"
+                    "valueId": "35ff91be35a24b45"
                   }
                 ],
                 "isDependency": false,
@@ -687,7 +687,7 @@
                               "refType": "named",
                               "name": "y"
                             },
-                            "valueId": "8193523605bdc018"
+                            "valueId": "437522dd8752aa86"
                           }
                         ],
                         "isDependency": false,
@@ -715,7 +715,7 @@
                           "refType": "named",
                           "name": "y"
                         },
-                        "valueId": "8193523605bdc018"
+                        "valueId": "437522dd8752aa86"
                       }
                     ],
                     "isDependency": false,
@@ -843,13 +843,13 @@
           }
         },
         {
-          "from_id": "8c693c9c0c2fe891",
+          "from_id": "35ff91be35a24b45",
           "to_id": "1076ea2026161c64",
           "kind": "usage-read",
           "line": 12,
           "column": 25,
           "data_json": {
-            "usageId": "67234f00d175d71b",
+            "usageId": "7dc2a59a47cc3bbc",
             "filePath": "/src/App.tsx",
             "line": 12,
             "column": 25,
@@ -875,13 +875,13 @@
           }
         },
         {
-          "from_id": "8c693c9c0c2fe891",
+          "from_id": "35ff91be35a24b45",
           "to_id": "71ebfad76923d940",
           "kind": "usage-read",
           "line": 22,
           "column": 27,
           "data_json": {
-            "usageId": "f1d238108b61741c",
+            "usageId": "4182a80339deab4e",
             "filePath": "/src/App.tsx",
             "line": 22,
             "column": 27,
@@ -891,13 +891,13 @@
           }
         },
         {
-          "from_id": "8193523605bdc018",
+          "from_id": "437522dd8752aa86",
           "to_id": "311c554b828f67a5",
           "kind": "usage-read",
           "line": 24,
           "column": 36,
           "data_json": {
-            "usageId": "dcd359e3e7130b7a",
+            "usageId": "a9aad0adce8477ca",
             "filePath": "/src/App.tsx",
             "line": 24,
             "column": 36,
@@ -955,13 +955,13 @@
           }
         },
         {
-          "from_id": "8193523605bdc018",
+          "from_id": "437522dd8752aa86",
           "to_id": "311c554b828f67a5",
           "kind": "usage-read",
           "line": 29,
           "column": 20,
           "data_json": {
-            "usageId": "6ce902d6e9438ea",
+            "usageId": "586638811fe30c6",
             "filePath": "/src/App.tsx",
             "line": 29,
             "column": 20,
@@ -971,13 +971,13 @@
           }
         },
         {
-          "from_id": "8c693c9c0c2fe891",
+          "from_id": "35ff91be35a24b45",
           "to_id": "311c554b828f67a5",
           "kind": "usage-read",
           "line": 31,
           "column": 27,
           "data_json": {
-            "usageId": "90181772c0344702",
+            "usageId": "335a5c463326936",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 27,
@@ -987,13 +987,13 @@
           }
         },
         {
-          "from_id": "8c693c9c0c2fe891",
+          "from_id": "35ff91be35a24b45",
           "to_id": "311c554b828f67a5",
           "kind": "usage-read",
           "line": 31,
           "column": 51,
           "data_json": {
-            "usageId": "5eb53f85f261f6bb",
+            "usageId": "80c989730b9a3de3",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 51,
@@ -1003,13 +1003,13 @@
           }
         },
         {
-          "from_id": "8193523605bdc018",
+          "from_id": "437522dd8752aa86",
           "to_id": "311c554b828f67a5",
           "kind": "usage-read",
           "line": 31,
           "column": 55,
           "data_json": {
-            "usageId": "1ec4b376b31be675",
+            "usageId": "d4aa4b939c503126",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 55,

@@ -10,15 +10,15 @@
           "name": "useUser",
           "type": "named",
           "exportKind": "value",
-          "id": "bcb4ad80b9e65abc"
+          "id": "3b61c6631db1ad5b"
         }
       },
       "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "bcb4ad80b9e65abc": {
-          "id": "bcb4ad80b9e65abc",
+        "3b61c6631db1ad5b": {
+          "id": "3b61c6631db1ad5b",
           "name": {
             "type": "object",
             "properties": [
@@ -106,17 +106,17 @@
       },
       "relations": [
         {
-          "from_id": "bcb4ad80b9e65abc:bf9fba8fcba32833",
-          "to_id": "bcb4ad80b9e65abc",
+          "from_id": "3b61c6631db1ad5b:bf9fba8fcba32833",
+          "to_id": "3b61c6631db1ad5b",
           "kind": "usage-read",
           "line": 1,
           "column": 15,
           "data_json": {
-            "usageId": "515e79ead20b859e",
+            "usageId": "4d87a452dc144513",
             "filePath": "/src/auth.tsx",
             "line": 1,
             "column": 15,
-            "ownerId": "bcb4ad80b9e65abc",
+            "ownerId": "3b61c6631db1ad5b",
             "ownerKind": "normal",
             "displayLabel": "useUser"
           }
@@ -162,7 +162,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "b365ece3540fa96b",
+          "hash": "ab80277a9577cd65",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -184,14 +184,14 @@
               "kind": "hook",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "320930bcc3a41283",
+              "hash": "2e0e939d7a4eb0ff",
               "dependencies": {},
               "loc": {
                 "line": 4,
                 "column": 8
               },
               "call": {
-                "id": "bcb4ad80b9e65abc",
+                "id": "3b61c6631db1ad5b",
                 "name": "useUser"
               }
             },
@@ -248,7 +248,7 @@
           "refs": [],
           "props": [],
           "hooks": [
-            "bcb4ad80b9e65abc"
+            "3b61c6631db1ad5b"
           ],
           "effects": {},
           "componentType": "Function",
@@ -304,12 +304,12 @@
     },
     {
       "from": "311c554b828f67a5",
-      "to": "bcb4ad80b9e65abc",
+      "to": "3b61c6631db1ad5b",
       "label": "hook"
     },
     {
       "from": "311c554b828f67a5:callhook:useUser:4:8",
-      "to": "bcb4ad80b9e65abc",
+      "to": "3b61c6631db1ad5b",
       "label": "hook"
     }
   ],

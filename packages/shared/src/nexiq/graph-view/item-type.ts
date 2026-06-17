@@ -16,7 +16,8 @@ export enum ItemType {
   SourceGroup = 12,
   PathGroup = 13,
   Variable = 14,
-  Attribute = 15
+  Attribute = 15,
+  Entry = 16
 }
 
 function normalizeTypeString(type: string): string {
@@ -57,6 +58,8 @@ export function itemTypeToString(type: ItemType): string {
       return "variable";
     case ItemType.Attribute:
       return "attribute";
+    case ItemType.Entry:
+      return "entry";
   }
 }
 
@@ -97,6 +100,8 @@ export function stringToItemType(type: string | undefined): ItemType {
       return ItemType.Variable;
     case "attribute":
       return ItemType.Attribute;
+    case "entry":
+      return ItemType.Entry;
     default:
       return ItemType.Scope;
   }

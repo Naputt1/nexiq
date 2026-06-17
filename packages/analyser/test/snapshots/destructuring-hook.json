@@ -289,8 +289,8 @@
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "de5badd01d3abc65": {
-          "id": "de5badd01d3abc65",
+        "b3a914d5cd86429e": {
+          "id": "b3a914d5cd86429e",
           "name": {
             "type": "identifier",
             "name": "MyContext",
@@ -1196,17 +1196,17 @@
       },
       "relations": [
         {
-          "from_id": "de5badd01d3abc65",
+          "from_id": "b3a914d5cd86429e",
           "to_id": "symbol:import:/src/App.tsx:createContext",
           "kind": "usage-call",
           "line": 3,
           "column": 18,
           "data_json": {
-            "usageId": "2663e8ff5d833dd2",
+            "usageId": "76ecb653b59f2e2c",
             "filePath": "/src/App.tsx",
             "line": 3,
             "column": 18,
-            "ownerId": "de5badd01d3abc65",
+            "ownerId": "b3a914d5cd86429e",
             "ownerKind": "normal",
             "displayLabel": "createContext"
           }
@@ -1276,13 +1276,13 @@
           }
         },
         {
-          "from_id": "de5badd01d3abc65",
+          "from_id": "b3a914d5cd86429e",
           "to_id": "311c554b828f67a5:callhook:useContext:19:8",
           "kind": "usage-read",
           "line": 19,
           "column": 31,
           "data_json": {
-            "usageId": "738707fc82c3ec6c",
+            "usageId": "9c510237981889a9",
             "filePath": "/src/App.tsx",
             "line": 19,
             "column": 31,

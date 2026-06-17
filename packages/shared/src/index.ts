@@ -101,6 +101,7 @@ export interface FileRow {
   fingerprint: string;
   default_export: string | null;
   star_exports_json: string | null;
+  entry_point?: string | null;
 }
 
 export interface AnalysisRunRow {

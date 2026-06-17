@@ -50,7 +50,7 @@ describe("Rust Component Task", () => {
     // Initialize Schema
     db.exec(`
             CREATE TABLE packages (id TEXT PRIMARY KEY, name TEXT, version TEXT, path TEXT);
-            CREATE TABLE files (id INTEGER PRIMARY KEY, path TEXT, package_id TEXT, hash TEXT, fingerprint TEXT);
+            CREATE TABLE files (id INTEGER PRIMARY KEY, path TEXT, package_id TEXT, hash TEXT, fingerprint TEXT, entry_point TEXT);
             CREATE TABLE entities (id TEXT PRIMARY KEY, scope_id TEXT, kind TEXT, name TEXT, type TEXT, line INTEGER, column INTEGER, data_json TEXT);
             CREATE TABLE scopes (id TEXT PRIMARY KEY, file_id INTEGER, parent_id TEXT, kind TEXT, entity_id TEXT, data_json TEXT);
             CREATE TABLE symbols (id TEXT PRIMARY KEY, entity_id TEXT, scope_id TEXT, name TEXT, path TEXT, is_alias INTEGER DEFAULT 0, has_default INTEGER DEFAULT 0, data_json TEXT);

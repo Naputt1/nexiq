@@ -133,7 +133,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "881b169d11c2f5d8",
+          "hash": "b5932c41e1e6e5cb",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -166,8 +166,8 @@
                 "name": "useSelector"
               }
             },
-            "1981986fd63b9d23": {
-              "id": "1981986fd63b9d23",
+            "1ced1eea74b79bd9": {
+              "id": "1ced1eea74b79bd9",
               "name": {
                 "type": "object",
                 "properties": [
@@ -260,7 +260,7 @@
               "kind": "callback",
               "type": "function",
               "file": "/index.tsx",
-              "hash": "4dd8641a5a0c4738",
+              "hash": "44b868fe221839aa",
               "dependencies": {},
               "loc": {
                 "line": 21,
@@ -285,11 +285,11 @@
               "effects": {},
               "reactDeps": [
                 {
-                  "id": "1981986fd63b9d23:841e96e73f3a4bc0",
+                  "id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
                   "name": "isFollowing"
                 },
                 {
-                  "id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
+                  "id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
                   "name": "channelId"
                 }
               ]
@@ -408,16 +408,16 @@
         },
         {
           "from_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
-          "to_id": "1981986fd63b9d23",
+          "to_id": "1ced1eea74b79bd9",
           "kind": "usage-read",
           "line": 19,
           "column": 6,
           "data_json": {
-            "usageId": "cb400df0c5ee0e26",
+            "usageId": "79d504e7085f01c0",
             "filePath": "/index.tsx",
             "line": 19,
             "column": 6,
-            "ownerId": "1981986fd63b9d23",
+            "ownerId": "1ced1eea74b79bd9",
             "ownerKind": "normal",
             "displayLabel": "thread"
           }
@@ -439,13 +439,13 @@
           }
         },
         {
-          "from_id": "1981986fd63b9d23:841e96e73f3a4bc0",
+          "from_id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
           "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
           "kind": "usage-read",
           "line": 23,
           "column": 18,
           "data_json": {
-            "usageId": "2ef22e336b43438c",
+            "usageId": "883f993cb33aebd1",
             "filePath": "/index.tsx",
             "line": 23,
             "column": 18,
@@ -455,13 +455,13 @@
           }
         },
         {
-          "from_id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
+          "from_id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
           "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
           "kind": "usage-read",
           "line": 23,
           "column": 31,
           "data_json": {
-            "usageId": "77bc4a9b8658bb76",
+            "usageId": "2220e68d6161353",
             "filePath": "/index.tsx",
             "line": 23,
             "column": 31,
@@ -471,13 +471,13 @@
           }
         },
         {
-          "from_id": "1981986fd63b9d23:841e96e73f3a4bc0",
+          "from_id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
           "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
           "kind": "usage-read",
           "line": 25,
           "column": 5,
           "data_json": {
-            "usageId": "43e02c52293b1c80",
+            "usageId": "42407480875ea467",
             "filePath": "/index.tsx",
             "line": 25,
             "column": 5,
@@ -487,13 +487,13 @@
           }
         },
         {
-          "from_id": "1981986fd63b9d23:cd657974cfc180fe:5cb21731d0f2a56e",
+          "from_id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
           "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
           "kind": "usage-read",
           "line": 25,
           "column": 18,
           "data_json": {
-            "usageId": "ce2ee4c89319867d",
+            "usageId": "435c4062e1cfb699",
             "filePath": "/index.tsx",
             "line": 25,
             "column": 18,
@@ -533,7 +533,7 @@
       "label": "hook"
     },
     {
-      "from": "1981986fd63b9d23",
+      "from": "1ced1eea74b79bd9",
       "to": "27f5be35fc906e3d",
       "label": "hook"
     },

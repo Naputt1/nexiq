@@ -10,6 +10,7 @@ import type {
   ComponentInfoRender,
   DataEdge,
   EffectInfo,
+  EntryPoint,
   JsonData,
   Memo,
   TypeData,
@@ -123,6 +124,7 @@ export class File {
   tsTypes: Map<string, TypeDataDeclare>;
   var: Scope;
   relations: ComponentRelation[];
+  entryPoint?: EntryPoint | undefined;
 
   public init: boolean = true;
 
@@ -352,6 +354,8 @@ export class File {
       this.tsTypes.set(typeData.id, typeData);
       this.tsTypesID.set(getVariableNameKey(typeData.name), typeData);
     }
+
+    this.entryPoint = data.entryPoint;
   }
 
   public addImport(fileImport: ComponentFileImport) {
@@ -372,6 +376,10 @@ export class File {
       resolvedId: fileImport.resolvedId,
       unresolvedWorkspace: fileImport.unresolvedWorkspace,
     });
+  }
+
+  public setEntryPoint(entryPoint: EntryPoint) {
+    this.entryPoint = entryPoint;
   }
 
   public addRelation(relation: ComponentRelation) {
@@ -789,6 +797,7 @@ export class File {
       var: this.var.getData(),
       ...(blockScopes.length > 0 ? { blockScopes } : {}),
       relations: this.relations,
+      ...(this.entryPoint ? { entryPoint: this.entryPoint } : {}),
     };
   }
 
@@ -1092,6 +1101,65 @@ export class File {
         ? exactVariable
         : hookVariable;
 
+    if (variable == null && parentId) {
+      // For child renders with a parent (e.g. JSX inside createRoot(...).render(...)),
+      // resolve variable from the parent render's location
+      const parent = this.renderInstanceMap.get(parentId);
+      if (parent && parent.loc) {
+        const parentVar = this.getVariable(parent.loc);
+        if (parentVar) {
+          // Use parent variable as fallback for dependency resolution
+          let targetComponent: Variable | Scope = parentVar;
+          while (
+            targetComponent &&
+            !isScope(targetComponent) &&
+            !isComponentVariable(targetComponent) &&
+            targetComponent.parent
+          ) {
+            targetComponent = targetComponent.parent;
+          }
+          this.getDependenciesIds(parentVar.id, dependencies);
+          
+          const existing = this.renderInstanceMap.get(instanceId);
+          let effectiveKind = kind;
+          if (existing && existing.kind !== "jsx" && kind === "jsx") {
+            effectiveKind = existing.kind;
+          }
+
+          let targetMap: Record<string, ComponentInfoRender> | undefined;
+          let renderIndex = existing?.renderIndex ?? 0;
+
+          if (!existing && parentId) {
+            const p = this.renderInstanceMap.get(parentId);
+            if (p) {
+              targetMap = p.children;
+              renderIndex = Object.keys(p.children).length;
+            }
+          }
+
+          const newRender: ComponentInfoRender = {
+            id: srcId || existing?.id || "",
+            instanceId,
+            tag,
+            dependencies,
+            isDependency: isDependency || (existing?.isDependency ?? false),
+            loc,
+            parentId,
+            renderIndex,
+            kind: effectiveKind,
+            children: existing?.children ?? {},
+          };
+
+          this.renderInstanceMap.set(instanceId, newRender);
+
+          if (targetMap) {
+            targetMap[instanceId] = newRender;
+          }
+
+          return parentVar.id;
+        }
+      }
+    }
     if (variable == null) return null;
 
     let targetComponent: Variable | Scope = variable;
@@ -1325,6 +1393,13 @@ export class FileDB {
     assert(file != null, "File not found");
 
     file.addImport(fileImport);
+  }
+
+  public setEntryPoint(fileName: string, entryPoint: EntryPoint) {
+    const file = this.files.get(fileName);
+    assert(file != null, "File not found");
+
+    file.setEntryPoint(entryPoint);
   }
 
   public has(fileName: string) {
