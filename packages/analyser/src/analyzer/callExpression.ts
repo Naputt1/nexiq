@@ -8,6 +8,7 @@ import {
   isScope,
 } from "../db/variable/type.ts";
 import { Variable } from "../db/variable/variable.ts";
+import { generateFn } from "../utils/babel.ts";
 import {
   ReactDependency,
   VariableLoc,
