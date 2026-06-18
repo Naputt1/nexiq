@@ -3554,11 +3554,6 @@
       "label": "hook"
     },
     {
-      "from": "66289b593d160656",
-      "to": "7a755d146a3ba89a",
-      "label": "hook"
-    },
-    {
       "from": "66289b593d160656:callhook:useCustomHook:7:8",
       "to": "7a755d146a3ba89a",
       "label": "hook"

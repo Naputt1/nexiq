@@ -739,7 +739,7 @@ export class ComponentDB {
       [],
       loc,
       "hook",
-      parentId || this.getCurrentRenderInstance(),
+      parentId,
     );
   }
 

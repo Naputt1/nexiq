@@ -890,9 +890,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             // (e.g. "{ t }" is redundant when a "useTranslation" source-group
             // with child "t" already exists).
             let is_entity_level = symbol.path.is_none();
+            let is_callhook = entity.id.contains(":callhook:");
             let has_source_group = entity.kind == "hook"
                 && hook_entities_with_paths.contains(&entity.id)
-                && is_entity_level;
+                && is_entity_level
+                && !is_callhook;
 
             if !has_source_group {
                 let node_type = if entity.kind == "normal" {
