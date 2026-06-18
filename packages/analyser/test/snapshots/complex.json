@@ -3371,7 +3371,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Context.tsx",
-          "hash": "8cbfd9593f82f853",
+          "hash": "645a462e5d060b59",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3393,7 +3393,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/Context.tsx",
-              "hash": "d42d8c6412818433",
+              "hash": "89744e497486b4bd",
               "dependencies": {
                 "645990c74ae7d7da": {
                   "id": "645990c74ae7d7da",
@@ -3411,7 +3411,16 @@
                 "dependencies": [
                   {
                     "id": "b3379aa31af9888",
-                    "name": "MyContext"
+                    "name": "MyContext",
+                    "value": {
+                      "type": "ref",
+                      "refType": "qualified",
+                      "names": [
+                        "MyContext",
+                        "Provider"
+                      ]
+                    },
+                    "valueId": "b3379aa31af9888"
                   },
                   {
                     "id": "87d57e269b9df0f0",
