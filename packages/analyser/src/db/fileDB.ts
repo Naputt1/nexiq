@@ -494,7 +494,11 @@ export class File {
     // Otherwise, we respect the ID already set on the variable (e.g. deterministic state IDs)
     // and only fallback to generating a generic one if no ID is present.
     else if (!variable.id) {
-      variable.id = getDeterministicId(this.path, nameKey, `${variable.loc.line}:${variable.loc.column}`);
+      variable.id = getDeterministicId(
+        this.path,
+        nameKey,
+        `${variable.loc.line}:${variable.loc.column}`,
+      );
     }
 
     const id = variable.id;
@@ -674,14 +678,6 @@ export class File {
         }
       }
     };
-
-    for (const hookId of variable.hooks || []) {
-      edges.push({
-        from: variable.id,
-        to: hookId,
-        label: "hook",
-      });
-    }
 
     const collectInnerEdges = (v: Variable) => {
       if (isJSXVariable(v)) {
@@ -1119,7 +1115,7 @@ export class File {
             targetComponent = targetComponent.parent;
           }
           this.getDependenciesIds(parentVar.id, dependencies);
-          
+
           const existing = this.renderInstanceMap.get(instanceId);
           let effectiveKind = kind;
           if (existing && existing.kind !== "jsx" && kind === "jsx") {

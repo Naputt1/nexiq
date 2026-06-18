@@ -303,11 +303,6 @@
       "label": "render"
     },
     {
-      "from": "311c554b828f67a5",
-      "to": "3b61c6631db1ad5b",
-      "label": "hook"
-    },
-    {
       "from": "311c554b828f67a5:callhook:useUser:4:8",
       "to": "3b61c6631db1ad5b",
       "label": "hook"
