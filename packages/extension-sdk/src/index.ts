@@ -578,6 +578,7 @@ export function getTaskData(context: TaskContext): DatabaseData {
         const msg = err instanceof Error ? err.message : String(err);
         throw new Error(
           `Extension SDK: Failed to open package database at ${pkgDbPath}: ${msg}`,
+          { cause: err },
         );
       }
 

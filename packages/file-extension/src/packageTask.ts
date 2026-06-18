@@ -10,7 +10,9 @@ export const packageTask: GraphViewTask = {
     const { db } = context;
     if (!db) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const packages = db.prepare("SELECT * FROM packages").all() as any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const package_dependencies = db.prepare("SELECT * FROM package_dependencies").all() as any[];
 
     if (!packages.length && !package_dependencies.length) return;

@@ -17,7 +17,6 @@ export default defineConfig([
       },
     },
     rules: {
-      // Add custom rules here if needed
       "@typescript-eslint/switch-exhaustiveness-check": "warn",
       "no-debugger": "warn",
       "@typescript-eslint/no-unused-vars": [
@@ -29,6 +28,12 @@ export default defineConfig([
         },
       ],
       "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 ]);

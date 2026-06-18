@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "src/nexiq/graph-view"]),
+  globalIgnores(["dist"]),
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -12,7 +12,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.node,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ["tsup.config.ts"],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

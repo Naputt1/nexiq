@@ -15,7 +15,9 @@ export const fileTask: GraphViewTask = {
     if (!db) return;
 
     // 1. Ensure all file/directory/package combos exist
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const packages = db.prepare("SELECT * FROM packages").all() as any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const files = db.prepare("SELECT * FROM files").all() as any[];
 
     const packageMap = new Map(packages.map((p) => [p.id, p]));
@@ -118,7 +120,7 @@ export const fileTask: GraphViewTask = {
       JOIN scopes sc ON s.scope_id = sc.id
       JOIN files f ON sc.file_id = f.id
       WHERE e.kind IN ('component', 'hook')
-    `).all() as any[];
+    `).all() as any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const insNode = db.prepare(
       "INSERT OR IGNORE INTO out_nodes (id, name, type, combo_id, radius, display_name) VALUES (?, ?, ?, ?, ?, ?)",

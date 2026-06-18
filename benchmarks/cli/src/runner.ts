@@ -45,7 +45,7 @@ export type ProjectScenarios = z.infer<typeof ProjectScenariosSchema>;
 export interface ToolCall {
   id: string;
   name: string;
-  arguments: any;
+  arguments: unknown;
 }
 
 export interface BenchmarkStep {
@@ -138,7 +138,7 @@ export class McpRunner {
     if (this.transport) await this.transport.close();
   }
 
-  async callTool(name: string, args: any) {
+  async callTool(name: string, args: unknown) {
     if (!this.client) throw new Error("Client not started");
     return await this.client.callTool({ name, arguments: args });
   }
@@ -198,7 +198,7 @@ export interface LlmClient {
   displayName: string;
   chat(
     messages: BenchmarkStep[],
-    tools: any[],
+    tools: unknown[],
   ): Promise<{ content?: string; toolCalls?: ToolCall[] }>;
 }
 
@@ -224,7 +224,7 @@ export class OpenRouterClient implements LlmClient {
     });
   }
 
-  async chat(messages: BenchmarkStep[], tools: any[]) {
+  async chat(messages: BenchmarkStep[], tools: unknown[]) {
     const formattedMessages = messages.map((m) => {
       if (m.role === "tool") {
         return {
@@ -245,20 +245,20 @@ export class OpenRouterClient implements LlmClient {
               arguments: JSON.stringify(tc.arguments),
             },
           })),
-        } as any;
+        } as Record<string, unknown>;
       }
-      return { role: m.role as any, content: m.content || "" };
+      return { role: m.role as string, content: m.content || "" };
     });
 
     try {
-      const response = await (this.openai.chat.completions.create as any)({
+      const response = await this.openai.chat.completions.create({
         model: this.name,
         messages: formattedMessages,
-        tools: tools.length > 0 ? tools.map((t) => ({
+        tools: tools.length > 0 ? (tools as Array<Record<string, unknown>>).map((t) => ({
           type: "function",
           function: {
-            name: t.name,
-            description: t.description,
+            name: t.name as string,
+            description: t.description as string,
             parameters: t.inputSchema,
           },
         })) : undefined,
@@ -267,13 +267,13 @@ export class OpenRouterClient implements LlmClient {
 
       const message = response.choices[0]!.message;
       const toolCalls = message.tool_calls
-        ?.filter((tc: any) => tc.type === "function")
-        .map((tc: any) => {
-          const tool = tc as any;
+        ?.filter((tc: Record<string, unknown>) => tc.type === "function")
+        .map((tc: Record<string, unknown>) => {
+          const tool = tc as Record<string, unknown>;
           return {
             id: tool.id,
-            name: tool.function.name,
-            arguments: JSON.parse(tool.function.arguments),
+            name: (tool.function as Record<string, unknown>).name as string,
+            arguments: JSON.parse((tool.function as Record<string, unknown>).arguments as string),
           };
         });
 
@@ -281,8 +281,8 @@ export class OpenRouterClient implements LlmClient {
         content: message.content || undefined,
         toolCalls,
       };
-    } catch (e: any) {
-      console.error("LLM Chat API Error:", e.message);
+    } catch (e: unknown) {
+      console.error("LLM Chat API Error:", (e as Error).message);
       throw e;
     }
   }
@@ -297,7 +297,7 @@ export class SnapshotManager {
     this.baseDir = "../../benchmarks/snapshots";
   }
 
-  save(toolName: string, args: any, data: any) {
+  save(toolName: string, args: unknown, data: unknown) {
     const dir = path.join(this.baseDir, toolName);
     fs.mkdirSync(dir, { recursive: true });
 
@@ -557,7 +557,7 @@ export class BenchmarkRunner {
 
   private async verifyCodingTask(projectRoot: string, command: string, mcp: McpRunner): Promise<{ success: boolean; output?: { stdout: string; stderr: string; exitCode: number } }> {
     try {
-      const response: any = await mcp.callTool("run_shell_command", {
+      const response: Record<string, unknown> = await mcp.callTool("run_shell_command", {
         command,
         projectPath: projectRoot,
       });
@@ -685,7 +685,7 @@ export async function runBenchmarks(options: RunOptions) {
 
         for (const testType of scenarioTestTypes) {
            for (const approach of options.approaches) {
-             tasks.push({ project: projectData, scenario, model, approach, testType: testType as any });
+             tasks.push(        { project: projectData, scenario, model, approach, testType });
            }
         }
       }
@@ -748,7 +748,7 @@ export async function runBenchmarks(options: RunOptions) {
   // Process tasks with concurrency limit and directory isolation
   const activeRoots = new Map<string, number>(); // root -> number of active tasks
   const activeIsolatedRoots = new Set<string>(); // roots used by isolated tasks
-  const promisePool = new Set<Promise<any>>();
+  const promisePool = new Set<Promise<unknown>>();
   const queue = [...tasks];
 
   while (queue.length > 0 || promisePool.size > 0) {
@@ -778,7 +778,7 @@ export async function runBenchmarks(options: RunOptions) {
         activeIsolatedRoots.add(root);
       }
 
-      const p: Promise<any> = runTask(task).then(() => {
+      const p: Promise<unknown> = runTask(task).then(() => {
         // Cleanup root usage
         const count = activeRoots.get(root) || 0;
         if (count <= 1) {

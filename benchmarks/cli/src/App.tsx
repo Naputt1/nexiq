@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
 import Spinner from "ink-spinner";
 import Gradient from "ink-gradient";
@@ -6,8 +6,6 @@ import BigText from "ink-big-text";
 import {
   runBenchmarks,
   OpenRouterClient,
-  ProgressUpdate,
-  BenchmarkResult,
 } from "./runner.js";
 import open from "open";
 
@@ -163,8 +161,8 @@ const App = () => {
       const resultPath = await runBenchmarks({
         projects: selectedProjects,
         models,
-        testTypes: selectedTestTypes as any,
-        approaches: selectedApproaches as any,
+        testTypes: selectedTestTypes,
+        approaches: selectedApproaches,
         concurrency,
         onProgress: (update) => {
           if (update.type === "start") {
@@ -255,7 +253,7 @@ const App = () => {
                   active)
                 </Text>
               </Text>
-              {projectTasks.map((t, i) => {
+              {projectTasks.map((t, _i) => {
                 const taskId = `${t.projectName}-${t.scenarioId}-${t.model}-${t.approach}-${t.testType}`;
                 let statusIcon = <Text color="gray">○</Text>;
                 if (t.status === "running")
