@@ -485,7 +485,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "9a87ffb0e53c4ed5",
+          "hash": "330edc1c6f74fb28",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -634,7 +634,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "a18accd8b3d00d0f",
+              "hash": "9af4d3580e07bb60",
               "dependencies": {
                 "9e038a40ca02979": {
                   "id": "9e038a40ca02979",
@@ -1013,7 +1013,16 @@
                     "dependencies": [
                       {
                         "id": "3b05a7ce5ff0d425",
-                        "name": "UserContext"
+                        "name": "UserContext",
+                        "value": {
+                          "type": "ref",
+                          "refType": "qualified",
+                          "names": [
+                            "UserContext",
+                            "Provider"
+                          ]
+                        },
+                        "valueId": "3b05a7ce5ff0d425"
                       },
                       {
                         "id": "87d57e269b9df0f0",
