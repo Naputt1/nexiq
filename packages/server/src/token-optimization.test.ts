@@ -10,14 +10,14 @@ vi.mock("node:fs");
 vi.mock("@parcel/watcher");
 
 const createMockStmt = () => ({
-  all: vi.fn(() => []),
-  get: vi.fn(() => undefined),
+  all: vi.fn<() => unknown[]>(() => []),
+  get: vi.fn<() => unknown>(() => undefined),
   run: vi.fn(() => ({ changes: 0 })),
   prepare: vi.fn(() => createMockStmt()),
 });
 
 const mockDb = {
-  prepare: vi.fn(() => createMockStmt() as unknown as Database.Statement),
+  prepare: vi.fn<(sql: string) => Database.Statement>(() => createMockStmt() as unknown as Database.Statement),
   close: vi.fn(),
   exec: vi.fn(),
   pragma: vi.fn(),
