@@ -10,6 +10,7 @@ import type {
 } from "@nexiq/shared";
 import { getTsConfigAliases, getViteAliases } from "./vite.ts";
 import { ComponentDB } from "./db/componentDB.ts";
+import { TsConfigManager } from "./tsconfig.ts";
 import type { PackageJson as PackageJsonStore } from "./db/packageJson.ts";
 import { SqliteDB } from "./db/sqlite.ts";
 import { WorkerPool } from "./workerPool.ts";
@@ -236,6 +237,7 @@ export class PackageMaster {
   private readonly sqlite: SqliteDB | undefined;
   private readonly threads: number;
   private readonly viteAliases: Record<string, string>;
+  private readonly tsConfigManager: TsConfigManager;
   private readonly componentDB: ComponentDB;
   private readonly packageRow: PackageRow | undefined;
   private readonly runId: string;
@@ -256,11 +258,13 @@ export class PackageMaster {
       ...getViteAliases(this.viteConfigPath),
       ...getTsConfigAliases(this.srcDir),
     };
+    this.tsConfigManager = new TsConfigManager(this.srcDir);
     this.componentDB = new ComponentDB({
       packageJson: this.packageJson,
       viteAliases: this.viteAliases,
       dir: this.srcDir,
       sqlite: this.sqlite,
+      tsConfigManager: this.tsConfigManager,
     });
     this.packageRow = getPackageRow(this.packageJson, this.srcDir);
     this.packageName =
@@ -670,6 +674,7 @@ export class PackageMaster {
         viteAliases: this.viteAliases,
         packageJsonData: this.packageJson.rawData,
         runId: this.runId,
+        tsConfigMap: this.tsConfigManager.toJSON(),
       });
       const batchSize = this.getBatchSize(filesToAnalyze.length, this.threads);
       const batches: string[][] = [];

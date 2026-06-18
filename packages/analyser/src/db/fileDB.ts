@@ -110,7 +110,7 @@ type TypeDataHandler<T> = (
   params: Set<string>,
 ) => boolean;
 
-const FILE_EXTENSIONS = [".ts", ".tsx", ".ts", ".jsx", ".mjs", ".cjs"];
+const FILE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 
 export class File {
   path: string;

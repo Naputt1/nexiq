@@ -70,6 +70,7 @@ import { MethodVariable } from "./variable/methodVariable.ts";
 import { StateVariable } from "./variable/stateVariable.ts";
 import { resolvePath } from "../utils/path.ts";
 import { VariableRegistry } from "./variable/registry.ts";
+import { TsConfigManager } from "../tsconfig.ts";
 
 VariableRegistry.MemoVariable = MemoVariable;
 VariableRegistry.CallbackVariable = CallbackVariable;
@@ -79,6 +80,7 @@ export type ComponentDBOptions = {
   viteAliases: Record<string, string>;
   dir: string;
   sqlite: SqliteDB | undefined;
+  tsConfigManager?: TsConfigManager | undefined;
 };
 
 export class ComponentDB {
@@ -94,6 +96,7 @@ export class ComponentDB {
 
   private packageJson: PackageJson;
   private viteAliases: Record<string, string>;
+  private tsConfigManager: TsConfigManager | undefined;
 
   private dir: string;
 
@@ -110,6 +113,7 @@ export class ComponentDB {
 
     this.packageJson = options.packageJson;
     this.viteAliases = options.viteAliases;
+    this.tsConfigManager = options.tsConfigManager;
 
     this.dir = options.dir;
     this.sqlite = options.sqlite;
@@ -1326,24 +1330,62 @@ export class ComponentDB {
       }
     }
 
-    if (source.startsWith("/")) {
-      const fullSource = path.join(this.dir, "." + source);
-      if (fs.existsSync(fullSource) && fs.statSync(fullSource).isDirectory()) {
-        const indexExtension = ["tsx", "ts", "jsx", "js"];
-        for (const ext of indexExtension) {
-          const testFile = path.join(fullSource, `index.${ext}`);
-          if (fs.existsSync(testFile)) {
-            return `${source}/index.${ext}`;
+    // Resolve to absolute path for filesystem checks
+    const absPath = source.startsWith("/")
+      ? path.join(this.dir, "." + source)
+      : path.join(this.dir, source);
+
+    // 1. Exact match exists as a file -> return as-is
+    if (fs.existsSync(absPath)) {
+      if (fs.statSync(absPath).isDirectory()) {
+        // Directory: look for index files
+        const indexExts = ["tsx", "ts", "jsx", "js"];
+        for (const ext of indexExts) {
+          const indexPath = path.join(absPath, `index.${ext}`);
+          if (fs.existsSync(indexPath)) {
+            const baseSource = source.replace(/\/?$/, "");
+            return `${baseSource}/index.${ext}`;
           }
         }
+      } else {
+        return source;
       }
+    }
 
-      const indexExtension = ["tsx", "ts", "jsx", "js"];
-      for (const ext of indexExtension) {
-        const testFile = `${fullSource}.${ext}`;
-        if (fs.existsSync(testFile)) {
-          return `${source}.${ext}`;
+    // 2. Strip existing extension and try all known extensions
+    const knownExts = [".tsx", ".ts", ".jsx", ".js", ".mjs", ".cjs"];
+    const sourceExt = path.extname(source);
+    const sourceBase = sourceExt ? source.slice(0, -sourceExt.length) : source;
+
+    // If allowImportingTsExtensions is true and the source already has
+    // a .ts/.tsx extension, don't strip it — the user intended the exact path.
+    const isTsExt = sourceExt === ".ts" || sourceExt === ".tsx" || sourceExt === ".mts" || sourceExt === ".cts";
+    const allowTs = this.tsConfigManager?.getAllowImportingTsExtensions(fileName) ?? false;
+    if (isTsExt && allowTs) {
+      return source;
+    }
+
+    const absBase = path.join(
+      this.dir,
+      sourceBase.startsWith("/") ? "." + sourceBase : sourceBase,
+    );
+
+    // Check if base path is a directory
+    if (fs.existsSync(absBase) && fs.statSync(absBase).isDirectory()) {
+      const indexExts = ["tsx", "ts", "jsx", "js"];
+      for (const ext of indexExts) {
+        const indexPath = path.join(absBase, `index.${ext}`);
+        if (fs.existsSync(indexPath)) {
+          return `${sourceBase}/index.${ext}`;
         }
+      }
+    }
+
+    // Try each known extension
+    for (const ext of knownExts) {
+      const testFile = `${absBase}${ext}`;
+      if (fs.existsSync(testFile)) {
+        return `${sourceBase}${ext}`;
       }
     }
 
