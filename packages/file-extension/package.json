@@ -18,6 +18,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@nexiq/extension-sdk": "workspace:*",
     "@nexiq/shared": "workspace:*",

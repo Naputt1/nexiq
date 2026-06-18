@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-# This script helps publish packages to GitHub Packages locally.
+# This script helps publish packages to npm locally using changesets.
 # It requires NODE_AUTH_TOKEN to be set in your environment.
+# Note: versions should already be bumped via `pnpm version-packages`.
 
 if [ -z "$NODE_AUTH_TOKEN" ]; then
   echo "Error: NODE_AUTH_TOKEN is not set."
-  echo "Please set it: export NODE_AUTH_TOKEN=your_github_token"
+  echo "Please set it: export NODE_AUTH_TOKEN=your_npm_token"
   exit 1
 fi
 
@@ -17,15 +18,12 @@ pnpm --filter @nexiq/analyser build
 pnpm --filter @nexiq/server build
 pnpm --filter @nexiq/cli build
 
-echo "Publishing packages..."
+echo "Publishing packages via changesets..."
 
 # Create/update .npmrc for local publishing
 echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
-# No need for @nexiq scope registry if it's on NPM
 
-pnpm --filter @nexiq/shared publish --no-git-checks --access public
-pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public
-pnpm --filter @nexiq/cli publish --no-git-checks --access public
+pnpm release
 
 # Cleanup
 rm .npmrc
