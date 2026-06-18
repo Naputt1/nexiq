@@ -6,6 +6,10 @@ import crypto from "crypto";
 import { get_encoding } from "tiktoken";
 import { z } from "zod";
 import OpenAI from "openai";
+import type {
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionMessageParam,
+} from "openai/resources/chat/completions";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 
@@ -228,7 +232,7 @@ export class OpenRouterClient implements LlmClient {
   }
 
   async chat(messages: BenchmarkStep[], tools: unknown[]) {
-    const formattedMessages = messages.map((m) => {
+    const formattedMessages: ChatCompletionMessageParam[] = messages.map((m) => {
       if (m.role === "tool") {
         return {
           role: "tool",
@@ -248,15 +252,15 @@ export class OpenRouterClient implements LlmClient {
               arguments: JSON.stringify(tc.arguments),
             },
           })),
-        } as Record<string, unknown>;
+        };
       }
-      return { role: m.role as string, content: m.content || "" };
-    });
+      return { role: m.role, content: m.content || "" };
+    }) as ChatCompletionMessageParam[];
 
     try {
       const response = await this.openai.chat.completions.create({
         model: this.name,
-        messages: formattedMessages as any,
+        messages: formattedMessages as ChatCompletionMessageParam[],
         tools:
           tools.length > 0
             ? (tools as Array<Record<string, unknown>>).map((t) => ({
@@ -269,7 +273,7 @@ export class OpenRouterClient implements LlmClient {
               }))
             : undefined,
         transforms: ["middle-out"],
-      } as any);
+      } as ChatCompletionCreateParamsNonStreaming & { transforms: string[] });
 
       const message = response.choices[0]!.message;
       const toolCalls = message.tool_calls
