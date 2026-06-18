@@ -827,6 +827,16 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                                     None::<String>
                                 ])
                                 .unwrap();
+                            ins_detail
+                                .execute(params![
+                                    sc_id,
+                                    file_info.map(|f| f.path.clone()),
+                                    file_info.and_then(|f| f.project_path.clone()),
+                                    entity.line.unwrap_or(0),
+                                    entity.column.unwrap_or(0),
+                                    entity.data_json
+                                ])
+                                .unwrap();
                             added_combos.insert(sc_id.clone());
                         }
                         pc_id = Some(sc_id);
@@ -890,11 +900,9 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             // (e.g. "{ t }" is redundant when a "useTranslation" source-group
             // with child "t" already exists).
             let is_entity_level = symbol.path.is_none();
-            let is_callhook = entity.id.contains(":callhook:");
             let has_source_group = entity.kind == "hook"
                 && hook_entities_with_paths.contains(&entity.id)
-                && is_entity_level
-                && !is_callhook;
+                && is_entity_level;
 
             if !has_source_group {
                 let node_type = if entity.kind == "normal" {
@@ -1049,8 +1057,23 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
         if rel.kind == "parent-child" {
             continue;
         }
+
+        // Rewrite CallHookVariable entity IDs to their SourceGroup combo
+        // IDs so the edge originates from the existing SourceGroup visual
+        // node rather than a separate entity node that doesn't exist.
+        let from_id = if rel.from_id.contains(":callhook:") {
+            let suffix = format!(":source:{}", rel.from_id);
+            added_combos
+                .iter()
+                .find(|c| c.ends_with(&suffix))
+                .cloned()
+                .unwrap_or_else(|| rel.from_id.clone())
+        } else {
+            rel.from_id.clone()
+        };
+
         add_edge_local(
-            &rel.from_id,
+            &from_id,
             &rel.to_id,
             &rel.kind,
             &rel.kind,
