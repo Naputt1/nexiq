@@ -248,7 +248,6 @@ describe("ProjectManager", () => {
     await projectManager.openProject(projectPath);
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("Failed to load extension"),
-      expect.any(String),
     );
   });
 

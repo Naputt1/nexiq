@@ -17,13 +17,17 @@ pub struct TaskContext {
 
 #[napi]
 pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
-    // 1. Open an empty in-memory connection with SQLITE_OPEN_MEMORY flag
-    //    (required by sqlite3_deserialize).
+    // 1. Open a temporary file-based connection so ATTACH DATABASE works
+    //    (SQLITE_OPEN_MEMORY prevents ATTACH, and we use sqlite3_serialize at the end).
+    let tmp_path = format!(
+        "/tmp/nexiq-component-{}.sqlite",
+        std::process::id()
+    );
     let conn = Connection::open_with_flags(
-        ":memory:",
-        OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE | OpenFlags::SQLITE_OPEN_MEMORY,
+        &tmp_path,
+        OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE,
     )
-    .map_err(|e| Error::from_reason(format!("Failed to open in-memory SQLite: {}", e)))?;
+    .map_err(|e| Error::from_reason(format!("Failed to open temp SQLite: {}", e)))?;
 
     if let Some(ref sqlite_buffer) = context.sqlite_buffer {
         // Fast path: deserialize the shared DB buffer from the JS orchestrator.
@@ -34,6 +38,8 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             let size = sqlite_buffer.len() as i64;
             let ptr = rusqlite::ffi::sqlite3_malloc64(size as u64);
             if ptr.is_null() {
+                std::fs::remove_file(&tmp_path).ok();
+                std::fs::remove_file(&tmp_path).ok();
                 return Err(Error::from_reason(
                     "Failed to allocate memory for sqlite3_deserialize",
                 ));
@@ -49,6 +55,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             );
             if rc != 0 {
                 rusqlite::ffi::sqlite3_free(ptr as *mut std::ffi::c_void);
+                std::fs::remove_file(&tmp_path).ok();
                 return Err(Error::from_reason(format!(
                     "sqlite3_deserialize failed with code {}",
                     rc
@@ -60,15 +67,15 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             Error::from_reason("cache_db_path is required for native Rust task execution")
         })?;
 
-        // 2. Attach the cache database read-only
-        conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
-            .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
-
         // 3. Initialize data tables in main
         rust_core::init_data_tables(&conn)
             .map_err(|e| Error::from_reason(format!("Failed to create data tables: {}", e)))?;
 
         // 4. Aggregate data
+        // 2. Attach the cache database read-only
+        conn.execute("ATTACH DATABASE ?1 AS source", params![cache_db_path])
+            .map_err(|e| Error::from_reason(format!("Failed to attach cache database: {}", e)))?;
+
         let is_monorepo = conn
             .prepare("SELECT 1 FROM source.workspace_packages")
             .is_ok();
@@ -167,7 +174,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
                     .unwrap();
             }
         } else {
-            // Single project: Create TEMP views to map the attached 'source' schema into the default namespace
+            // Single project: Copy source tables into main so data survives serialization
             let mut stmt = conn
                 .prepare("SELECT name FROM source.sqlite_master WHERE type IN ('table', 'view')")
                 .map_err(|e| Error::from_reason(format!("Failed to query schema: {}", e)))?;
@@ -179,12 +186,11 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
 
             for table in tables {
                 if !table.starts_with("sqlite_") && !table.starts_with("out_") {
-                    let create_view_sql = format!(
-                        "CREATE TEMP VIEW \"{}\" AS SELECT * FROM source.\"{}\"",
-                        table, table
-                    );
-                    conn.execute(&create_view_sql, []).map_err(|e| {
-                        Error::from_reason(format!("Failed to create alias view {}: {}", table, e))
+                    conn.execute_batch(&format!(
+                        "DROP TABLE IF EXISTS main.\"{0}\"; CREATE TABLE main.\"{0}\" AS SELECT * FROM source.\"{0}\"",
+                        table
+                    )).map_err(|e| {
+                        Error::from_reason(format!("Failed to copy table {}: {}", table, e))
                     })?;
                 }
             }
@@ -1275,20 +1281,35 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             .unwrap();
     }
 
-    // 4. Serialize back to buffer
-    let mut size: i64 = 0;
-    // Ensure no pending transactions before serialization
-    conn.execute_batch("COMMIT").ok();
-    conn.execute_batch("ROLLBACK").ok();
-    unsafe {
-        let db = conn.handle();
-        let ptr =
-            rusqlite::ffi::sqlite3_serialize(db, b"main\0".as_ptr() as *const i8, &mut size, 0u32);
-        if ptr.is_null() {
-            return Err(Error::from_reason("sqlite3_serialize failed"));
+    drop(ins_detail);
+    drop(ins_edge);
+    drop(ins_combo);
+    drop(ins_node);
+
+    // Serialize back to buffer
+    let result = {
+        let mut size: i64 = 0;
+        conn.execute_batch("COMMIT").ok();
+        conn.execute_batch("ROLLBACK").ok();
+        unsafe {
+            let db = conn.handle();
+            let ptr = rusqlite::ffi::sqlite3_serialize(
+                db,
+                b"main\0".as_ptr() as *const i8,
+                &mut size,
+                0u32,
+            );
+            if ptr.is_null() {
+                return Err(Error::from_reason("sqlite3_serialize failed"));
+            }
+            let result_vec = std::slice::from_raw_parts(ptr, size as usize).to_vec();
+            rusqlite::ffi::sqlite3_free(ptr as *mut std::ffi::c_void);
+            Buffer::from(result_vec)
         }
-        let result_vec = std::slice::from_raw_parts(ptr, size as usize).to_vec();
-        rusqlite::ffi::sqlite3_free(ptr as *mut std::ffi::c_void);
-        Ok(Buffer::from(result_vec))
-    }
+    };
+
+    drop(conn);
+    std::fs::remove_file(&tmp_path).ok();
+
+    Ok(result)
 }
