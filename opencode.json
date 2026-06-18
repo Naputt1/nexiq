@@ -7,7 +7,7 @@
         "uvx",
         "mcp-server-sqlite",
         "--db-path",
-        "./packages/sample-project/simple/.nexiq/cache/simple-2f557365.sqlite"
+        "./packages/sample-project/test/.nexiq/cache/test-2f557365.sqlite"
       ],
       "enabled": false
     },
@@ -17,7 +17,7 @@
         "uvx",
         "mcp-server-sqlite",
         "--db-path",
-        "./packages/sample-project/simple/.nexiq/debug/component-structure.sqlite"
+        "./packages/sample-project/test/.nexiq/debug/component-structure.sqlite"
       ],
       "enabled": false
     }

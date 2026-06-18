@@ -228,7 +228,7 @@
           "kind": "component",
           "type": "function",
           "file": "/index.tsx",
-          "hash": "f12eb846ad5c732a",
+          "hash": "a80172b0a1b1976a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -370,7 +370,12 @@
               "type": "jsx",
               "file": "/index.tsx",
               "hash": "8a25f53667c496e0",
-              "dependencies": {},
+              "dependencies": {
+                "5c94816a24672f50": {
+                  "id": "5c94816a24672f50",
+                  "name": "jsx@36:6"
+                }
+              },
               "loc": {
                 "line": 35,
                 "column": 4
@@ -406,6 +411,29 @@
                 }
               },
               "srcId": "/index.tsx:div:35:4"
+            },
+            "5c94816a24672f50": {
+              "id": "5c94816a24672f50",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@36:6",
+                "loc": {
+                  "line": 36,
+                  "column": 6
+                },
+                "id": "f3738261e2475a7b"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/index.tsx",
+              "hash": "49878ce5846e44de",
+              "dependencies": {},
+              "loc": {
+                "line": 36,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "3a012224bc5a1fc6"
             }
           },
           "scope": {
@@ -463,18 +491,18 @@
           }
         },
         {
-          "from_id": "f708b44afe0a51a5",
+          "from_id": "5c94816a24672f50",
           "to_id": "3a012224bc5a1fc6",
           "kind": "usage-render-call",
           "line": 36,
           "column": 7,
           "data_json": {
-            "usageId": "7ab98e83162f1648",
+            "usageId": "e4dddb94100761a9",
             "filePath": "/index.tsx",
             "line": 36,
             "column": 7,
-            "ownerId": "f708b44afe0a51a5",
-            "ownerKind": "component",
+            "ownerId": "5c94816a24672f50",
+            "ownerKind": "normal",
             "displayLabel": "AsyncComponent"
           }
         }
@@ -503,9 +531,19 @@
       "label": "render"
     },
     {
+      "from": "f708b44afe0a51a5",
+      "to": "5c94816a24672f50",
+      "label": "render"
+    },
+    {
       "from": "3a012224bc5a1fc6",
       "to": "f708b44afe0a51a5",
       "label": "render"
+    },
+    {
+      "from": "ccebff9beb262ca9",
+      "to": "5c94816a24672f50",
+      "label": "hook"
     }
   ],
   "resolve": []

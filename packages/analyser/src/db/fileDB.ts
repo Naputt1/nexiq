@@ -1262,7 +1262,7 @@ export class File {
 
     // if (instanceId == "bb9ce3377a9a0a19") debugger;
 
-    if (isJSXVariable(variable) && !variable.render) {
+    if (isJSXVariable(variable) && !variable.render && !parentId) {
       variable.render = newRender;
     }
 

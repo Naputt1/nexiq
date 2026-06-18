@@ -116,7 +116,12 @@
           "type": "jsx",
           "file": "/src/main.tsx",
           "hash": "3fae799c97da17bf",
-          "dependencies": {},
+          "dependencies": {
+            "d28ef55e6ceebff3": {
+              "id": "d28ef55e6ceebff3",
+              "name": "jsx@8:4"
+            }
+          },
           "loc": {
             "line": 7,
             "column": 2
@@ -152,6 +157,29 @@
             }
           },
           "srcId": "StrictMode"
+        },
+        "d28ef55e6ceebff3": {
+          "id": "d28ef55e6ceebff3",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@8:4",
+            "loc": {
+              "line": 8,
+              "column": 4
+            },
+            "id": "8ac6d21b71862809"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "2fbdba479d5019ac",
+          "dependencies": {},
+          "loc": {
+            "line": 8,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "311c554b828f67a5"
         }
       },
       "relations": [
@@ -169,6 +197,22 @@
             "ownerId": "5453275af356e1ca",
             "ownerKind": "normal",
             "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "d28ef55e6ceebff3",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 8,
+          "column": 5,
+          "data_json": {
+            "usageId": "ddcf6ae4062a8027",
+            "filePath": "/src/main.tsx",
+            "line": 8,
+            "column": 5,
+            "ownerId": "d28ef55e6ceebff3",
+            "ownerKind": "normal",
+            "displayLabel": "App"
           }
         }
       ],
@@ -441,7 +485,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "67a410e420c2b26c",
+          "hash": "9a87ffb0e53c4ed5",
           "dependencies": {},
           "loc": {
             "line": 12,
@@ -590,11 +634,27 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "ac73c0cf1bd626eb",
+              "hash": "a18accd8b3d00d0f",
               "dependencies": {
-                "79e8ab745e8da6a7": {
-                  "id": "79e8ab745e8da6a7",
-                  "name": "viteLogo"
+                "9e038a40ca02979": {
+                  "id": "9e038a40ca02979",
+                  "name": "jsx@24:6"
+                },
+                "c69dee04150d88e3": {
+                  "id": "c69dee04150d88e3",
+                  "name": "jsx@32:6"
+                },
+                "c2f62ae44b66eeb4": {
+                  "id": "c2f62ae44b66eeb4",
+                  "name": "jsx@33:6"
+                },
+                "29177c0a29fe46f": {
+                  "id": "29177c0a29fe46f",
+                  "name": "jsx@41:6"
+                },
+                "f3da9470727caa6f": {
+                  "id": "f3da9470727caa6f",
+                  "name": "jsx@44:6"
                 }
               },
               "loc": {
@@ -677,8 +737,7 @@
                                   "type": "ref",
                                   "refType": "named",
                                   "name": "viteLogo"
-                                },
-                                "valueId": "symbol:import:/src/App.tsx:viteLogo"
+                                }
                               },
                               {
                                 "id": "51db861cceddb843",
@@ -764,8 +823,7 @@
                                   "type": "ref",
                                   "refType": "named",
                                   "name": "reactLogo"
-                                },
-                                "valueId": "symbol:import:/src/App.tsx:reactLogo"
+                                }
                               },
                               {
                                 "id": "51db861cceddb843",
@@ -1009,6 +1067,233 @@
               },
               "srcId": "/src/App.tsx:Fragment:23:4"
             },
+            "9e038a40ca02979": {
+              "id": "9e038a40ca02979",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@24:6",
+                "loc": {
+                  "line": 24,
+                  "column": 6
+                },
+                "id": "3796f00c8146b6f2"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3e4d4613422a0318",
+              "dependencies": {
+                "4deea9009939fe0e": {
+                  "id": "4deea9009939fe0e",
+                  "name": "jsx@25:8"
+                },
+                "2572dd5248505fe1": {
+                  "id": "2572dd5248505fe1",
+                  "name": "jsx@28:8"
+                }
+              },
+              "loc": {
+                "line": 24,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:div:24:6"
+            },
+            "4deea9009939fe0e": {
+              "id": "4deea9009939fe0e",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@25:8",
+                "loc": {
+                  "line": 25,
+                  "column": 8
+                },
+                "id": "7113dc5fd7eba458"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "1494ca7ab8fd3ebd",
+              "dependencies": {
+                "74c28006053e2ec": {
+                  "id": "74c28006053e2ec",
+                  "name": "jsx@26:10"
+                }
+              },
+              "loc": {
+                "line": 25,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:a:25:8"
+            },
+            "74c28006053e2ec": {
+              "id": "74c28006053e2ec",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@26:10",
+                "loc": {
+                  "line": 26,
+                  "column": 10
+                },
+                "id": "a5d47f68befaa59f"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "34ccf933dc3daf6e",
+              "dependencies": {
+                "79e8ab745e8da6a7": {
+                  "id": "79e8ab745e8da6a7",
+                  "name": "viteLogo"
+                }
+              },
+              "loc": {
+                "line": 26,
+                "column": 10
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:img:26:10"
+            },
+            "2572dd5248505fe1": {
+              "id": "2572dd5248505fe1",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@28:8",
+                "loc": {
+                  "line": 28,
+                  "column": 8
+                },
+                "id": "c80abda34ef0305a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "b8887a4c755f3216",
+              "dependencies": {
+                "413501e7653d8125": {
+                  "id": "413501e7653d8125",
+                  "name": "jsx@29:10"
+                }
+              },
+              "loc": {
+                "line": 28,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:a:28:8"
+            },
+            "413501e7653d8125": {
+              "id": "413501e7653d8125",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@29:10",
+                "loc": {
+                  "line": 29,
+                  "column": 10
+                },
+                "id": "5386cf121f9a5d64"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "49b87ccc060e6ffa",
+              "dependencies": {
+                "5773588cbadd46e3": {
+                  "id": "5773588cbadd46e3",
+                  "name": "reactLogo"
+                }
+              },
+              "loc": {
+                "line": 29,
+                "column": 10
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:img:29:10"
+            },
+            "c69dee04150d88e3": {
+              "id": "c69dee04150d88e3",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@32:6",
+                "loc": {
+                  "line": 32,
+                  "column": 6
+                },
+                "id": "f3212f58da11c70f"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "e8a84d5614b824f",
+              "dependencies": {},
+              "loc": {
+                "line": 32,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:h1:32:6"
+            },
+            "c2f62ae44b66eeb4": {
+              "id": "c2f62ae44b66eeb4",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@33:6",
+                "loc": {
+                  "line": 33,
+                  "column": 6
+                },
+                "id": "d4ca624ca26f3c14"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "bbc009b629575e9d",
+              "dependencies": {
+                "1a8e760e5d5d3624": {
+                  "id": "1a8e760e5d5d3624",
+                  "name": "jsx@34:8"
+                },
+                "64b45644a30468bb": {
+                  "id": "64b45644a30468bb",
+                  "name": "jsx@37:8"
+                }
+              },
+              "loc": {
+                "line": 33,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:div:33:6"
+            },
+            "1a8e760e5d5d3624": {
+              "id": "1a8e760e5d5d3624",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@34:8",
+                "loc": {
+                  "line": 34,
+                  "column": 8
+                },
+                "id": "15524d75fb9cab72"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "e25af0ca49ff285c",
+              "dependencies": {
+                "810a33751161c4f1": {
+                  "id": "810a33751161c4f1",
+                  "name": "count"
+                }
+              },
+              "loc": {
+                "line": 34,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:button:34:8"
+            },
             "a2ae11ebdab8944f": {
               "id": "a2ae11ebdab8944f",
               "name": {
@@ -1048,6 +1333,140 @@
                   "value": "count + 1"
                 }
               }
+            },
+            "64b45644a30468bb": {
+              "id": "64b45644a30468bb",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@37:8",
+                "loc": {
+                  "line": 37,
+                  "column": 8
+                },
+                "id": "94c7186f81331b43"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "29be6665748253fc",
+              "dependencies": {
+                "e474ad1afd04801e": {
+                  "id": "e474ad1afd04801e",
+                  "name": "jsx@38:15"
+                }
+              },
+              "loc": {
+                "line": 37,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:p:37:8"
+            },
+            "e474ad1afd04801e": {
+              "id": "e474ad1afd04801e",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@38:15",
+                "loc": {
+                  "line": 38,
+                  "column": 15
+                },
+                "id": "6bd378c9512c4a6f"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "55851352e8d58d31",
+              "dependencies": {},
+              "loc": {
+                "line": 38,
+                "column": 15
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:code:38:15"
+            },
+            "29177c0a29fe46f": {
+              "id": "29177c0a29fe46f",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@41:6",
+                "loc": {
+                  "line": 41,
+                  "column": 6
+                },
+                "id": "c5e1671b43bb901f"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "991f532fcdf2729b",
+              "dependencies": {},
+              "loc": {
+                "line": 41,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:p:41:6"
+            },
+            "f3da9470727caa6f": {
+              "id": "f3da9470727caa6f",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@44:6",
+                "loc": {
+                  "line": 44,
+                  "column": 6
+                },
+                "id": "a1815be53e812958"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "6b96aee00bba81b8",
+              "dependencies": {
+                "99e389d25c10af32": {
+                  "id": "99e389d25c10af32",
+                  "name": "user"
+                },
+                "24032531a30e2377": {
+                  "id": "24032531a30e2377",
+                  "name": "jsx@45:8"
+                }
+              },
+              "loc": {
+                "line": 44,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "2a486d3d9e6ca850"
+            },
+            "24032531a30e2377": {
+              "id": "24032531a30e2377",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@45:8",
+                "loc": {
+                  "line": 45,
+                  "column": 8
+                },
+                "id": "1081e8b74dfc9d67"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2f8c2507272b59cc",
+              "dependencies": {
+                "99e389d25c10af32": {
+                  "id": "99e389d25c10af32",
+                  "name": "user"
+                }
+              },
+              "loc": {
+                "line": 45,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "8058275cdfd1a41c"
             }
           },
           "scope": {
@@ -1213,33 +1632,33 @@
         },
         {
           "from_id": "symbol:import:/src/App.tsx:viteLogo",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:img:26:10",
           "kind": "usage-read",
           "line": 26,
           "column": 20,
           "data_json": {
-            "usageId": "8888fe581eefc548",
+            "usageId": "a95516c9d7315082",
             "filePath": "/src/App.tsx",
             "line": 26,
             "column": 20,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "74c28006053e2ec",
+            "ownerKind": "normal",
             "displayLabel": "viteLogo"
           }
         },
         {
           "from_id": "symbol:import:/src/App.tsx:reactLogo",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:img:29:10",
           "kind": "usage-read",
           "line": 29,
           "column": 20,
           "data_json": {
-            "usageId": "3efa3c00dcb22ae4",
+            "usageId": "4eb918caa774ba5a",
             "filePath": "/src/App.tsx",
             "line": 29,
             "column": 20,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "413501e7653d8125",
+            "ownerKind": "normal",
             "displayLabel": "reactLogo"
           }
         },
@@ -1277,65 +1696,65 @@
         },
         {
           "from_id": "311c554b828f67a5:state:[count, setCount]:10de422fa6270553",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:button:34:8",
           "kind": "usage-read",
           "line": 35,
           "column": 20,
           "data_json": {
-            "usageId": "653062be2ca90735",
+            "usageId": "d0d338176b985256",
             "filePath": "/src/App.tsx",
             "line": 35,
             "column": 20,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "1a8e760e5d5d3624",
+            "ownerKind": "normal",
             "displayLabel": "count"
           }
         },
         {
           "from_id": "311c554b828f67a5:state:[user]:a17008bc68eae07d",
-          "to_id": "311c554b828f67a5",
+          "to_id": "2a486d3d9e6ca850",
           "kind": "usage-read",
           "line": 44,
           "column": 35,
           "data_json": {
-            "usageId": "9cb4e3bfe4db6815",
+            "usageId": "950d4b57d05cdb6a",
             "filePath": "/src/App.tsx",
             "line": 44,
             "column": 35,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "f3da9470727caa6f",
+            "ownerKind": "normal",
             "displayLabel": "user"
           }
         },
         {
-          "from_id": "311c554b828f67a5",
+          "from_id": "24032531a30e2377",
           "to_id": "symbol:import:/src/App.tsx:Child",
           "kind": "usage-render-call",
           "line": 45,
           "column": 9,
           "data_json": {
-            "usageId": "b5260aa57753be39",
+            "usageId": "66af544455350584",
             "filePath": "/src/App.tsx",
             "line": 45,
             "column": 9,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "24032531a30e2377",
+            "ownerKind": "normal",
             "displayLabel": "Child"
           }
         },
         {
           "from_id": "311c554b828f67a5:state:[user]:a17008bc68eae07d",
-          "to_id": "311c554b828f67a5",
+          "to_id": "8058275cdfd1a41c",
           "kind": "usage-read",
           "line": 45,
           "column": 21,
           "data_json": {
-            "usageId": "73367f1bb7bb0970",
+            "usageId": "57cb26c1c57a1ecf",
             "filePath": "/src/App.tsx",
             "line": 45,
             "column": 21,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "24032531a30e2377",
+            "ownerKind": "normal",
             "displayLabel": "user"
           }
         }
@@ -1789,6 +2208,76 @@
       "label": "render"
     },
     {
+      "from": "311c554b828f67a5",
+      "to": "9e038a40ca02979",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "4deea9009939fe0e",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "74c28006053e2ec",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "2572dd5248505fe1",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "413501e7653d8125",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "c69dee04150d88e3",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "c2f62ae44b66eeb4",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "1a8e760e5d5d3624",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "64b45644a30468bb",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "e474ad1afd04801e",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "29177c0a29fe46f",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "f3da9470727caa6f",
+      "label": "render"
+    },
+    {
+      "from": "8058275cdfd1a41c",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "24032531a30e2377",
+      "label": "render"
+    },
+    {
       "from": "a6b739fa4a0a9b84",
       "to": "211fe28b8334926e",
       "label": "render"
@@ -1810,7 +2299,97 @@
     },
     {
       "from": "7c0e8b9b1c76b5d8",
+      "to": "9e038a40ca02979",
+      "label": "hook"
+    },
+    {
+      "from": "7c0e8b9b1c76b5d8",
+      "to": "c69dee04150d88e3",
+      "label": "hook"
+    },
+    {
+      "from": "7c0e8b9b1c76b5d8",
+      "to": "c2f62ae44b66eeb4",
+      "label": "hook"
+    },
+    {
+      "from": "7c0e8b9b1c76b5d8",
+      "to": "29177c0a29fe46f",
+      "label": "hook"
+    },
+    {
+      "from": "7c0e8b9b1c76b5d8",
+      "to": "f3da9470727caa6f",
+      "label": "hook"
+    },
+    {
+      "from": "9e038a40ca02979",
+      "to": "4deea9009939fe0e",
+      "label": "hook"
+    },
+    {
+      "from": "9e038a40ca02979",
+      "to": "2572dd5248505fe1",
+      "label": "hook"
+    },
+    {
+      "from": "4deea9009939fe0e",
+      "to": "74c28006053e2ec",
+      "label": "hook"
+    },
+    {
+      "from": "74c28006053e2ec",
       "to": "79e8ab745e8da6a7",
+      "label": "hook"
+    },
+    {
+      "from": "2572dd5248505fe1",
+      "to": "413501e7653d8125",
+      "label": "hook"
+    },
+    {
+      "from": "413501e7653d8125",
+      "to": "5773588cbadd46e3",
+      "label": "hook"
+    },
+    {
+      "from": "c2f62ae44b66eeb4",
+      "to": "1a8e760e5d5d3624",
+      "label": "hook"
+    },
+    {
+      "from": "c2f62ae44b66eeb4",
+      "to": "64b45644a30468bb",
+      "label": "hook"
+    },
+    {
+      "from": "1a8e760e5d5d3624",
+      "to": "810a33751161c4f1",
+      "label": "hook"
+    },
+    {
+      "from": "64b45644a30468bb",
+      "to": "e474ad1afd04801e",
+      "label": "hook"
+    },
+    {
+      "from": "8058275cdfd1a41c",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "f3da9470727caa6f",
+      "to": "99e389d25c10af32",
+      "label": "hook"
+    },
+    {
+      "from": "f3da9470727caa6f",
+      "to": "24032531a30e2377",
+      "label": "hook"
+    },
+    {
+      "from": "24032531a30e2377",
+      "to": "99e389d25c10af32",
       "label": "hook"
     }
   ],

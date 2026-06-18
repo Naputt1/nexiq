@@ -504,12 +504,12 @@
         },
         {
           "from_id": "ba1bf171ca67c6dd:callback:handleFollowing",
-          "to_id": "7cd77b33010ba84d",
+          "to_id": "/index.tsx:div:28:9",
           "kind": "usage-read",
           "line": 28,
           "column": 23,
           "data_json": {
-            "usageId": "dad58910630c307d",
+            "usageId": "b3871512b1c2b476",
             "filePath": "/index.tsx",
             "line": 28,
             "column": 23,
