@@ -69,7 +69,7 @@ export interface BackendRequestMap {
   };
   get_node_detail: {
     payload: { projectPath: string; nodeId: string };
-    response: any; // We'll use GraphNodeDetail here, but need to import it or use a generic object
+    response: unknown;
   };
 }
 

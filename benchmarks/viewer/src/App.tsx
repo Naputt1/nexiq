@@ -4,17 +4,14 @@ import {
   Clock,
   Zap,
   Target,
-  FileJson,
   CheckCircle2,
   XCircle,
-  Upload,
   ChevronDown,
   ChevronUp,
   Brain,
   Filter,
   Trash2,
   Plus,
-  ArrowRightLeft,
   LayoutGrid,
   List,
   Check,
@@ -34,7 +31,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -69,15 +65,22 @@ const Button = ({
   size = "md",
   className,
   disabled,
-}: any) => {
-  const variants: any = {
+}: {
+  children?: React.ReactNode;
+  onClick?: () => void;
+  variant?: string;
+  size?: string;
+  className?: string;
+  disabled?: boolean;
+}) => {
+  const variants: Record<string, string> = {
     primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
     ghost: "hover:bg-gray-100 text-gray-600",
     outline: "border border-gray-200 hover:bg-gray-50 text-gray-700",
     danger: "bg-rose-50 text-rose-600 hover:bg-rose-100",
     success: "bg-emerald-600 text-white hover:bg-emerald-700",
   };
-  const sizes: any = {
+  const sizes: Record<string, string> = {
     sm: "px-3 py-1.5 text-xs",
     md: "px-4 py-2 text-sm",
     lg: "px-6 py-3 text-base font-bold",
@@ -115,7 +118,7 @@ const Badge = ({
     | "purple"
     | "cyan";
 }) => {
-  const variants: any = {
+  const variants: Record<string, string> = {
     default: "bg-gray-100 text-gray-600",
     blue: "bg-blue-100 text-blue-600",
     emerald: "bg-emerald-100 text-emerald-600",
@@ -155,7 +158,7 @@ interface BenchmarkResult {
     stderr: string;
     exitCode: number;
   };
-  steps: any[];
+  steps: unknown[];
   runId?: string;
   uniqueId: string; // Internal ID for comparison
 }
@@ -164,7 +167,7 @@ interface BenchmarkResult {
 
 export default function App() {
   const [results, setResults] = useState<BenchmarkResult[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [_isDragging, setIsDragging] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     "overview" | "comparison" | "runs" | "timeline" | "compare-tasks"
@@ -220,14 +223,15 @@ export default function App() {
     [results],
   );
 
-  const addResults = useCallback((data: any, fileName: string) => {
+  const addResults = useCallback((data: unknown, fileName: string) => {
     const newResults = Array.isArray(data) ? data : [data];
-    const runId = fileName
-      .split("/")
-      .pop()
-      ?.replace(/^run_/, "")
-      .replace(/\.json$/, "")
-      .replace(/\?url$/, "") || "";
+    const runId =
+      fileName
+        .split("/")
+        .pop()
+        ?.replace(/^run_/, "")
+        .replace(/\.json$/, "")
+        .replace(/\?url$/, "") || "";
 
     setResults((prev) => {
       // Avoid duplicate runs
@@ -236,13 +240,13 @@ export default function App() {
       const resultsWithIds = newResults.map((r, i) => {
         // Recalculate total tokens excluding system, user, and final summary
         const steps = r.steps || [];
-        const isSummary = (step: any, index: number) =>
+        const isSummary = (step: Record<string, unknown>, index: number) =>
           step.role === "assistant" &&
-          (!step.toolCalls || step.toolCalls.length === 0) &&
+          (!step.toolCalls || (step.toolCalls as unknown[]).length === 0) &&
           index === steps.length - 1;
 
         const filteredTokens = steps.reduce(
-          (acc: number, step: any, index: number) => {
+          (acc: number, step: Record<string, unknown>, index: number) => {
             if (step.role === "system" || step.role === "user") return acc;
             if (isSummary(step, index)) return acc;
             return acc + (step.tokens || 0);
@@ -266,13 +270,13 @@ export default function App() {
   useEffect(() => {
     const fetchRuns = async () => {
       try {
-        const response = await fetch('/api/results');
+        const response = await fetch("/api/results");
         const files: string[] = await response.json();
         setDetectedRunFiles(files.sort().reverse());
-        
+
         // Auto-load the latest run if nothing is loaded yet
         if (files.length > 0 && loadedRunFiles.size === 0) {
-            loadRun(files[0]);
+          loadRun(files[0]);
         }
       } catch (err) {
         console.error("Failed to fetch runs:", err);
@@ -304,7 +308,13 @@ export default function App() {
     setLoadedRunFiles((prev) => {
       const next = new Set(prev);
       const fileKey = Array.from(prev).find((k) => {
-        const id = k.split("/").pop()?.replace(/^run_/, "").replace(/\.json$/, "").replace(/\?url$/, "") || "";
+        const id =
+          k
+            .split("/")
+            .pop()
+            ?.replace(/^run_/, "")
+            .replace(/\.json$/, "")
+            .replace(/\?url$/, "") || "";
         return id === runId;
       });
       if (fileKey) next.delete(fileKey);
@@ -312,7 +322,7 @@ export default function App() {
     });
   };
 
-  const onDrop = useCallback(
+  const _onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
@@ -324,7 +334,7 @@ export default function App() {
             try {
               const data = JSON.parse(event.target?.result as string);
               addResults(data, file.name);
-            } catch (err) {
+            } catch (_err) {
               alert("Invalid JSON file: " + file.name);
             }
           };
@@ -342,7 +352,7 @@ export default function App() {
         try {
           const data = JSON.parse(event.target?.result as string);
           addResults(data, file.name);
-        } catch (err) {
+        } catch (_err) {
           alert("Invalid JSON file: " + file.name);
         }
       };
@@ -404,7 +414,7 @@ export default function App() {
 
   const dynamicCompData = useMemo(() => {
     // Group by the selected X-axis field (compGroupBy)
-    const groupsMap = new Map<string, any>();
+    const groupsMap = new Map<string, Record<string, unknown>>();
 
     // Baseline mapping for ratios
     const baselineMap = new Map<string, number>();
@@ -464,7 +474,7 @@ export default function App() {
     });
 
     return Array.from(groupsMap.values()).map((g) => {
-      const entry: any = { name: g.name };
+      const entry: Record<string, unknown> = { name: g.name };
       Object.keys(g).forEach((k) => {
         if (k !== "name") {
           entry[k] =
@@ -478,7 +488,7 @@ export default function App() {
   }, [filteredResults, compMetric, compGroupBy, compSeries, compRatioMode]);
 
   const runsData = useMemo(() => {
-    const runsMap = new Map<string, any>();
+    const runsMap = new Map<string, Record<string, unknown>>();
 
     filteredResults.forEach((r) => {
       const runId = r.runId || "unknown";
@@ -497,7 +507,7 @@ export default function App() {
 
     return Array.from(runsMap.values())
       .map((r) => {
-        const entry: any = {
+        const entry: Record<string, unknown> = {
           name: r.runId.substring(0, 19).replace("T", " "),
           fullRunId: r.runId,
         };
@@ -619,7 +629,7 @@ export default function App() {
                 input.type = "file";
                 input.multiple = true;
                 input.accept = ".json";
-                input.onchange = (e: any) => handleFileSelect(e);
+                input.onchange = (e: Event) => handleFileSelect(e as unknown as React.ChangeEvent<HTMLInputElement>);
                 input.click();
               }}
             >
@@ -664,7 +674,13 @@ export default function App() {
                       .replace(".json", "")
                       .replace("?url", "") || "";
                   const isLoaded = Array.from(loadedRunFiles).some((k) => {
-                    const id = k.split("/").pop()?.replace(/^run_/, "").replace(/\.json$/, "").replace(/\?url$/, "") || "";
+                    const id =
+                      k
+                        .split("/")
+                        .pop()
+                        ?.replace(/^run_/, "")
+                        .replace(/\.json$/, "")
+                        .replace(/\?url$/, "") || "";
                     return id === runId;
                   });
                   return (
@@ -866,7 +882,7 @@ export default function App() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as "overview" | "comparison" | "runs" | "timeline" | "compare-tasks")}
                   className={cn(
                     "px-4 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all",
                     activeTab === tab.id
@@ -1081,7 +1097,7 @@ export default function App() {
                         <select
                           className="w-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wider bg-white border border-gray-200 rounded-lg outline-none"
                           value={compSeries}
-                          onChange={(e) => setCompSeries(e.target.value as any)}
+                          onChange={(e) => setCompSeries(e.target.value)}
                         >
                           <option value="combined">Combined Details</option>
                           <option value="model">By Model</option>
@@ -1587,42 +1603,52 @@ export default function App() {
                                   </div>
                                 )}
 
-                                {step.toolCalls && step.toolCalls.length > 0 && (
-                                  <div className="grid gap-2">
-                                    {step.toolCalls.map(
-                                      (tc: any, tcIdx: number) => (
-                                        <div
-                                          key={tcIdx}
-                                          className="p-4 rounded-xl bg-purple-50 border border-purple-100 text-xs"
-                                        >
-                                          <div className="flex items-center gap-2 font-black text-purple-700 uppercase tracking-wider text-[9px] mb-2">
-                                            <Zap className="h-3 w-3" />
-                                            Tool Call: {tc.name}
+                                {step.toolCalls &&
+                                  step.toolCalls.length > 0 && (
+                                    <div className="grid gap-2">
+                                      {step.toolCalls.map(
+                                        (tc: Record<string, unknown>, tcIdx: number) => (
+                                          <div
+                                            key={tcIdx}
+                                            className="p-4 rounded-xl bg-purple-50 border border-purple-100 text-xs"
+                                          >
+                                            <div className="flex items-center gap-2 font-black text-purple-700 uppercase tracking-wider text-[9px] mb-2">
+                                              <Zap className="h-3 w-3" />
+                                              Tool Call: {tc.name}
+                                            </div>
+                                            <pre className="text-[10px] text-purple-900 opacity-80 overflow-auto bg-white/50 p-3 rounded-lg border border-purple-100 shadow-inner scrollbar-hide">
+                                              {JSON.stringify(
+                                                tc.arguments,
+                                                null,
+                                                2,
+                                              )}
+                                            </pre>
                                           </div>
-                                          <pre className="text-[10px] text-purple-900 opacity-80 overflow-auto bg-white/50 p-3 rounded-lg border border-purple-100 shadow-inner scrollbar-hide">
-                                            {JSON.stringify(
-                                              tc.arguments,
-                                              null,
-                                              2,
-                                            )}
-                                          </pre>
-                                        </div>
-                                      ),
-                                    )}
-                                  </div>
-                                )}
+                                        ),
+                                      )}
+                                    </div>
+                                  )}
                               </div>
                             ))}
                             {result.verificationOutput && (
                               <div className="space-y-4">
                                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                  <CheckCircle2 className={cn("h-4 w-4", result.verificationOutput.exitCode === 0 ? "text-emerald-500" : "text-rose-500")} />
+                                  <CheckCircle2
+                                    className={cn(
+                                      "h-4 w-4",
+                                      result.verificationOutput.exitCode === 0
+                                        ? "text-emerald-500"
+                                        : "text-rose-500",
+                                    )}
+                                  />
                                   Verification Output
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {result.verificationOutput.stdout && (
                                     <div className="space-y-1">
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">STDOUT</p>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                        STDOUT
+                                      </p>
                                       <pre className="p-3 rounded-lg bg-gray-900 text-gray-300 text-[10px] font-mono whitespace-pre-wrap max-h-60 overflow-auto border border-gray-800 shadow-inner">
                                         {result.verificationOutput.stdout}
                                       </pre>
@@ -1630,7 +1656,9 @@ export default function App() {
                                   )}
                                   {result.verificationOutput.stderr && (
                                     <div className="space-y-1">
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-rose-400">STDERR</p>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-rose-400">
+                                        STDERR
+                                      </p>
                                       <pre className="p-3 rounded-lg bg-rose-950/30 text-rose-200 text-[10px] font-mono whitespace-pre-wrap max-h-60 overflow-auto border border-rose-900/30 shadow-inner">
                                         {result.verificationOutput.stderr}
                                       </pre>
@@ -1683,7 +1711,9 @@ export default function App() {
                         <div key={task.uniqueId} className="space-y-4 min-w-0">
                           <Card className="p-4 bg-gray-900 text-white border-none shadow-xl">
                             <div className="flex items-center justify-between mb-3">
-                              <Badge variant={task.success ? "emerald" : "rose"}>
+                              <Badge
+                                variant={task.success ? "emerald" : "rose"}
+                              >
                                 {task.success ? "Success" : "Failure"}
                               </Badge>
                               <button
@@ -1758,30 +1788,31 @@ export default function App() {
                                   </div>
                                 )}
 
-                                {step.toolCalls && step.toolCalls.length > 0 && (
-                                  <div className="space-y-1">
-                                    {step.toolCalls.map(
-                                      (tc: any, tcIdx: number) => (
-                                        <div
-                                          key={tcIdx}
-                                          className="p-3 rounded-xl bg-purple-50 border border-purple-100 text-[10px] shadow-inner"
-                                        >
-                                          <div className="font-black text-purple-700 uppercase text-[8px] mb-2 flex items-center gap-2">
-                                            <Zap className="h-3 w-3" />
-                                            {tc.name}
+                                {step.toolCalls &&
+                                  step.toolCalls.length > 0 && (
+                                    <div className="space-y-1">
+                                      {step.toolCalls.map(
+                                        (tc: Record<string, unknown>, tcIdx: number) => (
+                                          <div
+                                            key={tcIdx}
+                                            className="p-3 rounded-xl bg-purple-50 border border-purple-100 text-[10px] shadow-inner"
+                                          >
+                                            <div className="font-black text-purple-700 uppercase text-[8px] mb-2 flex items-center gap-2">
+                                              <Zap className="h-3 w-3" />
+                                              {tc.name}
+                                            </div>
+                                            <pre className="text-[8px] text-purple-900 opacity-80 overflow-auto bg-white/40 p-2 rounded-lg border border-purple-100 scrollbar-hide">
+                                              {JSON.stringify(
+                                                tc.arguments,
+                                                null,
+                                                2,
+                                              )}
+                                            </pre>
                                           </div>
-                                          <pre className="text-[8px] text-purple-900 opacity-80 overflow-auto bg-white/40 p-2 rounded-lg border border-purple-100 scrollbar-hide">
-                                            {JSON.stringify(
-                                              tc.arguments,
-                                              null,
-                                              2,
-                                            )}
-                                          </pre>
-                                        </div>
-                                      ),
-                                    )}
-                                  </div>
-                                )}
+                                        ),
+                                      )}
+                                    </div>
+                                  )}
                               </div>
                             ))}
                           </div>
