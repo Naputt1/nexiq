@@ -3,10 +3,7 @@ import { Box, Text, useApp, useInput } from "ink";
 import Spinner from "ink-spinner";
 import Gradient from "ink-gradient";
 import BigText from "ink-big-text";
-import {
-  runBenchmarks,
-  OpenRouterClient,
-} from "./runner.js";
+import { runBenchmarks, OpenRouterClient, RunOptions } from "./runner.js";
 import open from "open";
 
 type Step =
@@ -138,8 +135,12 @@ const App = () => {
   const [step, setStep] = useState<Step>("projects");
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  const [selectedTestTypes, setSelectedTestTypes] = useState<string[]>([]);
-  const [selectedApproaches, setSelectedApproaches] = useState<string[]>([]);
+  const [selectedTestTypes, setSelectedTestTypes] = useState<
+    RunOptions["testTypes"]
+  >([]);
+  const [selectedApproaches, setSelectedApproaches] = useState<
+    RunOptions["approaches"]
+  >([]);
   const [concurrency, setConcurrency] = useState<number>(3);
   const [openViewerWhenDone, setOpenViewerWhenDone] = useState<boolean>(true);
 
@@ -339,11 +340,12 @@ const App = () => {
           <MultiSelector
             items={TEST_TYPES}
             selectedValues={selectedTestTypes}
-            onToggle={(v) =>
+            onToggle={(v) => {
+              const val = v as ("single-prompt" | "planning" | "coding");
               setSelectedTestTypes((prev) =>
-                prev.includes(v) ? prev.filter((p) => p !== v) : [...prev, v],
-              )
-            }
+                prev.includes(val) ? prev.filter((p) => p !== val) : [...prev, val],
+              );
+            }}
             onConfirm={() =>
               selectedTestTypes.length > 0 && setStep("approaches")
             }
@@ -357,11 +359,12 @@ const App = () => {
           <MultiSelector
             items={APPROACHES}
             selectedValues={selectedApproaches}
-            onToggle={(v) =>
+            onToggle={(v) => {
+              const val = v as ("baseline" | "nexiq-cold" | "nexiq-warm");
               setSelectedApproaches((prev) =>
-                prev.includes(v) ? prev.filter((p) => p !== v) : [...prev, v],
-              )
-            }
+                prev.includes(val) ? prev.filter((p) => p !== val) : [...prev, val],
+              );
+            }}
             onConfirm={() =>
               selectedApproaches.length > 0 && setStep("concurrency")
             }
