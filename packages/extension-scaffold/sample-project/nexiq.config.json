@@ -1,0 +1,6 @@
+{
+  "entry": "src/main.tsx",
+  "analysisPaths": [],
+  "ignorePatterns": [],
+  "extensions": ["@nexiq/extension-scaffold"]
+}
