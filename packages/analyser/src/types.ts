@@ -152,6 +152,7 @@ export interface WorkerSessionConfig {
   viteAliases: Record<string, string>;
   packageJsonData: Record<string, unknown>;
   runId?: string | undefined;
+  tsConfigMap?: Record<string, boolean>;
 }
 
 export interface FileBatchTask {

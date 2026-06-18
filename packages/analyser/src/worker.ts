@@ -42,21 +42,28 @@ import type {
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
+import { TsConfigManager } from "./tsconfig.ts";
 
 const sessionConfig = (workerData || {}) as WorkerSessionConfig;
 
 async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
-  const { srcDir, viteAliases, packageJsonData } = config;
+  const { srcDir, viteAliases, packageJsonData, tsConfigMap } = config;
   const fileName = filePath;
   const fullPath = resolvePath(srcDir, filePath);
 
   const packageJson = new PackageJson(srcDir, packageJsonData);
+
+  let tsConfigManager: TsConfigManager | undefined;
+  if (tsConfigMap) {
+    tsConfigManager = TsConfigManager.fromJSON(tsConfigMap);
+  }
 
   const componentDB = new ComponentDB({
     packageJson,
     viteAliases,
     dir: srcDir,
     sqlite: undefined, // Workers don't write to SQLite
+    tsConfigManager,
   });
 
   const code = fs.readFileSync(fullPath, "utf-8");
