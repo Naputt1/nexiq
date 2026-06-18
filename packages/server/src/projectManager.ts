@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "@nexiq/analyser";
@@ -24,12 +25,75 @@ import {
 } from "@nexiq/analyser";
 import type { Extension, GraphNodeDetail } from "@nexiq/extension-sdk";
 import { pathToFileURL } from "node:url";
-import { exec } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import { simpleGit, type LogOptions } from "simple-git";
 import tmp from "tmp";
 
 const execAsync = promisify(exec);
+
+/** Resolve and load an extension module from server's node_modules or global npm roots. */
+async function loadExtensionModule(
+  name: string,
+): Promise<Record<string, unknown> | null> {
+  // 1. Try bare import (resolves from server's own node_modules)
+  try {
+    return (await import(name)) as Record<string, unknown>;
+  } catch {
+    // fall through
+  }
+
+  // 2. Try global npm/pnpm roots
+  const globalPaths: string[] = [
+    "/usr/local/lib/node_modules",
+    "/opt/homebrew/lib/node_modules",
+    path.join(os.homedir(), ".npm", "lib", "node_modules"),
+    path.join(os.homedir(), ".config", "yarn", "global", "node_modules"),
+    path.join(os.homedir(), "Library", "pnpm", "global", "node_modules"),
+  ];
+
+  // Dynamically add npm/pnpm global roots
+  try {
+    const npmRoot = execSync("npm root -g", {
+      encoding: "utf8",
+      timeout: 2000,
+    }).trim();
+    if (npmRoot && !globalPaths.includes(npmRoot)) {
+      globalPaths.push(npmRoot);
+    }
+  } catch {
+    // fall through
+  }
+  try {
+    const pnpmRoot = execSync("pnpm root -g", {
+      encoding: "utf8",
+      timeout: 2000,
+    }).trim();
+    if (pnpmRoot && !globalPaths.includes(pnpmRoot)) {
+      globalPaths.push(pnpmRoot);
+    }
+  } catch {
+    // fall through
+  }
+
+  for (const globalPath of globalPaths) {
+    const candidate = path.join(globalPath, name);
+    const candidatePkgJson = path.join(candidate, "package.json");
+    if (fs.existsSync(candidatePkgJson)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(candidatePkgJson, "utf-8"));
+        const entry = pkg.module || pkg.main || "index.js";
+        return (await import(
+          pathToFileURL(path.join(candidate, entry)).href
+        )) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  return null;
+}
 
 interface ExtendedSymbolRow extends SymbolRow {
   file: string;
@@ -201,34 +265,15 @@ export class ProjectManager {
     const extensions: Extension[] = [];
     for (const name of extensionNames) {
       try {
-        let loaded: Record<string, unknown>;
-
-        try {
-          // 1. Try importing by name (resolves from server's node_modules)
-          loaded = (await import(name)) as Record<string, unknown>;
-        } catch (e: unknown) {
-          // 2. Try importing relative to the project being analyzed
-          const projectNodeModulesPath = path.join(
-            cacheRoot,
-            "node_modules",
-            name,
+        const loaded = await loadExtensionModule(name);
+        if (!loaded) {
+          console.error(
+            `Failed to load extension ${name}: not found in any resolve path`,
           );
-          const pkgJsonPath = path.join(projectNodeModulesPath, "package.json");
-
-          if (fs.existsSync(pkgJsonPath)) {
-            const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
-            const entry = pkg.module || pkg.main || "index.js";
-            const fullPath = path.join(projectNodeModulesPath, entry);
-            loaded = (await import(pathToFileURL(fullPath).href)) as Record<
-              string,
-              unknown
-            >;
-          } else {
-            throw e; // Rethrow original error if project-relative also fails
-          }
+          continue;
         }
 
-        const extension = Object.values(loaded || {}).find(
+        const extension = Object.values(loaded).find(
           (val: unknown): val is Extension =>
             !!(val && typeof val === "object" && "id" in val),
         );
