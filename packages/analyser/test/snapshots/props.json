@@ -2192,7 +2192,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "b5574acc37acb8fe",
+          "hash": "a0fcd2e0eb2181ca",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2216,9 +2216,13 @@
               "file": "/src/type.tsx",
               "hash": "3a7820c2b2c574b",
               "dependencies": {
-                "96050a97f611a0d5": {
-                  "id": "96050a97f611a0d5",
-                  "name": "title"
+                "7d030f0ccdfbdd22": {
+                  "id": "7d030f0ccdfbdd22",
+                  "name": "jsx@117:6"
+                },
+                "cdefa43c352c036c": {
+                  "id": "cdefa43c352c036c",
+                  "name": "jsx@118:6"
                 }
               },
               "loc": {
@@ -2298,6 +2302,62 @@
               },
               "srcId": "/src/type.tsx:div:116:4"
             },
+            "7d030f0ccdfbdd22": {
+              "id": "7d030f0ccdfbdd22",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@117:6",
+                "loc": {
+                  "line": 117,
+                  "column": 6
+                },
+                "id": "bebf60dfeca9fc24"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/type.tsx",
+              "hash": "807dd9a6510c8dab",
+              "dependencies": {
+                "96050a97f611a0d5": {
+                  "id": "96050a97f611a0d5",
+                  "name": "title"
+                }
+              },
+              "loc": {
+                "line": 117,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/type.tsx:h1:117:6"
+            },
+            "cdefa43c352c036c": {
+              "id": "cdefa43c352c036c",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@118:6",
+                "loc": {
+                  "line": 118,
+                  "column": 6
+                },
+                "id": "c853d7bcaa635ed"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/type.tsx",
+              "hash": "b3e63c12178fec39",
+              "dependencies": {
+                "b5a7b19a0b8e3afb": {
+                  "id": "b5a7b19a0b8e3afb",
+                  "name": "jsx@120:10"
+                }
+              },
+              "loc": {
+                "line": 118,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/type.tsx:ul:118:6"
+            },
             "6d0b10e8c6c5ad1": {
               "id": "6d0b10e8c6c5ad1",
               "name": {
@@ -2312,14 +2372,43 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/type.tsx",
-              "hash": "d446b64a82e2f470",
+              "hash": "15b684c7c115756",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 119,
                 "column": 19
               },
-              "var": {},
+              "var": {
+                "b5a7b19a0b8e3afb": {
+                  "id": "b5a7b19a0b8e3afb",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@120:10",
+                    "loc": {
+                      "line": 120,
+                      "column": 10
+                    },
+                    "id": "831c801447729687"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/type.tsx",
+                  "hash": "8c8dd6995eb3ad45",
+                  "dependencies": {
+                    "6ca8f7b0f03f9e41": {
+                      "id": "6ca8f7b0f03f9e41",
+                      "name": "item"
+                    }
+                  },
+                  "loc": {
+                    "line": 120,
+                    "column": 10
+                  },
+                  "render": null,
+                  "srcId": "/src/type.tsx:li:120:10"
+                }
+              },
               "scope": {
                 "start": {
                   "line": 119,
@@ -2329,7 +2418,8 @@
                   "line": 121,
                   "column": 9
                 }
-              }
+              },
+              "return": "b5a7b19a0b8e3afb"
             }
           },
           "scope": {
@@ -2389,7 +2479,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/type.tsx",
-          "hash": "3e74003e92fccf6b",
+          "hash": "de05e795a76834da",
           "dependencies": {},
           "loc": {
             "line": 127,
@@ -2412,9 +2502,13 @@
               "file": "/src/type.tsx",
               "hash": "38be6c65c16661e7",
               "dependencies": {
-                "96050a97f611a0d5": {
-                  "id": "96050a97f611a0d5",
-                  "name": "title"
+                "7c87567ccdebe7c0": {
+                  "id": "7c87567ccdebe7c0",
+                  "name": "jsx@130:6"
+                },
+                "ec6b21da53b4136e": {
+                  "id": "ec6b21da53b4136e",
+                  "name": "jsx@131:6"
                 }
               },
               "loc": {
@@ -2494,6 +2588,62 @@
               },
               "srcId": "/src/type.tsx:div:129:4"
             },
+            "7c87567ccdebe7c0": {
+              "id": "7c87567ccdebe7c0",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@130:6",
+                "loc": {
+                  "line": 130,
+                  "column": 6
+                },
+                "id": "f27c2eb46d72c5cb"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/type.tsx",
+              "hash": "b333af4a32d20d82",
+              "dependencies": {
+                "96050a97f611a0d5": {
+                  "id": "96050a97f611a0d5",
+                  "name": "title"
+                }
+              },
+              "loc": {
+                "line": 130,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/type.tsx:h1:130:6"
+            },
+            "ec6b21da53b4136e": {
+              "id": "ec6b21da53b4136e",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@131:6",
+                "loc": {
+                  "line": 131,
+                  "column": 6
+                },
+                "id": "39ba70a00704fbb6"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/type.tsx",
+              "hash": "ef9c46ae823739c",
+              "dependencies": {
+                "6ca55ce7850a464": {
+                  "id": "6ca55ce7850a464",
+                  "name": "jsx@133:10"
+                }
+              },
+              "loc": {
+                "line": 131,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/type.tsx:ul:131:6"
+            },
             "5aba12d8b66f3124": {
               "id": "5aba12d8b66f3124",
               "name": {
@@ -2508,14 +2658,43 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/type.tsx",
-              "hash": "498b2927115d4a70",
+              "hash": "f26e9a19d38920f9",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 132,
                 "column": 19
               },
-              "var": {},
+              "var": {
+                "6ca55ce7850a464": {
+                  "id": "6ca55ce7850a464",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@133:10",
+                    "loc": {
+                      "line": 133,
+                      "column": 10
+                    },
+                    "id": "6c698e2a6683527f"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/type.tsx",
+                  "hash": "ec80c9137180ac91",
+                  "dependencies": {
+                    "6ca8f7b0f03f9e41": {
+                      "id": "6ca8f7b0f03f9e41",
+                      "name": "item"
+                    }
+                  },
+                  "loc": {
+                    "line": 133,
+                    "column": 10
+                  },
+                  "render": null,
+                  "srcId": "/src/type.tsx:li:133:10"
+                }
+              },
               "scope": {
                 "start": {
                   "line": 132,
@@ -2525,7 +2704,8 @@
                   "line": 134,
                   "column": 9
                 }
-              }
+              },
+              "return": "6ca55ce7850a464"
             }
           },
           "scope": {
@@ -2766,7 +2946,12 @@
           "type": "jsx",
           "file": "/src/main.tsx",
           "hash": "3fae799c97da17bf",
-          "dependencies": {},
+          "dependencies": {
+            "d28ef55e6ceebff3": {
+              "id": "d28ef55e6ceebff3",
+              "name": "jsx@8:4"
+            }
+          },
           "loc": {
             "line": 7,
             "column": 2
@@ -2802,6 +2987,29 @@
             }
           },
           "srcId": "StrictMode"
+        },
+        "d28ef55e6ceebff3": {
+          "id": "d28ef55e6ceebff3",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@8:4",
+            "loc": {
+              "line": 8,
+              "column": 4
+            },
+            "id": "8ac6d21b71862809"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "2fbdba479d5019ac",
+          "dependencies": {},
+          "loc": {
+            "line": 8,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "311c554b828f67a5"
         }
       },
       "relations": [
@@ -2819,6 +3027,22 @@
             "ownerId": "5453275af356e1ca",
             "ownerKind": "normal",
             "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "d28ef55e6ceebff3",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 8,
+          "column": 5,
+          "data_json": {
+            "usageId": "ddcf6ae4062a8027",
+            "filePath": "/src/main.tsx",
+            "line": 8,
+            "column": 5,
+            "ownerId": "d28ef55e6ceebff3",
+            "ownerKind": "normal",
+            "displayLabel": "App"
           }
         }
       ],
@@ -2870,7 +3094,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Destructuring.tsx",
-          "hash": "5bae234c1a72a7fd",
+          "hash": "6a19a5ca581d0899",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -2894,9 +3118,13 @@
               "file": "/src/Destructuring.tsx",
               "hash": "a9ed07a51590fe58",
               "dependencies": {
-                "96050a97f611a0d5": {
-                  "id": "96050a97f611a0d5",
-                  "name": "title"
+                "19894f3b26c9eada": {
+                  "id": "19894f3b26c9eada",
+                  "name": "jsx@12:6"
+                },
+                "1667bf63d4d9490f": {
+                  "id": "1667bf63d4d9490f",
+                  "name": "jsx@13:6"
                 }
               },
               "loc": {
@@ -2976,6 +3204,62 @@
               },
               "srcId": "/src/Destructuring.tsx:div:11:4"
             },
+            "19894f3b26c9eada": {
+              "id": "19894f3b26c9eada",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:6",
+                "loc": {
+                  "line": 12,
+                  "column": 6
+                },
+                "id": "1cb36bef813ac66a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/Destructuring.tsx",
+              "hash": "7a66c22b7d9ec1b9",
+              "dependencies": {
+                "96050a97f611a0d5": {
+                  "id": "96050a97f611a0d5",
+                  "name": "title"
+                }
+              },
+              "loc": {
+                "line": 12,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/Destructuring.tsx:h1:12:6"
+            },
+            "1667bf63d4d9490f": {
+              "id": "1667bf63d4d9490f",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@13:6",
+                "loc": {
+                  "line": 13,
+                  "column": 6
+                },
+                "id": "38a6425d327ab480"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/Destructuring.tsx",
+              "hash": "50c189000bd97d0e",
+              "dependencies": {
+                "141da6f026920c77": {
+                  "id": "141da6f026920c77",
+                  "name": "jsx@15:10"
+                }
+              },
+              "loc": {
+                "line": 13,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/Destructuring.tsx:ul:13:6"
+            },
             "c646662955a5ad30": {
               "id": "c646662955a5ad30",
               "name": {
@@ -2990,14 +3274,43 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/Destructuring.tsx",
-              "hash": "5aa43f50c18d1939",
+              "hash": "bed8f2bbc5a1d9ad",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
                 "line": 14,
                 "column": 19
               },
-              "var": {},
+              "var": {
+                "141da6f026920c77": {
+                  "id": "141da6f026920c77",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@15:10",
+                    "loc": {
+                      "line": 15,
+                      "column": 10
+                    },
+                    "id": "e3f6bfda13b67ad7"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/Destructuring.tsx",
+                  "hash": "7decef244394b73d",
+                  "dependencies": {
+                    "6ca8f7b0f03f9e41": {
+                      "id": "6ca8f7b0f03f9e41",
+                      "name": "item"
+                    }
+                  },
+                  "loc": {
+                    "line": 15,
+                    "column": 10
+                  },
+                  "render": null,
+                  "srcId": "/src/Destructuring.tsx:li:15:10"
+                }
+              },
               "scope": {
                 "start": {
                   "line": 14,
@@ -3007,7 +3320,8 @@
                   "line": 16,
                   "column": 9
                 }
-              }
+              },
+              "return": "141da6f026920c77"
             }
           },
           "scope": {
@@ -3116,7 +3430,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "7180fb114d4ee1e1",
+          "hash": "468e9b8b1d34d6b",
           "dependencies": {},
           "loc": {
             "line": 4,
@@ -3138,7 +3452,12 @@
               "type": "jsx",
               "file": "/src/App.tsx",
               "hash": "e32888f65321617a",
-              "dependencies": {},
+              "dependencies": {
+                "24b99651629c6aff": {
+                  "id": "24b99651629c6aff",
+                  "name": "jsx@7:6"
+                }
+              },
               "loc": {
                 "line": 6,
                 "column": 4
@@ -3209,6 +3528,29 @@
                 }
               },
               "srcId": "/src/App.tsx:div:6:4"
+            },
+            "24b99651629c6aff": {
+              "id": "24b99651629c6aff",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@7:6",
+                "loc": {
+                  "line": 7,
+                  "column": 6
+                },
+                "id": "b78d1940a674e310"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "cea550ce9417e9d9",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "1259634e1eafe1c6"
             }
           },
           "scope": {
@@ -3234,18 +3576,18 @@
       },
       "relations": [
         {
-          "from_id": "311c554b828f67a5",
+          "from_id": "24b99651629c6aff",
           "to_id": "symbol:import:/src/App.tsx:DestructuringProps",
           "kind": "usage-render-call",
           "line": 7,
           "column": 7,
           "data_json": {
-            "usageId": "94256643542de629",
+            "usageId": "fada3f8a8497c5a5",
             "filePath": "/src/App.tsx",
             "line": 7,
             "column": 7,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "24b99651629c6aff",
+            "ownerKind": "normal",
             "displayLabel": "DestructuringProps"
           }
         }
@@ -3274,13 +3616,73 @@
       "label": "render"
     },
     {
+      "from": "80b1b60c7d127de5",
+      "to": "7d030f0ccdfbdd22",
+      "label": "render"
+    },
+    {
+      "from": "80b1b60c7d127de5",
+      "to": "cdefa43c352c036c",
+      "label": "render"
+    },
+    {
+      "from": "80b1b60c7d127de5",
+      "to": "b5a7b19a0b8e3afb",
+      "label": "render"
+    },
+    {
+      "from": "80b1b60c7d127de5",
+      "to": "b5a7b19a0b8e3afb",
+      "label": "render"
+    },
+    {
       "from": "f51adcb408401731",
       "to": "5266b90ad0960d7a",
       "label": "render"
     },
     {
+      "from": "f51adcb408401731",
+      "to": "7c87567ccdebe7c0",
+      "label": "render"
+    },
+    {
+      "from": "f51adcb408401731",
+      "to": "ec6b21da53b4136e",
+      "label": "render"
+    },
+    {
+      "from": "f51adcb408401731",
+      "to": "6ca55ce7850a464",
+      "label": "render"
+    },
+    {
+      "from": "f51adcb408401731",
+      "to": "6ca55ce7850a464",
+      "label": "render"
+    },
+    {
       "from": "1259634e1eafe1c6",
       "to": "36a5eedc2c9a474f",
+      "label": "render"
+    },
+    {
+      "from": "1259634e1eafe1c6",
+      "to": "19894f3b26c9eada",
+      "label": "render"
+    },
+    {
+      "from": "1259634e1eafe1c6",
+      "to": "1667bf63d4d9490f",
+      "label": "render"
+    },
+    {
+      "from": "1259634e1eafe1c6",
+      "to": "141da6f026920c77",
+      "label": "render"
+    },
+    {
+      "from": "1259634e1eafe1c6",
+      "to": "141da6f026920c77",
       "label": "render"
     },
     {
@@ -3299,24 +3701,94 @@
       "label": "render"
     },
     {
+      "from": "311c554b828f67a5",
+      "to": "24b99651629c6aff",
+      "label": "render"
+    },
+    {
       "from": "918ef0981d4f09e2",
+      "to": "7d030f0ccdfbdd22",
+      "label": "hook"
+    },
+    {
+      "from": "918ef0981d4f09e2",
+      "to": "cdefa43c352c036c",
+      "label": "hook"
+    },
+    {
+      "from": "7d030f0ccdfbdd22",
       "to": "96050a97f611a0d5",
+      "label": "hook"
+    },
+    {
+      "from": "cdefa43c352c036c",
+      "to": "b5a7b19a0b8e3afb",
+      "label": "hook"
+    },
+    {
+      "from": "b5a7b19a0b8e3afb",
+      "to": "6ca8f7b0f03f9e41",
       "label": "hook"
     },
     {
       "from": "5266b90ad0960d7a",
+      "to": "7c87567ccdebe7c0",
+      "label": "hook"
+    },
+    {
+      "from": "5266b90ad0960d7a",
+      "to": "ec6b21da53b4136e",
+      "label": "hook"
+    },
+    {
+      "from": "7c87567ccdebe7c0",
       "to": "96050a97f611a0d5",
       "label": "hook"
     },
     {
+      "from": "ec6b21da53b4136e",
+      "to": "6ca55ce7850a464",
+      "label": "hook"
+    },
+    {
+      "from": "6ca55ce7850a464",
+      "to": "6ca8f7b0f03f9e41",
+      "label": "hook"
+    },
+    {
       "from": "36a5eedc2c9a474f",
+      "to": "19894f3b26c9eada",
+      "label": "hook"
+    },
+    {
+      "from": "36a5eedc2c9a474f",
+      "to": "1667bf63d4d9490f",
+      "label": "hook"
+    },
+    {
+      "from": "19894f3b26c9eada",
       "to": "96050a97f611a0d5",
+      "label": "hook"
+    },
+    {
+      "from": "1667bf63d4d9490f",
+      "to": "141da6f026920c77",
+      "label": "hook"
+    },
+    {
+      "from": "141da6f026920c77",
+      "to": "6ca8f7b0f03f9e41",
       "label": "hook"
     },
     {
       "from": "1259634e1eafe1c6",
       "to": "311c554b828f67a5",
       "label": "render"
+    },
+    {
+      "from": "5fa4c0c2a96eddec",
+      "to": "24b99651629c6aff",
+      "label": "hook"
     }
   ],
   "resolve": []

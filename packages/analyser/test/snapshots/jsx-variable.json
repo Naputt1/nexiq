@@ -252,7 +252,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "a263aa38fc07b9d9",
+          "hash": "d3e349d2e272ef42",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -538,7 +538,12 @@
               "type": "jsx",
               "file": "/src/App.tsx",
               "hash": "d79151f9b0afd18c",
-              "dependencies": {},
+              "dependencies": {
+                "74e04b4116fbb4f2": {
+                  "id": "74e04b4116fbb4f2",
+                  "name": "jsx@17:6"
+                }
+              },
               "loc": {
                 "line": 16,
                 "column": 4
@@ -587,6 +592,29 @@
               },
               "srcId": "c499dc217e5afa37"
             },
+            "74e04b4116fbb4f2": {
+              "id": "74e04b4116fbb4f2",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@17:6",
+                "loc": {
+                  "line": 17,
+                  "column": 6
+                },
+                "id": "1293bc52b3b0e2a6"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "b246b197824bb35e",
+              "dependencies": {},
+              "loc": {
+                "line": 17,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:input:17:6"
+            },
             "71ebfad76923d940": {
               "id": "71ebfad76923d940",
               "name": {
@@ -607,17 +635,13 @@
                   "id": "eaf06c6480b2cd11",
                   "name": "x"
                 },
-                "272b57e6d7c0a9e5": {
-                  "id": "272b57e6d7c0a9e5",
-                  "name": "y"
+                "877366475b16a1ae": {
+                  "id": "877366475b16a1ae",
+                  "name": "jsx@23:6"
                 },
-                "f7042be43fb80714": {
-                  "id": "f7042be43fb80714",
-                  "name": "v"
-                },
-                "a5952880e9bb8442": {
-                  "id": "a5952880e9bb8442",
-                  "name": "form"
+                "f4497d729cd6f52": {
+                  "id": "f4497d729cd6f52",
+                  "name": "jsx@29:6"
                 }
               },
               "loc": {
@@ -802,6 +826,153 @@
                 }
               },
               "srcId": "/src/App.tsx:div:22:4"
+            },
+            "877366475b16a1ae": {
+              "id": "877366475b16a1ae",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@23:6",
+                "loc": {
+                  "line": 23,
+                  "column": 6
+                },
+                "id": "ff72b085e69fa362"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "2e19fc76ecd4491b",
+              "dependencies": {
+                "bd489cb67c07a9cd": {
+                  "id": "bd489cb67c07a9cd",
+                  "name": "jsx@24:8"
+                }
+              },
+              "loc": {
+                "line": 23,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:div:23:6"
+            },
+            "bd489cb67c07a9cd": {
+              "id": "bd489cb67c07a9cd",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@24:8",
+                "loc": {
+                  "line": 24,
+                  "column": 8
+                },
+                "id": "591b6f160a54a698"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "59bb0c074d06267f",
+              "dependencies": {
+                "272b57e6d7c0a9e5": {
+                  "id": "272b57e6d7c0a9e5",
+                  "name": "y"
+                },
+                "f7042be43fb80714": {
+                  "id": "f7042be43fb80714",
+                  "name": "v"
+                },
+                "a5952880e9bb8442": {
+                  "id": "a5952880e9bb8442",
+                  "name": "form"
+                }
+              },
+              "loc": {
+                "line": 24,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:div:24:8"
+            },
+            "f4497d729cd6f52": {
+              "id": "f4497d729cd6f52",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@29:6",
+                "loc": {
+                  "line": 29,
+                  "column": 6
+                },
+                "id": "20e5978bd24ed261"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "9ce5fb8b45538101",
+              "dependencies": {
+                "272b57e6d7c0a9e5": {
+                  "id": "272b57e6d7c0a9e5",
+                  "name": "y"
+                },
+                "8ba0dfec046efc7d": {
+                  "id": "8ba0dfec046efc7d",
+                  "name": "jsx@30:8"
+                }
+              },
+              "loc": {
+                "line": 29,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "7c128c607822e129"
+            },
+            "8ba0dfec046efc7d": {
+              "id": "8ba0dfec046efc7d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@30:8",
+                "loc": {
+                  "line": 30,
+                  "column": 8
+                },
+                "id": "24c58a97a2ece720"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "306b599826398ed4",
+              "dependencies": {
+                "7a63dceff672863b": {
+                  "id": "7a63dceff672863b",
+                  "name": "jsx@31:10"
+                }
+              },
+              "loc": {
+                "line": 30,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:Fragment:30:8"
+            },
+            "7a63dceff672863b": {
+              "id": "7a63dceff672863b",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@31:10",
+                "loc": {
+                  "line": 31,
+                  "column": 10
+                },
+                "id": "b122ade46778379c"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "32f617d83c60ffdf",
+              "dependencies": {},
+              "loc": {
+                "line": 31,
+                "column": 10
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:span:31:10"
             }
           },
           "scope": {
@@ -844,12 +1015,12 @@
         },
         {
           "from_id": "35ff91be35a24b45",
-          "to_id": "1076ea2026161c64",
+          "to_id": "94b6fcbf54cdfaec",
           "kind": "usage-read",
           "line": 12,
           "column": 25,
           "data_json": {
-            "usageId": "7dc2a59a47cc3bbc",
+            "usageId": "b6cbc7ce6837532b",
             "filePath": "/src/App.tsx",
             "line": 12,
             "column": 25,
@@ -876,12 +1047,12 @@
         },
         {
           "from_id": "35ff91be35a24b45",
-          "to_id": "71ebfad76923d940",
+          "to_id": "/src/App.tsx:div:22:4",
           "kind": "usage-read",
           "line": 22,
           "column": 27,
           "data_json": {
-            "usageId": "4182a80339deab4e",
+            "usageId": "9ae4c231f142b1b4",
             "filePath": "/src/App.tsx",
             "line": 22,
             "column": 27,
@@ -892,129 +1063,129 @@
         },
         {
           "from_id": "437522dd8752aa86",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:div:24:8",
           "kind": "usage-read",
           "line": 24,
           "column": 36,
           "data_json": {
-            "usageId": "a9aad0adce8477ca",
+            "usageId": "1425764003cefbcc",
             "filePath": "/src/App.tsx",
             "line": 24,
             "column": 36,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
             "displayLabel": "y"
           }
         },
         {
           "from_id": "69a7d87f8dc552ec",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:div:24:8",
           "kind": "usage-read",
           "line": 25,
           "column": 11,
           "data_json": {
-            "usageId": "bbda54a4472f4285",
+            "usageId": "8805891303fd9540",
             "filePath": "/src/App.tsx",
             "line": 25,
             "column": 11,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
             "displayLabel": "v"
           }
         },
         {
           "from_id": "5558f68a9e93a311",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:div:24:8",
           "kind": "usage-read",
           "line": 26,
           "column": 11,
           "data_json": {
-            "usageId": "f60e6f8c46791976",
+            "usageId": "81b1af6a74e5d8ba",
             "filePath": "/src/App.tsx",
             "line": 26,
             "column": 11,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "bd489cb67c07a9cd",
+            "ownerKind": "normal",
             "displayLabel": "form"
           }
         },
         {
-          "from_id": "311c554b828f67a5",
+          "from_id": "f4497d729cd6f52",
           "to_id": "7c128c607822e129",
           "kind": "usage-render-call",
           "line": 29,
           "column": 7,
           "data_json": {
-            "usageId": "44c18ca9d0087bb0",
+            "usageId": "380968d659ed6d63",
             "filePath": "/src/App.tsx",
             "line": 29,
             "column": 7,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "f4497d729cd6f52",
+            "ownerKind": "normal",
             "displayLabel": "Child2"
           }
         },
         {
           "from_id": "437522dd8752aa86",
-          "to_id": "311c554b828f67a5",
+          "to_id": "7c128c607822e129",
           "kind": "usage-read",
           "line": 29,
           "column": 20,
           "data_json": {
-            "usageId": "586638811fe30c6",
+            "usageId": "15d781d894848dd0",
             "filePath": "/src/App.tsx",
             "line": 29,
             "column": 20,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "f4497d729cd6f52",
+            "ownerKind": "normal",
             "displayLabel": "y"
           }
         },
         {
           "from_id": "35ff91be35a24b45",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:span:31:10",
           "kind": "usage-read",
           "line": 31,
           "column": 27,
           "data_json": {
-            "usageId": "335a5c463326936",
+            "usageId": "4398a48128dc2bbd",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 27,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
             "displayLabel": "x"
           }
         },
         {
           "from_id": "35ff91be35a24b45",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:span:31:10",
           "kind": "usage-read",
           "line": 31,
           "column": 51,
           "data_json": {
-            "usageId": "80c989730b9a3de3",
+            "usageId": "58e03259a652c2ee",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 51,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
             "displayLabel": "x"
           }
         },
         {
           "from_id": "437522dd8752aa86",
-          "to_id": "311c554b828f67a5",
+          "to_id": "/src/App.tsx:span:31:10",
           "kind": "usage-read",
           "line": 31,
           "column": 55,
           "data_json": {
-            "usageId": "d4aa4b939c503126",
+            "usageId": "b73a84bb8e89620a",
             "filePath": "/src/App.tsx",
             "line": 31,
             "column": 55,
-            "ownerId": "311c554b828f67a5",
-            "ownerKind": "component",
+            "ownerId": "7a63dceff672863b",
+            "ownerKind": "normal",
             "displayLabel": "y"
           }
         }
@@ -1054,12 +1225,42 @@
     },
     {
       "from": "311c554b828f67a5",
+      "to": "74e04b4116fbb4f2",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
       "to": "71ebfad76923d940",
       "label": "render"
     },
     {
       "from": "7c128c607822e129",
       "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "877366475b16a1ae",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "bd489cb67c07a9cd",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "f4497d729cd6f52",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "8ba0dfec046efc7d",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "7a63dceff672863b",
       "label": "render"
     },
     {
@@ -1093,6 +1294,11 @@
       "label": "render"
     },
     {
+      "from": "3c494cbacd69a670",
+      "to": "74e04b4116fbb4f2",
+      "label": "hook"
+    },
+    {
       "from": "7c128c607822e129",
       "to": "311c554b828f67a5",
       "label": "render"
@@ -1109,18 +1315,63 @@
     },
     {
       "from": "71ebfad76923d940",
+      "to": "877366475b16a1ae",
+      "label": "hook"
+    },
+    {
+      "from": "71ebfad76923d940",
+      "to": "f4497d729cd6f52",
+      "label": "hook"
+    },
+    {
+      "from": "877366475b16a1ae",
+      "to": "bd489cb67c07a9cd",
+      "label": "hook"
+    },
+    {
+      "from": "bd489cb67c07a9cd",
       "to": "272b57e6d7c0a9e5",
       "label": "hook"
     },
     {
-      "from": "71ebfad76923d940",
+      "from": "bd489cb67c07a9cd",
       "to": "f7042be43fb80714",
       "label": "hook"
     },
     {
-      "from": "71ebfad76923d940",
+      "from": "bd489cb67c07a9cd",
       "to": "a5952880e9bb8442",
       "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "f4497d729cd6f52",
+      "to": "272b57e6d7c0a9e5",
+      "label": "hook"
+    },
+    {
+      "from": "f4497d729cd6f52",
+      "to": "8ba0dfec046efc7d",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "8ba0dfec046efc7d",
+      "to": "7a63dceff672863b",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
     }
   ],
   "resolve": []

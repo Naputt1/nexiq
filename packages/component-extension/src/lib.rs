@@ -467,7 +467,7 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             .unwrap_or(&source.to_string())
             .clone();
         let s = if added_combos.contains(&s0) {
-            s0
+            s0.clone()
         } else {
             scope_redirect.get(&s0).unwrap_or(&s0).clone()
         };
@@ -476,6 +476,12 @@ pub fn run_component_task_sqlite(context: TaskContext) -> Result<Buffer> {
             .unwrap_or(&target.to_string())
             .clone();
         let t = scope_redirect.get(&t0).unwrap_or(&t0).clone();
+
+        let (s, t) = if s == t {
+            (s0, t0)
+        } else {
+            (s, t)
+        };
 
         // Skip edge if the source is already a child of the target combo.
         // Only skip for non-combo sources (e.g., variables) — render combos

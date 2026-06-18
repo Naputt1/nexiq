@@ -164,10 +164,10 @@ export default function JSXElement(
 
         const parentID = componentDB.getCurrentRenderInstance();
 
-        let id: string | null = null;
+        let id: string | null;
         if (existingVar && isJSXVariable(existingVar)) {
           id = existingVar.id;
-        } else if (!parentID) {
+        } else {
           const name: VariableName = {
             type: "identifier",
             name: `jsx@${loc.line}:${loc.column}`,
@@ -255,10 +255,10 @@ export default function JSXElement(
         const parentID = componentDB.getCurrentRenderInstance();
 
         const existingVar = componentDB.getVariableFromLoc(fileName, loc);
-        let id: string | null = null;
+        let id: string | null;
         if (existingVar && isJSXVariable(existingVar)) {
           id = existingVar.id;
-        } else if (!parentID) {
+        } else {
           const name: VariableName = {
             type: "identifier",
             name: `jsx@${loc.line}:${loc.column}`,

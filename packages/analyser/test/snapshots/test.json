@@ -1,0 +1,5902 @@
+{
+  "files": {
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "hash": "3522857d16b2440b",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "QueryClient": {
+          "localName": "QueryClient",
+          "importedName": "QueryClient",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "QueryClientProvider": {
+          "localName": "QueryClientProvider",
+          "importedName": "QueryClientProvider",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "App": {
+          "localName": "App",
+          "importedName": "App",
+          "source": "/src/App.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "d6dc5019cd355cff": {
+          "id": "d6dc5019cd355cff",
+          "name": {
+            "type": "identifier",
+            "name": "queryClient",
+            "loc": {
+              "line": 6,
+              "column": 6
+            },
+            "id": "ca2cddba14f4baad"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/main.tsx",
+          "hash": "751aaf5048e62e8a",
+          "declarationKind": "const",
+          "dependencies": {
+            "fd077c8e6ca98d9a": {
+              "id": "fd077c8e6ca98d9a",
+              "name": "QueryClient"
+            }
+          },
+          "loc": {
+            "line": 6,
+            "column": 6
+          },
+          "children": {}
+        },
+        "de8de009c32256c6": {
+          "id": "de8de009c32256c6",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@9:2",
+            "loc": {
+              "line": 9,
+              "column": 2
+            },
+            "id": "7aca7c8b7a76cb50"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "3356163684cd5080",
+          "dependencies": {
+            "d40f6b5762d18844": {
+              "id": "d40f6b5762d18844",
+              "name": "jsx@10:4"
+            }
+          },
+          "loc": {
+            "line": 9,
+            "column": 2
+          },
+          "render": {
+            "id": "StrictMode",
+            "instanceId": "16313f519dac461",
+            "tag": "StrictMode",
+            "dependencies": [],
+            "isDependency": true,
+            "loc": {
+              "line": 9,
+              "column": 2
+            },
+            "renderIndex": 0,
+            "kind": "jsx",
+            "children": {
+              "caff9c2d9ac27041": {
+                "id": "QueryClientProvider",
+                "instanceId": "caff9c2d9ac27041",
+                "tag": "QueryClientProvider",
+                "dependencies": [
+                  {
+                    "id": "9c40854bdd01e8ef",
+                    "name": "client",
+                    "value": {
+                      "type": "ref",
+                      "refType": "named",
+                      "name": "queryClient"
+                    },
+                    "valueId": "d6dc5019cd355cff"
+                  }
+                ],
+                "isDependency": true,
+                "loc": {
+                  "line": 10,
+                  "column": 4
+                },
+                "parentId": "16313f519dac461",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "1dde6f9d4f3f9307": {
+                    "id": "",
+                    "instanceId": "1dde6f9d4f3f9307",
+                    "tag": "App",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 11,
+                      "column": 6
+                    },
+                    "parentId": "caff9c2d9ac27041",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  }
+                }
+              }
+            }
+          },
+          "srcId": "StrictMode"
+        },
+        "d40f6b5762d18844": {
+          "id": "d40f6b5762d18844",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@10:4",
+            "loc": {
+              "line": 10,
+              "column": 4
+            },
+            "id": "d3118c1360866c4e"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "648f35852211fad8",
+          "dependencies": {
+            "ca2cddba14f4baad": {
+              "id": "ca2cddba14f4baad",
+              "name": "queryClient"
+            },
+            "7cf1232637e28aec": {
+              "id": "7cf1232637e28aec",
+              "name": "jsx@11:6"
+            }
+          },
+          "loc": {
+            "line": 10,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "QueryClientProvider"
+        },
+        "7cf1232637e28aec": {
+          "id": "7cf1232637e28aec",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@11:6",
+            "loc": {
+              "line": 11,
+              "column": 6
+            },
+            "id": "18a141393b9b5263"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "3c514b741056473d",
+          "dependencies": {},
+          "loc": {
+            "line": 11,
+            "column": 6
+          },
+          "render": null
+        }
+      },
+      "relations": [
+        {
+          "from_id": "d6dc5019cd355cff",
+          "to_id": "symbol:import:/src/main.tsx:QueryClient",
+          "kind": "usage-call",
+          "line": 6,
+          "column": 20,
+          "data_json": {
+            "usageId": "6ece61c210b22433",
+            "filePath": "/src/main.tsx",
+            "line": 6,
+            "column": 20,
+            "ownerId": "d6dc5019cd355cff",
+            "ownerKind": "normal",
+            "displayLabel": "QueryClient"
+          }
+        },
+        {
+          "from_id": "de8de009c32256c6",
+          "to_id": "symbol:import:/src/main.tsx:StrictMode",
+          "kind": "usage-render-call",
+          "line": 9,
+          "column": 3,
+          "data_json": {
+            "usageId": "ccfb5ea6cb149fa2",
+            "filePath": "/src/main.tsx",
+            "line": 9,
+            "column": 3,
+            "ownerId": "de8de009c32256c6",
+            "ownerKind": "normal",
+            "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "d40f6b5762d18844",
+          "to_id": "symbol:import:/src/main.tsx:QueryClientProvider",
+          "kind": "usage-render-call",
+          "line": 10,
+          "column": 5,
+          "data_json": {
+            "usageId": "269ef72552edc56",
+            "filePath": "/src/main.tsx",
+            "line": 10,
+            "column": 5,
+            "ownerId": "d40f6b5762d18844",
+            "ownerKind": "normal",
+            "displayLabel": "QueryClientProvider"
+          }
+        },
+        {
+          "from_id": "d6dc5019cd355cff",
+          "to_id": "d40f6b5762d18844",
+          "kind": "usage-read",
+          "line": 10,
+          "column": 33,
+          "data_json": {
+            "usageId": "a924a48c3ac3f7c7",
+            "filePath": "/src/main.tsx",
+            "line": 10,
+            "column": 33,
+            "ownerId": "d40f6b5762d18844",
+            "ownerKind": "normal",
+            "displayLabel": "queryClient"
+          }
+        },
+        {
+          "from_id": "7cf1232637e28aec",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 11,
+          "column": 7,
+          "data_json": {
+            "usageId": "fbba039a076315ff",
+            "filePath": "/src/main.tsx",
+            "line": 11,
+            "column": 7,
+            "ownerId": "7cf1232637e28aec",
+            "ownerKind": "normal",
+            "displayLabel": "App"
+          }
+        }
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 8,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "302ebf19b04b6297",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "TodoListPage": {
+          "localName": "TodoListPage",
+          "importedName": "TodoListPage",
+          "source": "/src/pages/TodoListPage.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "AddTodoPage": {
+          "localName": "AddTodoPage",
+          "importedName": "AddTodoPage",
+          "source": "/src/pages/AddTodoPage.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "InfinitePage": {
+          "localName": "InfinitePage",
+          "importedName": "InfinitePage",
+          "source": "/src/pages/InfinitePage.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "DashboardPage": {
+          "localName": "DashboardPage",
+          "importedName": "DashboardPage",
+          "source": "/src/pages/DashboardPage.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "InlineQueryPage": {
+          "localName": "InlineQueryPage",
+          "importedName": "InlineQueryPage",
+          "source": "/src/pages/InlineQueryPage.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "component",
+          "id": "311c554b828f67a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 7,
+              "column": 16
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "ba5a0c6433fa3d56",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 16
+          },
+          "var": {
+            "76b1f99b3d9b7a81": {
+              "id": "76b1f99b3d9b7a81",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@9:4",
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "id": "e0ad32bf5e78f8c9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "12b3f79d7c1a0126",
+              "dependencies": {
+                "42716fa6f9df0230": {
+                  "id": "42716fa6f9df0230",
+                  "name": "jsx@10:6"
+                },
+                "97cf3327e298b004": {
+                  "id": "97cf3327e298b004",
+                  "name": "jsx@11:6"
+                },
+                "e154d6be45200aa9": {
+                  "id": "e154d6be45200aa9",
+                  "name": "jsx@12:6"
+                },
+                "e5ae403b1dc7ed60": {
+                  "id": "e5ae403b1dc7ed60",
+                  "name": "jsx@13:6"
+                },
+                "41cb0d2504925c5d": {
+                  "id": "41cb0d2504925c5d",
+                  "name": "jsx@14:6"
+                },
+                "f8ba2fcb6279ea09": {
+                  "id": "f8ba2fcb6279ea09",
+                  "name": "jsx@15:6"
+                }
+              },
+              "loc": {
+                "line": 9,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/App.tsx:div:9:4",
+                "instanceId": "8742da2d332a1cee",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "6f3bf2079c4ff5e5": {
+                    "id": "/src/App.tsx:h1:10:6",
+                    "instanceId": "6f3bf2079c4ff5e5",
+                    "tag": "h1",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 10,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "55bb8fed00b995ff": {
+                    "id": "",
+                    "instanceId": "55bb8fed00b995ff",
+                    "tag": "TodoListPage",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 11,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "1af4674a0b68c8a9": {
+                    "id": "",
+                    "instanceId": "1af4674a0b68c8a9",
+                    "tag": "AddTodoPage",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 12,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 2,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "9ef58fcda52f4e0f": {
+                    "id": "",
+                    "instanceId": "9ef58fcda52f4e0f",
+                    "tag": "InfinitePage",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 13,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 3,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "5a6501387e858250": {
+                    "id": "",
+                    "instanceId": "5a6501387e858250",
+                    "tag": "DashboardPage",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 14,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 4,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "268f836bd4825073": {
+                    "id": "",
+                    "instanceId": "268f836bd4825073",
+                    "tag": "InlineQueryPage",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 15,
+                      "column": 6
+                    },
+                    "parentId": "8742da2d332a1cee",
+                    "renderIndex": 5,
+                    "kind": "jsx",
+                    "children": {}
+                  }
+                }
+              },
+              "srcId": "/src/App.tsx:div:9:4"
+            },
+            "42716fa6f9df0230": {
+              "id": "42716fa6f9df0230",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@10:6",
+                "loc": {
+                  "line": 10,
+                  "column": 6
+                },
+                "id": "a475083b7bc48723"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "9a30e3829bab32bc",
+              "dependencies": {},
+              "loc": {
+                "line": 10,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/App.tsx:h1:10:6"
+            },
+            "97cf3327e298b004": {
+              "id": "97cf3327e298b004",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@11:6",
+                "loc": {
+                  "line": 11,
+                  "column": 6
+                },
+                "id": "18a141393b9b5263"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3c514b741056473d",
+              "dependencies": {},
+              "loc": {
+                "line": 11,
+                "column": 6
+              },
+              "render": null
+            },
+            "e154d6be45200aa9": {
+              "id": "e154d6be45200aa9",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:6",
+                "loc": {
+                  "line": 12,
+                  "column": 6
+                },
+                "id": "1cb36bef813ac66a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3c514b741056473d",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 6
+              },
+              "render": null
+            },
+            "e5ae403b1dc7ed60": {
+              "id": "e5ae403b1dc7ed60",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@13:6",
+                "loc": {
+                  "line": 13,
+                  "column": 6
+                },
+                "id": "38a6425d327ab480"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3c514b741056473d",
+              "dependencies": {},
+              "loc": {
+                "line": 13,
+                "column": 6
+              },
+              "render": null
+            },
+            "41cb0d2504925c5d": {
+              "id": "41cb0d2504925c5d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@14:6",
+                "loc": {
+                  "line": 14,
+                  "column": 6
+                },
+                "id": "31eaefa3097b31c5"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3c514b741056473d",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 6
+              },
+              "render": null
+            },
+            "f8ba2fcb6279ea09": {
+              "id": "f8ba2fcb6279ea09",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@15:6",
+                "loc": {
+                  "line": 15,
+                  "column": 6
+                },
+                "id": "45442d429a191acd"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "3c514b741056473d",
+              "dependencies": {},
+              "loc": {
+                "line": 15,
+                "column": 6
+              },
+              "render": null
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 7,
+              "column": 7
+            },
+            "end": {
+              "line": 18,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "76b1f99b3d9b7a81",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "97cf3327e298b004",
+          "to_id": "symbol:import:/src/App.tsx:TodoListPage",
+          "kind": "usage-render-call",
+          "line": 11,
+          "column": 7,
+          "data_json": {
+            "usageId": "5e93e4e0261bea2e",
+            "filePath": "/src/App.tsx",
+            "line": 11,
+            "column": 7,
+            "ownerId": "97cf3327e298b004",
+            "ownerKind": "normal",
+            "displayLabel": "TodoListPage"
+          }
+        },
+        {
+          "from_id": "e154d6be45200aa9",
+          "to_id": "symbol:import:/src/App.tsx:AddTodoPage",
+          "kind": "usage-render-call",
+          "line": 12,
+          "column": 7,
+          "data_json": {
+            "usageId": "2e7a71a9a9036ead",
+            "filePath": "/src/App.tsx",
+            "line": 12,
+            "column": 7,
+            "ownerId": "e154d6be45200aa9",
+            "ownerKind": "normal",
+            "displayLabel": "AddTodoPage"
+          }
+        },
+        {
+          "from_id": "e5ae403b1dc7ed60",
+          "to_id": "symbol:import:/src/App.tsx:InfinitePage",
+          "kind": "usage-render-call",
+          "line": 13,
+          "column": 7,
+          "data_json": {
+            "usageId": "2b49d6ea75baa480",
+            "filePath": "/src/App.tsx",
+            "line": 13,
+            "column": 7,
+            "ownerId": "e5ae403b1dc7ed60",
+            "ownerKind": "normal",
+            "displayLabel": "InfinitePage"
+          }
+        },
+        {
+          "from_id": "41cb0d2504925c5d",
+          "to_id": "symbol:import:/src/App.tsx:DashboardPage",
+          "kind": "usage-render-call",
+          "line": 14,
+          "column": 7,
+          "data_json": {
+            "usageId": "cc0976bb378dc2fb",
+            "filePath": "/src/App.tsx",
+            "line": 14,
+            "column": 7,
+            "ownerId": "41cb0d2504925c5d",
+            "ownerKind": "normal",
+            "displayLabel": "DashboardPage"
+          }
+        },
+        {
+          "from_id": "f8ba2fcb6279ea09",
+          "to_id": "symbol:import:/src/App.tsx:InlineQueryPage",
+          "kind": "usage-render-call",
+          "line": 15,
+          "column": 7,
+          "data_json": {
+            "usageId": "e27ad27c6a12fdb6",
+            "filePath": "/src/App.tsx",
+            "line": 15,
+            "column": 7,
+            "ownerId": "f8ba2fcb6279ea09",
+            "ownerKind": "normal",
+            "displayLabel": "InlineQueryPage"
+          }
+        }
+      ]
+    },
+    "/src/queries/useTodos.ts": {
+      "path": "/src/queries/useTodos.ts",
+      "hash": "986bcfa117751f9b",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useQuery": {
+          "localName": "useQuery",
+          "importedName": "useQuery",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "todoKeys": {
+          "localName": "todoKeys",
+          "importedName": "todoKeys",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "Todo": {
+          "localName": "Todo",
+          "importedName": "Todo",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "useTodos": {
+          "name": "useTodos",
+          "type": "named",
+          "exportKind": "function",
+          "id": "33ebefb18c6d8a7d"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "33ebefb18c6d8a7d": {
+          "id": "33ebefb18c6d8a7d",
+          "name": {
+            "type": "identifier",
+            "name": "useTodos",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "e8f8f75b066be1a7"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/src/queries/useTodos.ts",
+          "hash": "6572aaac7155ba18",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "3f82872975dce6ed": {
+              "id": "3f82872975dce6ed",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@7:13",
+                "loc": {
+                  "line": 7,
+                  "column": 13
+                },
+                "id": "3c5f1ec4c3f1b4fa"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useTodos.ts",
+              "hash": "7564772c9b99d2e0",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 13
+              },
+              "var": {
+                "14e0cc4e231dce16": {
+                  "id": "14e0cc4e231dce16",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@8:31",
+                    "loc": {
+                      "line": 8,
+                      "column": 31
+                    },
+                    "id": "8adc3a21a81dbb78"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/queries/useTodos.ts",
+                  "hash": "a0efaa08052a1a48",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 8,
+                    "column": 31
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 8,
+                      "column": 31
+                    },
+                    "end": {
+                      "line": 8,
+                      "column": 65
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 7,
+                  "column": 13
+                },
+                "end": {
+                  "line": 8,
+                  "column": 66
+                }
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 10,
+              "column": 1
+            }
+          },
+          "async": false,
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [
+            "useQuery"
+          ],
+          "effects": {}
+        }
+      },
+      "relations": [
+        {
+          "from_id": "33ebefb18c6d8a7d",
+          "to_id": "symbol:import:/src/queries/useTodos.ts:useQuery",
+          "kind": "usage-call",
+          "line": 5,
+          "column": 9,
+          "data_json": {
+            "usageId": "b1932018e96c8fdd",
+            "filePath": "/src/queries/useTodos.ts",
+            "line": 5,
+            "column": 9,
+            "ownerId": "33ebefb18c6d8a7d",
+            "ownerKind": "hook",
+            "displayLabel": "useQuery"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useTodos.ts:todoKeys",
+          "to_id": "33ebefb18c6d8a7d",
+          "kind": "usage-read",
+          "line": 6,
+          "column": 14,
+          "data_json": {
+            "usageId": "e4c972c01b73c9a4",
+            "filePath": "/src/queries/useTodos.ts",
+            "line": 6,
+            "column": 14,
+            "ownerId": "33ebefb18c6d8a7d",
+            "ownerKind": "hook",
+            "accessPath": [
+              "all"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "todoKeys.all"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useTodos.ts:Todo",
+          "to_id": "14e0cc4e231dce16",
+          "kind": "usage-read",
+          "line": 8,
+          "column": 58,
+          "data_json": {
+            "usageId": "5cbae782ceb4674f",
+            "filePath": "/src/queries/useTodos.ts",
+            "line": 8,
+            "column": 58,
+            "ownerId": "14e0cc4e231dce16",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        }
+      ]
+    },
+    "/src/queries/useMultiple.ts": {
+      "path": "/src/queries/useMultiple.ts",
+      "hash": "bf6616122828432e",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useQueries": {
+          "localName": "useQueries",
+          "importedName": "useQueries",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "todoDetailOptions": {
+          "localName": "todoDetailOptions",
+          "importedName": "todoDetailOptions",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "Todo": {
+          "localName": "Todo",
+          "importedName": "Todo",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "useMultipleTodos": {
+          "name": "useMultipleTodos",
+          "type": "named",
+          "exportKind": "function",
+          "id": "6d36c16ecd78d2f6"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "cb690e84e5d9fb88": {
+          "id": "cb690e84e5d9fb88",
+          "name": {
+            "type": "identifier",
+            "name": "TODO_IDS",
+            "loc": {
+              "line": 4,
+              "column": 6
+            },
+            "id": "e12074172f06e49"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/queries/useMultiple.ts",
+          "hash": "a04370d5986a1245",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 6
+          },
+          "children": {}
+        },
+        "6d36c16ecd78d2f6": {
+          "id": "6d36c16ecd78d2f6",
+          "name": {
+            "type": "identifier",
+            "name": "useMultipleTodos",
+            "loc": {
+              "line": 6,
+              "column": 16
+            },
+            "id": "663616a868a210db"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/src/queries/useMultiple.ts",
+          "hash": "85a8d2429091190a",
+          "dependencies": {},
+          "loc": {
+            "line": 6,
+            "column": 16
+          },
+          "var": {
+            "6d36c16ecd78d2f6:callhook:useQueries:7:8": {
+              "id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+              "name": {
+                "type": "identifier",
+                "name": "results",
+                "loc": {
+                  "line": 7,
+                  "column": 8
+                },
+                "id": "7e9928d2377ef455"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/queries/useMultiple.ts",
+              "hash": "795ff9eca629018a",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 8
+              },
+              "call": {
+                "id": "useQueries",
+                "name": "useQueries"
+              }
+            },
+            "50104c6475ae083e": {
+              "id": "50104c6475ae083e",
+              "name": {
+                "type": "identifier",
+                "name": "todos",
+                "loc": {
+                  "line": 11,
+                  "column": 8
+                },
+                "id": "b0eff8827aa2340c"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useMultiple.ts",
+              "hash": "88b05c1e85ff7ce6",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 11,
+                "column": 8
+              },
+              "var": {
+                "b192d4b2786be278": {
+                  "id": "b192d4b2786be278",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@13:9",
+                    "loc": {
+                      "line": 13,
+                      "column": 9
+                    },
+                    "id": "c472e47d985a5013"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/queries/useMultiple.ts",
+                  "hash": "9a994d4bdac5c7ca",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 13,
+                    "column": 9
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 13,
+                      "column": 9
+                    },
+                    "end": {
+                      "line": 13,
+                      "column": 30
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 13,
+                  "column": 9
+                },
+                "end": {
+                  "line": 13,
+                  "column": 30
+                }
+              },
+              "async": false
+            },
+            "eff4cbee927773f1": {
+              "id": "eff4cbee927773f1",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@12:12",
+                "loc": {
+                  "line": 12,
+                  "column": 12
+                },
+                "id": "5167048b49a1f53c"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useMultiple.ts",
+              "hash": "3063391779f0b650",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 12
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 12,
+                  "column": 12
+                },
+                "end": {
+                  "line": 12,
+                  "column": 39
+                }
+              },
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "r.data !== undefined"
+                }
+              }
+            },
+            "bfc8901a00143fb2": {
+              "id": "bfc8901a00143fb2",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@17:28",
+                "loc": {
+                  "line": 17,
+                  "column": 28
+                },
+                "id": "f46eadc3b3ff4307"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useMultiple.ts",
+              "hash": "16dd3cdf31740e70",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 17,
+                "column": 28
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 17,
+                  "column": 28
+                },
+                "end": {
+                  "line": 17,
+                  "column": 46
+                }
+              },
+              "return": {
+                "type": "ref",
+                "refType": "qualified",
+                "names": [
+                  "r",
+                  "isLoading"
+                ]
+              }
+            },
+            "97893639260735c1": {
+              "id": "97893639260735c1",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@18:26",
+                "loc": {
+                  "line": 18,
+                  "column": 26
+                },
+                "id": "6889254cd515fe43"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useMultiple.ts",
+              "hash": "6d035e793ae2d51e",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 26
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 18,
+                  "column": 26
+                },
+                "end": {
+                  "line": 18,
+                  "column": 42
+                }
+              },
+              "return": {
+                "type": "ref",
+                "refType": "qualified",
+                "names": [
+                  "r",
+                  "isError"
+                ]
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 6,
+              "column": 7
+            },
+            "end": {
+              "line": 20,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": {
+            "type": "literal-object",
+            "properties": {
+              "todos": {
+                "type": "ref",
+                "refType": "named",
+                "name": "todos"
+              }
+            }
+          },
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [
+            "useQueries"
+          ],
+          "effects": {}
+        }
+      },
+      "relations": [
+        {
+          "from_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "to_id": "symbol:import:/src/queries/useMultiple.ts:useQueries",
+          "kind": "usage-call",
+          "line": 7,
+          "column": 18,
+          "data_json": {
+            "usageId": "5919d81f95ef8e5a",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 7,
+            "column": 18,
+            "ownerId": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+            "ownerKind": "hook",
+            "displayLabel": "useQueries"
+          }
+        },
+        {
+          "from_id": "cb690e84e5d9fb88",
+          "to_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "kind": "usage-read",
+          "line": 8,
+          "column": 13,
+          "data_json": {
+            "usageId": "a4c5daa931df7f1b",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 8,
+            "column": 13,
+            "ownerId": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+            "ownerKind": "hook",
+            "accessPath": [
+              "map"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "TODO_IDS.map"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useMultiple.ts:todoDetailOptions",
+          "to_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "kind": "usage-read",
+          "line": 8,
+          "column": 26,
+          "data_json": {
+            "usageId": "984e08e93d423543",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 8,
+            "column": 26,
+            "ownerId": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+            "ownerKind": "hook",
+            "displayLabel": "todoDetailOptions"
+          }
+        },
+        {
+          "from_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "to_id": "50104c6475ae083e",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 16,
+          "data_json": {
+            "usageId": "f19109e752102763",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 11,
+            "column": 16,
+            "ownerId": "50104c6475ae083e",
+            "ownerKind": "normal",
+            "accessPath": [
+              "filter"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "results.filter"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useMultiple.ts:Todo",
+          "to_id": "b192d4b2786be278",
+          "kind": "usage-read",
+          "line": 13,
+          "column": 26,
+          "data_json": {
+            "usageId": "ca4055721202f7d3",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 13,
+            "column": 26,
+            "ownerId": "b192d4b2786be278",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        },
+        {
+          "from_id": "50104c6475ae083e",
+          "to_id": "6d36c16ecd78d2f6",
+          "kind": "usage-read",
+          "line": 16,
+          "column": 4,
+          "data_json": {
+            "usageId": "be5f1e4da451f405",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 16,
+            "column": 4,
+            "ownerId": "6d36c16ecd78d2f6",
+            "ownerKind": "hook",
+            "displayLabel": "todos"
+          }
+        },
+        {
+          "from_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "to_id": "6d36c16ecd78d2f6",
+          "kind": "usage-read",
+          "line": 17,
+          "column": 15,
+          "data_json": {
+            "usageId": "3aa0092f49978b5e",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 17,
+            "column": 15,
+            "ownerId": "6d36c16ecd78d2f6",
+            "ownerKind": "hook",
+            "accessPath": [
+              "some"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "results.some"
+          }
+        },
+        {
+          "from_id": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+          "to_id": "6d36c16ecd78d2f6",
+          "kind": "usage-read",
+          "line": 18,
+          "column": 13,
+          "data_json": {
+            "usageId": "c827795a29b7fc07",
+            "filePath": "/src/queries/useMultiple.ts",
+            "line": 18,
+            "column": 13,
+            "ownerId": "6d36c16ecd78d2f6",
+            "ownerKind": "hook",
+            "accessPath": [
+              "some"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "results.some"
+          }
+        }
+      ]
+    },
+    "/src/queries/useInfinite.ts": {
+      "path": "/src/queries/useInfinite.ts",
+      "hash": "bbd1ac7ce99d2af8",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useInfiniteQuery": {
+          "localName": "useInfiniteQuery",
+          "importedName": "useInfiniteQuery",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "Todo": {
+          "localName": "Todo",
+          "importedName": "Todo",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "useInfiniteTodos": {
+          "name": "useInfiniteTodos",
+          "type": "named",
+          "exportKind": "function",
+          "id": "782e21a4f9c38bdf"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "782e21a4f9c38bdf": {
+          "id": "782e21a4f9c38bdf",
+          "name": {
+            "type": "identifier",
+            "name": "useInfiniteTodos",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "b25cadb3fa257cd3"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/src/queries/useInfinite.ts",
+          "hash": "47a9e1af8bddcf21",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "90a5f7e91488df53": {
+              "id": "90a5f7e91488df53",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@7:13",
+                "loc": {
+                  "line": 7,
+                  "column": 13
+                },
+                "id": "3c5f1ec4c3f1b4fa"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useInfinite.ts",
+              "hash": "bb404bfb1e4c04c5",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 13
+              },
+              "var": {
+                "bb518211dc925a86": {
+                  "id": "bb518211dc925a86",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@9:8",
+                    "loc": {
+                      "line": 9,
+                      "column": 8
+                    },
+                    "id": "52bbd307055082a2"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/queries/useInfinite.ts",
+                  "hash": "b7a1b9e7b53ebc7f",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 9,
+                    "column": 8
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 9,
+                      "column": 8
+                    },
+                    "end": {
+                      "line": 9,
+                      "column": 42
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 7,
+                  "column": 13
+                },
+                "end": {
+                  "line": 10,
+                  "column": 7
+                }
+              }
+            },
+            "9e39151bf0a50720": {
+              "id": "9e39151bf0a50720",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@12:22",
+                "loc": {
+                  "line": 12,
+                  "column": 22
+                },
+                "id": "fcc23c78e00dc5ea"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useInfinite.ts",
+              "hash": "19cce801900936f9",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 22
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 12,
+                  "column": 22
+                },
+                "end": {
+                  "line": 13,
+                  "column": 59
+                }
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 15,
+              "column": 1
+            }
+          },
+          "async": false,
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [
+            "useInfiniteQuery"
+          ],
+          "effects": {}
+        }
+      },
+      "relations": [
+        {
+          "from_id": "782e21a4f9c38bdf",
+          "to_id": "symbol:import:/src/queries/useInfinite.ts:useInfiniteQuery",
+          "kind": "usage-call",
+          "line": 5,
+          "column": 9,
+          "data_json": {
+            "usageId": "e06a1b0fe79d8013",
+            "filePath": "/src/queries/useInfinite.ts",
+            "line": 5,
+            "column": 9,
+            "ownerId": "782e21a4f9c38bdf",
+            "ownerKind": "hook",
+            "displayLabel": "useInfiniteQuery"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useInfinite.ts:Todo",
+          "to_id": "bb518211dc925a86",
+          "kind": "usage-read",
+          "line": 9,
+          "column": 35,
+          "data_json": {
+            "usageId": "34d771d551fef119",
+            "filePath": "/src/queries/useInfinite.ts",
+            "line": 9,
+            "column": 35,
+            "ownerId": "bb518211dc925a86",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useInfinite.ts:Todo",
+          "to_id": "9e39151bf0a50720",
+          "kind": "usage-read",
+          "line": 12,
+          "column": 31,
+          "data_json": {
+            "usageId": "63140b93ba157795",
+            "filePath": "/src/queries/useInfinite.ts",
+            "line": 12,
+            "column": 31,
+            "ownerId": "9e39151bf0a50720",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useInfinite.ts:Todo",
+          "to_id": "9e39151bf0a50720",
+          "kind": "usage-read",
+          "line": 12,
+          "column": 49,
+          "data_json": {
+            "usageId": "787c5eda59282ff3",
+            "filePath": "/src/queries/useInfinite.ts",
+            "line": 12,
+            "column": 49,
+            "ownerId": "9e39151bf0a50720",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        }
+      ]
+    },
+    "/src/queries/useAddTodo.ts": {
+      "path": "/src/queries/useAddTodo.ts",
+      "hash": "442c95510c025648",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useMutation": {
+          "localName": "useMutation",
+          "importedName": "useMutation",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useQueryClient": {
+          "localName": "useQueryClient",
+          "importedName": "useQueryClient",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        },
+        "todoKeys": {
+          "localName": "todoKeys",
+          "importedName": "todoKeys",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "Todo": {
+          "localName": "Todo",
+          "importedName": "Todo",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "useAddTodo": {
+          "name": "useAddTodo",
+          "type": "named",
+          "exportKind": "function",
+          "id": "d7a00cf4ac9ef0fa"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "d7a00cf4ac9ef0fa": {
+          "id": "d7a00cf4ac9ef0fa",
+          "name": {
+            "type": "identifier",
+            "name": "useAddTodo",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "81fcc413c30cb812"
+          },
+          "kind": "hook",
+          "type": "function",
+          "file": "/src/queries/useAddTodo.ts",
+          "hash": "e15e509bf070b992",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8": {
+              "id": "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8",
+              "name": {
+                "type": "identifier",
+                "name": "queryClient",
+                "loc": {
+                  "line": 5,
+                  "column": 8
+                },
+                "id": "ca2cddba14f4baad"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/queries/useAddTodo.ts",
+              "hash": "b29f0ba242851826",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 8
+              },
+              "call": {
+                "id": "useQueryClient",
+                "name": "useQueryClient"
+              }
+            },
+            "4e8c8b57d6272806": {
+              "id": "4e8c8b57d6272806",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@8:16",
+                "loc": {
+                  "line": 8,
+                  "column": 16
+                },
+                "id": "9b069cad5aa935cd"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useAddTodo.ts",
+              "hash": "2d709a19c310afaf",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 8,
+                "column": 16
+              },
+              "var": {
+                "28faf1e538f922f6": {
+                  "id": "28faf1e538f922f6",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@13:14",
+                    "loc": {
+                      "line": 13,
+                      "column": 14
+                    },
+                    "id": "67e261a8d59051c3"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/queries/useAddTodo.ts",
+                  "hash": "7ff431b8210dbecc",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 13,
+                    "column": 14
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 13,
+                      "column": 14
+                    },
+                    "end": {
+                      "line": 13,
+                      "column": 46
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 8,
+                  "column": 16
+                },
+                "end": {
+                  "line": 13,
+                  "column": 47
+                }
+              }
+            },
+            "2a0c842d9f91ef44": {
+              "id": "2a0c842d9f91ef44",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@14:15",
+                "loc": {
+                  "line": 14,
+                  "column": 15
+                },
+                "id": "7417827be885ace8"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/useAddTodo.ts",
+              "hash": "c44ca9efe9db527d",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 15
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 14,
+                  "column": 15
+                },
+                "end": {
+                  "line": 16,
+                  "column": 5
+                }
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 18,
+              "column": 1
+            }
+          },
+          "async": false,
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [
+            "useQueryClient",
+            "useMutation"
+          ],
+          "effects": {}
+        }
+      },
+      "relations": [
+        {
+          "from_id": "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8",
+          "to_id": "symbol:import:/src/queries/useAddTodo.ts:useQueryClient",
+          "kind": "usage-call",
+          "line": 5,
+          "column": 22,
+          "data_json": {
+            "usageId": "4f429f4a7e05db3d",
+            "filePath": "/src/queries/useAddTodo.ts",
+            "line": 5,
+            "column": 22,
+            "ownerId": "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8",
+            "ownerKind": "hook",
+            "displayLabel": "useQueryClient"
+          }
+        },
+        {
+          "from_id": "d7a00cf4ac9ef0fa",
+          "to_id": "symbol:import:/src/queries/useAddTodo.ts:useMutation",
+          "kind": "usage-call",
+          "line": 7,
+          "column": 9,
+          "data_json": {
+            "usageId": "874f9bb3056f70fd",
+            "filePath": "/src/queries/useAddTodo.ts",
+            "line": 7,
+            "column": 9,
+            "ownerId": "d7a00cf4ac9ef0fa",
+            "ownerKind": "hook",
+            "displayLabel": "useMutation"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useAddTodo.ts:Todo",
+          "to_id": "28faf1e538f922f6",
+          "kind": "usage-read",
+          "line": 13,
+          "column": 41,
+          "data_json": {
+            "usageId": "990ca6d8b2eb01c1",
+            "filePath": "/src/queries/useAddTodo.ts",
+            "line": 13,
+            "column": 41,
+            "ownerId": "28faf1e538f922f6",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        },
+        {
+          "from_id": "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8",
+          "to_id": "2a0c842d9f91ef44",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 6,
+          "data_json": {
+            "usageId": "ea700bfcbdabfdcb",
+            "filePath": "/src/queries/useAddTodo.ts",
+            "line": 15,
+            "column": 6,
+            "ownerId": "2a0c842d9f91ef44",
+            "ownerKind": "normal",
+            "accessPath": [
+              "invalidateQueries"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "queryClient.invalidateQueries"
+          }
+        },
+        {
+          "from_id": "symbol:import:/src/queries/useAddTodo.ts:todoKeys",
+          "to_id": "2a0c842d9f91ef44",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 48,
+          "data_json": {
+            "usageId": "49158b6d085d396f",
+            "filePath": "/src/queries/useAddTodo.ts",
+            "line": 15,
+            "column": 48,
+            "ownerId": "2a0c842d9f91ef44",
+            "ownerKind": "normal",
+            "accessPath": [
+              "all"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "todoKeys.all"
+          }
+        }
+      ]
+    },
+    "/src/queries/api.ts": {
+      "path": "/src/queries/api.ts",
+      "hash": "233db1f9ea46af2e",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "queryOptions": {
+          "localName": "queryOptions",
+          "importedName": "queryOptions",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "Todo": {
+          "name": "Todo",
+          "type": "type",
+          "exportKind": "type",
+          "id": "e2c243785c48cf58"
+        },
+        "todoKeys": {
+          "name": "todoKeys",
+          "type": "named",
+          "exportKind": "value",
+          "id": "28d8b08a4f94be6e"
+        },
+        "todoDetailOptions": {
+          "name": "todoDetailOptions",
+          "type": "named",
+          "exportKind": "function",
+          "id": "92214203ac10c517"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {
+        "e2c243785c48cf58": {
+          "type": "interface",
+          "name": {
+            "type": "identifier",
+            "name": "Todo",
+            "loc": {
+              "line": 3,
+              "column": 17
+            },
+            "id": "f8fc21de76800039"
+          },
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "id",
+              "type": {
+                "type": "number"
+              },
+              "loc": {
+                "line": 4,
+                "column": 2
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "title",
+              "type": {
+                "type": "string"
+              },
+              "loc": {
+                "line": 5,
+                "column": 2
+              }
+            },
+            {
+              "signatureType": "property",
+              "name": "completed",
+              "type": {
+                "type": "boolean"
+              },
+              "loc": {
+                "line": 6,
+                "column": 2
+              }
+            }
+          ],
+          "loc": {
+            "line": 3,
+            "column": 17
+          },
+          "id": "e2c243785c48cf58"
+        }
+      },
+      "var": {
+        "28d8b08a4f94be6e": {
+          "id": "28d8b08a4f94be6e",
+          "name": {
+            "type": "identifier",
+            "name": "todoKeys",
+            "loc": {
+              "line": 9,
+              "column": 13
+            },
+            "id": "d65caae25cc72362"
+          },
+          "kind": "normal",
+          "type": "data",
+          "file": "/src/queries/api.ts",
+          "hash": "83dc71fd87d2eb40",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 9,
+            "column": 13
+          },
+          "children": {}
+        },
+        "7667707e36cddb0b": {
+          "id": "7667707e36cddb0b",
+          "name": {
+            "type": "identifier",
+            "name": "anonymous@11:10",
+            "loc": {
+              "line": 11,
+              "column": 10
+            },
+            "id": "8bd3a7a54a2e3fb8"
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/queries/api.ts",
+          "hash": "13381118e886b1e5",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 11,
+            "column": 10
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 11,
+              "column": 10
+            },
+            "end": {
+              "line": 11,
+              "column": 48
+            }
+          }
+        },
+        "92214203ac10c517": {
+          "id": "92214203ac10c517",
+          "name": {
+            "type": "identifier",
+            "name": "todoDetailOptions",
+            "loc": {
+              "line": 14,
+              "column": 16
+            },
+            "id": "1123554daeb03896"
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/queries/api.ts",
+          "hash": "a7f1686efb0e89ff",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 14,
+            "column": 16
+          },
+          "var": {
+            "6459dfba6a811c8b": {
+              "id": "6459dfba6a811c8b",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@17:13",
+                "loc": {
+                  "line": 17,
+                  "column": 13
+                },
+                "id": "4f99972b45f95863"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/queries/api.ts",
+              "hash": "6d86e859ed81df9c",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 17,
+                "column": 13
+              },
+              "var": {
+                "f8dd8c066c0e12af": {
+                  "id": "f8dd8c066c0e12af",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@18:37",
+                    "loc": {
+                      "line": 18,
+                      "column": 37
+                    },
+                    "id": "4e5c1d6483b5c558"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/queries/api.ts",
+                  "hash": "b8479a06d41888b7",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 18,
+                    "column": 37
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 18,
+                      "column": 37
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 69
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 17,
+                  "column": 13
+                },
+                "end": {
+                  "line": 18,
+                  "column": 70
+                }
+              }
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 14,
+              "column": 7
+            },
+            "end": {
+              "line": 20,
+              "column": 1
+            }
+          },
+          "async": false
+        }
+      },
+      "relations": [
+        {
+          "from_id": "92214203ac10c517",
+          "to_id": "symbol:import:/src/queries/api.ts:queryOptions",
+          "kind": "usage-call",
+          "line": 15,
+          "column": 9,
+          "data_json": {
+            "usageId": "195c033c00547bf5",
+            "filePath": "/src/queries/api.ts",
+            "line": 15,
+            "column": 9,
+            "ownerId": "92214203ac10c517",
+            "ownerKind": "normal",
+            "displayLabel": "queryOptions"
+          }
+        },
+        {
+          "from_id": "28d8b08a4f94be6e",
+          "to_id": "92214203ac10c517",
+          "kind": "usage-read",
+          "line": 16,
+          "column": 14,
+          "data_json": {
+            "usageId": "ce44b0e6fbf23e9e",
+            "filePath": "/src/queries/api.ts",
+            "line": 16,
+            "column": 14,
+            "ownerId": "92214203ac10c517",
+            "ownerKind": "normal",
+            "accessPath": [
+              "detail"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "todoKeys.detail"
+          }
+        },
+        {
+          "from_id": "e2c243785c48cf58",
+          "to_id": "f8dd8c066c0e12af",
+          "kind": "usage-read",
+          "line": 18,
+          "column": 64,
+          "data_json": {
+            "usageId": "bf93d3b9a5d35dd0",
+            "filePath": "/src/queries/api.ts",
+            "line": 18,
+            "column": 64,
+            "ownerId": "f8dd8c066c0e12af",
+            "ownerKind": "normal",
+            "displayLabel": "Todo"
+          }
+        }
+      ]
+    },
+    "/src/pages/TodoListPage.tsx": {
+      "path": "/src/pages/TodoListPage.tsx",
+      "hash": "4296c0b80af30605",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useTodos": {
+          "localName": "useTodos",
+          "importedName": "useTodos",
+          "source": "/src/queries/useTodos.js",
+          "type": "named",
+          "importKind": "value"
+        },
+        "TodoItem": {
+          "localName": "TodoItem",
+          "importedName": "TodoItem",
+          "source": "/src/components/TodoItem.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "TodoListPage": {
+          "name": "TodoListPage",
+          "type": "named",
+          "exportKind": "component",
+          "id": "eb743e18edd4945c"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "eb743e18edd4945c": {
+          "id": "eb743e18edd4945c",
+          "name": {
+            "type": "identifier",
+            "name": "TodoListPage",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "4c8858dc42ba8b9d"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/pages/TodoListPage.tsx",
+          "hash": "c816b91987b8ebab",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "eb743e18edd4945c:callhook:useTodos:5:8": {
+              "id": "eb743e18edd4945c:callhook:useTodos:5:8",
+              "name": {
+                "type": "object",
+                "properties": [
+                  {
+                    "key": "data",
+                    "value": {
+                      "type": "identifier",
+                      "name": "todos",
+                      "loc": {
+                        "line": 5,
+                        "column": 16
+                      },
+                      "id": "f1a1dc9eeab25fe2"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 10
+                    }
+                  },
+                  {
+                    "key": "isLoading",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isLoading",
+                      "loc": {
+                        "line": 5,
+                        "column": 23
+                      },
+                      "id": "889638b7d4938d85"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 23
+                    }
+                  },
+                  {
+                    "key": "isError",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isError",
+                      "loc": {
+                        "line": 5,
+                        "column": 34
+                      },
+                      "id": "3fd8c3d55c250821"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 34
+                    }
+                  }
+                ],
+                "raw": "{\n  data: todos,\n  isLoading,\n  isError\n}",
+                "loc": {
+                  "line": 5,
+                  "column": 8
+                },
+                "id": "a69f4c7afb51a7a7"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "ed0fb3acd66bd907",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 8
+              },
+              "call": {
+                "id": "e8f8f75b066be1a7",
+                "name": "useTodos"
+              }
+            },
+            "174ae8fcd3e4994f": {
+              "id": "174ae8fcd3e4994f",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@7:24",
+                "loc": {
+                  "line": 7,
+                  "column": 24
+                },
+                "id": "dfc74ce74131edb2"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "fc0bfae2d5ce8a50",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 24
+              },
+              "render": {
+                "id": "/src/pages/TodoListPage.tsx:div:7:24",
+                "instanceId": "fd1707e16ed3e608",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 7,
+                  "column": 24
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/pages/TodoListPage.tsx:div:7:24"
+            },
+            "f2023115f52edf1d": {
+              "id": "f2023115f52edf1d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@8:22",
+                "loc": {
+                  "line": 8,
+                  "column": 22
+                },
+                "id": "2206c435d9bfaab3"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "5e706762679aba5",
+              "dependencies": {},
+              "loc": {
+                "line": 8,
+                "column": 22
+              },
+              "render": {
+                "id": "/src/pages/TodoListPage.tsx:div:8:22",
+                "instanceId": "c754c48f3392b155",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 8,
+                  "column": 22
+                },
+                "renderIndex": 1,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/pages/TodoListPage.tsx:div:8:22"
+            },
+            "1fd682fb17c3c6a7": {
+              "id": "1fd682fb17c3c6a7",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@11:4",
+                "loc": {
+                  "line": 11,
+                  "column": 4
+                },
+                "id": "7a583c6c06e1e0b9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "361511d6dadd5b3e",
+              "dependencies": {
+                "825039bb67785a38": {
+                  "id": "825039bb67785a38",
+                  "name": "jsx@12:6"
+                },
+                "6e2cc6f8fc0430d8": {
+                  "id": "6e2cc6f8fc0430d8",
+                  "name": "jsx@13:6"
+                }
+              },
+              "loc": {
+                "line": 11,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/pages/TodoListPage.tsx:section:11:4",
+                "instanceId": "64dd8357427ad2e9",
+                "tag": "section",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 11,
+                  "column": 4
+                },
+                "renderIndex": 2,
+                "kind": "jsx",
+                "children": {
+                  "b927dbeedf022670": {
+                    "id": "/src/pages/TodoListPage.tsx:h2:12:6",
+                    "instanceId": "b927dbeedf022670",
+                    "tag": "h2",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 12,
+                      "column": 6
+                    },
+                    "parentId": "64dd8357427ad2e9",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "1ac1450e0a0cb8de": {
+                    "id": "/src/pages/TodoListPage.tsx:ul:13:6",
+                    "instanceId": "1ac1450e0a0cb8de",
+                    "tag": "ul",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 13,
+                      "column": 6
+                    },
+                    "parentId": "64dd8357427ad2e9",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {
+                      "f8036ff688ec292f": {
+                        "id": "",
+                        "instanceId": "f8036ff688ec292f",
+                        "tag": "TodoItem",
+                        "dependencies": [
+                          {
+                            "id": "bbea0d63a05165e3",
+                            "name": "key",
+                            "value": {
+                              "type": "ref",
+                              "refType": "qualified",
+                              "names": [
+                                "todo",
+                                "id"
+                              ]
+                            }
+                          },
+                          {
+                            "id": "4791be95ce3a5af9",
+                            "name": "todo",
+                            "value": {
+                              "type": "ref",
+                              "refType": "named",
+                              "name": "todo"
+                            }
+                          }
+                        ],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 15,
+                          "column": 10
+                        },
+                        "parentId": "1ac1450e0a0cb8de",
+                        "renderIndex": 0,
+                        "kind": "jsx",
+                        "children": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "srcId": "/src/pages/TodoListPage.tsx:section:11:4"
+            },
+            "825039bb67785a38": {
+              "id": "825039bb67785a38",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:6",
+                "loc": {
+                  "line": 12,
+                  "column": 6
+                },
+                "id": "1cb36bef813ac66a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "23092ba9ee643e75",
+              "dependencies": {},
+              "loc": {
+                "line": 12,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/TodoListPage.tsx:h2:12:6"
+            },
+            "6e2cc6f8fc0430d8": {
+              "id": "6e2cc6f8fc0430d8",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@13:6",
+                "loc": {
+                  "line": 13,
+                  "column": 6
+                },
+                "id": "38a6425d327ab480"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "c6e7cf151a671f1d",
+              "dependencies": {
+                "6a8b9a2092fc5de2": {
+                  "id": "6a8b9a2092fc5de2",
+                  "name": "jsx@15:10"
+                }
+              },
+              "loc": {
+                "line": 13,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/TodoListPage.tsx:ul:13:6"
+            },
+            "2b21f185f6c27f44": {
+              "id": "2b21f185f6c27f44",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@14:20",
+                "loc": {
+                  "line": 14,
+                  "column": 20
+                },
+                "id": "977dff16ef71d424"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/pages/TodoListPage.tsx",
+              "hash": "839887be4dcb4ace",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 14,
+                "column": 20
+              },
+              "var": {
+                "6a8b9a2092fc5de2": {
+                  "id": "6a8b9a2092fc5de2",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@15:10",
+                    "loc": {
+                      "line": 15,
+                      "column": 10
+                    },
+                    "id": "e3f6bfda13b67ad7"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/pages/TodoListPage.tsx",
+                  "hash": "3c514b741056473d",
+                  "dependencies": {
+                    "4791be95ce3a5af9": {
+                      "id": "4791be95ce3a5af9",
+                      "name": "todo"
+                    }
+                  },
+                  "loc": {
+                    "line": 15,
+                    "column": 10
+                  },
+                  "render": null
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 14,
+                  "column": 20
+                },
+                "end": {
+                  "line": 16,
+                  "column": 9
+                }
+              },
+              "return": "6a8b9a2092fc5de2"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 20,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "1fd682fb17c3c6a7",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8:889638b7d4938d85",
+          "to_id": "eb743e18edd4945c:callhook:useTodos:5:8",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 23,
+          "data_json": {
+            "usageId": "d8617da9f5acb069",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 5,
+            "column": 23,
+            "ownerId": "eb743e18edd4945c:callhook:useTodos:5:8",
+            "ownerKind": "hook",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8:3fd8c3d55c250821",
+          "to_id": "eb743e18edd4945c:callhook:useTodos:5:8",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 34,
+          "data_json": {
+            "usageId": "8c045823f154024e",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 5,
+            "column": 34,
+            "ownerId": "eb743e18edd4945c:callhook:useTodos:5:8",
+            "ownerKind": "hook",
+            "displayLabel": "isError"
+          }
+        },
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8",
+          "to_id": "symbol:import:/src/pages/TodoListPage.tsx:useTodos",
+          "kind": "usage-call",
+          "line": 5,
+          "column": 46,
+          "data_json": {
+            "usageId": "e2e32fab3499137",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 5,
+            "column": 46,
+            "ownerId": "eb743e18edd4945c:callhook:useTodos:5:8",
+            "ownerKind": "hook",
+            "displayLabel": "useTodos"
+          }
+        },
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8:889638b7d4938d85",
+          "to_id": "eb743e18edd4945c",
+          "kind": "usage-read",
+          "line": 7,
+          "column": 6,
+          "data_json": {
+            "usageId": "8f7885a46e551aa8",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 7,
+            "column": 6,
+            "ownerId": "eb743e18edd4945c",
+            "ownerKind": "component",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8:3fd8c3d55c250821",
+          "to_id": "eb743e18edd4945c",
+          "kind": "usage-read",
+          "line": 8,
+          "column": 6,
+          "data_json": {
+            "usageId": "51f6bcd5d895827c",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 8,
+            "column": 6,
+            "ownerId": "eb743e18edd4945c",
+            "ownerKind": "component",
+            "displayLabel": "isError"
+          }
+        },
+        {
+          "from_id": "eb743e18edd4945c:callhook:useTodos:5:8:f1a1dc9eeab25fe2",
+          "to_id": "6e2cc6f8fc0430d8",
+          "kind": "usage-read",
+          "line": 14,
+          "column": 9,
+          "data_json": {
+            "usageId": "cfd684461999d8fb",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 14,
+            "column": 9,
+            "ownerId": "6e2cc6f8fc0430d8",
+            "ownerKind": "normal",
+            "accessPath": [
+              "map"
+            ],
+            "isOptional": true,
+            "isComputed": false,
+            "displayLabel": "todos.map"
+          }
+        },
+        {
+          "from_id": "2b21f185f6c27f44",
+          "to_id": "symbol:import:/src/pages/TodoListPage.tsx:TodoItem",
+          "kind": "usage-render-call",
+          "line": 15,
+          "column": 11,
+          "data_json": {
+            "usageId": "77fba9b0847e1884",
+            "filePath": "/src/pages/TodoListPage.tsx",
+            "line": 15,
+            "column": 11,
+            "ownerId": "2b21f185f6c27f44",
+            "ownerKind": "normal",
+            "displayLabel": "TodoItem"
+          }
+        }
+      ]
+    },
+    "/src/pages/InlineQueryPage.tsx": {
+      "path": "/src/pages/InlineQueryPage.tsx",
+      "hash": "75f18b3a742a1a8d",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useQuery": {
+          "localName": "useQuery",
+          "importedName": "useQuery",
+          "source": "@tanstack/react-query",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "InlineQueryPage": {
+          "name": "InlineQueryPage",
+          "type": "named",
+          "exportKind": "component",
+          "id": "bacb8bc57cf55952"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "bacb8bc57cf55952": {
+          "id": "bacb8bc57cf55952",
+          "name": {
+            "type": "identifier",
+            "name": "InlineQueryPage",
+            "loc": {
+              "line": 3,
+              "column": 16
+            },
+            "id": "687627267cea71b8"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/pages/InlineQueryPage.tsx",
+          "hash": "6428c8a124b40546",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 16
+          },
+          "var": {
+            "bacb8bc57cf55952:callhook:useQuery:4:8": {
+              "id": "bacb8bc57cf55952:callhook:useQuery:4:8",
+              "name": {
+                "type": "object",
+                "properties": [
+                  {
+                    "key": "data",
+                    "value": {
+                      "type": "identifier",
+                      "name": "data",
+                      "loc": {
+                        "line": 4,
+                        "column": 10
+                      },
+                      "id": "cd923a7c09fac0aa"
+                    },
+                    "loc": {
+                      "line": 4,
+                      "column": 10
+                    }
+                  },
+                  {
+                    "key": "isLoading",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isLoading",
+                      "loc": {
+                        "line": 4,
+                        "column": 16
+                      },
+                      "id": "889638b7d4938d85"
+                    },
+                    "loc": {
+                      "line": 4,
+                      "column": 16
+                    }
+                  }
+                ],
+                "raw": "{\n  data,\n  isLoading\n}",
+                "loc": {
+                  "line": 4,
+                  "column": 8
+                },
+                "id": "a69f4c7afb51a7a7"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/pages/InlineQueryPage.tsx",
+              "hash": "fb6b0ca28d62333b",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "call": {
+                "id": "useQuery",
+                "name": "useQuery"
+              }
+            },
+            "3dfd83377fa112d1": {
+              "id": "3dfd83377fa112d1",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@6:13",
+                "loc": {
+                  "line": 6,
+                  "column": 13
+                },
+                "id": "da7f2ef288f8e951"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/pages/InlineQueryPage.tsx",
+              "hash": "7f911b7a03a241c9",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 6,
+                "column": 13
+              },
+              "var": {
+                "eb611707b98c589d": {
+                  "id": "eb611707b98c589d",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@6:45",
+                    "loc": {
+                      "line": 6,
+                      "column": 45
+                    },
+                    "id": "fa9726e6a766465b"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/pages/InlineQueryPage.tsx",
+                  "hash": "d372ffa227c18bd1",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 6,
+                    "column": 45
+                  },
+                  "var": {},
+                  "scope": {
+                    "start": {
+                      "line": 6,
+                      "column": 45
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 60
+                    }
+                  }
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 6,
+                  "column": 13
+                },
+                "end": {
+                  "line": 6,
+                  "column": 61
+                }
+              }
+            },
+            "4278f17199e73915": {
+              "id": "4278f17199e73915",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@9:24",
+                "loc": {
+                  "line": 9,
+                  "column": 24
+                },
+                "id": "e65ad5a4192459f9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InlineQueryPage.tsx",
+              "hash": "4c185e5e8489218",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 24
+              },
+              "render": {
+                "id": "/src/pages/InlineQueryPage.tsx:div:9:24",
+                "instanceId": "996f7e03e629d3a4",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 9,
+                  "column": 24
+                },
+                "renderIndex": 1,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/pages/InlineQueryPage.tsx:div:9:24"
+            },
+            "5dba34b6a9cadcac": {
+              "id": "5dba34b6a9cadcac",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@10:9",
+                "loc": {
+                  "line": 10,
+                  "column": 9
+                },
+                "id": "492d1435e7f42021"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InlineQueryPage.tsx",
+              "hash": "64ad65a3579e2092",
+              "dependencies": {
+                "e4b7943fd57d5d1e": {
+                  "id": "e4b7943fd57d5d1e",
+                  "name": "data"
+                }
+              },
+              "loc": {
+                "line": 10,
+                "column": 9
+              },
+              "render": {
+                "id": "/src/pages/InlineQueryPage.tsx:div:10:9",
+                "instanceId": "4b65b73b9ef99691",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 10,
+                  "column": 9
+                },
+                "renderIndex": 2,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/pages/InlineQueryPage.tsx:div:10:9"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 7
+            },
+            "end": {
+              "line": 11,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "5dba34b6a9cadcac",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [
+            "useQuery"
+          ],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "bacb8bc57cf55952:callhook:useQuery:4:8:cd923a7c09fac0aa",
+          "to_id": "bacb8bc57cf55952:callhook:useQuery:4:8",
+          "kind": "usage-read",
+          "line": 4,
+          "column": 10,
+          "data_json": {
+            "usageId": "14121045b58e4ea1",
+            "filePath": "/src/pages/InlineQueryPage.tsx",
+            "line": 4,
+            "column": 10,
+            "ownerId": "bacb8bc57cf55952:callhook:useQuery:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "data"
+          }
+        },
+        {
+          "from_id": "bacb8bc57cf55952:callhook:useQuery:4:8:889638b7d4938d85",
+          "to_id": "bacb8bc57cf55952:callhook:useQuery:4:8",
+          "kind": "usage-read",
+          "line": 4,
+          "column": 16,
+          "data_json": {
+            "usageId": "b8c397fb7d1dec14",
+            "filePath": "/src/pages/InlineQueryPage.tsx",
+            "line": 4,
+            "column": 16,
+            "ownerId": "bacb8bc57cf55952:callhook:useQuery:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "bacb8bc57cf55952:callhook:useQuery:4:8",
+          "to_id": "symbol:import:/src/pages/InlineQueryPage.tsx:useQuery",
+          "kind": "usage-call",
+          "line": 4,
+          "column": 30,
+          "data_json": {
+            "usageId": "6537b25273d0ca23",
+            "filePath": "/src/pages/InlineQueryPage.tsx",
+            "line": 4,
+            "column": 30,
+            "ownerId": "bacb8bc57cf55952:callhook:useQuery:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "useQuery"
+          }
+        },
+        {
+          "from_id": "bacb8bc57cf55952:callhook:useQuery:4:8:889638b7d4938d85",
+          "to_id": "bacb8bc57cf55952",
+          "kind": "usage-read",
+          "line": 9,
+          "column": 6,
+          "data_json": {
+            "usageId": "925208cfaf98e0e7",
+            "filePath": "/src/pages/InlineQueryPage.tsx",
+            "line": 9,
+            "column": 6,
+            "ownerId": "bacb8bc57cf55952",
+            "ownerKind": "component",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "bacb8bc57cf55952:callhook:useQuery:4:8:cd923a7c09fac0aa",
+          "to_id": "5dba34b6a9cadcac",
+          "kind": "usage-read",
+          "line": 10,
+          "column": 38,
+          "data_json": {
+            "usageId": "4bf0671a8c919ff6",
+            "filePath": "/src/pages/InlineQueryPage.tsx",
+            "line": 10,
+            "column": 38,
+            "ownerId": "5dba34b6a9cadcac",
+            "ownerKind": "normal",
+            "displayLabel": "data"
+          }
+        }
+      ]
+    },
+    "/src/pages/InfinitePage.tsx": {
+      "path": "/src/pages/InfinitePage.tsx",
+      "hash": "6d17ead92ca3e997",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useInfiniteTodos": {
+          "localName": "useInfiniteTodos",
+          "importedName": "useInfiniteTodos",
+          "source": "/src/queries/useInfinite.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "InfinitePage": {
+          "name": "InfinitePage",
+          "type": "named",
+          "exportKind": "component",
+          "id": "b5a33390386ca4a"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "b5a33390386ca4a": {
+          "id": "b5a33390386ca4a",
+          "name": {
+            "type": "identifier",
+            "name": "InfinitePage",
+            "loc": {
+              "line": 3,
+              "column": 16
+            },
+            "id": "c30f88500f4de73d"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/pages/InfinitePage.tsx",
+          "hash": "abbc304c8d03ff15",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 16
+          },
+          "var": {
+            "b5a33390386ca4a:callhook:useInfiniteTodos:4:8": {
+              "id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+              "name": {
+                "type": "object",
+                "properties": [
+                  {
+                    "key": "data",
+                    "value": {
+                      "type": "identifier",
+                      "name": "data",
+                      "loc": {
+                        "line": 5,
+                        "column": 4
+                      },
+                      "id": "cd923a7c09fac0aa"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 4
+                    }
+                  },
+                  {
+                    "key": "fetchNextPage",
+                    "value": {
+                      "type": "identifier",
+                      "name": "fetchNextPage",
+                      "loc": {
+                        "line": 6,
+                        "column": 4
+                      },
+                      "id": "e81ea09f8a1262cb"
+                    },
+                    "loc": {
+                      "line": 6,
+                      "column": 4
+                    }
+                  },
+                  {
+                    "key": "hasNextPage",
+                    "value": {
+                      "type": "identifier",
+                      "name": "hasNextPage",
+                      "loc": {
+                        "line": 7,
+                        "column": 4
+                      },
+                      "id": "d4dca74b5bee4cfa"
+                    },
+                    "loc": {
+                      "line": 7,
+                      "column": 4
+                    }
+                  },
+                  {
+                    "key": "isFetchingNextPage",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isFetchingNextPage",
+                      "loc": {
+                        "line": 8,
+                        "column": 4
+                      },
+                      "id": "5aca83f72012a163"
+                    },
+                    "loc": {
+                      "line": 8,
+                      "column": 4
+                    }
+                  }
+                ],
+                "raw": "{\n  data,\n  fetchNextPage,\n  hasNextPage,\n  isFetchingNextPage\n}",
+                "loc": {
+                  "line": 4,
+                  "column": 8
+                },
+                "id": "a69f4c7afb51a7a7"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "3c14a4c5b87116cc",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "call": {
+                "id": "b25cadb3fa257cd3",
+                "name": "useInfiniteTodos"
+              }
+            },
+            "89df68380ac9f2bb": {
+              "id": "89df68380ac9f2bb",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:4",
+                "loc": {
+                  "line": 12,
+                  "column": 4
+                },
+                "id": "5643dc0e43d28453"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "cccc9eb1ceab417c",
+              "dependencies": {
+                "61bda7a1d2d2c80d": {
+                  "id": "61bda7a1d2d2c80d",
+                  "name": "jsx@13:6"
+                },
+                "df54f6dca7518de8": {
+                  "id": "df54f6dca7518de8",
+                  "name": "jsx@14:6"
+                },
+                "7b94647236d6fc3f": {
+                  "id": "7b94647236d6fc3f",
+                  "name": "jsx@23:6"
+                }
+              },
+              "loc": {
+                "line": 12,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/pages/InfinitePage.tsx:section:12:4",
+                "instanceId": "66b14ab6fe5a6550",
+                "tag": "section",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 12,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "3d82f35ee2cf4070": {
+                    "id": "/src/pages/InfinitePage.tsx:h2:13:6",
+                    "instanceId": "3d82f35ee2cf4070",
+                    "tag": "h2",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 13,
+                      "column": 6
+                    },
+                    "parentId": "66b14ab6fe5a6550",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "93ebbdcfab1e33e3": {
+                    "id": "/src/pages/InfinitePage.tsx:ul:14:6",
+                    "instanceId": "93ebbdcfab1e33e3",
+                    "tag": "ul",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 14,
+                      "column": 6
+                    },
+                    "parentId": "66b14ab6fe5a6550",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {
+                      "22cf647c033f672": {
+                        "id": "/src/pages/InfinitePage.tsx:li:16:10",
+                        "instanceId": "22cf647c033f672",
+                        "tag": "li",
+                        "dependencies": [
+                          {
+                            "id": "bbea0d63a05165e3",
+                            "name": "key",
+                            "value": {
+                              "type": "ref",
+                              "refType": "named",
+                              "name": "i"
+                            }
+                          }
+                        ],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 16,
+                          "column": 10
+                        },
+                        "parentId": "93ebbdcfab1e33e3",
+                        "renderIndex": 0,
+                        "kind": "jsx",
+                        "children": {
+                          "6b6146691842edf7": {
+                            "id": "/src/pages/InfinitePage.tsx:div:18:14",
+                            "instanceId": "6b6146691842edf7",
+                            "tag": "div",
+                            "dependencies": [
+                              {
+                                "id": "bbea0d63a05165e3",
+                                "name": "key",
+                                "value": {
+                                  "type": "ref",
+                                  "refType": "qualified",
+                                  "names": [
+                                    "todo",
+                                    "id"
+                                  ]
+                                }
+                              }
+                            ],
+                            "isDependency": false,
+                            "loc": {
+                              "line": 18,
+                              "column": 14
+                            },
+                            "parentId": "22cf647c033f672",
+                            "renderIndex": 0,
+                            "kind": "jsx",
+                            "children": {}
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "a54e488006c591ec": {
+                    "id": "/src/pages/InfinitePage.tsx:button:23:6",
+                    "instanceId": "a54e488006c591ec",
+                    "tag": "button",
+                    "dependencies": [
+                      {
+                        "id": "e67a7184a83a3fcb",
+                        "name": "onClick",
+                        "value": {
+                          "type": "literal-type",
+                          "literal": {
+                            "type": "string",
+                            "value": "() => fetchNextPage()"
+                          }
+                        }
+                      },
+                      {
+                        "id": "b044dd5ef21f20ed",
+                        "name": "disabled",
+                        "value": {
+                          "type": "literal-type",
+                          "literal": {
+                            "type": "string",
+                            "value": "!hasNextPage"
+                          }
+                        }
+                      },
+                      {
+                        "id": "b044dd5ef21f20ed",
+                        "name": "disabled",
+                        "value": {
+                          "type": "ref",
+                          "refType": "named",
+                          "name": "isFetchingNextPage"
+                        },
+                        "valueId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:5aca83f72012a163"
+                      }
+                    ],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 23,
+                      "column": 6
+                    },
+                    "parentId": "66b14ab6fe5a6550",
+                    "renderIndex": 2,
+                    "kind": "jsx",
+                    "children": {
+                      "891da16a0154d5fc": {
+                        "id": "9ae84659c6eaacb6",
+                        "instanceId": "891da16a0154d5fc",
+                        "tag": "onClick",
+                        "dependencies": [],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 24,
+                          "column": 8
+                        },
+                        "parentId": "a54e488006c591ec",
+                        "renderIndex": 0,
+                        "kind": "attribute",
+                        "children": {}
+                      },
+                      "f7270ad77dfd4799": {
+                        "id": "",
+                        "instanceId": "f7270ad77dfd4799",
+                        "tag": "Logical",
+                        "dependencies": [],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 25,
+                          "column": 18
+                        },
+                        "parentId": "a54e488006c591ec",
+                        "renderIndex": 1,
+                        "kind": "jsx",
+                        "children": {}
+                      },
+                      "10e0c8c0781edaf4": {
+                        "id": "",
+                        "instanceId": "10e0c8c0781edaf4",
+                        "tag": "Ternary",
+                        "dependencies": [],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 27,
+                          "column": 9
+                        },
+                        "parentId": "a54e488006c591ec",
+                        "renderIndex": 2,
+                        "kind": "jsx",
+                        "children": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "srcId": "/src/pages/InfinitePage.tsx:section:12:4"
+            },
+            "61bda7a1d2d2c80d": {
+              "id": "61bda7a1d2d2c80d",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@13:6",
+                "loc": {
+                  "line": 13,
+                  "column": 6
+                },
+                "id": "38a6425d327ab480"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "67c9126bb5a25a47",
+              "dependencies": {},
+              "loc": {
+                "line": 13,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/InfinitePage.tsx:h2:13:6"
+            },
+            "df54f6dca7518de8": {
+              "id": "df54f6dca7518de8",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@14:6",
+                "loc": {
+                  "line": 14,
+                  "column": 6
+                },
+                "id": "31eaefa3097b31c5"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "55336fc32cdbea8a",
+              "dependencies": {
+                "62a7e87577e0be1b": {
+                  "id": "62a7e87577e0be1b",
+                  "name": "jsx@16:10"
+                }
+              },
+              "loc": {
+                "line": 14,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/InfinitePage.tsx:ul:14:6"
+            },
+            "3b20de8e6a9d3e87": {
+              "id": "3b20de8e6a9d3e87",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@15:25",
+                "loc": {
+                  "line": 15,
+                  "column": 25
+                },
+                "id": "7d1f7db6ff37826c"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "a6a0bc5d00dc875a",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 15,
+                "column": 25
+              },
+              "var": {
+                "62a7e87577e0be1b": {
+                  "id": "62a7e87577e0be1b",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@16:10",
+                    "loc": {
+                      "line": 16,
+                      "column": 10
+                    },
+                    "id": "c7722109628e0387"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/pages/InfinitePage.tsx",
+                  "hash": "22ab93d46939d713",
+                  "dependencies": {
+                    "2c022d030ff25ace": {
+                      "id": "2c022d030ff25ace",
+                      "name": "i"
+                    },
+                    "e7948aad7672727b": {
+                      "id": "e7948aad7672727b",
+                      "name": "jsx@18:14"
+                    }
+                  },
+                  "loc": {
+                    "line": 16,
+                    "column": 10
+                  },
+                  "render": null,
+                  "srcId": "/src/pages/InfinitePage.tsx:li:16:10"
+                },
+                "cbbab6c21c73b2b0": {
+                  "id": "cbbab6c21c73b2b0",
+                  "name": {
+                    "type": "identifier",
+                    "name": "anonymous@17:22",
+                    "loc": {
+                      "line": 17,
+                      "column": 22
+                    },
+                    "id": "167517f6c65a4a23"
+                  },
+                  "kind": "normal",
+                  "type": "function",
+                  "file": "/src/pages/InfinitePage.tsx",
+                  "hash": "c4c6342add15a1c7",
+                  "declarationKind": "const",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 17,
+                    "column": 22
+                  },
+                  "var": {
+                    "e7948aad7672727b": {
+                      "id": "e7948aad7672727b",
+                      "name": {
+                        "type": "identifier",
+                        "name": "jsx@18:14",
+                        "loc": {
+                          "line": 18,
+                          "column": 14
+                        },
+                        "id": "7eddd23290d4c193"
+                      },
+                      "kind": "normal",
+                      "type": "jsx",
+                      "file": "/src/pages/InfinitePage.tsx",
+                      "hash": "61e974002b30640e",
+                      "dependencies": {},
+                      "loc": {
+                        "line": 18,
+                        "column": 14
+                      },
+                      "render": null,
+                      "srcId": "/src/pages/InfinitePage.tsx:div:18:14"
+                    }
+                  },
+                  "scope": {
+                    "start": {
+                      "line": 17,
+                      "column": 22
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 13
+                    }
+                  },
+                  "return": "e7948aad7672727b"
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 15,
+                  "column": 25
+                },
+                "end": {
+                  "line": 21,
+                  "column": 9
+                }
+              },
+              "return": "62a7e87577e0be1b"
+            },
+            "7b94647236d6fc3f": {
+              "id": "7b94647236d6fc3f",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@23:6",
+                "loc": {
+                  "line": 23,
+                  "column": 6
+                },
+                "id": "ff72b085e69fa362"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/InfinitePage.tsx",
+              "hash": "3b9ebf8257add5c4",
+              "dependencies": {
+                "fcc52562e049ec91": {
+                  "id": "fcc52562e049ec91",
+                  "name": "isFetchingNextPage"
+                }
+              },
+              "loc": {
+                "line": 23,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/InfinitePage.tsx:button:23:6"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 7
+            },
+            "end": {
+              "line": 35,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "89df68380ac9f2bb",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:cd923a7c09fac0aa",
+          "to_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+          "kind": "usage-read",
+          "line": 5,
+          "column": 4,
+          "data_json": {
+            "usageId": "d2d6f7ea13180a78",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 5,
+            "column": 4,
+            "ownerId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "data"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:e81ea09f8a1262cb",
+          "to_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+          "kind": "usage-read",
+          "line": 6,
+          "column": 4,
+          "data_json": {
+            "usageId": "d3f4d2676fb263e9",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 6,
+            "column": 4,
+            "ownerId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "fetchNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:d4dca74b5bee4cfa",
+          "to_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+          "kind": "usage-read",
+          "line": 7,
+          "column": 4,
+          "data_json": {
+            "usageId": "fa6a634bceb46e98",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 7,
+            "column": 4,
+            "ownerId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "hasNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:5aca83f72012a163",
+          "to_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+          "kind": "usage-read",
+          "line": 8,
+          "column": 4,
+          "data_json": {
+            "usageId": "b13cdde501f09826",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 8,
+            "column": 4,
+            "ownerId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "isFetchingNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+          "to_id": "symbol:import:/src/pages/InfinitePage.tsx:useInfiniteTodos",
+          "kind": "usage-call",
+          "line": 9,
+          "column": 6,
+          "data_json": {
+            "usageId": "cb11b7ed7c4da1bd",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 9,
+            "column": 6,
+            "ownerId": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "useInfiniteTodos"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:cd923a7c09fac0aa",
+          "to_id": "df54f6dca7518de8",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 9,
+          "data_json": {
+            "usageId": "a23359be967d8203",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 15,
+            "column": 9,
+            "ownerId": "df54f6dca7518de8",
+            "ownerKind": "normal",
+            "accessPath": [
+              "pages"
+            ],
+            "isOptional": true,
+            "isComputed": false,
+            "displayLabel": "data.pages"
+          }
+        },
+        {
+          "from_id": "9ae84659c6eaacb6",
+          "to_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:e81ea09f8a1262cb",
+          "kind": "usage-call",
+          "line": 24,
+          "column": 23,
+          "data_json": {
+            "usageId": "8691ce31b728534",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 24,
+            "column": 23,
+            "ownerId": "9ae84659c6eaacb6",
+            "ownerKind": "attribute",
+            "displayLabel": "fetchNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:d4dca74b5bee4cfa",
+          "to_id": "7b94647236d6fc3f",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 19,
+          "data_json": {
+            "usageId": "e4026bf6069757c3",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 25,
+            "column": 19,
+            "ownerId": "7b94647236d6fc3f",
+            "ownerKind": "normal",
+            "displayLabel": "hasNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:5aca83f72012a163",
+          "to_id": "7b94647236d6fc3f",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 34,
+          "data_json": {
+            "usageId": "1a364dcdaab33c3c",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 25,
+            "column": 34,
+            "ownerId": "7b94647236d6fc3f",
+            "ownerKind": "normal",
+            "displayLabel": "isFetchingNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:5aca83f72012a163",
+          "to_id": "7b94647236d6fc3f",
+          "kind": "usage-read",
+          "line": 27,
+          "column": 9,
+          "data_json": {
+            "usageId": "bd9333a2a5f5922b",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 27,
+            "column": 9,
+            "ownerId": "7b94647236d6fc3f",
+            "ownerKind": "normal",
+            "displayLabel": "isFetchingNextPage"
+          }
+        },
+        {
+          "from_id": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8:d4dca74b5bee4cfa",
+          "to_id": "7b94647236d6fc3f",
+          "kind": "usage-read",
+          "line": 29,
+          "column": 12,
+          "data_json": {
+            "usageId": "894bbb2def1527b5",
+            "filePath": "/src/pages/InfinitePage.tsx",
+            "line": 29,
+            "column": 12,
+            "ownerId": "7b94647236d6fc3f",
+            "ownerKind": "normal",
+            "displayLabel": "hasNextPage"
+          }
+        }
+      ]
+    },
+    "/src/pages/DashboardPage.tsx": {
+      "path": "/src/pages/DashboardPage.tsx",
+      "hash": "af0b046ba136b73a",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useMultipleTodos": {
+          "localName": "useMultipleTodos",
+          "importedName": "useMultipleTodos",
+          "source": "/src/queries/useMultiple.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "DashboardPage": {
+          "name": "DashboardPage",
+          "type": "named",
+          "exportKind": "component",
+          "id": "66015324a75acd71"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "66015324a75acd71": {
+          "id": "66015324a75acd71",
+          "name": {
+            "type": "identifier",
+            "name": "DashboardPage",
+            "loc": {
+              "line": 3,
+              "column": 16
+            },
+            "id": "ee77e3d3b98e28a"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/pages/DashboardPage.tsx",
+          "hash": "8318cb12dd26ead0",
+          "dependencies": {},
+          "loc": {
+            "line": 3,
+            "column": 16
+          },
+          "var": {
+            "66015324a75acd71:callhook:useMultipleTodos:4:8": {
+              "id": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+              "name": {
+                "type": "object",
+                "properties": [
+                  {
+                    "key": "todos",
+                    "value": {
+                      "type": "identifier",
+                      "name": "todos",
+                      "loc": {
+                        "line": 4,
+                        "column": 10
+                      },
+                      "id": "b02b563b58d2aa55"
+                    },
+                    "loc": {
+                      "line": 4,
+                      "column": 10
+                    }
+                  },
+                  {
+                    "key": "isLoading",
+                    "value": {
+                      "type": "identifier",
+                      "name": "isLoading",
+                      "loc": {
+                        "line": 4,
+                        "column": 17
+                      },
+                      "id": "889638b7d4938d85"
+                    },
+                    "loc": {
+                      "line": 4,
+                      "column": 17
+                    }
+                  }
+                ],
+                "raw": "{\n  todos,\n  isLoading\n}",
+                "loc": {
+                  "line": 4,
+                  "column": 8
+                },
+                "id": "a69f4c7afb51a7a7"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "7a5c3b2dd892b59",
+              "dependencies": {},
+              "loc": {
+                "line": 4,
+                "column": 8
+              },
+              "call": {
+                "id": "663616a868a210db",
+                "name": "useMultipleTodos"
+              }
+            },
+            "10a28e67c6717255": {
+              "id": "10a28e67c6717255",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@6:24",
+                "loc": {
+                  "line": 6,
+                  "column": 24
+                },
+                "id": "f6f95bb5bb6ef7fe"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "17913275b0150d45",
+              "dependencies": {},
+              "loc": {
+                "line": 6,
+                "column": 24
+              },
+              "render": {
+                "id": "/src/pages/DashboardPage.tsx:div:6:24",
+                "instanceId": "7b262f7a4e698713",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 6,
+                  "column": 24
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/pages/DashboardPage.tsx:div:6:24"
+            },
+            "7857da43d4121b55": {
+              "id": "7857da43d4121b55",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@9:4",
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "id": "e0ad32bf5e78f8c9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "7b0b38bd177a1c68",
+              "dependencies": {
+                "9217321245cf4d0c": {
+                  "id": "9217321245cf4d0c",
+                  "name": "jsx@10:6"
+                },
+                "761475742855b96a": {
+                  "id": "761475742855b96a",
+                  "name": "jsx@11:6"
+                },
+                "49b2e3af9a697838": {
+                  "id": "49b2e3af9a697838",
+                  "name": "jsx@12:6"
+                }
+              },
+              "loc": {
+                "line": 9,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/pages/DashboardPage.tsx:section:9:4",
+                "instanceId": "dcbb2fe22a047032",
+                "tag": "section",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "renderIndex": 1,
+                "kind": "jsx",
+                "children": {
+                  "f43bc8d3916c4a65": {
+                    "id": "/src/pages/DashboardPage.tsx:h2:10:6",
+                    "instanceId": "f43bc8d3916c4a65",
+                    "tag": "h2",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 10,
+                      "column": 6
+                    },
+                    "parentId": "dcbb2fe22a047032",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "96a87cb6d42a31d7": {
+                    "id": "/src/pages/DashboardPage.tsx:p:11:6",
+                    "instanceId": "96a87cb6d42a31d7",
+                    "tag": "p",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 11,
+                      "column": 6
+                    },
+                    "parentId": "dcbb2fe22a047032",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "aaba8f867bf5f25c": {
+                    "id": "/src/pages/DashboardPage.tsx:ul:12:6",
+                    "instanceId": "aaba8f867bf5f25c",
+                    "tag": "ul",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 12,
+                      "column": 6
+                    },
+                    "parentId": "dcbb2fe22a047032",
+                    "renderIndex": 2,
+                    "kind": "jsx",
+                    "children": {
+                      "46e89a2348aeb94c": {
+                        "id": "/src/pages/DashboardPage.tsx:li:14:10",
+                        "instanceId": "46e89a2348aeb94c",
+                        "tag": "li",
+                        "dependencies": [
+                          {
+                            "id": "bbea0d63a05165e3",
+                            "name": "key",
+                            "value": {
+                              "type": "ref",
+                              "refType": "qualified",
+                              "names": [
+                                "todo",
+                                "id"
+                              ]
+                            }
+                          }
+                        ],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 14,
+                          "column": 10
+                        },
+                        "parentId": "aaba8f867bf5f25c",
+                        "renderIndex": 0,
+                        "kind": "jsx",
+                        "children": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "srcId": "/src/pages/DashboardPage.tsx:section:9:4"
+            },
+            "9217321245cf4d0c": {
+              "id": "9217321245cf4d0c",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@10:6",
+                "loc": {
+                  "line": 10,
+                  "column": 6
+                },
+                "id": "a475083b7bc48723"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "56d4408169bc0595",
+              "dependencies": {},
+              "loc": {
+                "line": 10,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/DashboardPage.tsx:h2:10:6"
+            },
+            "761475742855b96a": {
+              "id": "761475742855b96a",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@11:6",
+                "loc": {
+                  "line": 11,
+                  "column": 6
+                },
+                "id": "18a141393b9b5263"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "40f65f73e5e28ff3",
+              "dependencies": {},
+              "loc": {
+                "line": 11,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/DashboardPage.tsx:p:11:6"
+            },
+            "49b2e3af9a697838": {
+              "id": "49b2e3af9a697838",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@12:6",
+                "loc": {
+                  "line": 12,
+                  "column": 6
+                },
+                "id": "1cb36bef813ac66a"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "68cc69e3d1e2f2c2",
+              "dependencies": {
+                "ff790b18780d25c7": {
+                  "id": "ff790b18780d25c7",
+                  "name": "jsx@14:10"
+                }
+              },
+              "loc": {
+                "line": 12,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/DashboardPage.tsx:ul:12:6"
+            },
+            "98aacdd3fb8e333f": {
+              "id": "98aacdd3fb8e333f",
+              "name": {
+                "type": "identifier",
+                "name": "anonymous@13:19",
+                "loc": {
+                  "line": 13,
+                  "column": 19
+                },
+                "id": "28c886e76c8f2021"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/pages/DashboardPage.tsx",
+              "hash": "6452248b23a57a9f",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 13,
+                "column": 19
+              },
+              "var": {
+                "ff790b18780d25c7": {
+                  "id": "ff790b18780d25c7",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@14:10",
+                    "loc": {
+                      "line": 14,
+                      "column": 10
+                    },
+                    "id": "64101b5b208b9eaf"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/pages/DashboardPage.tsx",
+                  "hash": "114f066a09799adb",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 14,
+                    "column": 10
+                  },
+                  "render": null,
+                  "srcId": "/src/pages/DashboardPage.tsx:li:14:10"
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 13,
+                  "column": 19
+                },
+                "end": {
+                  "line": 15,
+                  "column": 9
+                }
+              },
+              "return": "ff790b18780d25c7"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 3,
+              "column": 7
+            },
+            "end": {
+              "line": 19,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "7857da43d4121b55",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8:b02b563b58d2aa55",
+          "to_id": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+          "kind": "usage-read",
+          "line": 4,
+          "column": 10,
+          "data_json": {
+            "usageId": "4da88bb7e665dfa4",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 4,
+            "column": 10,
+            "ownerId": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "todos"
+          }
+        },
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8:889638b7d4938d85",
+          "to_id": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+          "kind": "usage-read",
+          "line": 4,
+          "column": 17,
+          "data_json": {
+            "usageId": "d4a214f479b9b50c",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 4,
+            "column": 17,
+            "ownerId": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+          "to_id": "symbol:import:/src/pages/DashboardPage.tsx:useMultipleTodos",
+          "kind": "usage-call",
+          "line": 4,
+          "column": 31,
+          "data_json": {
+            "usageId": "7f92189632bb1558",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 4,
+            "column": 31,
+            "ownerId": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+            "ownerKind": "hook",
+            "displayLabel": "useMultipleTodos"
+          }
+        },
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8:889638b7d4938d85",
+          "to_id": "66015324a75acd71",
+          "kind": "usage-read",
+          "line": 6,
+          "column": 6,
+          "data_json": {
+            "usageId": "5aeb7fc71d3d57dc",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 6,
+            "column": 6,
+            "ownerId": "66015324a75acd71",
+            "ownerKind": "component",
+            "displayLabel": "isLoading"
+          }
+        },
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8:b02b563b58d2aa55",
+          "to_id": "761475742855b96a",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 17,
+          "data_json": {
+            "usageId": "d28e71d54197b546",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 11,
+            "column": 17,
+            "ownerId": "761475742855b96a",
+            "ownerKind": "normal",
+            "accessPath": [
+              "length"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "todos.length"
+          }
+        },
+        {
+          "from_id": "66015324a75acd71:callhook:useMultipleTodos:4:8:b02b563b58d2aa55",
+          "to_id": "49b2e3af9a697838",
+          "kind": "usage-read",
+          "line": 13,
+          "column": 9,
+          "data_json": {
+            "usageId": "17b76eb279444da7",
+            "filePath": "/src/pages/DashboardPage.tsx",
+            "line": 13,
+            "column": 9,
+            "ownerId": "49b2e3af9a697838",
+            "ownerKind": "normal",
+            "accessPath": [
+              "map"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "todos.map"
+          }
+        }
+      ]
+    },
+    "/src/pages/AddTodoPage.tsx": {
+      "path": "/src/pages/AddTodoPage.tsx",
+      "hash": "4e64d193f700074",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "useState": {
+          "localName": "useState",
+          "importedName": "useState",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "useAddTodo": {
+          "localName": "useAddTodo",
+          "importedName": "useAddTodo",
+          "source": "/src/queries/useAddTodo.js",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "AddTodoPage": {
+          "name": "AddTodoPage",
+          "type": "named",
+          "exportKind": "component",
+          "id": "844f2b92f62f06ef"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "844f2b92f62f06ef": {
+          "id": "844f2b92f62f06ef",
+          "name": {
+            "type": "identifier",
+            "name": "AddTodoPage",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "e25ec4dfb01595de"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/pages/AddTodoPage.tsx",
+          "hash": "79ff82c5db305840",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "844f2b92f62f06ef:state:[title, setTitle]": {
+              "id": "844f2b92f62f06ef:state:[title, setTitle]",
+              "name": {
+                "type": "array",
+                "elements": [
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "title",
+                      "loc": {
+                        "line": 5,
+                        "column": 9
+                      },
+                      "id": "637593e0771d7421"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "type": "element",
+                    "value": {
+                      "type": "identifier",
+                      "name": "setTitle",
+                      "loc": {
+                        "line": 5,
+                        "column": 16
+                      },
+                      "id": "5f55eea3c8b14ebf"
+                    },
+                    "loc": {
+                      "line": 5,
+                      "column": 16
+                    }
+                  }
+                ],
+                "raw": "[title, setTitle]",
+                "loc": {
+                  "line": 5,
+                  "column": 8
+                },
+                "id": "65beeb58fc140d46"
+              },
+              "kind": "state",
+              "type": "data",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "43e12af2c7071c9b",
+              "dependencies": {},
+              "loc": {
+                "line": 5,
+                "column": 8
+              }
+            },
+            "844f2b92f62f06ef:callhook:useAddTodo:6:8": {
+              "id": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+              "name": {
+                "type": "identifier",
+                "name": "addTodo",
+                "loc": {
+                  "line": 6,
+                  "column": 8
+                },
+                "id": "3669b77141d0eb82"
+              },
+              "kind": "hook",
+              "type": "data",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "acbce29f6e8be606",
+              "dependencies": {},
+              "loc": {
+                "line": 6,
+                "column": 8
+              },
+              "call": {
+                "id": "81fcc413c30cb812",
+                "name": "useAddTodo"
+              }
+            },
+            "3e768a3b9297520b": {
+              "id": "3e768a3b9297520b",
+              "name": {
+                "type": "identifier",
+                "name": "handleSubmit",
+                "loc": {
+                  "line": 8,
+                  "column": 8
+                },
+                "id": "37718395cbb5a9c9"
+              },
+              "kind": "normal",
+              "type": "function",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "5c07e63bef69aecc",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 8,
+                "column": 8
+              },
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 8,
+                  "column": 23
+                },
+                "end": {
+                  "line": 14,
+                  "column": 3
+                }
+              },
+              "async": false
+            },
+            "8540e5930117a4bd": {
+              "id": "8540e5930117a4bd",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@17:4",
+                "loc": {
+                  "line": 17,
+                  "column": 4
+                },
+                "id": "2bcd5de0439f756"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "177f4da091b46a3d",
+              "dependencies": {
+                "2b2f83d96af13056": {
+                  "id": "2b2f83d96af13056",
+                  "name": "jsx@18:6"
+                },
+                "90695d7d69d28b2c": {
+                  "id": "90695d7d69d28b2c",
+                  "name": "jsx@19:6"
+                }
+              },
+              "loc": {
+                "line": 17,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/pages/AddTodoPage.tsx:section:17:4",
+                "instanceId": "783f70f32eb91452",
+                "tag": "section",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 17,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "fd321355caec7a24": {
+                    "id": "/src/pages/AddTodoPage.tsx:h2:18:6",
+                    "instanceId": "fd321355caec7a24",
+                    "tag": "h2",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 18,
+                      "column": 6
+                    },
+                    "parentId": "783f70f32eb91452",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "51478d23609e2d13": {
+                    "id": "/src/pages/AddTodoPage.tsx:form:19:6",
+                    "instanceId": "51478d23609e2d13",
+                    "tag": "form",
+                    "dependencies": [
+                      {
+                        "id": "bfb6d936a8589e0c",
+                        "name": "onSubmit",
+                        "value": {
+                          "type": "ref",
+                          "refType": "named",
+                          "name": "handleSubmit"
+                        },
+                        "valueId": "3e768a3b9297520b"
+                      }
+                    ],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 19,
+                      "column": 6
+                    },
+                    "parentId": "783f70f32eb91452",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {
+                      "2f2f1b821752a666": {
+                        "id": "/src/pages/AddTodoPage.tsx:input:20:8",
+                        "instanceId": "2f2f1b821752a666",
+                        "tag": "input",
+                        "dependencies": [
+                          {
+                            "id": "87d57e269b9df0f0",
+                            "name": "value",
+                            "value": {
+                              "type": "ref",
+                              "refType": "named",
+                              "name": "title"
+                            },
+                            "valueId": "844f2b92f62f06ef:state:[title, setTitle]:637593e0771d7421"
+                          },
+                          {
+                            "id": "5c99627728b09afe",
+                            "name": "onChange",
+                            "value": {
+                              "type": "literal-type",
+                              "literal": {
+                                "type": "string",
+                                "value": "e => setTitle(e.target.value)"
+                              }
+                            }
+                          },
+                          {
+                            "id": "487916bf9dc00bd2",
+                            "name": "placeholder",
+                            "value": {
+                              "type": "literal-type",
+                              "literal": {
+                                "type": "string",
+                                "value": "New todo title"
+                              }
+                            }
+                          }
+                        ],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 20,
+                          "column": 8
+                        },
+                        "parentId": "51478d23609e2d13",
+                        "renderIndex": 0,
+                        "kind": "jsx",
+                        "children": {
+                          "5a6fd06d4c6108e0": {
+                            "id": "d298006eaa9772b9",
+                            "instanceId": "5a6fd06d4c6108e0",
+                            "tag": "onChange",
+                            "dependencies": [],
+                            "isDependency": false,
+                            "loc": {
+                              "line": 22,
+                              "column": 10
+                            },
+                            "parentId": "2f2f1b821752a666",
+                            "renderIndex": 0,
+                            "kind": "attribute",
+                            "children": {}
+                          }
+                        }
+                      },
+                      "1012bb8dc44c2724": {
+                        "id": "/src/pages/AddTodoPage.tsx:button:25:8",
+                        "instanceId": "1012bb8dc44c2724",
+                        "tag": "button",
+                        "dependencies": [
+                          {
+                            "id": "4703abfdcb310e86",
+                            "name": "type",
+                            "value": {
+                              "type": "literal-type",
+                              "literal": {
+                                "type": "string",
+                                "value": "submit"
+                              }
+                            }
+                          },
+                          {
+                            "id": "b044dd5ef21f20ed",
+                            "name": "disabled",
+                            "value": {
+                              "type": "ref",
+                              "refType": "qualified",
+                              "names": [
+                                "addTodo",
+                                "isPending"
+                              ]
+                            },
+                            "valueId": "844f2b92f62f06ef:callhook:useAddTodo:6:8"
+                          }
+                        ],
+                        "isDependency": false,
+                        "loc": {
+                          "line": 25,
+                          "column": 8
+                        },
+                        "parentId": "51478d23609e2d13",
+                        "renderIndex": 1,
+                        "kind": "jsx",
+                        "children": {
+                          "6ef014ff6b23d513": {
+                            "id": "",
+                            "instanceId": "6ef014ff6b23d513",
+                            "tag": "Ternary",
+                            "dependencies": [],
+                            "isDependency": false,
+                            "loc": {
+                              "line": 26,
+                              "column": 11
+                            },
+                            "parentId": "1012bb8dc44c2724",
+                            "renderIndex": 0,
+                            "kind": "jsx",
+                            "children": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "srcId": "/src/pages/AddTodoPage.tsx:section:17:4"
+            },
+            "2b2f83d96af13056": {
+              "id": "2b2f83d96af13056",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@18:6",
+                "loc": {
+                  "line": 18,
+                  "column": 6
+                },
+                "id": "eba5bae57cc2bcc1"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "230d0af216c64e79",
+              "dependencies": {},
+              "loc": {
+                "line": 18,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/AddTodoPage.tsx:h2:18:6"
+            },
+            "90695d7d69d28b2c": {
+              "id": "90695d7d69d28b2c",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@19:6",
+                "loc": {
+                  "line": 19,
+                  "column": 6
+                },
+                "id": "9925698f18567392"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "9f8e35ab7e057ed",
+              "dependencies": {
+                "37718395cbb5a9c9": {
+                  "id": "37718395cbb5a9c9",
+                  "name": "handleSubmit"
+                },
+                "b8df14d025b0a633": {
+                  "id": "b8df14d025b0a633",
+                  "name": "jsx@20:8"
+                },
+                "3b25ab918e00b2b3": {
+                  "id": "3b25ab918e00b2b3",
+                  "name": "jsx@25:8"
+                }
+              },
+              "loc": {
+                "line": 19,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "/src/pages/AddTodoPage.tsx:form:19:6"
+            },
+            "b8df14d025b0a633": {
+              "id": "b8df14d025b0a633",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@20:8",
+                "loc": {
+                  "line": 20,
+                  "column": 8
+                },
+                "id": "73a11c1ece8a6d6"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "8fb22ee81bd069f2",
+              "dependencies": {
+                "96050a97f611a0d5": {
+                  "id": "96050a97f611a0d5",
+                  "name": "title"
+                }
+              },
+              "loc": {
+                "line": 20,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/pages/AddTodoPage.tsx:input:20:8"
+            },
+            "3b25ab918e00b2b3": {
+              "id": "3b25ab918e00b2b3",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@25:8",
+                "loc": {
+                  "line": 25,
+                  "column": 8
+                },
+                "id": "7113dc5fd7eba458"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/pages/AddTodoPage.tsx",
+              "hash": "7214fc0cc849f9d2",
+              "dependencies": {},
+              "loc": {
+                "line": 25,
+                "column": 8
+              },
+              "render": null,
+              "srcId": "/src/pages/AddTodoPage.tsx:button:25:8"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 31,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "8540e5930117a4bd",
+          "states": [
+            "844f2b92f62f06ef:state:[title, setTitle]"
+          ],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "blockScopes": [
+        {
+          "id": "489ae17f55ac66f0",
+          "parentId": "scope:block:3e768a3b9297520b",
+          "scope": {
+            "start": {
+              "line": 10,
+              "column": 22
+            },
+            "end": {
+              "line": 13,
+              "column": 5
+            }
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_id": "844f2b92f62f06ef",
+          "to_id": "symbol:import:/src/pages/AddTodoPage.tsx:useState",
+          "kind": "usage-call",
+          "line": 5,
+          "column": 28,
+          "data_json": {
+            "usageId": "96766b84867a85",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 5,
+            "column": 28,
+            "ownerId": "844f2b92f62f06ef",
+            "ownerKind": "component",
+            "displayLabel": "useState"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+          "to_id": "symbol:import:/src/pages/AddTodoPage.tsx:useAddTodo",
+          "kind": "usage-call",
+          "line": 6,
+          "column": 18,
+          "data_json": {
+            "usageId": "49f0122ae261f1fb",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 6,
+            "column": 18,
+            "ownerId": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+            "ownerKind": "hook",
+            "displayLabel": "useAddTodo"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:state:[title, setTitle]:637593e0771d7421",
+          "to_id": "3e768a3b9297520b",
+          "kind": "usage-read",
+          "line": 10,
+          "column": 8,
+          "data_json": {
+            "usageId": "1bb25f26617c9508",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 10,
+            "column": 8,
+            "ownerId": "3e768a3b9297520b",
+            "ownerKind": "normal",
+            "accessPath": [
+              "trim"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "title.trim"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+          "to_id": "3e768a3b9297520b",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 6,
+          "data_json": {
+            "usageId": "d944d1c8c47ec5b2",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 11,
+            "column": 6,
+            "ownerId": "3e768a3b9297520b",
+            "ownerKind": "normal",
+            "accessPath": [
+              "mutate"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "addTodo.mutate"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:state:[title, setTitle]:637593e0771d7421",
+          "to_id": "3e768a3b9297520b",
+          "kind": "usage-read",
+          "line": 11,
+          "column": 21,
+          "data_json": {
+            "usageId": "c3dbc72369246943",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 11,
+            "column": 21,
+            "ownerId": "3e768a3b9297520b",
+            "ownerKind": "normal",
+            "displayLabel": "title"
+          }
+        },
+        {
+          "from_id": "3e768a3b9297520b",
+          "to_id": "844f2b92f62f06ef:state:[title, setTitle]:5f55eea3c8b14ebf",
+          "kind": "usage-call",
+          "line": 12,
+          "column": 6,
+          "data_json": {
+            "usageId": "e24f84f2c95643d8",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 12,
+            "column": 6,
+            "ownerId": "3e768a3b9297520b",
+            "ownerKind": "normal",
+            "displayLabel": "setTitle"
+          }
+        },
+        {
+          "from_id": "3e768a3b9297520b",
+          "to_id": "90695d7d69d28b2c",
+          "kind": "usage-read",
+          "line": 19,
+          "column": 22,
+          "data_json": {
+            "usageId": "c74b91b36f33ee78",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 19,
+            "column": 22,
+            "ownerId": "90695d7d69d28b2c",
+            "ownerKind": "normal",
+            "displayLabel": "handleSubmit"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:state:[title, setTitle]:637593e0771d7421",
+          "to_id": "b8df14d025b0a633",
+          "kind": "usage-read",
+          "line": 21,
+          "column": 17,
+          "data_json": {
+            "usageId": "a319e8739358fe3c",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 21,
+            "column": 17,
+            "ownerId": "b8df14d025b0a633",
+            "ownerKind": "normal",
+            "displayLabel": "title"
+          }
+        },
+        {
+          "from_id": "d298006eaa9772b9",
+          "to_id": "844f2b92f62f06ef:state:[title, setTitle]:5f55eea3c8b14ebf",
+          "kind": "usage-call",
+          "line": 22,
+          "column": 27,
+          "data_json": {
+            "usageId": "1cfcf83c750b51e2",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 22,
+            "column": 27,
+            "ownerId": "d298006eaa9772b9",
+            "ownerKind": "attribute",
+            "displayLabel": "setTitle"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+          "to_id": "3b25ab918e00b2b3",
+          "kind": "usage-read",
+          "line": 25,
+          "column": 40,
+          "data_json": {
+            "usageId": "1792fe088a50c616",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 25,
+            "column": 40,
+            "ownerId": "3b25ab918e00b2b3",
+            "ownerKind": "normal",
+            "accessPath": [
+              "isPending"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "addTodo.isPending"
+          }
+        },
+        {
+          "from_id": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+          "to_id": "3b25ab918e00b2b3",
+          "kind": "usage-read",
+          "line": 26,
+          "column": 11,
+          "data_json": {
+            "usageId": "b2464a955ffcf386",
+            "filePath": "/src/pages/AddTodoPage.tsx",
+            "line": 26,
+            "column": 11,
+            "ownerId": "3b25ab918e00b2b3",
+            "ownerKind": "normal",
+            "accessPath": [
+              "isPending"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "addTodo.isPending"
+          }
+        }
+      ]
+    },
+    "/src/components/TodoItem.tsx": {
+      "path": "/src/components/TodoItem.tsx",
+      "hash": "9047c738ff00ca4c",
+      "package_id": "tanstack-query-sample@0.0.0",
+      "import": {
+        "Todo": {
+          "localName": "Todo",
+          "importedName": "Todo",
+          "source": "/src/queries/api.js",
+          "type": "named",
+          "importKind": "type"
+        }
+      },
+      "export": {
+        "TodoItem": {
+          "name": "TodoItem",
+          "type": "named",
+          "exportKind": "component",
+          "id": "f14586ee56051e70"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {
+        "aa533486b8a8034e": {
+          "type": "interface",
+          "name": {
+            "type": "identifier",
+            "name": "TodoItemProps",
+            "loc": {
+              "line": 3,
+              "column": 10
+            },
+            "id": "ecab911e54295e60"
+          },
+          "body": [
+            {
+              "signatureType": "property",
+              "name": "todo",
+              "type": {
+                "type": "ref",
+                "refType": "named",
+                "name": "Todo"
+              },
+              "loc": {
+                "line": 4,
+                "column": 2
+              }
+            }
+          ],
+          "loc": {
+            "line": 3,
+            "column": 10
+          },
+          "id": "aa533486b8a8034e"
+        }
+      },
+      "var": {
+        "f14586ee56051e70": {
+          "id": "f14586ee56051e70",
+          "name": {
+            "type": "identifier",
+            "name": "TodoItem",
+            "loc": {
+              "line": 7,
+              "column": 16
+            },
+            "id": "28665c253fd0b35f"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/components/TodoItem.tsx",
+          "hash": "d3a32561819e5e5",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 16
+          },
+          "var": {
+            "10ac814e5d022140": {
+              "id": "10ac814e5d022140",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@9:4",
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "id": "e0ad32bf5e78f8c9"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/components/TodoItem.tsx",
+              "hash": "1b641c4cbc605915",
+              "dependencies": {},
+              "loc": {
+                "line": 9,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/components/TodoItem.tsx:li:9:4",
+                "instanceId": "cd8273563133a4b7",
+                "tag": "li",
+                "dependencies": [
+                  {
+                    "id": "5dda3fd64afd6f11",
+                    "name": "style",
+                    "value": {
+                      "type": "literal-object",
+                      "properties": {}
+                    }
+                  }
+                ],
+                "isDependency": false,
+                "loc": {
+                  "line": 9,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              },
+              "srcId": "/src/components/TodoItem.tsx:li:9:4"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 7,
+              "column": 7
+            },
+            "end": {
+              "line": 13,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "10ac814e5d022140",
+          "states": [],
+          "refs": [],
+          "props": [
+            {
+              "id": "f14586ee56051e70:prop:todo",
+              "name": "todo",
+              "type": "Todo",
+              "kind": "prop",
+              "loc": {
+                "line": 7,
+                "column": 27
+              },
+              "hash": "b8d3f80699f21563"
+            }
+          ],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "aa533486b8a8034e",
+          "to_id": "f14586ee56051e70",
+          "kind": "usage-read",
+          "line": 7,
+          "column": 35,
+          "data_json": {
+            "usageId": "cdeb31098ad6e07",
+            "filePath": "/src/components/TodoItem.tsx",
+            "line": 7,
+            "column": 35,
+            "ownerId": "f14586ee56051e70",
+            "ownerKind": "component",
+            "displayLabel": "TodoItemProps"
+          }
+        }
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "311c554b828f67a5",
+      "to": "76b1f99b3d9b7a81",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "42716fa6f9df0230",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "97cf3327e298b004",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "e154d6be45200aa9",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "e5ae403b1dc7ed60",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "41cb0d2504925c5d",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "f8ba2fcb6279ea09",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "174ae8fcd3e4994f",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "f2023115f52edf1d",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "1fd682fb17c3c6a7",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "825039bb67785a38",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "6e2cc6f8fc0430d8",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "6a8b9a2092fc5de2",
+      "label": "render"
+    },
+    {
+      "from": "eb743e18edd4945c",
+      "to": "6a8b9a2092fc5de2",
+      "label": "render"
+    },
+    {
+      "from": "bacb8bc57cf55952",
+      "to": "4278f17199e73915",
+      "label": "render"
+    },
+    {
+      "from": "bacb8bc57cf55952",
+      "to": "5dba34b6a9cadcac",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "89df68380ac9f2bb",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "61bda7a1d2d2c80d",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "df54f6dca7518de8",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "62a7e87577e0be1b",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "62a7e87577e0be1b",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "e7948aad7672727b",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "e7948aad7672727b",
+      "label": "render"
+    },
+    {
+      "from": "b5a33390386ca4a",
+      "to": "7b94647236d6fc3f",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "10a28e67c6717255",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "7857da43d4121b55",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "9217321245cf4d0c",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "761475742855b96a",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "49b2e3af9a697838",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "ff790b18780d25c7",
+      "label": "render"
+    },
+    {
+      "from": "66015324a75acd71",
+      "to": "ff790b18780d25c7",
+      "label": "render"
+    },
+    {
+      "from": "844f2b92f62f06ef",
+      "to": "8540e5930117a4bd",
+      "label": "render"
+    },
+    {
+      "from": "844f2b92f62f06ef",
+      "to": "2b2f83d96af13056",
+      "label": "render"
+    },
+    {
+      "from": "844f2b92f62f06ef",
+      "to": "90695d7d69d28b2c",
+      "label": "render"
+    },
+    {
+      "from": "844f2b92f62f06ef",
+      "to": "b8df14d025b0a633",
+      "label": "render"
+    },
+    {
+      "from": "844f2b92f62f06ef",
+      "to": "3b25ab918e00b2b3",
+      "label": "render"
+    },
+    {
+      "from": "f14586ee56051e70",
+      "to": "10ac814e5d022140",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "42716fa6f9df0230",
+      "label": "hook"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "97cf3327e298b004",
+      "label": "hook"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "e154d6be45200aa9",
+      "label": "hook"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "e5ae403b1dc7ed60",
+      "label": "hook"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "41cb0d2504925c5d",
+      "label": "hook"
+    },
+    {
+      "from": "76b1f99b3d9b7a81",
+      "to": "f8ba2fcb6279ea09",
+      "label": "hook"
+    },
+    {
+      "from": "33ebefb18c6d8a7d",
+      "to": "useQuery",
+      "label": "hook"
+    },
+    {
+      "from": "6d36c16ecd78d2f6",
+      "to": "useQueries",
+      "label": "hook"
+    },
+    {
+      "from": "6d36c16ecd78d2f6:callhook:useQueries:7:8",
+      "to": "useQueries",
+      "label": "hook"
+    },
+    {
+      "from": "782e21a4f9c38bdf",
+      "to": "useInfiniteQuery",
+      "label": "hook"
+    },
+    {
+      "from": "d7a00cf4ac9ef0fa",
+      "to": "useQueryClient",
+      "label": "hook"
+    },
+    {
+      "from": "d7a00cf4ac9ef0fa",
+      "to": "useMutation",
+      "label": "hook"
+    },
+    {
+      "from": "d7a00cf4ac9ef0fa:callhook:useQueryClient:5:8",
+      "to": "useQueryClient",
+      "label": "hook"
+    },
+    {
+      "from": "eb743e18edd4945c:callhook:useTodos:5:8",
+      "to": "e8f8f75b066be1a7",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "eb743e18edd4945c",
+      "label": "render"
+    },
+    {
+      "from": "1fd682fb17c3c6a7",
+      "to": "825039bb67785a38",
+      "label": "hook"
+    },
+    {
+      "from": "1fd682fb17c3c6a7",
+      "to": "6e2cc6f8fc0430d8",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "eb743e18edd4945c",
+      "label": "render"
+    },
+    {
+      "from": "6e2cc6f8fc0430d8",
+      "to": "6a8b9a2092fc5de2",
+      "label": "hook"
+    },
+    {
+      "from": "6a8b9a2092fc5de2",
+      "to": "4791be95ce3a5af9",
+      "label": "hook"
+    },
+    {
+      "from": "bacb8bc57cf55952",
+      "to": "useQuery",
+      "label": "hook"
+    },
+    {
+      "from": "bacb8bc57cf55952:callhook:useQuery:4:8",
+      "to": "useQuery",
+      "label": "hook"
+    },
+    {
+      "from": "5dba34b6a9cadcac",
+      "to": "e4b7943fd57d5d1e",
+      "label": "hook"
+    },
+    {
+      "from": "b5a33390386ca4a:callhook:useInfiniteTodos:4:8",
+      "to": "b25cadb3fa257cd3",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "b5a33390386ca4a",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "b5a33390386ca4a",
+      "label": "render"
+    },
+    {
+      "from": "89df68380ac9f2bb",
+      "to": "61bda7a1d2d2c80d",
+      "label": "hook"
+    },
+    {
+      "from": "89df68380ac9f2bb",
+      "to": "df54f6dca7518de8",
+      "label": "hook"
+    },
+    {
+      "from": "89df68380ac9f2bb",
+      "to": "7b94647236d6fc3f",
+      "label": "hook"
+    },
+    {
+      "from": "df54f6dca7518de8",
+      "to": "62a7e87577e0be1b",
+      "label": "hook"
+    },
+    {
+      "from": "62a7e87577e0be1b",
+      "to": "2c022d030ff25ace",
+      "label": "hook"
+    },
+    {
+      "from": "62a7e87577e0be1b",
+      "to": "e7948aad7672727b",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "b5a33390386ca4a",
+      "label": "render"
+    },
+    {
+      "from": "",
+      "to": "b5a33390386ca4a",
+      "label": "render"
+    },
+    {
+      "from": "7b94647236d6fc3f",
+      "to": "fcc52562e049ec91",
+      "label": "hook"
+    },
+    {
+      "from": "66015324a75acd71:callhook:useMultipleTodos:4:8",
+      "to": "663616a868a210db",
+      "label": "hook"
+    },
+    {
+      "from": "7857da43d4121b55",
+      "to": "9217321245cf4d0c",
+      "label": "hook"
+    },
+    {
+      "from": "7857da43d4121b55",
+      "to": "761475742855b96a",
+      "label": "hook"
+    },
+    {
+      "from": "7857da43d4121b55",
+      "to": "49b2e3af9a697838",
+      "label": "hook"
+    },
+    {
+      "from": "49b2e3af9a697838",
+      "to": "ff790b18780d25c7",
+      "label": "hook"
+    },
+    {
+      "from": "844f2b92f62f06ef:callhook:useAddTodo:6:8",
+      "to": "81fcc413c30cb812",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "844f2b92f62f06ef",
+      "label": "render"
+    },
+    {
+      "from": "8540e5930117a4bd",
+      "to": "2b2f83d96af13056",
+      "label": "hook"
+    },
+    {
+      "from": "8540e5930117a4bd",
+      "to": "90695d7d69d28b2c",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "844f2b92f62f06ef",
+      "label": "render"
+    },
+    {
+      "from": "90695d7d69d28b2c",
+      "to": "37718395cbb5a9c9",
+      "label": "hook"
+    },
+    {
+      "from": "90695d7d69d28b2c",
+      "to": "b8df14d025b0a633",
+      "label": "hook"
+    },
+    {
+      "from": "90695d7d69d28b2c",
+      "to": "3b25ab918e00b2b3",
+      "label": "hook"
+    },
+    {
+      "from": "b8df14d025b0a633",
+      "to": "96050a97f611a0d5",
+      "label": "hook"
+    },
+    {
+      "from": "",
+      "to": "844f2b92f62f06ef",
+      "label": "render"
+    }
+  ],
+  "resolve": []
+}

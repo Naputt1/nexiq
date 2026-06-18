@@ -452,10 +452,12 @@ export function extractFileUsages(
       );
       if (!target || target.id === owner.id) return;
 
+      const ownerTargetId = owner.srcId || owner.id;
+
       const parent = path.parentPath;
       if (parent.isMemberExpression() && parent.get("object") === path) {
         const memberData = getMemberAccessPath(parent.node);
-        emitRelation("usage-read", target.id, owner.id, loc, owner, {
+        emitRelation("usage-read", target.id, ownerTargetId, loc, owner, {
           accessPath: memberData.accessPath,
           isOptional: memberData.isOptional,
           isComputed: memberData.isComputed,
@@ -470,7 +472,7 @@ export function extractFileUsages(
         parent.get("object") === path
       ) {
         const memberData = getMemberAccessPath(parent.node);
-        emitRelation("usage-read", target.id, owner.id, loc, owner, {
+        emitRelation("usage-read", target.id, ownerTargetId, loc, owner, {
           accessPath: memberData.accessPath,
           isOptional: memberData.isOptional,
           isComputed: memberData.isComputed,
@@ -480,7 +482,7 @@ export function extractFileUsages(
         return;
       }
 
-      emitRelation("usage-read", target.id, owner.id, loc, owner, {
+      emitRelation("usage-read", target.id, ownerTargetId, loc, owner, {
         hiddenIntermediate: target.hiddenIntermediate,
         displayLabel: path.node.name,
       });
