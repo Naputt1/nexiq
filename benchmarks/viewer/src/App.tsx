@@ -163,6 +163,26 @@ interface BenchmarkResult {
   uniqueId: string; // Internal ID for comparison
 }
 
+interface Step {
+  role: string;
+  tokens?: number;
+  content?: string;
+  toolCalls?: Array<{ name: string; arguments: unknown }>;
+}
+
+interface MetricEntry {
+  val: number;
+  count: number;
+  successCount: number;
+}
+
+interface RunEntry {
+  tokens: number;
+  count: number;
+  successCount: number;
+  latency: number;
+}
+
 // --- Main App ---
 
 export default function App() {
@@ -224,7 +244,9 @@ export default function App() {
   );
 
   const addResults = useCallback((data: unknown, fileName: string) => {
-    const newResults = Array.isArray(data) ? data : [data];
+    const newResults = (
+      Array.isArray(data) ? data : [data]
+    ) as BenchmarkResult[];
     const runId =
       fileName
         .split("/")
@@ -239,14 +261,14 @@ export default function App() {
 
       const resultsWithIds = newResults.map((r, i) => {
         // Recalculate total tokens excluding system, user, and final summary
-        const steps = r.steps || [];
-        const isSummary = (step: Record<string, unknown>, index: number) =>
+        const steps = (r.steps || []) as Step[];
+        const isSummary = (step: Step, index: number) =>
           step.role === "assistant" &&
-          (!step.toolCalls || (step.toolCalls as unknown[]).length === 0) &&
+          (!step.toolCalls || step.toolCalls.length === 0) &&
           index === steps.length - 1;
 
         const filteredTokens = steps.reduce(
-          (acc: number, step: Record<string, unknown>, index: number) => {
+          (acc: number, step: Step, index: number) => {
             if (step.role === "system" || step.role === "user") return acc;
             if (isSummary(step, index)) return acc;
             return acc + (step.tokens || 0);
@@ -414,7 +436,10 @@ export default function App() {
 
   const dynamicCompData = useMemo(() => {
     // Group by the selected X-axis field (compGroupBy)
-    const groupsMap = new Map<string, Record<string, unknown>>();
+    const groupsMap = new Map<
+      string,
+      { name: string; series: Record<string, MetricEntry> }
+    >();
 
     // Baseline mapping for ratios
     const baselineMap = new Map<string, number>();
@@ -430,9 +455,9 @@ export default function App() {
     filteredResults.forEach((r) => {
       const groupValue = r[compGroupBy] as string;
       if (!groupsMap.has(groupValue)) {
-        groupsMap.set(groupValue, { name: groupValue });
+        groupsMap.set(groupValue, { name: groupValue, series: {} });
       }
-      const group = groupsMap.get(groupValue);
+      const group = groupsMap.get(groupValue)!;
 
       let seriesKey = "";
       if (compSeries === "combined") {
@@ -445,8 +470,8 @@ export default function App() {
         seriesKey = r.testType;
       }
 
-      if (!group[seriesKey]) {
-        group[seriesKey] = { val: 0, count: 0, successCount: 0 };
+      if (!group.series[seriesKey]) {
+        group.series[seriesKey] = { val: 0, count: 0, successCount: 0 };
       }
 
       let metricVal = 0;
@@ -468,62 +493,70 @@ export default function App() {
         metricVal = r.success ? 100 : 0;
       }
 
-      group[seriesKey].val += metricVal;
-      group[seriesKey].count += 1;
-      if (r.success) group[seriesKey].successCount += 1;
+      const entry = group.series[seriesKey];
+      entry.val += metricVal;
+      entry.count += 1;
+      if (r.success) entry.successCount += 1;
     });
 
     return Array.from(groupsMap.values()).map((g) => {
-      const entry: Record<string, unknown> = { name: g.name };
-      Object.keys(g).forEach((k) => {
-        if (k !== "name") {
-          entry[k] =
-            compMetric === "success"
-              ? (g[k].successCount / g[k].count) * 100
-              : g[k].val / g[k].count;
-        }
+      const entry: Record<string, number | string> = { name: g.name };
+      Object.entries(g.series).forEach(([k, m]) => {
+        entry[k] =
+          compMetric === "success"
+            ? (m.successCount / m.count) * 100
+            : m.val / m.count;
       });
-      return entry;
+      return entry as Record<string, unknown>;
     });
   }, [filteredResults, compMetric, compGroupBy, compSeries, compRatioMode]);
 
   const runsData = useMemo(() => {
-    const runsMap = new Map<string, Record<string, unknown>>();
+    const runsMap = new Map<
+      string,
+      { runId: string; series: Record<string, RunEntry> }
+    >();
 
     filteredResults.forEach((r) => {
       const runId = r.runId || "unknown";
       if (!runsMap.has(runId)) {
-        runsMap.set(runId, { runId });
+        runsMap.set(runId, { runId, series: {} });
       }
-      const run = runsMap.get(runId);
-      if (!run[r.model]) {
-        run[r.model] = { tokens: 0, count: 0, successCount: 0, latency: 0 };
+      const run = runsMap.get(runId)!;
+      if (!run.series[r.model]) {
+        run.series[r.model] = {
+          tokens: 0,
+          count: 0,
+          successCount: 0,
+          latency: 0,
+        };
       }
-      run[r.model].tokens += r.totalTokens;
-      run[r.model].count += 1;
-      run[r.model].latency += r.latencyMs;
-      if (r.success) run[r.model].successCount += 1;
+      const entry = run.series[r.model];
+      entry.tokens += r.totalTokens;
+      entry.count += 1;
+      entry.latency += r.latencyMs;
+      if (r.success) entry.successCount += 1;
     });
 
     return Array.from(runsMap.values())
       .map((r) => {
-        const entry: Record<string, unknown> = {
+        const entry: Record<string, string | number> = {
           name: r.runId.substring(0, 19).replace("T", " "),
           fullRunId: r.runId,
         };
         uniqueModels.forEach((model) => {
-          if (r[model]) {
-            entry[model] = Math.round(r[model].tokens / r[model].count);
-            entry[`${model}_success`] =
-              (r[model].successCount / r[model].count) * 100;
-            entry[`${model}_latency`] = Math.round(
-              r[model].latency / r[model].count,
-            );
+          const m = r.series[model];
+          if (m) {
+            entry[model] = Math.round(m.tokens / m.count);
+            entry[`${model}_success`] = (m.successCount / m.count) * 100;
+            entry[`${model}_latency`] = Math.round(m.latency / m.count);
           }
         });
-        return entry;
+        return entry as Record<string, unknown>;
       })
-      .sort((a, b) => a.fullRunId.localeCompare(b.fullRunId));
+      .sort((a, b) =>
+        (a.fullRunId as string).localeCompare(b.fullRunId as string),
+      );
   }, [filteredResults, uniqueModels]);
 
   const toggleFilter = (
@@ -629,7 +662,10 @@ export default function App() {
                 input.type = "file";
                 input.multiple = true;
                 input.accept = ".json";
-                input.onchange = (e: Event) => handleFileSelect(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                input.onchange = (e: Event) =>
+                  handleFileSelect(
+                    e as unknown as React.ChangeEvent<HTMLInputElement>,
+                  );
                 input.click();
               }}
             >
@@ -882,7 +918,16 @@ export default function App() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as "overview" | "comparison" | "runs" | "timeline" | "compare-tasks")}
+                  onClick={() =>
+                    setActiveTab(
+                      tab.id as
+                        | "overview"
+                        | "comparison"
+                        | "runs"
+                        | "timeline"
+                        | "compare-tasks",
+                    )
+                  }
                   className={cn(
                     "px-4 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all",
                     activeTab === tab.id
@@ -1097,7 +1142,15 @@ export default function App() {
                         <select
                           className="w-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wider bg-white border border-gray-200 rounded-lg outline-none"
                           value={compSeries}
-                          onChange={(e) => setCompSeries(e.target.value)}
+                          onChange={(e) =>
+                            setCompSeries(
+                              e.target.value as
+                                | "model"
+                                | "approach"
+                                | "testType"
+                                | "combined",
+                            )
+                          }
                         >
                           <option value="combined">Combined Details</option>
                           <option value="model">By Model</option>
@@ -1576,38 +1629,39 @@ export default function App() {
 
                         {isExpanded && (
                           <div className="border-t border-gray-100 bg-gray-50/50 p-6 space-y-6 animate-in slide-in-from-top-2 duration-200">
-                            {result.steps.map((step, sIdx) => (
-                              <div key={sIdx} className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Badge
-                                    variant={
-                                      step.role === "user"
-                                        ? "indigo"
-                                        : step.role === "assistant"
-                                          ? "emerald"
-                                          : step.role === "tool"
-                                            ? "purple"
-                                            : "default"
-                                    }
-                                  >
-                                    {step.role}
-                                  </Badge>
-                                  <span className="text-[10px] font-bold text-gray-400 font-mono">
-                                    {step.tokens} tokens
-                                  </span>
-                                </div>
-
-                                {step.content && (
-                                  <div className="p-4 rounded-xl bg-white border border-gray-200 text-xs font-mono whitespace-pre-wrap max-h-100 overflow-auto shadow-inner text-gray-800 scrollbar-hide">
-                                    {step.content}
+                            {result.steps.map((rawStep, sIdx) => {
+                              const step = rawStep as Step;
+                              return (
+                                <div key={sIdx} className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <Badge
+                                      variant={
+                                        step.role === "user"
+                                          ? "indigo"
+                                          : step.role === "assistant"
+                                            ? "emerald"
+                                            : step.role === "tool"
+                                              ? "purple"
+                                              : "default"
+                                      }
+                                    >
+                                      {step.role}
+                                    </Badge>
+                                    <span className="text-[10px] font-bold text-gray-400 font-mono">
+                                      {step.tokens} tokens
+                                    </span>
                                   </div>
-                                )}
 
-                                {step.toolCalls &&
-                                  step.toolCalls.length > 0 && (
-                                    <div className="grid gap-2">
-                                      {step.toolCalls.map(
-                                        (tc: Record<string, unknown>, tcIdx: number) => (
+                                  {step.content && (
+                                    <div className="p-4 rounded-xl bg-white border border-gray-200 text-xs font-mono whitespace-pre-wrap max-h-100 overflow-auto shadow-inner text-gray-800 scrollbar-hide">
+                                      {step.content}
+                                    </div>
+                                  )}
+
+                                  {step.toolCalls &&
+                                    step.toolCalls.length > 0 && (
+                                      <div className="grid gap-2">
+                                        {step.toolCalls.map((tc, tcIdx) => (
                                           <div
                                             key={tcIdx}
                                             className="p-4 rounded-xl bg-purple-50 border border-purple-100 text-xs"
@@ -1624,12 +1678,12 @@ export default function App() {
                                               )}
                                             </pre>
                                           </div>
-                                        ),
-                                      )}
-                                    </div>
-                                  )}
-                              </div>
-                            ))}
+                                        ))}
+                                      </div>
+                                    )}
+                                </div>
+                              );
+                            })}
                             {result.verificationOutput && (
                               <div className="space-y-4">
                                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -1656,7 +1710,7 @@ export default function App() {
                                   )}
                                   {result.verificationOutput.stderr && (
                                     <div className="space-y-1">
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-rose-400">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
                                         STDERR
                                       </p>
                                       <pre className="p-3 rounded-lg bg-rose-950/30 text-rose-200 text-[10px] font-mono whitespace-pre-wrap max-h-60 overflow-auto border border-rose-900/30 shadow-inner">
@@ -1761,38 +1815,39 @@ export default function App() {
                           </Card>
 
                           <div className="space-y-4">
-                            {task.steps.map((step, sIdx) => (
-                              <div key={sIdx} className="space-y-2 group">
-                                <div className="flex items-center justify-between">
-                                  <Badge
-                                    variant={
-                                      step.role === "user"
-                                        ? "indigo"
-                                        : step.role === "assistant"
-                                          ? "emerald"
-                                          : step.role === "tool"
-                                            ? "purple"
-                                            : "default"
-                                    }
-                                  >
-                                    {step.role}
-                                  </Badge>
-                                  <span className="text-[9px] font-bold text-gray-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {step.tokens} tk
-                                  </span>
-                                </div>
-
-                                {step.content && (
-                                  <div className="p-4 rounded-xl bg-white border border-gray-200 text-[10px] font-mono whitespace-pre-wrap shadow-sm text-gray-800 leading-relaxed overflow-x-hidden">
-                                    {step.content}
+                            {task.steps.map((rawStep, sIdx) => {
+                              const step = rawStep as Step;
+                              return (
+                                <div key={sIdx} className="space-y-2 group">
+                                  <div className="flex items-center justify-between">
+                                    <Badge
+                                      variant={
+                                        step.role === "user"
+                                          ? "indigo"
+                                          : step.role === "assistant"
+                                            ? "emerald"
+                                            : step.role === "tool"
+                                              ? "purple"
+                                              : "default"
+                                      }
+                                    >
+                                      {step.role}
+                                    </Badge>
+                                    <span className="text-[9px] font-bold text-gray-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                                      {step.tokens} tk
+                                    </span>
                                   </div>
-                                )}
 
-                                {step.toolCalls &&
-                                  step.toolCalls.length > 0 && (
-                                    <div className="space-y-1">
-                                      {step.toolCalls.map(
-                                        (tc: Record<string, unknown>, tcIdx: number) => (
+                                  {step.content && (
+                                    <div className="p-4 rounded-xl bg-white border border-gray-200 text-[10px] font-mono whitespace-pre-wrap shadow-sm text-gray-800 leading-relaxed overflow-x-hidden">
+                                      {step.content}
+                                    </div>
+                                  )}
+
+                                  {step.toolCalls &&
+                                    step.toolCalls.length > 0 && (
+                                      <div className="space-y-1">
+                                        {step.toolCalls.map((tc, tcIdx) => (
                                           <div
                                             key={tcIdx}
                                             className="p-3 rounded-xl bg-purple-50 border border-purple-100 text-[10px] shadow-inner"
@@ -1809,12 +1864,12 @@ export default function App() {
                                               )}
                                             </pre>
                                           </div>
-                                        ),
-                                      )}
-                                    </div>
-                                  )}
-                              </div>
-                            ))}
+                                        ))}
+                                      </div>
+                                    )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
