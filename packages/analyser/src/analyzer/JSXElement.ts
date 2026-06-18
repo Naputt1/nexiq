@@ -81,6 +81,15 @@ function extractDependencies(
   }
 }
 
+function getJSXMemberExpressionNames(
+  expr: t.JSXMemberExpression | t.JSXIdentifier,
+): string[] {
+  if (expr.type === "JSXIdentifier") {
+    return [expr.name];
+  }
+  return [...getJSXMemberExpressionNames(expr.object), expr.property.name];
+}
+
 export default function JSXElement(
   componentDB: ComponentDB,
   fileName: string,
@@ -110,9 +119,15 @@ export default function JSXElement(
           const baseName = generateFn(opening.object).code;
           const baseId = componentDB.getVariableID(baseName, fileName);
           if (baseId) {
+            const names = getJSXMemberExpressionNames(opening);
             dependency.push({
               id: baseId,
               name: baseName,
+              value: {
+                type: "ref",
+                refType: "qualified",
+                names,
+              },
             });
           }
         }
