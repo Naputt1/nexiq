@@ -240,6 +240,7 @@ describe("BackendServer", () => {
         extensions: [],
         sqlitePath: "test.sqlite",
         graph: mockGraph as unknown as JsonData,
+        nodeDetailCache: new Map(),
       });
 
       const args = { projectPath: "/test" };
@@ -288,6 +289,7 @@ describe("BackendServer", () => {
         extensions: [],
         sqlitePath: "test.sqlite",
         graph: mockGraph as unknown as JsonData,
+        nodeDetailCache: new Map(),
       });
 
       const result = await server.handleCallTool({
@@ -552,6 +554,7 @@ describe("BackendServer", () => {
         extensions: [],
         sqlitePath: "test.sqlite",
         graph: mockGraph as unknown as JsonData,
+        nodeDetailCache: new Map(),
       });
       const result = await server.handleCallTool({
         name: "list_files",
