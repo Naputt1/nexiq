@@ -140,7 +140,10 @@ export class McpRunner {
 
   async callTool(name: string, args: unknown) {
     if (!this.client) throw new Error("Client not started");
-    return await this.client.callTool({ name, arguments: args });
+    return await this.client.callTool({
+      name,
+      arguments: args as Record<string, unknown>,
+    });
   }
 
   async listTools() {
@@ -253,27 +256,29 @@ export class OpenRouterClient implements LlmClient {
     try {
       const response = await this.openai.chat.completions.create({
         model: this.name,
-        messages: formattedMessages,
-        tools: tools.length > 0 ? (tools as Array<Record<string, unknown>>).map((t) => ({
-          type: "function",
-          function: {
-            name: t.name as string,
-            description: t.description as string,
-            parameters: t.inputSchema,
-          },
-        })) : undefined,
+        messages: formattedMessages as any,
+        tools:
+          tools.length > 0
+            ? (tools as Array<Record<string, unknown>>).map((t) => ({
+                type: "function",
+                function: {
+                  name: t.name as string,
+                  description: t.description as string,
+                  parameters: t.inputSchema as Record<string, unknown>,
+                },
+              }))
+            : undefined,
         transforms: ["middle-out"],
-      });
+      } as any);
 
       const message = response.choices[0]!.message;
       const toolCalls = message.tool_calls
-        ?.filter((tc: Record<string, unknown>) => tc.type === "function")
-        .map((tc: Record<string, unknown>) => {
-          const tool = tc as Record<string, unknown>;
+        ?.filter((tc) => tc.type === "function")
+        .map((tc) => {
           return {
-            id: tool.id,
-            name: (tool.function as Record<string, unknown>).name as string,
-            arguments: JSON.parse((tool.function as Record<string, unknown>).arguments as string),
+            id: tc.id,
+            name: tc.function.name,
+            arguments: JSON.parse(tc.function.arguments),
           };
         });
 
@@ -465,7 +470,7 @@ export class BenchmarkRunner {
             testType,
           });
 
-          const toolArgs = { ...tc.arguments };
+          const toolArgs = { ...(tc.arguments as Record<string, unknown>) };
           // Inject projectPath if missing and it's a specialized tool
           if (
             !toolArgs.projectPath &&
@@ -518,7 +523,11 @@ export class BenchmarkRunner {
       } else if (response.content) {
         // Evaluate completion
         if (testType === "coding" && scenario.verification_command) {
-          const verifyResult = await this.verifyCodingTask(absoluteRoot, scenario.verification_command, mcp);
+          const verifyResult = await this.verifyCodingTask(
+            absoluteRoot,
+            scenario.verification_command,
+            mcp,
+          );
           success = verifyResult.success;
           verificationOutput = verifyResult.output;
         } else {
@@ -555,32 +564,50 @@ export class BenchmarkRunner {
     return result;
   }
 
-  private async verifyCodingTask(projectRoot: string, command: string, mcp: McpRunner): Promise<{ success: boolean; output?: { stdout: string; stderr: string; exitCode: number } }> {
+  private async verifyCodingTask(
+    projectRoot: string,
+    command: string,
+    mcp: McpRunner,
+  ): Promise<{
+    success: boolean;
+    output?: { stdout: string; stderr: string; exitCode: number };
+  }> {
     try {
-      const response: Record<string, unknown> = await mcp.callTool("run_shell_command", {
-        command,
-        projectPath: projectRoot,
-      });
-      
-      const content = response.content?.[0];
+      const response: Record<string, unknown> = await mcp.callTool(
+        "run_shell_command",
+        {
+          command,
+          projectPath: projectRoot,
+        },
+      );
+
+      const content = (
+        response.content as Array<{ type: string; text: string }>
+      )?.[0];
       if (content?.type === "text") {
         try {
           const result = JSON.parse(content.text);
           if (result.exitCode !== 0) {
-            console.error(`Verification command failed with exit code ${result.exitCode}`);
+            console.error(
+              `Verification command failed with exit code ${result.exitCode}`,
+            );
             if (result.stdout) console.error(`STDOUT: ${result.stdout}`);
             if (result.stderr) console.error(`STDERR: ${result.stderr}`);
           }
-          return { 
-            success: result.exitCode === 0, 
-            output: { 
-              stdout: result.stdout || "", 
-              stderr: result.stderr || "", 
-              exitCode: result.exitCode 
-            } 
+          return {
+            success: result.exitCode === 0,
+            output: {
+              stdout: result.stdout || "",
+              stderr: result.stderr || "",
+              exitCode: result.exitCode,
+            },
           };
         } catch (e) {
-          console.error("Failed to parse verification result:", e, content.text);
+          console.error(
+            "Failed to parse verification result:",
+            e,
+            content.text,
+          );
           return { success: false };
         }
       }
@@ -597,8 +624,8 @@ export class BenchmarkRunner {
     response: string,
   ): Promise<boolean> {
     if (!scenario.expected_answer_contains) {
-        // If no expectation, check if llm thinks it succeeded
-        return true; 
+      // If no expectation, check if llm thinks it succeeded
+      return true;
     }
 
     const evalPrompt = `
@@ -662,31 +689,51 @@ export async function runBenchmarks(options: RunOptions) {
   const concurrency = options.concurrency || 3;
   const pool = new RunnerPool(concurrency);
 
-  const tasks: { 
-    project: ProjectScenarios; 
-    scenario: Scenario; 
-    model: LlmClient; 
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm"; 
-    testType: "single-prompt" | "planning" | "coding" 
+  const tasks: {
+    project: ProjectScenarios;
+    scenario: Scenario;
+    model: LlmClient;
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+    testType: "single-prompt" | "planning" | "coding";
   }[] = [];
 
   for (const tier of options.projects) {
-    const scenarioFile = path.resolve(REPO_ROOT, `benchmarks/scenarios/${tier}.json`);
+    const scenarioFile = path.resolve(
+      REPO_ROOT,
+      `benchmarks/scenarios/${tier}.json`,
+    );
     if (!fs.existsSync(scenarioFile)) {
-        console.warn(`Scenario file not found: ${scenarioFile}`);
-        continue;
+      console.warn(`Scenario file not found: ${scenarioFile}`);
+      continue;
     }
 
-    const projectData: ProjectScenarios = JSON.parse(fs.readFileSync(scenarioFile, "utf-8"));
+    const projectData: ProjectScenarios = JSON.parse(
+      fs.readFileSync(scenarioFile, "utf-8"),
+    );
 
     for (const scenario of projectData.scenarios) {
       for (const model of options.models) {
-        const scenarioTestTypes = (scenario.type === 'coding') ? ["coding"] : options.testTypes;
+        const scenarioTestTypes =
+          scenario.type === "coding" ? ["coding"] : options.testTypes;
 
-        for (const testType of scenarioTestTypes) {
-           for (const approach of options.approaches) {
-             tasks.push(        { project: projectData, scenario, model, approach, testType });
-           }
+        for (const testType of scenarioTestTypes as (
+          | "single-prompt"
+          | "planning"
+          | "coding"
+        )[]) {
+          for (const approach of options.approaches as (
+            | "baseline"
+            | "nexiq-cold"
+            | "nexiq-warm"
+          )[]) {
+            tasks.push({
+              project: projectData,
+              scenario,
+              model,
+              approach,
+              testType,
+            });
+          }
         }
       }
     }
@@ -699,7 +746,7 @@ export async function runBenchmarks(options: RunOptions) {
 
   await pool.init(serverPath);
 
-  const runTask = async (task: typeof tasks[0]) => {
+  const runTask = async (task: (typeof tasks)[0]) => {
     activeScenarios++;
     options.onProgress?.({
       type: "scenario-start",
@@ -736,9 +783,9 @@ export async function runBenchmarks(options: RunOptions) {
       activeScenarios--;
       completedScenarios++; // Still mark as completed to avoid hanging UI
       options.onProgress?.({
-          type: "scenario-end",
-          completedScenarios,
-          activeScenarios,
+        type: "scenario-end",
+        completedScenarios,
+        activeScenarios,
       });
     } finally {
       pool.release(mcp);
@@ -756,7 +803,7 @@ export async function runBenchmarks(options: RunOptions) {
     let taskStarted = false;
     while (promisePool.size < concurrency && queue.length > 0) {
       // Find a task that can run given current active roots
-      const taskIndex = queue.findIndex(t => {
+      const taskIndex = queue.findIndex((t) => {
         const root = t.project.root;
         if (t.scenario.isolation) {
           // Isolated task needs root to be completely free
@@ -771,7 +818,7 @@ export async function runBenchmarks(options: RunOptions) {
 
       const task = queue.splice(taskIndex, 1)[0];
       const root = task.project.root;
-      
+
       // Mark root as in use
       activeRoots.set(root, (activeRoots.get(root) || 0) + 1);
       if (task.scenario.isolation) {
@@ -792,7 +839,7 @@ export async function runBenchmarks(options: RunOptions) {
         }
         promisePool.delete(p);
       });
-      
+
       promisePool.add(p);
       taskStarted = true;
     }
@@ -802,7 +849,9 @@ export async function runBenchmarks(options: RunOptions) {
       await Promise.race(promisePool);
     } else if (queue.length > 0 && !taskStarted) {
       // This shouldn't happen if the logic is correct, but avoid infinite loop
-      console.error("Scheduler stuck: some tasks in queue but none can start and none are running.");
+      console.error(
+        "Scheduler stuck: some tasks in queue but none can start and none are running.",
+      );
       break;
     }
   }
