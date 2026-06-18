@@ -1,6 +1,6 @@
 {
   "name": "@nexiq/cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI for the nexiq React analysis server",
   "type": "module",
   "bin": {
