@@ -452,7 +452,7 @@ export function extractFileUsages(
       );
       if (!target || target.id === owner.id) return;
 
-      const ownerTargetId = owner.srcId || owner.id;
+      const ownerTargetId = isJSXVariable(owner) ? (owner.srcId || owner.id) : owner.id;
 
       const parent = path.parentPath;
       if (parent.isMemberExpression() && parent.get("object") === path) {

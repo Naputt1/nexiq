@@ -243,29 +243,29 @@ export default function CallExpression(
           t.isCallExpression(callee.object)
         ) {
           const innerCallee = callee.object.callee;
-          const component = getJSXTagName(args[0]);
+          const component = t.isExpression(args[0]) ? getJSXTagName(args[0]) : undefined;
 
           if (t.isIdentifier(innerCallee) && innerCallee.name === "createRoot" &&
             isImportFromSource(componentDB, fileName, "createRoot", "react-dom/client")) {
-            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, component });
+            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, ...(component ? { component } : {}) });
           } else if (
             t.isMemberExpression(innerCallee) &&
             isCreateRootMemberExpression(innerCallee, componentDB, fileName)
           ) {
-            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, component });
+            componentDB.setEntryPoint(fileName, { kind: "createRoot", loc, ...(component ? { component } : {}) });
           }
         }
 
         // Pattern: hydrateRoot(container, jsx)  or  ReactDOM.hydrateRoot(container, jsx)
-        const component = getJSXTagName(args.length > 1 ? args[1] : undefined);
+        const component = args.length > 1 && t.isExpression(args[1]) ? getJSXTagName(args[1]) : undefined;
         if (t.isIdentifier(callee) && callee.name === "hydrateRoot" &&
           isImportFromSource(componentDB, fileName, "hydrateRoot", "react-dom/client")) {
-          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, component });
+          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, ...(component ? { component } : {}) });
         } else if (
           t.isMemberExpression(callee) &&
           isHydrateRootMemberExpression(callee, componentDB, fileName)
         ) {
-          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, component });
+          componentDB.setEntryPoint(fileName, { kind: "hydrateRoot", loc, ...(component ? { component } : {}) });
         }
       }
     },
