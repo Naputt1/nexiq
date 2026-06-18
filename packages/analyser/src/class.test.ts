@@ -4,12 +4,11 @@ import { getViteConfig } from "./analyzer/utils.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
 describe("analyser class handling", () => {
   it("should correctly scope variables inside class methods", async () => {
-    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
-
-    // Create a temporary file with a class
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-class-scope-"));
     const fileName = "ClassScopeTest.tsx";
     const code = `
       export class MyClass {
@@ -20,16 +19,16 @@ describe("analyser class handling", () => {
       }
     `;
 
-    const filePath = path.resolve(projectPath, fileName);
+    const filePath = path.resolve(tmpDir, fileName);
     fs.writeFileSync(filePath, code);
 
     try {
-      const packageJson = new PackageJson(projectPath);
-      const viteConfigPath = getViteConfig(projectPath);
-      const files = [fileName]; // Only analyze our test file
+      const packageJson = new PackageJson(tmpDir);
+      const viteConfigPath = getViteConfig(tmpDir);
+      const files = [fileName];
 
       const graph = await analyzeFiles(
-        projectPath,
+        tmpDir,
         viteConfigPath,
         files,
         packageJson,
@@ -38,7 +37,6 @@ describe("analyser class handling", () => {
       const file = graph.files["/ClassScopeTest.tsx"];
       expect(file).toBeDefined();
 
-      // Check for MyClass
       const myClass = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "MyClass",
       );
@@ -46,18 +44,14 @@ describe("analyser class handling", () => {
       expect(myClass?.kind).toBe("class");
       expect(myClass?.type).toBe("data");
 
-      // Check for 'x'
       const topLevelX = Object.values(file!.var).find(
         (v) => v.name.type === "identifier" && v.name.name === "x",
       );
-
-      // 'x' should NOT be at the top level
       expect(topLevelX).toBeUndefined();
 
       if (myClass?.kind !== "class")
         throw new Error("MyClass should be a class");
 
-      // Check for myMethod
       const myClassVar = myClass?.var;
       expect(myClassVar).toBeDefined();
 
@@ -70,7 +64,6 @@ describe("analyser class handling", () => {
       if (myMethod?.kind !== "method")
         throw new Error("myMethod should be a method");
 
-      // 'x' should be inside myMethod's var
       const myMethodVar = myMethod?.var;
       expect(myMethodVar).toBeDefined();
 
@@ -79,15 +72,12 @@ describe("analyser class handling", () => {
       );
       expect(methodX).toBeDefined();
     } finally {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
   it("should capture inheritance and members", async () => {
-    const projectPath = path.resolve(process.cwd(), "../sample-project/simple");
-
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-class-members-"));
     const fileName = "ClassMembersTest.tsx";
     const code = `
       class Base {}
@@ -103,16 +93,16 @@ describe("analyser class handling", () => {
       }
     `;
 
-    const filePath = path.resolve(projectPath, fileName);
+    const filePath = path.resolve(tmpDir, fileName);
     fs.writeFileSync(filePath, code);
 
     try {
-      const packageJson = new PackageJson(projectPath);
-      const viteConfigPath = getViteConfig(projectPath);
+      const packageJson = new PackageJson(tmpDir);
+      const viteConfigPath = getViteConfig(tmpDir);
       const files = [fileName];
 
       const graph = await analyzeFiles(
-        projectPath,
+        tmpDir,
         viteConfigPath,
         files,
         packageJson,
@@ -156,9 +146,7 @@ describe("analyser class handling", () => {
       expect(myMethod).toBeDefined();
       expect(myMethod?.memberKind).toBe("method");
     } finally {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 });
