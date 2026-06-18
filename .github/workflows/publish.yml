@@ -83,9 +83,17 @@ jobs:
 
   publish:
     needs: build-native
+    if: |
+      github.event_name == 'push' ||
+      inputs.all == true ||
+      inputs.shared == true ||
+      inputs.extension-sdk == true ||
+      inputs.component-extension == true ||
+      inputs.file-extension == true ||
+      inputs.cli == true
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
       id-token: write
     steps:
@@ -125,47 +133,9 @@ jobs:
         env:
           MODE: production
 
-      - name: Publish @nexiq/shared
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.shared == true
-        run: pnpm --filter @nexiq/shared publish --no-git-checks --access public --provenance
+      - name: Publish to npm
+        run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @nexiq/extension-sdk
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.extension-sdk == true
-        run: pnpm --filter @nexiq/extension-sdk publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @nexiq/component-extension
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.component-extension == true
-        run: pnpm --filter @nexiq/component-extension publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @nexiq/file-extension
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.file-extension == true
-        run: pnpm --filter @nexiq/file-extension publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @nexiq/cli
-        if: |
-          github.event_name == 'push' ||
-          inputs.all == true ||
-          inputs.cli == true
-        run: pnpm --filter @nexiq/cli publish --no-git-checks --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
