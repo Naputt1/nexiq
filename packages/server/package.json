@@ -1,6 +1,6 @@
 {
   "name": "@nexiq/server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Short and powerful React component dependency analysis",
   "type": "module",
