@@ -1,5 +1,11 @@
 # @nexiq/extension-sdk
 
+## 1.0.7
+
+### Patch Changes
+
+- 41543d6: custom node type
+
 ## 1.0.6
 
 ### Patch Changes
