@@ -1,6 +1,6 @@
 {
   "name": "@nexiq/file-extension",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Nexiq extension for file and package structure",
   "type": "module",
   "main": "dist/index.js",
