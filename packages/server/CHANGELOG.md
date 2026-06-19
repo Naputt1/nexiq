@@ -1,5 +1,13 @@
 # @nexiq/server
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [41543d6]
+  - @nexiq/extension-sdk@1.0.7
+  - @nexiq/analyser@1.0.1
+
 ## 1.0.3
 
 ### Patch Changes

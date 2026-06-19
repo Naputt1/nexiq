@@ -1,5 +1,12 @@
 # @nexiq/file-extension
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [41543d6]
+  - @nexiq/extension-sdk@1.0.7
+
 ## 0.1.2
 
 ### Patch Changes
