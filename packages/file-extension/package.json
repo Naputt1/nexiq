@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "peerDependencies": {
     "@nexiq/extension-sdk": "workspace:*",

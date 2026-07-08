@@ -25,7 +25,8 @@
     "@nexiq/shared": "workspace:*"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "devDependencies": {
     "@napi-rs/cli": "^2.18.4",
