@@ -11,6 +11,11 @@
       "import": "./dist/index.js"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naputt1/nexiq.git",
+    "directory": "packages/file-extension"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

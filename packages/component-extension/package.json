@@ -9,6 +9,11 @@
     "*.node",
     "index.cjs"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naputt1/nexiq.git",
+    "directory": "packages/component-extension"
+  },
   "scripts": {
     "build:rs": "napi build --platform --release",
     "postbuild:rs": "mv index.js index.cjs || true",

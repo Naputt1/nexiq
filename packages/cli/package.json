@@ -7,6 +7,11 @@
     "nexiq": "dist/cli.js"
   },
   "main": "dist/cli.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naputt1/nexiq.git",
+    "directory": "packages/cli"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public",
