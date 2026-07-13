@@ -45,6 +45,15 @@ export interface GetSymbolUsagesWithContextArgs {
   fields?: string[];
 }
 
+export interface GetFieldAccessesArgs {
+  projectPath: string;
+  subProject?: string;
+  query: string;
+  fieldPath: string;
+  contextLines?: number;
+  fields?: string[];
+}
+
 export interface FindFilesArgs {
   projectPath: string;
   subProject?: string;
@@ -178,6 +187,7 @@ export interface ToolArgsMap {
   open_project: OpenProjectArgs;
   get_symbol_info: GetSymbolInfoArgs;
   get_symbol_usages_with_context: GetSymbolUsagesWithContextArgs;
+  get_field_accesses: GetFieldAccessesArgs;
   get_prop_definitions: GetPropDefinitionsArgs;
   find_files: FindFilesArgs;
   get_file_imports: GetFileImportsArgs;
@@ -397,6 +407,46 @@ export class BackendServer {
               },
             },
             required: ["projectPath", "query"],
+          },
+        },
+        {
+          name: "get_field_accesses",
+          description:
+            "Find all files that access a specific field on the result of a hook, component, or function call. For example, query 'useUser' with fieldPath 'data.role' finds every component that accesses 'user.data.role' on the return value of 'useUser'. Returns file, line, and surrounding code context for each match.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: {
+                type: "string",
+                description: "Absolute path to the project root",
+              },
+              subProject: {
+                type: "string",
+                description: "Optional sub-project path",
+              },
+              query: {
+                type: "string",
+                description:
+                  "The name of the hook, component, or function to trace (e.g., 'useUser', 'Button')",
+              },
+              fieldPath: {
+                type: "string",
+                description:
+                  "Dot-separated field access path to search for (e.g., 'data.role', 'isLoading'). Only returns results where this field is accessed on the symbol's return value.",
+              },
+              contextLines: {
+                type: "number",
+                description:
+                  "Number of context lines to show around each field access match. Defaults to 2.",
+              },
+              fields: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Optional list of fields to return. Omit to return all fields.",
+              },
+            },
+            required: ["projectPath", "query", "fieldPath"],
           },
         },
         {
@@ -989,6 +1039,27 @@ export class BackendServer {
           strict !== false,
           contextLines ?? 2,
           exclude || DEFAULT_EXCLUDES,
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(this.filterFields(results, fields), null, 2),
+            },
+          ],
+        };
+      }
+      case "get_field_accesses": {
+        const { projectPath, subProject, query, fieldPath, contextLines, fields } =
+          knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const results = await this.projectManager.getFieldAccesses(
+          resolvedPath,
+          query,
+          fieldPath,
+          subProject,
+          contextLines ?? 2,
         );
 
         return {

@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "componentName": "Button",
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "componentName": "Button"
   },
   "result": {
     "content": [

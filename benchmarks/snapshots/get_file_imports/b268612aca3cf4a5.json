@@ -1,0 +1,17 @@
+{
+  "arguments": {
+    "filePath": "/src/app/routes/app/dashboard.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "fields": [
+      "imports"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{}"
+      }
+    ]
+  }
+}

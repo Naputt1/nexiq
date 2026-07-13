@@ -696,7 +696,7 @@ export class SqliteDB extends BaseSqliteDB {
         rel.kind,
         rel.line ?? 0,
         rel.column ?? 0,
-        rel.data_json ? JSON.stringify(rel.data_json) : null,
+        rel.data_json ?? null,
       );
     }
   }

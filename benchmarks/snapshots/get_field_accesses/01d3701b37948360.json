@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "useUser",
+    "fieldPath": "data.role",
+    "contextLines": 3
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"symbol\": \"useUser\",\n  \"fieldPath\": \"data.role\",\n  \"results\": []\n}"
+      }
+    ]
+  }
+}

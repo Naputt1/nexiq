@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "/src/lib/__tests__/authorization.test.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"createUser\": {\n    \"localName\": \"createUser\",\n    \"importedName\": \"createUser\",\n    \"source\": \"/src/testing/test-utils.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"renderApp\": {\n    \"localName\": \"renderApp\",\n    \"importedName\": \"renderApp\",\n    \"source\": \"/src/testing/test-utils.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"screen\": {\n    \"localName\": \"screen\",\n    \"importedName\": \"screen\",\n    \"source\": \"/src/testing/test-utils.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Authorization\": {\n    \"localName\": \"Authorization\",\n    \"importedName\": \"Authorization\",\n    \"source\": \"/src/lib/authorization.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"ROLES\": {\n    \"localName\": \"ROLES\",\n    \"importedName\": \"ROLES\",\n    \"source\": \"/src/lib/authorization.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "arguments": {
+    "filePath": "/src/features/users/components/update-profile.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "fields": [
+      "imports"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{}"
+      }
+    ]
+  }
+}

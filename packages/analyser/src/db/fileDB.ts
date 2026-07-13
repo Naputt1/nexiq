@@ -186,7 +186,7 @@ export class File {
         kind: rel.kind,
         line: rel.line ?? null,
         column: rel.column ?? null,
-        data_json: null,
+        data_json: rel.data_json ? JSON.stringify(rel.data_json) : null,
       });
     }
   }

@@ -380,7 +380,7 @@ export class BenchmarkRunner {
 
     const pathContext = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
-    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands.
+    Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands. For field-level queries (e.g., finding which files access 'user.data.role'), use 'get_field_accesses' with the hook/component name and the field path.
     To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.
     Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.
     If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.`;

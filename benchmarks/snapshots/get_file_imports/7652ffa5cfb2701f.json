@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "/src/app/routes/app/profile.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"ContentLayout\": {\n    \"localName\": \"ContentLayout\",\n    \"importedName\": \"ContentLayout\",\n    \"source\": \"/src/components/layouts/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"UpdateProfile\": {\n    \"localName\": \"UpdateProfile\",\n    \"importedName\": \"UpdateProfile\",\n    \"source\": \"/src/features/users/components/update-profile.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"useUser\": {\n    \"localName\": \"useUser\",\n    \"importedName\": \"useUser\",\n    \"source\": \"/src/lib/auth.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

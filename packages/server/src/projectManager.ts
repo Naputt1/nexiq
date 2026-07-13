@@ -19,6 +19,7 @@ import {
   type DatabaseData,
   type SymbolRow,
   type RenderRow,
+  type UsageOccurrence,
 } from "@nexiq/shared";
 import {
   discoverWorkspacePackages,
@@ -139,6 +140,16 @@ export interface SymbolSearchResult {
 export interface SymbolInfo {
   definitions: SymbolSearchResult[];
   externalUsages?: SymbolSearchResult[];
+}
+
+export interface FieldAccessResult {
+  file: string;
+  line: number;
+  column: number;
+  owner: string;
+  accessPath: string[];
+  displayLabel: string;
+  context: string[];
 }
 
 interface TreeNode {
@@ -733,6 +744,75 @@ export class ProjectManager {
     }
 
     return results;
+  }
+
+  async getFieldAccesses(
+    projectPath: string,
+    query: string,
+    fieldPath: string,
+    subProject?: string,
+    contextLines: number = 2,
+  ): Promise<{ symbol: string; fieldPath: string; results: FieldAccessResult[] }> {
+    const project = await this.openProject(projectPath, subProject);
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
+
+    // Find all usage-read relations with matching field access
+    const results: FieldAccessResult[] = [];
+    const suffixPattern = `%.${fieldPath}`;
+
+    const accesses = project.db!.db.prepare(`
+      SELECT r.line, r.column, r.data_json
+      FROM relations r
+      WHERE r.kind = 'usage-read'
+        AND (json_extract(r.data_json, '$.displayLabel') = ?
+             OR json_extract(r.data_json, '$.displayLabel') LIKE ?)
+    `).all(fieldPath, suffixPattern) as Array<{
+      line: number;
+      column: number;
+      data_json: string | null;
+    }>;
+
+    for (const access of accesses) {
+      if (!access.data_json) continue;
+      const data = JSON.parse(access.data_json) as UsageOccurrence;
+      const file = data.filePath;
+      if (!file) continue;
+
+      results.push({
+        file,
+        line: access.line,
+        column: access.column,
+        owner: data.ownerKind || "unknown",
+        accessPath: data.accessPath || [],
+        displayLabel: data.displayLabel || "",
+        context: [],
+      });
+    }
+
+    // Step 3: Read context lines if requested
+    if (contextLines > 0) {
+      const fileCache = new Map<string, string[]>();
+      for (const result of results) {
+        const fullPath = path.resolve(
+          analysisPath,
+          result.file.startsWith("/") ? result.file.slice(1) : result.file,
+        );
+        if (!fs.existsSync(fullPath)) continue;
+
+        let lines = fileCache.get(fullPath);
+        if (!lines) {
+          lines = fs.readFileSync(fullPath, "utf-8").split("\n");
+          fileCache.set(fullPath, lines);
+        }
+
+        const lineIdx = result.line - 1;
+        const start = Math.max(0, lineIdx - contextLines);
+        const end = Math.min(lines.length - 1, lineIdx + contextLines);
+        result.context = lines.slice(start, end + 1);
+      }
+    }
+
+    return { symbol: query, fieldPath, results };
   }
 
   async getPropDefinitions(

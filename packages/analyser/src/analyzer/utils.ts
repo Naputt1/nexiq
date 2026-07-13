@@ -16,7 +16,7 @@ export function getViteConfig(dir: string): string | null {
 }
 
 export function getFiles(dir: string, customIgnore: string[] = []): string[] {
-  return glob.sync("**/*.{js,jsx,ts,tsx}", {
+  const allFiles = glob.sync("**/*.{js,jsx,ts,tsx}", {
     cwd: dir,
     absolute: false,
     ignore: [
@@ -31,6 +31,16 @@ export function getFiles(dir: string, customIgnore: string[] = []): string[] {
       "**/*.d.ts",
       ...customIgnore,
     ],
+  });
+
+  // Safety filter: only return actual files, not directories that matched by name
+  return allFiles.filter((f) => {
+    const fullPath = path.join(dir, f);
+    try {
+      return fs.statSync(fullPath).isFile();
+    } catch {
+      return false;
+    }
   });
 }
 
