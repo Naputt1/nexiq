@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "user.data.role",
+    "strict": false,
+    "contextLines": 5
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

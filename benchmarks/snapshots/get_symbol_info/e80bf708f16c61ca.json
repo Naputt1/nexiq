@@ -1,8 +1,8 @@
 {
   "arguments": {
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "usages": true,
     "query": "Button",
-    "usages": true
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
   },
   "result": {
     "content": [

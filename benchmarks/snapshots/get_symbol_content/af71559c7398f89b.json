@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
-    "query": "MainView"
+    "query": "MainView",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid"
   },
   "result": {
     "content": [

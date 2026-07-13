@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "Input",
+    "strict": false
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"normal\",\n      \"name\": \"loginInputSchema\",\n      \"file\": \"/src/lib/auth.tsx\"\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"registerInputSchema\",\n      \"file\": \"/src/lib/auth.tsx\"\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"updateDiscussionInputSchema\",\n      \"file\": \"/src/features/discussions/api/update-discussion.ts\"\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"createDiscussionInputSchema\",\n      \"file\": \"/src/features/discussions/api/create-discussion.ts\"\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"updateProfileInputSchema\",\n      \"file\": \"/src/features/users/api/update-profile.ts\"\n    },\n    {\n      \"kind\": \"normal\",\n      \"name\": \"createCommentInputSchema\",\n      \"file\": \"/src/features/comments/api/create-comment.ts\"\n    },\n    {\n      \"kind\": \"component\",\n      \"name\": \"FormInput\",\n      \"file\": \"/src/features/auth/components/form-input.tsx\"\n    },\n    {\n      \"kind\": \"component\",\n      \"name\": \"Input\",\n      \"file\": \"/src/components/ui/form/input.tsx\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

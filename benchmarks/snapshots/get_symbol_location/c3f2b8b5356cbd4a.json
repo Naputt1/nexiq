@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "query": "GenericModal"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

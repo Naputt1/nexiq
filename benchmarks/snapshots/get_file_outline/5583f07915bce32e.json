@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "filePath": "src/components/ui/button/button.tsx",
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "filePath": "src/components/ui/button/button.tsx"
   },
   "result": {
     "content": [

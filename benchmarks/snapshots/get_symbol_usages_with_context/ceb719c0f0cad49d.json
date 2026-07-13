@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
-    "query": "useAuthorization"
+    "query": "useAuthorization",
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
   },
   "result": {
     "content": [

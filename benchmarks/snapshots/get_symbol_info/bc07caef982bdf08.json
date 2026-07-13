@@ -1,0 +1,18 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "query": "GenericModal",
+    "fields": [
+      "definitions",
+      "usages"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": []\n}"
+      }
+    ]
+  }
+}

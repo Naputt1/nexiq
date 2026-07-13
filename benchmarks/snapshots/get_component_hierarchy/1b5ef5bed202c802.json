@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "componentName": "GenericModal",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"error\": \"Component \\\"GenericModal\\\" not found.\"\n}"
+      }
+    ]
+  }
+}

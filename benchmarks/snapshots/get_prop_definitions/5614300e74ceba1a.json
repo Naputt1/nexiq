@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "componentName": "LoginForm",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"LoginForm\",\n    \"file\": \"/src/features/auth/components/login-form.tsx\",\n    \"props\": [\n      {\n        \"id\": \"df9da7513c533ee:prop:onSuccess\",\n        \"name\": \"onSuccess\",\n        \"type\": \"() => void\",\n        \"kind\": \"prop\",\n        \"loc\": {\n          \"line\": 12,\n          \"column\": 28\n        },\n        \"hash\": \"58821a2c8adb72ca\"\n      }\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

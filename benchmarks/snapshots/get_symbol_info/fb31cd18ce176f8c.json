@@ -2,8 +2,8 @@
   "arguments": {
     "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
     "query": "GenericModal",
-    "strict": true,
-    "usages": true
+    "usages": true,
+    "strict": true
   },
   "result": {
     "content": [

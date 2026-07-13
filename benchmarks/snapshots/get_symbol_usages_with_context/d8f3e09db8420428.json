@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "useUser",
+    "strict": true,
+    "contextLines": 5
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/app/provider.tsx\",\n    \"line\": 17,\n    \"column\": 13,\n    \"in\": \"AppProvider\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"\",\n      \"type AppProviderProps = {\",\n      \"  children: React.ReactNode;\",\n      \"};\",\n      \"\",\n      \"export const AppProvider = ({ children }: AppProviderProps) => {\",\n      \"  const [queryClient] = React.useState(\",\n      \"    () =>\",\n      \"      new QueryClient({\",\n      \"        defaultOptions: queryConfig,\",\n      \"      }),\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

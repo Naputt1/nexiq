@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "packages/types/src/posts.ts",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "src/components/NavLink.js",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/mid"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"120d9c6da4374c74\",\n    \"name\": \"NavLink\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 4\n  }\n]"
+      }
+    ]
+  }
+}

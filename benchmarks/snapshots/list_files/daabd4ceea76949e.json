@@ -1,0 +1,19 @@
+{
+  "arguments": {
+    "exclude": [
+      "**/types/**"
+    ],
+    "fields": [
+      "path"
+    ],
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"totalFiles\": 22,\n  \"displayedCount\": 22,\n  \"files\": [\n    {\n      \"path\": \"/packages/client/src/websocket.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/telemetry.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/index.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/helpers.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/helpers.test.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/errors.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/errors.test.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/client4.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/client4.test.ts\"\n    },\n    {\n      \"path\": \"/packages/components/rollup.config.js\"\n    },\n    {\n      \"path\": \"/packages/components/babel.config.js\"\n    },\n    {\n      \"path\": \"/packages/components/src/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/tour_tip_backdrop.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/tour_tip.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/index.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/skeleton_loader/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/pulsating_dot/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/generic_modal/generic_modal.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/focus_trap/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useMeasurePunchouts.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useElementAvailable.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useClickOutsideRef.ts\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

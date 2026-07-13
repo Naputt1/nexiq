@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "filePath": "src/components/ArticleList.js",
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid"
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/mid",
+    "filePath": "src/components/ArticleList.js"
   },
   "result": {
     "content": [

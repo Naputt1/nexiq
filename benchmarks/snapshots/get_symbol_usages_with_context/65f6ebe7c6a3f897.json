@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/mid",
+    "query": "ArticleList",
+    "contextLines": 3
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/components/Home/MainView.js\",\n    \"line\": 72,\n    \"column\": 6,\n    \"in\": \"MainView\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"    dispatch({ type: CHANGE_TAB, tab, pager, payload }),\",\n      \"});\",\n      \"\",\n      \"const MainView = (props) => {\",\n      \"  return (\",\n      \"    <div className=\\\"col-md-9\\\">\",\n      \"      <div className=\\\"feed-toggle\\\">\"\n    ]\n  },\n  {\n    \"file\": \"/src/components/ArticleList.js\",\n    \"line\": 17,\n    \"column\": 15,\n    \"in\": \"jsx@17:15\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  return (\",\n      \"    <div>\",\n      \"      {props.articles.map((article) => {\",\n      \"        return <ArticlePreview article={article} key={article.slug} />;\",\n      \"      })}\",\n      \"\",\n      \"      <ListPagination\"\n    ]\n  },\n  {\n    \"file\": \"/src/components/ArticleList.js\",\n    \"line\": 20,\n    \"column\": 6,\n    \"in\": \"jsx@20:6\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"        return <ArticlePreview article={article} key={article.slug} />;\",\n      \"      })}\",\n      \"\",\n      \"      <ListPagination\",\n      \"        pager={props.pager}\",\n      \"        articlesCount={props.articlesCount}\",\n      \"        currentPage={props.currentPage}\"\n    ]\n  },\n  {\n    \"file\": \"/src/components/ArticleList.js\",\n    \"line\": 15,\n    \"column\": 4,\n    \"in\": \"jsx@15:4\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  }\",\n      \"\",\n      \"  return (\",\n      \"    <div>\",\n      \"      {props.articles.map((article) => {\",\n      \"        return <ArticlePreview article={article} key={article.slug} />;\",\n      \"      })}\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

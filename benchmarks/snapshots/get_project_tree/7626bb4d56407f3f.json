@@ -1,0 +1,15 @@
+{
+  "arguments": {
+    "maxDepth": 3,
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "subProject": "packages/components/src/generic_modal"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"name\": \"/\",\n  \"children\": [\n    {\n      \"name\": \"generic_modal.tsx\",\n      \"children\": []\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

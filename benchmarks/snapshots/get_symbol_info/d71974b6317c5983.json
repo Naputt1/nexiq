@@ -1,0 +1,17 @@
+{
+  "arguments": {
+    "fields": [
+      "definitions"
+    ],
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "notifications"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"hook\",\n      \"name\": \"notifications\",\n      \"file\": \"/src/components/ui/notifications/notifications.tsx\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+}

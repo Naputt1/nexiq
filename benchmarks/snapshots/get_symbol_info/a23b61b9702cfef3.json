@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "LoginForm",
+    "props": true,
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [\n    {\n      \"kind\": \"component\",\n      \"name\": \"LoginForm\",\n      \"file\": \"/src/features/auth/components/login-form.tsx\",\n      \"props\": [\n        {\n          \"id\": \"df9da7513c533ee:prop:onSuccess\",\n          \"name\": \"onSuccess\",\n          \"type\": \"() => void\",\n          \"kind\": \"prop\",\n          \"loc\": {\n            \"line\": 12,\n            \"column\": 28\n          },\n          \"hash\": \"58821a2c8adb72ca\"\n        }\n      ],\n      \"usages\": [\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@21:6\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/app/routes/auth/login.tsx\",\n          \"in\": \"LoginRoute\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@20:4\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@53:6\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@28:10\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@35:12\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@54:8\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@42:14\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@55:10\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@29:12\"\n        },\n        {\n          \"kind\": \"render\",\n          \"name\": \"LoginForm\",\n          \"file\": \"/src/features/auth/components/login-form.tsx\",\n          \"in\": \"jsx@41:12\"\n        }\n      ]\n    }\n  ],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

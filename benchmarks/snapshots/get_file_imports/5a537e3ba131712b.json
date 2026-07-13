@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "filePath": "packages/components/src/index.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"GenericModalProps\": {\n    \"localName\": \"GenericModalProps\",\n    \"importedName\": \"Props\",\n    \"source\": \"/src/generic_modal/generic_modal.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"CircleSkeletonLoaderProps\": {\n    \"localName\": \"CircleSkeletonLoaderProps\",\n    \"importedName\": \"CircleSkeletonLoaderProps\",\n    \"source\": \"/src/skeleton_loader/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"RectangleSkeletonLoaderProps\": {\n    \"localName\": \"RectangleSkeletonLoaderProps\",\n    \"importedName\": \"RectangleSkeletonLoaderProps\",\n    \"source\": \"/src/skeleton_loader/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"FocusTrapProps\": {\n    \"localName\": \"FocusTrapProps\",\n    \"importedName\": \"Props\",\n    \"source\": \"/src/focus_trap/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"GenericModal\": {\n    \"localName\": \"GenericModal\",\n    \"importedName\": \"GenericModal\",\n    \"source\": \"/src/generic_modal/generic_modal.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"CircleSkeletonLoader\": {\n    \"localName\": \"CircleSkeletonLoader\",\n    \"importedName\": \"CircleSkeletonLoader\",\n    \"source\": \"/src/skeleton_loader/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"RectangleSkeletonLoader\": {\n    \"localName\": \"RectangleSkeletonLoader\",\n    \"importedName\": \"RectangleSkeletonLoader\",\n    \"source\": \"/src/skeleton_loader/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"FocusTrap\": {\n    \"localName\": \"FocusTrap\",\n    \"importedName\": \"FocusTrap\",\n    \"source\": \"/src/focus_trap/index.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"useElementAvailable\": {\n    \"localName\": \"useElementAvailable\",\n    \"importedName\": \"useElementAvailable\",\n    \"source\": \"/src/common/hooks/useElementAvailable.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+      }
+    ]
+  }
+}

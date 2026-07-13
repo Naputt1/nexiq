@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "query": "PostList",
+    "props": true,
+    "usages": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": [],\n  \"externalUsages\": []\n}"
+      }
+    ]
+  }
+}

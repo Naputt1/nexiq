@@ -1,0 +1,19 @@
+{
+  "arguments": {
+    "componentName": "Button",
+    "fields": [
+      "name",
+      "type",
+      "required"
+    ],
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"name\": \"Button\"\n  }\n]"
+      }
+    ]
+  }
+}

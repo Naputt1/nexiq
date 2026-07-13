@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "contextLines": 3,
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "Authorization",
+    "strict": false
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"file\": \"/src/lib/authorization.tsx\",\n    \"line\": 81,\n    \"column\": 9,\n    \"in\": \"jsx@81:9\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"    canAccess = policyCheck;\",\n      \"  }\",\n      \"\",\n      \"  return <>{canAccess ? children : forbiddenFallback}</>;\",\n      \"};\",\n      \"\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/discussions/components/create-discussion.tsx\",\n    \"line\": 13,\n    \"column\": 13,\n    \"in\": \"CreateDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  useCreateDiscussion,\",\n      \"} from '../api/create-discussion';\",\n      \"\",\n      \"export const CreateDiscussion = () => {\",\n      \"  const { addNotification } = useNotifications();\",\n      \"  const createDiscussionMutation = useCreateDiscussion({\",\n      \"    mutationConfig: {\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/discussions/components/update-discussion.tsx\",\n    \"line\": 18,\n    \"column\": 13,\n    \"in\": \"UpdateDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  discussionId: string;\",\n      \"};\",\n      \"\",\n      \"export const UpdateDiscussion = ({ discussionId }: UpdateDiscussionProps) => {\",\n      \"  const { addNotification } = useNotifications();\",\n      \"  const discussionQuery = useDiscussion({ discussionId });\",\n      \"  const updateDiscussionMutation = useUpdateDiscussion({\"\n    ]\n  },\n  {\n    \"file\": \"/src/app/routes/app/users.tsx\",\n    \"line\": 17,\n    \"column\": 6,\n    \"in\": \"UsersRoute\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  );\",\n      \"};\",\n      \"\",\n      \"const UsersRoute = () => {\",\n      \"  return (\",\n      \"    <ContentLayout title=\\\"Users\\\">\",\n      \"      <Authorization\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/comments/components/comments-list.tsx\",\n    \"line\": 19,\n    \"column\": 13,\n    \"in\": \"CommentsList\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  discussionId: string;\",\n      \"};\",\n      \"\",\n      \"export const CommentsList = ({ discussionId }: CommentsListProps) => {\",\n      \"  const user = useUser();\",\n      \"  const commentsQuery = useInfiniteComments({ discussionId });\",\n      \"\"\n    ]\n  },\n  {\n    \"file\": \"/src/features/discussions/components/delete-discussion.tsx\",\n    \"line\": 14,\n    \"column\": 13,\n    \"in\": \"DeleteDiscussion\",\n    \"kind\": \"render\",\n    \"context\": [\n      \"  id: string;\",\n      \"};\",\n      \"\",\n      \"export const DeleteDiscussion = ({ id }: DeleteDiscussionProps) => {\",\n      \"  const { addNotification } = useNotifications();\",\n      \"  const deleteDiscussionMutation = useDeleteDiscussion({\",\n      \"    mutationConfig: {\"\n    ]\n  }\n]"
+      }
+    ]
+  }
+}

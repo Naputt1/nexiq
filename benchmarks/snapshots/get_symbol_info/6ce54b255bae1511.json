@@ -1,0 +1,19 @@
+{
+  "arguments": {
+    "strict": false,
+    "fields": [
+      "definitions",
+      "usages"
+    ],
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "query": "PostList"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"definitions\": []\n}"
+      }
+    ]
+  }
+}

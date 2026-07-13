@@ -1,0 +1,20 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "ButtonProps",
+    "strict": true,
+    "exclude": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.nexiq/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

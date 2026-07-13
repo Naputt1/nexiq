@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "contextLines": 3,
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "useAuthorization",
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

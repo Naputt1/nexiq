@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "maxDepth": 2,
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite"
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/small/apps/react-vite",
+    "maxDepth": 2
   },
   "result": {
     "content": [

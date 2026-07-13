@@ -1,0 +1,14 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "useUser"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"b144b05b7e49e530:bf9fba8fcba32833\",\n    \"name\": \"useUser\",\n    \"file\": \"/src/lib/auth.tsx\",\n    \"loc\": {\n      \"line\": 75,\n      \"column\": 13\n    },\n    \"kind\": \"normal\",\n    \"type\": \"data\",\n    \"content\": \"export const { useUser, useLogin, useLogout, useRegister, AuthLoader } =\"\n  }\n]"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "filePath": "components/post_view/post_view.tsx",
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "filePath": "components/post_view/post_view.tsx"
   },
   "result": {
     "content": [

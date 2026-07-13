@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "componentName": "PostList",
-    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large"
+    "projectPath": "/Users/naputt/git/react-map/benchmarks/projects/large",
+    "componentName": "PostList"
   },
   "result": {
     "content": [

@@ -1,0 +1,20 @@
+{
+  "arguments": {
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "query": "GenericModal",
+    "contextLines": 3,
+    "exclude": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.nexiq/**"
+    ]
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}

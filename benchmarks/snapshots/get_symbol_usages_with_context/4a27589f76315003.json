@@ -1,0 +1,16 @@
+{
+  "arguments": {
+    "filePath": "src/components/ui/button/button.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "query": "ButtonProps",
+    "strict": true
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[]"
+      }
+    ]
+  }
+}
