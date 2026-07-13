@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import crypto from "node:crypto";
 import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "@nexiq/analyser";
@@ -1677,7 +1678,7 @@ export class ProjectManager {
     const cacheDir = path.join(cacheRoot, ".nexiq", "cache");
 
     // Create a stable hash of the selection
-    const pathHash = Buffer.from(analysisPath).toString("hex").slice(0, 8);
+    const pathHash = crypto.createHash("sha256").update(analysisPath).digest("hex").slice(0, 8);
 
     // Ensure safe filename length
     let safeBaseName = "workspace";
