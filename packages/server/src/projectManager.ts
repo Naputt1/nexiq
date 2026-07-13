@@ -599,26 +599,37 @@ export class ProjectManager {
 
       if (includeUsages) {
         definition.usages = [];
-        // 2. Find renders of this specific symbol ID or tag name
+        // 2. Find usages via relations table (render edges)
+        // Relations store use: from_id = rendered component's entity_id, to_id = parent component's entity_id
+        // file_id is null in relations, so we resolve the file through the entity's scope
         const usages = project
           .db!.db.prepare(
             `
-          SELECT r.*, f.path as file, s.name as in_name 
-          FROM renders r
-          JOIN files f ON r.file_id = f.id
-          LEFT JOIN entities e ON r.parent_entity_id = e.id
-          LEFT JOIN symbols s ON s.entity_id = e.id
-          WHERE r.symbol_id = ? OR r.tag = ?
+          SELECT DISTINCT
+            f.path as file,
+            e_to.name as in_name,
+            e_to.line,
+            e_to.column
+          FROM relations rel
+          JOIN entities e_to ON rel.to_id = e_to.id
+          JOIN scopes sc_to ON e_to.scope_id = sc_to.id
+          JOIN files f ON sc_to.file_id = f.id
+          WHERE rel.from_id = ? AND rel.kind = 'render'
         `,
           )
-          .all(def.id, def.name) as ExtendedRenderRow[];
+          .all(def.entity_id) as Array<{
+          file: string;
+          in_name: string;
+          line: number;
+          column: number;
+        }>;
 
         for (const usage of usages) {
           if (isExcluded(usage.file)) continue;
 
           definition.usages.push({
-            kind: usage.kind === "jsx" ? "render" : "call",
-            name: usage.tag,
+            kind: "render",
+            name: def.name,
             file: usage.file,
             loc: { line: usage.line || 0, column: usage.column || 0 },
             in: usage.in_name || "unknown",
@@ -895,15 +906,17 @@ export class ProjectManager {
       .db!.db.prepare(
         `
       SELECT DISTINCT s.id, s.name, f.path as file 
-      FROM symbols s
-      JOIN entities e ON s.entity_id = e.id
-      JOIN scopes sc ON e.scope_id = sc.id
+      FROM relations rel
+      JOIN entities e_parent ON rel.to_id = e_parent.id
+      LEFT JOIN symbols s ON s.entity_id = e_parent.id
+      JOIN scopes sc ON e_parent.scope_id = sc.id
       JOIN files f ON sc.file_id = f.id
-      JOIN renders r ON r.parent_entity_id = e.id
-      WHERE r.tag = ? OR r.symbol_id IN (SELECT id FROM symbols WHERE name = ?)
+      WHERE rel.from_id = (SELECT entity_id FROM symbols WHERE name = ? LIMIT 1)
+        AND rel.kind = 'render'
+        AND e_parent.kind = 'component'
     `,
       )
-      .all(componentName, componentName) as ExtendedSymbolRow[];
+      .all(componentName) as ExtendedSymbolRow[];
 
     return {
       component: componentName,

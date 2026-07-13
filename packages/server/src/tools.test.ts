@@ -121,12 +121,14 @@ describe("MCP Tools Integration", () => {
         const s = createMockStmt();
         if (sql.includes("FROM symbols s")) {
           s.all.mockReturnValue([{
-            id: "sym-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
+            id: "sym-1", entity_id: "ent-1", name: "Button", file: "/src/Button.tsx", line: 10, column: 5, kind: "component", type: "function"
           }]);
-        } else if (sql.includes("FROM renders r")) {
+        } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([{
-            tag: "Button", file: "/src/App.tsx", line: 20, column: 8, kind: "jsx", in_name: "App"
+            file: "/src/App.tsx", in_name: "App", line: 20, column: 8
           }]);
+        } else if (sql.includes("FROM relations")) {
+          s.all.mockReturnValue([]);
         }
         return s as unknown as Database.Statement;
       });
@@ -220,8 +222,8 @@ describe("MCP Tools Integration", () => {
       mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
         if (sql.includes("AND e.kind = 'component'")) {
-          s.all.mockReturnValue([{ id: "app-id", name: "App", file: "/src/App.tsx" }]);
-        } else if (sql.includes("WHERE r.tag = ? OR r.symbol_id IN")) {
+          s.all.mockReturnValue([{ id: "app-id", entity_id: "ent-app", name: "App", file: "/src/App.tsx" }]);
+        } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([{ id: "root-id", name: "Root", file: "/src/index.tsx" }]);
         } else if (sql.includes("SELECT * FROM symbols WHERE id = ?")) {
           symGetCalls++;

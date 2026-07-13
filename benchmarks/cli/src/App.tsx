@@ -22,6 +22,7 @@ const MODELS = [
   { label: "Claude Haiku 4.5", value: "anthropic/claude-haiku-4.5" },
   { label: "GPT-5.2 Codex", value: "openai/gpt-5.2-codex" },
   { label: "DeepSeek v3.2", value: "deepseek/deepseek-v3.2" },
+  { label: "DeepSeek V4 Flash", value: "deepseek/deepseek-v4-flash" },
 ];
 
 const PROJECTS = [

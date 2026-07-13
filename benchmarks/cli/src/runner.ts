@@ -311,7 +311,7 @@ export class SnapshotManager {
     fs.mkdirSync(dir, { recursive: true });
 
     // Create a deterministic hash of name + arguments
-    const hashInput = JSON.stringify(args);
+    const hashInput = JSON.stringify(args, Object.keys(args).sort());
     const hash = crypto
       .createHash("sha256")
       .update(hashInput)

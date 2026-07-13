@@ -197,6 +197,7 @@ describe("Token Optimization Tools", () => {
           s.all.mockReturnValue([
             {
               id: "btn-1",
+              entity_id: "ent-btn",
               name: "Button",
               file: "/src/Button.tsx",
               line: 1,
@@ -204,15 +205,13 @@ describe("Token Optimization Tools", () => {
               kind: "component",
             },
           ]);
-        } else if (sql.includes("FROM renders r")) {
+        } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([
             {
-              tag: "Button",
               file: "/src/App.tsx",
+              in_name: "App",
               line: 3,
               column: 10,
-              kind: "jsx",
-              in_name: "App",
             },
           ]);
         }

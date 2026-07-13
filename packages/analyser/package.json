@@ -17,7 +17,6 @@
     }
   },
   "scripts": {
-    "prepare": "pnpm rebuild better-sqlite3",
     "build": "tsup",
     "dev": "tsup --watch --onSuccess \"node dist/analyzer.js ./sample-project ./out/graph.json\"",
     "start": "node dist/analyzer.js ./sample-project ./out/graph.json",
@@ -29,7 +28,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.3",
   "dependencies": {
     "@babel/generator": "^7.29.1",
     "@babel/parser": "^7.29.2",
