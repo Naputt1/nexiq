@@ -118,12 +118,42 @@ function countTokens(text: string | undefined): number {
 
 // --- MCP Client Orchestration ---
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
+function isTransportError(e: unknown): boolean {
+  const msg = (e as Error)?.message || "";
+  return (
+    msg.includes("Connection closed") ||
+    msg.includes("connection closed") ||
+    msg.includes("transport") ||
+    msg.includes("Transport") ||
+    msg.includes("closed") ||
+    msg.includes("disconnected") ||
+    msg.includes("ECONNRESET") ||
+    msg.includes("EPIPE") ||
+    msg.includes("timed out")
+  );
+}
+
 export class McpRunner {
   private client: Client | null = null;
   private transport: StdioClientTransport | null = null;
   public id: string = crypto.randomBytes(4).toString("hex");
+  private _dead = false;
+
+  get dead(): boolean {
+    return this._dead;
+  }
 
   async start(serverPath: string, args: string[] = []) {
+    this._dead = false;
     this.transport = new StdioClientTransport({
       command: "node",
       args: [serverPath, ...args],
@@ -134,7 +164,7 @@ export class McpRunner {
       { capabilities: {} },
     );
 
-    await this.client.connect(this.transport);
+    await withTimeout(this.client.connect(this.transport), 15_000, "connect");
   }
 
   async stop() {
@@ -144,16 +174,30 @@ export class McpRunner {
 
   async callTool(name: string, args: unknown) {
     if (!this.client) throw new Error("Client not started");
-    return await this.client.callTool({
-      name,
-      arguments: args as Record<string, unknown>,
-    });
+    try {
+      return await withTimeout(
+        this.client.callTool({
+          name,
+          arguments: args as Record<string, unknown>,
+        }),
+        120_000,
+        `callTool(${name})`,
+      );
+    } catch (e) {
+      this._dead = true;
+      throw e;
+    }
   }
 
   async listTools() {
     if (!this.client) throw new Error("Client not started");
-    const result = await this.client.listTools();
-    return result.tools;
+    try {
+      const result = await withTimeout(this.client.listTools(), 15_000, "listTools");
+      return result.tools;
+    } catch (e) {
+      this._dead = true;
+      throw e;
+    }
   }
 }
 
@@ -161,33 +205,74 @@ export class RunnerPool {
   private pool: McpRunner[] = [];
   private available: McpRunner[] = [];
   private waiting: ((runner: McpRunner) => void)[] = [];
+  private serverPath = "";
 
   constructor(private size: number) {}
 
   async init(serverPath: string) {
+    this.serverPath = serverPath;
     for (let i = 0; i < this.size; i++) {
-      const runner = new McpRunner();
-      await runner.start(serverPath);
-      this.pool.push(runner);
+      await this.spawnRunner();
+    }
+  }
+
+  private async spawnRunner(): Promise<McpRunner> {
+    const runner = new McpRunner();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await runner.start(this.serverPath);
+        break;
+      } catch (e) {
+        if (attempt === 2) throw e;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+    this.pool.push(runner);
+    if (this.waiting.length > 0) {
+      this.waiting.shift()!(runner);
+    } else {
       this.available.push(runner);
     }
+    return runner;
   }
 
   async acquire(): Promise<McpRunner> {
     if (this.available.length > 0) {
       return this.available.pop()!;
     }
-    return new Promise((resolve) => {
-      this.waiting.push(resolve);
-    });
+    return withTimeout(
+      new Promise<McpRunner>((resolve) => {
+        this.waiting.push(resolve);
+      }),
+      120_000,
+      "acquire runner",
+    );
   }
 
   release(runner: McpRunner) {
+    if (runner.dead) {
+      runner.stop().catch(() => {});
+      this.retrySpawnForever();
+      return;
+    }
     if (this.waiting.length > 0) {
       const resolve = this.waiting.shift()!;
       resolve(runner);
     } else {
       this.available.push(runner);
+    }
+  }
+
+  private async retrySpawnForever() {
+    let delay = 2000;
+    for (;;) {
+      try {
+        await this.spawnRunner();
+        return;
+      } catch {
+        await new Promise((r) => setTimeout(r, delay));
+        delay = Math.min(delay * 2, 30_000);
+      }
     }
   }
 
@@ -333,6 +418,24 @@ export class BenchmarkRunner {
     this.snapshots = new SnapshotManager();
   }
 
+  private async callWithRetry<T>(
+    fn: (m: McpRunner) => Promise<T>,
+    mcp: McpRunner,
+    requestReplacement: () => Promise<McpRunner>,
+  ): Promise<{ result: T; mcp: McpRunner }> {
+    let current = mcp;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await fn(current);
+        return { result, mcp: current };
+      } catch (e) {
+        if (!current.dead) throw e;
+        current = await requestReplacement();
+      }
+    }
+    throw new Error("Max retries exceeded on dead runner");
+  }
+
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
@@ -341,12 +444,20 @@ export class BenchmarkRunner {
     llm: LlmClient,
     mcp: McpRunner,
     onProgress?: (update: ProgressUpdate) => void,
+    requestReplacement?: () => Promise<McpRunner>,
   ): Promise<BenchmarkResult> {
     const startTime = Date.now();
     let totalTokens = 0;
     let toolCallsCount = 0;
     const steps: BenchmarkStep[] = [];
     let verificationOutput: BenchmarkResult["verificationOutput"];
+    let currentMcp = mcp;
+    const repl = requestReplacement ?? (() => Promise.reject(new Error("No replacement available")));
+    const retry = <T>(fn: (m: McpRunner) => Promise<T>) =>
+      this.callWithRetry(fn, currentMcp, repl).then(({ result, mcp: m }) => {
+        currentMcp = m;
+        return result;
+      });
 
     // Resolve relative to repo root
     const absoluteRoot = path.resolve(REPO_ROOT, project.root);
@@ -359,11 +470,8 @@ export class BenchmarkRunner {
       }
     }
 
-    // Initialize MCP with project (Always call it to set context)
-    await mcp.callTool("open_project", { projectPath: absoluteRoot });
-
     // Tools setup
-    const allTools = await mcp.listTools();
+    const allTools = await retry((m) => m.listTools());
     const availableTools =
       approach === "baseline"
         ? allTools.filter((t) =>
@@ -381,9 +489,8 @@ export class BenchmarkRunner {
     const pathContext = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands. For field-level queries (e.g., finding which files access 'user.data.role'), use 'get_field_accesses' with the hook/component name and the field path.
-    To reduce token usage, use the 'fields' parameter in tools like 'get_symbol_info' or 'get_file_outline' to return only the information you need.
-    Use 'strict: true' (default) for precise symbol matching, or 'strict: false' if you need a broader search.
-    If you need to make changes, use the 'write_file' or 'replace_file_content' or 'multi_replace_file_content' tools.`;
+    Each tool definition costs tokens every roundtrip. Include all needed parameters in one call rather than making multiple calls for the same symbol. Prefer get_symbol_info → get_symbol_content over read_file for targeted code reading.
+    If you need to make changes, use 'write_file' or 'replace_file_content' or 'multi_replace_file_content'.`;
 
     // Interaction setup based on testType
     if (testType === "planning") {
@@ -484,7 +591,7 @@ export class BenchmarkRunner {
             toolArgs.projectPath = absoluteRoot;
           }
 
-          const result = await mcp.callTool(tc.name, toolArgs);
+          const result = await retry((m) => m.callTool(tc.name, toolArgs));
 
           // Snapshot tool result (only for nexiq specialized tools)
           const genericTools = [
@@ -492,7 +599,6 @@ export class BenchmarkRunner {
             "read_file",
             "grep_search",
             "run_shell_command",
-            "open_project",
           ];
           if (!genericTools.includes(tc.name)) {
             this.snapshots.save(tc.name, toolArgs, {
@@ -530,7 +636,7 @@ export class BenchmarkRunner {
           const verifyResult = await this.verifyCodingTask(
             absoluteRoot,
             scenario.verification_command,
-            mcp,
+            currentMcp,
           );
           success = verifyResult.success;
           verificationOutput = verifyResult.output;
@@ -545,10 +651,12 @@ export class BenchmarkRunner {
 
     // Cleanup
     if (scenario.cleanup_command) {
-      await mcp.callTool("run_shell_command", {
-        command: scenario.cleanup_command,
-        cwd: absoluteRoot,
-      });
+      await retry((m) =>
+        m.callTool("run_shell_command", {
+          command: scenario.cleanup_command,
+          projectPath: absoluteRoot,
+        }),
+      );
     }
 
     const result: BenchmarkResult = {
@@ -585,35 +693,24 @@ export class BenchmarkRunner {
         },
       );
 
-      const content = (
-        response.content as Array<{ type: string; text: string }>
-      )?.[0];
-      if (content?.type === "text") {
-        try {
-          const result = JSON.parse(content.text);
-          if (result.exitCode !== 0) {
-            console.error(
-              `Verification command failed with exit code ${result.exitCode}`,
-            );
-            if (result.stdout) console.error(`STDOUT: ${result.stdout}`);
-            if (result.stderr) console.error(`STDERR: ${result.stderr}`);
-          }
-          return {
-            success: result.exitCode === 0,
-            output: {
-              stdout: result.stdout || "",
-              stderr: result.stderr || "",
-              exitCode: result.exitCode,
-            },
-          };
-        } catch (e) {
+      const sc = (response as { structuredContent?: Record<string, unknown> }).structuredContent;
+      if (sc && sc.exitCode !== undefined) {
+        const exitCode = sc.exitCode as number;
+        if (exitCode !== 0) {
           console.error(
-            "Failed to parse verification result:",
-            e,
-            content.text,
+            `Verification command failed with exit code ${exitCode}`,
           );
-          return { success: false };
+          if (sc.stdout) console.error(`STDOUT: ${sc.stdout}`);
+          if (sc.stderr) console.error(`STDERR: ${sc.stderr}`);
         }
+        return {
+          success: exitCode === 0,
+          output: {
+            stdout: (sc.stdout as string) || "",
+            stderr: (sc.stderr as string) || "",
+            exitCode,
+          },
+        };
       }
       return { success: false };
     } catch (e) {
@@ -672,6 +769,30 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
         answer.includes(term.toLowerCase()),
       );
     }
+  }
+
+  reportError(
+    scenarioId: string,
+    projectName: string,
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
+    testType: "single-prompt" | "planning" | "coding",
+    model: string,
+    startTime: number,
+  ): BenchmarkResult {
+    const result: BenchmarkResult = {
+      scenarioId,
+      projectName,
+      approach,
+      testType,
+      model,
+      success: false,
+      totalTokens: 0,
+      toolCallsCount: 0,
+      latencyMs: Date.now() - startTime,
+      steps: [],
+    };
+    this.results.push(result);
+    return result;
   }
 
   saveResults(timestamp: string): string {
@@ -750,7 +871,13 @@ export async function runBenchmarks(options: RunOptions) {
 
   await pool.init(serverPath);
 
-  const runTask = async (task: (typeof tasks)[0]) => {
+  // Process tasks with concurrency limit and directory isolation
+  const activeRoots = new Map<string, number>();
+  const activeIsolatedRoots = new Set<string>();
+  const promisePool = new Set<Promise<void>>();
+  const queue = [...tasks];
+
+  const runTask = async (task: (typeof tasks)[0], root: string) => {
     activeScenarios++;
     options.onProgress?.({
       type: "scenario-start",
@@ -762,7 +889,14 @@ export async function runBenchmarks(options: RunOptions) {
       activeScenarios,
     });
 
-    const mcp = await pool.acquire();
+    let mcp = await pool.acquire();
+    const taskStartTime = Date.now();
+    const requestReplacement = async () => {
+      const dead = mcp;
+      pool.release(dead);
+      mcp = await pool.acquire();
+      return mcp;
+    };
     try {
       const result = await orchestrator.runScenario(
         task.project,
@@ -772,6 +906,7 @@ export async function runBenchmarks(options: RunOptions) {
         task.model,
         mcp,
         options.onProgress,
+        requestReplacement,
       );
 
       completedScenarios++;
@@ -784,77 +919,84 @@ export async function runBenchmarks(options: RunOptions) {
       });
     } catch (e) {
       console.error(`Error running scenario ${task.scenario.id}:`, e);
+      const errorResult = orchestrator.reportError(
+        task.scenario.id,
+        task.project.name,
+        task.approach,
+        task.testType,
+        task.model.displayName,
+        taskStartTime,
+      );
       activeScenarios--;
-      completedScenarios++; // Still mark as completed to avoid hanging UI
+      completedScenarios++;
       options.onProgress?.({
         type: "scenario-end",
+        result: errorResult,
         completedScenarios,
         activeScenarios,
       });
     } finally {
       pool.release(mcp);
+
+      const count = activeRoots.get(root) || 0;
+      if (count <= 1) {
+        activeRoots.delete(root);
+      } else {
+        activeRoots.set(root, count - 1);
+      }
+      if (task.scenario.isolation) {
+        activeIsolatedRoots.delete(root);
+      }
     }
   };
 
-  // Process tasks with concurrency limit and directory isolation
-  const activeRoots = new Map<string, number>(); // root -> number of active tasks
-  const activeIsolatedRoots = new Set<string>(); // roots used by isolated tasks
-  const promisePool = new Set<Promise<unknown>>();
-  const queue = [...tasks];
+  const isTaskAvailable = (t: (typeof tasks)[0]) => {
+    const r = t.project.root;
+    if (t.scenario.isolation) {
+      return (activeRoots.get(r) || 0) === 0;
+    }
+    return !activeIsolatedRoots.has(r);
+  };
 
   while (queue.length > 0 || promisePool.size > 0) {
-    // Try to start new tasks up to concurrency
-    let taskStarted = false;
+    // Schedule new tasks up to concurrency limit
     while (promisePool.size < concurrency && queue.length > 0) {
-      // Find a task that can run given current active roots
-      const taskIndex = queue.findIndex((t) => {
-        const root = t.project.root;
-        if (t.scenario.isolation) {
-          // Isolated task needs root to be completely free
-          return (activeRoots.get(root) || 0) === 0;
-        } else {
-          // Non-isolated task needs root to not be used by an isolated task
-          return !activeIsolatedRoots.has(root);
-        }
-      });
+      let taskIndex = -1;
 
-      if (taskIndex === -1) break; // No task can start right now (waiting for roots to clear)
+      // Pass 1: prefer tasks from a root not currently active (cross-project parallelism)
+      if (activeRoots.size > 0) {
+        taskIndex = queue.findIndex(
+          (t) => !activeRoots.has(t.project.root) && isTaskAvailable(t),
+        );
+      }
+
+      // Pass 2: fall back to any available task on an active root
+      if (taskIndex === -1) {
+        taskIndex = queue.findIndex((t) => isTaskAvailable(t));
+      }
+
+      if (taskIndex === -1) break;
 
       const task = queue.splice(taskIndex, 1)[0];
       const root = task.project.root;
 
-      // Mark root as in use
       activeRoots.set(root, (activeRoots.get(root) || 0) + 1);
       if (task.scenario.isolation) {
         activeIsolatedRoots.add(root);
       }
 
-      const p: Promise<unknown> = runTask(task).then(() => {
-        // Cleanup root usage
-        const count = activeRoots.get(root) || 0;
-        if (count <= 1) {
-          activeRoots.delete(root);
-        } else {
-          activeRoots.set(root, count - 1);
-        }
-
-        if (task.scenario.isolation) {
-          activeIsolatedRoots.delete(root);
-        }
+      const p = runTask(task, root).finally(() => {
         promisePool.delete(p);
       });
-
       promisePool.add(p);
-      taskStarted = true;
     }
 
     if (promisePool.size > 0) {
-      // Wait for at least one task to finish before trying to schedule more
+      // Wait for at least one task to finish
       await Promise.race(promisePool);
-    } else if (queue.length > 0 && !taskStarted) {
-      // This shouldn't happen if the logic is correct, but avoid infinite loop
+    } else if (queue.length > 0) {
       console.error(
-        "Scheduler stuck: some tasks in queue but none can start and none are running.",
+        "Scheduler stuck: some tasks in queue but none can start.",
       );
       break;
     }

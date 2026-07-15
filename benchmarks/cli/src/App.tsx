@@ -23,6 +23,7 @@ const MODELS = [
   { label: "GPT-5.2 Codex", value: "openai/gpt-5.2-codex" },
   { label: "DeepSeek v3.2", value: "deepseek/deepseek-v3.2" },
   { label: "DeepSeek V4 Flash", value: "deepseek/deepseek-v4-flash" },
+  { label: "Mimo v2.5", value: "xiaomi/mimo-v2.5" },
 ];
 
 const PROJECTS = [
@@ -39,8 +40,8 @@ const TEST_TYPES = [
 
 const APPROACHES = [
   { label: "Baseline", value: "baseline" },
-  { label: "React Map (Cold Cache)", value: "react-map-cold" },
-  { label: "React Map (Warm Cache)", value: "react-map-warm" },
+  { label: "React Map (Cold Cache)", value: "nexiq-cold" },
+  { label: "React Map (Warm Cache)", value: "nexiq-warm" },
 ];
 
 const CONCURRENCY_OPTIONS = [
@@ -70,7 +71,12 @@ const MultiSelector: React.FC<MultiSelectorProps> = ({
   onConfirm,
   single,
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const initialIndex = single && selectedValues.length > 0
+    ? items.findIndex((i) => i.value === selectedValues[0])
+    : 0;
+  const [selectedIndex, setSelectedIndex] = useState(
+    initialIndex >= 0 ? initialIndex : 0,
+  );
 
   useInput((input, key) => {
     if (key.upArrow) {
