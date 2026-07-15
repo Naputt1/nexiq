@@ -64,7 +64,8 @@ describe("workspace discovery", () => {
 
     const packages = await discoverWorkspacePackages(rootDir);
     
-    expect(packages).toHaveLength(1);
-    expect(packages[0]?.name).toBe("pkg-a");
+    expect(packages).toHaveLength(2);
+    expect(packages.find(p => p.name === "monorepo-root")).toBeDefined();
+    expect(packages.find(p => p.name === "pkg-a")).toBeDefined();
   });
 });

@@ -139,6 +139,15 @@ export async function discoverWorkspacePackages(
     return matches;
   });
 
+  // Always include the root package when workspaces are detected
+  if (
+    workspacePatterns.length > 0 &&
+    fs.existsSync(rootPackageJson) &&
+    !entries.includes(rootPackageJson)
+  ) {
+    entries.push(rootPackageJson);
+  }
+
   const packages: WorkspacePackageInfo[] = [];
   for (const entry of entries) {
     try {

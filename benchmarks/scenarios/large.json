@@ -9,7 +9,8 @@
       "target_component": "PostList",
       "expected_answer_contains": [
         "components/post_view/post_list/post_list.tsx"
-      ]
+      ],
+      "max_iterations": 30
     },
     {
       "id": "large-2",
@@ -17,9 +18,8 @@
       "prompt": "Identify all props accepted by `PostList` and find exactly where the data for the `postListIds` prop originates in its parent component.",
       "target_component": "PostList",
       "target_prop": "postListIds",
-      "expected_answer_contains": [
-        "mapStateToProps"
-      ]
+      "expected_answer_contains": ["mapStateToProps"],
+      "max_iterations": 30
     },
     {
       "id": "large-coding-1",
@@ -28,7 +28,7 @@
       "verification_command": "npx prettier --write components/generic_modal.tsx && ESLINT_USE_FLAT_CONFIG=false npx eslint --fix components/generic_modal.tsx",
       "cleanup_command": "git checkout .",
       "isolation": true,
-      "max_iterations": 20
+      "max_iterations": 30
     }
   ]
 }

@@ -452,11 +452,21 @@ export function extractFileUsages(
       );
       if (!target || target.id === owner.id) return;
 
-      const ownerTargetId = isJSXVariable(owner) ? (owner.srcId || owner.id) : owner.id;
+      const ownerTargetId = isJSXVariable(owner)
+        ? owner.srcId || owner.id
+        : owner.id;
 
       const parent = path.parentPath;
       if (parent.isMemberExpression() && parent.get("object") === path) {
-        const memberData = getMemberAccessPath(parent.node);
+        // Walk up through chained MemberExpressions (e.g., user.data.role)
+        let topMember: typeof parent = parent;
+        while (
+          topMember.parentPath.isMemberExpression() &&
+          topMember.parentPath.get("object") === topMember
+        ) {
+          topMember = topMember.parentPath;
+        }
+        const memberData = getMemberAccessPath(topMember.node);
         emitRelation("usage-read", target.id, ownerTargetId, loc, owner, {
           accessPath: memberData.accessPath,
           isOptional: memberData.isOptional,
@@ -471,7 +481,15 @@ export function extractFileUsages(
         parent.isOptionalMemberExpression() &&
         parent.get("object") === path
       ) {
-        const memberData = getMemberAccessPath(parent.node);
+        // Walk up through chained OptionalMemberExpressions (e.g., user?.data?.role)
+        let topMember: typeof parent = parent;
+        while (
+          topMember.parentPath.isOptionalMemberExpression() &&
+          topMember.parentPath.get("object") === topMember
+        ) {
+          topMember = topMember.parentPath;
+        }
+        const memberData = getMemberAccessPath(topMember.node);
         emitRelation("usage-read", target.id, ownerTargetId, loc, owner, {
           accessPath: memberData.accessPath,
           isOptional: memberData.isOptional,

@@ -161,7 +161,7 @@ describe("analyser orchestration", () => {
     }[];
     centralDb.close();
 
-    expect(workspacePackages).toHaveLength(2);
+    expect(workspacePackages).toHaveLength(3);
     expect(packageExports.some((row) => row.export_name === "Shared")).toBe(
       true,
     );

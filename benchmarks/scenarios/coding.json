@@ -9,16 +9,16 @@
       "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
       "cleanup_command": "git checkout src",
       "isolation": true,
-      "max_iterations": 20
+      "max_iterations": 30
     },
     {
-        "id": "coding-2-bugfix",
-        "type": "coding",
-        "prompt": "Fix a missing prop in `LoginForm`. The `Button` component has an `isLoading` prop, but it's not being passed from the `LoginForm`. Identify where `isLoading` should come from in `LoginForm` (possibly from the state or hook) and pass it to the `Button`.",
-        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
-        "cleanup_command": "git checkout src",
-        "isolation": true,
-        "max_iterations": 20
+      "id": "coding-2-bugfix",
+      "type": "coding",
+      "prompt": "Fix a missing prop in `LoginForm`. The `Button` component has an `isLoading` prop, but it's not being passed from the `LoginForm`. Identify where `isLoading` should come from in `LoginForm` (possibly from the state or hook) and pass it to the `Button`.",
+      "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+      "cleanup_command": "git checkout src",
+      "isolation": true,
+      "max_iterations": 30
     },
     {
       "id": "coding-3-enhancement",
@@ -27,25 +27,25 @@
       "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npx playwright test e2e/tests/button-size.spec.ts",
       "cleanup_command": "git checkout src",
       "isolation": true,
-      "max_iterations": 20
+      "max_iterations": 30
     },
     {
-        "id": "coding-4-complex-refactor",
-        "type": "coding",
-        "prompt": "Extract a `FormInput` component from `LoginForm` in `src/features/auth/components/login-form.tsx`. The `FormInput` should encapsulate the `InputField` and its label/error logic. Replace the usage of `InputField` in `LoginForm` with the new `FormInput` component.",
-        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
-        "cleanup_command": "git checkout .",
-        "isolation": true,
-        "max_iterations": 30
+      "id": "coding-4-complex-refactor",
+      "type": "coding",
+      "prompt": "Extract a `FormInput` component from `LoginForm` in `src/features/auth/components/login-form.tsx`. The `FormInput` should encapsulate the `InputField` and its label/error logic. Replace the usage of `InputField` in `LoginForm` with the new `FormInput` component.",
+      "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 30
     },
     {
-        "id": "coding-5-hook-extraction",
-        "type": "coding",
-        "prompt": "Extract the login submission logic from `LoginForm` in `src/features/auth/components/login-form.tsx` into a custom hook called `useLoginForm`. This hook should handle the `useLogin` mutation and any success/failure side effects (like showing notifications).",
-        "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
-        "cleanup_command": "git checkout .",
-        "isolation": true,
-        "max_iterations": 30
+      "id": "coding-5-hook-extraction",
+      "type": "coding",
+      "prompt": "Extract the login submission logic from `LoginForm` in `src/features/auth/components/login-form.tsx` into a custom hook called `useLoginForm`. This hook should handle the `useLogin` mutation and any success/failure side effects (like showing notifications).",
+      "verification_command": "npx prettier --write . && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix && npm run check-types",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 30
     }
   ]
 }

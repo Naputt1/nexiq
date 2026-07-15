@@ -332,6 +332,31 @@ export class ProjectManager {
       nodeDetailCache: new Map<string, GraphNodeDetail>(),
     };
 
+    // For workspace/monorepo analysis, the sqlitePath contains the central DB
+    // (workspace-level metadata like package_relations, not actual symbols).
+    // Redirect project.db to the root package's DB for queries.
+    try {
+      const hasWorkspaceTables = projectInfo
+        .db!.db.prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='workspace_packages'",
+        )
+        .get();
+      if (hasWorkspaceTables) {
+        const packageDbDir = path.join(cacheRoot, ".nexiq", "packages");
+        const rootPkgDb = path.join(
+          packageDbDir,
+          `${analysisPath.replace(/[^a-zA-Z0-9_-]/g, "_")}.sqlite`,
+        );
+        if (fs.existsSync(rootPkgDb)) {
+          projectInfo.db!.close();
+          projectInfo.db = new SqliteDB(rootPkgDb);
+          projectInfo.sqlitePath = rootPkgDb;
+        }
+      }
+    } catch {
+      // Not a workspace DB, use as-is
+    }
+
     // Set up watcher
     try {
       const subscription = await watcher.subscribe(
@@ -752,7 +777,11 @@ export class ProjectManager {
     fieldPath: string,
     subProject?: string,
     contextLines: number = 2,
-  ): Promise<{ symbol: string; fieldPath: string; results: FieldAccessResult[] }> {
+  ): Promise<{
+    symbol: string;
+    fieldPath: string;
+    results: FieldAccessResult[];
+  }> {
     const project = await this.openProject(projectPath, subProject);
     const analysisPath = this.getAnalysisPath(projectPath, subProject);
 
@@ -760,13 +789,17 @@ export class ProjectManager {
     const results: FieldAccessResult[] = [];
     const suffixPattern = `%.${fieldPath}`;
 
-    const accesses = project.db!.db.prepare(`
+    const accesses = project
+      .db!.db.prepare(
+        `
       SELECT r.line, r.column, r.data_json
       FROM relations r
       WHERE r.kind = 'usage-read'
         AND (json_extract(r.data_json, '$.displayLabel') = ?
              OR json_extract(r.data_json, '$.displayLabel') LIKE ?)
-    `).all(fieldPath, suffixPattern) as Array<{
+    `,
+      )
+      .all(fieldPath, suffixPattern) as Array<{
       line: number;
       column: number;
       data_json: string | null;
@@ -1055,6 +1088,7 @@ export class ProjectManager {
     projectPath: string,
     query: string,
     subProject?: string,
+    contextLines: number = 0,
   ): Promise<
     | {
         id: string;
@@ -1098,10 +1132,16 @@ export class ProjectManager {
         continue;
       }
 
-      const content = fs.readFileSync(fullPath, "utf-8");
-      const lines = content.split("\n");
+      const fileContent = fs.readFileSync(fullPath, "utf-8");
+      const lines = fileContent.split("\n");
+      const lineIdx = locInfo.loc.line - 1;
+      const start = Math.max(0, lineIdx - contextLines);
+      const end = Math.min(lines.length, lineIdx + contextLines + 1);
 
-      results.push({ ...locInfo, content: lines[locInfo.loc.line - 1] || "" });
+      results.push({
+        ...locInfo,
+        content: lines.slice(start, end).join("\n"),
+      });
     }
 
     return results;
@@ -1211,7 +1251,13 @@ export class ProjectManager {
     return outline.sort((a, b) => a.line - b.line);
   }
 
-  async readFile(projectPath: string, filePath: string, subProject?: string) {
+  async readFile(
+    projectPath: string,
+    filePath: string,
+    subProject?: string,
+    startLine?: number,
+    endLine?: number,
+  ) {
     const analysisPath = subProject
       ? path.join(projectPath, subProject.replace(/^\/+/, ""))
       : projectPath;
@@ -1221,7 +1267,15 @@ export class ProjectManager {
     );
     if (!fs.existsSync(fullPath))
       throw new Error(`File not found: ${filePath}`);
-    return fs.readFileSync(fullPath, "utf-8");
+    const content = fs.readFileSync(fullPath, "utf-8");
+    if (startLine != null) {
+      const lines = content.split("\n");
+      const from = Math.max(0, startLine - 1);
+      const to =
+        endLine != null ? Math.min(lines.length, endLine) : lines.length;
+      return lines.slice(from, to).join("\n") + "\n";
+    }
+    return content;
   }
 
   async grepSearch(
@@ -1758,7 +1812,11 @@ export class ProjectManager {
     const cacheDir = path.join(cacheRoot, ".nexiq", "cache");
 
     // Create a stable hash of the selection
-    const pathHash = crypto.createHash("sha256").update(analysisPath).digest("hex").slice(0, 8);
+    const pathHash = crypto
+      .createHash("sha256")
+      .update(analysisPath)
+      .digest("hex")
+      .slice(0, 8);
 
     // Ensure safe filename length
     let safeBaseName = "workspace";

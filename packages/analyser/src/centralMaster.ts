@@ -1088,10 +1088,13 @@ export class CentralMaster {
     };
 
     const analysisPaths = this.options.analysisPaths?.map(normalize);
+    const normalizedRoot = normalize(rootDir);
 
     const packages = analysisPaths
       ? discoveredPackages.filter((p) => {
           const normalizedP = normalize(p.path);
+          // Always include the root package
+          if (normalizedP === normalizedRoot) return true;
           // Case-insensitive check for macOS/Windows
           return analysisPaths!.some(
             (ap) => ap.toLowerCase() === normalizedP.toLowerCase(),
@@ -1159,6 +1162,11 @@ export class CentralMaster {
       packageConcurrency,
     );
 
+    // Build list of sub-package directories to exclude from root scanning
+    const subPackageDirs = packages
+      .filter((pkg) => pkg.path !== rootDir)
+      .map((pkg) => path.relative(rootDir, pkg.path) + "/**");
+
     workspaceDb.beginWorkspaceRun({
       id: runId,
       root_dir: rootDir,
@@ -1172,10 +1180,14 @@ export class CentralMaster {
         const dbPath = getPackageDbPath(packageDbDir, pkg.path);
         const sqlite = new SqliteDB(dbPath);
         try {
+          const extraIgnores = pkg.path === rootDir ? subPackageDirs : [];
           const master = new PackageMaster({
             srcDir: pkg.path,
             viteConfigPath: getViteConfig(pkg.path),
-            files: getFiles(pkg.path, this.options.ignorePatterns || []),
+            files: getFiles(pkg.path, [
+              ...(this.options.ignorePatterns || []),
+              ...extraIgnores,
+            ]),
             packageJson,
             cacheData: undefined,
             sqlite,

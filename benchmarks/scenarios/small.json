@@ -7,9 +7,8 @@
       "type": "breadth",
       "prompt": "Find the definition of `Button` and list every file where it is rendered.",
       "target_component": "Button",
-      "expected_answer_contains": [
-        "src/components/ui/button/button.tsx"
-      ]
+      "expected_answer_contains": ["src/components/ui/button/button.tsx"],
+      "max_iterations": 30
     },
     {
       "id": "small-2",
@@ -18,9 +17,8 @@
       "target_component": "Button",
       "target_prop": "isLoading",
       "parent_component": "LoginForm",
-      "expected_answer_contains": [
-        "isLoading"
-      ]
+      "expected_answer_contains": ["isLoading"],
+      "max_iterations": 30
     },
     {
       "id": "small-3",
@@ -28,9 +26,8 @@
       "prompt": "Find all usages of the `useUser` hook and list every component that depends on the `user.data.role` field of the returned object.",
       "target_hook": "useUser",
       "target_field": "user.data.role",
-      "expected_answer_contains": [
-        "src/lib/auth.tsx"
-      ]
+      "expected_answer_contains": ["src/lib/auth.tsx"],
+      "max_iterations": 30
     },
     {
       "id": "small-coding-1",
@@ -39,7 +36,7 @@
       "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
       "cleanup_command": "git checkout .",
       "isolation": true,
-      "max_iterations": 20
+      "max_iterations": 30
     }
   ]
 }

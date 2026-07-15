@@ -7,9 +7,8 @@
       "type": "breadth",
       "prompt": "Find the definition of `ArticleList` and list every file where it is rendered.",
       "target_component": "ArticleList",
-      "expected_answer_contains": [
-        "src/components/ArticleList.js"
-      ]
+      "expected_answer_contains": ["src/components/ArticleList.js"],
+      "max_iterations": 30
     },
     {
       "id": "mid-2",
@@ -18,9 +17,8 @@
       "target_component": "ArticleList",
       "target_prop": "articles",
       "parent_component": "MainView",
-      "expected_answer_contains": [
-        "mapStateToProps"
-      ]
+      "expected_answer_contains": ["mapStateToProps"],
+      "max_iterations": 30
     },
     {
       "id": "mid-coding-1",
@@ -29,7 +27,7 @@
       "verification_command": "npx prettier --write src && ESLINT_USE_FLAT_CONFIG=false npx eslint --fix src && npx playwright test",
       "cleanup_command": "git checkout .",
       "isolation": true,
-      "max_iterations": 20
+      "max_iterations": 30
     }
   ]
 }
