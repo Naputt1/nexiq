@@ -90,10 +90,7 @@ describe("Token Optimization Tools", () => {
     projectManager = new ProjectManager();
     server = new BackendServer(projectManager);
 
-    await server.handleCallTool({
-      name: "open_project",
-      args: { projectPath },
-    });
+    await projectManager.openProject(projectPath);
   });
 
   describe("get_symbol_info with filtering", () => {
@@ -128,7 +125,7 @@ describe("Token Optimization Tools", () => {
         name: "get_symbol_info",
         args: { projectPath, query: "Button" },
       });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
 
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].file).toBe("/src/Button.tsx");
@@ -168,7 +165,7 @@ describe("Token Optimization Tools", () => {
           exclude: ["**/components/**"],
         },
       });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
 
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].file).toBe("/src/Button.tsx");
@@ -181,7 +178,7 @@ describe("Token Optimization Tools", () => {
         name: "list_files",
         args: { projectPath },
       });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
 
       expect(data.totalFiles).toBe(1);
       expect(data.files[0].path).toBe("/src/App.tsx");
@@ -189,7 +186,7 @@ describe("Token Optimization Tools", () => {
     });
   });
 
-  describe("get_symbol_usages_with_context", () => {
+  describe("get_symbol_info with contextLines", () => {
     it("should return usages with source code context", async () => {
       mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
@@ -225,14 +222,14 @@ export const App = () => {
 };`);
 
       const result = await server.handleCallTool({
-        name: "get_symbol_usages_with_context",
+        name: "get_symbol_info",
         args: {
           projectPath,
           query: "Button",
           contextLines: 1,
         },
       });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: { items: unknown[] } }).structuredContent.items;
 
       expect(data).toHaveLength(1);
       expect(data[0].file).toBe("/src/App.tsx");
@@ -271,7 +268,7 @@ export const App = () => {
           componentName: "Button",
         },
       });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: { items: unknown[] } }).structuredContent.items;
 
       expect(data).toHaveLength(1);
       expect(data[0].name).toBe("Button");

@@ -51,24 +51,6 @@ describe("BackendServer", () => {
   });
 
   describe("MCP Tool Handlers", () => {
-    it("should handle open_project tool", async () => {
-      const args = { projectPath: "/test" };
-      const result = await server.handleCallTool({
-        name: "open_project",
-        args: args,
-      });
-
-      expect(mockProjectManager.openProject).toHaveBeenCalledWith(
-        "/test",
-        undefined,
-      );
-      expect(result).toEqual({
-        content: [
-          { type: "text", text: expect.stringContaining("successfully") },
-        ],
-      });
-    });
-
     it("should handle get_symbol_info tool", async () => {
       const mockResult = {
         definitions: [
@@ -102,9 +84,7 @@ describe("BackendServer", () => {
         expect.arrayContaining(["**/node_modules/**"]),
       );
 
-      const content = JSON.parse(
-        (result as { content: { text: string }[] }).content[0].text,
-      ) as {
+      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
@@ -148,13 +128,11 @@ describe("BackendServer", () => {
         expect.any(Array),
       );
 
-      const content = JSON.parse(
-        (result as { content: { text: string }[] }).content[0].text,
-      ) as {
+      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
-      expect(content.definitions[0].loc).toBeUndefined();
+      expect(content.definitions[0].loc).toBeDefined();
     });
 
     it("should handle get_symbol_info tool with nested and external usages", async () => {
@@ -205,9 +183,7 @@ describe("BackendServer", () => {
         expect.any(Array),
       );
 
-      const content = JSON.parse(
-        (result as { content: { text: string }[] }).content[0].text,
-      ) as {
+      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
@@ -249,9 +225,7 @@ describe("BackendServer", () => {
         args: args,
       });
 
-      const content = JSON.parse(
-        (result as { content: { text: string }[] }).content[0].text,
-      ) as { totalFiles: number; files: { path: string }[] };
+      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
       expect(content.totalFiles).toBe(1);
       expect(content.files).toHaveLength(1);
       expect(content.files[0].path).toBe("src/index.ts");
@@ -264,7 +238,7 @@ describe("BackendServer", () => {
         name: "read_file",
         args: args,
       });
-      expect((result as { content: { text: string }[] }).content[0].text).toBe(
+      expect((result as { structuredContent: { content: string } }).structuredContent.content).toBe(
         "file content",
       );
     });
@@ -278,7 +252,7 @@ describe("BackendServer", () => {
         args: args,
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(mockResult);
     });
 
@@ -316,9 +290,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse(
-          (addResult as { content: { text: string }[] }).content[0].text,
-        ),
+        (addResult as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(["tag1"]);
 
       vi.mocked(mockProjectManager.getLabels).mockResolvedValue({
@@ -331,9 +303,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse(
-          (listResult as { content: { text: string }[] }).content[0].text,
-        ),
+        (listResult as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual({
         id1: ["tag1"],
       });
@@ -349,9 +319,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse(
-          (searchResult as { content: { text: string }[] }).content[0].text,
-        ),
+        (searchResult as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(["id1"]);
     });
 
@@ -366,9 +334,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse(
-          (dirResult as { content: { text: string }[] }).content[0].text,
-        ),
+        (dirResult as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockDir);
 
       const mockOutline = [
@@ -390,11 +356,10 @@ describe("BackendServer", () => {
           filePath: "f1",
         },
       });
+      const expectedOutline = mockOutline.map(({ id, ...rest }) => rest);
       expect(
-        JSON.parse(
-          (outlineResult as { content: { text: string }[] }).content[0].text,
-        ),
-      ).toEqual(mockOutline);
+        (outlineResult as { structuredContent: { items: unknown } }).structuredContent.items,
+      ).toEqual(expectedOutline);
     });
 
     it("should handle symbol exploration tools", async () => {
@@ -419,11 +384,10 @@ describe("BackendServer", () => {
           query: "S",
         },
       });
+      const expectedLoc = mockLoc.map(({ id, ...rest }) => rest);
       expect(
-        JSON.parse(
-          (locResult as { content: { text: string }[] }).content[0].text,
-        ),
-      ).toEqual(mockLoc);
+        (locResult as { structuredContent: { items: unknown } }).structuredContent.items,
+      ).toEqual(expectedLoc);
 
       const mockContent = [
         {
@@ -446,11 +410,10 @@ describe("BackendServer", () => {
           query: "S",
         },
       });
+      const expectedContent = mockContent.map(({ id, ...rest }) => rest);
       expect(
-        JSON.parse(
-          (contentResult as { content: { text: string }[] }).content[0].text,
-        ),
-      ).toEqual(mockContent);
+        (contentResult as { structuredContent: { items: unknown } }).structuredContent.items,
+      ).toEqual(expectedContent);
     });
 
     it("should handle find_files tool", async () => {
@@ -464,7 +427,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(mockResult);
     });
 
@@ -489,7 +452,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -505,7 +468,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -522,7 +485,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -539,7 +502,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -562,9 +525,7 @@ describe("BackendServer", () => {
           projectPath: "/p",
         },
       });
-      const content = JSON.parse(
-        (result as { content: { text: string }[] }).content[0].text,
-      ) as { totalFiles: number; files: { path: string; exports?: unknown }[] };
+      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports?: unknown }[] };
       expect(content.totalFiles).toBe(101);
       expect(content.files[0]).not.toHaveProperty("exports");
     });
@@ -588,7 +549,7 @@ describe("BackendServer", () => {
       expect(result.tools).toBeDefined();
       expect(
         (result.tools as { name: string }[]).some(
-          (t) => t.name === "open_project",
+          (t) => t.name === "get_symbol_info",
         ),
       ).toBe(true);
     });
@@ -642,7 +603,7 @@ describe("BackendServer", () => {
       });
       expect(mockExt.mcpTools[0].handler).toHaveBeenCalled();
       expect(
-        JSON.parse((result as { content: { text: string }[] }).content[0].text),
+        (result as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual({ ok: true });
     });
   });
@@ -699,9 +660,15 @@ describe("BackendServer", () => {
         (args) => args[0] === "message",
       )![1] as (msg: string) => Promise<void>;
 
+      vi.mocked(mockProjectManager.openProject).mockResolvedValue({
+        projectPath: "/test",
+        db: { db: { prepare: () => ({ all: () => [], get: () => undefined, run: () => ({ changes: 0 }) }) } } as any,
+        graph: { files: {} },
+      } as any);
+
       const payload = {
         type: "call_tool",
-        payload: { name: "open_project", arguments: { projectPath: "/test" } },
+        payload: { name: "list_files", arguments: { projectPath: "/test" } },
         requestId: "req-3",
       };
 

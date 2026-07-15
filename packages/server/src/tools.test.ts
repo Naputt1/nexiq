@@ -79,20 +79,8 @@ describe("MCP Tools Integration", () => {
     projectManager = new ProjectManager();
     server = new BackendServer(projectManager);
     
-    // Pre-open the project for most tests
-    await server.handleCallTool({ name: "open_project", args: { projectPath } });
-  });
-
-  it("open_project: should initialize project and return success message", async () => {
-    const result = await server.handleCallTool({ name: "open_project", args: { projectPath: "/new/path" } });
-    expect(result.content[0].text).toContain("opened and analyzed successfully");
-    expect(analyzeProject).toHaveBeenCalledWith(
-      "/new/path",
-      expect.objectContaining({
-        cacheFile: expect.any(String),
-        sqlitePath: expect.any(String),
-      }),
-    );
+    // Pre-open the project for most tests (tools auto-open internally)
+    await projectManager.openProject(projectPath);
   });
 
   describe("get_symbol_info", () => {
@@ -108,11 +96,11 @@ describe("MCP Tools Integration", () => {
       });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
       
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].name).toBe("Button");
-      expect(data.definitions[0].loc).toBeUndefined(); // loc false by default
+      expect(data.definitions[0].loc).toBeDefined(); // loc always included
       expect(data.usages).toBeUndefined();
     });
 
@@ -136,7 +124,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "Button", usages: true, loc: true 
       } });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { loc: unknown; usages: { file: string; in: string }[] }[] };
       
       expect(data.definitions[0].loc).toBeDefined();
       expect(data.definitions[0].usages).toHaveLength(1);
@@ -160,7 +148,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "div", usages: true 
       } });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[]; externalUsages: { name: string }[] };
       
       expect(data.definitions).toHaveLength(0);
       expect(data.externalUsages).toHaveLength(1);
@@ -181,7 +169,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "But", strict: false 
       } });
-      const data = JSON.parse(result.content[0].text);
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { name: string }[] };
       
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].name).toBe("Button");
@@ -191,26 +179,26 @@ describe("MCP Tools Integration", () => {
 
   it("find_files: should support glob patterns", async () => {
     const result = await server.handleCallTool({ name: "find_files", args: { projectPath, pattern: "**/*.tsx" } });
-    const files = JSON.parse(result.content[0].text);
+    const files = (result as { structuredContent: { items: string[] } }).structuredContent.items;
     expect(files).toContain("/src/App.tsx");
   });
 
   it("get_file_imports: should return imports for a file", async () => {
     const result = await server.handleCallTool({ name: "get_file_imports", args: { projectPath, filePath: "src/App.tsx" } });
-    const imports = JSON.parse(result.content[0].text);
-    expect(imports["react"]).toBeDefined();
+    const imports = (result as { structuredContent: Record<string, unknown> }).structuredContent;
+    expect((imports as Record<string, unknown>)["react"]).toBeDefined();
   });
 
   it("get_project_tree: should return tree up to maxDepth", async () => {
     const result = await server.handleCallTool({ name: "get_project_tree", args: { projectPath, maxDepth: 1 } });
-    const tree = JSON.parse(result.content[0].text);
+    const tree = (result as { structuredContent: Record<string, unknown> }).structuredContent as { name: string; children: { name: string }[] };
     expect(tree.name).toBe("/");
     expect(tree.children[0].name).toBe("src");
   });
 
   it("list_files: should return summary for small projects", async () => {
     const result = await server.handleCallTool({ name: "list_files", args: { projectPath } });
-    const data = JSON.parse(result.content[0].text);
+    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports: unknown }[] };
     expect(data.totalFiles).toBe(1);
     expect(data.files[0].path).toBe("/src/App.tsx");
     expect(data.files[0].exports).toBeDefined();
@@ -236,7 +224,7 @@ describe("MCP Tools Integration", () => {
       });
 
     const result = await server.handleCallTool({ name: "get_component_hierarchy", args: { projectPath, componentName: "App" } });
-    const data = JSON.parse(result.content[0].text);
+    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { component: string; hierarchies: { name: string; children: { name: string }[] }[]; renderedBy: { name: string }[] };
     
     expect(data.component).toBe("App");
     expect(data.hierarchies[0].name).toBe("App");
@@ -256,7 +244,7 @@ describe("MCP Tools Integration", () => {
     });
 
     const result = await server.handleCallTool({ name: "get_symbol_location", args: { projectPath, query: "App" } });
-    const locs = JSON.parse(result.content[0].text);
+    const locs = (result as { structuredContent: { items: { file: string; loc: { line: number } }[] } }).structuredContent.items;
     expect(locs[0].file).toBe("/src/App.tsx");
     expect(locs[0].loc.line).toBe(5);
   });
@@ -277,31 +265,31 @@ export const App = () => {}
 line 3`);
 
     const result = await server.handleCallTool({ name: "get_symbol_content", args: { projectPath, query: "App" } });
-    const contents = JSON.parse(result.content[0].text);
-    expect(contents[0].content).toBe("export const App = () => {}");
+    const contents = (result as { structuredContent: { items: { content: string }[] } }).structuredContent.items;
+    expect(contents[0].content).toBe("line 1\nexport const App = () => {}\nline 3");
   });
 
   it("add_label / list_labels / search_by_label: should manage entity labels", async () => {
     await server.handleCallTool({ name: "add_label", args: { projectPath, id: "app-id", label: "entry" } });
     
     const listResult = await server.handleCallTool({ name: "list_labels", args: { projectPath } });
-    const labels = JSON.parse(listResult.content[0].text);
+    const labels = (listResult as { structuredContent: Record<string, unknown> }).structuredContent as Record<string, string[]>;
     expect(labels["app-id"]).toContain("entry");
 
     const searchResult = await server.handleCallTool({ name: "search_by_label", args: { projectPath, label: "entry" } });
-    const ids = JSON.parse(searchResult.content[0].text);
+    const ids = (searchResult as { structuredContent: { items: string[] } }).structuredContent.items;
     expect(ids).toContain("app-id");
   });
 
   it("list_directory: should return files and subdirs", async () => {
     const result = await server.handleCallTool({ name: "list_directory", args: { projectPath, dirPath: "src" } });
-    const data = JSON.parse(result.content[0].text);
+    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { files: string[] };
     expect(data.files).toContain("App.tsx");
   });
 
   it("get_file_outline: should return symbols in a file", async () => {
     const result = await server.handleCallTool({ name: "get_file_outline", args: { projectPath, filePath: "src/App.tsx" } });
-    const outline = JSON.parse(result.content[0].text);
+    const outline = (result as { structuredContent: { items: { name: string; line: number }[] } }).structuredContent.items;
     expect(outline[0].name).toBe("App");
     expect(outline[0].line).toBe(1);
   });
@@ -309,14 +297,14 @@ line 3`);
   it("read_file: should return raw file content", async () => {
     vi.mocked(fs.readFileSync).mockReturnValue("raw content");
     const result = await server.handleCallTool({ name: "read_file", args: { projectPath, filePath: "src/App.tsx" } });
-    expect(result.content[0].text).toBe("raw content");
+    expect((result as { structuredContent: { content: string } }).structuredContent.content).toBe("raw content");
   });
 
   it("grep_search: should find occurrences", async () => {
     vi.mocked(fs.readFileSync).mockReturnValue(`const x = 1;
 console.log(x);`);
     const result = await server.handleCallTool({ name: "grep_search", args: { projectPath, pattern: "console" } });
-    const matches = JSON.parse(result.content[0].text);
+    const matches = (result as { structuredContent: { items: { file: string; content: string }[] } }).structuredContent.items;
     expect(matches[0].file).toBe("/src/App.tsx");
     expect(matches[0].content).toBe("console.log(x);");
   });
