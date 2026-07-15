@@ -18,11 +18,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import { minimatch } from "minimatch";
 import path from "node:path";
 
-export interface OpenProjectArgs {
-  projectPath: string;
-  subProject?: string;
-}
-
 export interface GetSymbolInfoArgs {
   projectPath: string;
   subProject?: string;
@@ -31,15 +26,6 @@ export interface GetSymbolInfoArgs {
   props?: boolean;
   usages?: boolean;
   loc?: boolean;
-  exclude?: string[];
-  fields?: string[];
-}
-
-export interface GetSymbolUsagesWithContextArgs {
-  projectPath: string;
-  subProject?: string;
-  query: string;
-  strict?: boolean;
   contextLines?: number;
   exclude?: string[];
   fields?: string[];
@@ -94,6 +80,7 @@ export interface GetSymbolContentArgs {
   projectPath: string;
   subProject?: string;
   query: string;
+  contextLines?: number;
   fields?: string[];
 }
 
@@ -132,6 +119,8 @@ export interface ReadFileArgs {
   projectPath: string;
   subProject?: string;
   filePath: string;
+  startLine?: number;
+  endLine?: number;
 }
 
 export interface GrepSearchArgs {
@@ -184,9 +173,7 @@ export interface MultiReplaceFileContentArgs {
 }
 
 export interface ToolArgsMap {
-  open_project: OpenProjectArgs;
   get_symbol_info: GetSymbolInfoArgs;
-  get_symbol_usages_with_context: GetSymbolUsagesWithContextArgs;
   get_field_accesses: GetFieldAccessesArgs;
   get_prop_definitions: GetPropDefinitionsArgs;
   find_files: FindFilesArgs;
@@ -291,425 +278,189 @@ export class BackendServer {
     this.mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       const baseTools = [
         {
-          name: "open_project",
-          description:
-            "Open a project and start analysis. Returns project status.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path for monorepos",
-              },
-            },
-            required: ["projectPath"],
-          },
-        },
-        {
           name: "get_symbol_info",
-          description:
-            "Get detailed information about a symbol (component or hook), including its definition and all usages/call sites across the project.",
-          inputSchema: {
+          description: "Get symbol definitions and usages.",
+          outputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              query: {
-                type: "string",
-                description: "The name of the component or hook to find",
-              },
-              strict: {
-                type: "boolean",
-                description:
-                  "If true, only return symbols that exactly match the query. Defaults to true.",
-              },
-              props: {
-                type: "boolean",
-                description:
-                  "If true, include props in the definition. Defaults to false.",
-              },
-              usages: {
-                type: "boolean",
-                description:
-                  "If true, include usages across the project. Defaults to false.",
-              },
-              loc: {
-                type: "boolean",
-                description:
-                  "If true, include location information (line, column). Defaults to false.",
-              },
-              exclude: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return (e.g., ['definitions']). Omit to return all fields.",
-              },
+              definitions: { type: "array", items: { type: "object" } },
+              externalUsages: { type: "array", items: { type: "object" } },
             },
-            required: ["projectPath", "query"],
           },
-        },
-        {
-          name: "get_symbol_usages_with_context",
-          description:
-            "Find all usages of a symbol and return them with a few lines of surrounding code context. Highly token-efficient for understanding how a symbol is used.",
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              query: {
-                type: "string",
-                description: "The name of the component or hook to find",
-              },
-              strict: {
-                type: "boolean",
-                description:
-                  "If true, only return symbols that exactly match the query. Defaults to true.",
-              },
-              contextLines: {
-                type: "number",
-                description:
-                  "Number of context lines to show around the match. Defaults to 2.",
-              },
-              exclude: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              query: { type: "string", description: "Symbol name" },
+              strict: { type: "boolean" },
+              props: { type: "boolean" },
+              usages: { type: "boolean" },
+              contextLines: { type: "number", description: "Context lines around usages" },
+              exclude: { type: "array", items: { type: "string" } },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "query"],
           },
         },
         {
           name: "get_field_accesses",
-          description:
-            "Find all files that access a specific field on the result of a hook, component, or function call. For example, query 'useUser' with fieldPath 'data.role' finds every component that accesses 'user.data.role' on the return value of 'useUser'. Returns file, line, and surrounding code context for each match.",
+          description: "Find field accesses on a hook/component.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              query: {
-                type: "string",
-                description:
-                  "The name of the hook, component, or function to trace (e.g., 'useUser', 'Button')",
-              },
-              fieldPath: {
-                type: "string",
-                description:
-                  "Dot-separated field access path to search for (e.g., 'data.role', 'isLoading'). Only returns results where this field is accessed on the symbol's return value.",
-              },
-              contextLines: {
-                type: "number",
-                description:
-                  "Number of context lines to show around each field access match. Defaults to 2.",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              query: { type: "string", description: "Hook/component name" },
+              fieldPath: { type: "string", description: "Dot-separated field path" },
+              contextLines: { type: "number" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "query", "fieldPath"],
           },
         },
         {
           name: "get_prop_definitions",
-          description:
-            "Get the prop definitions for a component. Returns a clean summary of props (name, type, required, documentation).",
+          description: "Get component prop definitions.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              componentName: {
-                type: "string",
-                description: "The name of the component",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              componentName: { type: "string" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "componentName"],
           },
         },
         {
           name: "find_files",
-          description:
-            "Search for files by name or pattern (glob or regex) across the project.",
+          description: "Find files by glob pattern.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              pattern: {
-                type: "string",
-                description:
-                  "Pattern to match against file paths or basenames (e.g., 'App*', 'src/**/*.tsx', 'auth')",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              pattern: { type: "string", description: "Glob or filename pattern" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "pattern"],
           },
         },
         {
           name: "get_file_imports",
-          description:
-            "Get the list of imports for a specific file from the analysis data. More token-efficient than reading the full file.",
+          description: "Get a file's imports.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              filePath: { type: "string", description: "Relative path from project root" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "filePath"],
           },
         },
         {
           name: "get_project_tree",
-          description:
-            "Get a tree structure of the project directories and files up to a specified depth.",
+          description: "Get project directory tree.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              maxDepth: {
-                type: "number",
-                description: "Maximum depth to traverse (default: 3)",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              maxDepth: { type: "number" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath"],
           },
         },
         {
           name: "list_files",
-          description:
-            "List files in the project. For large projects, this returns a summary. Use list_directory for exploring specific folders and get_file_outline for details of a single file.",
+          description: "List project files.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return for each file (e.g., ['path']). Omit to return all fields.",
-              },
-              exclude: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              fields: { type: "array", items: { type: "string" } },
+              exclude: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath"],
           },
         },
         {
           name: "get_component_hierarchy",
-          description:
-            "Get the render hierarchy starting from a specific component (who it renders and who renders it).",
+          description: "Get component render hierarchy.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              componentName: {
-                type: "string",
-                description: "The name of the component to start from",
-              },
-              depth: {
-                type: "number",
-                description:
-                  "How many levels up and down to traverse (default: 2)",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              componentName: { type: "string" },
+              depth: { type: "number" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "componentName"],
           },
         },
         {
           name: "get_symbol_location",
-          description:
-            "Get the exact file and location (line/column) of a symbol's definition, including its body scope if it's a function or hook.",
+          description: "Get symbol file and position.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              query: {
-                type: "string",
-                description: "The name of the symbol to find",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              query: { type: "string", description: "Symbol name" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "query"],
           },
         },
         {
           name: "get_symbol_content",
-          description: "Get the source code content of a symbol's definition.",
+          description: "Get symbol source code.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
-              projectPath: {
-                type: "string",
-                description: "Absolute path to the project root",
-              },
-              subProject: {
-                type: "string",
-                description: "Optional sub-project path",
-              },
-              query: {
-                type: "string",
-                description: "The name of the symbol to find",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return. Omit to return all fields.",
-              },
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              query: { type: "string", description: "Symbol name" },
+              contextLines: { type: "number" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "query"],
           },
         },
         {
           name: "add_label",
-          description:
-            "Add a persistent label/tag to a file, folder, or variable ID for instant retrieval later.",
+          description: "Tag a file or entity.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              id: {
-                type: "string",
-                description:
-                  "The ID or path to label (e.g. file path or graph ID)",
-              },
-              label: { type: "string", description: "The label to attach" },
+              id: { type: "string", description: "File path or graph ID" },
+              label: { type: "string" },
             },
             required: ["projectPath", "id", "label"],
           },
         },
         {
           name: "list_labels",
-          description: "List all persistent labels in the project.",
+          description: "List all labels.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
@@ -721,8 +472,8 @@ export class BackendServer {
         },
         {
           name: "search_by_label",
-          description:
-            "Find entities (files, folders, variables) by their associated label.",
+          description: "Find entities by label.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
@@ -735,112 +486,88 @@ export class BackendServer {
         },
         {
           name: "list_directory",
-          description:
-            "List files and subdirectories in a specific folder. Use this to explore the project structure efficiently.",
+          description: "List files in a folder.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              dirPath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
+              dirPath: { type: "string", description: "Relative path from project root" },
             },
             required: ["projectPath", "dirPath"],
           },
         },
         {
           name: "get_file_outline",
-          description:
-            "Get a structured outline of a single file, including components, hooks, states, and their line numbers.",
+          description: "Get structured file outline.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
-              fields: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Optional list of fields to return (e.g., ['name', 'line']). Omit to return all fields.",
-              },
+              filePath: { type: "string", description: "Relative path from project root" },
+              fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "filePath"],
           },
         },
         {
           name: "read_file",
-          description: "Read the full content of a file.",
+          description: "Read file content with optional range.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
+              filePath: { type: "string", description: "Relative path from project root" },
+              startLine: { type: "number" },
+              endLine: { type: "number" },
             },
             required: ["projectPath", "filePath"],
           },
         },
         {
           name: "grep_search",
-          description: "Search for a pattern across all files in the project.",
+          description: "Search files by regex pattern.",
+          outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              pattern: {
-                type: "string",
-                description: "Regex pattern to search for",
-              },
-              exclude: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "List of glob patterns to exclude from results (e.g. ['**/test/**', '**/*.test.tsx']).",
-              },
+              pattern: { type: "string", description: "Regex pattern" },
+              exclude: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "pattern"],
           },
         },
         {
           name: "run_shell_command",
-          description:
-            "Execute a shell command in the project directory. Use this for terminal tasks. For searching code, prefer 'grep_search'. If using 'grep' manually, ensure you exclude '.git', 'node_modules', and '.nexiq' directories to avoid noise.",
+          description: "Execute a shell command.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              command: {
-                type: "string",
-                description: "The command to execute",
-              },
+              command: { type: "string" },
             },
             required: ["projectPath", "command"],
           },
         },
         {
           name: "write_file",
-          description:
-            "Write content to a file. Useful for creating or overwriting files.",
+          description: "Write content to a file.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
+              filePath: { type: "string", description: "Relative path from project root" },
               content: { type: "string" },
             },
             required: ["projectPath", "filePath", "content"],
@@ -848,16 +575,14 @@ export class BackendServer {
         },
         {
           name: "replace_file_content",
-          description: "Replace a string in a file with another string.",
+          description: "Replace text in a file.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
+              filePath: { type: "string", description: "Relative path from project root" },
               oldString: { type: "string" },
               newString: { type: "string" },
             },
@@ -866,16 +591,14 @@ export class BackendServer {
         },
         {
           name: "multi_replace_file_content",
-          description: "Perform multiple string replacements in a single file.",
+          description: "Multiple replacements in one file.",
+          outputSchema: { type: "object" },
           inputSchema: {
             type: "object",
             properties: {
               projectPath: { type: "string" },
               subProject: { type: "string" },
-              filePath: {
-                type: "string",
-                description: "Relative path from project root",
-              },
+              filePath: { type: "string", description: "Relative path from project root" },
               replacements: {
                 type: "array",
                 items: {
@@ -899,6 +622,7 @@ export class BackendServer {
           name: `${ext.id}_${tool.name}`,
           description: tool.description,
           inputSchema: tool.inputSchema,
+          ...(tool.outputSchema ? { outputSchema: tool.outputSchema } : {}),
         })),
       );
 
@@ -938,9 +662,7 @@ export class BackendServer {
             ...toolCall.args,
             projectManager: this.projectManager,
           });
-          return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          };
+          return this.toStructuredResult(result);
         }
       }
     }
@@ -950,18 +672,6 @@ export class BackendServer {
 
   private async handleKnownToolCall(knownCall: KnownToolCall) {
     switch (knownCall.name) {
-      case "open_project": {
-        const { projectPath, subProject } = knownCall.args;
-        await this.projectManager.openProject(projectPath, subProject);
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Project ${subProject || projectPath} opened and analyzed successfully.`,
-            },
-          ],
-        };
-      }
       case "get_symbol_info": {
         const {
           projectPath,
@@ -970,33 +680,48 @@ export class BackendServer {
           strict,
           props,
           usages,
-          loc,
+          contextLines,
           exclude,
           fields,
         } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
 
-        const includeUsage = usages === true; // Default to false
+        const includeContext = (contextLines ?? 0) > 0;
 
+        // When contextLines is set, return flat usage results with source context
+        if (includeContext) {
+          const results = await this.projectManager.getSymbolUsagesWithContext(
+            resolvedPath,
+            query,
+            subProject,
+            strict !== false,
+            contextLines ?? 2,
+            exclude || DEFAULT_EXCLUDES,
+          );
+          return this.toStructuredResult(results);
+        }
+
+        const includeUsage = usages === true;
         const results = await this.projectManager.findSymbol(
           resolvedPath,
           query,
           subProject,
-          strict !== false, // Default to strict true
-          props === true, // Default to false
+          strict !== false,
+          props === true,
           includeUsage,
           exclude || DEFAULT_EXCLUDES,
         );
 
-        const includeLoc = loc === true;
-
         const processItem = (item: SymbolSearchResult) => {
           const processed = { ...item };
-          if (!includeLoc) {
-            delete (processed as Partial<SymbolSearchResult>).loc;
+          if (processed.props) {
+            processed.props = this.sanitizeProps(processed.props);
           }
           if (processed.usages) {
-            processed.usages = processed.usages.map((u) => processItem(u));
+            processed.usages = processed.usages.map((u) => {
+              const { loc: _loc, ...rest } = u;
+              return rest as SymbolSearchResult;
+            });
           }
 
           return processed;
@@ -1007,52 +732,27 @@ export class BackendServer {
         };
 
         if (includeUsage) {
-          result.externalUsages = (results.externalUsages ?? []).map((u) =>
-            processItem(u),
-          );
+          result.externalUsages = (results.externalUsages ?? []).map((u) => {
+            const { loc: _loc, ...rest } = u;
+            return rest as SymbolSearchResult;
+          });
         }
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(result, fields), null, 2),
-            },
-          ],
-        };
+        // Map 'usages' field request to 'definitions' (usages are nested inside definitions)
+        const effectiveFields = fields?.map((f) =>
+          f === "usages" ? "definitions" : f,
+        );
+        return this.toStructuredResult(this.filterFields(result, effectiveFields));
       }
-      case "get_symbol_usages_with_context": {
+      case "get_field_accesses": {
         const {
           projectPath,
           subProject,
           query,
-          strict,
+          fieldPath,
           contextLines,
-          exclude,
           fields,
         } = knownCall.args;
-        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
-        const results = await this.projectManager.getSymbolUsagesWithContext(
-          resolvedPath,
-          query,
-          subProject,
-          strict !== false,
-          contextLines ?? 2,
-          exclude || DEFAULT_EXCLUDES,
-        );
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
-      }
-      case "get_field_accesses": {
-        const { projectPath, subProject, query, fieldPath, contextLines, fields } =
-          knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getFieldAccesses(
           resolvedPath,
@@ -1062,14 +762,7 @@ export class BackendServer {
           contextLines ?? 2,
         );
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.filterFields(results, fields));
       }
       case "get_prop_definitions": {
         const { projectPath, subProject, componentName, fields } =
@@ -1081,14 +774,12 @@ export class BackendServer {
           subProject,
         );
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
+        const sanitized = results.map((r) => ({
+          ...r,
+          props: this.sanitizeProps(r.props || []),
+        }));
+
+        return this.toStructuredResult(this.filterFields(sanitized, fields));
       }
       case "find_files": {
         const { projectPath, subProject, pattern, fields } = knownCall.args;
@@ -1099,14 +790,7 @@ export class BackendServer {
           subProject,
         );
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.filterFields(results, fields));
       }
 
       case "get_file_imports": {
@@ -1118,14 +802,7 @@ export class BackendServer {
           subProject,
         );
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.filterFields(results, fields));
       }
 
       case "get_project_tree": {
@@ -1137,14 +814,7 @@ export class BackendServer {
           maxDepth,
         );
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(results, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.filterFields(results, fields));
       }
 
       case "list_files": {
@@ -1196,26 +866,16 @@ export class BackendServer {
           });
         }
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(
-                {
-                  totalFiles,
-                  displayedCount: fileSummary.length,
-                  files: this.filterFields(fileSummary, fields),
-                  hint:
-                    totalFiles > MAX_FILES
-                      ? `Project has ${totalFiles} files. Showing first ${MAX_FILES}. Use 'list_directory' to explore folders or 'find_files' to search for specific files.`
-                      : undefined,
-                },
-                null,
-                2,
-              ),
-            },
-          ],
+        const listResult = {
+          totalFiles,
+          displayedCount: fileSummary.length,
+          files: this.filterFields(fileSummary, fields),
+          hint:
+            totalFiles > MAX_FILES
+              ? `Project has ${totalFiles} files. Showing first ${MAX_FILES}. Use 'list_directory' to explore folders or 'find_files' to search for specific files.`
+              : undefined,
         };
+        return this.toStructuredResult(listResult);
       }
 
       case "get_component_hierarchy": {
@@ -1228,14 +888,7 @@ export class BackendServer {
           subProject,
           depth,
         );
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(result, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }
 
       case "get_symbol_location": {
@@ -1246,32 +899,20 @@ export class BackendServer {
           query,
           subProject,
         );
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(result, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }
 
       case "get_symbol_content": {
-        const { projectPath, subProject, query, fields } = knownCall.args;
+        const { projectPath, subProject, query, contextLines, fields } =
+          knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.getSymbolContent(
           resolvedPath,
           query,
           subProject,
+          contextLines ?? 5,
         );
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(result, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }
 
       case "add_label": {
@@ -1283,9 +924,7 @@ export class BackendServer {
           label,
           subProject,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "list_labels": {
@@ -1295,9 +934,7 @@ export class BackendServer {
           resolvedPath,
           subProject,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "search_by_label": {
@@ -1308,9 +945,7 @@ export class BackendServer {
           label,
           subProject,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "list_directory": {
@@ -1321,9 +956,7 @@ export class BackendServer {
           dirPath,
           subProject,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "get_file_outline": {
@@ -1334,25 +967,24 @@ export class BackendServer {
           filePath,
           subProject,
         );
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(this.filterFields(result, fields), null, 2),
-            },
-          ],
-        };
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }
 
       case "read_file": {
-        const { projectPath, subProject, filePath } = knownCall.args;
+        const { projectPath, subProject, filePath, startLine, endLine } =
+          knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const result = await this.projectManager.readFile(
           resolvedPath,
           filePath,
           subProject,
+          startLine,
+          endLine,
         );
-        return { content: [{ type: "text", text: result }] };
+        return {
+          content: [{ type: "text", text: result }],
+          structuredContent: { content: result },
+        };
       }
 
       case "grep_search": {
@@ -1364,9 +996,7 @@ export class BackendServer {
           subProject,
           exclude || DEFAULT_EXCLUDES,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "run_shell_command": {
@@ -1377,9 +1007,7 @@ export class BackendServer {
           command,
           subProject,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        return this.toStructuredResult(result);
       }
 
       case "write_file": {
@@ -1390,9 +1018,7 @@ export class BackendServer {
           filePath,
           content,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify({ success }) }],
-        };
+        return this.toStructuredResult({ success });
       }
 
       case "replace_file_content": {
@@ -1405,9 +1031,7 @@ export class BackendServer {
           oldString,
           newString,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify({ success }) }],
-        };
+        return this.toStructuredResult({ success });
       }
 
       case "multi_replace_file_content": {
@@ -1419,9 +1043,7 @@ export class BackendServer {
           filePath,
           replacements,
         );
-        return {
-          content: [{ type: "text", text: JSON.stringify({ success }) }],
-        };
+        return this.toStructuredResult({ success });
       }
 
       default:
@@ -1429,6 +1051,47 @@ export class BackendServer {
         // @ts-expect-error
         throw new Error(`Unknown tool: ${knownCall.name}`);
     }
+  }
+
+  private toStructuredResult(data: unknown): {
+    content: { type: "text"; text: string }[];
+    structuredContent: Record<string, unknown>;
+  } {
+    const obj = Array.isArray(data) ? { items: data } : (data as Record<string, unknown>);
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: obj,
+    };
+  }
+
+  private sanitizeProps(props: unknown[]): unknown[] {
+    if (!props) return props;
+    return props.map((prop) => {
+      const p = prop as Record<string, unknown>;
+      const cleaned: Record<string, unknown> = {};
+      if (p.name !== undefined) cleaned.name = p.name;
+      if (p.kind !== undefined) cleaned.kind = p.kind;
+      if (p.type !== undefined && p.type !== "any") cleaned.type = p.type;
+      if (p.defaultValue !== undefined) cleaned.defaultValue = p.defaultValue;
+      if (p.props !== undefined) {
+        cleaned.props = this.sanitizeProps(p.props as unknown[]);
+      }
+      return cleaned;
+    });
+  }
+
+  private stripIds<T>(data: T): T {
+    if (!data) return data;
+    if (Array.isArray(data)) {
+      return data.map((item) => this.stripIds(item)) as unknown as T;
+    }
+    if (typeof data !== "object") return data;
+    const obj = data as Record<string, unknown>;
+    const { id: _, ...rest } = obj;
+    for (const key of Object.keys(rest)) {
+      rest[key] = this.stripIds(rest[key]);
+    }
+    return rest as unknown as T;
   }
 
   private filterFields<T>(data: T, fields?: string[]): T {

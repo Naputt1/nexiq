@@ -846,6 +846,7 @@ export interface MCPTool {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
   handler: (args: MCPToolHandlerArgs) => Promise<unknown>;
 }
 
