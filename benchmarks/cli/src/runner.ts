@@ -180,7 +180,7 @@ export class McpRunner {
           name,
           arguments: args as Record<string, unknown>,
         }),
-        120_000,
+        300_000,
         `callTool(${name})`,
       );
     } catch (e) {
@@ -244,7 +244,7 @@ export class RunnerPool {
       new Promise<McpRunner>((resolve) => {
         this.waiting.push(resolve);
       }),
-      120_000,
+      300_000,
       "acquire runner",
     );
   }
@@ -486,12 +486,14 @@ export class BenchmarkRunner {
             (t) => !["grep_search", "run_shell_command"].includes(t.name),
           ); // Force specialized tools for nexiq approach
 
+    const pathPrefix = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls.`;
     const pathContext = approach === "nexiq-skill"
-      ? fs.readFileSync(
+      ? pathPrefix + "\n\n" +
+        fs.readFileSync(
           path.resolve(REPO_ROOT, "docs/skills/nexiq-mcp.md"),
           "utf-8",
         ).replace(/^---[\s\S]*?---\n/, "")
-      : `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
+      : pathPrefix + `
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands. For field-level queries (e.g., finding which files access 'user.data.role'), use 'get_field_accesses' with the hook/component name and the field path.
     Each tool definition costs tokens every roundtrip. Include all needed parameters in one call rather than making multiple calls for the same symbol. Prefer get_symbol_info → get_symbol_content over read_file for targeted code reading.
@@ -587,11 +589,10 @@ export class BenchmarkRunner {
           });
 
           const toolArgs = { ...(tc.arguments as Record<string, unknown>) };
-          // Inject projectPath if missing and it's a specialized tool
+          // Override projectPath for specialized tools to prevent LLM from using wrong paths
           if (
-            !toolArgs.projectPath &&
             approach !== "baseline" &&
-            (tc.name.startsWith("get_") || tc.name.startsWith("list_"))
+            (tc.name.startsWith("get_") || tc.name.startsWith("list_") || tc.name === "read_file" || tc.name === "grep_search")
           ) {
             toolArgs.projectPath = absoluteRoot;
           }

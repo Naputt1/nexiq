@@ -7,8 +7,52 @@
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"Slot\": {\n    \"localName\": \"Slot\",\n    \"importedName\": \"Slot\",\n    \"source\": \"@radix-ui/react-slot\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"cva\": {\n    \"localName\": \"cva\",\n    \"importedName\": \"cva\",\n    \"source\": \"class-variance-authority\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"VariantProps\": {\n    \"localName\": \"VariantProps\",\n    \"importedName\": \"VariantProps\",\n    \"source\": \"class-variance-authority\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": \"*\",\n    \"source\": \"react\",\n    \"type\": \"namespace\",\n    \"importKind\": \"value\"\n  },\n  \"cn\": {\n    \"localName\": \"cn\",\n    \"importedName\": \"cn\",\n    \"source\": \"/src/utils/cn.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"Spinner\": {\n    \"localName\": \"Spinner\",\n    \"importedName\": \"Spinner\",\n    \"source\": \"/src/components/ui/spinner/index.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+        "text": "{\"Slot\":{\"localName\":\"Slot\",\"importedName\":\"Slot\",\"source\":\"@radix-ui/react-slot\",\"type\":\"named\",\"importKind\":\"value\"},\"cva\":{\"localName\":\"cva\",\"importedName\":\"cva\",\"source\":\"class-variance-authority\",\"type\":\"named\",\"importKind\":\"value\"},\"VariantProps\":{\"localName\":\"VariantProps\",\"importedName\":\"VariantProps\",\"source\":\"class-variance-authority\",\"type\":\"named\",\"importKind\":\"value\"},\"React\":{\"localName\":\"React\",\"importedName\":\"*\",\"source\":\"react\",\"type\":\"namespace\",\"importKind\":\"value\"},\"cn\":{\"localName\":\"cn\",\"importedName\":\"cn\",\"source\":\"/src/utils/cn.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"Spinner\":{\"localName\":\"Spinner\",\"importedName\":\"Spinner\",\"source\":\"/src/components/ui/spinner/index.ts\",\"type\":\"named\",\"importKind\":\"value\"}}"
       }
-    ]
+    ],
+    "structuredContent": {
+      "Slot": {
+        "localName": "Slot",
+        "importedName": "Slot",
+        "source": "@radix-ui/react-slot",
+        "type": "named",
+        "importKind": "value"
+      },
+      "cva": {
+        "localName": "cva",
+        "importedName": "cva",
+        "source": "class-variance-authority",
+        "type": "named",
+        "importKind": "value"
+      },
+      "VariantProps": {
+        "localName": "VariantProps",
+        "importedName": "VariantProps",
+        "source": "class-variance-authority",
+        "type": "named",
+        "importKind": "value"
+      },
+      "React": {
+        "localName": "React",
+        "importedName": "*",
+        "source": "react",
+        "type": "namespace",
+        "importKind": "value"
+      },
+      "cn": {
+        "localName": "cn",
+        "importedName": "cn",
+        "source": "/src/utils/cn.ts",
+        "type": "named",
+        "importKind": "value"
+      },
+      "Spinner": {
+        "localName": "Spinner",
+        "importedName": "Spinner",
+        "source": "/src/components/ui/spinner/index.ts",
+        "type": "named",
+        "importKind": "value"
+      }
+    }
   }
 }
