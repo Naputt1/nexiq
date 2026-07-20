@@ -64,7 +64,7 @@ export interface BenchmarkStep {
 export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+  approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill";
   testType: "single-prompt" | "planning" | "coding";
   model: string;
   success: boolean;
@@ -83,7 +83,7 @@ export interface RunOptions {
   projects: string[]; // Tier names (small, mid, large, coding)
   models: LlmClient[];
   testTypes: ("single-prompt" | "planning" | "coding")[];
-  approaches: ("baseline" | "nexiq-cold" | "nexiq-warm")[];
+  approaches: ("baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill")[];
   concurrency?: number;
   onProgress?: (update: ProgressUpdate) => void;
 }
@@ -439,7 +439,7 @@ export class BenchmarkRunner {
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     llm: LlmClient,
     mcp: McpRunner,
@@ -486,7 +486,12 @@ export class BenchmarkRunner {
             (t) => !["grep_search", "run_shell_command"].includes(t.name),
           ); // Force specialized tools for nexiq approach
 
-    const pathContext = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
+    const pathContext = approach === "nexiq-skill"
+      ? fs.readFileSync(
+          path.resolve(REPO_ROOT, "docs/skills/nexiq-mcp.md"),
+          "utf-8",
+        ).replace(/^---[\s\S]*?---\n/, "")
+      : `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands. For field-level queries (e.g., finding which files access 'user.data.role'), use 'get_field_accesses' with the hook/component name and the field path.
     Each tool definition costs tokens every roundtrip. Include all needed parameters in one call rather than making multiple calls for the same symbol. Prefer get_symbol_info → get_symbol_content over read_file for targeted code reading.
@@ -774,7 +779,7 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
   reportError(
     scenarioId: string,
     projectName: string,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     model: string,
     startTime: number,
@@ -818,7 +823,7 @@ export async function runBenchmarks(options: RunOptions) {
     project: ProjectScenarios;
     scenario: Scenario;
     model: LlmClient;
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill";
     testType: "single-prompt" | "planning" | "coding";
   }[] = [];
 

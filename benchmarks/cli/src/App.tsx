@@ -42,6 +42,7 @@ const APPROACHES = [
   { label: "Baseline", value: "baseline" },
   { label: "React Map (Cold Cache)", value: "nexiq-cold" },
   { label: "React Map (Warm Cache)", value: "nexiq-warm" },
+  { label: "Nexiq Skill", value: "nexiq-skill" },
 ];
 
 const CONCURRENCY_OPTIONS = [
