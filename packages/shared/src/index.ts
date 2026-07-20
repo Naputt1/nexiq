@@ -284,7 +284,7 @@ export interface BenchmarkStep {
 export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+  approach: "baseline" | "nexiq-warm" | "nexiq-skill";
   testType: "single-prompt" | "planning";
   model: string;
   success: boolean;

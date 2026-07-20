@@ -64,7 +64,7 @@ export interface BenchmarkStep {
 export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill";
+  approach: "baseline" | "nexiq-warm" | "nexiq-skill";
   testType: "single-prompt" | "planning" | "coding";
   model: string;
   success: boolean;
@@ -83,7 +83,7 @@ export interface RunOptions {
   projects: string[]; // Tier names (small, mid, large, coding)
   models: LlmClient[];
   testTypes: ("single-prompt" | "planning" | "coding")[];
-  approaches: ("baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill")[];
+  approaches: ("baseline" | "nexiq-warm" | "nexiq-skill")[];
   concurrency?: number;
   onProgress?: (update: ProgressUpdate) => void;
 }
@@ -439,7 +439,7 @@ export class BenchmarkRunner {
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill",
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     llm: LlmClient,
     mcp: McpRunner,
@@ -461,14 +461,6 @@ export class BenchmarkRunner {
 
     // Resolve relative to repo root
     const absoluteRoot = path.resolve(REPO_ROOT, project.root);
-
-    // Pre-scenario setup
-    if (approach === "nexiq-cold") {
-      const cacheDir = path.join(absoluteRoot, ".nexiq", "cache");
-      if (fs.existsSync(cacheDir)) {
-        fs.rmSync(cacheDir, { recursive: true });
-      }
-    }
 
     // Tools setup
     const allTools = await retry((m) => m.listTools());
@@ -780,7 +772,7 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
   reportError(
     scenarioId: string,
     projectName: string,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill",
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     model: string,
     startTime: number,
@@ -824,7 +816,7 @@ export async function runBenchmarks(options: RunOptions) {
     project: ProjectScenarios;
     scenario: Scenario;
     model: LlmClient;
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm" | "nexiq-skill";
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill";
     testType: "single-prompt" | "planning" | "coding";
   }[] = [];
 
@@ -854,8 +846,8 @@ export async function runBenchmarks(options: RunOptions) {
         )[]) {
           for (const approach of options.approaches as (
             | "baseline"
-            | "nexiq-cold"
             | "nexiq-warm"
+            | "nexiq-skill"
           )[]) {
             tasks.push({
               project: projectData,
@@ -876,6 +868,21 @@ export async function runBenchmarks(options: RunOptions) {
   let activeScenarios = 0;
 
   await pool.init(serverPath);
+
+  // Pre-warm: trigger analysis on all unique project roots
+  const warmedRoots = new Set<string>();
+  for (const task of tasks) {
+    const root = path.resolve(REPO_ROOT, task.project.root);
+    if (warmedRoots.has(root)) continue;
+    warmedRoots.add(root);
+    const runner = await pool.acquire();
+    try {
+      await runner.callTool("list_files", { projectPath: root });
+    } catch {
+      // Non-fatal — the scenario will trigger analysis on demand
+    }
+    pool.release(runner);
+  }
 
   // Process tasks with concurrency limit and directory isolation
   const activeRoots = new Map<string, number>();
