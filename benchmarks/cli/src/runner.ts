@@ -148,6 +148,7 @@ export class McpRunner {
   private transport: StdioClientTransport | null = null;
   public id: string = crypto.randomBytes(4).toString("hex");
   private _dead = false;
+  private logStream?: fs.WriteStream;
 
   get dead(): boolean {
     return this._dead;
@@ -155,10 +156,22 @@ export class McpRunner {
 
   async start(serverPath: string, args: string[] = []) {
     this._dead = false;
+    const logDir = path.resolve(REPO_ROOT, "benchmarks/results");
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    this.logStream = fs.createWriteStream(
+      path.join(logDir, `server-${this.id}.log`),
+    );
     this.transport = new StdioClientTransport({
       command: "node",
-      args: [serverPath, ...args],
+      args: [serverPath, "--max-old-space-size=4096", ...args],
     });
+    const stderrStream = (this.transport as unknown as { _stderrStream?: NodeJS.ReadableStream })._stderrStream;
+    if (stderrStream) {
+      stderrStream.setEncoding("utf8");
+      stderrStream.pipe(this.logStream);
+    }
 
     this.client = new Client(
       { name: "benchmark-runner", version: "1.0.0" },
@@ -171,6 +184,9 @@ export class McpRunner {
   async stop() {
     if (this.client) await this.client.close();
     if (this.transport) await this.transport.close();
+    if (this.logStream) {
+      this.logStream.end();
+    }
   }
 
   async callTool(name: string, args: unknown) {
@@ -203,13 +219,18 @@ export class McpRunner {
 }
 
 export class RunnerPool {
-  private sharedRunner: McpRunner | null = null;
+  private pool: McpRunner[] = [];
+  private available: McpRunner[] = [];
+  private waiting: ((runner: McpRunner) => void)[] = [];
   private serverPath = "";
-  private replacement: Promise<void> | null = null;
+
+  constructor(private size: number) {}
 
   async init(serverPath: string) {
     this.serverPath = serverPath;
-    this.sharedRunner = await this.spawnRunner();
+    for (let i = 0; i < this.size; i++) {
+      await this.spawnRunner();
+    }
   }
 
   private async spawnRunner(): Promise<McpRunner> {
@@ -223,29 +244,48 @@ export class RunnerPool {
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
+    this.pool.push(runner);
+    if (this.waiting.length > 0) {
+      this.waiting.shift()!(runner);
+    } else {
+      this.available.push(runner);
+    }
     return runner;
   }
 
   async acquire(): Promise<McpRunner> {
-    if (this.replacement) await this.replacement;
-    if (!this.sharedRunner) throw new Error("Pool not initialized");
-    return this.sharedRunner;
+    if (this.available.length > 0) {
+      return this.available.pop()!;
+    }
+    return withTimeout(
+      new Promise<McpRunner>((resolve) => {
+        this.waiting.push(resolve);
+      }),
+      300_000,
+      "acquire runner",
+    );
   }
 
   release(runner: McpRunner) {
     if (runner.dead) {
       runner.stop().catch(() => {});
-      this.replacement = this.retrySpawnForever()
-        .then((r) => { this.sharedRunner = r; })
-        .catch(() => { this.sharedRunner = null; });
+      this.retrySpawnForever();
+      return;
+    }
+    if (this.waiting.length > 0) {
+      const resolve = this.waiting.shift()!;
+      resolve(runner);
+    } else {
+      this.available.push(runner);
     }
   }
 
-  private async retrySpawnForever(): Promise<McpRunner> {
+  private async retrySpawnForever() {
     let delay = 2000;
     for (;;) {
       try {
-        return await this.spawnRunner();
+        await this.spawnRunner();
+        return;
       } catch {
         await new Promise((r) => setTimeout(r, delay));
         delay = Math.min(delay * 2, 30_000);
@@ -254,8 +294,8 @@ export class RunnerPool {
   }
 
   async stop() {
-    if (this.sharedRunner) {
-      await this.sharedRunner.stop();
+    for (const runner of this.pool) {
+      await runner.stop();
     }
   }
 }
@@ -814,7 +854,7 @@ export async function runBenchmarks(options: RunOptions) {
   const orchestrator = new BenchmarkRunner();
   const serverPath = path.resolve(REPO_ROOT, "packages/server/dist/index.js");
   const concurrency = options.concurrency || 3;
-  const pool = new RunnerPool();
+  const pool = new RunnerPool(concurrency);
 
   const tasks: {
     project: ProjectScenarios;
