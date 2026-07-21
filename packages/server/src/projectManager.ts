@@ -252,6 +252,59 @@ export class ProjectManager {
       return analyzeProject(srcDir, options);
     }
 
+    const lockPath = path.join(
+      os.tmpdir(),
+      `nexiq-analyze-${crypto.createHash("md5").update(srcDir).digest("hex")}.lock`,
+    );
+    await this.acquireAnalysisLock(lockPath);
+    try {
+      return await this.runAnalysisWorker(srcDir, options);
+    } finally {
+      this.releaseAnalysisLock(lockPath);
+    }
+  }
+
+  private async acquireAnalysisLock(lockPath: string): Promise<void> {
+    const staleTimeout = 600_000;
+    for (let i = 0; i < 120; i++) {
+      try {
+        fs.mkdirSync(lockPath);
+        return;
+      } catch {
+        // Lock exists — check if stale
+        try {
+          const stat = fs.statSync(lockPath);
+          if (Date.now() - stat.mtimeMs > staleTimeout) {
+            fs.rmdirSync(lockPath);
+            continue;
+          }
+        } catch {
+          // Lock was released by another process between stat and rmdir
+        }
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`Timed out waiting for analysis lock: ${lockPath}`);
+  }
+
+  private releaseAnalysisLock(lockPath: string) {
+    try {
+      fs.rmdirSync(lockPath);
+    } catch {
+      // Already released by another process, or never existed
+    }
+  }
+
+  private async runAnalysisWorker(
+    srcDir: string,
+    options: {
+      cacheFile?: string;
+      ignorePatterns?: string[];
+      sqlitePath?: string;
+      analysisPaths?: string[];
+      monorepo?: boolean;
+    },
+  ): Promise<JsonData> {
     const workerPath = fileURLToPath(
       new URL("analysis-worker.js", import.meta.url),
     );
