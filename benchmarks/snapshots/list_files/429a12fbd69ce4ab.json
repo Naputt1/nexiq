@@ -9,9 +9,13 @@
     "content": [
       {
         "type": "text",
-        "text": "Cannot convert undefined or null to object"
+        "text": "{\"totalFiles\":0,\"displayedCount\":0,\"files\":[]}"
       }
     ],
-    "isError": true
+    "structuredContent": {
+      "totalFiles": 0,
+      "displayedCount": 0,
+      "files": []
+    }
   }
 }

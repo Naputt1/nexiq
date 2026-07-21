@@ -166,11 +166,13 @@ export class McpRunner {
     this.transport = new StdioClientTransport({
       command: "node",
       args: [serverPath, "--max-old-space-size=4096", ...args],
+      stderr: "pipe",
     });
     const stderrStream = (this.transport as unknown as { _stderrStream?: NodeJS.ReadableStream })._stderrStream;
     if (stderrStream) {
       stderrStream.setEncoding("utf8");
       stderrStream.pipe(this.logStream);
+      stderrStream.pipe(process.stderr);
     }
 
     this.client = new Client(
