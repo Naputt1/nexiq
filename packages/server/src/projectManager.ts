@@ -257,6 +257,7 @@ export class ProjectManager {
     );
     const child = fork(workerPath, [], {
       stdio: ["pipe", "ignore", "pipe", "ipc"],
+      execArgv: [],
     });
 
     const input = JSON.stringify({ srcDir, ...options });
