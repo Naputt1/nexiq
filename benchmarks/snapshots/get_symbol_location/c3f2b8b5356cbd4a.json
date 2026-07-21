@@ -9,6 +9,9 @@
         "type": "text",
         "text": "[]"
       }
-    ]
+    ],
+    "structuredContent": {
+      "items": []
+    }
   }
 }

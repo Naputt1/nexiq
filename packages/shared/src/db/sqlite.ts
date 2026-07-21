@@ -21,7 +21,7 @@ export class SqliteDB {
   constructor(db: Database) {
     this.db = db;
     this.db.pragma("journal_mode = WAL");
-    this.db.pragma("busy_timeout = 30000");
+    this.db.pragma("busy_timeout = 600000");
     this.db.pragma("foreign_keys = ON");
     this.db.pragma("synchronous = NORMAL");
     this.db.pragma("temp_store = MEMORY");
