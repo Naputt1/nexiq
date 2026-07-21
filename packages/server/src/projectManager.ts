@@ -26,8 +26,8 @@ import {
   getWorkspacePatterns,
 } from "@nexiq/analyser";
 import type { Extension, GraphNodeDetail } from "@nexiq/extension-sdk";
-import { pathToFileURL } from "node:url";
-import { exec, execSync } from "node:child_process";
+import { pathToFileURL, fileURLToPath } from "node:url";
+import { exec, execSync, fork } from "node:child_process";
 import { promisify } from "node:util";
 import { simpleGit, type LogOptions } from "simple-git";
 import tmp from "tmp";
@@ -238,6 +238,61 @@ export class ProjectManager {
     }
   }
 
+  private async forkAndAnalyze(
+    srcDir: string,
+    options: {
+      cacheFile?: string;
+      ignorePatterns?: string[];
+      sqlitePath?: string;
+      analysisPaths?: string[];
+      monorepo?: boolean;
+    },
+  ): Promise<JsonData> {
+    if (process.env.VITEST) {
+      return analyzeProject(srcDir, options);
+    }
+
+    const workerPath = fileURLToPath(
+      new URL("analysis-worker.js", import.meta.url),
+    );
+    const child = fork(workerPath, [], {
+      stdio: ["pipe", "pipe", "inherit"],
+    });
+
+    const input = JSON.stringify({ srcDir, ...options });
+    child.stdin!.write(input);
+    child.stdin!.end();
+
+    const graphPromise = new Promise<JsonData>((resolve, reject) => {
+      let stdoutData = "";
+      child.stdout!.setEncoding("utf8");
+      child.stdout!.on("data", (chunk: string) => (stdoutData += chunk));
+      child.on("exit", (code) => {
+        if (code !== 0) {
+          reject(new Error(`Worker exited with code ${code}`));
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdoutData) as JsonData);
+        } catch (e) {
+          reject(new Error(`Failed to parse worker output: ${e}`));
+        }
+      });
+      child.on("error", reject);
+    });
+
+    const timeout = 600_000;
+    return Promise.race([
+      graphPromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`Analysis timed out after ${timeout / 1000}s`)),
+          timeout,
+        ),
+      ),
+    ]);
+  }
+
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
@@ -305,7 +360,7 @@ export class ProjectManager {
     console.error(
       `Analyzing project: ${cacheRoot} (Selection: ${analysisPath})`,
     );
-    const graph = await analyzeProject(
+    const graph = await this.forkAndAnalyze(
       subProjects && subProjects.length > 0 ? projectPath : analysisPath,
       {
         cacheFile,

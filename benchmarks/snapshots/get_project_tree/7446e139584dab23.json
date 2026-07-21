@@ -7,9 +7,2216 @@
     "content": [
       {
         "type": "text",
-        "text": "database is locked"
+        "text": "{\"name\":\"/\",\"children\":[{\"name\":\"actions\",\"children\":[{\"name\":\"admin_actions.jsx\",\"children\":[]},{\"name\":\"admin_actions.test.js\",\"children\":[]},{\"name\":\"apps.ts\",\"children\":[]},{\"name\":\"channel_actions.test.ts\",\"children\":[]},{\"name\":\"channel_actions.ts\",\"children\":[]},{\"name\":\"channel_queries.ts\",\"children\":[]},{\"name\":\"cloud.tsx\",\"children\":[]},{\"name\":\"command.test.js\",\"children\":[]},{\"name\":\"command.ts\",\"children\":[]},{\"name\":\"emoji_actions.js\",\"children\":[]},{\"name\":\"emoji_actions.mock.test.js\",\"children\":[]},{\"name\":\"emoji_actions.test.js\",\"children\":[]},{\"name\":\"file_actions.ts\",\"children\":[]},{\"name\":\"global_actions.test.ts\",\"children\":[]},{\"name\":\"global_actions.tsx\",\"children\":[]},{\"name\":\"hooks.js\",\"children\":[]},{\"name\":\"hooks.test.js\",\"children\":[]},{\"name\":\"hosted_customer.tsx\",\"children\":[]},{\"name\":\"integration_actions.jsx\",\"children\":[]},{\"name\":\"integration_actions.test.js\",\"children\":[]},{\"name\":\"invite_actions.test.ts\",\"children\":[]},{\"name\":\"invite_actions.ts\",\"children\":[]},{\"name\":\"marketplace.ts\",\"children\":[]},{\"name\":\"new_post.test.ts\",\"children\":[]},{\"name\":\"new_post.ts\",\"children\":[]},{\"name\":\"notification_actions.jsx\",\"children\":[]},{\"name\":\"notification_actions.test.js\",\"children\":[]},{\"name\":\"post_actions.test.ts\",\"children\":[]},{\"name\":\"post_actions.ts\",\"children\":[]},{\"name\":\"status_actions.test.ts\",\"children\":[]},{\"name\":\"status_actions.ts\",\"children\":[]},{\"name\":\"storage.test.ts\",\"children\":[]},{\"name\":\"storage.ts\",\"children\":[]},{\"name\":\"team_actions.test.ts\",\"children\":[]},{\"name\":\"team_actions.ts\",\"children\":[]},{\"name\":\"telemetry_actions.jsx\",\"children\":[]},{\"name\":\"telemetry_actions.test.js\",\"children\":[]},{\"name\":\"user_actions.test.ts\",\"children\":[]},{\"name\":\"user_actions.ts\",\"children\":[]},{\"name\":\"views\",\"children\":[]},{\"name\":\"websocket_actions.jsx\",\"children\":[]},{\"name\":\"websocket_actions.test.jsx\",\"children\":[]}]},{\"name\":\"babel.config.js\",\"children\":[]},{\"name\":\"client\",\"children\":[{\"name\":\"web_websocket_client.jsx\",\"children\":[]}]},{\"name\":\"components\",\"children\":[{\"name\":\"about_build_modal\",\"children\":[]},{\"name\":\"access_history_modal\",\"children\":[]},{\"name\":\"access_problem\",\"children\":[]},{\"name\":\"accordion.tsx\",\"children\":[]},{\"name\":\"actions_menu\",\"children\":[]},{\"name\":\"activity_and_insights\",\"children\":[]},{\"name\":\"activity_log_modal\",\"children\":[]},{\"name\":\"add_groups_to_channel_modal\",\"children\":[]},{\"name\":\"add_groups_to_team_modal\",\"children\":[]},{\"name\":\"add_user_to_channel_modal\",\"children\":[]},{\"name\":\"add_user_to_group_multiselect\",\"children\":[]},{\"name\":\"add_users_to_group_modal\",\"children\":[]},{\"name\":\"add_users_to_team_modal\",\"children\":[]},{\"name\":\"admin_console\",\"children\":[]},{\"name\":\"advanced_create_comment\",\"children\":[]},{\"name\":\"advanced_create_post\",\"children\":[]},{\"name\":\"advanced_text_editor\",\"children\":[]},{\"name\":\"air_gapped_self_hosted_purchase_modal\",\"children\":[]},{\"name\":\"alert_banner.test.tsx\",\"children\":[]},{\"name\":\"alert_banner.tsx\",\"children\":[]},{\"name\":\"analytics\",\"children\":[]},{\"name\":\"announcement_bar\",\"children\":[]},{\"name\":\"app_bar\",\"children\":[]},{\"name\":\"app.jsx\",\"children\":[]},{\"name\":\"apps_form\",\"children\":[]},{\"name\":\"archived_preview.tsx\",\"children\":[]},{\"name\":\"async_load.tsx\",\"children\":[]},{\"name\":\"at_mention\",\"children\":[]},{\"name\":\"at_plan_mention\",\"children\":[]},{\"name\":\"at_sum_members_mention\",\"children\":[]},{\"name\":\"audio_video_preview\",\"children\":[]},{\"name\":\"audit_table\",\"children\":[]},{\"name\":\"authorize\",\"children\":[]},{\"name\":\"autocomplete_selector.jsx\",\"children\":[]},{\"name\":\"autocomplete_selector.test.jsx\",\"children\":[]},{\"name\":\"autosize_textarea.test.tsx\",\"children\":[]},{\"name\":\"autosize_textarea.tsx\",\"children\":[]},{\"name\":\"backstage\",\"children\":[]},{\"name\":\"card\",\"children\":[]},{\"name\":\"center_message_lock\",\"children\":[]},{\"name\":\"channel_groups_manage_modal\",\"children\":[]},{\"name\":\"channel_header\",\"children\":[]},{\"name\":\"channel_header_dropdown\",\"children\":[]},{\"name\":\"channel_header_mobile\",\"children\":[]},{\"name\":\"channel_info_rhs\",\"children\":[]},{\"name\":\"channel_invite_modal\",\"children\":[]},{\"name\":\"channel_layout\",\"children\":[]},{\"name\":\"channel_members_dropdown\",\"children\":[]},{\"name\":\"channel_members_modal\",\"children\":[]},{\"name\":\"channel_members_rhs\",\"children\":[]},{\"name\":\"channel_move_to_sub_menu\",\"children\":[]},{\"name\":\"channel_move_to_sub_menu_old\",\"children\":[]},{\"name\":\"channel_notifications_modal\",\"children\":[]},{\"name\":\"channel_select\",\"children\":[]},{\"name\":\"channel_selector_modal\",\"children\":[]},{\"name\":\"channel_view\",\"children\":[]},{\"name\":\"claim\",\"children\":[]},{\"name\":\"cloud_effects\",\"children\":[]},{\"name\":\"cloud_fetch_error\",\"children\":[]},{\"name\":\"cloud_invoice_preview\",\"children\":[]},{\"name\":\"cloud_start_trial\",\"children\":[]},{\"name\":\"cloud_subscribe_result_modal\",\"children\":[]},{\"name\":\"cloud_subscribe_with_loading_modal\",\"children\":[]},{\"name\":\"cloud_usage_modal\",\"children\":[]},{\"name\":\"code_block\",\"children\":[]},{\"name\":\"code_preview.tsx\",\"children\":[]},{\"name\":\"color_input.test.tsx\",\"children\":[]},{\"name\":\"color_input.tsx\",\"children\":[]},{\"name\":\"commercial_support_modal\",\"children\":[]},{\"name\":\"common\",\"children\":[]},{\"name\":\"compass_design_provider\",\"children\":[]},{\"name\":\"compass_theme_provider\",\"children\":[]},{\"name\":\"confirm_modal_redux\",\"children\":[]},{\"name\":\"confirm_modal.test.tsx\",\"children\":[]},{\"name\":\"confirm_modal.tsx\",\"children\":[]},{\"name\":\"convert_channel_modal\",\"children\":[]},{\"name\":\"copy_button.tsx\",\"children\":[]},{\"name\":\"copy_text.tsx\",\"children\":[]},{\"name\":\"copy_url_context_menu\",\"children\":[]},{\"name\":\"create_team\",\"children\":[]},{\"name\":\"create_user_groups_modal\",\"children\":[]},{\"name\":\"custom_open_plugin_install_post_renderer\",\"children\":[]},{\"name\":\"custom_open_pricing_modal_post_renderer\",\"children\":[]},{\"name\":\"custom_status\",\"children\":[]},{\"name\":\"data_prefetch\",\"children\":[]},{\"name\":\"date_picker\",\"children\":[]},{\"name\":\"deferComponentRender.tsx\",\"children\":[]},{\"name\":\"delete_category_modal\",\"children\":[]},{\"name\":\"delete_channel_modal\",\"children\":[]},{\"name\":\"delete_post_modal\",\"children\":[]},{\"name\":\"delinquency_modal\",\"children\":[]},{\"name\":\"discard_changes_modal.tsx\",\"children\":[]},{\"name\":\"dnd_custom_time_picker_modal\",\"children\":[]},{\"name\":\"do_verify_email\",\"children\":[]},{\"name\":\"dot_menu\",\"children\":[]},{\"name\":\"downgrade_modal\",\"children\":[]},{\"name\":\"drafts\",\"children\":[]},{\"name\":\"dropdown_input.tsx\",\"children\":[]},{\"name\":\"edit_category_modal\",\"children\":[]},{\"name\":\"edit_channel_header_modal\",\"children\":[]},{\"name\":\"edit_channel_purpose_modal\",\"children\":[]},{\"name\":\"edit_post\",\"children\":[]},{\"name\":\"emoji\",\"children\":[]},{\"name\":\"emoji_picker\",\"children\":[]},{\"name\":\"error_page\",\"children\":[]},{\"name\":\"external_image\",\"children\":[]},{\"name\":\"external_link\",\"children\":[]},{\"name\":\"external_login_button\",\"children\":[]},{\"name\":\"favicon_title_handler\",\"children\":[]},{\"name\":\"feature_restricted_modal\",\"children\":[]},{\"name\":\"feedback_modal\",\"children\":[]},{\"name\":\"file_attachment\",\"children\":[]},{\"name\":\"file_attachment_list\",\"children\":[]},{\"name\":\"file_info_preview\",\"children\":[]},{\"name\":\"file_limit_sticky_banner\",\"children\":[]},{\"name\":\"file_preview\",\"children\":[]},{\"name\":\"file_preview_modal\",\"children\":[]},{\"name\":\"file_search_results\",\"children\":[]},{\"name\":\"file_upload\",\"children\":[]},{\"name\":\"file_upload_overlay.test.tsx\",\"children\":[]},{\"name\":\"file_upload_overlay.tsx\",\"children\":[]},{\"name\":\"form_error.tsx\",\"children\":[]},{\"name\":\"formatted_markdown_message.test.tsx\",\"children\":[]},{\"name\":\"formatted_markdown_message.tsx\",\"children\":[]},{\"name\":\"forward_post_modal\",\"children\":[]},{\"name\":\"generic_modal.test.tsx\",\"children\":[]},{\"name\":\"generic_modal.tsx\",\"children\":[]},{\"name\":\"get_link_modal.test.tsx\",\"children\":[]},{\"name\":\"get_link_modal.tsx\",\"children\":[]},{\"name\":\"get_public_link_modal\",\"children\":[]},{\"name\":\"gif_picker\",\"children\":[]},{\"name\":\"global_header\",\"children\":[]},{\"name\":\"header_footer_route\",\"children\":[]},{\"name\":\"header_footer_template\",\"children\":[]},{\"name\":\"header_footer_template_route.jsx\",\"children\":[]},{\"name\":\"help\",\"children\":[]},{\"name\":\"hint-toast\",\"children\":[]},{\"name\":\"html_entities\",\"children\":[]},{\"name\":\"icon_message_with_progress_bar\",\"children\":[]},{\"name\":\"info_toast\",\"children\":[]},{\"name\":\"integrations\",\"children\":[]},{\"name\":\"interactive_dialog\",\"children\":[]},{\"name\":\"intl_provider\",\"children\":[]},{\"name\":\"invitation_modal\",\"children\":[]},{\"name\":\"join_private_channel_modal.tsx\",\"children\":[]},{\"name\":\"keyboard_shortcuts\",\"children\":[]},{\"name\":\"latex_block\",\"children\":[]},{\"name\":\"latex_inline\",\"children\":[]},{\"name\":\"learn_more_trial_modal\",\"children\":[]},{\"name\":\"leave_channel_modal\",\"children\":[]},{\"name\":\"leave_team_modal\",\"children\":[]},{\"name\":\"link_tooltip\",\"children\":[]},{\"name\":\"linking_landing_page\",\"children\":[]},{\"name\":\"list_modal.test.jsx\",\"children\":[]},{\"name\":\"list_modal.tsx\",\"children\":[]},{\"name\":\"loading_image_preview.test.tsx\",\"children\":[]},{\"name\":\"loading_image_preview.tsx\",\"children\":[]},{\"name\":\"loading_screen.tsx\",\"children\":[]},{\"name\":\"localized_icon.test.tsx\",\"children\":[]},{\"name\":\"localized_icon.tsx\",\"children\":[]},{\"name\":\"localized_input\",\"children\":[]},{\"name\":\"logged_in\",\"children\":[]},{\"name\":\"login\",\"children\":[]},{\"name\":\"main_menu\",\"children\":[]},{\"name\":\"markdown\",\"children\":[]},{\"name\":\"markdown_image\",\"children\":[]},{\"name\":\"markdown_image_expand\",\"children\":[]},{\"name\":\"member_list_channel\",\"children\":[]},{\"name\":\"member_list_team\",\"children\":[]},{\"name\":\"menu\",\"children\":[]},{\"name\":\"message_submit_error.test.tsx\",\"children\":[]},{\"name\":\"message_submit_error.tsx\",\"children\":[]},{\"name\":\"message_with_additional_content.tsx\",\"children\":[]},{\"name\":\"mfa\",\"children\":[]},{\"name\":\"modal_controller\",\"children\":[]},{\"name\":\"more_channels\",\"children\":[]},{\"name\":\"more_direct_channels\",\"children\":[]},{\"name\":\"msg_typing\",\"children\":[]},{\"name\":\"multi_input.tsx\",\"children\":[]},{\"name\":\"multiselect\",\"children\":[]},{\"name\":\"new_channel_modal\",\"children\":[]},{\"name\":\"new_replies_banner\",\"children\":[]},{\"name\":\"no_results_indicator\",\"children\":[]},{\"name\":\"notification_box\",\"children\":[]},{\"name\":\"notify_admin_cta\",\"children\":[]},{\"name\":\"notify_confirm_modal.tsx\",\"children\":[]},{\"name\":\"notify_counts\",\"children\":[]},{\"name\":\"onboarding_tasklist\",\"children\":[]},{\"name\":\"onboarding_tasks\",\"children\":[]},{\"name\":\"overlay_trigger.test.tsx\",\"children\":[]},{\"name\":\"overlay_trigger.tsx\",\"children\":[]},{\"name\":\"password_reset_form\",\"children\":[]},{\"name\":\"password_reset_send_link\",\"children\":[]},{\"name\":\"payment_form\",\"children\":[]},{\"name\":\"pdf_preview.jsx\",\"children\":[]},{\"name\":\"pdf_preview.test.jsx\",\"children\":[]},{\"name\":\"permalink_view\",\"children\":[]},{\"name\":\"permissions_gates\",\"children\":[]},{\"name\":\"picture_selector.test.tsx\",\"children\":[]},{\"name\":\"picture_selector.tsx\",\"children\":[]},{\"name\":\"plugin_marketplace\",\"children\":[]},{\"name\":\"post\",\"children\":[]},{\"name\":\"post_deleted_modal.test.tsx\",\"children\":[]},{\"name\":\"post_deleted_modal.tsx\",\"children\":[]},{\"name\":\"post_edit_history\",\"children\":[]},{\"name\":\"post_emoji\",\"children\":[]},{\"name\":\"post_markdown\",\"children\":[]},{\"name\":\"post_priority\",\"children\":[]},{\"name\":\"post_profile_picture\",\"children\":[]},{\"name\":\"post_reminder_custom_time_picker_modal\",\"children\":[]},{\"name\":\"post_view\",\"children\":[]},{\"name\":\"preparing_workspace\",\"children\":[]},{\"name\":\"pricing_modal\",\"children\":[]},{\"name\":\"product_notices_modal\",\"children\":[]},{\"name\":\"profile_picture\",\"children\":[]},{\"name\":\"profile_popover\",\"children\":[]},{\"name\":\"profile_popover_call_button\",\"children\":[]},{\"name\":\"progress_bar.test.tsx\",\"children\":[]},{\"name\":\"progress_bar.tsx\",\"children\":[]},{\"name\":\"purchase_in_progress_modal\",\"children\":[]},{\"name\":\"purchase_modal\",\"children\":[]},{\"name\":\"quick_input\",\"children\":[]},{\"name\":\"quick_switch_modal\",\"children\":[]},{\"name\":\"removed_from_channel_modal\",\"children\":[]},{\"name\":\"rename_channel_modal\",\"children\":[]},{\"name\":\"reset_status_modal\",\"children\":[]},{\"name\":\"rhs_card\",\"children\":[]},{\"name\":\"rhs_card_header\",\"children\":[]},{\"name\":\"rhs_header_post\",\"children\":[]},{\"name\":\"rhs_thread\",\"children\":[]},{\"name\":\"root\",\"children\":[]},{\"name\":\"root_portal.test.tsx\",\"children\":[]},{\"name\":\"root_portal.tsx\",\"children\":[]},{\"name\":\"save_button.test.tsx\",\"children\":[]},{\"name\":\"save_button.tsx\",\"children\":[]},{\"name\":\"screening_in_progress_modal\",\"children\":[]},{\"name\":\"search\",\"children\":[]},{\"name\":\"search_bar\",\"children\":[]},{\"name\":\"search_hint\",\"children\":[]},{\"name\":\"search_results\",\"children\":[]},{\"name\":\"search_results_header\",\"children\":[]},{\"name\":\"search_shortcut\",\"children\":[]},{\"name\":\"searchable_user_list\",\"children\":[]},{\"name\":\"seats_calculator\",\"children\":[]},{\"name\":\"select_team\",\"children\":[]},{\"name\":\"self_hosted_purchase_modal\",\"children\":[]},{\"name\":\"setting_item_max.test.jsx\",\"children\":[]},{\"name\":\"setting_item_max.tsx\",\"children\":[]},{\"name\":\"setting_item_min\",\"children\":[]},{\"name\":\"setting_item.tsx\",\"children\":[]},{\"name\":\"setting_picture.test.tsx\",\"children\":[]},{\"name\":\"setting_picture.tsx\",\"children\":[]},{\"name\":\"settings_sidebar\",\"children\":[]},{\"name\":\"shared_channel_indicator.tsx\",\"children\":[]},{\"name\":\"shared_user_indicator.tsx\",\"children\":[]},{\"name\":\"shortcut_key\",\"children\":[]},{\"name\":\"should_verify_email\",\"children\":[]},{\"name\":\"sidebar\",\"children\":[]},{\"name\":\"sidebar_right\",\"children\":[]},{\"name\":\"sidebar_right_menu\",\"children\":[]},{\"name\":\"signup\",\"children\":[]},{\"name\":\"single_image_view\",\"children\":[]},{\"name\":\"size_aware_image.jsx\",\"children\":[]},{\"name\":\"size_aware_image.test.jsx\",\"children\":[]},{\"name\":\"spinner_button.test.tsx\",\"children\":[]},{\"name\":\"spinner_button.tsx\",\"children\":[]},{\"name\":\"start_trial_modal\",\"children\":[]},{\"name\":\"status_dropdown\",\"children\":[]},{\"name\":\"status_icon_new.tsx\",\"children\":[]},{\"name\":\"status_icon.tsx\",\"children\":[]},{\"name\":\"suggestion\",\"children\":[]},{\"name\":\"switch_to_yearly_plan_confirm_modal\",\"children\":[]},{\"name\":\"system_notice\",\"children\":[]},{\"name\":\"team_controller\",\"children\":[]},{\"name\":\"team_general_tab\",\"children\":[]},{\"name\":\"team_groups_manage_modal\",\"children\":[]},{\"name\":\"team_members_dropdown\",\"children\":[]},{\"name\":\"team_members_modal\",\"children\":[]},{\"name\":\"team_selector_modal\",\"children\":[]},{\"name\":\"team_settings\",\"children\":[]},{\"name\":\"team_settings_modal\",\"children\":[]},{\"name\":\"team_sidebar\",\"children\":[]},{\"name\":\"terms_of_service\",\"children\":[]},{\"name\":\"textbox\",\"children\":[]},{\"name\":\"textbox.test.tsx\",\"children\":[]},{\"name\":\"threading\",\"children\":[]},{\"name\":\"three_days_left_trial_modal\",\"children\":[]},{\"name\":\"timestamp\",\"children\":[]},{\"name\":\"toast\",\"children\":[]},{\"name\":\"toast_wrapper\",\"children\":[]},{\"name\":\"toggle_modal_button\",\"children\":[]},{\"name\":\"toggle.tsx\",\"children\":[]},{\"name\":\"tooltip.tsx\",\"children\":[]},{\"name\":\"tours\",\"children\":[]},{\"name\":\"trial_benefits_modal\",\"children\":[]},{\"name\":\"unarchive_channel_modal\",\"children\":[]},{\"name\":\"update_user_group_modal\",\"children\":[]},{\"name\":\"user_group_popover\",\"children\":[]},{\"name\":\"user_groups_modal\",\"children\":[]},{\"name\":\"user_list_row\",\"children\":[]},{\"name\":\"user_list_row_with_error\",\"children\":[]},{\"name\":\"user_list.test.tsx\",\"children\":[]},{\"name\":\"user_list.tsx\",\"children\":[]},{\"name\":\"user_profile\",\"children\":[]},{\"name\":\"user_settings\",\"children\":[]},{\"name\":\"view_user_group_modal\",\"children\":[]},{\"name\":\"warn_metric_ack_modal\",\"children\":[]},{\"name\":\"welcome_post_renderer\",\"children\":[]},{\"name\":\"widgets\",\"children\":[]},{\"name\":\"work_templates\",\"children\":[]},{\"name\":\"youtube_video\",\"children\":[]}]},{\"name\":\"e2e\",\"children\":[{\"name\":\"cypress\",\"children\":[]},{\"name\":\"playwright\",\"children\":[]},{\"name\":\"smoke.spec.ts\",\"children\":[]}]},{\"name\":\"entry.tsx\",\"children\":[]},{\"name\":\"i18n\",\"children\":[{\"name\":\"i18n.jsx\",\"children\":[]}]},{\"name\":\"jest.config.js\",\"children\":[]},{\"name\":\"module_registry.ts\",\"children\":[]},{\"name\":\"packages\",\"children\":[{\"name\":\"client\",\"children\":[]},{\"name\":\"components\",\"children\":[]},{\"name\":\"mattermost-redux\",\"children\":[]},{\"name\":\"reselect\",\"children\":[]},{\"name\":\"types\",\"children\":[]}]},{\"name\":\"playwright.config.ts\",\"children\":[]},{\"name\":\"plugins\",\"children\":[{\"name\":\"actions.js\",\"children\":[]},{\"name\":\"call_button\",\"children\":[]},{\"name\":\"channel_header_plug\",\"children\":[]},{\"name\":\"export.js\",\"children\":[]},{\"name\":\"index.js\",\"children\":[]},{\"name\":\"interactive_dialog.js\",\"children\":[]},{\"name\":\"mobile_channel_header_plug\",\"children\":[]},{\"name\":\"pluggable\",\"children\":[]},{\"name\":\"products.test.ts\",\"children\":[]},{\"name\":\"products.ts\",\"children\":[]},{\"name\":\"registry.ts\",\"children\":[]},{\"name\":\"rhs_plugin\",\"children\":[]},{\"name\":\"test\",\"children\":[]},{\"name\":\"textbox\",\"children\":[]},{\"name\":\"useGetPluginsActivationState.ts\",\"children\":[]}]},{\"name\":\"reducers\",\"children\":[{\"name\":\"index.ts\",\"children\":[]},{\"name\":\"plugins\",\"children\":[]},{\"name\":\"storage.test.ts\",\"children\":[]},{\"name\":\"storage.ts\",\"children\":[]},{\"name\":\"views\",\"children\":[]}]},{\"name\":\"root.tsx\",\"children\":[]},{\"name\":\"scripts\",\"children\":[{\"name\":\"build.js\",\"children\":[]},{\"name\":\"dev-server.js\",\"children\":[]},{\"name\":\"run.js\",\"children\":[]},{\"name\":\"runner.js\",\"children\":[]},{\"name\":\"utils.js\",\"children\":[]}]},{\"name\":\"selectors\",\"children\":[{\"name\":\"actions_menu.ts\",\"children\":[]},{\"name\":\"admin_console.jsx\",\"children\":[]},{\"name\":\"admin_console.test.jsx\",\"children\":[]},{\"name\":\"cloud.ts\",\"children\":[]},{\"name\":\"drafts.test.ts\",\"children\":[]},{\"name\":\"drafts.ts\",\"children\":[]},{\"name\":\"emojis.test.js\",\"children\":[]},{\"name\":\"emojis.ts\",\"children\":[]},{\"name\":\"general.ts\",\"children\":[]},{\"name\":\"i18n.test.js\",\"children\":[]},{\"name\":\"i18n.ts\",\"children\":[]},{\"name\":\"insights.ts\",\"children\":[]},{\"name\":\"lhs.test.ts\",\"children\":[]},{\"name\":\"lhs.ts\",\"children\":[]},{\"name\":\"local_storage.ts\",\"children\":[]},{\"name\":\"onboarding.test.ts\",\"children\":[]},{\"name\":\"onboarding.ts\",\"children\":[]},{\"name\":\"plugins.test.js\",\"children\":[]},{\"name\":\"plugins.ts\",\"children\":[]},{\"name\":\"posts.ts\",\"children\":[]},{\"name\":\"preferences.ts\",\"children\":[]},{\"name\":\"products.ts\",\"children\":[]},{\"name\":\"rhs.test.ts\",\"children\":[]},{\"name\":\"rhs.ts\",\"children\":[]},{\"name\":\"storage.test.ts\",\"children\":[]},{\"name\":\"storage.ts\",\"children\":[]},{\"name\":\"views\",\"children\":[]},{\"name\":\"work_template.ts\",\"children\":[]}]},{\"name\":\"skip_integrity_check.js\",\"children\":[]},{\"name\":\"store\",\"children\":[{\"name\":\"index.js\",\"children\":[]},{\"name\":\"index.test.js\",\"children\":[]}]},{\"name\":\"stores\",\"children\":[{\"name\":\"browser_store.tsx\",\"children\":[]},{\"name\":\"hooks.ts\",\"children\":[]},{\"name\":\"local_storage_store.test.ts\",\"children\":[]},{\"name\":\"local_storage_store.ts\",\"children\":[]},{\"name\":\"redux_store.jsx\",\"children\":[]}]},{\"name\":\"tests\",\"children\":[{\"name\":\"constants\",\"children\":[]},{\"name\":\"helpers\",\"children\":[]},{\"name\":\"react_testing_utils.tsx\",\"children\":[]},{\"name\":\"react-intl_mock.js\",\"children\":[]},{\"name\":\"react-router-dom_mock.ts\",\"children\":[]},{\"name\":\"react-tippy_mock.js\",\"children\":[]},{\"name\":\"redux-persist_mock.js\",\"children\":[]},{\"name\":\"setup.js\",\"children\":[]},{\"name\":\"test_store.tsx\",\"children\":[]}]},{\"name\":\"types\",\"children\":[{\"name\":\"actions.ts\",\"children\":[]},{\"name\":\"apps.ts\",\"children\":[]},{\"name\":\"cloud\",\"children\":[]},{\"name\":\"store\",\"children\":[]}]},{\"name\":\"utils\",\"children\":[{\"name\":\"a11y_controller.ts\",\"children\":[]},{\"name\":\"admin_console_index.test.tsx\",\"children\":[]},{\"name\":\"admin_console_index.tsx\",\"children\":[]},{\"name\":\"admin_console_plugin_index.test.ts\",\"children\":[]},{\"name\":\"admin_console_plugin_index.ts\",\"children\":[]},{\"name\":\"apps.ts\",\"children\":[]},{\"name\":\"browser_history.tsx\",\"children\":[]},{\"name\":\"channel_utils.test.ts\",\"children\":[]},{\"name\":\"channel_utils.tsx\",\"children\":[]},{\"name\":\"cloud_utils.ts\",\"children\":[]},{\"name\":\"constants.tsx\",\"children\":[]},{\"name\":\"countries.ts\",\"children\":[]},{\"name\":\"datetime.test.ts\",\"children\":[]},{\"name\":\"datetime.ts\",\"children\":[]},{\"name\":\"delayed_action.tsx\",\"children\":[]},{\"name\":\"dragster.test.ts\",\"children\":[]},{\"name\":\"dragster.ts\",\"children\":[]},{\"name\":\"emoji_map.ts\",\"children\":[]},{\"name\":\"emoji_utils.test.tsx\",\"children\":[]},{\"name\":\"emoji_utils.tsx\",\"children\":[]},{\"name\":\"emoji.ts\",\"children\":[]},{\"name\":\"emoticons.test.tsx\",\"children\":[]},{\"name\":\"emoticons.tsx\",\"children\":[]},{\"name\":\"empty-string.ts\",\"children\":[]},{\"name\":\"file_utils.test.ts\",\"children\":[]},{\"name\":\"file_utils.tsx\",\"children\":[]},{\"name\":\"filter_users.test.ts\",\"children\":[]},{\"name\":\"filter_users.ts\",\"children\":[]},{\"name\":\"func.test.ts\",\"children\":[]},{\"name\":\"func.ts\",\"children\":[]},{\"name\":\"hosted_customer.ts\",\"children\":[]},{\"name\":\"http_utils.ts\",\"children\":[]},{\"name\":\"i18n.tsx\",\"children\":[]},{\"name\":\"latinise.test.tsx\",\"children\":[]},{\"name\":\"latinise.tsx\",\"children\":[]},{\"name\":\"license_utils.test.ts\",\"children\":[]},{\"name\":\"license_utils.ts\",\"children\":[]},{\"name\":\"limits_test.tsx\",\"children\":[]},{\"name\":\"limits.tsx\",\"children\":[]},{\"name\":\"markdown\",\"children\":[]},{\"name\":\"message_html_to_component.jsx\",\"children\":[]},{\"name\":\"message_html_to_component.test.jsx\",\"children\":[]},{\"name\":\"notifications.test.ts\",\"children\":[]},{\"name\":\"notifications.ts\",\"children\":[]},{\"name\":\"notify_admin_utils.ts\",\"children\":[]},{\"name\":\"overage_team.ts\",\"children\":[]},{\"name\":\"paste.test.tsx\",\"children\":[]},{\"name\":\"paste.tsx\",\"children\":[]},{\"name\":\"policy_roles_adapter.test.ts\",\"children\":[]},{\"name\":\"policy_roles_adapter.ts\",\"children\":[]},{\"name\":\"position_utils.test.tsx\",\"children\":[]},{\"name\":\"position_utils.tsx\",\"children\":[]},{\"name\":\"post_utils.test.tsx\",\"children\":[]},{\"name\":\"post_utils.ts\",\"children\":[]},{\"name\":\"products.ts\",\"children\":[]},{\"name\":\"react_intl.ts\",\"children\":[]},{\"name\":\"resolvable.ts\",\"children\":[]},{\"name\":\"route.test.ts\",\"children\":[]},{\"name\":\"route.tsx\",\"children\":[]},{\"name\":\"server_version.test.tsx\",\"children\":[]},{\"name\":\"server_version.tsx\",\"children\":[]},{\"name\":\"states.ts\",\"children\":[]},{\"name\":\"storage_utils.ts\",\"children\":[]},{\"name\":\"subscription.ts\",\"children\":[]},{\"name\":\"syntax_highlighting.test.ts\",\"children\":[]},{\"name\":\"syntax_highlighting.tsx\",\"children\":[]},{\"name\":\"team_utils.test.ts\",\"children\":[]},{\"name\":\"team_utils.tsx\",\"children\":[]},{\"name\":\"test_helper.ts\",\"children\":[]},{\"name\":\"text_formatting_at_mentions.test.ts\",\"children\":[]},{\"name\":\"text_formatting_channel_links.test.ts\",\"children\":[]},{\"name\":\"text_formatting_email.test.ts\",\"children\":[]},{\"name\":\"text_formatting_hashtags.test.ts\",\"children\":[]},{\"name\":\"text_formatting_imgs.test.ts\",\"children\":[]},{\"name\":\"text_formatting_links.test.ts\",\"children\":[]},{\"name\":\"text_formatting_mention_highlighting.test.ts\",\"children\":[]},{\"name\":\"text_formatting_search_highlighting.test.ts\",\"children\":[]},{\"name\":\"text_formatting.test.ts\",\"children\":[]},{\"name\":\"text_formatting.tsx\",\"children\":[]},{\"name\":\"timezone.ts\",\"children\":[]},{\"name\":\"url.test.tsx\",\"children\":[]},{\"name\":\"url.tsx\",\"children\":[]},{\"name\":\"use_websocket\",\"children\":[]},{\"name\":\"user_agent.tsx\",\"children\":[]},{\"name\":\"utils.test.tsx\",\"children\":[]},{\"name\":\"utils.tsx\",\"children\":[]},{\"name\":\"youtube.test.ts\",\"children\":[]},{\"name\":\"youtube.ts\",\"children\":[]}]},{\"name\":\"webpack.config.js\",\"children\":[]}]}"
       }
     ],
-    "isError": true
+    "structuredContent": {
+      "name": "/",
+      "children": [
+        {
+          "name": "actions",
+          "children": [
+            {
+              "name": "admin_actions.jsx",
+              "children": []
+            },
+            {
+              "name": "admin_actions.test.js",
+              "children": []
+            },
+            {
+              "name": "apps.ts",
+              "children": []
+            },
+            {
+              "name": "channel_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "channel_actions.ts",
+              "children": []
+            },
+            {
+              "name": "channel_queries.ts",
+              "children": []
+            },
+            {
+              "name": "cloud.tsx",
+              "children": []
+            },
+            {
+              "name": "command.test.js",
+              "children": []
+            },
+            {
+              "name": "command.ts",
+              "children": []
+            },
+            {
+              "name": "emoji_actions.js",
+              "children": []
+            },
+            {
+              "name": "emoji_actions.mock.test.js",
+              "children": []
+            },
+            {
+              "name": "emoji_actions.test.js",
+              "children": []
+            },
+            {
+              "name": "file_actions.ts",
+              "children": []
+            },
+            {
+              "name": "global_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "global_actions.tsx",
+              "children": []
+            },
+            {
+              "name": "hooks.js",
+              "children": []
+            },
+            {
+              "name": "hooks.test.js",
+              "children": []
+            },
+            {
+              "name": "hosted_customer.tsx",
+              "children": []
+            },
+            {
+              "name": "integration_actions.jsx",
+              "children": []
+            },
+            {
+              "name": "integration_actions.test.js",
+              "children": []
+            },
+            {
+              "name": "invite_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "invite_actions.ts",
+              "children": []
+            },
+            {
+              "name": "marketplace.ts",
+              "children": []
+            },
+            {
+              "name": "new_post.test.ts",
+              "children": []
+            },
+            {
+              "name": "new_post.ts",
+              "children": []
+            },
+            {
+              "name": "notification_actions.jsx",
+              "children": []
+            },
+            {
+              "name": "notification_actions.test.js",
+              "children": []
+            },
+            {
+              "name": "post_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "post_actions.ts",
+              "children": []
+            },
+            {
+              "name": "status_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "status_actions.ts",
+              "children": []
+            },
+            {
+              "name": "storage.test.ts",
+              "children": []
+            },
+            {
+              "name": "storage.ts",
+              "children": []
+            },
+            {
+              "name": "team_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "team_actions.ts",
+              "children": []
+            },
+            {
+              "name": "telemetry_actions.jsx",
+              "children": []
+            },
+            {
+              "name": "telemetry_actions.test.js",
+              "children": []
+            },
+            {
+              "name": "user_actions.test.ts",
+              "children": []
+            },
+            {
+              "name": "user_actions.ts",
+              "children": []
+            },
+            {
+              "name": "views",
+              "children": []
+            },
+            {
+              "name": "websocket_actions.jsx",
+              "children": []
+            },
+            {
+              "name": "websocket_actions.test.jsx",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "babel.config.js",
+          "children": []
+        },
+        {
+          "name": "client",
+          "children": [
+            {
+              "name": "web_websocket_client.jsx",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "components",
+          "children": [
+            {
+              "name": "about_build_modal",
+              "children": []
+            },
+            {
+              "name": "access_history_modal",
+              "children": []
+            },
+            {
+              "name": "access_problem",
+              "children": []
+            },
+            {
+              "name": "accordion.tsx",
+              "children": []
+            },
+            {
+              "name": "actions_menu",
+              "children": []
+            },
+            {
+              "name": "activity_and_insights",
+              "children": []
+            },
+            {
+              "name": "activity_log_modal",
+              "children": []
+            },
+            {
+              "name": "add_groups_to_channel_modal",
+              "children": []
+            },
+            {
+              "name": "add_groups_to_team_modal",
+              "children": []
+            },
+            {
+              "name": "add_user_to_channel_modal",
+              "children": []
+            },
+            {
+              "name": "add_user_to_group_multiselect",
+              "children": []
+            },
+            {
+              "name": "add_users_to_group_modal",
+              "children": []
+            },
+            {
+              "name": "add_users_to_team_modal",
+              "children": []
+            },
+            {
+              "name": "admin_console",
+              "children": []
+            },
+            {
+              "name": "advanced_create_comment",
+              "children": []
+            },
+            {
+              "name": "advanced_create_post",
+              "children": []
+            },
+            {
+              "name": "advanced_text_editor",
+              "children": []
+            },
+            {
+              "name": "air_gapped_self_hosted_purchase_modal",
+              "children": []
+            },
+            {
+              "name": "alert_banner.test.tsx",
+              "children": []
+            },
+            {
+              "name": "alert_banner.tsx",
+              "children": []
+            },
+            {
+              "name": "analytics",
+              "children": []
+            },
+            {
+              "name": "announcement_bar",
+              "children": []
+            },
+            {
+              "name": "app_bar",
+              "children": []
+            },
+            {
+              "name": "app.jsx",
+              "children": []
+            },
+            {
+              "name": "apps_form",
+              "children": []
+            },
+            {
+              "name": "archived_preview.tsx",
+              "children": []
+            },
+            {
+              "name": "async_load.tsx",
+              "children": []
+            },
+            {
+              "name": "at_mention",
+              "children": []
+            },
+            {
+              "name": "at_plan_mention",
+              "children": []
+            },
+            {
+              "name": "at_sum_members_mention",
+              "children": []
+            },
+            {
+              "name": "audio_video_preview",
+              "children": []
+            },
+            {
+              "name": "audit_table",
+              "children": []
+            },
+            {
+              "name": "authorize",
+              "children": []
+            },
+            {
+              "name": "autocomplete_selector.jsx",
+              "children": []
+            },
+            {
+              "name": "autocomplete_selector.test.jsx",
+              "children": []
+            },
+            {
+              "name": "autosize_textarea.test.tsx",
+              "children": []
+            },
+            {
+              "name": "autosize_textarea.tsx",
+              "children": []
+            },
+            {
+              "name": "backstage",
+              "children": []
+            },
+            {
+              "name": "card",
+              "children": []
+            },
+            {
+              "name": "center_message_lock",
+              "children": []
+            },
+            {
+              "name": "channel_groups_manage_modal",
+              "children": []
+            },
+            {
+              "name": "channel_header",
+              "children": []
+            },
+            {
+              "name": "channel_header_dropdown",
+              "children": []
+            },
+            {
+              "name": "channel_header_mobile",
+              "children": []
+            },
+            {
+              "name": "channel_info_rhs",
+              "children": []
+            },
+            {
+              "name": "channel_invite_modal",
+              "children": []
+            },
+            {
+              "name": "channel_layout",
+              "children": []
+            },
+            {
+              "name": "channel_members_dropdown",
+              "children": []
+            },
+            {
+              "name": "channel_members_modal",
+              "children": []
+            },
+            {
+              "name": "channel_members_rhs",
+              "children": []
+            },
+            {
+              "name": "channel_move_to_sub_menu",
+              "children": []
+            },
+            {
+              "name": "channel_move_to_sub_menu_old",
+              "children": []
+            },
+            {
+              "name": "channel_notifications_modal",
+              "children": []
+            },
+            {
+              "name": "channel_select",
+              "children": []
+            },
+            {
+              "name": "channel_selector_modal",
+              "children": []
+            },
+            {
+              "name": "channel_view",
+              "children": []
+            },
+            {
+              "name": "claim",
+              "children": []
+            },
+            {
+              "name": "cloud_effects",
+              "children": []
+            },
+            {
+              "name": "cloud_fetch_error",
+              "children": []
+            },
+            {
+              "name": "cloud_invoice_preview",
+              "children": []
+            },
+            {
+              "name": "cloud_start_trial",
+              "children": []
+            },
+            {
+              "name": "cloud_subscribe_result_modal",
+              "children": []
+            },
+            {
+              "name": "cloud_subscribe_with_loading_modal",
+              "children": []
+            },
+            {
+              "name": "cloud_usage_modal",
+              "children": []
+            },
+            {
+              "name": "code_block",
+              "children": []
+            },
+            {
+              "name": "code_preview.tsx",
+              "children": []
+            },
+            {
+              "name": "color_input.test.tsx",
+              "children": []
+            },
+            {
+              "name": "color_input.tsx",
+              "children": []
+            },
+            {
+              "name": "commercial_support_modal",
+              "children": []
+            },
+            {
+              "name": "common",
+              "children": []
+            },
+            {
+              "name": "compass_design_provider",
+              "children": []
+            },
+            {
+              "name": "compass_theme_provider",
+              "children": []
+            },
+            {
+              "name": "confirm_modal_redux",
+              "children": []
+            },
+            {
+              "name": "confirm_modal.test.tsx",
+              "children": []
+            },
+            {
+              "name": "confirm_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "convert_channel_modal",
+              "children": []
+            },
+            {
+              "name": "copy_button.tsx",
+              "children": []
+            },
+            {
+              "name": "copy_text.tsx",
+              "children": []
+            },
+            {
+              "name": "copy_url_context_menu",
+              "children": []
+            },
+            {
+              "name": "create_team",
+              "children": []
+            },
+            {
+              "name": "create_user_groups_modal",
+              "children": []
+            },
+            {
+              "name": "custom_open_plugin_install_post_renderer",
+              "children": []
+            },
+            {
+              "name": "custom_open_pricing_modal_post_renderer",
+              "children": []
+            },
+            {
+              "name": "custom_status",
+              "children": []
+            },
+            {
+              "name": "data_prefetch",
+              "children": []
+            },
+            {
+              "name": "date_picker",
+              "children": []
+            },
+            {
+              "name": "deferComponentRender.tsx",
+              "children": []
+            },
+            {
+              "name": "delete_category_modal",
+              "children": []
+            },
+            {
+              "name": "delete_channel_modal",
+              "children": []
+            },
+            {
+              "name": "delete_post_modal",
+              "children": []
+            },
+            {
+              "name": "delinquency_modal",
+              "children": []
+            },
+            {
+              "name": "discard_changes_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "dnd_custom_time_picker_modal",
+              "children": []
+            },
+            {
+              "name": "do_verify_email",
+              "children": []
+            },
+            {
+              "name": "dot_menu",
+              "children": []
+            },
+            {
+              "name": "downgrade_modal",
+              "children": []
+            },
+            {
+              "name": "drafts",
+              "children": []
+            },
+            {
+              "name": "dropdown_input.tsx",
+              "children": []
+            },
+            {
+              "name": "edit_category_modal",
+              "children": []
+            },
+            {
+              "name": "edit_channel_header_modal",
+              "children": []
+            },
+            {
+              "name": "edit_channel_purpose_modal",
+              "children": []
+            },
+            {
+              "name": "edit_post",
+              "children": []
+            },
+            {
+              "name": "emoji",
+              "children": []
+            },
+            {
+              "name": "emoji_picker",
+              "children": []
+            },
+            {
+              "name": "error_page",
+              "children": []
+            },
+            {
+              "name": "external_image",
+              "children": []
+            },
+            {
+              "name": "external_link",
+              "children": []
+            },
+            {
+              "name": "external_login_button",
+              "children": []
+            },
+            {
+              "name": "favicon_title_handler",
+              "children": []
+            },
+            {
+              "name": "feature_restricted_modal",
+              "children": []
+            },
+            {
+              "name": "feedback_modal",
+              "children": []
+            },
+            {
+              "name": "file_attachment",
+              "children": []
+            },
+            {
+              "name": "file_attachment_list",
+              "children": []
+            },
+            {
+              "name": "file_info_preview",
+              "children": []
+            },
+            {
+              "name": "file_limit_sticky_banner",
+              "children": []
+            },
+            {
+              "name": "file_preview",
+              "children": []
+            },
+            {
+              "name": "file_preview_modal",
+              "children": []
+            },
+            {
+              "name": "file_search_results",
+              "children": []
+            },
+            {
+              "name": "file_upload",
+              "children": []
+            },
+            {
+              "name": "file_upload_overlay.test.tsx",
+              "children": []
+            },
+            {
+              "name": "file_upload_overlay.tsx",
+              "children": []
+            },
+            {
+              "name": "form_error.tsx",
+              "children": []
+            },
+            {
+              "name": "formatted_markdown_message.test.tsx",
+              "children": []
+            },
+            {
+              "name": "formatted_markdown_message.tsx",
+              "children": []
+            },
+            {
+              "name": "forward_post_modal",
+              "children": []
+            },
+            {
+              "name": "generic_modal.test.tsx",
+              "children": []
+            },
+            {
+              "name": "generic_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "get_link_modal.test.tsx",
+              "children": []
+            },
+            {
+              "name": "get_link_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "get_public_link_modal",
+              "children": []
+            },
+            {
+              "name": "gif_picker",
+              "children": []
+            },
+            {
+              "name": "global_header",
+              "children": []
+            },
+            {
+              "name": "header_footer_route",
+              "children": []
+            },
+            {
+              "name": "header_footer_template",
+              "children": []
+            },
+            {
+              "name": "header_footer_template_route.jsx",
+              "children": []
+            },
+            {
+              "name": "help",
+              "children": []
+            },
+            {
+              "name": "hint-toast",
+              "children": []
+            },
+            {
+              "name": "html_entities",
+              "children": []
+            },
+            {
+              "name": "icon_message_with_progress_bar",
+              "children": []
+            },
+            {
+              "name": "info_toast",
+              "children": []
+            },
+            {
+              "name": "integrations",
+              "children": []
+            },
+            {
+              "name": "interactive_dialog",
+              "children": []
+            },
+            {
+              "name": "intl_provider",
+              "children": []
+            },
+            {
+              "name": "invitation_modal",
+              "children": []
+            },
+            {
+              "name": "join_private_channel_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "keyboard_shortcuts",
+              "children": []
+            },
+            {
+              "name": "latex_block",
+              "children": []
+            },
+            {
+              "name": "latex_inline",
+              "children": []
+            },
+            {
+              "name": "learn_more_trial_modal",
+              "children": []
+            },
+            {
+              "name": "leave_channel_modal",
+              "children": []
+            },
+            {
+              "name": "leave_team_modal",
+              "children": []
+            },
+            {
+              "name": "link_tooltip",
+              "children": []
+            },
+            {
+              "name": "linking_landing_page",
+              "children": []
+            },
+            {
+              "name": "list_modal.test.jsx",
+              "children": []
+            },
+            {
+              "name": "list_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "loading_image_preview.test.tsx",
+              "children": []
+            },
+            {
+              "name": "loading_image_preview.tsx",
+              "children": []
+            },
+            {
+              "name": "loading_screen.tsx",
+              "children": []
+            },
+            {
+              "name": "localized_icon.test.tsx",
+              "children": []
+            },
+            {
+              "name": "localized_icon.tsx",
+              "children": []
+            },
+            {
+              "name": "localized_input",
+              "children": []
+            },
+            {
+              "name": "logged_in",
+              "children": []
+            },
+            {
+              "name": "login",
+              "children": []
+            },
+            {
+              "name": "main_menu",
+              "children": []
+            },
+            {
+              "name": "markdown",
+              "children": []
+            },
+            {
+              "name": "markdown_image",
+              "children": []
+            },
+            {
+              "name": "markdown_image_expand",
+              "children": []
+            },
+            {
+              "name": "member_list_channel",
+              "children": []
+            },
+            {
+              "name": "member_list_team",
+              "children": []
+            },
+            {
+              "name": "menu",
+              "children": []
+            },
+            {
+              "name": "message_submit_error.test.tsx",
+              "children": []
+            },
+            {
+              "name": "message_submit_error.tsx",
+              "children": []
+            },
+            {
+              "name": "message_with_additional_content.tsx",
+              "children": []
+            },
+            {
+              "name": "mfa",
+              "children": []
+            },
+            {
+              "name": "modal_controller",
+              "children": []
+            },
+            {
+              "name": "more_channels",
+              "children": []
+            },
+            {
+              "name": "more_direct_channels",
+              "children": []
+            },
+            {
+              "name": "msg_typing",
+              "children": []
+            },
+            {
+              "name": "multi_input.tsx",
+              "children": []
+            },
+            {
+              "name": "multiselect",
+              "children": []
+            },
+            {
+              "name": "new_channel_modal",
+              "children": []
+            },
+            {
+              "name": "new_replies_banner",
+              "children": []
+            },
+            {
+              "name": "no_results_indicator",
+              "children": []
+            },
+            {
+              "name": "notification_box",
+              "children": []
+            },
+            {
+              "name": "notify_admin_cta",
+              "children": []
+            },
+            {
+              "name": "notify_confirm_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "notify_counts",
+              "children": []
+            },
+            {
+              "name": "onboarding_tasklist",
+              "children": []
+            },
+            {
+              "name": "onboarding_tasks",
+              "children": []
+            },
+            {
+              "name": "overlay_trigger.test.tsx",
+              "children": []
+            },
+            {
+              "name": "overlay_trigger.tsx",
+              "children": []
+            },
+            {
+              "name": "password_reset_form",
+              "children": []
+            },
+            {
+              "name": "password_reset_send_link",
+              "children": []
+            },
+            {
+              "name": "payment_form",
+              "children": []
+            },
+            {
+              "name": "pdf_preview.jsx",
+              "children": []
+            },
+            {
+              "name": "pdf_preview.test.jsx",
+              "children": []
+            },
+            {
+              "name": "permalink_view",
+              "children": []
+            },
+            {
+              "name": "permissions_gates",
+              "children": []
+            },
+            {
+              "name": "picture_selector.test.tsx",
+              "children": []
+            },
+            {
+              "name": "picture_selector.tsx",
+              "children": []
+            },
+            {
+              "name": "plugin_marketplace",
+              "children": []
+            },
+            {
+              "name": "post",
+              "children": []
+            },
+            {
+              "name": "post_deleted_modal.test.tsx",
+              "children": []
+            },
+            {
+              "name": "post_deleted_modal.tsx",
+              "children": []
+            },
+            {
+              "name": "post_edit_history",
+              "children": []
+            },
+            {
+              "name": "post_emoji",
+              "children": []
+            },
+            {
+              "name": "post_markdown",
+              "children": []
+            },
+            {
+              "name": "post_priority",
+              "children": []
+            },
+            {
+              "name": "post_profile_picture",
+              "children": []
+            },
+            {
+              "name": "post_reminder_custom_time_picker_modal",
+              "children": []
+            },
+            {
+              "name": "post_view",
+              "children": []
+            },
+            {
+              "name": "preparing_workspace",
+              "children": []
+            },
+            {
+              "name": "pricing_modal",
+              "children": []
+            },
+            {
+              "name": "product_notices_modal",
+              "children": []
+            },
+            {
+              "name": "profile_picture",
+              "children": []
+            },
+            {
+              "name": "profile_popover",
+              "children": []
+            },
+            {
+              "name": "profile_popover_call_button",
+              "children": []
+            },
+            {
+              "name": "progress_bar.test.tsx",
+              "children": []
+            },
+            {
+              "name": "progress_bar.tsx",
+              "children": []
+            },
+            {
+              "name": "purchase_in_progress_modal",
+              "children": []
+            },
+            {
+              "name": "purchase_modal",
+              "children": []
+            },
+            {
+              "name": "quick_input",
+              "children": []
+            },
+            {
+              "name": "quick_switch_modal",
+              "children": []
+            },
+            {
+              "name": "removed_from_channel_modal",
+              "children": []
+            },
+            {
+              "name": "rename_channel_modal",
+              "children": []
+            },
+            {
+              "name": "reset_status_modal",
+              "children": []
+            },
+            {
+              "name": "rhs_card",
+              "children": []
+            },
+            {
+              "name": "rhs_card_header",
+              "children": []
+            },
+            {
+              "name": "rhs_header_post",
+              "children": []
+            },
+            {
+              "name": "rhs_thread",
+              "children": []
+            },
+            {
+              "name": "root",
+              "children": []
+            },
+            {
+              "name": "root_portal.test.tsx",
+              "children": []
+            },
+            {
+              "name": "root_portal.tsx",
+              "children": []
+            },
+            {
+              "name": "save_button.test.tsx",
+              "children": []
+            },
+            {
+              "name": "save_button.tsx",
+              "children": []
+            },
+            {
+              "name": "screening_in_progress_modal",
+              "children": []
+            },
+            {
+              "name": "search",
+              "children": []
+            },
+            {
+              "name": "search_bar",
+              "children": []
+            },
+            {
+              "name": "search_hint",
+              "children": []
+            },
+            {
+              "name": "search_results",
+              "children": []
+            },
+            {
+              "name": "search_results_header",
+              "children": []
+            },
+            {
+              "name": "search_shortcut",
+              "children": []
+            },
+            {
+              "name": "searchable_user_list",
+              "children": []
+            },
+            {
+              "name": "seats_calculator",
+              "children": []
+            },
+            {
+              "name": "select_team",
+              "children": []
+            },
+            {
+              "name": "self_hosted_purchase_modal",
+              "children": []
+            },
+            {
+              "name": "setting_item_max.test.jsx",
+              "children": []
+            },
+            {
+              "name": "setting_item_max.tsx",
+              "children": []
+            },
+            {
+              "name": "setting_item_min",
+              "children": []
+            },
+            {
+              "name": "setting_item.tsx",
+              "children": []
+            },
+            {
+              "name": "setting_picture.test.tsx",
+              "children": []
+            },
+            {
+              "name": "setting_picture.tsx",
+              "children": []
+            },
+            {
+              "name": "settings_sidebar",
+              "children": []
+            },
+            {
+              "name": "shared_channel_indicator.tsx",
+              "children": []
+            },
+            {
+              "name": "shared_user_indicator.tsx",
+              "children": []
+            },
+            {
+              "name": "shortcut_key",
+              "children": []
+            },
+            {
+              "name": "should_verify_email",
+              "children": []
+            },
+            {
+              "name": "sidebar",
+              "children": []
+            },
+            {
+              "name": "sidebar_right",
+              "children": []
+            },
+            {
+              "name": "sidebar_right_menu",
+              "children": []
+            },
+            {
+              "name": "signup",
+              "children": []
+            },
+            {
+              "name": "single_image_view",
+              "children": []
+            },
+            {
+              "name": "size_aware_image.jsx",
+              "children": []
+            },
+            {
+              "name": "size_aware_image.test.jsx",
+              "children": []
+            },
+            {
+              "name": "spinner_button.test.tsx",
+              "children": []
+            },
+            {
+              "name": "spinner_button.tsx",
+              "children": []
+            },
+            {
+              "name": "start_trial_modal",
+              "children": []
+            },
+            {
+              "name": "status_dropdown",
+              "children": []
+            },
+            {
+              "name": "status_icon_new.tsx",
+              "children": []
+            },
+            {
+              "name": "status_icon.tsx",
+              "children": []
+            },
+            {
+              "name": "suggestion",
+              "children": []
+            },
+            {
+              "name": "switch_to_yearly_plan_confirm_modal",
+              "children": []
+            },
+            {
+              "name": "system_notice",
+              "children": []
+            },
+            {
+              "name": "team_controller",
+              "children": []
+            },
+            {
+              "name": "team_general_tab",
+              "children": []
+            },
+            {
+              "name": "team_groups_manage_modal",
+              "children": []
+            },
+            {
+              "name": "team_members_dropdown",
+              "children": []
+            },
+            {
+              "name": "team_members_modal",
+              "children": []
+            },
+            {
+              "name": "team_selector_modal",
+              "children": []
+            },
+            {
+              "name": "team_settings",
+              "children": []
+            },
+            {
+              "name": "team_settings_modal",
+              "children": []
+            },
+            {
+              "name": "team_sidebar",
+              "children": []
+            },
+            {
+              "name": "terms_of_service",
+              "children": []
+            },
+            {
+              "name": "textbox",
+              "children": []
+            },
+            {
+              "name": "textbox.test.tsx",
+              "children": []
+            },
+            {
+              "name": "threading",
+              "children": []
+            },
+            {
+              "name": "three_days_left_trial_modal",
+              "children": []
+            },
+            {
+              "name": "timestamp",
+              "children": []
+            },
+            {
+              "name": "toast",
+              "children": []
+            },
+            {
+              "name": "toast_wrapper",
+              "children": []
+            },
+            {
+              "name": "toggle_modal_button",
+              "children": []
+            },
+            {
+              "name": "toggle.tsx",
+              "children": []
+            },
+            {
+              "name": "tooltip.tsx",
+              "children": []
+            },
+            {
+              "name": "tours",
+              "children": []
+            },
+            {
+              "name": "trial_benefits_modal",
+              "children": []
+            },
+            {
+              "name": "unarchive_channel_modal",
+              "children": []
+            },
+            {
+              "name": "update_user_group_modal",
+              "children": []
+            },
+            {
+              "name": "user_group_popover",
+              "children": []
+            },
+            {
+              "name": "user_groups_modal",
+              "children": []
+            },
+            {
+              "name": "user_list_row",
+              "children": []
+            },
+            {
+              "name": "user_list_row_with_error",
+              "children": []
+            },
+            {
+              "name": "user_list.test.tsx",
+              "children": []
+            },
+            {
+              "name": "user_list.tsx",
+              "children": []
+            },
+            {
+              "name": "user_profile",
+              "children": []
+            },
+            {
+              "name": "user_settings",
+              "children": []
+            },
+            {
+              "name": "view_user_group_modal",
+              "children": []
+            },
+            {
+              "name": "warn_metric_ack_modal",
+              "children": []
+            },
+            {
+              "name": "welcome_post_renderer",
+              "children": []
+            },
+            {
+              "name": "widgets",
+              "children": []
+            },
+            {
+              "name": "work_templates",
+              "children": []
+            },
+            {
+              "name": "youtube_video",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "e2e",
+          "children": [
+            {
+              "name": "cypress",
+              "children": []
+            },
+            {
+              "name": "playwright",
+              "children": []
+            },
+            {
+              "name": "smoke.spec.ts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "entry.tsx",
+          "children": []
+        },
+        {
+          "name": "i18n",
+          "children": [
+            {
+              "name": "i18n.jsx",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "jest.config.js",
+          "children": []
+        },
+        {
+          "name": "module_registry.ts",
+          "children": []
+        },
+        {
+          "name": "packages",
+          "children": [
+            {
+              "name": "client",
+              "children": []
+            },
+            {
+              "name": "components",
+              "children": []
+            },
+            {
+              "name": "mattermost-redux",
+              "children": []
+            },
+            {
+              "name": "reselect",
+              "children": []
+            },
+            {
+              "name": "types",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "playwright.config.ts",
+          "children": []
+        },
+        {
+          "name": "plugins",
+          "children": [
+            {
+              "name": "actions.js",
+              "children": []
+            },
+            {
+              "name": "call_button",
+              "children": []
+            },
+            {
+              "name": "channel_header_plug",
+              "children": []
+            },
+            {
+              "name": "export.js",
+              "children": []
+            },
+            {
+              "name": "index.js",
+              "children": []
+            },
+            {
+              "name": "interactive_dialog.js",
+              "children": []
+            },
+            {
+              "name": "mobile_channel_header_plug",
+              "children": []
+            },
+            {
+              "name": "pluggable",
+              "children": []
+            },
+            {
+              "name": "products.test.ts",
+              "children": []
+            },
+            {
+              "name": "products.ts",
+              "children": []
+            },
+            {
+              "name": "registry.ts",
+              "children": []
+            },
+            {
+              "name": "rhs_plugin",
+              "children": []
+            },
+            {
+              "name": "test",
+              "children": []
+            },
+            {
+              "name": "textbox",
+              "children": []
+            },
+            {
+              "name": "useGetPluginsActivationState.ts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "reducers",
+          "children": [
+            {
+              "name": "index.ts",
+              "children": []
+            },
+            {
+              "name": "plugins",
+              "children": []
+            },
+            {
+              "name": "storage.test.ts",
+              "children": []
+            },
+            {
+              "name": "storage.ts",
+              "children": []
+            },
+            {
+              "name": "views",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "root.tsx",
+          "children": []
+        },
+        {
+          "name": "scripts",
+          "children": [
+            {
+              "name": "build.js",
+              "children": []
+            },
+            {
+              "name": "dev-server.js",
+              "children": []
+            },
+            {
+              "name": "run.js",
+              "children": []
+            },
+            {
+              "name": "runner.js",
+              "children": []
+            },
+            {
+              "name": "utils.js",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "selectors",
+          "children": [
+            {
+              "name": "actions_menu.ts",
+              "children": []
+            },
+            {
+              "name": "admin_console.jsx",
+              "children": []
+            },
+            {
+              "name": "admin_console.test.jsx",
+              "children": []
+            },
+            {
+              "name": "cloud.ts",
+              "children": []
+            },
+            {
+              "name": "drafts.test.ts",
+              "children": []
+            },
+            {
+              "name": "drafts.ts",
+              "children": []
+            },
+            {
+              "name": "emojis.test.js",
+              "children": []
+            },
+            {
+              "name": "emojis.ts",
+              "children": []
+            },
+            {
+              "name": "general.ts",
+              "children": []
+            },
+            {
+              "name": "i18n.test.js",
+              "children": []
+            },
+            {
+              "name": "i18n.ts",
+              "children": []
+            },
+            {
+              "name": "insights.ts",
+              "children": []
+            },
+            {
+              "name": "lhs.test.ts",
+              "children": []
+            },
+            {
+              "name": "lhs.ts",
+              "children": []
+            },
+            {
+              "name": "local_storage.ts",
+              "children": []
+            },
+            {
+              "name": "onboarding.test.ts",
+              "children": []
+            },
+            {
+              "name": "onboarding.ts",
+              "children": []
+            },
+            {
+              "name": "plugins.test.js",
+              "children": []
+            },
+            {
+              "name": "plugins.ts",
+              "children": []
+            },
+            {
+              "name": "posts.ts",
+              "children": []
+            },
+            {
+              "name": "preferences.ts",
+              "children": []
+            },
+            {
+              "name": "products.ts",
+              "children": []
+            },
+            {
+              "name": "rhs.test.ts",
+              "children": []
+            },
+            {
+              "name": "rhs.ts",
+              "children": []
+            },
+            {
+              "name": "storage.test.ts",
+              "children": []
+            },
+            {
+              "name": "storage.ts",
+              "children": []
+            },
+            {
+              "name": "views",
+              "children": []
+            },
+            {
+              "name": "work_template.ts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "skip_integrity_check.js",
+          "children": []
+        },
+        {
+          "name": "store",
+          "children": [
+            {
+              "name": "index.js",
+              "children": []
+            },
+            {
+              "name": "index.test.js",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "stores",
+          "children": [
+            {
+              "name": "browser_store.tsx",
+              "children": []
+            },
+            {
+              "name": "hooks.ts",
+              "children": []
+            },
+            {
+              "name": "local_storage_store.test.ts",
+              "children": []
+            },
+            {
+              "name": "local_storage_store.ts",
+              "children": []
+            },
+            {
+              "name": "redux_store.jsx",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "tests",
+          "children": [
+            {
+              "name": "constants",
+              "children": []
+            },
+            {
+              "name": "helpers",
+              "children": []
+            },
+            {
+              "name": "react_testing_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "react-intl_mock.js",
+              "children": []
+            },
+            {
+              "name": "react-router-dom_mock.ts",
+              "children": []
+            },
+            {
+              "name": "react-tippy_mock.js",
+              "children": []
+            },
+            {
+              "name": "redux-persist_mock.js",
+              "children": []
+            },
+            {
+              "name": "setup.js",
+              "children": []
+            },
+            {
+              "name": "test_store.tsx",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "types",
+          "children": [
+            {
+              "name": "actions.ts",
+              "children": []
+            },
+            {
+              "name": "apps.ts",
+              "children": []
+            },
+            {
+              "name": "cloud",
+              "children": []
+            },
+            {
+              "name": "store",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "utils",
+          "children": [
+            {
+              "name": "a11y_controller.ts",
+              "children": []
+            },
+            {
+              "name": "admin_console_index.test.tsx",
+              "children": []
+            },
+            {
+              "name": "admin_console_index.tsx",
+              "children": []
+            },
+            {
+              "name": "admin_console_plugin_index.test.ts",
+              "children": []
+            },
+            {
+              "name": "admin_console_plugin_index.ts",
+              "children": []
+            },
+            {
+              "name": "apps.ts",
+              "children": []
+            },
+            {
+              "name": "browser_history.tsx",
+              "children": []
+            },
+            {
+              "name": "channel_utils.test.ts",
+              "children": []
+            },
+            {
+              "name": "channel_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "cloud_utils.ts",
+              "children": []
+            },
+            {
+              "name": "constants.tsx",
+              "children": []
+            },
+            {
+              "name": "countries.ts",
+              "children": []
+            },
+            {
+              "name": "datetime.test.ts",
+              "children": []
+            },
+            {
+              "name": "datetime.ts",
+              "children": []
+            },
+            {
+              "name": "delayed_action.tsx",
+              "children": []
+            },
+            {
+              "name": "dragster.test.ts",
+              "children": []
+            },
+            {
+              "name": "dragster.ts",
+              "children": []
+            },
+            {
+              "name": "emoji_map.ts",
+              "children": []
+            },
+            {
+              "name": "emoji_utils.test.tsx",
+              "children": []
+            },
+            {
+              "name": "emoji_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "emoji.ts",
+              "children": []
+            },
+            {
+              "name": "emoticons.test.tsx",
+              "children": []
+            },
+            {
+              "name": "emoticons.tsx",
+              "children": []
+            },
+            {
+              "name": "empty-string.ts",
+              "children": []
+            },
+            {
+              "name": "file_utils.test.ts",
+              "children": []
+            },
+            {
+              "name": "file_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "filter_users.test.ts",
+              "children": []
+            },
+            {
+              "name": "filter_users.ts",
+              "children": []
+            },
+            {
+              "name": "func.test.ts",
+              "children": []
+            },
+            {
+              "name": "func.ts",
+              "children": []
+            },
+            {
+              "name": "hosted_customer.ts",
+              "children": []
+            },
+            {
+              "name": "http_utils.ts",
+              "children": []
+            },
+            {
+              "name": "i18n.tsx",
+              "children": []
+            },
+            {
+              "name": "latinise.test.tsx",
+              "children": []
+            },
+            {
+              "name": "latinise.tsx",
+              "children": []
+            },
+            {
+              "name": "license_utils.test.ts",
+              "children": []
+            },
+            {
+              "name": "license_utils.ts",
+              "children": []
+            },
+            {
+              "name": "limits_test.tsx",
+              "children": []
+            },
+            {
+              "name": "limits.tsx",
+              "children": []
+            },
+            {
+              "name": "markdown",
+              "children": []
+            },
+            {
+              "name": "message_html_to_component.jsx",
+              "children": []
+            },
+            {
+              "name": "message_html_to_component.test.jsx",
+              "children": []
+            },
+            {
+              "name": "notifications.test.ts",
+              "children": []
+            },
+            {
+              "name": "notifications.ts",
+              "children": []
+            },
+            {
+              "name": "notify_admin_utils.ts",
+              "children": []
+            },
+            {
+              "name": "overage_team.ts",
+              "children": []
+            },
+            {
+              "name": "paste.test.tsx",
+              "children": []
+            },
+            {
+              "name": "paste.tsx",
+              "children": []
+            },
+            {
+              "name": "policy_roles_adapter.test.ts",
+              "children": []
+            },
+            {
+              "name": "policy_roles_adapter.ts",
+              "children": []
+            },
+            {
+              "name": "position_utils.test.tsx",
+              "children": []
+            },
+            {
+              "name": "position_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "post_utils.test.tsx",
+              "children": []
+            },
+            {
+              "name": "post_utils.ts",
+              "children": []
+            },
+            {
+              "name": "products.ts",
+              "children": []
+            },
+            {
+              "name": "react_intl.ts",
+              "children": []
+            },
+            {
+              "name": "resolvable.ts",
+              "children": []
+            },
+            {
+              "name": "route.test.ts",
+              "children": []
+            },
+            {
+              "name": "route.tsx",
+              "children": []
+            },
+            {
+              "name": "server_version.test.tsx",
+              "children": []
+            },
+            {
+              "name": "server_version.tsx",
+              "children": []
+            },
+            {
+              "name": "states.ts",
+              "children": []
+            },
+            {
+              "name": "storage_utils.ts",
+              "children": []
+            },
+            {
+              "name": "subscription.ts",
+              "children": []
+            },
+            {
+              "name": "syntax_highlighting.test.ts",
+              "children": []
+            },
+            {
+              "name": "syntax_highlighting.tsx",
+              "children": []
+            },
+            {
+              "name": "team_utils.test.ts",
+              "children": []
+            },
+            {
+              "name": "team_utils.tsx",
+              "children": []
+            },
+            {
+              "name": "test_helper.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_at_mentions.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_channel_links.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_email.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_hashtags.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_imgs.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_links.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_mention_highlighting.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting_search_highlighting.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting.test.ts",
+              "children": []
+            },
+            {
+              "name": "text_formatting.tsx",
+              "children": []
+            },
+            {
+              "name": "timezone.ts",
+              "children": []
+            },
+            {
+              "name": "url.test.tsx",
+              "children": []
+            },
+            {
+              "name": "url.tsx",
+              "children": []
+            },
+            {
+              "name": "use_websocket",
+              "children": []
+            },
+            {
+              "name": "user_agent.tsx",
+              "children": []
+            },
+            {
+              "name": "utils.test.tsx",
+              "children": []
+            },
+            {
+              "name": "utils.tsx",
+              "children": []
+            },
+            {
+              "name": "youtube.test.ts",
+              "children": []
+            },
+            {
+              "name": "youtube.ts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "webpack.config.js",
+          "children": []
+        }
+      ]
+    }
   }
 }

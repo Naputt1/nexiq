@@ -1,10 +1,10 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig((options) => ({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/analysis-worker.ts"],
   format: ["esm"],
   target: "node18",
-  dts: false,
+  dts: { entry: "src/index.ts" },
   clean: true,
   sourcemap: true,
   minify: true,
