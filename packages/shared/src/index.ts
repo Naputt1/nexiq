@@ -292,6 +292,7 @@ export interface BenchmarkResult {
   toolCallsCount: number;
   latencyMs: number;
   steps: BenchmarkStep[];
+  errorMessage?: string;
 }
 
 export * from "./types/index.js";

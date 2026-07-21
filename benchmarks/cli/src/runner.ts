@@ -76,6 +76,7 @@ export interface BenchmarkResult {
     stderr: string;
     exitCode: number;
   };
+  errorMessage?: string;
   steps: BenchmarkStep[];
 }
 
@@ -529,7 +530,7 @@ export class BenchmarkRunner {
         testType,
       });
 
-      const response = await llm.chat(steps, availableTools);
+      const response = await this.callLlmWithRetry(llm, steps, availableTools);
       const assistantMessage: BenchmarkStep = {
         role: "assistant",
         content: response.content,
@@ -745,6 +746,31 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
     }
   }
 
+  private async callLlmWithRetry(
+    llm: LlmClient,
+    steps: BenchmarkStep[],
+    tools: unknown[],
+    maxRetries = 3,
+  ) {
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await llm.chat(steps, tools);
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        console.error(
+          `LLM API error (attempt ${attempt + 1}/${maxRetries}):`,
+          lastError.message,
+        );
+        if (attempt < maxRetries - 1) {
+          const delay = 5000 * Math.pow(2, attempt);
+          await new Promise((r) => setTimeout(r, delay));
+        }
+      }
+    }
+    throw lastError!;
+  }
+
   reportError(
     scenarioId: string,
     projectName: string,
@@ -752,6 +778,7 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
     testType: "single-prompt" | "planning" | "coding",
     model: string,
     startTime: number,
+    error?: Error,
   ): BenchmarkResult {
     const result: BenchmarkResult = {
       scenarioId,
@@ -763,6 +790,7 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
       totalTokens: 0,
       toolCallsCount: 0,
       latencyMs: Date.now() - startTime,
+      errorMessage: error?.message,
       steps: [],
     };
     this.results.push(result);
@@ -900,6 +928,7 @@ export async function runBenchmarks(options: RunOptions) {
         task.testType,
         task.model.displayName,
         taskStartTime,
+        e instanceof Error ? e : new Error(String(e)),
       );
       activeScenarios--;
       completedScenarios++;

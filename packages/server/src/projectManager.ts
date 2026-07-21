@@ -256,19 +256,31 @@ export class ProjectManager {
       new URL("analysis-worker.js", import.meta.url),
     );
     const child = fork(workerPath, [], {
-      stdio: ["pipe", "ignore", "inherit", "ipc"],
+      stdio: ["pipe", "ignore", "pipe", "ipc"],
     });
 
     const input = JSON.stringify({ srcDir, ...options });
     child.stdin!.write(input);
     child.stdin!.end();
 
+    let stderrBuf = "";
+    child.stderr!.setEncoding("utf8");
+    child.stderr!.on("data", (chunk: string) => (stderrBuf += chunk));
+
     const exitPromise = new Promise<void>((resolve, reject) => {
       child.on("exit", (code) => {
-        if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
+        if (code !== 0)
+          reject(
+            new Error(
+              `Worker exited with code ${code}. Stderr: ${stderrBuf.slice(-2000)}`,
+            ),
+          );
         else resolve();
       });
-      child.on("error", reject);
+      child.on("error", (e) => {
+        (e as Error & { stderr?: string }).stderr = stderrBuf;
+        reject(e);
+      });
     });
 
     const timeout = 600_000;

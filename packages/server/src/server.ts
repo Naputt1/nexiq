@@ -642,6 +642,7 @@ export class BackendServer {
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
+        console.error(`Tool "${name}" failed:`, errorMessage);
         return {
           isError: true,
           content: [{ type: "text", text: errorMessage }],

@@ -1,14 +1,44 @@
 {
   "arguments": {
-    "filePath": "/src/lib/authorization.tsx",
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
+    "filePath": "/src/lib/authorization.tsx"
   },
   "result": {
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"React\": {\n    \"localName\": \"React\",\n    \"importedName\": \"*\",\n    \"source\": \"react\",\n    \"type\": \"namespace\",\n    \"importKind\": \"value\"\n  },\n  \"Comment\": {\n    \"localName\": \"Comment\",\n    \"importedName\": \"Comment\",\n    \"source\": \"/src/types/api.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"User\": {\n    \"localName\": \"User\",\n    \"importedName\": \"User\",\n    \"source\": \"/src/types/api.ts\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  },\n  \"useUser\": {\n    \"localName\": \"useUser\",\n    \"importedName\": \"useUser\",\n    \"source\": \"/src/lib/auth.tsx\",\n    \"type\": \"named\",\n    \"importKind\": \"value\"\n  }\n}"
+        "text": "{\"React\":{\"localName\":\"React\",\"importedName\":\"*\",\"source\":\"react\",\"type\":\"namespace\",\"importKind\":\"value\"},\"Comment\":{\"localName\":\"Comment\",\"importedName\":\"Comment\",\"source\":\"/src/types/api.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"User\":{\"localName\":\"User\",\"importedName\":\"User\",\"source\":\"/src/types/api.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"useUser\":{\"localName\":\"useUser\",\"importedName\":\"useUser\",\"source\":\"/src/lib/auth.tsx\",\"type\":\"named\",\"importKind\":\"value\"}}"
       }
-    ]
+    ],
+    "structuredContent": {
+      "React": {
+        "localName": "React",
+        "importedName": "*",
+        "source": "react",
+        "type": "namespace",
+        "importKind": "value"
+      },
+      "Comment": {
+        "localName": "Comment",
+        "importedName": "Comment",
+        "source": "/src/types/api.ts",
+        "type": "named",
+        "importKind": "value"
+      },
+      "User": {
+        "localName": "User",
+        "importedName": "User",
+        "source": "/src/types/api.ts",
+        "type": "named",
+        "importKind": "value"
+      },
+      "useUser": {
+        "localName": "useUser",
+        "importedName": "useUser",
+        "source": "/src/lib/auth.tsx",
+        "type": "named",
+        "importKind": "value"
+      }
+    }
   }
 }
