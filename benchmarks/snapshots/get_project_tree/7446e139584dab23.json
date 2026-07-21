@@ -1,14 +1,15 @@
 {
   "arguments": {
-    "maxDepth": 2,
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "maxDepth": 2
   },
   "result": {
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"name\": \"/\",\n  \"children\": [\n    {\n      \"name\": \"packages\",\n      \"children\": [\n        {\n          \"name\": \"client\",\n          \"children\": []\n        },\n        {\n          \"name\": \"components\",\n          \"children\": []\n        },\n        {\n          \"name\": \"types\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}"
+        "text": "database is locked"
       }
-    ]
+    ],
+    "isError": true
   }
 }
