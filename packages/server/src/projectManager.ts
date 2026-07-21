@@ -297,7 +297,7 @@ export class ProjectManager {
       ]);
     } catch (e) {
       console.error(`Analysis failed for ${srcDir}:`, e);
-      return {} as JsonData;
+      return { src: "", files: {}, edges: [], resolve: [] } as JsonData;
     }
 
     if (options.cacheFile && fs.existsSync(options.cacheFile)) {
@@ -988,9 +988,12 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
 
     const root: TreeNode = { name: "/", children: [] };
-    const files = Object.keys(project.graph!.files).sort();
+    const rows = project
+      .db!.db.prepare("SELECT path FROM files ORDER BY path")
+      .all() as { path: string }[];
+    const paths = rows.map((r) => r.path);
 
-    for (const filePath of files) {
+    for (const filePath of paths) {
       const parts = filePath.split("/").filter(Boolean);
       let current = root;
       for (let i = 0; i < Math.min(parts.length, maxDepth); i++) {

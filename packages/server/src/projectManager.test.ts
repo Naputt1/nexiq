@@ -674,6 +674,17 @@ describe("ProjectManager", () => {
     });
 
     it("should get project tree", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("SELECT path FROM files")) {
+          s.all.mockReturnValue([
+            { path: "/src/App.tsx" },
+            { path: "/src/components/Button.tsx" },
+            { path: "/src/components/index.ts" },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
       const tree = await projectManager.getProjectTree(
         projectPath,
         undefined,

@@ -190,6 +190,13 @@ describe("MCP Tools Integration", () => {
   });
 
   it("get_project_tree: should return tree up to maxDepth", async () => {
+    mockDb.prepare.mockImplementation((sql: string) => {
+      const s = createMockStmt();
+      if (sql.includes("SELECT path FROM files")) {
+        s.all.mockReturnValue([{ path: "/src/App.tsx" }]);
+      }
+      return s as unknown as Database.Statement;
+    });
     const result = await server.handleCallTool({ name: "get_project_tree", args: { projectPath, maxDepth: 1 } });
     const tree = (result as { structuredContent: Record<string, unknown> }).structuredContent as { name: string; children: { name: string }[] };
     expect(tree.name).toBe("/");
