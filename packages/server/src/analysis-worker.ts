@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { analyzeProject } from "@nexiq/analyser";
 
 interface WorkerInput {
@@ -27,8 +29,16 @@ async function main() {
   if (input.monorepo) options.monorepo = input.monorepo;
 
   const graph = await analyzeProject(input.srcDir, options);
-  const graphJson = JSON.stringify(graph);
-  process.stdout.write(graphJson, () => process.exit(0));
+
+  if (input.cacheFile) {
+    const dir = path.dirname(input.cacheFile);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(input.cacheFile, JSON.stringify(graph));
+  }
+
+  process.exit(0);
 }
 
 main().catch(() => process.exit(1));

@@ -256,43 +256,49 @@ export class ProjectManager {
       new URL("analysis-worker.js", import.meta.url),
     );
     const child = fork(workerPath, [], {
-      stdio: ["pipe", "pipe", "inherit", "ipc"],
+      stdio: ["pipe", "ignore", "inherit", "ipc"],
     });
 
     const input = JSON.stringify({ srcDir, ...options });
     child.stdin!.write(input);
     child.stdin!.end();
 
-    const graphPromise = new Promise<JsonData>((resolve, reject) => {
-      let stdoutData = "";
-      child.stdout!.setEncoding("utf8");
-      child.stdout!.on("data", (chunk: string) => (stdoutData += chunk));
+    const exitPromise = new Promise<void>((resolve, reject) => {
       child.on("exit", (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker exited with code ${code}`));
-          return;
-        }
-        try {
-          resolve(JSON.parse(stdoutData) as JsonData);
-        } catch (e) {
-          reject(new Error(`Failed to parse worker output: ${e}`));
-        }
+        if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
+        else resolve();
       });
       child.on("error", reject);
     });
 
     const timeout = 600_000;
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-    const result = await Promise.race([
-      graphPromise.finally(() => clearTimeout(timeoutHandle)),
-      new Promise<never>((_, reject) => {
-        timeoutHandle = setTimeout(() => {
-          child.kill();
-          reject(new Error(`Analysis timed out after ${timeout / 1000}s`));
-        }, timeout);
-      }),
-    ]);
-    return result;
+    try {
+      await Promise.race([
+        exitPromise.finally(() => clearTimeout(timeoutHandle)),
+        new Promise<never>((_, reject) => {
+          timeoutHandle = setTimeout(() => {
+            child.kill();
+            reject(new Error(`Analysis timed out after ${timeout / 1000}s`));
+          }, timeout);
+        }),
+      ]);
+    } catch (e) {
+      console.error(`Analysis failed for ${srcDir}:`, e);
+      return {} as JsonData;
+    }
+
+    if (options.cacheFile && fs.existsSync(options.cacheFile)) {
+      try {
+        return JSON.parse(
+          fs.readFileSync(options.cacheFile, "utf-8"),
+        ) as JsonData;
+      } catch (e) {
+        console.error(`Failed to read cache file ${options.cacheFile}:`, e);
+      }
+    }
+
+    return {} as JsonData;
   }
 
   private async _openProjectInternal(
