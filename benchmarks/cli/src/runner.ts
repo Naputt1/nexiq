@@ -869,19 +869,25 @@ export async function runBenchmarks(options: RunOptions) {
 
   await pool.init(serverPath);
 
-  // Pre-warm: trigger analysis on all unique project roots
+  // Pre-warm: trigger analysis on all unique project roots using isolated runners
+  // (analysis may crash the process due to OOM — isolated runner prevents pool poisoning)
   const warmedRoots = new Set<string>();
   for (const task of tasks) {
     const root = path.resolve(REPO_ROOT, task.project.root);
     if (warmedRoots.has(root)) continue;
     warmedRoots.add(root);
-    const runner = await pool.acquire();
+    const warmRunner = new McpRunner();
     try {
-      await runner.callTool("list_files", { projectPath: root });
+      await withTimeout(warmRunner.start(serverPath), 15_000, "warm connect");
+      await withTimeout(
+        warmRunner.callTool("list_files", { projectPath: root }),
+        300_000,
+        "warm analysis",
+      );
     } catch {
-      // Non-fatal — the scenario will trigger analysis on demand
+      // Analysis may crash the process — cache persists on disk
     }
-    pool.release(runner);
+    warmRunner.stop().catch(() => {});
   }
 
   // Process tasks with concurrency limit and directory isolation
