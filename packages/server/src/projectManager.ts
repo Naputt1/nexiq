@@ -256,7 +256,7 @@ export class ProjectManager {
       new URL("analysis-worker.js", import.meta.url),
     );
     const child = fork(workerPath, [], {
-      stdio: ["pipe", "pipe", "inherit"],
+      stdio: ["pipe", "pipe", "inherit", "ipc"],
     });
 
     const input = JSON.stringify({ srcDir, ...options });
