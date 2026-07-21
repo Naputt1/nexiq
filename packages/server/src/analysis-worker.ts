@@ -41,4 +41,8 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(() => process.exit(1));
+main().catch((err) => {
+  const msg = err instanceof Error ? err.stack || err.message : String(err);
+  process.stderr.write("Analysis worker fatal error:\n" + msg + "\n");
+  process.exit(1);
+});
