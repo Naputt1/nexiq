@@ -282,15 +282,17 @@ export class ProjectManager {
     });
 
     const timeout = 600_000;
-    return Promise.race([
-      graphPromise,
-      new Promise<never>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`Analysis timed out after ${timeout / 1000}s`)),
-          timeout,
-        ),
-      ),
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const result = await Promise.race([
+      graphPromise.finally(() => clearTimeout(timeoutHandle)),
+      new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          child.kill();
+          reject(new Error(`Analysis timed out after ${timeout / 1000}s`));
+        }, timeout);
+      }),
     ]);
+    return result;
   }
 
   private async _openProjectInternal(
