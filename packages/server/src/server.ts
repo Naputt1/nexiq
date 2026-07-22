@@ -950,7 +950,7 @@ export class BackendServer {
           resolvedPath,
           query,
           subProject,
-          contextLines ?? 5,
+          contextLines ?? 20,
         );
         return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }

@@ -806,8 +806,10 @@ export class ProjectManager {
       definitions_results.push(definition);
     }
 
-    // 3. Fallback for external symbols (tags not defined in this project)
-    if (includeUsages && definitions_results.length === 0) {
+    // 3. Query renders table for JSX usages — handles cross-file render refs
+    //    that the graph edges (relations) may not have resolved
+    if (includeUsages) {
+      const defFiles = new Set(definitions_results.map((d) => d.file));
       const results = project
         .db!.db.prepare(
           `
@@ -823,6 +825,7 @@ export class ProjectManager {
 
       for (const usage of results) {
         if (isExcluded(usage.file)) continue;
+        if (defFiles.has(usage.file)) continue;
 
         externalUsages.push({
           kind: usage.kind === "jsx" ? "render" : "call",
@@ -923,12 +926,14 @@ export class ProjectManager {
         `
       SELECT r.line, r.column, r.data_json
       FROM relations r
+      JOIN entities e ON r.to_id = e.id
       WHERE r.kind = 'usage-read'
         AND (json_extract(r.data_json, '$.displayLabel') = ?
              OR json_extract(r.data_json, '$.displayLabel') LIKE ?)
+        AND e.name = ?
     `,
       )
-      .all(fieldPath, suffixPattern) as Array<{
+      .all(fieldPath, suffixPattern, query) as Array<{
       line: number;
       column: number;
       data_json: string | null;
@@ -1301,7 +1306,22 @@ export class ProjectManager {
       const fileContent = fs.readFileSync(fullPath, "utf-8");
       const lines = fileContent.split("\n");
       const lineIdx = locInfo.loc.line - 1;
-      const start = Math.max(0, lineIdx - contextLines);
+
+      // Scan backward from symbol to find preceding interface/type declarations
+      let start = Math.max(0, lineIdx - contextLines);
+      for (let i = lineIdx - 1; i >= start; i--) {
+        const line = lines[i]!.trim();
+        if (
+          line.startsWith("export interface") ||
+          line.startsWith("interface") ||
+          line.startsWith("export type") ||
+          line.startsWith("type ")
+        ) {
+          start = i;
+          break;
+        }
+      }
+
       const end = Math.min(lines.length, lineIdx + contextLines + 1);
 
       results.push({
