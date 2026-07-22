@@ -253,7 +253,7 @@ export class PackageMaster {
     this.sqlite = options.sqlite;
     this.threads =
       options.threads ??
-      (process.env.VITEST || process.env.SNAPSHOT ? 1 : os.cpus().length);
+      (process.env.VITEST || process.env.SNAPSHOT ? 1 : Math.min(os.cpus().length, 4));
     this.viteAliases = {
       ...getViteAliases(this.viteConfigPath),
       ...getTsConfigAliases(this.srcDir),
