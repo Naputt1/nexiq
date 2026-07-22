@@ -58,6 +58,8 @@ export interface GetProjectTreeArgs {
   projectPath: string;
   subProject?: string;
   maxDepth?: number;
+  exclude?: string[];
+  include?: string[];
   fields?: string[];
 }
 
@@ -375,6 +377,8 @@ export class BackendServer {
               projectPath: { type: "string" },
               subProject: { type: "string" },
               maxDepth: { type: "number" },
+              exclude: { type: "array", items: { type: "string" } },
+              include: { type: "array", items: { type: "string" } },
               fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath"],
@@ -807,12 +811,14 @@ export class BackendServer {
       }
 
       case "get_project_tree": {
-        const { projectPath, subProject, maxDepth, fields } = knownCall.args;
+        const { projectPath, subProject, maxDepth, exclude, include, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
         const results = await this.projectManager.getProjectTree(
           resolvedPath,
           subProject,
           maxDepth,
+          exclude || DEFAULT_EXCLUDES,
+          include,
         );
 
         return this.toStructuredResult(this.filterFields(results, fields));

@@ -1064,6 +1064,8 @@ export class ProjectManager {
     projectPath: string,
     subProject?: string,
     maxDepth: number = 3,
+    exclude?: string[],
+    include?: string[],
   ): Promise<TreeNode> {
     const project = await this.openProject(projectPath, subProject);
 
@@ -1071,7 +1073,13 @@ export class ProjectManager {
     const rows = project
       .db!.db.prepare("SELECT path FROM files ORDER BY path")
       .all() as { path: string }[];
-    const paths = rows.map((r) => r.path);
+    const paths = rows
+      .map((r) => r.path)
+      .filter((p) => {
+        if (include && include.length > 0 && !include.some((g) => minimatch(p, g) || minimatch(path.basename(p), g))) return false;
+        if (exclude && exclude.length > 0 && exclude.some((g) => minimatch(p, g) || minimatch(path.basename(p), g))) return false;
+        return true;
+      });
 
     for (const filePath of paths) {
       const parts = filePath.split("/").filter(Boolean);
