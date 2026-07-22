@@ -513,13 +513,12 @@ export class PackageMaster {
   }
 
   private buildWorkspaceHandoff(
-    graphData: JsonData,
     unresolvedTasks: ComponentDBResolve[],
   ): WorkspaceAnalysisHandoff {
     const exports: WorkspacePackageExport[] = [];
     const externalImports: WorkspaceExternalImport[] = [];
 
-    for (const file of Object.values(graphData.files)) {
+    for (const file of this.componentDB.getFiles()) {
       for (const fileExport of Object.values(file.export)) {
         exports.push({
           packageId: this.packageRow?.id || this.srcDir,
@@ -533,7 +532,7 @@ export class PackageMaster {
         });
       }
 
-      for (const fileImport of Object.values(file.import)) {
+      for (const fileImport of file.import.values()) {
         if (
           fileImport.source.startsWith(".") ||
           fileImport.source.startsWith("/") ||
@@ -798,10 +797,10 @@ export class PackageMaster {
     const unresolvedTasks = this.componentDB.resolve();
     this.componentDB.resolveDependency();
 
-    const graphData = this.componentDB.getData();
+    const edges = this.componentDB.getEdges();
 
     if (this.sqlite) {
-      this.sqlite.saveEdges(graphData.edges);
+      this.sqlite.saveEdges(edges);
 
       const packages = this.packageJson.getAllLoadedPackages();
       for (const [dir, rawPkgJson] of packages) {
@@ -818,23 +817,13 @@ export class PackageMaster {
       }
 
       for (const fullfileName of succeededFiles) {
-        const result = this.componentDB.getFile(fullfileName).getData();
-        result.package_id =
-          this.packageJson.getPackageIdForFile(
-            resolvePath(this.srcDir, fullfileName),
-          ) || undefined;
-        this.sqlite.saveFileResults({
-          ...result,
-          package_id: this.packageRow?.id,
-        });
-        this.markFileStatus(
-          fullfileName,
-          unresolvedTasks.length > 0 ? "resolved" : "resolved",
-          {
-            fileHash: result.hash,
-            fingerprint: result.fingerPrint,
-          },
-        );
+        const file = this.componentDB.getFile(fullfileName);
+        if (file) {
+          this.markFileStatus(fullfileName, "resolved", {
+            fileHash: file.hash,
+            fingerprint: file.fingerPrint,
+          });
+        }
       }
 
       this.recordResolveErrors(unresolvedTasks);
@@ -853,8 +842,8 @@ export class PackageMaster {
       filesSucceeded: succeededFiles.length,
       filesFailed,
       resolveErrors: unresolvedTasks.length,
-      graph: graphData,
-      workspaceHandoff: this.buildWorkspaceHandoff(graphData, unresolvedTasks),
+      graph: { src: this.srcDir, files: {}, edges, resolve: unresolvedTasks },
+      workspaceHandoff: this.buildWorkspaceHandoff(unresolvedTasks),
     };
   }
 }
