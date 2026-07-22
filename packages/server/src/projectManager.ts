@@ -1001,9 +1001,15 @@ export class ProjectManager {
   async findFiles(projectPath: string, pattern: string, subProject?: string) {
     const project = await this.openProject(projectPath, subProject);
 
-    const isGlob = /[*?[\]]/.test(pattern);
-    const files = Object.keys(project.graph!.files);
+    const rows = project
+      .db!.db.prepare("SELECT path FROM files")
+      .all() as { path: string }[];
+    const files =
+      rows.length > 0
+        ? rows.map((r) => r.path)
+        : Object.keys(project.graph?.files || {});
 
+    const isGlob = /[*?[\]]/.test(pattern);
     if (isGlob) {
       const results = files.filter(
         (p) =>
@@ -1028,9 +1034,29 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
 
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph!.files[normalizedPath];
-    if (!file) throw new Error(`File not found: ${normalizedPath}`);
 
+    const rows = project
+      .db!.db.prepare(
+        `SELECT e.name, e.data_json
+         FROM entities e
+         JOIN scopes s ON e.scope_id = s.id
+         JOIN files f ON s.file_id = f.id
+         WHERE f.path = ? AND e.kind = 'import'`,
+      )
+      .all(normalizedPath) as { name: string; data_json: string | null }[];
+
+    if (rows.length > 0) {
+      const imports: Record<string, unknown> = {};
+      for (const row of rows) {
+        if (row.name) {
+          imports[row.name] = JSON.parse(row.data_json || "{}");
+        }
+      }
+      return imports;
+    }
+
+    const file = project.graph?.files?.[normalizedPath];
+    if (!file) throw new Error(`File not found: ${normalizedPath}`);
     return file.import;
   }
 
@@ -1344,17 +1370,33 @@ export class ProjectManager {
   ) {
     const project = await this.openProject(projectPath, subProject);
     const normalizedDir = dirPath.startsWith("/") ? dirPath : `/${dirPath}`;
+
+    const allFiles: string[] = [];
+    const rows = project
+      .db!.db.prepare(`SELECT path FROM files WHERE path LIKE ? || '%' ORDER BY path`)
+      .all(normalizedDir) as { path: string }[];
+    if (rows.length > 0) {
+      allFiles.push(...rows.map((r) => r.path));
+    } else {
+      const graphFiles = project.graph?.files;
+      if (graphFiles) {
+        for (const filePath of Object.keys(graphFiles)) {
+          if (filePath.startsWith(normalizedDir)) {
+            allFiles.push(filePath);
+          }
+        }
+      }
+    }
+
     const filesInDir = new Set<string>();
     const subDirs = new Set<string>();
-    for (const filePath of Object.keys(project.graph!.files)) {
-      if (filePath.startsWith(normalizedDir)) {
-        const relative = filePath
-          .slice(normalizedDir.length)
-          .replace(/^\//, "");
-        const parts = relative.split("/");
-        if (parts.length === 1 && parts[0] !== "") filesInDir.add(parts[0]!);
-        else if (parts.length > 1) subDirs.add(parts[0]!);
-      }
+    for (const filePath of allFiles) {
+      const relative = filePath
+        .slice(normalizedDir.length)
+        .replace(/^\//, "");
+      const parts = relative.split("/");
+      if (parts.length === 1 && parts[0] !== "") filesInDir.add(parts[0]!);
+      else if (parts.length > 1) subDirs.add(parts[0]!);
     }
     return {
       directories: Array.from(subDirs).sort(),
@@ -1369,7 +1411,37 @@ export class ProjectManager {
   ) {
     const project = await this.openProject(projectPath, subProject);
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph!.files[normalizedPath];
+
+    const rows = project
+      .db!.db.prepare(
+        `SELECT e.id, e.name, e.kind, e.type, e.line
+         FROM entities e
+         JOIN scopes s ON e.scope_id = s.id
+         JOIN files f ON s.file_id = f.id
+         WHERE f.path = ? AND e.kind != 'import' AND e.name IS NOT NULL
+         ORDER BY e.line ASC`,
+      )
+      .all(normalizedPath) as {
+      id: string;
+      name: string;
+      kind: string;
+      type: string;
+      line: number;
+    }[];
+
+    if (rows.length > 0) {
+      return rows
+        .filter((r) => !getDisplayName(r.name).startsWith("jsx@"))
+        .map((r) => ({
+          id: r.id,
+          name: getDisplayName(r.name),
+          kind: r.kind,
+          type: r.type,
+          line: r.line || 0,
+        }));
+    }
+
+    const file = project.graph?.files?.[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
     const outline = Object.values(file.var || {})
       .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))

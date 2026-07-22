@@ -31,8 +31,8 @@ const createMockStmt = () => ({
 const mockDb = {
   prepare: vi.fn<(sql: string) => Database.Statement>(() => createMockStmt() as unknown as Database.Statement),
   close: vi.fn(),
-  pragma: vi.fn(),
   exec: vi.fn(),
+  pragma: vi.fn(),
 };
 
 vi.mock("@nexiq/analyser", () => ({
@@ -73,11 +73,12 @@ describe("ProjectManager", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     projectManager = new ProjectManager();
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    vi.mocked(analyzeProject).mockResolvedValue({
+    const graph = {
       src: "/test/project",
       files: {},
       edges: [],
-    } as unknown as JsonData);
+    } as unknown as JsonData;
+    vi.mocked(analyzeProject).mockResolvedValue(graph);
   });
 
   it("should open a project and return project info", async () => {

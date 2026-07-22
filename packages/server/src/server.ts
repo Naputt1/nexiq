@@ -838,12 +838,19 @@ export class BackendServer {
           );
         };
 
-        const files = Object.entries(project.graph!.files).filter(
-          ([path]) => !isExcluded(path),
-        );
-        const totalFiles = files.length;
+        const rows = project.db
+          ? (project
+              .db!.db.prepare("SELECT path FROM files ORDER BY path")
+              .all() as { path: string }[])
+          : [];
+        const allPaths =
+          rows.length > 0
+            ? rows.map((r) => r.path)
+            : Object.keys(project.graph?.files || {});
+        const filteredPaths = allPaths.filter((p) => !isExcluded(p));
+        const totalFiles = filteredPaths.length;
         const MAX_FILES = 50;
-        const displayedFiles = files.slice(0, MAX_FILES);
+        const displayedPaths = filteredPaths.slice(0, MAX_FILES);
 
         let fileSummary: {
           path: string;
@@ -851,19 +858,45 @@ export class BackendServer {
         }[];
 
         if (totalFiles > MAX_FILES) {
-          // Large project: return only paths for a subset to save tokens
-          fileSummary = displayedFiles.map(([path]) => ({ path }));
+          fileSummary = displayedPaths.map((path) => ({ path }));
         } else {
-          fileSummary = displayedFiles.map(([path, file]) => {
-            return {
-              path,
-              exports: Object.values(file.var || {})
-                .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))
-                .map((v) => ({
-                  name: getDisplayName(v.name),
-                  kind: v.kind,
-                })),
-            };
+          fileSummary = displayedPaths.map((path) => {
+            const exportRows = project.db
+              ? (project
+                  .db!.db.prepare(
+                    `SELECT e.name, e.kind
+                     FROM entities e
+                     JOIN scopes s ON e.scope_id = s.id
+                     JOIN files f ON s.file_id = f.id
+                     WHERE f.path = ? AND e.kind IN ('component', 'function', 'hook', 'class') AND e.name IS NOT NULL
+                     ORDER BY e.line ASC`,
+                  )
+                  .all(path) as { name: string; kind: string }[])
+              : [];
+            if (exportRows.length > 0) {
+              return {
+                path,
+                exports: exportRows
+                  .filter(
+                    (r) => !getDisplayName(r.name).startsWith("jsx@"),
+                  )
+                  .map((r) => ({
+                    name: getDisplayName(r.name),
+                    kind: r.kind,
+                  })),
+              };
+            }
+            // Fallback: read from graph
+            const file = project.graph?.files?.[path];
+            const graphExports = file
+              ? Object.values(file.var || {})
+                  .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))
+                  .map((v) => ({
+                    name: getDisplayName(v.name),
+                    kind: v.kind,
+                  }))
+              : undefined;
+            return { path, exports: graphExports };
           });
         }
 
@@ -1113,6 +1146,8 @@ export class BackendServer {
         filtered[field] = obj[field];
       }
     }
+
+    if (Object.keys(filtered).length === 0) return data;
     return filtered as unknown as T;
   }
 

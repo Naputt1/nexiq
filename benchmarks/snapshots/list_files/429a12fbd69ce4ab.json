@@ -1,9 +1,9 @@
 {
   "arguments": {
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
     "fields": [
       "path"
-    ]
+    ],
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
   },
   "result": {
     "content": [
