@@ -66,6 +66,8 @@ export class SqliteDB extends BaseSqliteDB {
     this.db.pragma("busy_timeout = 600000");
     this.db.pragma("synchronous = NORMAL");
     this.db.pragma("temp_store = MEMORY");
+    this.db.pragma("mmap_size = 0");
+    this.db.pragma("cache_size = -16000");
     this.initSchema();
     this.initStatements();
   }
