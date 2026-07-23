@@ -36,12 +36,74 @@ get_symbol_info("LoginForm", usages: true)
   → if you need the component calling useUser
 ```
 
+### Tracing data flow through the component hierarchy
+
+```
+trace_data_flow("PostList", "postListIds")
+  → walks up from PostList through parent renders
+  → each step shows what expression is passed as postListIds
+  → if the expression is a prop reference, recurses up automatically
+  → returns chain: [{component, renderLoc, expression}]
+```
+
+Use `trace_data_flow` instead of manually walking the render tree to find where a prop value originates. It handles multi-hop parent chains automatically up to `maxDepth` (default 3).
+
+### Exploring monorepo workspace packages
+
+```
+get_workspace_info(projectPath)
+  → lists all workspace packages (name, path, file count, analysis status)
+  → use first to understand the monorepo structure
+  → returns isMonorepo: false if not a monorepo
+```
+
+### Finding symbols across packages
+
+```
+search_workspace_symbol(symbol: "GenericModal")
+  → searches package_export_index across all packages
+  → returns which package exports it, file path, and export type
+  → use when get_symbol_info returns empty definitions
+  → hint on get_symbol_info automatically suggests this
+```
+
+### Checking a file's external imports
+
+```
+get_package_imports(filePath: "packages/app/src/App.tsx")
+  → returns all imports from the file, annotated with resolved package info
+  → shows which workspace package each import resolves to
+  → use to understand cross-package dependencies
+
 ### Understanding render relationships
 
 ```
 get_component_hierarchy("ComponentName", depth: 2)
   → parent/child render tree (both directions)
+  renderedBy tells you which components render this one
 ```
+
+### Traversing the dependency graph
+
+```
+get_symbol_info("ComponentName", usages: true)
+  → get the symbol IDs from definitions[].id
+get_relations(symbolId: "<id from above>")
+  → returns all incoming/outgoing graph edges
+  → filter by kind: "render", "import", "usage-read", "usage-call"
+  → use direction: "incoming" for what uses this, "outgoing" for what this uses
+```
+
+### Chaining graph traversal for deep paths
+
+```
+get_relations(symbolId: "<parent>", direction: "incoming", kind: "render")
+  → find what renders this component
+get_relations(symbolId: "<grandparent>", direction: "outgoing", kind: "render")
+  → find what the grandparent renders (siblings)
+```
+
+Use `get_relations` to replace 5+ hops of manual `read_file` + grep when tracing data flow through the component tree.
 
 ### Finding files without full listing
 
@@ -63,6 +125,9 @@ Every tool accepts an optional `fields` array. Use it to reduce response size:
 | `get_file_outline` | `["name","line"]` | Excludes type metadata |
 | `get_symbol_location` | `["file","line"]` | Excludes kind/type |
 | `get_prop_definitions` | `["name","type"]` | Excludes defaults |
+| `trace_data_flow` | `["chain"]` | Excludes notes |
+| `search_workspace_symbol` | `["matches"]` | Excludes package totals |
+| `get_package_imports` | `["imports"]` | Excludes file metadata |
 
 Default returns all fields. Always specify `fields` when you don't need everything.
 
@@ -80,6 +145,16 @@ const matches = result.structuredContent.items;
 
 Results in `content[0].text` also contain the full JSON string (backward compatible).
 
+## Empty Results & Hints
+
+When a tool returns empty results, it may include a `hint` field explaining why:
+- `find_files` returning `[]` → hint may suggest the file is in an external monorepo package
+- `list_directory` returning `{directories:[], files:[]}` → hint suggests checking root `/` first
+- `get_symbol_info` returning `{definitions: []}` → hint suggests using `search_workspace_symbol` to find it in a monorepo package
+- `get_component_hierarchy` returning `{error: "..."}` → hint suggests using `grep_search` as fallback
+
+Treat empty results with a `hint` as diagnostic feedback, not dead ends. Switch strategy.
+
 ## Anti-Patterns
 
 | Avoid | Use instead |
@@ -91,6 +166,9 @@ Results in `content[0].text` also contain the full JSON string (backward compati
 | `run_shell_command` for any search | One of the specialized tools above |
 | Multiple calls for related symbols | One call with `usages: true` |
 | Omitting `fields` param | Always specify to reduce response size |
+| Manual parent chain traversal for props | `trace_data_flow(component, fieldPath)` — 1 call instead of 12+ |
+| Getting stuck when symbol not found | `search_workspace_symbol(symbol)` — finds it across all packages |
+| `find_files` spiraling on monorepos | `get_workspace_info` + `search_workspace_symbol` to locate the right package |
 
 ## Token Budget Tips
 

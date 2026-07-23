@@ -6,6 +6,7 @@ import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "@nexiq/analyser";
 import { SqliteDB } from "@nexiq/analyser/db/sqlite";
+import Database from "better-sqlite3";
 import {
   type JsonData,
   type ProjectStatus,
@@ -926,18 +927,30 @@ export class ProjectManager {
         `
       SELECT r.line, r.column, r.data_json
       FROM relations r
-      JOIN entities e ON r.to_id = e.id
       WHERE r.kind = 'usage-read'
         AND (json_extract(r.data_json, '$.displayLabel') = ?
              OR json_extract(r.data_json, '$.displayLabel') LIKE ?)
-        AND e.name = ?
     `,
       )
-      .all(fieldPath, suffixPattern, query) as Array<{
+      .all(fieldPath, suffixPattern) as Array<{
       line: number;
       column: number;
       data_json: string | null;
     }>;
+
+    // Look up entity IDs matching the query symbol name for owner filtering
+    const queryEntityIds = new Set(
+      (
+        project
+          .db!.db.prepare(
+            `SELECT DISTINCT e.id FROM entities e JOIN symbols s ON s.entity_id = e.id WHERE s.name = ?`,
+          )
+          .all(query) as { id: string }[]
+      ).map((r) => r.id),
+    );
+
+    const ownerMatched: FieldAccessResult[] = [];
+    const otherResults: FieldAccessResult[] = [];
 
     for (const access of accesses) {
       if (!access.data_json) continue;
@@ -945,7 +958,7 @@ export class ProjectManager {
       const file = data.filePath;
       if (!file) continue;
 
-      results.push({
+      const result: FieldAccessResult = {
         file,
         line: access.line,
         column: access.column,
@@ -953,8 +966,17 @@ export class ProjectManager {
         accessPath: data.accessPath || [],
         displayLabel: data.displayLabel || "",
         context: [],
-      });
+      };
+
+      if (data.ownerId && queryEntityIds.has(data.ownerId)) {
+        ownerMatched.push(result);
+      } else {
+        otherResults.push(result);
+      }
     }
+
+    // Use owner-matched results when available; otherwise fall back to all
+    results.push(...(ownerMatched.length > 0 ? ownerMatched : otherResults));
 
     // Step 3: Read context lines if requested
     if (contextLines > 0) {
@@ -1119,7 +1141,7 @@ export class ProjectManager {
         hierarchies: ComponentHierarchyNode[];
         renderedBy: { id: string; name: string; file: string }[];
       }
-    | { error: string }
+    | { error: string; hint?: string }
   > {
     const project = await this.openProject(projectPath, subProject);
 
@@ -1139,7 +1161,10 @@ export class ProjectManager {
       .all(componentName) as ExtendedSymbolRow[];
 
     if (startComponents.length === 0) {
-      return { error: `Component "${componentName}" not found.` };
+      return {
+        error: `Component "${componentName}" not found.`,
+        hint: `The component may be in an external monorepo package, or registered under a different name. Use 'get_symbol_info' with usages=false to find it, or 'grep_search' to locate references.`,
+      };
     }
 
     const buildHierarchy = (
@@ -1214,6 +1239,382 @@ export class ProjectManager {
         file: s.file,
       })),
     };
+  }
+
+  async getRelations(
+    projectPath: string,
+    symbolId: string,
+    subProject?: string,
+    kind?: string,
+    direction: "outgoing" | "incoming" | "both" = "both",
+  ) {
+    const project = await this.openProject(projectPath, subProject);
+
+    const symbol = project.db!.db.prepare(`
+      SELECT s.id, s.name, e.id as entity_id
+      FROM symbols s
+      JOIN entities e ON s.entity_id = e.id
+      WHERE s.id = ?
+    `).get(symbolId) as { id: string; name: string; entity_id: string } | undefined;
+
+    if (!symbol) {
+      return { error: `Symbol "${symbolId}" not found.` };
+    }
+
+    const kindFilter = kind ? "AND r.kind = ?" : "";
+    const kindParams = kind ? [kind] : [];
+
+    const queryEdge = (selectCols: string, joinCol: string, dirLabel: string) =>
+      project.db!.db.prepare(`
+        SELECT r.kind, r.line, r.column, r.data_json,
+               ${selectCols}.id as other_id,
+               ${selectCols}.name as other_name,
+               f.path as file,
+               e_other.kind as other_kind,
+               e_other.type as other_type
+        FROM relations r
+        JOIN entities e_other ON r.${joinCol} = e_other.id
+        JOIN scopes sc_other ON e_other.scope_id = sc_other.id
+        JOIN files f ON sc_other.file_id = f.id
+        LEFT JOIN symbols ${selectCols} ON ${selectCols}.entity_id = e_other.id
+        WHERE r.${dirLabel === "outgoing" ? "from_id" : "to_id"} = ? ${kindFilter}
+        ORDER BY r.kind, r.line
+      `).all(symbol.entity_id, ...kindParams) as {
+        kind: string; line: number; column: number; data_json: string | null;
+        other_id: string; other_name: string | null; file: string;
+        other_kind: string; other_type: string;
+      }[];
+
+    const outgoing = direction !== "incoming"
+      ? queryEdge("s_to", "to_id", "outgoing").map((e) => ({
+          kind: e.kind, toName: e.other_name || "anonymous",
+          toId: e.other_id, toKind: e.other_kind, toType: e.other_type,
+          file: e.file, line: e.line, column: e.column,
+        }))
+      : [];
+
+    const incoming = direction !== "outgoing"
+      ? queryEdge("s_from", "from_id", "incoming").map((e) => ({
+          kind: e.kind, fromName: e.other_name || "anonymous",
+          fromId: e.other_id, fromKind: e.other_kind, fromType: e.other_type,
+          file: e.file, line: e.line, column: e.column,
+        }))
+      : [];
+
+    return {
+      symbolId: symbol.id,
+      symbolName: symbol.name,
+      totalOutgoing: outgoing.length,
+      totalIncoming: incoming.length,
+      ...(outgoing.length > 0 ? { outgoing } : {}),
+      ...(incoming.length > 0 ? { incoming } : {}),
+    };
+  }
+
+  async traceDataFlow(
+    projectPath: string,
+    componentName: string,
+    fieldPath: string,
+    subProject?: string,
+    maxDepth: number = 3,
+  ) {
+    const project = await this.openProject(projectPath, subProject);
+    const chain: {
+      step: number;
+      component: string;
+      file: string;
+      renderLoc?: { line: number; column: number };
+      expression?: { type: string; name: string; refType?: string };
+    }[] = [];
+
+    const findEntityStmt = project.db!.db.prepare(`
+      SELECT e.id, s.id as symbol_id, f.path as file
+      FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      LEFT JOIN symbols s ON s.entity_id = e.id
+      WHERE s.name = ? AND e.kind = 'component'
+      LIMIT 1
+    `);
+
+    const findParentStmt = project.db!.db.prepare(`
+      SELECT DISTINCT rel.to_id as parent_entity_id,
+             e_parent.name as parent_name,
+             f_parent.path as parent_file
+      FROM relations rel
+      JOIN entities e_parent ON rel.to_id = e_parent.id
+      JOIN scopes sc_parent ON e_parent.scope_id = sc_parent.id
+      JOIN files f_parent ON sc_parent.file_id = f_parent.id
+      WHERE rel.from_id = ? AND rel.kind = 'render'
+    `);
+
+    const findRenderStmt = project.db!.db.prepare(`
+      SELECT r.*
+      FROM renders r
+      WHERE r.parent_entity_id = ? AND r.tag = ?
+      LIMIT 1
+    `);
+
+    const hasPropStmt = project.db!.db.prepare(`
+      SELECT 1 FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      WHERE sc.entity_id = ? AND e.kind = 'prop' AND e.name = ?
+      LIMIT 1
+    `);
+
+    let currentName = componentName;
+    let currentField = fieldPath;
+    let currentDepth = 0;
+
+    while (currentDepth < maxDepth) {
+      const entity = findEntityStmt.get(currentName) as { id: string; symbol_id: string; file: string } | undefined;
+      if (!entity) {
+        if (chain.length === 0) {
+          return { error: `Component "${currentName}" not found.` };
+        }
+        break;
+      }
+
+      const parents = findParentStmt.all(entity.id) as { parent_entity_id: string; parent_name: string; parent_file: string }[];
+      if (parents.length === 0) {
+        chain.push({
+          step: currentDepth + 1,
+          component: currentName,
+          file: entity.file,
+        });
+        break;
+      }
+
+      let found = false;
+      for (const parent of parents) {
+        const renders = findRenderStmt.all(parent.parent_entity_id, currentName) as RenderRow[];
+        for (const render of renders) {
+          if (!render.data_json) continue;
+          const data = JSON.parse(render.data_json);
+          const deps: Array<{ name: string; value: { type: string; name: string; refType?: string }; valueId?: string }> = data.dependencies || [];
+          const dep = deps.find((d) => d.name === currentField);
+          if (dep) {
+            const expression = { type: dep.value.type, name: dep.value.name, refType: dep.value.refType };
+            chain.push({
+              step: currentDepth + 1,
+              component: currentName,
+              file: entity.file,
+              renderLoc: { line: render.line || 0, column: render.column || 0 },
+              expression,
+            });
+
+            // Check if the expression is a prop reference on the parent — if so, recurse
+            if (
+              expression.type === "ref" &&
+              expression.refType === "named" &&
+              currentDepth + 1 < maxDepth
+            ) {
+              const hasProp = hasPropStmt.get(parent.parent_entity_id, expression.name) as { "1": number } | undefined;
+              if (hasProp) {
+                currentName = parent.parent_name;
+                currentField = expression.name;
+                currentDepth++;
+                found = true;
+                break;
+              }
+            }
+            // Found dependency but can't recurse — stop here
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+
+      if (!found) {
+        chain.push({
+          step: currentDepth + 1,
+          component: currentName,
+          file: entity.file,
+        });
+      }
+      break;
+    }
+
+    return {
+      component: componentName,
+      field: fieldPath,
+      chain,
+      note: chain.length > 0
+        ? "Further resolution may require reading source at the final render location."
+        : "No render parent chain found for this component.",
+    };
+  }
+
+  async getWorkspaceInfo(projectPath: string, subProject?: string) {
+    const analysisRoot = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const workspaceDbPath = path.join(analysisRoot, ".nexiq", "workspace.sqlite");
+
+    if (!fs.existsSync(workspaceDbPath)) {
+      // Also check for a central DB in the cache directory
+      const cacheDbPath = path.join(analysisRoot, ".nexiq", "cache", "central.sqlite");
+      if (fs.existsSync(cacheDbPath)) {
+        return this._queryWorkspaceDb(cacheDbPath);
+      }
+      return { isMonorepo: false, packages: [], note: "No workspace database found. This may not be a monorepo." };
+    }
+
+    return this._queryWorkspaceDb(workspaceDbPath);
+  }
+
+  private _queryWorkspaceDb(workspaceDbPath: string) {
+    const db = new Database(workspaceDbPath, { readonly: true });
+    try {
+      const packages = db.prepare(`
+        SELECT wp.package_id, wp.name, wp.path, wp.db_path,
+               COALESCE(prs.files_total, 0) as file_count,
+               COALESCE(prs.status, 'unknown') as analysis_status
+        FROM workspace_packages wp
+        LEFT JOIN package_run_summaries prs ON wp.package_id = prs.package_id
+        ORDER BY wp.name
+      `).all() as Array<{
+        package_id: string; name: string; path: string; db_path: string;
+        file_count: number; analysis_status: string;
+      }>;
+
+      return {
+        isMonorepo: packages.length > 0,
+        packages: packages.map((p) => ({
+          packageId: p.package_id,
+          name: p.name,
+          path: p.path,
+          fileCount: p.file_count,
+          analysisStatus: p.analysis_status,
+        })),
+      };
+    } finally {
+      db.close();
+    }
+  }
+
+  async searchWorkspaceSymbol(
+    projectPath: string,
+    symbol: string,
+    subProject?: string,
+    packageName?: string,
+  ) {
+    const workspaceDbPath = this._findWorkspaceDb(projectPath, subProject);
+    if (!workspaceDbPath) {
+      return {
+        found: false,
+        matches: [],
+        note: "No workspace database found. This project may not have been analyzed as a monorepo.",
+      };
+    }
+
+    const db = new Database(workspaceDbPath, { readonly: true });
+    try {
+      const packageFilter = packageName ? "AND package_name = ?" : "";
+      const packageParams = packageName ? [packageName] : [];
+
+      const matches = db.prepare(`
+        SELECT export_name, export_type, export_kind, package_name, file_path, is_default
+        FROM package_export_index
+        WHERE export_name = ? OR export_name LIKE ? ${packageFilter}
+        ORDER BY package_name, file_path
+      `).all(symbol, `%${symbol}%`, ...packageParams) as Array<{
+        export_name: string; export_type: string; export_kind: string;
+        package_name: string; file_path: string; is_default: number;
+      }>;
+
+      return {
+        found: matches.length > 0,
+        totalPackagesSearched: db.prepare("SELECT COUNT(*) as cnt FROM workspace_packages").get() as { cnt: number },
+        matches: matches.map((m) => ({
+          exportName: m.export_name,
+          exportType: m.export_type,
+          exportKind: m.export_kind,
+          packageName: m.package_name,
+          filePath: m.file_path,
+          isDefault: m.is_default === 1,
+        })),
+      } as { found: boolean; matches: unknown[]; totalPackagesSearched: { cnt: number } };
+    } finally {
+      db.close();
+    }
+  }
+
+  async getPackageImports(projectPath: string, filePath: string, subProject?: string) {
+    const project = await this.openProject(projectPath, subProject);
+    const workspaceDbPath = this._findWorkspaceDb(projectPath, subProject);
+
+    // Get local imports from the per-package DB
+    const localImports = project.db!.db.prepare(`
+      SELECT e.name, e.data_json, e.line, e.column
+      FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      WHERE f.path = ? AND e.kind = 'import'
+      ORDER BY e.line
+    `).all(filePath) as Array<{ name: string; data_json: string | null; line: number; column: number }>;
+
+    const imports = localImports.map((imp) => {
+      const data = imp.data_json ? JSON.parse(imp.data_json) : {};
+      return {
+        localName: imp.name,
+        importedName: data.importedName || null,
+        sourceModule: data.source || null,
+        importType: data.type || "named",
+        line: imp.line,
+        column: imp.column,
+      } as Record<string, unknown>;
+    });
+
+    // Enrich with workspace info if available
+    if (workspaceDbPath) {
+      const db = new Database(workspaceDbPath, { readonly: true });
+      try {
+        const deferred = db.prepare(`
+          SELECT source_module, source_package_name, source_subpath,
+                 imported_name, import_type, local_name
+          FROM deferred_external_imports
+          WHERE file_path = ?
+        `).all(filePath) as Array<{
+          source_module: string; source_package_name: string; source_subpath: string | null;
+          imported_name: string | null; import_type: string; local_name: string;
+        }>;
+
+        if (deferred.length > 0) {
+          const deferredMap = new Map(deferred.map((d) => [d.local_name, d]));
+          for (const imp of imports) {
+            const match = deferredMap.get(imp.localName as string);
+            if (match) {
+              (imp as Record<string, unknown>).resolvedToPackage = match.source_package_name;
+              (imp as Record<string, unknown>).sourceSubpath = match.source_subpath;
+            }
+          }
+        }
+      } finally {
+        db.close();
+      }
+    }
+
+    return {
+      file: filePath,
+      totalImports: imports.length,
+      imports,
+    };
+  }
+
+  private _findWorkspaceDb(projectPath: string, subProject?: string): string | null {
+    const analysisRoot = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const candidates = [
+      path.join(analysisRoot, ".nexiq", "workspace.sqlite"),
+      path.join(analysisRoot, ".nexiq", "cache", "central.sqlite"),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) return candidate;
+    }
+    return null;
   }
 
   async getSymbolLocation(

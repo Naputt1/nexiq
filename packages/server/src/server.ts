@@ -145,6 +145,44 @@ export interface ListFilesArgs {
   exclude?: string[];
 }
 
+export interface GetRelationsArgs {
+  projectPath: string;
+  subProject?: string;
+  symbolId: string;
+  kind?: string;
+  direction?: "outgoing" | "incoming" | "both";
+  fields?: string[];
+}
+
+export interface TraceDataFlowArgs {
+  projectPath: string;
+  subProject?: string;
+  componentName: string;
+  fieldPath: string;
+  maxDepth?: number;
+  fields?: string[];
+}
+
+export interface GetWorkspaceInfoArgs {
+  projectPath: string;
+  subProject?: string;
+}
+
+export interface SearchWorkspaceSymbolArgs {
+  projectPath: string;
+  symbol: string;
+  packageName?: string;
+  subProject?: string;
+  fields?: string[];
+}
+
+export interface GetPackageImportsArgs {
+  projectPath: string;
+  filePath: string;
+  subProject?: string;
+  fields?: string[];
+}
+
 export interface GetPropDefinitionsArgs {
   projectPath: string;
   subProject?: string;
@@ -177,6 +215,11 @@ export interface MultiReplaceFileContentArgs {
 export interface ToolArgsMap {
   get_symbol_info: GetSymbolInfoArgs;
   get_field_accesses: GetFieldAccessesArgs;
+  get_relations: GetRelationsArgs;
+  trace_data_flow: TraceDataFlowArgs;
+  get_workspace_info: GetWorkspaceInfoArgs;
+  search_workspace_symbol: SearchWorkspaceSymbolArgs;
+  get_package_imports: GetPackageImportsArgs;
   get_prop_definitions: GetPropDefinitionsArgs;
   find_files: FindFilesArgs;
   get_file_imports: GetFileImportsArgs;
@@ -338,6 +381,40 @@ export class BackendServer {
           },
         },
         {
+          name: "get_relations",
+          description: "Query graph relations (edges) for a symbol/entity. Returns incoming and outgoing edges — renders, imports, usages, dependencies. Use after get_symbol_info to traverse the dependency graph.",
+          outputSchema: { type: "object", properties: { outgoing: { type: "array" }, incoming: { type: "array" } } },
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              symbolId: { type: "string", description: "Symbol ID from get_symbol_info response" },
+              kind: { type: "string", description: "Filter by relation kind: render, import, usage-read, usage-call, dependency, parent-child" },
+              direction: { type: "string", enum: ["outgoing", "incoming", "both"] },
+              fields: { type: "array", items: { type: "string" } },
+            },
+            required: ["projectPath", "symbolId"],
+          },
+        },
+        {
+          name: "trace_data_flow",
+          description: "Trace a prop/field from a component through its parent chain. Walks up render hierarchy to find how a field is passed as a prop. Each step shows which parent component passes what expression as the prop value.",
+          outputSchema: { type: "object", properties: { chain: { type: "array" } } },
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              componentName: { type: "string", description: "Component name (the child receiving the prop)" },
+              fieldPath: { type: "string", description: "Prop/field name to trace (e.g., 'postListIds')" },
+              maxDepth: { type: "number", description: "Max parent chain steps to traverse (default 3)" },
+              fields: { type: "array", items: { type: "string" } },
+            },
+            required: ["projectPath", "componentName", "fieldPath"],
+          },
+        },
+        {
           name: "find_files",
           description: "Find files by glob pattern.",
           outputSchema: { type: "object", properties: { items: { type: "array", items: { type: "object" } } } },
@@ -382,6 +459,50 @@ export class BackendServer {
               fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath"],
+          },
+        },
+        {
+          name: "get_workspace_info",
+          description: "List all workspace packages in the monorepo with their analysis status and file counts. Use when exploring a monorepo structure.",
+          outputSchema: { type: "object", properties: { packages: { type: "array" } } },
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+            },
+            required: ["projectPath"],
+          },
+        },
+        {
+          name: "search_workspace_symbol",
+          description: "Search for a symbol across all workspace packages. Uses the workspace export index. When get_symbol_info finds nothing locally, use this to locate which package exports the symbol.",
+          outputSchema: { type: "object", properties: { matches: { type: "array" } } },
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              symbol: { type: "string", description: "Symbol name to search for across all workspace packages" },
+              packageName: { type: "string", description: "Optional filter: only search within a specific package" },
+              fields: { type: "array", items: { type: "string" } },
+            },
+            required: ["projectPath", "symbol"],
+          },
+        },
+        {
+          name: "get_package_imports",
+          description: "Get a file's imports annotated with resolved workspace package information. Shows which imports are local vs cross-package, and which workspace package they resolve to.",
+          outputSchema: { type: "object", properties: { imports: { type: "array" } } },
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectPath: { type: "string" },
+              subProject: { type: "string" },
+              filePath: { type: "string", description: "Relative path from project root" },
+              fields: { type: "array", items: { type: "string" } },
+            },
+            required: ["projectPath", "filePath"],
           },
         },
         {
@@ -747,7 +868,13 @@ export class BackendServer {
         const effectiveFields = fields?.map((f) =>
           f === "usages" ? "definitions" : f,
         );
-        return this.toStructuredResult(this.filterFields(result, effectiveFields));
+        const structured = this.toStructuredResult(this.filterFields(result, effectiveFields));
+        if (result.definitions.length === 0) {
+          (structured.structuredContent as Record<string, unknown>).hint =
+            `Symbol "${query}" not found in local index. It may be in a monorepo sibling package. ` +
+            `Use 'search_workspace_symbol' to locate which workspace package exports it, or 'grep_search' as fallback.`;
+        }
+        return structured;
       }
       case "get_field_accesses": {
         const {
@@ -795,7 +922,13 @@ export class BackendServer {
           subProject,
         );
 
-        return this.toStructuredResult(this.filterFields(results, fields));
+        const structured = this.toStructuredResult(this.filterFields(results, fields));
+        if (results.length === 0) {
+          (structured.structuredContent as Record<string, unknown>).hint =
+            `No files matched pattern "${pattern}" among the indexed files. ` +
+            `The file may not exist, be excluded by ignore patterns, or live in an external monorepo package. Try simpler patterns or 'grep_search'.`;
+        }
+        return structured;
       }
 
       case "get_file_imports": {
@@ -822,6 +955,31 @@ export class BackendServer {
         );
 
         return this.toStructuredResult(this.filterFields(results, fields));
+      }
+
+      case "get_workspace_info": {
+        const { projectPath, subProject } = knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const result = await this.projectManager.getWorkspaceInfo(resolvedPath, subProject);
+        return this.toStructuredResult(result);
+      }
+
+      case "search_workspace_symbol": {
+        const { projectPath, subProject, symbol, packageName, fields } = knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const result = await this.projectManager.searchWorkspaceSymbol(
+          resolvedPath, symbol, subProject, packageName,
+        );
+        return this.toStructuredResult(this.filterFields(result, fields));
+      }
+
+      case "get_package_imports": {
+        const { projectPath, subProject, filePath, fields } = knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const result = await this.projectManager.getPackageImports(
+          resolvedPath, filePath, subProject,
+        );
+        return this.toStructuredResult(this.filterFields(result, fields));
       }
 
       case "list_files": {
@@ -931,6 +1089,34 @@ export class BackendServer {
         return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
       }
 
+      case "get_relations": {
+        const { projectPath, subProject, symbolId, kind, direction, fields } =
+          knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const result = await this.projectManager.getRelations(
+          resolvedPath,
+          symbolId,
+          subProject,
+          kind,
+          direction,
+        );
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
+      }
+
+      case "trace_data_flow": {
+        const { projectPath, subProject, componentName, fieldPath, maxDepth, fields } =
+          knownCall.args;
+        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
+        const result = await this.projectManager.traceDataFlow(
+          resolvedPath,
+          componentName,
+          fieldPath,
+          subProject,
+          maxDepth,
+        );
+        return this.toStructuredResult(this.stripIds(this.filterFields(result, fields)));
+      }
+
       case "get_symbol_location": {
         const { projectPath, subProject, query, fields } = knownCall.args;
         const resolvedPath = this.resolveProjectPath(projectPath, subProject);
@@ -996,7 +1182,13 @@ export class BackendServer {
           dirPath,
           subProject,
         );
-        return this.toStructuredResult(result);
+
+        const structured = this.toStructuredResult(result);
+        if (result.directories.length === 0 && result.files.length === 0) {
+          (structured.structuredContent as Record<string, unknown>).hint =
+            `Directory "${dirPath}" has no indexed files. Try '/' to see the root, or check if the path exists in a monorepo sub-package.`;
+        }
+        return structured;
       }
 
       case "get_file_outline": {
