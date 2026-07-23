@@ -855,7 +855,7 @@ export async function runBenchmarks(options: RunOptions) {
   const timestamp = new Date().toISOString().replace(/:/g, "-");
   const orchestrator = new BenchmarkRunner();
   const serverPath = path.resolve(REPO_ROOT, "packages/server/dist/index.js");
-  const concurrency = options.concurrency || 3;
+  const concurrency = options.concurrency || 2;
   const pool = new RunnerPool(concurrency);
 
   const tasks: {

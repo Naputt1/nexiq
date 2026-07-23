@@ -267,7 +267,7 @@ export class ProjectManager {
 
   private async acquireAnalysisLock(lockPath: string): Promise<void> {
     const staleTimeout = 600_000;
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 300; i++) {
       try {
         fs.mkdirSync(lockPath);
         return;
