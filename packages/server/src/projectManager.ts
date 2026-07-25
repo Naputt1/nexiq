@@ -1767,8 +1767,9 @@ export class ProjectManager {
       const lineIdx = locInfo.loc.line - 1;
 
       // Scan backward from symbol to find preceding interface/type declarations
-      let start = Math.max(0, lineIdx - contextLines);
-      for (let i = lineIdx - 1; i >= start; i--) {
+      const scanBoundary = Math.max(0, lineIdx - contextLines);
+      let contentStart = scanBoundary;
+      for (let i = lineIdx - 1; i >= scanBoundary; i--) {
         const line = lines[i]!.trim();
         if (
           line.startsWith("export interface") ||
@@ -1776,8 +1777,7 @@ export class ProjectManager {
           line.startsWith("export type") ||
           line.startsWith("type ")
         ) {
-          start = i;
-          break;
+          contentStart = i;
         }
       }
 
@@ -1785,7 +1785,7 @@ export class ProjectManager {
 
       results.push({
         ...locInfo,
-        content: lines.slice(start, end).join("\n"),
+        content: lines.slice(contentStart, end).join("\n"),
       });
     }
 

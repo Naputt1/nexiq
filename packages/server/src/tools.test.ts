@@ -177,6 +177,256 @@ describe("MCP Tools Integration", () => {
     });
   });
 
+  describe("get_field_accesses", () => {
+    it("should filter by owner when ownerId matches query symbol", async () => {
+      const postListEntityId = "ent-postlist";
+      const toastEntityId = "ent-toast";
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE r.kind = 'usage-read'")) {
+          s.all.mockReturnValue([
+            {
+              line: 10, column: 5,
+              data_json: JSON.stringify({
+                filePath: "/src/PostList.tsx",
+                ownerId: postListEntityId,
+                ownerKind: "component",
+                accessPath: ["postListIds"],
+                displayLabel: "props.postListIds",
+              }),
+            },
+            {
+              line: 20, column: 8,
+              data_json: JSON.stringify({
+                filePath: "/src/ToastWrapper.tsx",
+                ownerId: toastEntityId,
+                ownerKind: "component",
+                accessPath: ["postListIds"],
+                displayLabel: "props.postListIds",
+              }),
+            },
+          ]);
+        } else if (sql.includes("FROM entities e JOIN symbols s")) {
+          s.all.mockReturnValue([{ id: postListEntityId }]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_field_accesses",
+        args: { projectPath, query: "PostList", fieldPath: "postListIds", contextLines: 0 },
+      });
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+        symbol: string; fieldPath: string; results: { file: string }[]
+      };
+      expect(data.symbol).toBe("PostList");
+      expect(data.results).toHaveLength(1);
+      expect(data.results[0].file).toBe("/src/PostList.tsx");
+    });
+
+    it("should return all results when no owner matches query symbol", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE r.kind = 'usage-read'")) {
+          s.all.mockReturnValue([
+            {
+              line: 10, column: 5,
+              data_json: JSON.stringify({
+                filePath: "/src/LoginForm.tsx",
+                ownerId: "ent-loginform",
+                ownerKind: "component",
+                accessPath: ["user", "data", "role"],
+                displayLabel: "user.data.role",
+              }),
+            },
+            {
+              line: 20, column: 8,
+              data_json: JSON.stringify({
+                filePath: "/src/Profile.tsx",
+                ownerId: "ent-profile",
+                ownerKind: "component",
+                accessPath: ["user", "data", "role"],
+                displayLabel: "user.data.role",
+              }),
+            },
+          ]);
+        } else if (sql.includes("FROM entities e JOIN symbols s")) {
+          s.all.mockReturnValue([]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_field_accesses",
+        args: { projectPath, query: "useUser", fieldPath: "user.data.role", contextLines: 0 },
+      });
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+        symbol: string; fieldPath: string; results: { file: string }[]
+      };
+      expect(data.symbol).toBe("useUser");
+      expect(data.results).toHaveLength(2);
+      expect(data.results[0].file).toBe("/src/LoginForm.tsx");
+      expect(data.results[1].file).toBe("/src/Profile.tsx");
+    });
+  });
+
+  describe("get_symbol_info", () => {
+    it("should always query renders table for external usages when definitions exist", async () => {
+      let queryCounts: Record<string, number> = {};
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s") && sql.includes("WHERE s.name = ?") && !sql.includes("LIKE")) {
+          s.all.mockReturnValue([{
+            id: "sym-1", entity_id: "ent-1", name: "PostList",
+            file: "/src/post_list.tsx", line: 10, column: 5,
+            kind: "component", type: "class", data_json: null,
+          }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([{
+            file: "/src/post_view.tsx", in_name: "PostView", line: 20, column: 8,
+          }]);
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([{
+            tag: "PostList", file: "/src/another_file.tsx", line: 30, column: 5,
+            kind: "jsx", in_name: "AnotherComp",
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_symbol_info",
+        args: { projectPath, query: "PostList", usages: true },
+      });
+      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+        definitions: { file: string }[];
+        externalUsages: { file: string }[];
+      };
+      expect(data.definitions).toHaveLength(1);
+      expect(data.externalUsages).toBeDefined();
+      // The renders table result in another_file.tsx should be an external usage
+      const crossFile = data.externalUsages.find((u) => u.file === "/src/another_file.tsx");
+      expect(crossFile).toBeDefined();
+    });
+  });
+
+  describe("get_prop_definitions", () => {
+    it("should fall back to file scan when analyser props are empty", async () => {
+      let queryCount = 0;
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          queryCount++;
+          s.all.mockReturnValue([{
+            id: "sym-1", entity_id: "ent-1", name: "PostList",
+            file: "/src/post_list.tsx", line: 10, column: 5,
+            kind: "component", type: "class",
+            data_json: JSON.stringify({}),
+          }]);
+        } else if (sql.includes("FROM entities e JOIN symbols s")) {
+          s.all.mockReturnValue([]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      vi.mocked(fs.readFileSync).mockReturnValue(`interface Props {
+  postListIds: string[];
+  channelId: string;
+  focusedPostId?: string;
+}`);
+
+      const result = await server.handleCallTool({
+        name: "get_prop_definitions",
+        args: { projectPath, "componentName": "PostList" },
+      });
+      const data = (result as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
+      expect(data[0].props.length).toBeGreaterThan(0);
+      const names = data[0].props.map((p: { name: string }) => p.name);
+      expect(names).toContain("postListIds");
+      expect(names).toContain("channelId");
+      expect(names).toContain("focusedPostId");
+    });
+
+    it("should use analyser props when available (no file scan)", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM symbols s")) {
+          s.all.mockReturnValue([{
+            id: "sym-1", entity_id: "ent-1", name: "Button",
+            file: "/src/Button.tsx", line: 10, column: 5,
+            kind: "component", type: "function",
+            data_json: JSON.stringify({ props: [{ name: "isLoading", type: "boolean", kind: "prop" }] }),
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_prop_definitions",
+        args: { projectPath, "componentName": "Button" },
+      });
+      const data = (result as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
+      expect(data[0].props).toHaveLength(1);
+      expect(data[0].props[0].name).toBe("isLoading");
+    });
+  });
+
+  describe("get_project_tree", () => {
+    it("should exclude files matching exclude patterns", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("SELECT path FROM files")) {
+          s.all.mockReturnValue([
+            { path: "/src/App.tsx" },
+            { path: "/src/test/App.test.tsx" },
+            { path: "/src/components/Button.tsx" },
+            { path: "/src/node_modules/pkg/index.ts" },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_project_tree",
+        args: { projectPath, maxDepth: 3, exclude: ["**/node_modules/**", "**/*.test.*"] },
+      });
+      const tree = (result as { structuredContent: { name: string; children: { name: string; children: { name: string }[] }[] } }).structuredContent;
+
+      const allNodeNames = (nodes: { name: string; children?: unknown[] }[]): string[] =>
+        nodes.flatMap((n) => [n.name, ...(n.children ? allNodeNames(n.children as { name: string; children?: unknown[] }[]) : [])]);
+
+      expect(allNodeNames(tree.children)).not.toContain("App.test.tsx");
+      expect(allNodeNames(tree.children)).not.toContain("node_modules");
+    });
+
+    it("should only include files matching include patterns", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("SELECT path FROM files")) {
+          s.all.mockReturnValue([
+            { path: "/src/App.tsx" },
+            { path: "/src/components/Button.tsx" },
+            { path: "/src/utils/helpers.ts" },
+          ]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await server.handleCallTool({
+        name: "get_project_tree",
+        args: { projectPath, maxDepth: 3, include: ["**/src/components/**"] },
+      });
+      const tree = (result as { structuredContent: { children: { name: string; children: { name: string }[] }[] } }).structuredContent;
+
+      expect(tree.children[0].name).toBe("src");
+      const childNames = tree.children[0].children.map((c: { name: string }) => c.name);
+      expect(childNames).toContain("components");
+      // App.tsx and utils should be excluded by the include filter
+      expect(childNames).not.toContain("App.tsx");
+      expect(childNames).not.toContain("utils");
+    });
+  });
+
   it("find_files: should support glob patterns", async () => {
     const result = await server.handleCallTool({ name: "find_files", args: { projectPath, pattern: "**/*.tsx" } });
     const files = (result as { structuredContent: { items: string[] } }).structuredContent.items;
