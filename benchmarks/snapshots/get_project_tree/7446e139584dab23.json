@@ -1,7 +1,7 @@
 {
   "arguments": {
-    "maxDepth": 2,
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large"
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/large",
+    "maxDepth": 2
   },
   "result": {
     "content": [

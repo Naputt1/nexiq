@@ -1018,11 +1018,25 @@ export class ProjectManager {
       false, // includeUsages
     );
 
-    return symbolInfo.definitions.map((def) => ({
-      name: def.name,
-      file: def.file,
-      props: def.props || [],
-    }));
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
+    const results = [];
+
+    for (const def of symbolInfo.definitions) {
+      let props = def.props || [];
+      if (props.length === 0 && def.file && analysisPath) {
+        const fullPath = path.resolve(
+          analysisPath,
+          def.file.startsWith("/") ? def.file.slice(1) : def.file,
+        );
+        if (fs.existsSync(fullPath)) {
+          const content = fs.readFileSync(fullPath, "utf-8");
+          props = extractPropsFromSource(content);
+        }
+      }
+      results.push({ name: def.name, file: def.file, props });
+    }
+
+    return results;
   }
 
   async findFiles(projectPath: string, pattern: string, subProject?: string) {
@@ -1319,22 +1333,14 @@ export class ProjectManager {
     maxDepth: number = 3,
   ) {
     const project = await this.openProject(projectPath, subProject);
-    const chain: {
-      step: number;
-      component: string;
-      file: string;
-      renderLoc?: { line: number; column: number };
-      expression?: { type: string; name: string; refType?: string };
-    }[] = [];
 
-    const findEntityStmt = project.db!.db.prepare(`
+    const findEntitiesStmt = project.db!.db.prepare(`
       SELECT e.id, s.id as symbol_id, f.path as file
       FROM entities e
       JOIN scopes sc ON e.scope_id = sc.id
       JOIN files f ON sc.file_id = f.id
       LEFT JOIN symbols s ON s.entity_id = e.id
       WHERE s.name = ? AND e.kind = 'component'
-      LIMIT 1
     `);
 
     const findParentStmt = project.db!.db.prepare(`
@@ -1346,6 +1352,18 @@ export class ProjectManager {
       JOIN scopes sc_parent ON e_parent.scope_id = sc_parent.id
       JOIN files f_parent ON sc_parent.file_id = f_parent.id
       WHERE rel.from_id = ? AND rel.kind = 'render'
+    `);
+
+    const findParentByRenderStmt = project.db!.db.prepare(`
+      SELECT DISTINCT e.id as parent_entity_id,
+             s.name as parent_name,
+             f.path as parent_file
+      FROM renders r
+      JOIN entities e ON r.parent_entity_id = e.id
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      LEFT JOIN symbols s ON s.entity_id = e.id
+      WHERE r.tag = ?
     `);
 
     const findRenderStmt = project.db!.db.prepare(`
@@ -1362,85 +1380,125 @@ export class ProjectManager {
       LIMIT 1
     `);
 
-    let currentName = componentName;
-    let currentField = fieldPath;
-    let currentDepth = 0;
-
-    while (currentDepth < maxDepth) {
-      const entity = findEntityStmt.get(currentName) as { id: string; symbol_id: string; file: string } | undefined;
-      if (!entity) {
-        if (chain.length === 0) {
-          return { error: `Component "${currentName}" not found.` };
-        }
-        break;
-      }
-
-      const parents = findParentStmt.all(entity.id) as { parent_entity_id: string; parent_name: string; parent_file: string }[];
-      if (parents.length === 0) {
-        chain.push({
-          step: currentDepth + 1,
-          component: currentName,
-          file: entity.file,
-        });
-        break;
-      }
-
-      let found = false;
-      for (const parent of parents) {
-        const renders = findRenderStmt.all(parent.parent_entity_id, currentName) as RenderRow[];
-        for (const render of renders) {
-          if (!render.data_json) continue;
-          const data = JSON.parse(render.data_json);
-          const deps: Array<{ name: string; value: { type: string; name: string; refType?: string }; valueId?: string }> = data.dependencies || [];
-          const dep = deps.find((d) => d.name === currentField);
-          if (dep) {
-            const expression = { type: dep.value.type, name: dep.value.name, refType: dep.value.refType };
-            chain.push({
-              step: currentDepth + 1,
-              component: currentName,
-              file: entity.file,
-              renderLoc: { line: render.line || 0, column: render.column || 0 },
-              expression,
-            });
-
-            // Check if the expression is a prop reference on the parent — if so, recurse
-            if (
-              expression.type === "ref" &&
-              expression.refType === "named" &&
-              currentDepth + 1 < maxDepth
-            ) {
-              const hasProp = hasPropStmt.get(parent.parent_entity_id, expression.name) as { "1": number } | undefined;
-              if (hasProp) {
-                currentName = parent.parent_name;
-                currentField = expression.name;
-                currentDepth++;
-                found = true;
-                break;
-              }
-            }
-            // Found dependency but can't recurse — stop here
-            found = true;
-            break;
-          }
-        }
-        if (found) break;
-      }
-
-      if (!found) {
-        chain.push({
-          step: currentDepth + 1,
-          component: currentName,
-          file: entity.file,
-        });
-      }
-      break;
+    interface TraceResult {
+      chain: {
+        step: number;
+        component: string;
+        file: string;
+        renderLoc?: { line: number; column: number };
+        expression?: { type: string; name: string; refType?: string };
+      }[];
+      depth: number;
+      fieldFound: boolean;
     }
+
+    const entities = findEntitiesStmt.all(componentName) as { id: string; symbol_id: string; file: string }[];
+    if (entities.length === 0) {
+      return { error: `Component "${componentName}" not found.` };
+    }
+
+    const traceFrom = (startEntity: { id: string; file: string }): TraceResult => {
+      const chain: TraceResult['chain'] = [];
+      let currentEntityId = startEntity.id;
+      let currentEntityFile = startEntity.file;
+      let currentName = componentName;
+      let currentField = fieldPath;
+      let currentDepth = 0;
+      let fieldFound = false;
+
+      while (currentDepth < maxDepth) {
+        const parents = findParentStmt.all(currentEntityId) as {
+          parent_entity_id: string; parent_name: string; parent_file: string;
+        }[];
+
+        let allParents = [...parents];
+
+        // Fallback: renders table when graph edges don't resolve
+        if (allParents.length === 0) {
+          const renderParents = findParentByRenderStmt.all(currentName) as {
+            parent_entity_id: string; parent_name: string; parent_file: string;
+          }[];
+          allParents = renderParents.filter((p) => p.parent_file !== currentEntityFile);
+        }
+
+        if (allParents.length === 0) {
+          chain.push({
+            step: currentDepth + 1,
+            component: currentName,
+            file: currentEntityFile,
+          });
+          break;
+        }
+
+        let found = false;
+        for (const parent of allParents) {
+          const renders = findRenderStmt.all(parent.parent_entity_id, currentName) as RenderRow[];
+          for (const render of renders) {
+            if (!render.data_json) continue;
+            const data = JSON.parse(render.data_json);
+            const deps: Array<{ name: string; value: { type: string; name: string; refType?: string }; valueId?: string }> = data.dependencies || [];
+            const dep = deps.find((d) => d.name === currentField);
+            if (dep) {
+              fieldFound = true;
+              const expression = { type: dep.value.type, name: dep.value.name, refType: dep.value.refType };
+              chain.push({
+                step: currentDepth + 1,
+                component: currentName,
+                file: currentEntityFile,
+                renderLoc: { line: render.line || 0, column: render.column || 0 },
+                expression,
+              });
+
+              // Recurse to parent if expression references a parent prop
+              if (
+                expression.type === "ref" &&
+                expression.refType === "named" &&
+                currentDepth + 1 < maxDepth
+              ) {
+                const hasProp = hasPropStmt.get(parent.parent_entity_id, expression.name) as { "1": number } | undefined;
+                if (hasProp) {
+                  currentEntityId = parent.parent_entity_id;
+                  currentEntityFile = parent.parent_file;
+                  currentName = parent.parent_name;
+                  currentField = expression.name;
+                  currentDepth++;
+                  found = true;
+                  break;
+                }
+              }
+              found = true;
+              break;
+            }
+          }
+          if (found) break;
+        }
+
+        if (!found) {
+          chain.push({
+            step: currentDepth + 1,
+            component: currentName,
+            file: currentEntityFile,
+          });
+        }
+        break;
+      }
+
+      return { chain, depth: currentDepth, fieldFound };
+    };
+
+    const results = entities.map((e) => traceFrom(e));
+    results.sort((a, b) => {
+      if (a.fieldFound !== b.fieldFound) return b.fieldFound ? 1 : -1;
+      return b.depth - a.depth;
+    });
+
+    const best = results[0] || { chain: [], depth: 0, fieldFound: false };
 
     return {
       component: componentName,
       field: fieldPath,
-      chain,
-      note: chain.length > 0
+      chain: best.chain,
+      note: best.chain.length > 0
         ? "Further resolution may require reading source at the final render location."
         : "No render parent chain found for this component.",
     };
@@ -2468,4 +2526,46 @@ export class ProjectManager {
       isMultiProject,
     };
   }
+}
+
+function extractPropsFromSource(content: string): { name: string; type: string; kind: string }[] {
+  const props: { name: string; type: string; kind: string }[] = [];
+  const lines = content.split("\n");
+  let inInterface = false;
+  let interfaceDepth = 0;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!inInterface) {
+      if (
+        /^(export\s+)?interface\s+Props/.test(line) ||
+        /^(export\s+)?type\s+Props\s*=/.test(line)
+      ) {
+        inInterface = true;
+        interfaceDepth = line.includes("{") ? (line.match(/{/g) || []).length : 0;
+        if (interfaceDepth === 0) interfaceDepth = 1;
+      }
+      continue;
+    }
+
+    interfaceDepth += (line.match(/{/g) || []).length;
+    interfaceDepth -= (line.match(/}/g) || []).length;
+
+    if (interfaceDepth <= 0) {
+      inInterface = false;
+      interfaceDepth = 0;
+      continue;
+    }
+
+    const propMatch = line.match(/^\s*(\w[\w\d_]*)\??\s*:/);
+    if (propMatch) {
+      const name = propMatch[1];
+      if (!props.some((p) => p.name === name)) {
+        props.push({ name, type: "any", kind: "prop" });
+      }
+    }
+  }
+
+  return props;
 }

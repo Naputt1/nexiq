@@ -7,8 +7,66 @@
     "content": [
       {
         "type": "text",
-        "text": "[\n  {\n    \"id\": \"557a295414e87777\",\n    \"name\": \"LoggedOutView\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 5\n  },\n  {\n    \"id\": \"8982493f10e4e4fd\",\n    \"name\": \"LoggedInView\",\n    \"kind\": \"component\",\n    \"type\": \"function\",\n    \"line\": 20\n  },\n  {\n    \"id\": \"6410381af30c57\",\n    \"name\": \"Header\",\n    \"kind\": \"component\",\n    \"type\": \"class\",\n    \"line\": 49\n  }\n]"
+        "text": "[{\"name\":\"NavLink\",\"kind\":\"component\",\"type\":\"function\",\"line\":4},{\"name\":\"to\",\"kind\":\"prop\",\"type\":\"data\",\"line\":4},{\"name\":\"children\",\"kind\":\"prop\",\"type\":\"data\",\"line\":4},{\"name\":\"LoggedOutView\",\"kind\":\"component\",\"type\":\"function\",\"line\":12},{\"name\":\"props\",\"kind\":\"prop\",\"type\":\"data\",\"line\":12},{\"name\":\"LoggedInView\",\"kind\":\"component\",\"type\":\"function\",\"line\":35},{\"name\":\"props\",\"kind\":\"prop\",\"type\":\"data\",\"line\":35},{\"name\":\"Header\",\"kind\":\"component\",\"type\":\"class\",\"line\":64},{\"name\":\"render\",\"kind\":\"method\",\"type\":\"function\",\"line\":65}]"
       }
-    ]
+    ],
+    "structuredContent": {
+      "items": [
+        {
+          "name": "NavLink",
+          "kind": "component",
+          "type": "function",
+          "line": 4
+        },
+        {
+          "name": "to",
+          "kind": "prop",
+          "type": "data",
+          "line": 4
+        },
+        {
+          "name": "children",
+          "kind": "prop",
+          "type": "data",
+          "line": 4
+        },
+        {
+          "name": "LoggedOutView",
+          "kind": "component",
+          "type": "function",
+          "line": 12
+        },
+        {
+          "name": "props",
+          "kind": "prop",
+          "type": "data",
+          "line": 12
+        },
+        {
+          "name": "LoggedInView",
+          "kind": "component",
+          "type": "function",
+          "line": 35
+        },
+        {
+          "name": "props",
+          "kind": "prop",
+          "type": "data",
+          "line": 35
+        },
+        {
+          "name": "Header",
+          "kind": "component",
+          "type": "class",
+          "line": 64
+        },
+        {
+          "name": "render",
+          "kind": "method",
+          "type": "function",
+          "line": 65
+        }
+      ]
+    }
   }
 }
