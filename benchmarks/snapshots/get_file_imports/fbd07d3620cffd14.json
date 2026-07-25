@@ -1,44 +1,15 @@
 {
   "arguments": {
-    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite",
-    "filePath": "/src/lib/authorization.tsx"
+    "filePath": "/src/lib/authorization.tsx",
+    "projectPath": "/Users/naputt/code/nexiq/nexiq/benchmarks/projects/small/apps/react-vite"
   },
   "result": {
     "content": [
       {
         "type": "text",
-        "text": "{\"React\":{\"localName\":\"React\",\"importedName\":\"*\",\"source\":\"react\",\"type\":\"namespace\",\"importKind\":\"value\"},\"Comment\":{\"localName\":\"Comment\",\"importedName\":\"Comment\",\"source\":\"/src/types/api.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"User\":{\"localName\":\"User\",\"importedName\":\"User\",\"source\":\"/src/types/api.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"useUser\":{\"localName\":\"useUser\",\"importedName\":\"useUser\",\"source\":\"/src/lib/auth.tsx\",\"type\":\"named\",\"importKind\":\"value\"}}"
+        "text": "File not found: /src/lib/authorization.tsx"
       }
     ],
-    "structuredContent": {
-      "React": {
-        "localName": "React",
-        "importedName": "*",
-        "source": "react",
-        "type": "namespace",
-        "importKind": "value"
-      },
-      "Comment": {
-        "localName": "Comment",
-        "importedName": "Comment",
-        "source": "/src/types/api.ts",
-        "type": "named",
-        "importKind": "value"
-      },
-      "User": {
-        "localName": "User",
-        "importedName": "User",
-        "source": "/src/types/api.ts",
-        "type": "named",
-        "importKind": "value"
-      },
-      "useUser": {
-        "localName": "useUser",
-        "importedName": "useUser",
-        "source": "/src/lib/auth.tsx",
-        "type": "named",
-        "importKind": "value"
-      }
-    }
+    "isError": true
   }
 }

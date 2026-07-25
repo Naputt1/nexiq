@@ -807,30 +807,49 @@ export class ProjectManager {
       definitions_results.push(definition);
     }
 
-    // 3. Query renders table for JSX usages — handles cross-file render refs
-    //    that the graph edges (relations) may not have resolved
+    // 3. Query usage-render-call relations for cross-file JSX usage
+    //    These are created by usageCollector.ts during analysis and always
+    //    have correct cross-file data (unlike the renders table which misses
+    //    entries created during the resolve phase)
     if (includeUsages) {
       const defFiles = new Set(definitions_results.map((d) => d.file));
       const results = project
         .db!.db.prepare(
           `
-        SELECT r.*, f.path as file, s.name as in_name 
-        FROM renders r 
-        JOIN files f ON r.file_id = f.id
-        LEFT JOIN entities e ON r.parent_entity_id = e.id
-        LEFT JOIN symbols s ON s.entity_id = e.id
-        WHERE r.tag = ?
+        SELECT DISTINCT rel.line, rel.column, rel.data_json,
+               e_from.name as in_name,
+               f.path as file
+        FROM relations rel
+        JOIN entities e_from ON rel.from_id = e_from.id
+        JOIN scopes sc_from ON e_from.scope_id = sc_from.id
+        JOIN files f ON sc_from.file_id = f.id
+        WHERE rel.kind = 'usage-render-call'
+          AND json_extract(rel.data_json, '$.displayLabel') = ?
       `,
         )
-        .all(query) as ExtendedRenderRow[];
+        .all(query) as {
+        line: number;
+        column: number;
+        data_json: string | null;
+        in_name: string;
+        file: string;
+      }[];
 
       for (const usage of results) {
         if (isExcluded(usage.file)) continue;
         if (defFiles.has(usage.file)) continue;
 
+        let tag = query;
+        if (usage.data_json) {
+          try {
+            const data = JSON.parse(usage.data_json);
+            if (data.displayLabel) tag = data.displayLabel;
+          } catch {}
+        }
+
         externalUsages.push({
-          kind: usage.kind === "jsx" ? "render" : "call",
-          name: usage.tag,
+          kind: "render",
+          name: tag,
           file: usage.file,
           loc: { line: usage.line || 0, column: usage.column || 0 },
           in: usage.in_name || "unknown",
@@ -1355,15 +1374,15 @@ export class ProjectManager {
     `);
 
     const findParentByRenderStmt = project.db!.db.prepare(`
-      SELECT DISTINCT e.id as parent_entity_id,
-             s.name as parent_name,
-             f.path as parent_file
-      FROM renders r
-      JOIN entities e ON r.parent_entity_id = e.id
-      JOIN scopes sc ON e.scope_id = sc.id
-      JOIN files f ON sc.file_id = f.id
-      LEFT JOIN symbols s ON s.entity_id = e.id
-      WHERE r.tag = ?
+      SELECT DISTINCT e_from.id as parent_entity_id,
+             e_from.name as parent_name,
+             f_from.path as parent_file
+      FROM relations rel
+      JOIN entities e_from ON rel.from_id = e_from.id
+      JOIN scopes sc_from ON e_from.scope_id = sc_from.id
+      JOIN files f_from ON sc_from.file_id = f_from.id
+      WHERE rel.kind = 'usage-render-call'
+        AND json_extract(rel.data_json, '$.displayLabel') = ?
     `);
 
     const findRenderStmt = project.db!.db.prepare(`

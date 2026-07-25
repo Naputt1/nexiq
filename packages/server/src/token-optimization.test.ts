@@ -202,6 +202,8 @@ describe("Token Optimization Tools", () => {
               kind: "component",
             },
           ]);
+        } else if (sql.includes("usage-render-call")) {
+          s.all.mockReturnValue([]);
         } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([
             {

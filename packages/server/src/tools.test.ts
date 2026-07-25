@@ -137,9 +137,12 @@ describe("MCP Tools Integration", () => {
         const s = createMockStmt();
         if (sql.includes("FROM symbols s")) {
           s.all.mockReturnValue([]);
-        } else if (sql.includes("FROM renders r")) {
+        } else if (sql.includes("usage-render-call")) {
           s.all.mockReturnValue([{
-            tag: "div", file: "/src/App.tsx", line: 5, column: 5, kind: "jsx"
+            line: 5, column: 5,
+            data_json: JSON.stringify({ displayLabel: "div" }),
+            in_name: "App",
+            file: "/src/App.tsx",
           }]);
         }
         return s as unknown as Database.Statement;
@@ -281,14 +284,19 @@ describe("MCP Tools Integration", () => {
             file: "/src/post_list.tsx", line: 10, column: 5,
             kind: "component", type: "class", data_json: null,
           }]);
+        } else if (sql.includes("usage-render-call")) {
+          s.all.mockReturnValue([{
+            line: 30, column: 5,
+            data_json: JSON.stringify({ displayLabel: "PostList" }),
+            in_name: "AnotherComp",
+            file: "/src/another_file.tsx",
+          }]);
         } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([{
-            file: "/src/post_view.tsx", in_name: "PostView", line: 20, column: 8,
-          }]);
-        } else if (sql.includes("FROM renders r")) {
-          s.all.mockReturnValue([{
-            tag: "PostList", file: "/src/another_file.tsx", line: 30, column: 5,
-            kind: "jsx", in_name: "AnotherComp",
+            line: 30, column: 5,
+            data_json: JSON.stringify({ displayLabel: "PostList" }),
+            in_name: "AnotherComp",
+            file: "/src/another_file.tsx",
           }]);
         }
         return s as unknown as Database.Statement;

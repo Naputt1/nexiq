@@ -970,15 +970,15 @@ describe("ProjectManager", () => {
           } else {
             s.all.mockReturnValue([]);
           }
-        } else if (sql.includes("FROM relations rel")) {
-          s.all.mockReturnValue([]);
         } else if (sql.includes("DISTINCT")) {
-          // findParentByRenderStmt
+          // findParentByRenderStmt (usage-render-call fallback)
           s.all.mockReturnValue([{
             parent_entity_id: "ent-parent",
             parent_name: "PostView",
             parent_file: "/src/post_view.tsx",
           }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
         } else if (sql.includes("SELECT r.*")) {
           // findRenderStmt (has SELECT r.* and LIMIT 1)
           s.all.mockReturnValue([{
@@ -1005,12 +1005,12 @@ describe("ProjectManager", () => {
         const s = createMockStmt();
         if (sql.includes("FROM entities e") && sql.includes("JOIN scopes sc")) {
           s.all.mockReturnValue([{ id: "ent-outer", symbol_id: "sym-o", file: "/src/post_list.tsx" }]);
-        } else if (sql.includes("FROM relations rel")) {
-          s.all.mockReturnValue([]);
         } else if (sql.includes("DISTINCT")) {
           s.all.mockReturnValue([{
             parent_entity_id: "ent-parent", parent_name: "PostView", parent_file: "/src/post_view.tsx",
           }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
         } else if (sql.includes("SELECT r.*")) {
           s.all.mockReturnValue([{
             data_json: JSON.stringify({
