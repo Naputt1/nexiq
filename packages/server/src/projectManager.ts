@@ -2415,7 +2415,8 @@ export class ProjectManager {
     filePath: string,
     content: string,
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }
@@ -2436,7 +2437,8 @@ export class ProjectManager {
     oldString: string,
     newString: string,
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }
@@ -2463,7 +2465,8 @@ export class ProjectManager {
     filePath: string,
     replacements: { oldString: string; newString: string }[],
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }

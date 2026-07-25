@@ -7,52 +7,9 @@
     "content": [
       {
         "type": "text",
-        "text": "{\"Slot\":{\"localName\":\"Slot\",\"importedName\":\"Slot\",\"source\":\"@radix-ui/react-slot\",\"type\":\"named\",\"importKind\":\"value\"},\"cva\":{\"localName\":\"cva\",\"importedName\":\"cva\",\"source\":\"class-variance-authority\",\"type\":\"named\",\"importKind\":\"value\"},\"VariantProps\":{\"localName\":\"VariantProps\",\"importedName\":\"VariantProps\",\"source\":\"class-variance-authority\",\"type\":\"named\",\"importKind\":\"value\"},\"React\":{\"localName\":\"React\",\"importedName\":\"*\",\"source\":\"react\",\"type\":\"namespace\",\"importKind\":\"value\"},\"cn\":{\"localName\":\"cn\",\"importedName\":\"cn\",\"source\":\"/src/utils/cn.ts\",\"type\":\"named\",\"importKind\":\"value\"},\"Spinner\":{\"localName\":\"Spinner\",\"importedName\":\"Spinner\",\"source\":\"/src/components/ui/spinner/index.ts\",\"type\":\"named\",\"importKind\":\"value\"}}"
+        "text": "File not found: /src/components/ui/button/button.tsx"
       }
     ],
-    "structuredContent": {
-      "Slot": {
-        "localName": "Slot",
-        "importedName": "Slot",
-        "source": "@radix-ui/react-slot",
-        "type": "named",
-        "importKind": "value"
-      },
-      "cva": {
-        "localName": "cva",
-        "importedName": "cva",
-        "source": "class-variance-authority",
-        "type": "named",
-        "importKind": "value"
-      },
-      "VariantProps": {
-        "localName": "VariantProps",
-        "importedName": "VariantProps",
-        "source": "class-variance-authority",
-        "type": "named",
-        "importKind": "value"
-      },
-      "React": {
-        "localName": "React",
-        "importedName": "*",
-        "source": "react",
-        "type": "namespace",
-        "importKind": "value"
-      },
-      "cn": {
-        "localName": "cn",
-        "importedName": "cn",
-        "source": "/src/utils/cn.ts",
-        "type": "named",
-        "importKind": "value"
-      },
-      "Spinner": {
-        "localName": "Spinner",
-        "importedName": "Spinner",
-        "source": "/src/components/ui/spinner/index.ts",
-        "type": "named",
-        "importKind": "value"
-      }
-    }
+    "isError": true
   }
 }
