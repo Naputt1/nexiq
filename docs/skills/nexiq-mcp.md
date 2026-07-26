@@ -198,3 +198,5 @@ Treat empty results with a `hint` as diagnostic feedback, not dead ends. Switch 
 - `list_files` caps at 50 files for large projects — use `find_files` or `list_directory` for specific queries
 - `get_component_hierarchy` with `depth: 1` is enough for most questions
 - Default excludes (node_modules, test, build) are already applied to all tools
+- **`get_project_tree` is expensive** — returns the full directory tree (~10K+ tokens for large projects). Use `find_files(pattern)` for targeted file discovery instead.
+- **`grep_search` searches all project files** — not just analyzed files. It costs ~20 tokens per call, making it the cheapest fallback when specialised tools fail. Always use `grep_search` over `run_shell_command` for text searches.
