@@ -2536,6 +2536,7 @@ export class ProjectManager {
   }
 
   private getAnalysisPath(projectPath: string, subProject?: string): string {
+    projectPath = this.ensureDirectory(projectPath);
     if (!subProject) return projectPath;
     if (path.isAbsolute(subProject)) {
       // If it's inside projectPath, we can still use it.
