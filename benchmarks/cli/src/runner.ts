@@ -493,9 +493,7 @@ export class BenchmarkRunner {
               "run_shell_command",
             ].includes(t.name),
           )
-        : allTools.filter(
-            (t) => !["grep_search", "run_shell_command"].includes(t.name),
-          ); // Force specialized tools for nexiq approach
+        : allTools; // All tools available — skill doc guides optimal usage
 
     const pathPrefix = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls.`;
     const pathContext = approach === "nexiq-skill"

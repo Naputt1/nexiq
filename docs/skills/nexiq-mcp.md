@@ -14,6 +14,27 @@ Efficient codebase exploration with nexiq's specialized tools.
 3. **Batch related queries** — one `get_symbol_info` with `usages: true` is cheaper than two calls
 4. **Read content via `get_symbol_content`** — not `read_file` — returns only the relevant symbol
 
+## Scope & Limitations
+
+Nexiq's specialised tools (`get_symbol_info`, `get_symbol_content`, `get_prop_definitions`, `get_field_accesses`, `trace_data_flow`, `get_component_hierarchy`) only work for **source code within the open project** that has been analyzed by the static analysis pipeline. They do **NOT** work for:
+
+- External dependencies in `node_modules/`
+- Symbols from imported packages (`@mattermost/components`, etc.)
+- Code in sub-packages not included in analysis scope
+
+**How to detect:** These tools return `"Symbol not found"`, `{definitions: []}`, `{props: []}`, or empty `results: []` when the symbol is outside analysis scope.
+
+**Fallback:** When specialised tools fail, use generic tools instead:
+
+```
+find_files(pattern: "**/ComponentName*")
+  → locate the file anywhere in the project
+grep_search(pattern: "ComponentName")
+  → find references across all source files
+read_file(filePath)
+  → read source directly when tools can't parse it
+```
+
 ## Optimal Tool Sequences
 
 ### Finding and understanding a component
