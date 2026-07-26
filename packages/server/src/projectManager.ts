@@ -373,8 +373,19 @@ export class ProjectManager {
     try {
       const stat = fs.statSync(p);
       if (stat.isFile()) return path.dirname(p);
+      return p; // Already a directory
     } catch {
-      // Non-existent or inaccessible — pass through as-is
+      // Path doesn't exist — walk up to find the first existing directory
+      let current = p;
+      for (let i = 0; i < 20; i++) {
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        try {
+          const stat = fs.statSync(parent);
+          if (stat.isDirectory()) return parent;
+        } catch {}
+        current = parent;
+      }
     }
     return p;
   }
