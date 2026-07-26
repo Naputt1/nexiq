@@ -368,13 +368,26 @@ export class ProjectManager {
     return {} as JsonData;
   }
 
+  /** If `p` is a file path, return its parent directory; otherwise return as-is. */
+  private ensureDirectory(p: string): string {
+    try {
+      const stat = fs.statSync(p);
+      if (stat.isFile()) return path.dirname(p);
+    } catch {
+      // Non-existent or inaccessible — pass through as-is
+    }
+    return p;
+  }
+
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
+    // LLM sometimes passes a file path instead of project root; resolve to directory
+    const safeProjectPath = this.ensureDirectory(projectPath);
     const { analysisPath, cacheRoot, cacheDir, cacheFile, sqlitePath } =
-      this.getProjectStoragePaths(projectPath, subProject, subProjects);
+      this.getProjectStoragePaths(safeProjectPath, subProject, subProjects);
 
     const isMultiProject = subProjects && subProjects.length > 0;
 
