@@ -54,15 +54,6 @@ export interface GetFileImportsArgs {
   fields?: string[];
 }
 
-export interface GetProjectTreeArgs {
-  projectPath: string;
-  subProject?: string;
-  maxDepth?: number;
-  exclude?: string[];
-  include?: string[];
-  fields?: string[];
-}
-
 export interface GetComponentHierarchyArgs {
   projectPath: string;
   subProject?: string;
@@ -223,7 +214,6 @@ export interface ToolArgsMap {
   get_prop_definitions: GetPropDefinitionsArgs;
   find_files: FindFilesArgs;
   get_file_imports: GetFileImportsArgs;
-  get_project_tree: GetProjectTreeArgs;
   list_files: ListFilesArgs;
   get_component_hierarchy: GetComponentHierarchyArgs;
   get_symbol_location: GetSymbolLocationArgs;
@@ -442,23 +432,6 @@ export class BackendServer {
               fields: { type: "array", items: { type: "string" } },
             },
             required: ["projectPath", "filePath"],
-          },
-        },
-        {
-          name: "get_project_tree",
-          description: "Get project directory tree.",
-          outputSchema: { type: "object" },
-          inputSchema: {
-            type: "object",
-            properties: {
-              projectPath: { type: "string" },
-              subProject: { type: "string" },
-              maxDepth: { type: "number" },
-              exclude: { type: "array", items: { type: "string" } },
-              include: { type: "array", items: { type: "string" } },
-              fields: { type: "array", items: { type: "string" } },
-            },
-            required: ["projectPath"],
           },
         },
         {
@@ -938,20 +911,6 @@ export class BackendServer {
           resolvedPath,
           filePath,
           subProject,
-        );
-
-        return this.toStructuredResult(this.filterFields(results, fields));
-      }
-
-      case "get_project_tree": {
-        const { projectPath, subProject, maxDepth, exclude, include, fields } = knownCall.args;
-        const resolvedPath = this.resolveProjectPath(projectPath, subProject);
-        const results = await this.projectManager.getProjectTree(
-          resolvedPath,
-          subProject,
-          maxDepth,
-          exclude || DEFAULT_EXCLUDES,
-          include,
         );
 
         return this.toStructuredResult(this.filterFields(results, fields));

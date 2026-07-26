@@ -153,11 +153,6 @@ export interface FieldAccessResult {
   context: string[];
 }
 
-interface TreeNode {
-  name: string;
-  children: TreeNode[];
-}
-
 export interface ComponentHierarchyNode {
   id: string;
   name: string;
@@ -1142,49 +1137,6 @@ export class ProjectManager {
     const file = project.graph?.files?.[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
     return file.import;
-  }
-
-  async getProjectTree(
-    projectPath: string,
-    subProject?: string,
-    maxDepth: number = 3,
-    exclude?: string[],
-    include?: string[],
-  ): Promise<TreeNode> {
-    const project = await this.openProject(projectPath, subProject);
-
-    const root: TreeNode = { name: "/", children: [] };
-    const rows = project
-      .db!.db.prepare("SELECT path FROM files ORDER BY path")
-      .all() as { path: string }[];
-    const paths = rows
-      .map((r) => r.path)
-      .filter((p) => {
-        if (include && include.length > 0 && !include.some((g) => minimatch(p, g) || minimatch(path.basename(p), g))) return false;
-        if (exclude && exclude.length > 0 && exclude.some((g) => minimatch(p, g) || minimatch(path.basename(p), g))) return false;
-        return true;
-      });
-
-    for (const filePath of paths) {
-      const parts = filePath.split("/").filter(Boolean);
-      let current = root;
-      for (let i = 0; i < Math.min(parts.length, maxDepth); i++) {
-        const part = parts[i]!;
-        let node = current.children.find((c) => c.name === part);
-        if (!node) {
-          node = { name: part, children: [] };
-          current.children.push(node);
-        }
-        current = node;
-      }
-    }
-
-    const sortNodes = (node: TreeNode) => {
-      node.children.sort((a, b) => a.name.localeCompare(b.name));
-      for (const child of node.children) sortNodes(child);
-    };
-    sortNodes(root);
-    return root;
   }
 
   async getComponentHierarchy(

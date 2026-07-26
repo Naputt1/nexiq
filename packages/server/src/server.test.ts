@@ -456,22 +456,6 @@ describe("BackendServer", () => {
       ).toEqual(mockResult);
     });
 
-    it("should handle get_project_tree tool", async () => {
-      const mockResult = { name: "/", children: [] };
-      vi.mocked(mockProjectManager.getProjectTree).mockResolvedValue(
-        mockResult,
-      );
-      const result = await server.handleCallTool({
-        name: "get_project_tree",
-        args: {
-          projectPath: "/p",
-        },
-      });
-      expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
-      ).toEqual(mockResult);
-    });
-
     it("should handle get_component_hierarchy tool", async () => {
       const mockResult = { component: "App", hierarchies: [], renderedBy: [] };
       vi.mocked(mockProjectManager.getComponentHierarchy).mockResolvedValue(

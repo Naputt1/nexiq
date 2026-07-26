@@ -379,61 +379,6 @@ describe("MCP Tools Integration", () => {
     });
   });
 
-  describe("get_project_tree", () => {
-    it("should exclude files matching exclude patterns", async () => {
-      mockDb.prepare.mockImplementation((sql: string) => {
-        const s = createMockStmt();
-        if (sql.includes("SELECT path FROM files")) {
-          s.all.mockReturnValue([
-            { path: "/src/App.tsx" },
-            { path: "/src/test/App.test.tsx" },
-            { path: "/src/components/Button.tsx" },
-            { path: "/src/node_modules/pkg/index.ts" },
-          ]);
-        }
-        return s as unknown as Database.Statement;
-      });
-
-      const result = await server.handleCallTool({
-        name: "get_project_tree",
-        args: { projectPath, maxDepth: 3, exclude: ["**/node_modules/**", "**/*.test.*"] },
-      });
-      const tree = (result as { structuredContent: { name: string; children: { name: string; children: { name: string }[] }[] } }).structuredContent;
-
-      const allNodeNames = (nodes: { name: string; children?: unknown[] }[]): string[] =>
-        nodes.flatMap((n) => [n.name, ...(n.children ? allNodeNames(n.children as { name: string; children?: unknown[] }[]) : [])]);
-
-      expect(allNodeNames(tree.children)).not.toContain("App.test.tsx");
-      expect(allNodeNames(tree.children)).not.toContain("node_modules");
-    });
-
-    it("should only include files matching include patterns", async () => {
-      mockDb.prepare.mockImplementation((sql: string) => {
-        const s = createMockStmt();
-        if (sql.includes("SELECT path FROM files")) {
-          s.all.mockReturnValue([
-            { path: "/src/App.tsx" },
-            { path: "/src/components/Button.tsx" },
-            { path: "/src/utils/helpers.ts" },
-          ]);
-        }
-        return s as unknown as Database.Statement;
-      });
-
-      const result = await server.handleCallTool({
-        name: "get_project_tree",
-        args: { projectPath, maxDepth: 3, include: ["**/src/components/**"] },
-      });
-      const tree = (result as { structuredContent: { children: { name: string; children: { name: string }[] }[] } }).structuredContent;
-
-      expect(tree.children[0].name).toBe("src");
-      const childNames = tree.children[0].children.map((c: { name: string }) => c.name);
-      expect(childNames).toContain("components");
-      // App.tsx and utils should be excluded by the include filter
-      expect(childNames).not.toContain("App.tsx");
-      expect(childNames).not.toContain("utils");
-    });
-  });
 
   it("find_files: should support glob patterns", async () => {
     const result = await server.handleCallTool({ name: "find_files", args: { projectPath, pattern: "**/*.tsx" } });
@@ -445,20 +390,6 @@ describe("MCP Tools Integration", () => {
     const result = await server.handleCallTool({ name: "get_file_imports", args: { projectPath, filePath: "src/App.tsx" } });
     const imports = (result as { structuredContent: Record<string, unknown> }).structuredContent;
     expect((imports as Record<string, unknown>)["react"]).toBeDefined();
-  });
-
-  it("get_project_tree: should return tree up to maxDepth", async () => {
-    mockDb.prepare.mockImplementation((sql: string) => {
-      const s = createMockStmt();
-      if (sql.includes("SELECT path FROM files")) {
-        s.all.mockReturnValue([{ path: "/src/App.tsx" }]);
-      }
-      return s as unknown as Database.Statement;
-    });
-    const result = await server.handleCallTool({ name: "get_project_tree", args: { projectPath, maxDepth: 1 } });
-    const tree = (result as { structuredContent: Record<string, unknown> }).structuredContent as { name: string; children: { name: string }[] };
-    expect(tree.name).toBe("/");
-    expect(tree.children[0].name).toBe("src");
   });
 
   it("list_files: should return summary for small projects", async () => {
