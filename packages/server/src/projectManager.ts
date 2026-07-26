@@ -2024,27 +2024,50 @@ export class ProjectManager {
       );
     };
 
-    for (const filePath of Object.keys(project.graph!.files)) {
-      if (isExcluded(filePath)) continue;
+    const isSourceFile = (name: string) =>
+      /\.(tsx?|jsx?|mjs|cjs|mts|cts|js|ts|json|md|css|scss|html|vue|svelte|astro)$/i.test(name);
 
-      const fullPath = path.resolve(
-        analysisPath,
-        filePath.startsWith("/") ? filePath.slice(1) : filePath,
-      );
-      if (fs.existsSync(fullPath)) {
-        const content = fs.readFileSync(fullPath, "utf-8");
-        const lines = content.split("\n");
-        lines.forEach((line, index) => {
-          if (regex.test(line))
-            results.push({
-              file: filePath,
-              line: index + 1,
-              content: line.trim(),
-            });
-        });
+    const walkDir = (dir: string, rootRel: string) => {
+      let entries: fs.Dirent[];
+      try {
+        entries = fs.readdirSync(dir, { withFileTypes: true });
+      } catch {
+        return;
       }
-      if (results.length > 100) break;
-    }
+
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        const relPath = rootRel
+          ? `${rootRel}/${entry.name}`
+          : `/${entry.name}`;
+
+        if (isExcluded(relPath) || isExcluded(entry.name)) continue;
+
+        if (entry.isDirectory()) {
+          walkDir(fullPath, relPath);
+        } else if (entry.isFile() && isSourceFile(entry.name)) {
+          try {
+            const content = fs.readFileSync(fullPath, "utf-8");
+            const lines = content.split("\n");
+            for (let i = 0; i < lines.length; i++) {
+              if (regex.test(lines[i])) {
+                results.push({
+                  file: relPath,
+                  line: i + 1,
+                  content: lines[i].trim(),
+                });
+                if (results.length >= 100) return;
+              }
+            }
+          } catch {
+            // Skip binary or unreadable files
+          }
+        }
+        if (results.length >= 100) return;
+      }
+    };
+
+    walkDir(analysisPath, "");
     return results;
   }
 

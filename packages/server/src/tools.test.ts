@@ -566,11 +566,19 @@ line 3`);
   });
 
   it("grep_search: should find occurrences", async () => {
+    vi.mocked(fs.readdirSync).mockImplementation((dir: unknown) => {
+      const d = dir as string;
+      if (d.includes(".nexiq") || d.includes("node_modules")) return [] as fs.Dirent[];
+      if (d === "/test/project" || d === "/test/project/src") {
+        return [{ name: "App.tsx", isDirectory: () => false, isFile: () => true }] as fs.Dirent[];
+      }
+      return [] as fs.Dirent[];
+    });
     vi.mocked(fs.readFileSync).mockReturnValue(`const x = 1;
 console.log(x);`);
     const result = await server.handleCallTool({ name: "grep_search", args: { projectPath, pattern: "console" } });
     const matches = (result as { structuredContent: { items: { file: string; content: string }[] } }).structuredContent.items;
-    expect(matches[0].file).toBe("/src/App.tsx");
+    expect(matches[0].file).toBe("/App.tsx");
     expect(matches[0].content).toBe("console.log(x);");
   });
 
