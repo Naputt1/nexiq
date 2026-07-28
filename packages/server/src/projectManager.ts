@@ -261,8 +261,8 @@ export class ProjectManager {
   }
 
   private async acquireAnalysisLock(lockPath: string): Promise<void> {
-    const staleTimeout = 600_000;
-    for (let i = 0; i < 300; i++) {
+    const staleTimeout = 60_000;
+    for (let i = 0; i < 120; i++) {
       try {
         fs.mkdirSync(lockPath);
         return;
@@ -378,7 +378,9 @@ export class ProjectManager {
         try {
           const stat = fs.statSync(parent);
           if (stat.isDirectory()) return parent;
-        } catch {}
+        } catch {
+          /* empty */
+        }
         current = parent;
       }
     }
@@ -863,7 +865,9 @@ export class ProjectManager {
           try {
             const data = JSON.parse(usage.data_json);
             if (data.displayLabel) tag = data.displayLabel;
-          } catch {}
+          } catch {
+            /* empty */
+          }
         }
 
         externalUsages.push({
@@ -1080,9 +1084,9 @@ export class ProjectManager {
   async findFiles(projectPath: string, pattern: string, subProject?: string) {
     const project = await this.openProject(projectPath, subProject);
 
-    const rows = project
-      .db!.db.prepare("SELECT path FROM files")
-      .all() as { path: string }[];
+    const rows = project.db!.db.prepare("SELECT path FROM files").all() as {
+      path: string;
+    }[];
     const files =
       rows.length > 0
         ? rows.map((r) => r.path)
@@ -1259,12 +1263,18 @@ export class ProjectManager {
   ) {
     const project = await this.openProject(projectPath, subProject);
 
-    const symbol = project.db!.db.prepare(`
+    const symbol = project
+      .db!.db.prepare(
+        `
       SELECT s.id, s.name, e.id as entity_id
       FROM symbols s
       JOIN entities e ON s.entity_id = e.id
       WHERE s.id = ?
-    `).get(symbolId) as { id: string; name: string; entity_id: string } | undefined;
+    `,
+      )
+      .get(symbolId) as
+      | { id: string; name: string; entity_id: string }
+      | undefined;
 
     if (!symbol) {
       return { error: `Symbol "${symbolId}" not found.` };
@@ -1274,7 +1284,9 @@ export class ProjectManager {
     const kindParams = kind ? [kind] : [];
 
     const queryEdge = (selectCols: string, joinCol: string, dirLabel: string) =>
-      project.db!.db.prepare(`
+      project
+        .db!.db.prepare(
+          `
         SELECT r.kind, r.line, r.column, r.data_json,
                ${selectCols}.id as other_id,
                ${selectCols}.name as other_name,
@@ -1288,27 +1300,47 @@ export class ProjectManager {
         LEFT JOIN symbols ${selectCols} ON ${selectCols}.entity_id = e_other.id
         WHERE r.${dirLabel === "outgoing" ? "from_id" : "to_id"} = ? ${kindFilter}
         ORDER BY r.kind, r.line
-      `).all(symbol.entity_id, ...kindParams) as {
-        kind: string; line: number; column: number; data_json: string | null;
-        other_id: string; other_name: string | null; file: string;
-        other_kind: string; other_type: string;
+      `,
+        )
+        .all(symbol.entity_id, ...kindParams) as {
+        kind: string;
+        line: number;
+        column: number;
+        data_json: string | null;
+        other_id: string;
+        other_name: string | null;
+        file: string;
+        other_kind: string;
+        other_type: string;
       }[];
 
-    const outgoing = direction !== "incoming"
-      ? queryEdge("s_to", "to_id", "outgoing").map((e) => ({
-          kind: e.kind, toName: e.other_name || "anonymous",
-          toId: e.other_id, toKind: e.other_kind, toType: e.other_type,
-          file: e.file, line: e.line, column: e.column,
-        }))
-      : [];
+    const outgoing =
+      direction !== "incoming"
+        ? queryEdge("s_to", "to_id", "outgoing").map((e) => ({
+            kind: e.kind,
+            toName: e.other_name || "anonymous",
+            toId: e.other_id,
+            toKind: e.other_kind,
+            toType: e.other_type,
+            file: e.file,
+            line: e.line,
+            column: e.column,
+          }))
+        : [];
 
-    const incoming = direction !== "outgoing"
-      ? queryEdge("s_from", "from_id", "incoming").map((e) => ({
-          kind: e.kind, fromName: e.other_name || "anonymous",
-          fromId: e.other_id, fromKind: e.other_kind, fromType: e.other_type,
-          file: e.file, line: e.line, column: e.column,
-        }))
-      : [];
+    const incoming =
+      direction !== "outgoing"
+        ? queryEdge("s_from", "from_id", "incoming").map((e) => ({
+            kind: e.kind,
+            fromName: e.other_name || "anonymous",
+            fromId: e.other_id,
+            fromKind: e.other_kind,
+            fromType: e.other_type,
+            file: e.file,
+            line: e.line,
+            column: e.column,
+          }))
+        : [];
 
     return {
       symbolId: symbol.id,
@@ -1387,13 +1419,20 @@ export class ProjectManager {
       fieldFound: boolean;
     }
 
-    const entities = findEntitiesStmt.all(componentName) as { id: string; symbol_id: string; file: string }[];
+    const entities = findEntitiesStmt.all(componentName) as {
+      id: string;
+      symbol_id: string;
+      file: string;
+    }[];
     if (entities.length === 0) {
       return { error: `Component "${componentName}" not found.` };
     }
 
-    const traceFrom = (startEntity: { id: string; file: string }): TraceResult => {
-      const chain: TraceResult['chain'] = [];
+    const traceFrom = (startEntity: {
+      id: string;
+      file: string;
+    }): TraceResult => {
+      const chain: TraceResult["chain"] = [];
       let currentEntityId = startEntity.id;
       let currentEntityFile = startEntity.file;
       let currentName = componentName;
@@ -1403,7 +1442,9 @@ export class ProjectManager {
 
       while (currentDepth < maxDepth) {
         const parents = findParentStmt.all(currentEntityId) as {
-          parent_entity_id: string; parent_name: string; parent_file: string;
+          parent_entity_id: string;
+          parent_name: string;
+          parent_file: string;
         }[];
 
         let allParents = [...parents];
@@ -1411,9 +1452,13 @@ export class ProjectManager {
         // Fallback: renders table when graph edges don't resolve
         if (allParents.length === 0) {
           const renderParents = findParentByRenderStmt.all(currentName) as {
-            parent_entity_id: string; parent_name: string; parent_file: string;
+            parent_entity_id: string;
+            parent_name: string;
+            parent_file: string;
           }[];
-          allParents = renderParents.filter((p) => p.parent_file !== currentEntityFile);
+          allParents = renderParents.filter(
+            (p) => p.parent_file !== currentEntityFile,
+          );
         }
 
         if (allParents.length === 0) {
@@ -1427,20 +1472,34 @@ export class ProjectManager {
 
         let found = false;
         for (const parent of allParents) {
-          const renders = findRenderStmt.all(parent.parent_entity_id, currentName) as RenderRow[];
+          const renders = findRenderStmt.all(
+            parent.parent_entity_id,
+            currentName,
+          ) as RenderRow[];
           for (const render of renders) {
             if (!render.data_json) continue;
             const data = JSON.parse(render.data_json);
-            const deps: Array<{ name: string; value: { type: string; name: string; refType?: string }; valueId?: string }> = data.dependencies || [];
+            const deps: Array<{
+              name: string;
+              value: { type: string; name: string; refType?: string };
+              valueId?: string;
+            }> = data.dependencies || [];
             const dep = deps.find((d) => d.name === currentField);
             if (dep) {
               fieldFound = true;
-              const expression = { type: dep.value.type, name: dep.value.name, refType: dep.value.refType };
+              const expression = {
+                type: dep.value.type,
+                name: dep.value.name,
+                refType: dep.value.refType,
+              };
               chain.push({
                 step: currentDepth + 1,
                 component: currentName,
                 file: currentEntityFile,
-                renderLoc: { line: render.line || 0, column: render.column || 0 },
+                renderLoc: {
+                  line: render.line || 0,
+                  column: render.column || 0,
+                },
                 expression,
               });
 
@@ -1450,7 +1509,10 @@ export class ProjectManager {
                 expression.refType === "named" &&
                 currentDepth + 1 < maxDepth
               ) {
-                const hasProp = hasPropStmt.get(parent.parent_entity_id, expression.name) as { "1": number } | undefined;
+                const hasProp = hasPropStmt.get(
+                  parent.parent_entity_id,
+                  expression.name,
+                ) as { "1": number } | undefined;
                 if (hasProp) {
                   currentEntityId = parent.parent_entity_id;
                   currentEntityFile = parent.parent_file;
@@ -1493,9 +1555,10 @@ export class ProjectManager {
       component: componentName,
       field: fieldPath,
       chain: best.chain,
-      note: best.chain.length > 0
-        ? "Further resolution may require reading source at the final render location."
-        : "No render parent chain found for this component.",
+      note:
+        best.chain.length > 0
+          ? "Further resolution may require reading source at the final render location."
+          : "No render parent chain found for this component.",
     };
   }
 
@@ -1503,15 +1566,28 @@ export class ProjectManager {
     const analysisRoot = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
-    const workspaceDbPath = path.join(analysisRoot, ".nexiq", "workspace.sqlite");
+    const workspaceDbPath = path.join(
+      analysisRoot,
+      ".nexiq",
+      "workspace.sqlite",
+    );
 
     if (!fs.existsSync(workspaceDbPath)) {
       // Also check for a central DB in the cache directory
-      const cacheDbPath = path.join(analysisRoot, ".nexiq", "cache", "central.sqlite");
+      const cacheDbPath = path.join(
+        analysisRoot,
+        ".nexiq",
+        "cache",
+        "central.sqlite",
+      );
       if (fs.existsSync(cacheDbPath)) {
         return this._queryWorkspaceDb(cacheDbPath);
       }
-      return { isMonorepo: false, packages: [], note: "No workspace database found. This may not be a monorepo." };
+      return {
+        isMonorepo: false,
+        packages: [],
+        note: "No workspace database found. This may not be a monorepo.",
+      };
     }
 
     return this._queryWorkspaceDb(workspaceDbPath);
@@ -1520,16 +1596,24 @@ export class ProjectManager {
   private _queryWorkspaceDb(workspaceDbPath: string) {
     const db = new Database(workspaceDbPath, { readonly: true });
     try {
-      const packages = db.prepare(`
+      const packages = db
+        .prepare(
+          `
         SELECT wp.package_id, wp.name, wp.path, wp.db_path,
                COALESCE(prs.files_total, 0) as file_count,
                COALESCE(prs.status, 'unknown') as analysis_status
         FROM workspace_packages wp
         LEFT JOIN package_run_summaries prs ON wp.package_id = prs.package_id
         ORDER BY wp.name
-      `).all() as Array<{
-        package_id: string; name: string; path: string; db_path: string;
-        file_count: number; analysis_status: string;
+      `,
+        )
+        .all() as Array<{
+        package_id: string;
+        name: string;
+        path: string;
+        db_path: string;
+        file_count: number;
+        analysis_status: string;
       }>;
 
       return {
@@ -1567,19 +1651,29 @@ export class ProjectManager {
       const packageFilter = packageName ? "AND package_name = ?" : "";
       const packageParams = packageName ? [packageName] : [];
 
-      const matches = db.prepare(`
+      const matches = db
+        .prepare(
+          `
         SELECT export_name, export_type, export_kind, package_name, file_path, is_default
         FROM package_export_index
         WHERE export_name = ? OR export_name LIKE ? ${packageFilter}
         ORDER BY package_name, file_path
-      `).all(symbol, `%${symbol}%`, ...packageParams) as Array<{
-        export_name: string; export_type: string; export_kind: string;
-        package_name: string; file_path: string; is_default: number;
+      `,
+        )
+        .all(symbol, `%${symbol}%`, ...packageParams) as Array<{
+        export_name: string;
+        export_type: string;
+        export_kind: string;
+        package_name: string;
+        file_path: string;
+        is_default: number;
       }>;
 
       return {
         found: matches.length > 0,
-        totalPackagesSearched: db.prepare("SELECT COUNT(*) as cnt FROM workspace_packages").get() as { cnt: number },
+        totalPackagesSearched: db
+          .prepare("SELECT COUNT(*) as cnt FROM workspace_packages")
+          .get() as { cnt: number },
         matches: matches.map((m) => ({
           exportName: m.export_name,
           exportType: m.export_type,
@@ -1588,25 +1682,42 @@ export class ProjectManager {
           filePath: m.file_path,
           isDefault: m.is_default === 1,
         })),
-      } as { found: boolean; matches: unknown[]; totalPackagesSearched: { cnt: number } };
+      } as {
+        found: boolean;
+        matches: unknown[];
+        totalPackagesSearched: { cnt: number };
+      };
     } finally {
       db.close();
     }
   }
 
-  async getPackageImports(projectPath: string, filePath: string, subProject?: string) {
+  async getPackageImports(
+    projectPath: string,
+    filePath: string,
+    subProject?: string,
+  ) {
     const project = await this.openProject(projectPath, subProject);
     const workspaceDbPath = this._findWorkspaceDb(projectPath, subProject);
 
     // Get local imports from the per-package DB
-    const localImports = project.db!.db.prepare(`
+    const localImports = project
+      .db!.db.prepare(
+        `
       SELECT e.name, e.data_json, e.line, e.column
       FROM entities e
       JOIN scopes sc ON e.scope_id = sc.id
       JOIN files f ON sc.file_id = f.id
       WHERE f.path = ? AND e.kind = 'import'
       ORDER BY e.line
-    `).all(filePath) as Array<{ name: string; data_json: string | null; line: number; column: number }>;
+    `,
+      )
+      .all(filePath) as Array<{
+      name: string;
+      data_json: string | null;
+      line: number;
+      column: number;
+    }>;
 
     const imports = localImports.map((imp) => {
       const data = imp.data_json ? JSON.parse(imp.data_json) : {};
@@ -1624,14 +1735,22 @@ export class ProjectManager {
     if (workspaceDbPath) {
       const db = new Database(workspaceDbPath, { readonly: true });
       try {
-        const deferred = db.prepare(`
+        const deferred = db
+          .prepare(
+            `
           SELECT source_module, source_package_name, source_subpath,
                  imported_name, import_type, local_name
           FROM deferred_external_imports
           WHERE file_path = ?
-        `).all(filePath) as Array<{
-          source_module: string; source_package_name: string; source_subpath: string | null;
-          imported_name: string | null; import_type: string; local_name: string;
+        `,
+          )
+          .all(filePath) as Array<{
+          source_module: string;
+          source_package_name: string;
+          source_subpath: string | null;
+          imported_name: string | null;
+          import_type: string;
+          local_name: string;
         }>;
 
         if (deferred.length > 0) {
@@ -1639,8 +1758,10 @@ export class ProjectManager {
           for (const imp of imports) {
             const match = deferredMap.get(imp.localName as string);
             if (match) {
-              (imp as Record<string, unknown>).resolvedToPackage = match.source_package_name;
-              (imp as Record<string, unknown>).sourceSubpath = match.source_subpath;
+              (imp as Record<string, unknown>).resolvedToPackage =
+                match.source_package_name;
+              (imp as Record<string, unknown>).sourceSubpath =
+                match.source_subpath;
             }
           }
         }
@@ -1656,7 +1777,10 @@ export class ProjectManager {
     };
   }
 
-  private _findWorkspaceDb(projectPath: string, subProject?: string): string | null {
+  private _findWorkspaceDb(
+    projectPath: string,
+    subProject?: string,
+  ): string | null {
     const analysisRoot = subProject
       ? path.resolve(projectPath, subProject)
       : projectPath;
@@ -1855,7 +1979,9 @@ export class ProjectManager {
 
     const allFiles: string[] = [];
     const rows = project
-      .db!.db.prepare(`SELECT path FROM files WHERE path LIKE ? || '%' ORDER BY path`)
+      .db!.db.prepare(
+        `SELECT path FROM files WHERE path LIKE ? || '%' ORDER BY path`,
+      )
       .all(normalizedDir) as { path: string }[];
     if (rows.length > 0) {
       allFiles.push(...rows.map((r) => r.path));
@@ -1873,9 +1999,7 @@ export class ProjectManager {
     const filesInDir = new Set<string>();
     const subDirs = new Set<string>();
     for (const filePath of allFiles) {
-      const relative = filePath
-        .slice(normalizedDir.length)
-        .replace(/^\//, "");
+      const relative = filePath.slice(normalizedDir.length).replace(/^\//, "");
       const parts = relative.split("/");
       if (parts.length === 1 && parts[0] !== "") filesInDir.add(parts[0]!);
       else if (parts.length > 1) subDirs.add(parts[0]!);
@@ -1988,7 +2112,9 @@ export class ProjectManager {
     };
 
     const isSourceFile = (name: string) =>
-      /\.(tsx?|jsx?|mjs|cjs|mts|cts|js|ts|json|md|css|scss|html|vue|svelte|astro)$/i.test(name);
+      /\.(tsx?|jsx?|mjs|cjs|mts|cts|js|ts|json|md|css|scss|html|vue|svelte|astro)$/i.test(
+        name,
+      );
 
     const walkDir = (dir: string, rootRel: string) => {
       let entries: fs.Dirent[];
@@ -2000,9 +2126,7 @@ export class ProjectManager {
 
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        const relPath = rootRel
-          ? `${rootRel}/${entry.name}`
-          : `/${entry.name}`;
+        const relPath = rootRel ? `${rootRel}/${entry.name}` : `/${entry.name}`;
 
         if (isExcluded(relPath) || isExcluded(entry.name)) continue;
 
@@ -2550,7 +2674,9 @@ export class ProjectManager {
   }
 }
 
-function extractPropsFromSource(content: string): { name: string; type: string; kind: string }[] {
+function extractPropsFromSource(
+  content: string,
+): { name: string; type: string; kind: string }[] {
   const props: { name: string; type: string; kind: string }[] = [];
   const lines = content.split("\n");
   let inInterface = false;
@@ -2565,7 +2691,9 @@ function extractPropsFromSource(content: string): { name: string; type: string; 
         /^(export\s+)?type\s+Props\s*=/.test(line)
       ) {
         inInterface = true;
-        interfaceDepth = line.includes("{") ? (line.match(/{/g) || []).length : 0;
+        interfaceDepth = line.includes("{")
+          ? (line.match(/{/g) || []).length
+          : 0;
         if (interfaceDepth === 0) interfaceDepth = 1;
       }
       continue;

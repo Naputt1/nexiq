@@ -31,19 +31,34 @@ type FileResultWithPackage = ComponentFile & {
   package_id?: string | undefined;
 };
 
+function isENOTDIR(e: unknown): boolean {
+  return typeof e === "object" && e !== null && (e as NodeJS.ErrnoException).code === "ENOTDIR";
+}
+
 export class SqliteDB extends BaseSqliteDB {
   constructor(dbPath: string, options: { readonly?: boolean } = {}) {
+    let resolvedPath = dbPath;
+
     // Ensure directory exists if not readonly
     if (!options.readonly) {
-      const dir = path.dirname(dbPath);
+      const dir = path.dirname(resolvedPath);
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+        try {
+          fs.mkdirSync(dir, { recursive: true });
+        } catch (e: unknown) {
+          if (isENOTDIR(e)) {
+            // Walk up the path to find a valid parent directory
+            resolvedPath = SqliteDB.resolveCachePath(resolvedPath);
+          } else {
+            throw e;
+          }
+        }
       }
     }
 
     let db: Database.Database;
     try {
-      db = new Database(dbPath, options);
+      db = new Database(resolvedPath, options);
       // Try a simple pragma to verify the database is valid
       db.pragma("user_version");
     } catch (e: unknown) {
@@ -51,16 +66,16 @@ export class SqliteDB extends BaseSqliteDB {
         throw e;
       }
       try {
-        if (fs.existsSync(dbPath)) {
-          fs.unlinkSync(dbPath);
+        if (fs.existsSync(resolvedPath)) {
+          fs.unlinkSync(resolvedPath);
           // Also delete -shm and -wal if they exist
-          if (fs.existsSync(`${dbPath}-shm`)) fs.unlinkSync(`${dbPath}-shm`);
-          if (fs.existsSync(`${dbPath}-wal`)) fs.unlinkSync(`${dbPath}-wal`);
+          if (fs.existsSync(`${resolvedPath}-shm`)) fs.unlinkSync(`${resolvedPath}-shm`);
+          if (fs.existsSync(`${resolvedPath}-wal`)) fs.unlinkSync(`${resolvedPath}-wal`);
         }
       } catch {
         // ignore unlink error
       }
-      db = new Database(dbPath, options);
+      db = new Database(resolvedPath, options);
     }
     super(db);
     this.db.pragma("busy_timeout = 600000");
@@ -70,6 +85,29 @@ export class SqliteDB extends BaseSqliteDB {
     this.db.pragma("cache_size = -16000");
     this.initSchema();
     this.initStatements();
+  }
+
+  /**
+   * When the passed cache path falls inside a file segment (ENOTDIR),
+   * walk up the path tree to find the first existing directory and
+   * reconstruct the cache path under `.nexiq/cache` in that directory.
+   */
+  static resolveCachePath(badPath: string): string {
+    let current = path.dirname(badPath);
+    for (let i = 0; i < 20; i++) {
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      try {
+        if (fs.statSync(parent).isDirectory()) {
+          const fallback = path.join(parent, ".nexiq", "cache");
+          return path.join(fallback, path.basename(badPath));
+        }
+      } catch {
+        // continue walking up
+      }
+      current = parent;
+    }
+    return badPath;
   }
 
   private insertEntityStmt!: Database.Statement;

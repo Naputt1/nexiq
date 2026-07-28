@@ -27,7 +27,7 @@ async function main() {
   if (input.ignorePatterns) options.ignorePatterns = input.ignorePatterns;
   if (input.analysisPaths) options.analysisPaths = input.analysisPaths;
   if (input.monorepo) options.monorepo = input.monorepo;
-  options.fileWorkerThreads = options.fileWorkerThreads ?? 4;
+  options.fileWorkerThreads = options.fileWorkerThreads ?? 2;
 
   const graph = await analyzeProject(input.srcDir, options);
 

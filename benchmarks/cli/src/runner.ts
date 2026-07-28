@@ -167,6 +167,7 @@ export class McpRunner {
       command: "node",
       args: ["--max-old-space-size=4096", serverPath, ...args],
       stderr: "pipe",
+      env: { PORT: "0" },
     });
     const stderrStream = (this.transport as unknown as { _stderrStream?: NodeJS.ReadableStream })._stderrStream;
     if (stderrStream) {
@@ -184,8 +185,17 @@ export class McpRunner {
   }
 
   async stop() {
+    // Kill the child process first to free the port
+    if (this.transport) {
+      const pid = (this.transport as unknown as { pid: number | null }).pid;
+      if (pid !== null && pid !== undefined) {
+        try {
+          process.kill(pid, 'SIGTERM');
+        } catch {}
+      }
+      await this.transport.close();
+    }
     if (this.client) await this.client.close();
-    if (this.transport) await this.transport.close();
     if (this.logStream) {
       this.logStream.end();
     }
@@ -268,10 +278,10 @@ export class RunnerPool {
     );
   }
 
-  release(runner: McpRunner) {
+  async release(runner: McpRunner) {
     if (runner.dead) {
-      runner.stop().catch(() => {});
-      this.retrySpawnForever();
+      await runner.stop().catch(() => {});
+      await this.retrySpawnForever();
       return;
     }
     if (this.waiting.length > 0) {
@@ -935,7 +945,7 @@ export async function runBenchmarks(options: RunOptions) {
     const taskStartTime = Date.now();
     const requestReplacement = async () => {
       const dead = mcp;
-      pool.release(dead);
+      await pool.release(dead);
       mcp = await pool.acquire();
       return mcp;
     };
@@ -979,7 +989,7 @@ export async function runBenchmarks(options: RunOptions) {
         activeScenarios,
       });
     } finally {
-      pool.release(mcp);
+      await pool.release(mcp);
 
       const count = activeRoots.get(root) || 0;
       if (count <= 1) {
