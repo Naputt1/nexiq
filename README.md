@@ -40,6 +40,10 @@ Add the following to your `claude_desktop_config.json`:
 }
 ```
 
+### Token Optimization
+
+For efficient MCP tool usage — optimal tool sequences, field filtering, and anti-patterns — see the [nexiq MCP skill](docs/skills/nexiq-mcp.md).
+
 ## Key Features
 
 - Analyze React and TypeScript codebases into graph data that can be inspected or consumed by other tools.

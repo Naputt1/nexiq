@@ -29,6 +29,29 @@
       "cleanup_command": "git checkout .",
       "isolation": true,
       "max_iterations": 30
+    },
+    {
+      "id": "large-3",
+      "type": "breadth",
+      "prompt": "The `ConfirmModal` component is being deprecated in favor of `ConfirmDialog`. List every file that imports or renders `ConfirmModal` so the team knows what to update. Include test files.",
+      "expected_answer_contains": [
+        "admin_console",
+        "team_members_dropdown",
+        "confirm_modal_redux",
+        "integrations",
+        "plugin_marketplace",
+        "edit_command"
+      ],
+      "max_iterations": 30
+    },
+    {
+      "id": "large-4",
+      "type": "coding",
+      "prompt": "The `ConfirmModal` component in `components/confirm_modal.tsx` needs its `onConfirm` callback signature changed from `(checked: boolean) => void` to `() => void` (removing the checkbox state parameter). Find every file that passes `onConfirm` to `ConfirmModal` and update them to remove the `checked` parameter from their callback. Then update `ConfirmModal` itself.",
+      "verification_command": "npx prettier --write components/confirm_modal.tsx components/confirm_modal_redux/confirm_modal_redux.tsx components/team_members_dropdown/team_members_dropdown.tsx components/plugin_marketplace/marketplace_item/marketplace_item_plugin/marketplace_item_plugin.tsx components/integrations && ESLINT_USE_FLAT_CONFIG=false npx eslint --fix components/confirm_modal.tsx components/confirm_modal_redux components/team_members_dropdown/team_members_dropdown.tsx components/plugin_marketplace/marketplace_item/marketplace_item_plugin/marketplace_item_plugin.tsx components/integrations",
+      "cleanup_command": "git checkout .",
+      "isolation": true,
+      "max_iterations": 30
     }
   ]
 }

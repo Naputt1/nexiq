@@ -38,6 +38,7 @@ import type {
   MemoFileVarHook,
 } from "@nexiq/shared";
 import { FileDB } from "./fileDB.ts";
+import type { File } from "./fileDB.ts";
 import type { PackageJson } from "./packageJson.ts";
 import fs from "fs";
 import path from "path";
@@ -894,6 +895,10 @@ export class ComponentDB {
     return this.files.get(fileName);
   }
 
+  public getFiles(): Iterable<File> {
+    return this.files.getFiles();
+  }
+
   public fileAddImport(fileName: string, fileImport: ComponentFileImport) {
     this.files.addImport(fileName, fileImport);
   }
@@ -1115,7 +1120,7 @@ export class ComponentDB {
     }
   }
 
-  private getEdges(): DataEdge[] {
+  public getEdges(): DataEdge[] {
     const edges: DataEdge[] = [...this.edges];
 
     for (const file of this.files.getFiles()) {

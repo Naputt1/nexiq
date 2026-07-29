@@ -64,7 +64,7 @@ export interface BenchmarkStep {
 export interface BenchmarkResult {
   scenarioId: string;
   projectName: string;
-  approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+  approach: "baseline" | "nexiq-warm" | "nexiq-skill";
   testType: "single-prompt" | "planning" | "coding";
   model: string;
   success: boolean;
@@ -76,6 +76,7 @@ export interface BenchmarkResult {
     stderr: string;
     exitCode: number;
   };
+  errorMessage?: string;
   steps: BenchmarkStep[];
 }
 
@@ -83,7 +84,7 @@ export interface RunOptions {
   projects: string[]; // Tier names (small, mid, large, coding)
   models: LlmClient[];
   testTypes: ("single-prompt" | "planning" | "coding")[];
-  approaches: ("baseline" | "nexiq-cold" | "nexiq-warm")[];
+  approaches: ("baseline" | "nexiq-warm" | "nexiq-skill")[];
   concurrency?: number;
   onProgress?: (update: ProgressUpdate) => void;
 }
@@ -127,7 +128,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   ]);
 }
 
-function isTransportError(e: unknown): boolean {
+function _isTransportError(e: unknown): boolean {
   const msg = (e as Error)?.message || "";
   return (
     msg.includes("Connection closed") ||
@@ -147,6 +148,7 @@ export class McpRunner {
   private transport: StdioClientTransport | null = null;
   public id: string = crypto.randomBytes(4).toString("hex");
   private _dead = false;
+  private logStream?: fs.WriteStream;
 
   get dead(): boolean {
     return this._dead;
@@ -154,10 +156,25 @@ export class McpRunner {
 
   async start(serverPath: string, args: string[] = []) {
     this._dead = false;
+    const logDir = path.resolve(REPO_ROOT, "benchmarks/results");
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    this.logStream = fs.createWriteStream(
+      path.join(logDir, `server-${this.id}.log`),
+    );
     this.transport = new StdioClientTransport({
       command: "node",
-      args: [serverPath, ...args],
+      args: ["--max-old-space-size=4096", serverPath, ...args],
+      stderr: "pipe",
+      env: { PORT: "0" },
     });
+    const stderrStream = (this.transport as unknown as { _stderrStream?: NodeJS.ReadableStream })._stderrStream;
+    if (stderrStream) {
+      stderrStream.setEncoding("utf8");
+      stderrStream.pipe(this.logStream);
+      stderrStream.pipe(process.stderr);
+    }
 
     this.client = new Client(
       { name: "benchmark-runner", version: "1.0.0" },
@@ -168,8 +185,20 @@ export class McpRunner {
   }
 
   async stop() {
+    // Kill the child process first to free the port
+    if (this.transport) {
+      const pid = (this.transport as unknown as { pid: number | null }).pid;
+      if (pid !== null && pid !== undefined) {
+        try {
+          process.kill(pid, 'SIGTERM');
+        } catch { /* expected */ }
+      }
+      await this.transport.close();
+    }
     if (this.client) await this.client.close();
-    if (this.transport) await this.transport.close();
+    if (this.logStream) {
+      this.logStream.end();
+    }
   }
 
   async callTool(name: string, args: unknown) {
@@ -180,7 +209,7 @@ export class McpRunner {
           name,
           arguments: args as Record<string, unknown>,
         }),
-        120_000,
+        300_000,
         `callTool(${name})`,
       );
     } catch (e) {
@@ -244,15 +273,15 @@ export class RunnerPool {
       new Promise<McpRunner>((resolve) => {
         this.waiting.push(resolve);
       }),
-      120_000,
+      300_000,
       "acquire runner",
     );
   }
 
-  release(runner: McpRunner) {
+  async release(runner: McpRunner) {
     if (runner.dead) {
-      runner.stop().catch(() => {});
-      this.retrySpawnForever();
+      await runner.stop().catch(() => {});
+      await this.retrySpawnForever();
       return;
     }
     if (this.waiting.length > 0) {
@@ -439,7 +468,7 @@ export class BenchmarkRunner {
   async runScenario(
     project: ProjectScenarios,
     scenario: Scenario,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     llm: LlmClient,
     mcp: McpRunner,
@@ -462,14 +491,6 @@ export class BenchmarkRunner {
     // Resolve relative to repo root
     const absoluteRoot = path.resolve(REPO_ROOT, project.root);
 
-    // Pre-scenario setup
-    if (approach === "nexiq-cold") {
-      const cacheDir = path.join(absoluteRoot, ".nexiq", "cache");
-      if (fs.existsSync(cacheDir)) {
-        fs.rmSync(cacheDir, { recursive: true });
-      }
-    }
-
     // Tools setup
     const allTools = await retry((m) => m.listTools());
     const availableTools =
@@ -482,11 +503,16 @@ export class BenchmarkRunner {
               "run_shell_command",
             ].includes(t.name),
           )
-        : allTools.filter(
-            (t) => !["grep_search", "run_shell_command"].includes(t.name),
-          ); // Force specialized tools for nexiq approach
+        : allTools; // All tools available — skill doc guides optimal usage
 
-    const pathContext = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls. 
+    const pathPrefix = `The project is already open at "${absoluteRoot}". Use this absolute path for the 'projectPath' argument in all tool calls.`;
+    const pathContext = approach === "nexiq-skill"
+      ? pathPrefix + "\n\n" +
+        fs.readFileSync(
+          path.resolve(REPO_ROOT, "docs/skills/nexiq-mcp.md"),
+          "utf-8",
+        ).replace(/^---[\s\S]*?---\n/, "")
+      : pathPrefix + `
     IMPORTANT: Do not search or explore '.git', 'node_modules', or '.nexiq' directories as they contain large amounts of noise. 
     Use specialized tools like 'get_symbol_info' or 'get_component_hierarchy' when available, as they are significantly more accurate and token-efficient than generic shell commands. For field-level queries (e.g., finding which files access 'user.data.role'), use 'get_field_accesses' with the hook/component name and the field path.
     Each tool definition costs tokens every roundtrip. Include all needed parameters in one call rather than making multiple calls for the same symbol. Prefer get_symbol_info → get_symbol_content over read_file for targeted code reading.
@@ -554,7 +580,7 @@ export class BenchmarkRunner {
         testType,
       });
 
-      const response = await llm.chat(steps, availableTools);
+      const response = await this.callLlmWithRetry(llm, steps, availableTools);
       const assistantMessage: BenchmarkStep = {
         role: "assistant",
         content: response.content,
@@ -582,11 +608,10 @@ export class BenchmarkRunner {
           });
 
           const toolArgs = { ...(tc.arguments as Record<string, unknown>) };
-          // Inject projectPath if missing and it's a specialized tool
+          // Override projectPath for specialized tools to prevent LLM from using wrong paths
           if (
-            !toolArgs.projectPath &&
             approach !== "baseline" &&
-            (tc.name.startsWith("get_") || tc.name.startsWith("list_"))
+            (tc.name.startsWith("get_") || tc.name.startsWith("list_") || tc.name === "read_file" || tc.name === "grep_search")
           ) {
             toolArgs.projectPath = absoluteRoot;
           }
@@ -771,13 +796,39 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
     }
   }
 
+  private async callLlmWithRetry(
+    llm: LlmClient,
+    steps: BenchmarkStep[],
+    tools: unknown[],
+    maxRetries = 3,
+  ) {
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await llm.chat(steps, tools);
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        console.error(
+          `LLM API error (attempt ${attempt + 1}/${maxRetries}):`,
+          lastError.message,
+        );
+        if (attempt < maxRetries - 1) {
+          const delay = 5000 * Math.pow(2, attempt);
+          await new Promise((r) => setTimeout(r, delay));
+        }
+      }
+    }
+    throw lastError!;
+  }
+
   reportError(
     scenarioId: string,
     projectName: string,
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm",
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill",
     testType: "single-prompt" | "planning" | "coding",
     model: string,
     startTime: number,
+    error?: Error,
   ): BenchmarkResult {
     const result: BenchmarkResult = {
       scenarioId,
@@ -789,6 +840,7 @@ Respond with ONLY the word "SUCCESS" if it is correct, or "FAILURE" if it is inc
       totalTokens: 0,
       toolCallsCount: 0,
       latencyMs: Date.now() - startTime,
+      errorMessage: error?.message,
       steps: [],
     };
     this.results.push(result);
@@ -811,14 +863,14 @@ export async function runBenchmarks(options: RunOptions) {
   const timestamp = new Date().toISOString().replace(/:/g, "-");
   const orchestrator = new BenchmarkRunner();
   const serverPath = path.resolve(REPO_ROOT, "packages/server/dist/index.js");
-  const concurrency = options.concurrency || 3;
+  const concurrency = options.concurrency || 2;
   const pool = new RunnerPool(concurrency);
 
   const tasks: {
     project: ProjectScenarios;
     scenario: Scenario;
     model: LlmClient;
-    approach: "baseline" | "nexiq-cold" | "nexiq-warm";
+    approach: "baseline" | "nexiq-warm" | "nexiq-skill";
     testType: "single-prompt" | "planning" | "coding";
   }[] = [];
 
@@ -848,8 +900,8 @@ export async function runBenchmarks(options: RunOptions) {
         )[]) {
           for (const approach of options.approaches as (
             | "baseline"
-            | "nexiq-cold"
             | "nexiq-warm"
+            | "nexiq-skill"
           )[]) {
             tasks.push({
               project: projectData,
@@ -893,7 +945,7 @@ export async function runBenchmarks(options: RunOptions) {
     const taskStartTime = Date.now();
     const requestReplacement = async () => {
       const dead = mcp;
-      pool.release(dead);
+      await pool.release(dead);
       mcp = await pool.acquire();
       return mcp;
     };
@@ -926,6 +978,7 @@ export async function runBenchmarks(options: RunOptions) {
         task.testType,
         task.model.displayName,
         taskStartTime,
+        e instanceof Error ? e : new Error(String(e)),
       );
       activeScenarios--;
       completedScenarios++;
@@ -936,7 +989,7 @@ export async function runBenchmarks(options: RunOptions) {
         activeScenarios,
       });
     } finally {
-      pool.release(mcp);
+      await pool.release(mcp);
 
       const count = activeRoots.get(root) || 0;
       if (count <= 1) {

@@ -125,7 +125,7 @@ describe("Token Optimization Tools", () => {
         name: "get_symbol_info",
         args: { projectPath, query: "Button" },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: Array<{ file: string }> };
 
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].file).toBe("/src/Button.tsx");
@@ -165,7 +165,7 @@ describe("Token Optimization Tools", () => {
           exclude: ["**/components/**"],
         },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: Array<{ file: string }> };
 
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].file).toBe("/src/Button.tsx");
@@ -178,7 +178,7 @@ describe("Token Optimization Tools", () => {
         name: "list_files",
         args: { projectPath },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
 
       expect(data.totalFiles).toBe(1);
       expect(data.files[0].path).toBe("/src/App.tsx");
@@ -202,6 +202,8 @@ describe("Token Optimization Tools", () => {
               kind: "component",
             },
           ]);
+        } else if (sql.includes("usage-render-call")) {
+          s.all.mockReturnValue([]);
         } else if (sql.includes("FROM relations rel")) {
           s.all.mockReturnValue([
             {
@@ -229,7 +231,7 @@ export const App = () => {
           contextLines: 1,
         },
       });
-      const data = (result as { structuredContent: { items: unknown[] } }).structuredContent.items;
+      const data = (result as unknown as { structuredContent: { items: Array<{ file: string; line: number; context: string[] }> } }).structuredContent.items;
 
       expect(data).toHaveLength(1);
       expect(data[0].file).toBe("/src/App.tsx");
@@ -268,7 +270,7 @@ export const App = () => {
           componentName: "Button",
         },
       });
-      const data = (result as { structuredContent: { items: unknown[] } }).structuredContent.items;
+      const data = (result as unknown as { structuredContent: { items: Array<{ name: string; props: Array<{ name: string }> }> } }).structuredContent.items;
 
       expect(data).toHaveLength(1);
       expect(data[0].name).toBe("Button");

@@ -46,8 +46,29 @@ export class WorkerPool {
     );
   }
 
+  private static INVALID_WORKER_FLAGS = [
+    "--max-old-space-size",
+    "--max-semi-space-size",
+    "--max-heap-size",
+    "--expose-gc",
+    "--expose-internals",
+    "--harmony",
+    "--harmony-shipping",
+    "--harmony-import-assertions",
+  ];
+
   private buildExecArgv(): string[] {
-    const execArgv = [...process.execArgv, "--no-warnings"];
+    // Filter out V8 flags that are invalid for Worker threads
+    // (throw ERR_WORKER_INVALID_EXEC_ARGV)
+    const execArgv = process.execArgv.filter(
+      (arg) =>
+        !WorkerPool.INVALID_WORKER_FLAGS.some((flag) =>
+          arg.startsWith(flag),
+        ) || arg.startsWith("--inspect"),
+    );
+    if (!execArgv.includes("--no-warnings")) {
+      execArgv.push("--no-warnings");
+    }
     const hasTsx = execArgv.some(
       (arg) => arg.includes("tsx") || arg.includes("ts-node"),
     );

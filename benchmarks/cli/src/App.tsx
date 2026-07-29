@@ -40,8 +40,8 @@ const TEST_TYPES = [
 
 const APPROACHES = [
   { label: "Baseline", value: "baseline" },
-  { label: "React Map (Cold Cache)", value: "nexiq-cold" },
-  { label: "React Map (Warm Cache)", value: "nexiq-warm" },
+  { label: "React Map", value: "nexiq-warm" },
+  { label: "Nexiq Skill", value: "nexiq-skill" },
 ];
 
 const CONCURRENCY_OPTIONS = [
@@ -367,7 +367,7 @@ const App = () => {
             items={APPROACHES}
             selectedValues={selectedApproaches}
             onToggle={(v) => {
-              const val = v as ("baseline" | "nexiq-cold" | "nexiq-warm");
+              const val = v as ("baseline" | "nexiq-warm" | "nexiq-skill");
               setSelectedApproaches((prev) =>
                 prev.includes(val) ? prev.filter((p) => p !== val) : [...prev, val],
               );

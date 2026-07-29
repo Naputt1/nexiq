@@ -6,6 +6,17 @@ export { ProjectManager, BackendServer };
 
 // If this file is run directly (e.g., pnpm start)
 if (import.meta.url === `file://${process.argv[1]}`) {
+  process.on("uncaughtException", (err) => {
+    console.error("UNCAUGHT EXCEPTION:", err);
+    console.error("Stack:", err.stack);
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", (reason) => {
+    console.error("UNHANDLED REJECTION:", reason);
+    process.exit(1);
+  });
+
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;
   const projectManager = new ProjectManager();
   const server = new BackendServer(projectManager, port);

@@ -31,8 +31,8 @@ const createMockStmt = () => ({
 const mockDb = {
   prepare: vi.fn<(sql: string) => Database.Statement>(() => createMockStmt() as unknown as Database.Statement),
   close: vi.fn(),
-  pragma: vi.fn(),
   exec: vi.fn(),
+  pragma: vi.fn(),
 };
 
 vi.mock("@nexiq/analyser", () => ({
@@ -73,11 +73,12 @@ describe("ProjectManager", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     projectManager = new ProjectManager();
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    vi.mocked(analyzeProject).mockResolvedValue({
+    const graph = {
       src: "/test/project",
       files: {},
       edges: [],
-    } as unknown as JsonData);
+    } as unknown as JsonData;
+    vi.mocked(analyzeProject).mockResolvedValue(graph);
   });
 
   it("should open a project and return project info", async () => {
@@ -537,23 +538,23 @@ describe("ProjectManager", () => {
         },
         edges: [],
       } as unknown as JsonData);
-      await projectManager.openProject(projectPath);
-      mockDb.prepare
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([{ id: "btn-id", name: "Button" }]),
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([]), // renderedBy call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          get: vi.fn().mockReturnValue({ id: "btn-id", name: "Button" }), // sym call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([{ tag: "div", symbol_id: null }]), // children call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([]),
-        } as unknown as Database.Statement);
+      vi.mocked(fs.existsSync).mockImplementation((p: unknown) => {
+        const path = p as string;
+        return path.includes(".nexiq");
+      });
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("SELECT s.*, f.path as file, e.line")) {
+          s.all.mockReturnValue([{ id: "btn-id", name: "Button" }]);
+        } else if (sql.includes("SELECT * FROM symbols WHERE id = ?")) {
+          s.get.mockReturnValue({ id: "btn-id", name: "Button" });
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([{ tag: "div", symbol_id: null }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = (await projectManager.getComponentHierarchy(
         projectPath,
@@ -672,18 +673,6 @@ describe("ProjectManager", () => {
       expect(imports["useState"]).toBeDefined();
       expect(imports["Button"]).toBeDefined();
     });
-
-    it("should get project tree", async () => {
-      const tree = await projectManager.getProjectTree(
-        projectPath,
-        undefined,
-        2,
-      );
-      expect(tree.name).toBe("/");
-      expect(tree.children[0].name).toBe("src");
-      expect(tree.children[0].children[0].name).toBe("App.tsx");
-      expect(tree.children[0].children[1].name).toBe("components");
-    });
   });
 
   describe("Symbol Location and Content", () => {
@@ -718,10 +707,11 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol location", async () => {
-      mockDb.prepare.mockImplementationOnce(() => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
-        s.all.mockReturnValue([
-          {
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([{
             id: "app-id",
             name: "App",
             file: "/src/App.tsx",
@@ -729,8 +719,8 @@ describe("ProjectManager", () => {
             column: 1,
             kind: "component",
             type: "function",
-          },
-        ]);
+          }]);
+        }
         return s as unknown as Database.Statement;
       });
       const loc = await projectManager.getSymbolLocation(projectPath, "App");
@@ -906,20 +896,23 @@ describe("ProjectManager", () => {
     });
 
     it("should handle partial symbol matches", async () => {
-      mockDb.prepare.mockImplementationOnce(() => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
-        s.all.mockReturnValue([
-          {
-            id: "app",
-            name: "App",
-            file: "/src/App.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            type: "function",
-            props_json: "[]",
-          },
-        ]);
+        if (sql.includes("WHERE (s.name = ? OR s.name LIKE ?)")) {
+          s.all.mockReturnValue([
+            {
+              id: "app",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+              props_json: "[]",
+            },
+          ]);
+        }
         return s as unknown as Database.Statement;
       });
       const results = await projectManager.findSymbol(
@@ -931,6 +924,157 @@ describe("ProjectManager", () => {
       expect(results.definitions).toHaveLength(1);
       expect(results.definitions[0].name).toBe("App");
       expect(results.externalUsages).toHaveLength(0);
+    });
+  });
+
+  describe("trace_data_flow", () => {
+    const projectPath = "/test/project";
+
+    beforeEach(async () => {
+      vi.mocked(analyzeProject).mockResolvedValue({
+        src: projectPath, files: {}, edges: [],
+      } as unknown as JsonData);
+      await projectManager.openProject(projectPath);
+    });
+
+    it("should iterate all entities and pick the one with the traceable field", async () => {
+      let queryIndex = 0;
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM entities e") && sql.includes("JOIN scopes sc")) {
+          queryIndex++;
+          if (queryIndex === 1) {
+            s.all.mockReturnValue([
+              { id: "ent-virtual", symbol_id: "sym-v", file: "/src/post_list_virtualized.tsx" },
+              { id: "ent-outer", symbol_id: "sym-o", file: "/src/post_list.tsx" },
+            ]);
+          } else {
+            s.all.mockReturnValue([]);
+          }
+        } else if (sql.includes("DISTINCT")) {
+          // findParentByRenderStmt (usage-render-call fallback)
+          s.all.mockReturnValue([{
+            parent_entity_id: "ent-parent",
+            parent_name: "PostView",
+            parent_file: "/src/post_view.tsx",
+          }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
+        } else if (sql.includes("SELECT r.*")) {
+          // findRenderStmt (has SELECT r.* and LIMIT 1)
+          s.all.mockReturnValue([{
+            data_json: JSON.stringify({
+              dependencies: [{ name: "postListIds", value: { type: "ref", name: "formattedPostIds", refType: "named" } }],
+            }),
+            line: 50, column: 10,
+          }]);
+        } else if (sql.includes("WHERE sc.entity_id = ? AND e.kind = 'prop'")) {
+          s.get.mockReturnValue({ "1": 1 });
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await projectManager.traceDataFlow(projectPath, "PostList", "postListIds", undefined, 3);
+      expect(result.chain!).toHaveLength(1);
+      expect(result.chain![0].component).toBe("PostList");
+      expect(result.chain![0].expression).toBeDefined();
+      expect(result.chain![0].expression!.name).toBe("formattedPostIds");
+    });
+
+    it("should fall back to renders table when graph edges are missing", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("FROM entities e") && sql.includes("JOIN scopes sc")) {
+          s.all.mockReturnValue([{ id: "ent-outer", symbol_id: "sym-o", file: "/src/post_list.tsx" }]);
+        } else if (sql.includes("DISTINCT")) {
+          s.all.mockReturnValue([{
+            parent_entity_id: "ent-parent", parent_name: "PostView", parent_file: "/src/post_view.tsx",
+          }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
+        } else if (sql.includes("SELECT r.*")) {
+          s.all.mockReturnValue([{
+            data_json: JSON.stringify({
+              dependencies: [{ name: "postListIds", value: { type: "ref", name: "formattedPostIds", refType: "named" } }],
+            }),
+            line: 50, column: 10,
+          }]);
+        } else if (sql.includes("WHERE sc.entity_id = ? AND e.kind = 'prop'")) {
+          s.get.mockReturnValue({ "1": 1 });
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const result = await projectManager.traceDataFlow(projectPath, "PostList", "postListIds", undefined, 3);
+      expect(result.chain!).toHaveLength(1);
+      expect(result.chain![0].file).toBe("/src/post_list.tsx");
+    });
+  });
+
+  describe("getSymbolContent backward scan", () => {
+    const projectPath = "/test/project";
+
+    beforeEach(async () => {
+      const mockGraph = {
+        src: projectPath,
+        files: {
+          "/src/PostList.tsx": {
+            var: {
+              "postlist-id": {
+                id: "postlist-id",
+                name: { type: "identifier" as const, name: "PostList" },
+                kind: "component" as const, type: "class" as const,
+                loc: { line: 30, column: 1 },
+                scope: { start: { line: 30, column: 20 }, end: { line: 50, column: 1 } },
+              },
+            },
+          },
+        },
+        edges: [],
+      };
+      vi.mocked(analyzeProject).mockResolvedValue(mockGraph as unknown as JsonData);
+      await projectManager.openProject(projectPath);
+    });
+
+    it("should scan backward to include Props interface before the component", async () => {
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([{
+            id: "sym-pl", name: "PostList", file: "/src/PostList.tsx",
+            line: 13, column: 1, kind: "component", type: "class",
+          }]);
+        }
+        return s as unknown as Database.Statement;
+      });
+
+      const fileContent = [
+        'import React from "react";',
+        "",
+        "export interface Props {",
+        "  postListIds: string[];",
+        "  channelId: string;",
+        "  focusedPostId?: string;",
+        "}",
+        "",
+        "type State = {",
+        "  loadingNewerPosts: boolean;",
+        "};",
+        "",
+        "export default class PostList extends React.PureComponent<Props, State> {",
+        "  render() { return <div/>; }",
+        "}",
+      ].join("\n");
+
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(fileContent);
+
+      const result = await projectManager.getSymbolContent(projectPath, "PostList", undefined, 10);
+      if (!Array.isArray(result)) throw new Error("Expected array");
+      expect(result[0].content).toBeDefined();
+      expect(result[0].content).toContain("interface Props");
+      expect(result[0].content).toContain("postListIds");
+      expect(result[0].content).toContain("PostList");
     });
   });
 });

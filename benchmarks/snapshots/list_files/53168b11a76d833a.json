@@ -9,8 +9,165 @@
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"totalFiles\": 126,\n  \"displayedCount\": 50,\n  \"files\": [\n    {\n      \"path\": \"/playwright.config.ts\"\n    },\n    {\n      \"path\": \"/mock-server.ts\"\n    },\n    {\n      \"path\": \"/src/main.tsx\"\n    },\n    {\n      \"path\": \"/src/utils/format.ts\"\n    },\n    {\n      \"path\": \"/src/utils/cn.ts\"\n    },\n    {\n      \"path\": \"/src/types/api.ts\"\n    },\n    {\n      \"path\": \"/src/testing/test-utils.tsx\"\n    },\n    {\n      \"path\": \"/src/testing/setup-tests.ts\"\n    },\n    {\n      \"path\": \"/src/testing/data-generators.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/utils.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/server.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/index.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/db.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/browser.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/users.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/teams.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/index.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/discussions.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/comments.ts\"\n    },\n    {\n      \"path\": \"/src/testing/mocks/handlers/auth.ts\"\n    },\n    {\n      \"path\": \"/src/lib/react-query.ts\"\n    },\n    {\n      \"path\": \"/src/lib/authorization.tsx\"\n    },\n    {\n      \"path\": \"/src/lib/auth.tsx\"\n    },\n    {\n      \"path\": \"/src/lib/api-client.ts\"\n    },\n    {\n      \"path\": \"/src/hooks/use-disclosure.ts\"\n    },\n    {\n      \"path\": \"/src/features/users/components/users-list.tsx\"\n    },\n    {\n      \"path\": \"/src/features/users/components/update-profile.tsx\"\n    },\n    {\n      \"path\": \"/src/features/users/components/delete-user.tsx\"\n    },\n    {\n      \"path\": \"/src/features/users/api/update-profile.ts\"\n    },\n    {\n      \"path\": \"/src/features/users/api/get-users.ts\"\n    },\n    {\n      \"path\": \"/src/features/users/api/delete-user.ts\"\n    },\n    {\n      \"path\": \"/src/features/teams/api/get-teams.ts\"\n    },\n    {\n      \"path\": \"/src/features/discussions/components/update-discussion.tsx\"\n    },\n    {\n      \"path\": \"/src/features/discussions/components/discussions-list.tsx\"\n    },\n    {\n      \"path\": \"/src/features/discussions/components/discussion-view.tsx\"\n    },\n    {\n      \"path\": \"/src/features/discussions/components/delete-discussion.tsx\"\n    },\n    {\n      \"path\": \"/src/features/discussions/components/create-discussion.tsx\"\n    },\n    {\n      \"path\": \"/src/features/discussions/api/update-discussion.ts\"\n    },\n    {\n      \"path\": \"/src/features/discussions/api/get-discussions.ts\"\n    },\n    {\n      \"path\": \"/src/features/discussions/api/get-discussion.ts\"\n    },\n    {\n      \"path\": \"/src/features/discussions/api/delete-discussion.ts\"\n    },\n    {\n      \"path\": \"/src/features/discussions/api/create-discussion.ts\"\n    },\n    {\n      \"path\": \"/src/features/comments/components/delete-comment.tsx\"\n    },\n    {\n      \"path\": \"/src/features/comments/components/create-comment.tsx\"\n    },\n    {\n      \"path\": \"/src/features/comments/components/comments.tsx\"\n    },\n    {\n      \"path\": \"/src/features/comments/components/comments-list.tsx\"\n    },\n    {\n      \"path\": \"/src/features/comments/api/get-comments.ts\"\n    },\n    {\n      \"path\": \"/src/features/comments/api/delete-comment.ts\"\n    },\n    {\n      \"path\": \"/src/features/comments/api/create-comment.ts\"\n    },\n    {\n      \"path\": \"/src/features/auth/hooks/use-login-form.ts\"\n    }\n  ],\n  \"hint\": \"Project has 126 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files.\"\n}"
+        "text": "{\"totalFiles\":126,\"displayedCount\":50,\"files\":[{\"path\":\"/__mocks__/zustand.ts\"},{\"path\":\"/e2e/tests/auth.setup.ts\"},{\"path\":\"/e2e/tests/button-size.spec.ts\"},{\"path\":\"/e2e/tests/profile.spec.ts\"},{\"path\":\"/e2e/tests/smoke.spec.ts\"},{\"path\":\"/mock-server.ts\"},{\"path\":\"/playwright.config.ts\"},{\"path\":\"/src/app/index.tsx\"},{\"path\":\"/src/app/provider.tsx\"},{\"path\":\"/src/app/router.tsx\"},{\"path\":\"/src/app/routes/app/dashboard.tsx\"},{\"path\":\"/src/app/routes/app/discussions/discussion.tsx\"},{\"path\":\"/src/app/routes/app/discussions/discussions.tsx\"},{\"path\":\"/src/app/routes/app/profile.tsx\"},{\"path\":\"/src/app/routes/app/root.tsx\"},{\"path\":\"/src/app/routes/app/users.tsx\"},{\"path\":\"/src/app/routes/auth/login.tsx\"},{\"path\":\"/src/app/routes/auth/register.tsx\"},{\"path\":\"/src/app/routes/landing.tsx\"},{\"path\":\"/src/app/routes/not-found.tsx\"},{\"path\":\"/src/components/errors/main.tsx\"},{\"path\":\"/src/components/layouts/auth-layout.tsx\"},{\"path\":\"/src/components/layouts/content-layout.tsx\"},{\"path\":\"/src/components/layouts/dashboard-layout.tsx\"},{\"path\":\"/src/components/layouts/index.ts\"},{\"path\":\"/src/components/seo/head.tsx\"},{\"path\":\"/src/components/seo/index.ts\"},{\"path\":\"/src/components/ui/button/button.stories.tsx\"},{\"path\":\"/src/components/ui/button/button.tsx\"},{\"path\":\"/src/components/ui/button/index.ts\"},{\"path\":\"/src/components/ui/button/types.ts\"},{\"path\":\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx\"},{\"path\":\"/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx\"},{\"path\":\"/src/components/ui/dialog/confirmation-dialog/index.ts\"},{\"path\":\"/src/components/ui/dialog/dialog.stories.tsx\"},{\"path\":\"/src/components/ui/dialog/dialog.tsx\"},{\"path\":\"/src/components/ui/dialog/index.ts\"},{\"path\":\"/src/components/ui/drawer/drawer.stories.tsx\"},{\"path\":\"/src/components/ui/drawer/drawer.tsx\"},{\"path\":\"/src/components/ui/drawer/index.ts\"},{\"path\":\"/src/components/ui/dropdown/dropdown.stories.tsx\"},{\"path\":\"/src/components/ui/dropdown/dropdown.tsx\"},{\"path\":\"/src/components/ui/dropdown/index.ts\"},{\"path\":\"/src/components/ui/form/error.tsx\"},{\"path\":\"/src/components/ui/form/field-wrapper.tsx\"},{\"path\":\"/src/components/ui/form/form-drawer.tsx\"},{\"path\":\"/src/components/ui/form/form.stories.tsx\"},{\"path\":\"/src/components/ui/form/form.tsx\"},{\"path\":\"/src/components/ui/form/index.ts\"},{\"path\":\"/src/components/ui/form/input.tsx\"}],\"hint\":\"Project has 126 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files.\"}"
       }
-    ]
+    ],
+    "structuredContent": {
+      "totalFiles": 126,
+      "displayedCount": 50,
+      "files": [
+        {
+          "path": "/__mocks__/zustand.ts"
+        },
+        {
+          "path": "/e2e/tests/auth.setup.ts"
+        },
+        {
+          "path": "/e2e/tests/button-size.spec.ts"
+        },
+        {
+          "path": "/e2e/tests/profile.spec.ts"
+        },
+        {
+          "path": "/e2e/tests/smoke.spec.ts"
+        },
+        {
+          "path": "/mock-server.ts"
+        },
+        {
+          "path": "/playwright.config.ts"
+        },
+        {
+          "path": "/src/app/index.tsx"
+        },
+        {
+          "path": "/src/app/provider.tsx"
+        },
+        {
+          "path": "/src/app/router.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/dashboard.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/discussions/discussion.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/discussions/discussions.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/profile.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/root.tsx"
+        },
+        {
+          "path": "/src/app/routes/app/users.tsx"
+        },
+        {
+          "path": "/src/app/routes/auth/login.tsx"
+        },
+        {
+          "path": "/src/app/routes/auth/register.tsx"
+        },
+        {
+          "path": "/src/app/routes/landing.tsx"
+        },
+        {
+          "path": "/src/app/routes/not-found.tsx"
+        },
+        {
+          "path": "/src/components/errors/main.tsx"
+        },
+        {
+          "path": "/src/components/layouts/auth-layout.tsx"
+        },
+        {
+          "path": "/src/components/layouts/content-layout.tsx"
+        },
+        {
+          "path": "/src/components/layouts/dashboard-layout.tsx"
+        },
+        {
+          "path": "/src/components/layouts/index.ts"
+        },
+        {
+          "path": "/src/components/seo/head.tsx"
+        },
+        {
+          "path": "/src/components/seo/index.ts"
+        },
+        {
+          "path": "/src/components/ui/button/button.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/button/button.tsx"
+        },
+        {
+          "path": "/src/components/ui/button/index.ts"
+        },
+        {
+          "path": "/src/components/ui/button/types.ts"
+        },
+        {
+          "path": "/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx"
+        },
+        {
+          "path": "/src/components/ui/dialog/confirmation-dialog/index.ts"
+        },
+        {
+          "path": "/src/components/ui/dialog/dialog.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/dialog/dialog.tsx"
+        },
+        {
+          "path": "/src/components/ui/dialog/index.ts"
+        },
+        {
+          "path": "/src/components/ui/drawer/drawer.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/drawer/drawer.tsx"
+        },
+        {
+          "path": "/src/components/ui/drawer/index.ts"
+        },
+        {
+          "path": "/src/components/ui/dropdown/dropdown.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/dropdown/dropdown.tsx"
+        },
+        {
+          "path": "/src/components/ui/dropdown/index.ts"
+        },
+        {
+          "path": "/src/components/ui/form/error.tsx"
+        },
+        {
+          "path": "/src/components/ui/form/field-wrapper.tsx"
+        },
+        {
+          "path": "/src/components/ui/form/form-drawer.tsx"
+        },
+        {
+          "path": "/src/components/ui/form/form.stories.tsx"
+        },
+        {
+          "path": "/src/components/ui/form/form.tsx"
+        },
+        {
+          "path": "/src/components/ui/form/index.ts"
+        },
+        {
+          "path": "/src/components/ui/form/input.tsx"
+        }
+      ],
+      "hint": "Project has 126 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files."
+    }
   }
 }

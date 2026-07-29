@@ -84,7 +84,7 @@ describe("BackendServer", () => {
         expect.arrayContaining(["**/node_modules/**"]),
       );
 
-      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const content = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
@@ -128,7 +128,7 @@ describe("BackendServer", () => {
         expect.any(Array),
       );
 
-      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const content = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
@@ -183,7 +183,7 @@ describe("BackendServer", () => {
         expect.any(Array),
       );
 
-      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const content = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: (SymbolInfoResult & { usages?: SymbolInfoResult[] })[];
         externalUsages: SymbolInfoResult[];
       };
@@ -225,7 +225,7 @@ describe("BackendServer", () => {
         args: args,
       });
 
-      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
+      const content = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string }[] };
       expect(content.totalFiles).toBe(1);
       expect(content.files).toHaveLength(1);
       expect(content.files[0].path).toBe("src/index.ts");
@@ -238,7 +238,7 @@ describe("BackendServer", () => {
         name: "read_file",
         args: args,
       });
-      expect((result as { structuredContent: { content: string } }).structuredContent.content).toBe(
+      expect((result as unknown as { structuredContent: { content: string } }).structuredContent.content).toBe(
         "file content",
       );
     });
@@ -252,7 +252,7 @@ describe("BackendServer", () => {
         args: args,
       });
       expect(
-        (result as { structuredContent: { items: unknown } }).structuredContent.items,
+        (result as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(mockResult);
     });
 
@@ -290,7 +290,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (addResult as { structuredContent: { items: unknown } }).structuredContent.items,
+        (addResult as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(["tag1"]);
 
       vi.mocked(mockProjectManager.getLabels).mockResolvedValue({
@@ -303,7 +303,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (listResult as { structuredContent: Record<string, unknown> }).structuredContent,
+        (listResult as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual({
         id1: ["tag1"],
       });
@@ -319,7 +319,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (searchResult as { structuredContent: { items: unknown } }).structuredContent.items,
+        (searchResult as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(["id1"]);
     });
 
@@ -334,7 +334,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (dirResult as { structuredContent: Record<string, unknown> }).structuredContent,
+        (dirResult as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockDir);
 
       const mockOutline = [
@@ -358,7 +358,7 @@ describe("BackendServer", () => {
       });
       const expectedOutline = mockOutline.map(({ id, ...rest }) => rest);
       expect(
-        (outlineResult as { structuredContent: { items: unknown } }).structuredContent.items,
+        (outlineResult as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(expectedOutline);
     });
 
@@ -386,7 +386,7 @@ describe("BackendServer", () => {
       });
       const expectedLoc = mockLoc.map(({ id, ...rest }) => rest);
       expect(
-        (locResult as { structuredContent: { items: unknown } }).structuredContent.items,
+        (locResult as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(expectedLoc);
 
       const mockContent = [
@@ -412,7 +412,7 @@ describe("BackendServer", () => {
       });
       const expectedContent = mockContent.map(({ id, ...rest }) => rest);
       expect(
-        (contentResult as { structuredContent: { items: unknown } }).structuredContent.items,
+        (contentResult as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(expectedContent);
     });
 
@@ -427,7 +427,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (result as { structuredContent: { items: unknown } }).structuredContent.items,
+        (result as unknown as { structuredContent: { items: unknown } }).structuredContent.items,
       ).toEqual(mockResult);
     });
 
@@ -452,23 +452,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
-      ).toEqual(mockResult);
-    });
-
-    it("should handle get_project_tree tool", async () => {
-      const mockResult = { name: "/", children: [] };
-      vi.mocked(mockProjectManager.getProjectTree).mockResolvedValue(
-        mockResult,
-      );
-      const result = await server.handleCallTool({
-        name: "get_project_tree",
-        args: {
-          projectPath: "/p",
-        },
-      });
-      expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
+        (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -485,7 +469,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
+        (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -502,7 +486,7 @@ describe("BackendServer", () => {
         },
       });
       expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
+        (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual(mockResult);
     });
 
@@ -525,7 +509,7 @@ describe("BackendServer", () => {
           projectPath: "/p",
         },
       });
-      const content = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports?: unknown }[] };
+      const content = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports?: unknown }[] };
       expect(content.totalFiles).toBe(101);
       expect(content.files[0]).not.toHaveProperty("exports");
     });
@@ -603,7 +587,7 @@ describe("BackendServer", () => {
       });
       expect(mockExt.mcpTools[0].handler).toHaveBeenCalled();
       expect(
-        (result as { structuredContent: Record<string, unknown> }).structuredContent,
+        (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent,
       ).toEqual({ ok: true });
     });
   });

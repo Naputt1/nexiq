@@ -6,8 +6,165 @@
     "content": [
       {
         "type": "text",
-        "text": "{\n  \"totalFiles\": 68,\n  \"displayedCount\": 50,\n  \"files\": [\n    {\n      \"path\": \"/packages/client/src/websocket.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/telemetry.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/index.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/helpers.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/errors.ts\"\n    },\n    {\n      \"path\": \"/packages/client/src/client4.ts\"\n    },\n    {\n      \"path\": \"/packages/components/rollup.config.js\"\n    },\n    {\n      \"path\": \"/packages/components/babel.config.js\"\n    },\n    {\n      \"path\": \"/packages/components/src/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/tour_tip_backdrop.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/tour_tip.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/tour_tip/index.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/skeleton_loader/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/pulsating_dot/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/generic_modal/generic_modal.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/focus_trap/index.tsx\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useMeasurePunchouts.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useElementAvailable.ts\"\n    },\n    {\n      \"path\": \"/packages/components/src/common/hooks/useClickOutsideRef.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/work_templates.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/utilities.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/users.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/typing.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/threads.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/terms_of_service.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/teams.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/store.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/setup.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/sessions.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/search.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/schemes.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/saml.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/roles.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/requests.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/reactions.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/products.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/product_notices.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/preferences.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/posts.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/plugins.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/mfa.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/message_attachments.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/marketplace.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/jobs.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/integrations.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/integration_actions.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/insights.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/hosted_customer.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/groups.ts\"\n    },\n    {\n      \"path\": \"/packages/types/src/gifs.ts\"\n    }\n  ],\n  \"hint\": \"Project has 68 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files.\"\n}"
+        "text": "{\"totalFiles\":3046,\"displayedCount\":50,\"files\":[{\"path\":\"/actions/admin_actions.jsx\"},{\"path\":\"/actions/apps.ts\"},{\"path\":\"/actions/channel_actions.ts\"},{\"path\":\"/actions/channel_queries.ts\"},{\"path\":\"/actions/cloud.tsx\"},{\"path\":\"/actions/command.ts\"},{\"path\":\"/actions/emoji_actions.js\"},{\"path\":\"/actions/file_actions.ts\"},{\"path\":\"/actions/global_actions.tsx\"},{\"path\":\"/actions/hooks.js\"},{\"path\":\"/actions/hosted_customer.tsx\"},{\"path\":\"/actions/integration_actions.jsx\"},{\"path\":\"/actions/invite_actions.ts\"},{\"path\":\"/actions/marketplace.ts\"},{\"path\":\"/actions/new_post.ts\"},{\"path\":\"/actions/notification_actions.jsx\"},{\"path\":\"/actions/post_actions.ts\"},{\"path\":\"/actions/status_actions.ts\"},{\"path\":\"/actions/storage.ts\"},{\"path\":\"/actions/team_actions.ts\"},{\"path\":\"/actions/telemetry_actions.jsx\"},{\"path\":\"/actions/user_actions.ts\"},{\"path\":\"/actions/views/add_channel_dropdown.ts\"},{\"path\":\"/actions/views/admin.ts\"},{\"path\":\"/actions/views/announcement_bar.js\"},{\"path\":\"/actions/views/browser.ts\"},{\"path\":\"/actions/views/channel.ts\"},{\"path\":\"/actions/views/channel_sidebar.ts\"},{\"path\":\"/actions/views/cookie.js\"},{\"path\":\"/actions/views/create_comment.tsx\"},{\"path\":\"/actions/views/drafts.ts\"},{\"path\":\"/actions/views/group.js\"},{\"path\":\"/actions/views/lhs.ts\"},{\"path\":\"/actions/views/login.ts\"},{\"path\":\"/actions/views/mfa.js\"},{\"path\":\"/actions/views/modals.ts\"},{\"path\":\"/actions/views/notice.js\"},{\"path\":\"/actions/views/onboarding_tasks.ts\"},{\"path\":\"/actions/views/posts.js\"},{\"path\":\"/actions/views/product_menu.ts\"},{\"path\":\"/actions/views/profile_popover.js\"},{\"path\":\"/actions/views/rhs.ts\"},{\"path\":\"/actions/views/root.ts\"},{\"path\":\"/actions/views/search.js\"},{\"path\":\"/actions/views/status_dropdown.ts\"},{\"path\":\"/actions/views/system.js\"},{\"path\":\"/actions/views/textbox.js\"},{\"path\":\"/actions/views/threads.ts\"},{\"path\":\"/actions/websocket_actions.jsx\"},{\"path\":\"/babel.config.js\"}],\"hint\":\"Project has 3046 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files.\"}"
       }
-    ]
+    ],
+    "structuredContent": {
+      "totalFiles": 3046,
+      "displayedCount": 50,
+      "files": [
+        {
+          "path": "/actions/admin_actions.jsx"
+        },
+        {
+          "path": "/actions/apps.ts"
+        },
+        {
+          "path": "/actions/channel_actions.ts"
+        },
+        {
+          "path": "/actions/channel_queries.ts"
+        },
+        {
+          "path": "/actions/cloud.tsx"
+        },
+        {
+          "path": "/actions/command.ts"
+        },
+        {
+          "path": "/actions/emoji_actions.js"
+        },
+        {
+          "path": "/actions/file_actions.ts"
+        },
+        {
+          "path": "/actions/global_actions.tsx"
+        },
+        {
+          "path": "/actions/hooks.js"
+        },
+        {
+          "path": "/actions/hosted_customer.tsx"
+        },
+        {
+          "path": "/actions/integration_actions.jsx"
+        },
+        {
+          "path": "/actions/invite_actions.ts"
+        },
+        {
+          "path": "/actions/marketplace.ts"
+        },
+        {
+          "path": "/actions/new_post.ts"
+        },
+        {
+          "path": "/actions/notification_actions.jsx"
+        },
+        {
+          "path": "/actions/post_actions.ts"
+        },
+        {
+          "path": "/actions/status_actions.ts"
+        },
+        {
+          "path": "/actions/storage.ts"
+        },
+        {
+          "path": "/actions/team_actions.ts"
+        },
+        {
+          "path": "/actions/telemetry_actions.jsx"
+        },
+        {
+          "path": "/actions/user_actions.ts"
+        },
+        {
+          "path": "/actions/views/add_channel_dropdown.ts"
+        },
+        {
+          "path": "/actions/views/admin.ts"
+        },
+        {
+          "path": "/actions/views/announcement_bar.js"
+        },
+        {
+          "path": "/actions/views/browser.ts"
+        },
+        {
+          "path": "/actions/views/channel.ts"
+        },
+        {
+          "path": "/actions/views/channel_sidebar.ts"
+        },
+        {
+          "path": "/actions/views/cookie.js"
+        },
+        {
+          "path": "/actions/views/create_comment.tsx"
+        },
+        {
+          "path": "/actions/views/drafts.ts"
+        },
+        {
+          "path": "/actions/views/group.js"
+        },
+        {
+          "path": "/actions/views/lhs.ts"
+        },
+        {
+          "path": "/actions/views/login.ts"
+        },
+        {
+          "path": "/actions/views/mfa.js"
+        },
+        {
+          "path": "/actions/views/modals.ts"
+        },
+        {
+          "path": "/actions/views/notice.js"
+        },
+        {
+          "path": "/actions/views/onboarding_tasks.ts"
+        },
+        {
+          "path": "/actions/views/posts.js"
+        },
+        {
+          "path": "/actions/views/product_menu.ts"
+        },
+        {
+          "path": "/actions/views/profile_popover.js"
+        },
+        {
+          "path": "/actions/views/rhs.ts"
+        },
+        {
+          "path": "/actions/views/root.ts"
+        },
+        {
+          "path": "/actions/views/search.js"
+        },
+        {
+          "path": "/actions/views/status_dropdown.ts"
+        },
+        {
+          "path": "/actions/views/system.js"
+        },
+        {
+          "path": "/actions/views/textbox.js"
+        },
+        {
+          "path": "/actions/views/threads.ts"
+        },
+        {
+          "path": "/actions/websocket_actions.jsx"
+        },
+        {
+          "path": "/babel.config.js"
+        }
+      ],
+      "hint": "Project has 3046 files. Showing first 50. Use 'list_directory' to explore folders or 'find_files' to search for specific files."
+    }
   }
 }

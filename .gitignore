@@ -167,6 +167,7 @@ server_error*.log
 
 benchmarks/results/
 benchmarks/snapshots/
+benchmarks/cli/src/components/
 
 .turbo
 index.*.node

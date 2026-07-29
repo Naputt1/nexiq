@@ -6,6 +6,7 @@ import { minimatch } from "minimatch";
 import * as watcher from "@parcel/watcher";
 import { analyzeProject } from "@nexiq/analyser";
 import { SqliteDB } from "@nexiq/analyser/db/sqlite";
+import Database from "better-sqlite3";
 import {
   type JsonData,
   type ProjectStatus,
@@ -26,8 +27,8 @@ import {
   getWorkspacePatterns,
 } from "@nexiq/analyser";
 import type { Extension, GraphNodeDetail } from "@nexiq/extension-sdk";
-import { pathToFileURL } from "node:url";
-import { exec, execSync } from "node:child_process";
+import { pathToFileURL, fileURLToPath } from "node:url";
+import { exec, execSync, fork } from "node:child_process";
 import { promisify } from "node:util";
 import { simpleGit, type LogOptions } from "simple-git";
 import tmp from "tmp";
@@ -152,11 +153,6 @@ export interface FieldAccessResult {
   context: string[];
 }
 
-interface TreeNode {
-  name: string;
-  children: TreeNode[];
-}
-
 export interface ComponentHierarchyNode {
   id: string;
   name: string;
@@ -238,13 +234,168 @@ export class ProjectManager {
     }
   }
 
+  private async forkAndAnalyze(
+    srcDir: string,
+    options: {
+      cacheFile?: string;
+      ignorePatterns?: string[];
+      sqlitePath?: string;
+      analysisPaths?: string[];
+      monorepo?: boolean;
+    },
+  ): Promise<JsonData> {
+    if (process.env.VITEST) {
+      return analyzeProject(srcDir, options);
+    }
+
+    const lockPath = path.join(
+      os.tmpdir(),
+      `nexiq-analyze-${crypto.createHash("md5").update(srcDir).digest("hex")}.lock`,
+    );
+    await this.acquireAnalysisLock(lockPath);
+    try {
+      return await this.runAnalysisWorker(srcDir, options);
+    } finally {
+      this.releaseAnalysisLock(lockPath);
+    }
+  }
+
+  private async acquireAnalysisLock(lockPath: string): Promise<void> {
+    const staleTimeout = 60_000;
+    for (let i = 0; i < 120; i++) {
+      try {
+        fs.mkdirSync(lockPath);
+        return;
+      } catch {
+        // Lock exists — check if stale
+        try {
+          const stat = fs.statSync(lockPath);
+          if (Date.now() - stat.mtimeMs > staleTimeout) {
+            fs.rmdirSync(lockPath);
+            continue;
+          }
+        } catch {
+          // Lock was released by another process between stat and rmdir
+        }
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`Timed out waiting for analysis lock: ${lockPath}`);
+  }
+
+  private releaseAnalysisLock(lockPath: string) {
+    try {
+      fs.rmdirSync(lockPath);
+    } catch {
+      // Already released by another process, or never existed
+    }
+  }
+
+  private async runAnalysisWorker(
+    srcDir: string,
+    options: {
+      cacheFile?: string;
+      ignorePatterns?: string[];
+      sqlitePath?: string;
+      analysisPaths?: string[];
+      monorepo?: boolean;
+    },
+  ): Promise<JsonData> {
+    const workerPath = fileURLToPath(
+      new URL("analysis-worker.js", import.meta.url),
+    );
+    const child = fork(workerPath, [], {
+      stdio: ["pipe", "ignore", "pipe", "ipc"],
+      execArgv: [],
+    });
+
+    const input = JSON.stringify({ srcDir, ...options });
+    child.stdin!.write(input);
+    child.stdin!.end();
+
+    let stderrBuf = "";
+    child.stderr!.setEncoding("utf8");
+    child.stderr!.on("data", (chunk: string) => (stderrBuf += chunk));
+
+    const exitPromise = new Promise<void>((resolve, reject) => {
+      child.on("exit", (code) => {
+        if (code !== 0)
+          reject(
+            new Error(
+              `Worker exited with code ${code}. Stderr: ${stderrBuf.slice(-2000)}`,
+            ),
+          );
+        else resolve();
+      });
+      child.on("error", (e) => {
+        (e as Error & { stderr?: string }).stderr = stderrBuf;
+        reject(e);
+      });
+    });
+
+    const timeout = 600_000;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        exitPromise.finally(() => clearTimeout(timeoutHandle)),
+        new Promise<never>((_, reject) => {
+          timeoutHandle = setTimeout(() => {
+            child.kill();
+            reject(new Error(`Analysis timed out after ${timeout / 1000}s`));
+          }, timeout);
+        }),
+      ]);
+    } catch (e) {
+      console.error(`Analysis failed for ${srcDir}:`, e);
+      return { src: "", files: {}, edges: [], resolve: [] } as JsonData;
+    }
+
+    if (options.cacheFile && fs.existsSync(options.cacheFile)) {
+      try {
+        return JSON.parse(
+          fs.readFileSync(options.cacheFile, "utf-8"),
+        ) as JsonData;
+      } catch (e) {
+        console.error(`Failed to read cache file ${options.cacheFile}:`, e);
+      }
+    }
+
+    return {} as JsonData;
+  }
+
+  /** If `p` is a file path, return its parent directory; otherwise return as-is. */
+  private ensureDirectory(p: string): string {
+    try {
+      const stat = fs.statSync(p);
+      if (stat.isFile()) return path.dirname(p);
+      return p; // Already a directory
+    } catch {
+      // Path doesn't exist — walk up to find the first existing directory
+      let current = p;
+      for (let i = 0; i < 20; i++) {
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        try {
+          const stat = fs.statSync(parent);
+          if (stat.isDirectory()) return parent;
+        } catch {
+          /* empty */
+        }
+        current = parent;
+      }
+    }
+    return p;
+  }
+
   private async _openProjectInternal(
     projectPath: string,
     subProject?: string,
     subProjects?: string[],
   ): Promise<ProjectInfo> {
+    // LLM sometimes passes a file path instead of project root; resolve to directory
+    const safeProjectPath = this.ensureDirectory(projectPath);
     const { analysisPath, cacheRoot, cacheDir, cacheFile, sqlitePath } =
-      this.getProjectStoragePaths(projectPath, subProject, subProjects);
+      this.getProjectStoragePaths(safeProjectPath, subProject, subProjects);
 
     const isMultiProject = subProjects && subProjects.length > 0;
 
@@ -305,7 +456,7 @@ export class ProjectManager {
     console.error(
       `Analyzing project: ${cacheRoot} (Selection: ${analysisPath})`,
     );
-    const graph = await analyzeProject(
+    const graph = await this.forkAndAnalyze(
       subProjects && subProjects.length > 0 ? projectPath : analysisPath,
       {
         cacheFile,
@@ -677,27 +828,51 @@ export class ProjectManager {
       definitions_results.push(definition);
     }
 
-    // 3. Fallback for external symbols (tags not defined in this project)
-    if (includeUsages && definitions_results.length === 0) {
+    // 3. Query usage-render-call relations for cross-file JSX usage
+    //    These are created by usageCollector.ts during analysis and always
+    //    have correct cross-file data (unlike the renders table which misses
+    //    entries created during the resolve phase)
+    if (includeUsages) {
+      const defFiles = new Set(definitions_results.map((d) => d.file));
       const results = project
         .db!.db.prepare(
           `
-        SELECT r.*, f.path as file, s.name as in_name 
-        FROM renders r 
-        JOIN files f ON r.file_id = f.id
-        LEFT JOIN entities e ON r.parent_entity_id = e.id
-        LEFT JOIN symbols s ON s.entity_id = e.id
-        WHERE r.tag = ?
+        SELECT DISTINCT rel.line, rel.column, rel.data_json,
+               e_from.name as in_name,
+               f.path as file
+        FROM relations rel
+        JOIN entities e_from ON rel.from_id = e_from.id
+        JOIN scopes sc_from ON e_from.scope_id = sc_from.id
+        JOIN files f ON sc_from.file_id = f.id
+        WHERE rel.kind = 'usage-render-call'
+          AND json_extract(rel.data_json, '$.displayLabel') = ?
       `,
         )
-        .all(query) as ExtendedRenderRow[];
+        .all(query) as {
+        line: number;
+        column: number;
+        data_json: string | null;
+        in_name: string;
+        file: string;
+      }[];
 
       for (const usage of results) {
         if (isExcluded(usage.file)) continue;
+        if (defFiles.has(usage.file)) continue;
+
+        let tag = query;
+        if (usage.data_json) {
+          try {
+            const data = JSON.parse(usage.data_json);
+            if (data.displayLabel) tag = data.displayLabel;
+          } catch {
+            /* empty */
+          }
+        }
 
         externalUsages.push({
-          kind: usage.kind === "jsx" ? "render" : "call",
-          name: usage.tag,
+          kind: "render",
+          name: tag,
           file: usage.file,
           loc: { line: usage.line || 0, column: usage.column || 0 },
           in: usage.in_name || "unknown",
@@ -805,13 +980,27 @@ export class ProjectManager {
       data_json: string | null;
     }>;
 
+    // Look up entity IDs matching the query symbol name for owner filtering
+    const queryEntityIds = new Set(
+      (
+        project
+          .db!.db.prepare(
+            `SELECT DISTINCT e.id FROM entities e JOIN symbols s ON s.entity_id = e.id WHERE s.name = ?`,
+          )
+          .all(query) as { id: string }[]
+      ).map((r) => r.id),
+    );
+
+    const ownerMatched: FieldAccessResult[] = [];
+    const otherResults: FieldAccessResult[] = [];
+
     for (const access of accesses) {
       if (!access.data_json) continue;
       const data = JSON.parse(access.data_json) as UsageOccurrence;
       const file = data.filePath;
       if (!file) continue;
 
-      results.push({
+      const result: FieldAccessResult = {
         file,
         line: access.line,
         column: access.column,
@@ -819,8 +1008,17 @@ export class ProjectManager {
         accessPath: data.accessPath || [],
         displayLabel: data.displayLabel || "",
         context: [],
-      });
+      };
+
+      if (data.ownerId && queryEntityIds.has(data.ownerId)) {
+        ownerMatched.push(result);
+      } else {
+        otherResults.push(result);
+      }
     }
+
+    // Use owner-matched results when available; otherwise fall back to all
+    results.push(...(ownerMatched.length > 0 ? ownerMatched : otherResults));
 
     // Step 3: Read context lines if requested
     if (contextLines > 0) {
@@ -862,19 +1060,39 @@ export class ProjectManager {
       false, // includeUsages
     );
 
-    return symbolInfo.definitions.map((def) => ({
-      name: def.name,
-      file: def.file,
-      props: def.props || [],
-    }));
+    const analysisPath = this.getAnalysisPath(projectPath, subProject);
+    const results = [];
+
+    for (const def of symbolInfo.definitions) {
+      let props = def.props || [];
+      if (props.length === 0 && def.file && analysisPath) {
+        const fullPath = path.resolve(
+          analysisPath,
+          def.file.startsWith("/") ? def.file.slice(1) : def.file,
+        );
+        if (fs.existsSync(fullPath)) {
+          const content = fs.readFileSync(fullPath, "utf-8");
+          props = extractPropsFromSource(content);
+        }
+      }
+      results.push({ name: def.name, file: def.file, props });
+    }
+
+    return results;
   }
 
   async findFiles(projectPath: string, pattern: string, subProject?: string) {
     const project = await this.openProject(projectPath, subProject);
 
-    const isGlob = /[*?[\]]/.test(pattern);
-    const files = Object.keys(project.graph!.files);
+    const rows = project.db!.db.prepare("SELECT path FROM files").all() as {
+      path: string;
+    }[];
+    const files =
+      rows.length > 0
+        ? rows.map((r) => r.path)
+        : Object.keys(project.graph?.files || {});
 
+    const isGlob = /[*?[\]]/.test(pattern);
     if (isGlob) {
       const results = files.filter(
         (p) =>
@@ -899,42 +1117,30 @@ export class ProjectManager {
     const project = await this.openProject(projectPath, subProject);
 
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph!.files[normalizedPath];
-    if (!file) throw new Error(`File not found: ${normalizedPath}`);
 
-    return file.import;
-  }
+    const rows = project
+      .db!.db.prepare(
+        `SELECT e.name, e.data_json
+         FROM entities e
+         JOIN scopes s ON e.scope_id = s.id
+         JOIN files f ON s.file_id = f.id
+         WHERE f.path = ? AND e.kind = 'import'`,
+      )
+      .all(normalizedPath) as { name: string; data_json: string | null }[];
 
-  async getProjectTree(
-    projectPath: string,
-    subProject?: string,
-    maxDepth: number = 3,
-  ): Promise<TreeNode> {
-    const project = await this.openProject(projectPath, subProject);
-
-    const root: TreeNode = { name: "/", children: [] };
-    const files = Object.keys(project.graph!.files).sort();
-
-    for (const filePath of files) {
-      const parts = filePath.split("/").filter(Boolean);
-      let current = root;
-      for (let i = 0; i < Math.min(parts.length, maxDepth); i++) {
-        const part = parts[i]!;
-        let node = current.children.find((c) => c.name === part);
-        if (!node) {
-          node = { name: part, children: [] };
-          current.children.push(node);
+    if (rows.length > 0) {
+      const imports: Record<string, unknown> = {};
+      for (const row of rows) {
+        if (row.name) {
+          imports[row.name] = JSON.parse(row.data_json || "{}");
         }
-        current = node;
       }
+      return imports;
     }
 
-    const sortNodes = (node: TreeNode) => {
-      node.children.sort((a, b) => a.name.localeCompare(b.name));
-      for (const child of node.children) sortNodes(child);
-    };
-    sortNodes(root);
-    return root;
+    const file = project.graph?.files?.[normalizedPath];
+    if (!file) throw new Error(`File not found: ${normalizedPath}`);
+    return file.import;
   }
 
   async getComponentHierarchy(
@@ -948,7 +1154,7 @@ export class ProjectManager {
         hierarchies: ComponentHierarchyNode[];
         renderedBy: { id: string; name: string; file: string }[];
       }
-    | { error: string }
+    | { error: string; hint?: string }
   > {
     const project = await this.openProject(projectPath, subProject);
 
@@ -968,7 +1174,10 @@ export class ProjectManager {
       .all(componentName) as ExtendedSymbolRow[];
 
     if (startComponents.length === 0) {
-      return { error: `Component "${componentName}" not found.` };
+      return {
+        error: `Component "${componentName}" not found.`,
+        hint: `The component may be in an external monorepo package, or registered under a different name. Use 'get_symbol_info' with usages=false to find it, or 'grep_search' to locate references.`,
+      };
     }
 
     const buildHierarchy = (
@@ -1043,6 +1252,547 @@ export class ProjectManager {
         file: s.file,
       })),
     };
+  }
+
+  async getRelations(
+    projectPath: string,
+    symbolId: string,
+    subProject?: string,
+    kind?: string,
+    direction: "outgoing" | "incoming" | "both" = "both",
+  ) {
+    const project = await this.openProject(projectPath, subProject);
+
+    const symbol = project
+      .db!.db.prepare(
+        `
+      SELECT s.id, s.name, e.id as entity_id
+      FROM symbols s
+      JOIN entities e ON s.entity_id = e.id
+      WHERE s.id = ?
+    `,
+      )
+      .get(symbolId) as
+      | { id: string; name: string; entity_id: string }
+      | undefined;
+
+    if (!symbol) {
+      return { error: `Symbol "${symbolId}" not found.` };
+    }
+
+    const kindFilter = kind ? "AND r.kind = ?" : "";
+    const kindParams = kind ? [kind] : [];
+
+    const queryEdge = (selectCols: string, joinCol: string, dirLabel: string) =>
+      project
+        .db!.db.prepare(
+          `
+        SELECT r.kind, r.line, r.column, r.data_json,
+               ${selectCols}.id as other_id,
+               ${selectCols}.name as other_name,
+               f.path as file,
+               e_other.kind as other_kind,
+               e_other.type as other_type
+        FROM relations r
+        JOIN entities e_other ON r.${joinCol} = e_other.id
+        JOIN scopes sc_other ON e_other.scope_id = sc_other.id
+        JOIN files f ON sc_other.file_id = f.id
+        LEFT JOIN symbols ${selectCols} ON ${selectCols}.entity_id = e_other.id
+        WHERE r.${dirLabel === "outgoing" ? "from_id" : "to_id"} = ? ${kindFilter}
+        ORDER BY r.kind, r.line
+      `,
+        )
+        .all(symbol.entity_id, ...kindParams) as {
+        kind: string;
+        line: number;
+        column: number;
+        data_json: string | null;
+        other_id: string;
+        other_name: string | null;
+        file: string;
+        other_kind: string;
+        other_type: string;
+      }[];
+
+    const outgoing =
+      direction !== "incoming"
+        ? queryEdge("s_to", "to_id", "outgoing").map((e) => ({
+            kind: e.kind,
+            toName: e.other_name || "anonymous",
+            toId: e.other_id,
+            toKind: e.other_kind,
+            toType: e.other_type,
+            file: e.file,
+            line: e.line,
+            column: e.column,
+          }))
+        : [];
+
+    const incoming =
+      direction !== "outgoing"
+        ? queryEdge("s_from", "from_id", "incoming").map((e) => ({
+            kind: e.kind,
+            fromName: e.other_name || "anonymous",
+            fromId: e.other_id,
+            fromKind: e.other_kind,
+            fromType: e.other_type,
+            file: e.file,
+            line: e.line,
+            column: e.column,
+          }))
+        : [];
+
+    return {
+      symbolId: symbol.id,
+      symbolName: symbol.name,
+      totalOutgoing: outgoing.length,
+      totalIncoming: incoming.length,
+      ...(outgoing.length > 0 ? { outgoing } : {}),
+      ...(incoming.length > 0 ? { incoming } : {}),
+    };
+  }
+
+  async traceDataFlow(
+    projectPath: string,
+    componentName: string,
+    fieldPath: string,
+    subProject?: string,
+    maxDepth: number = 3,
+  ) {
+    const project = await this.openProject(projectPath, subProject);
+
+    const findEntitiesStmt = project.db!.db.prepare(`
+      SELECT e.id, s.id as symbol_id, f.path as file
+      FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      LEFT JOIN symbols s ON s.entity_id = e.id
+      WHERE s.name = ? AND e.kind = 'component'
+    `);
+
+    const findParentStmt = project.db!.db.prepare(`
+      SELECT DISTINCT rel.to_id as parent_entity_id,
+             e_parent.name as parent_name,
+             f_parent.path as parent_file
+      FROM relations rel
+      JOIN entities e_parent ON rel.to_id = e_parent.id
+      JOIN scopes sc_parent ON e_parent.scope_id = sc_parent.id
+      JOIN files f_parent ON sc_parent.file_id = f_parent.id
+      WHERE rel.from_id = ? AND rel.kind = 'render'
+    `);
+
+    const findParentByRenderStmt = project.db!.db.prepare(`
+      SELECT DISTINCT e_from.id as parent_entity_id,
+             e_from.name as parent_name,
+             f_from.path as parent_file
+      FROM relations rel
+      JOIN entities e_from ON rel.from_id = e_from.id
+      JOIN scopes sc_from ON e_from.scope_id = sc_from.id
+      JOIN files f_from ON sc_from.file_id = f_from.id
+      WHERE rel.kind = 'usage-render-call'
+        AND json_extract(rel.data_json, '$.displayLabel') = ?
+    `);
+
+    const findRenderStmt = project.db!.db.prepare(`
+      SELECT r.*
+      FROM renders r
+      WHERE r.parent_entity_id = ? AND r.tag = ?
+      LIMIT 1
+    `);
+
+    const hasPropStmt = project.db!.db.prepare(`
+      SELECT 1 FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      WHERE sc.entity_id = ? AND e.kind = 'prop' AND e.name = ?
+      LIMIT 1
+    `);
+
+    interface TraceResult {
+      chain: {
+        step: number;
+        component: string;
+        file: string;
+        renderLoc?: { line: number; column: number };
+        expression?: { type: string; name: string; refType?: string };
+      }[];
+      depth: number;
+      fieldFound: boolean;
+    }
+
+    const entities = findEntitiesStmt.all(componentName) as {
+      id: string;
+      symbol_id: string;
+      file: string;
+    }[];
+    if (entities.length === 0) {
+      return { error: `Component "${componentName}" not found.` };
+    }
+
+    const traceFrom = (startEntity: {
+      id: string;
+      file: string;
+    }): TraceResult => {
+      const chain: TraceResult["chain"] = [];
+      let currentEntityId = startEntity.id;
+      let currentEntityFile = startEntity.file;
+      let currentName = componentName;
+      let currentField = fieldPath;
+      let currentDepth = 0;
+      let fieldFound = false;
+
+      while (currentDepth < maxDepth) {
+        const parents = findParentStmt.all(currentEntityId) as {
+          parent_entity_id: string;
+          parent_name: string;
+          parent_file: string;
+        }[];
+
+        let allParents = [...parents];
+
+        // Fallback: renders table when graph edges don't resolve
+        if (allParents.length === 0) {
+          const renderParents = findParentByRenderStmt.all(currentName) as {
+            parent_entity_id: string;
+            parent_name: string;
+            parent_file: string;
+          }[];
+          allParents = renderParents.filter(
+            (p) => p.parent_file !== currentEntityFile,
+          );
+        }
+
+        if (allParents.length === 0) {
+          chain.push({
+            step: currentDepth + 1,
+            component: currentName,
+            file: currentEntityFile,
+          });
+          break;
+        }
+
+        let found = false;
+        for (const parent of allParents) {
+          const renders = findRenderStmt.all(
+            parent.parent_entity_id,
+            currentName,
+          ) as RenderRow[];
+          for (const render of renders) {
+            if (!render.data_json) continue;
+            const data = JSON.parse(render.data_json);
+            const deps: Array<{
+              name: string;
+              value: { type: string; name: string; refType?: string };
+              valueId?: string;
+            }> = data.dependencies || [];
+            const dep = deps.find((d) => d.name === currentField);
+            if (dep) {
+              fieldFound = true;
+              const expression = {
+                type: dep.value.type,
+                name: dep.value.name,
+                refType: dep.value.refType,
+              };
+              chain.push({
+                step: currentDepth + 1,
+                component: currentName,
+                file: currentEntityFile,
+                renderLoc: {
+                  line: render.line || 0,
+                  column: render.column || 0,
+                },
+                expression,
+              });
+
+              // Recurse to parent if expression references a parent prop
+              if (
+                expression.type === "ref" &&
+                expression.refType === "named" &&
+                currentDepth + 1 < maxDepth
+              ) {
+                const hasProp = hasPropStmt.get(
+                  parent.parent_entity_id,
+                  expression.name,
+                ) as { "1": number } | undefined;
+                if (hasProp) {
+                  // eslint-disable-next-line no-useless-assignment
+                  currentEntityId = parent.parent_entity_id;
+                  currentEntityFile = parent.parent_file;
+                  currentName = parent.parent_name;
+                  currentField = expression.name;
+                  currentDepth++;
+                  found = true;
+                  break;
+                }
+              }
+              found = true;
+              break;
+            }
+          }
+          if (found) break;
+        }
+
+        if (!found) {
+          chain.push({
+            step: currentDepth + 1,
+            component: currentName,
+            file: currentEntityFile,
+          });
+        }
+        break;
+      }
+
+      return { chain, depth: currentDepth, fieldFound };
+    };
+
+    const results = entities.map((e) => traceFrom(e));
+    results.sort((a, b) => {
+      if (a.fieldFound !== b.fieldFound) return b.fieldFound ? 1 : -1;
+      return b.depth - a.depth;
+    });
+
+    const best = results[0] || { chain: [], depth: 0, fieldFound: false };
+
+    return {
+      component: componentName,
+      field: fieldPath,
+      chain: best.chain,
+      note:
+        best.chain.length > 0
+          ? "Further resolution may require reading source at the final render location."
+          : "No render parent chain found for this component.",
+    };
+  }
+
+  async getWorkspaceInfo(projectPath: string, subProject?: string) {
+    const analysisRoot = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const workspaceDbPath = path.join(
+      analysisRoot,
+      ".nexiq",
+      "workspace.sqlite",
+    );
+
+    if (!fs.existsSync(workspaceDbPath)) {
+      // Also check for a central DB in the cache directory
+      const cacheDbPath = path.join(
+        analysisRoot,
+        ".nexiq",
+        "cache",
+        "central.sqlite",
+      );
+      if (fs.existsSync(cacheDbPath)) {
+        return this._queryWorkspaceDb(cacheDbPath);
+      }
+      return {
+        isMonorepo: false,
+        packages: [],
+        note: "No workspace database found. This may not be a monorepo.",
+      };
+    }
+
+    return this._queryWorkspaceDb(workspaceDbPath);
+  }
+
+  private _queryWorkspaceDb(workspaceDbPath: string) {
+    const db = new Database(workspaceDbPath, { readonly: true });
+    try {
+      const packages = db
+        .prepare(
+          `
+        SELECT wp.package_id, wp.name, wp.path, wp.db_path,
+               COALESCE(prs.files_total, 0) as file_count,
+               COALESCE(prs.status, 'unknown') as analysis_status
+        FROM workspace_packages wp
+        LEFT JOIN package_run_summaries prs ON wp.package_id = prs.package_id
+        ORDER BY wp.name
+      `,
+        )
+        .all() as Array<{
+        package_id: string;
+        name: string;
+        path: string;
+        db_path: string;
+        file_count: number;
+        analysis_status: string;
+      }>;
+
+      return {
+        isMonorepo: packages.length > 0,
+        packages: packages.map((p) => ({
+          packageId: p.package_id,
+          name: p.name,
+          path: p.path,
+          fileCount: p.file_count,
+          analysisStatus: p.analysis_status,
+        })),
+      };
+    } finally {
+      db.close();
+    }
+  }
+
+  async searchWorkspaceSymbol(
+    projectPath: string,
+    symbol: string,
+    subProject?: string,
+    packageName?: string,
+  ) {
+    const workspaceDbPath = this._findWorkspaceDb(projectPath, subProject);
+    if (!workspaceDbPath) {
+      return {
+        found: false,
+        matches: [],
+        note: "No workspace database found. This project may not have been analyzed as a monorepo.",
+      };
+    }
+
+    const db = new Database(workspaceDbPath, { readonly: true });
+    try {
+      const packageFilter = packageName ? "AND package_name = ?" : "";
+      const packageParams = packageName ? [packageName] : [];
+
+      const matches = db
+        .prepare(
+          `
+        SELECT export_name, export_type, export_kind, package_name, file_path, is_default
+        FROM package_export_index
+        WHERE export_name = ? OR export_name LIKE ? ${packageFilter}
+        ORDER BY package_name, file_path
+      `,
+        )
+        .all(symbol, `%${symbol}%`, ...packageParams) as Array<{
+        export_name: string;
+        export_type: string;
+        export_kind: string;
+        package_name: string;
+        file_path: string;
+        is_default: number;
+      }>;
+
+      return {
+        found: matches.length > 0,
+        totalPackagesSearched: db
+          .prepare("SELECT COUNT(*) as cnt FROM workspace_packages")
+          .get() as { cnt: number },
+        matches: matches.map((m) => ({
+          exportName: m.export_name,
+          exportType: m.export_type,
+          exportKind: m.export_kind,
+          packageName: m.package_name,
+          filePath: m.file_path,
+          isDefault: m.is_default === 1,
+        })),
+      } as {
+        found: boolean;
+        matches: unknown[];
+        totalPackagesSearched: { cnt: number };
+      };
+    } finally {
+      db.close();
+    }
+  }
+
+  async getPackageImports(
+    projectPath: string,
+    filePath: string,
+    subProject?: string,
+  ) {
+    const project = await this.openProject(projectPath, subProject);
+    const workspaceDbPath = this._findWorkspaceDb(projectPath, subProject);
+
+    // Get local imports from the per-package DB
+    const localImports = project
+      .db!.db.prepare(
+        `
+      SELECT e.name, e.data_json, e.line, e.column
+      FROM entities e
+      JOIN scopes sc ON e.scope_id = sc.id
+      JOIN files f ON sc.file_id = f.id
+      WHERE f.path = ? AND e.kind = 'import'
+      ORDER BY e.line
+    `,
+      )
+      .all(filePath) as Array<{
+      name: string;
+      data_json: string | null;
+      line: number;
+      column: number;
+    }>;
+
+    const imports = localImports.map((imp) => {
+      const data = imp.data_json ? JSON.parse(imp.data_json) : {};
+      return {
+        localName: imp.name,
+        importedName: data.importedName || null,
+        sourceModule: data.source || null,
+        importType: data.type || "named",
+        line: imp.line,
+        column: imp.column,
+      } as Record<string, unknown>;
+    });
+
+    // Enrich with workspace info if available
+    if (workspaceDbPath) {
+      const db = new Database(workspaceDbPath, { readonly: true });
+      try {
+        const deferred = db
+          .prepare(
+            `
+          SELECT source_module, source_package_name, source_subpath,
+                 imported_name, import_type, local_name
+          FROM deferred_external_imports
+          WHERE file_path = ?
+        `,
+          )
+          .all(filePath) as Array<{
+          source_module: string;
+          source_package_name: string;
+          source_subpath: string | null;
+          imported_name: string | null;
+          import_type: string;
+          local_name: string;
+        }>;
+
+        if (deferred.length > 0) {
+          const deferredMap = new Map(deferred.map((d) => [d.local_name, d]));
+          for (const imp of imports) {
+            const match = deferredMap.get(imp.localName as string);
+            if (match) {
+              (imp as Record<string, unknown>).resolvedToPackage =
+                match.source_package_name;
+              (imp as Record<string, unknown>).sourceSubpath =
+                match.source_subpath;
+            }
+          }
+        }
+      } finally {
+        db.close();
+      }
+    }
+
+    return {
+      file: filePath,
+      totalImports: imports.length,
+      imports,
+    };
+  }
+
+  private _findWorkspaceDb(
+    projectPath: string,
+    subProject?: string,
+  ): string | null {
+    const analysisRoot = subProject
+      ? path.resolve(projectPath, subProject)
+      : projectPath;
+    const candidates = [
+      path.join(analysisRoot, ".nexiq", "workspace.sqlite"),
+      path.join(analysisRoot, ".nexiq", "cache", "central.sqlite"),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) return candidate;
+    }
+    return null;
   }
 
   async getSymbolLocation(
@@ -1135,12 +1885,27 @@ export class ProjectManager {
       const fileContent = fs.readFileSync(fullPath, "utf-8");
       const lines = fileContent.split("\n");
       const lineIdx = locInfo.loc.line - 1;
-      const start = Math.max(0, lineIdx - contextLines);
+
+      // Scan backward from symbol to find preceding interface/type declarations
+      const scanBoundary = Math.max(0, lineIdx - contextLines);
+      let contentStart = scanBoundary;
+      for (let i = lineIdx - 1; i >= scanBoundary; i--) {
+        const line = lines[i]!.trim();
+        if (
+          line.startsWith("export interface") ||
+          line.startsWith("interface") ||
+          line.startsWith("export type") ||
+          line.startsWith("type ")
+        ) {
+          contentStart = i;
+        }
+      }
+
       const end = Math.min(lines.length, lineIdx + contextLines + 1);
 
       results.push({
         ...locInfo,
-        content: lines.slice(start, end).join("\n"),
+        content: lines.slice(contentStart, end).join("\n"),
       });
     }
 
@@ -1212,17 +1977,33 @@ export class ProjectManager {
   ) {
     const project = await this.openProject(projectPath, subProject);
     const normalizedDir = dirPath.startsWith("/") ? dirPath : `/${dirPath}`;
+
+    const allFiles: string[] = [];
+    const rows = project
+      .db!.db.prepare(
+        `SELECT path FROM files WHERE path LIKE ? || '%' ORDER BY path`,
+      )
+      .all(normalizedDir) as { path: string }[];
+    if (rows.length > 0) {
+      allFiles.push(...rows.map((r) => r.path));
+    } else {
+      const graphFiles = project.graph?.files;
+      if (graphFiles) {
+        for (const filePath of Object.keys(graphFiles)) {
+          if (filePath.startsWith(normalizedDir)) {
+            allFiles.push(filePath);
+          }
+        }
+      }
+    }
+
     const filesInDir = new Set<string>();
     const subDirs = new Set<string>();
-    for (const filePath of Object.keys(project.graph!.files)) {
-      if (filePath.startsWith(normalizedDir)) {
-        const relative = filePath
-          .slice(normalizedDir.length)
-          .replace(/^\//, "");
-        const parts = relative.split("/");
-        if (parts.length === 1 && parts[0] !== "") filesInDir.add(parts[0]!);
-        else if (parts.length > 1) subDirs.add(parts[0]!);
-      }
+    for (const filePath of allFiles) {
+      const relative = filePath.slice(normalizedDir.length).replace(/^\//, "");
+      const parts = relative.split("/");
+      if (parts.length === 1 && parts[0] !== "") filesInDir.add(parts[0]!);
+      else if (parts.length > 1) subDirs.add(parts[0]!);
     }
     return {
       directories: Array.from(subDirs).sort(),
@@ -1237,7 +2018,37 @@ export class ProjectManager {
   ) {
     const project = await this.openProject(projectPath, subProject);
     const normalizedPath = filePath.startsWith("/") ? filePath : `/${filePath}`;
-    const file = project.graph!.files[normalizedPath];
+
+    const rows = project
+      .db!.db.prepare(
+        `SELECT e.id, e.name, e.kind, e.type, e.line
+         FROM entities e
+         JOIN scopes s ON e.scope_id = s.id
+         JOIN files f ON s.file_id = f.id
+         WHERE f.path = ? AND e.kind != 'import' AND e.name IS NOT NULL
+         ORDER BY e.line ASC`,
+      )
+      .all(normalizedPath) as {
+      id: string;
+      name: string;
+      kind: string;
+      type: string;
+      line: number;
+    }[];
+
+    if (rows.length > 0) {
+      return rows
+        .filter((r) => !getDisplayName(r.name).startsWith("jsx@"))
+        .map((r) => ({
+          id: r.id,
+          name: getDisplayName(r.name),
+          kind: r.kind,
+          type: r.type,
+          line: r.line || 0,
+        }));
+    }
+
+    const file = project.graph?.files?.[normalizedPath];
     if (!file) throw new Error(`File not found: ${normalizedPath}`);
     const outline = Object.values(file.var || {})
       .filter((v) => !getDisplayName(v.name).startsWith("jsx@"))
@@ -1284,7 +2095,7 @@ export class ProjectManager {
     subProject?: string,
     exclude?: string[],
   ): Promise<{ file: string; line: number; content: string }[]> {
-    const project = await this.openProject(projectPath, subProject);
+    const _project = await this.openProject(projectPath, subProject);
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
     const analysisPath = this.getAnalysisPath(projectPath, subProject);
@@ -1301,27 +2112,50 @@ export class ProjectManager {
       );
     };
 
-    for (const filePath of Object.keys(project.graph!.files)) {
-      if (isExcluded(filePath)) continue;
-
-      const fullPath = path.resolve(
-        analysisPath,
-        filePath.startsWith("/") ? filePath.slice(1) : filePath,
+    const isSourceFile = (name: string) =>
+      /\.(tsx?|jsx?|mjs|cjs|mts|cts|js|ts|json|md|css|scss|html|vue|svelte|astro)$/i.test(
+        name,
       );
-      if (fs.existsSync(fullPath)) {
-        const content = fs.readFileSync(fullPath, "utf-8");
-        const lines = content.split("\n");
-        lines.forEach((line, index) => {
-          if (regex.test(line))
-            results.push({
-              file: filePath,
-              line: index + 1,
-              content: line.trim(),
-            });
-        });
+
+    const walkDir = (dir: string, rootRel: string) => {
+      let entries: fs.Dirent[];
+      try {
+        entries = fs.readdirSync(dir, { withFileTypes: true });
+      } catch {
+        return;
       }
-      if (results.length > 100) break;
-    }
+
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        const relPath = rootRel ? `${rootRel}/${entry.name}` : `/${entry.name}`;
+
+        if (isExcluded(relPath) || isExcluded(entry.name)) continue;
+
+        if (entry.isDirectory()) {
+          walkDir(fullPath, relPath);
+        } else if (entry.isFile() && isSourceFile(entry.name)) {
+          try {
+            const content = fs.readFileSync(fullPath, "utf-8");
+            const lines = content.split("\n");
+            for (let i = 0; i < lines.length; i++) {
+              if (regex.test(lines[i])) {
+                results.push({
+                  file: relPath,
+                  line: i + 1,
+                  content: lines[i].trim(),
+                });
+                if (results.length >= 100) return;
+              }
+            }
+          } catch {
+            // Skip binary or unreadable files
+          }
+        }
+        if (results.length >= 100) return;
+      }
+    };
+
+    walkDir(analysisPath, "");
     return results;
   }
 
@@ -1705,7 +2539,8 @@ export class ProjectManager {
     filePath: string,
     content: string,
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }
@@ -1726,7 +2561,8 @@ export class ProjectManager {
     oldString: string,
     newString: string,
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }
@@ -1753,7 +2589,8 @@ export class ProjectManager {
     filePath: string,
     replacements: { oldString: string; newString: string }[],
   ): Promise<boolean> {
-    const absolutePath = path.resolve(projectRoot, filePath);
+    const safePath = filePath.replace(/^\//, "");
+    const absolutePath = path.resolve(projectRoot, safePath);
     if (!absolutePath.startsWith(path.resolve(projectRoot))) {
       throw new Error("Path is outside of project root");
     }
@@ -1787,6 +2624,7 @@ export class ProjectManager {
   }
 
   private getAnalysisPath(projectPath: string, subProject?: string): string {
+    projectPath = this.ensureDirectory(projectPath);
     if (!subProject) return projectPath;
     if (path.isAbsolute(subProject)) {
       // If it's inside projectPath, we can still use it.
@@ -1835,4 +2673,50 @@ export class ProjectManager {
       isMultiProject,
     };
   }
+}
+
+function extractPropsFromSource(
+  content: string,
+): { name: string; type: string; kind: string }[] {
+  const props: { name: string; type: string; kind: string }[] = [];
+  const lines = content.split("\n");
+  let inInterface = false;
+  let interfaceDepth = 0;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!inInterface) {
+      if (
+        /^(export\s+)?interface\s+Props/.test(line) ||
+        /^(export\s+)?type\s+Props\s*=/.test(line)
+      ) {
+        inInterface = true;
+        interfaceDepth = line.includes("{")
+          ? (line.match(/{/g) || []).length
+          : 0;
+        if (interfaceDepth === 0) interfaceDepth = 1;
+      }
+      continue;
+    }
+
+    interfaceDepth += (line.match(/{/g) || []).length;
+    interfaceDepth -= (line.match(/}/g) || []).length;
+
+    if (interfaceDepth <= 0) {
+      inInterface = false;
+      interfaceDepth = 0;
+      continue;
+    }
+
+    const propMatch = line.match(/^\s*(\w[\w\d_]*)\??\s*:/);
+    if (propMatch) {
+      const name = propMatch[1];
+      if (!props.some((p) => p.name === name)) {
+        props.push({ name, type: "any", kind: "prop" });
+      }
+    }
+  }
+
+  return props;
 }
