@@ -1514,6 +1514,7 @@ export class ProjectManager {
                   expression.name,
                 ) as { "1": number } | undefined;
                 if (hasProp) {
+                  // eslint-disable-next-line no-useless-assignment
                   currentEntityId = parent.parent_entity_id;
                   currentEntityFile = parent.parent_file;
                   currentName = parent.parent_name;
@@ -2094,7 +2095,7 @@ export class ProjectManager {
     subProject?: string,
     exclude?: string[],
   ): Promise<{ file: string; line: number; content: string }[]> {
-    const project = await this.openProject(projectPath, subProject);
+    const _project = await this.openProject(projectPath, subProject);
     const results: { file: string; line: number; content: string }[] = [];
     const regex = new RegExp(pattern, "i");
     const analysisPath = this.getAnalysisPath(projectPath, subProject);

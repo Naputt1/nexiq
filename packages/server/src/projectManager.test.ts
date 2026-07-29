@@ -971,10 +971,10 @@ describe("ProjectManager", () => {
       });
 
       const result = await projectManager.traceDataFlow(projectPath, "PostList", "postListIds", undefined, 3);
-      expect(result.chain).toHaveLength(1);
-      expect(result.chain[0].component).toBe("PostList");
-      expect(result.chain[0].expression).toBeDefined();
-      expect(result.chain[0].expression!.name).toBe("formattedPostIds");
+      expect(result.chain!).toHaveLength(1);
+      expect(result.chain![0].component).toBe("PostList");
+      expect(result.chain![0].expression).toBeDefined();
+      expect(result.chain![0].expression!.name).toBe("formattedPostIds");
     });
 
     it("should fall back to renders table when graph edges are missing", async () => {
@@ -1002,8 +1002,8 @@ describe("ProjectManager", () => {
       });
 
       const result = await projectManager.traceDataFlow(projectPath, "PostList", "postListIds", undefined, 3);
-      expect(result.chain).toHaveLength(1);
-      expect(result.chain[0].file).toBe("/src/post_list.tsx");
+      expect(result.chain!).toHaveLength(1);
+      expect(result.chain![0].file).toBe("/src/post_list.tsx");
     });
   });
 

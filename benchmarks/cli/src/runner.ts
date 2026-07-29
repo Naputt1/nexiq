@@ -128,7 +128,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   ]);
 }
 
-function isTransportError(e: unknown): boolean {
+function _isTransportError(e: unknown): boolean {
   const msg = (e as Error)?.message || "";
   return (
     msg.includes("Connection closed") ||
@@ -191,7 +191,7 @@ export class McpRunner {
       if (pid !== null && pid !== undefined) {
         try {
           process.kill(pid, 'SIGTERM');
-        } catch {}
+        } catch { /* expected */ }
       }
       await this.transport.close();
     }

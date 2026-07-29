@@ -96,12 +96,12 @@ describe("MCP Tools Integration", () => {
       });
 
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { projectPath, query: "Button" } });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: Array<{ name: string; loc?: unknown }> };
       
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].name).toBe("Button");
       expect(data.definitions[0].loc).toBeDefined(); // loc always included
-      expect(data.usages).toBeUndefined();
+      expect((data as Record<string, unknown>).usages).toBeUndefined();
     });
 
     it("should include usages and location when requested", async () => {
@@ -124,7 +124,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "Button", usages: true, loc: true 
       } });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { loc: unknown; usages: { file: string; in: string }[] }[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { loc: unknown; usages: { file: string; in: string }[] }[] };
       
       expect(data.definitions[0].loc).toBeDefined();
       expect(data.definitions[0].usages).toHaveLength(1);
@@ -151,7 +151,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "div", usages: true 
       } });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[]; externalUsages: { name: string }[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: unknown[]; externalUsages: { name: string }[] };
       
       expect(data.definitions).toHaveLength(0);
       expect(data.externalUsages).toHaveLength(1);
@@ -172,7 +172,7 @@ describe("MCP Tools Integration", () => {
       const result = await server.handleCallTool({ name: "get_symbol_info", args: { 
         projectPath, query: "But", strict: false 
       } });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { name: string }[] };
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { definitions: { name: string }[] };
       
       expect(data.definitions).toHaveLength(1);
       expect(data.definitions[0].name).toBe("Button");
@@ -219,7 +219,7 @@ describe("MCP Tools Integration", () => {
         name: "get_field_accesses",
         args: { projectPath, query: "PostList", fieldPath: "postListIds", contextLines: 0 },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         symbol: string; fieldPath: string; results: { file: string }[]
       };
       expect(data.symbol).toBe("PostList");
@@ -263,7 +263,7 @@ describe("MCP Tools Integration", () => {
         name: "get_field_accesses",
         args: { projectPath, query: "useUser", fieldPath: "user.data.role", contextLines: 0 },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         symbol: string; fieldPath: string; results: { file: string }[]
       };
       expect(data.symbol).toBe("useUser");
@@ -275,7 +275,7 @@ describe("MCP Tools Integration", () => {
 
   describe("get_symbol_info", () => {
     it("should always query renders table for external usages when definitions exist", async () => {
-      let queryCounts: Record<string, number> = {};
+      const queryCounts: Record<string, number> = {};
       mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
         if (sql.includes("FROM symbols s") && sql.includes("WHERE s.name = ?") && !sql.includes("LIKE")) {
@@ -306,7 +306,7 @@ describe("MCP Tools Integration", () => {
         name: "get_symbol_info",
         args: { projectPath, query: "PostList", usages: true },
       });
-      const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as {
+      const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as {
         definitions: { file: string }[];
         externalUsages: { file: string }[];
       };
@@ -347,7 +347,7 @@ describe("MCP Tools Integration", () => {
         name: "get_prop_definitions",
         args: { projectPath, "componentName": "PostList" },
       });
-      const data = (result as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
+      const data = (result as unknown as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
       expect(data[0].props.length).toBeGreaterThan(0);
       const names = data[0].props.map((p: { name: string }) => p.name);
       expect(names).toContain("postListIds");
@@ -373,7 +373,7 @@ describe("MCP Tools Integration", () => {
         name: "get_prop_definitions",
         args: { projectPath, "componentName": "Button" },
       });
-      const data = (result as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
+      const data = (result as unknown as { structuredContent: { items: { props: { name: string }[] }[] } }).structuredContent.items;
       expect(data[0].props).toHaveLength(1);
       expect(data[0].props[0].name).toBe("isLoading");
     });
@@ -382,19 +382,19 @@ describe("MCP Tools Integration", () => {
 
   it("find_files: should support glob patterns", async () => {
     const result = await server.handleCallTool({ name: "find_files", args: { projectPath, pattern: "**/*.tsx" } });
-    const files = (result as { structuredContent: { items: string[] } }).structuredContent.items;
+    const files = (result as unknown as { structuredContent: { items: string[] } }).structuredContent.items;
     expect(files).toContain("/src/App.tsx");
   });
 
   it("get_file_imports: should return imports for a file", async () => {
     const result = await server.handleCallTool({ name: "get_file_imports", args: { projectPath, filePath: "src/App.tsx" } });
-    const imports = (result as { structuredContent: Record<string, unknown> }).structuredContent;
+    const imports = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent;
     expect((imports as Record<string, unknown>)["react"]).toBeDefined();
   });
 
   it("list_files: should return summary for small projects", async () => {
     const result = await server.handleCallTool({ name: "list_files", args: { projectPath } });
-    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports: unknown }[] };
+    const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { totalFiles: number; files: { path: string; exports: unknown }[] };
     expect(data.totalFiles).toBe(1);
     expect(data.files[0].path).toBe("/src/App.tsx");
     expect(data.files[0].exports).toBeDefined();
@@ -420,7 +420,7 @@ describe("MCP Tools Integration", () => {
       });
 
     const result = await server.handleCallTool({ name: "get_component_hierarchy", args: { projectPath, componentName: "App" } });
-    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { component: string; hierarchies: { name: string; children: { name: string }[] }[]; renderedBy: { name: string }[] };
+    const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { component: string; hierarchies: { name: string; children: { name: string }[] }[]; renderedBy: { name: string }[] };
     
     expect(data.component).toBe("App");
     expect(data.hierarchies[0].name).toBe("App");
@@ -440,7 +440,7 @@ describe("MCP Tools Integration", () => {
     });
 
     const result = await server.handleCallTool({ name: "get_symbol_location", args: { projectPath, query: "App" } });
-    const locs = (result as { structuredContent: { items: { file: string; loc: { line: number } }[] } }).structuredContent.items;
+    const locs = (result as unknown as { structuredContent: { items: { file: string; loc: { line: number } }[] } }).structuredContent.items;
     expect(locs[0].file).toBe("/src/App.tsx");
     expect(locs[0].loc.line).toBe(5);
   });
@@ -461,7 +461,7 @@ export const App = () => {}
 line 3`);
 
     const result = await server.handleCallTool({ name: "get_symbol_content", args: { projectPath, query: "App" } });
-    const contents = (result as { structuredContent: { items: { content: string }[] } }).structuredContent.items;
+    const contents = (result as unknown as { structuredContent: { items: { content: string }[] } }).structuredContent.items;
     expect(contents[0].content).toBe("line 1\nexport const App = () => {}\nline 3");
   });
 
@@ -469,23 +469,23 @@ line 3`);
     await server.handleCallTool({ name: "add_label", args: { projectPath, id: "app-id", label: "entry" } });
     
     const listResult = await server.handleCallTool({ name: "list_labels", args: { projectPath } });
-    const labels = (listResult as { structuredContent: Record<string, unknown> }).structuredContent as Record<string, string[]>;
+    const labels = (listResult as unknown as { structuredContent: Record<string, unknown> }).structuredContent as Record<string, string[]>;
     expect(labels["app-id"]).toContain("entry");
 
     const searchResult = await server.handleCallTool({ name: "search_by_label", args: { projectPath, label: "entry" } });
-    const ids = (searchResult as { structuredContent: { items: string[] } }).structuredContent.items;
+    const ids = (searchResult as unknown as { structuredContent: { items: string[] } }).structuredContent.items;
     expect(ids).toContain("app-id");
   });
 
   it("list_directory: should return files and subdirs", async () => {
     const result = await server.handleCallTool({ name: "list_directory", args: { projectPath, dirPath: "src" } });
-    const data = (result as { structuredContent: Record<string, unknown> }).structuredContent as { files: string[] };
+    const data = (result as unknown as { structuredContent: Record<string, unknown> }).structuredContent as { files: string[] };
     expect(data.files).toContain("App.tsx");
   });
 
   it("get_file_outline: should return symbols in a file", async () => {
     const result = await server.handleCallTool({ name: "get_file_outline", args: { projectPath, filePath: "src/App.tsx" } });
-    const outline = (result as { structuredContent: { items: { name: string; line: number }[] } }).structuredContent.items;
+    const outline = (result as unknown as { structuredContent: { items: { name: string; line: number }[] } }).structuredContent.items;
     expect(outline[0].name).toBe("App");
     expect(outline[0].line).toBe(1);
   });
@@ -493,22 +493,21 @@ line 3`);
   it("read_file: should return raw file content", async () => {
     vi.mocked(fs.readFileSync).mockReturnValue("raw content");
     const result = await server.handleCallTool({ name: "read_file", args: { projectPath, filePath: "src/App.tsx" } });
-    expect((result as { structuredContent: { content: string } }).structuredContent.content).toBe("raw content");
+    expect((result as unknown as { structuredContent: { content: string } }).structuredContent.content).toBe("raw content");
   });
 
   it("grep_search: should find occurrences", async () => {
-    vi.mocked(fs.readdirSync).mockImplementation((dir: unknown) => {
-      const d = dir as string;
-      if (d.includes(".nexiq") || d.includes("node_modules")) return [] as fs.Dirent[];
-      if (d === "/test/project" || d === "/test/project/src") {
+    vi.mocked(fs.readdirSync).mockImplementation(((dir: string) => {
+      if (dir.includes(".nexiq") || dir.includes("node_modules")) return [] as fs.Dirent[];
+      if (dir === "/test/project" || dir === "/test/project/src") {
         return [{ name: "App.tsx", isDirectory: () => false, isFile: () => true }] as fs.Dirent[];
       }
       return [] as fs.Dirent[];
-    });
+    }) as unknown as typeof fs.readdirSync);
     vi.mocked(fs.readFileSync).mockReturnValue(`const x = 1;
 console.log(x);`);
     const result = await server.handleCallTool({ name: "grep_search", args: { projectPath, pattern: "console" } });
-    const matches = (result as { structuredContent: { items: { file: string; content: string }[] } }).structuredContent.items;
+    const matches = (result as unknown as { structuredContent: { items: { file: string; content: string }[] } }).structuredContent.items;
     expect(matches[0].file).toBe("/App.tsx");
     expect(matches[0].content).toBe("console.log(x);");
   });

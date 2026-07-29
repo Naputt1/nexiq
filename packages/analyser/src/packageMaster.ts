@@ -842,7 +842,7 @@ export class PackageMaster {
       filesSucceeded: succeededFiles.length,
       filesFailed,
       resolveErrors: unresolvedTasks.length,
-      graph: { src: this.srcDir, files: {}, edges, resolve: unresolvedTasks },
+      graph: { ...this.componentDB.getData(), resolve: unresolvedTasks },
       workspaceHandoff: this.buildWorkspaceHandoff(unresolvedTasks),
     };
   }
