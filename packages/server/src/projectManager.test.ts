@@ -538,23 +538,23 @@ describe("ProjectManager", () => {
         },
         edges: [],
       } as unknown as JsonData);
-      await projectManager.openProject(projectPath);
-      mockDb.prepare
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([{ id: "btn-id", name: "Button" }]),
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([]), // renderedBy call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          get: vi.fn().mockReturnValue({ id: "btn-id", name: "Button" }), // sym call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([{ tag: "div", symbol_id: null }]), // children call
-        } as unknown as Database.Statement)
-        .mockReturnValueOnce({
-          all: vi.fn().mockReturnValue([]),
-        } as unknown as Database.Statement);
+      vi.mocked(fs.existsSync).mockImplementation((p: unknown) => {
+        const path = p as string;
+        return path.includes(".nexiq");
+      });
+      mockDb.prepare.mockImplementation((sql: string) => {
+        const s = createMockStmt();
+        if (sql.includes("SELECT s.*, f.path as file, e.line")) {
+          s.all.mockReturnValue([{ id: "btn-id", name: "Button" }]);
+        } else if (sql.includes("SELECT * FROM symbols WHERE id = ?")) {
+          s.get.mockReturnValue({ id: "btn-id", name: "Button" });
+        } else if (sql.includes("FROM renders r")) {
+          s.all.mockReturnValue([{ tag: "div", symbol_id: null }]);
+        } else if (sql.includes("FROM relations rel")) {
+          s.all.mockReturnValue([]);
+        }
+        return s as unknown as Database.Statement;
+      });
 
       const result = (await projectManager.getComponentHierarchy(
         projectPath,
@@ -707,10 +707,11 @@ describe("ProjectManager", () => {
     });
 
     it("should get symbol location", async () => {
-      mockDb.prepare.mockImplementationOnce(() => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
-        s.all.mockReturnValue([
-          {
+        if (sql.includes("WHERE s.name = ?")) {
+          s.all.mockReturnValue([{
             id: "app-id",
             name: "App",
             file: "/src/App.tsx",
@@ -718,8 +719,8 @@ describe("ProjectManager", () => {
             column: 1,
             kind: "component",
             type: "function",
-          },
-        ]);
+          }]);
+        }
         return s as unknown as Database.Statement;
       });
       const loc = await projectManager.getSymbolLocation(projectPath, "App");
@@ -895,20 +896,23 @@ describe("ProjectManager", () => {
     });
 
     it("should handle partial symbol matches", async () => {
-      mockDb.prepare.mockImplementationOnce(() => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      mockDb.prepare.mockImplementation((sql: string) => {
         const s = createMockStmt();
-        s.all.mockReturnValue([
-          {
-            id: "app",
-            name: "App",
-            file: "/src/App.tsx",
-            line: 1,
-            column: 1,
-            kind: "component",
-            type: "function",
-            props_json: "[]",
-          },
-        ]);
+        if (sql.includes("WHERE (s.name = ? OR s.name LIKE ?)")) {
+          s.all.mockReturnValue([
+            {
+              id: "app",
+              name: "App",
+              file: "/src/App.tsx",
+              line: 1,
+              column: 1,
+              kind: "component",
+              type: "function",
+              props_json: "[]",
+            },
+          ]);
+        }
         return s as unknown as Database.Statement;
       });
       const results = await projectManager.findSymbol(
