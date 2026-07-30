@@ -847,7 +847,6 @@ function getMemberExpressionNames(
     if (t.isMemberExpression(expr.callee)) {
       return getMemberExpressionNames(expr.callee);
     }
-    return null;
   }
   if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
     if (t.isIdentifier(expr.property)) {
@@ -1079,4 +1078,63 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       break;
   }
   return null;
+}
+
+export function walkExpressionDeps(
+  expr: t.Expression,
+  visitRef: (name: string) => void,
+) {
+  if (t.isObjectExpression(expr)) {
+    for (const prop of expr.properties) {
+      if (t.isObjectProperty(prop)) {
+        if (t.isExpression(prop.value)) {
+          walkExpressionDeps(prop.value, visitRef);
+        }
+      } else if (t.isSpreadElement(prop)) {
+        walkExpressionDeps(prop.argument, visitRef);
+      }
+    }
+  } else if (t.isLogicalExpression(expr)) {
+    walkExpressionDeps(expr.left, visitRef);
+    walkExpressionDeps(expr.right, visitRef);
+  } else if (t.isConditionalExpression(expr)) {
+    walkExpressionDeps(expr.test, visitRef);
+    walkExpressionDeps(expr.consequent, visitRef);
+    walkExpressionDeps(expr.alternate, visitRef);
+  } else if (t.isTemplateLiteral(expr)) {
+    for (const subExpr of expr.expressions) {
+      if (t.isExpression(subExpr)) walkExpressionDeps(subExpr, visitRef);
+    }
+  } else if (t.isBinaryExpression(expr)) {
+    if (t.isExpression(expr.left)) walkExpressionDeps(expr.left, visitRef);
+    walkExpressionDeps(expr.right, visitRef);
+  } else if (t.isCallExpression(expr) || t.isOptionalCallExpression(expr)) {
+    for (const arg of expr.arguments) {
+      if (t.isExpression(arg)) walkExpressionDeps(arg, visitRef);
+    }
+  } else if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
+    walkExpressionDeps(expr.object, visitRef);
+  } else if (t.isTSNonNullExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr) || t.isTSTypeAssertion(expr) || t.isTSInstantiationExpression(expr) || t.isParenthesizedExpression(expr)) {
+    walkExpressionDeps(expr.expression, visitRef);
+  } else if (t.isUnaryExpression(expr) || t.isUpdateExpression(expr)) {
+    walkExpressionDeps(expr.argument, visitRef);
+  } else if (t.isAssignmentExpression(expr)) {
+    walkExpressionDeps(expr.right, visitRef);
+  } else if (t.isSequenceExpression(expr)) {
+    for (const ex of expr.expressions) {
+      if (t.isExpression(ex)) walkExpressionDeps(ex, visitRef);
+    }
+  } else if (t.isAwaitExpression(expr)) {
+    walkExpressionDeps(expr.argument, visitRef);
+  } else if (t.isTaggedTemplateExpression(expr)) {
+    for (const ex of expr.quasi.expressions) {
+      if (t.isExpression(ex)) walkExpressionDeps(ex, visitRef);
+    }
+  } else if (t.isYieldExpression(expr)) {
+    if (expr.argument && t.isExpression(expr.argument)) {
+      walkExpressionDeps(expr.argument, visitRef);
+    }
+  } else if (t.isIdentifier(expr)) {
+    visitRef(expr.name);
+  }
 }

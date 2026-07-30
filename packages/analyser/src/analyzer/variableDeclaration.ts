@@ -23,7 +23,7 @@ import {
 } from "../utils.ts";
 import assert from "assert";
 import { getProps } from "./propExtractor.ts";
-import { getExpressionData, getType } from "./type/helper.ts";
+import { getExpressionData, getType, walkExpressionDeps } from "./type/helper.ts";
 import { getPattern, getVariableNameKey } from "./pattern.ts";
 import { getDeterministicId } from "../utils/hash.ts";
 import { getVariableComponentName } from "../variable.ts";
@@ -37,114 +37,38 @@ export default function VariableDeclarator(
     init: t.Expression | null | undefined,
   ): Record<string, ComponentFileVarDependency> => {
     const dependencies: Record<string, ComponentFileVarDependency> = {};
-    if (init?.type === "NewExpression") {
-      if (init.callee.type === "Identifier") {
-        const id = getDeterministicId(init.callee.name);
-        dependencies[id] = {
-          id,
-          name: init.callee.name,
-        };
-      }
-    } else if (init?.type === "Identifier") {
-      const id = getDeterministicId(init.name);
-      dependencies[id] = {
-        id,
-        name: init.name,
-      };
+    const addDep = (name: string) => {
+      const id = getDeterministicId(name);
+      dependencies[id] = { id, name };
+    };
+
+    if (init?.type === "Identifier") {
+      addDep(init.name);
     } else if (init?.type === "CallExpression") {
-      if (init.callee.type === "Identifier") {
-        const id = getDeterministicId(init.callee.name);
-        dependencies[id] = {
-          id,
-          name: init.callee.name,
-        };
-      }
-    } else if (init?.type === "TSSatisfiesExpression") {
-      if (t.isIdentifier(init.expression)) {
-        const id = getDeterministicId(init.expression.name);
-        dependencies[id] = { id, name: init.expression.name };
-      }
-    } else if (init?.type === "MemberExpression" || init?.type === "OptionalMemberExpression") {
-      if (t.isIdentifier(init.object)) {
-        const id = getDeterministicId(init.object.name);
-        dependencies[id] = {
-          id,
-          name: init.object.name,
-        };
+      if (init.callee.type === "Identifier") addDep(init.callee.name);
+      walkExpressionDeps(init, addDep);
+    } else if (init?.type === "OptionalCallExpression") {
+      if (init.callee.type === "Identifier") addDep(init.callee.name);
+    } else if (init?.type === "NewExpression") {
+      if (init.callee.type === "Identifier") addDep(init.callee.name);
+    } else if (init?.type === "ArrayExpression") {
+      for (const element of init.elements) {
+        if (t.isIdentifier(element)) {
+          addDep(element.name);
+        } else if (t.isSpreadElement(element) && t.isIdentifier(element.argument)) {
+          addDep(element.argument.name);
+        }
       }
     } else if (init?.type === "ObjectExpression") {
       for (const prop of init.properties) {
         if (t.isObjectProperty(prop) && t.isIdentifier(prop.value)) {
-          const id = getDeterministicId(prop.value.name);
-          dependencies[id] = { id, name: prop.value.name };
+          addDep(prop.value.name);
         } else if (t.isSpreadElement(prop) && t.isIdentifier(prop.argument)) {
-          const id = getDeterministicId(prop.argument.name);
-          dependencies[id] = { id, name: prop.argument.name };
+          addDep(prop.argument.name);
         }
       }
-    } else if (init?.type === "ArrayExpression") {
-      for (const element of init.elements) {
-        if (t.isIdentifier(element)) {
-          const id = getDeterministicId(element.name);
-          dependencies[id] = { id, name: element.name };
-        } else if (t.isSpreadElement(element) && t.isIdentifier(element.argument)) {
-          const id = getDeterministicId(element.argument.name);
-          dependencies[id] = { id, name: element.argument.name };
-        }
-      }
-    } else if (init?.type === "ConditionalExpression") {
-      Object.assign(dependencies, extractDependencies(init.test));
-      Object.assign(dependencies, extractDependencies(init.consequent));
-      Object.assign(dependencies, extractDependencies(init.alternate));
-    } else if (init?.type === "LogicalExpression") {
-      Object.assign(dependencies, extractDependencies(init.left));
-      Object.assign(dependencies, extractDependencies(init.right));
-    } else if (init?.type === "BinaryExpression") {
-      Object.assign(dependencies, extractDependencies(init.left));
-      Object.assign(dependencies, extractDependencies(init.right));
-    } else if (init?.type === "TemplateLiteral") {
-      for (const expr of init.expressions) {
-        Object.assign(dependencies, extractDependencies(expr));
-      }
-    } else if (init?.type === "UnaryExpression") {
-      Object.assign(dependencies, extractDependencies(init.argument));
-    } else if (init?.type === "TSNonNullExpression") {
-      Object.assign(dependencies, extractDependencies(init.expression));
-    } else if (init?.type === "TSAsExpression") {
-      Object.assign(dependencies, extractDependencies(init.expression));
-    } else if (init?.type === "TSTypeAssertion") {
-      Object.assign(dependencies, extractDependencies(init.expression));
-    } else if (init?.type === "TSInstantiationExpression") {
-      Object.assign(dependencies, extractDependencies(init.expression));
-    } else if (init?.type === "TaggedTemplateExpression") {
-      for (const ex of init.quasi.expressions) {
-        Object.assign(dependencies, extractDependencies(ex as t.Expression));
-      }
-    } else if (init?.type === "SequenceExpression") {
-      for (const ex of init.expressions) {
-        Object.assign(dependencies, extractDependencies(ex));
-      }
-    } else if (init?.type === "AwaitExpression") {
-      Object.assign(dependencies, extractDependencies(init.argument));
-    } else if (init?.type === "AssignmentExpression") {
-      Object.assign(dependencies, extractDependencies(init.right));
-    } else if (init?.type === "UpdateExpression") {
-      Object.assign(dependencies, extractDependencies(init.argument));
-    } else if (init?.type === "ParenthesizedExpression") {
-      Object.assign(dependencies, extractDependencies(init.expression));
-    } else if (init?.type === "ThisExpression") {
-      // this is a keyword reference, no dependencies to extract
-    } else if (init?.type === "YieldExpression") {
-      if (init.argument) {
-        Object.assign(dependencies, extractDependencies(init.argument));
-      }
-    } else if (init?.type === "MetaProperty") {
-      // new.target / import.meta — no dependencies
-    } else if (init?.type === "OptionalCallExpression") {
-      if (init.callee.type === "Identifier") {
-        const id = getDeterministicId(init.callee.name);
-        dependencies[id] = { id, name: init.callee.name };
-      }
+    } else {
+      walkExpressionDeps(init as t.Expression, addDep);
     }
     return dependencies;
   };

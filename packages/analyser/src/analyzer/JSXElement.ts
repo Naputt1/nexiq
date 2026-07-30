@@ -8,7 +8,7 @@ import type {
 import assert from "assert";
 import generate from "@babel/generator";
 import { getDeterministicId } from "../utils/hash.ts";
-import { getExpressionData } from "./type/helper.ts";
+import { getExpressionData, walkExpressionDeps } from "./type/helper.ts";
 import {
   isJSXVariable,
   isComponentVariable,
@@ -29,79 +29,19 @@ function extractDependencies(
       name: name,
       value: data,
     });
-  } else if (t.isObjectExpression(expr)) {
-    for (const prop of expr.properties) {
-      if (t.isObjectProperty(prop)) {
-        let propName = "";
-        if (t.isIdentifier(prop.key)) {
-          propName = prop.key.name;
-        } else if (t.isStringLiteral(prop.key)) {
-          propName = prop.key.value;
-        }
+    return;
+  }
 
-        if (propName && t.isExpression(prop.value)) {
-          extractDependencies(prop.value, propName, dependency);
-        }
-      } else if (t.isSpreadElement(prop)) {
-        extractDependencies(prop.argument, "...", dependency);
-      }
-    }
-  } else if (t.isLogicalExpression(expr)) {
-    extractDependencies(expr.left, name, dependency);
-    extractDependencies(expr.right, name, dependency);
-  } else if (t.isConditionalExpression(expr)) {
-    extractDependencies(expr.consequent, name, dependency);
-    extractDependencies(expr.alternate, name, dependency);
-  } else if (t.isTemplateLiteral(expr)) {
-    for (const subExpr of expr.expressions) {
-      if (t.isExpression(subExpr)) {
-        extractDependencies(subExpr, name, dependency);
-      }
-    }
-  } else if (t.isBinaryExpression(expr)) {
-    if (t.isExpression(expr.left)) {
-      extractDependencies(expr.left, name, dependency);
-    }
-    extractDependencies(expr.right, name, dependency);
-  } else if (t.isCallExpression(expr)) {
-    for (const arg of expr.arguments) {
-      if (t.isExpression(arg)) {
-        extractDependencies(arg, name, dependency);
-      }
-    }
-  } else if (t.isOptionalMemberExpression(expr)) {
-    extractDependencies(expr.object, name, dependency);
-  } else if (t.isTSNonNullExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr) || t.isTSTypeAssertion(expr)) {
-    extractDependencies(expr.expression, name, dependency);
-  } else if (t.isUnaryExpression(expr)) {
-    extractDependencies(expr.argument, name, dependency);
-  } else if (t.isUpdateExpression(expr)) {
-    extractDependencies(expr.argument, name, dependency);
-  } else if (t.isAssignmentExpression(expr)) {
-    extractDependencies(expr.right, name, dependency);
-  } else if (t.isSequenceExpression(expr)) {
-    for (const ex of expr.expressions) {
-      if (t.isExpression(ex)) extractDependencies(ex, name, dependency);
-    }
-  } else if (t.isAwaitExpression(expr)) {
-    extractDependencies(expr.argument, name, dependency);
-  } else if (t.isTaggedTemplateExpression(expr)) {
-    for (const ex of expr.quasi.expressions) {
-      if (t.isExpression(ex)) extractDependencies(ex, name, dependency);
-    }
-  } else if (t.isMemberExpression(expr)) {
-    extractDependencies(expr.object, name, dependency);
-  } else if (t.isThisExpression(expr)) {
+  if (t.isThisExpression(expr)) {
     dependency.push({
       id: getDeterministicId("this"),
       name: "this",
       value: { type: "this" },
     });
-  } else if (t.isYieldExpression(expr)) {
-    if (expr.argument && t.isExpression(expr.argument)) {
-      extractDependencies(expr.argument, name, dependency);
-    }
-  } else if (t.isMetaProperty(expr)) {
+    return;
+  }
+
+  if (t.isMetaProperty(expr)) {
     dependency.push({
       id: getDeterministicId(`${expr.meta.name}.${expr.property.name}`),
       name: `${expr.meta.name}.${expr.property.name}`,
@@ -110,9 +50,20 @@ function extractDependencies(
         literal: { type: "string", value: generateFn(expr).code },
       },
     });
-  } else if (t.isParenthesizedExpression(expr)) {
-    extractDependencies(expr.expression, name, dependency);
-  } else {
+    return;
+  }
+
+  let found = false;
+  walkExpressionDeps(expr, (refName) => {
+    found = true;
+    dependency.push({
+      id: getDeterministicId(name),
+      name: name,
+      value: { type: "ref", refType: "named", name: refName },
+    });
+  });
+
+  if (!found) {
     dependency.push({
       id: getDeterministicId(name),
       name: name,
