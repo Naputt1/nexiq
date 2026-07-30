@@ -1,5 +1,74 @@
 {
   "files": {
+    "/eslint.config.js": {
+      "path": "/eslint.config.js",
+      "hash": "bc90159d99344e9b",
+      "package_id": "sample-hook@0.0.0",
+      "import": {
+        "js": {
+          "localName": "js",
+          "importedName": null,
+          "source": "@eslint/js",
+          "type": "default",
+          "importKind": "value"
+        },
+        "globals": {
+          "localName": "globals",
+          "importedName": null,
+          "source": "globals",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactHooks": {
+          "localName": "reactHooks",
+          "importedName": null,
+          "source": "eslint-plugin-react-hooks",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactRefresh": {
+          "localName": "reactRefresh",
+          "importedName": null,
+          "source": "eslint-plugin-react-refresh",
+          "type": "default",
+          "importKind": "value"
+        },
+        "tseslint": {
+          "localName": "tseslint",
+          "importedName": null,
+          "source": "typescript-eslint",
+          "type": "default",
+          "importKind": "value"
+        },
+        "defineConfig": {
+          "localName": "defineConfig",
+          "importedName": "defineConfig",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        },
+        "globalIgnores": {
+          "localName": "globalIgnores",
+          "importedName": "globalIgnores",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "value",
+          "id": "cafb2fea281e67de"
+        }
+      },
+      "starExports": [],
+      "defaultExport": "anonymous",
+      "tsTypes": {},
+      "var": {},
+      "relations": []
+    },
     "/src/various-imports.tsx": {
       "path": "/src/various-imports.tsx",
       "hash": "4142527f2f903c42",
@@ -1334,6 +1403,162 @@
           }
         }
       ]
+    },
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "hash": "cb9d4b4a9bada21f",
+      "package_id": "sample-hook@0.0.0",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "App": {
+          "localName": "App",
+          "importedName": "App",
+          "source": "/src/App.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "51d92d1c6d1f1871": {
+          "id": "51d92d1c6d1f1871",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@6:2",
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "id": "a8abd32ffb8c90bc"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "939967f0753a38f8",
+          "dependencies": {
+            "cec4bdc6c41a05ae": {
+              "id": "cec4bdc6c41a05ae",
+              "name": "jsx@7:4"
+            }
+          },
+          "loc": {
+            "line": 6,
+            "column": 2
+          },
+          "render": {
+            "id": "StrictMode",
+            "instanceId": "6bbdbd6d9dba921c",
+            "tag": "StrictMode",
+            "dependencies": [],
+            "isDependency": true,
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "renderIndex": 0,
+            "kind": "jsx",
+            "children": {
+              "c7ccfcf52fed6762": {
+                "id": "311c554b828f67a5",
+                "instanceId": "c7ccfcf52fed6762",
+                "tag": "App",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 7,
+                  "column": 4
+                },
+                "parentId": "6bbdbd6d9dba921c",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              }
+            }
+          },
+          "srcId": "StrictMode"
+        },
+        "cec4bdc6c41a05ae": {
+          "id": "cec4bdc6c41a05ae",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@7:4",
+            "loc": {
+              "line": 7,
+              "column": 4
+            },
+            "id": "e9add94ca8125596"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "2fbdba479d5019ac",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "311c554b828f67a5"
+        }
+      },
+      "relations": [
+        {
+          "from_id": "51d92d1c6d1f1871",
+          "to_id": "symbol:import:/src/main.tsx:StrictMode",
+          "kind": "usage-render-call",
+          "line": 6,
+          "column": 3,
+          "data_json": {
+            "usageId": "78ac5eb08ef66be8",
+            "filePath": "/src/main.tsx",
+            "line": 6,
+            "column": 3,
+            "ownerId": "51d92d1c6d1f1871",
+            "ownerKind": "normal",
+            "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "cec4bdc6c41a05ae",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 5,
+          "data_json": {
+            "usageId": "aa0d019a24a46d0a",
+            "filePath": "/src/main.tsx",
+            "line": 7,
+            "column": 5,
+            "ownerId": "cec4bdc6c41a05ae",
+            "ownerKind": "normal",
+            "displayLabel": "App"
+          }
+        }
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 5,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
     },
     "/src/effectt.tsx": {
       "path": "/src/effectt.tsx",
@@ -3485,6 +3710,238 @@
           }
         }
       ]
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
+      "hash": "1965020d3589f807",
+      "package_id": "sample-hook@0.0.0",
+      "import": {
+        "CallbackFactory": {
+          "localName": "CallbackFactory",
+          "importedName": "CallbackFactory",
+          "source": "/src/callback.tsx",
+          "type": "named",
+          "importKind": "value"
+        },
+        "MyComponent": {
+          "localName": "MyComponent",
+          "importedName": "MyComponent",
+          "source": "/src/various-imports.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "App": {
+          "name": "App",
+          "type": "named",
+          "exportKind": "component",
+          "id": "311c554b828f67a5"
+        }
+      },
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "311c554b828f67a5": {
+          "id": "311c554b828f67a5",
+          "name": {
+            "type": "identifier",
+            "name": "App",
+            "loc": {
+              "line": 4,
+              "column": 16
+            },
+            "id": "ce7286aa30b0e33b"
+          },
+          "kind": "component",
+          "type": "function",
+          "file": "/src/App.tsx",
+          "hash": "2e05e133148f3b95",
+          "dependencies": {},
+          "loc": {
+            "line": 4,
+            "column": 16
+          },
+          "var": {
+            "5fa4c0c2a96eddec": {
+              "id": "5fa4c0c2a96eddec",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@6:4",
+                "loc": {
+                  "line": 6,
+                  "column": 4
+                },
+                "id": "69e4aca41756b725"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "4ace766e591bef42",
+              "dependencies": {
+                "24b99651629c6aff": {
+                  "id": "24b99651629c6aff",
+                  "name": "jsx@7:6"
+                },
+                "dbaeffb3a024d036": {
+                  "id": "dbaeffb3a024d036",
+                  "name": "jsx@8:6"
+                }
+              },
+              "loc": {
+                "line": 6,
+                "column": 4
+              },
+              "render": {
+                "id": "/src/App.tsx:div:6:4",
+                "instanceId": "4b10cd7c9d4d337b",
+                "tag": "div",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 6,
+                  "column": 4
+                },
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {
+                  "b4366b95069a0d75": {
+                    "id": "65338fa51b33f878",
+                    "instanceId": "b4366b95069a0d75",
+                    "tag": "MyComponent",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 7,
+                      "column": 6
+                    },
+                    "parentId": "4b10cd7c9d4d337b",
+                    "renderIndex": 0,
+                    "kind": "jsx",
+                    "children": {}
+                  },
+                  "8ae8f7ad1434e3a": {
+                    "id": "89091d73d3a537b1",
+                    "instanceId": "8ae8f7ad1434e3a",
+                    "tag": "CallbackFactory",
+                    "dependencies": [],
+                    "isDependency": false,
+                    "loc": {
+                      "line": 8,
+                      "column": 6
+                    },
+                    "parentId": "4b10cd7c9d4d337b",
+                    "renderIndex": 1,
+                    "kind": "jsx",
+                    "children": {}
+                  }
+                }
+              },
+              "srcId": "/src/App.tsx:div:6:4"
+            },
+            "24b99651629c6aff": {
+              "id": "24b99651629c6aff",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@7:6",
+                "loc": {
+                  "line": 7,
+                  "column": 6
+                },
+                "id": "b78d1940a674e310"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "eb81c44dd8a1c12d",
+              "dependencies": {},
+              "loc": {
+                "line": 7,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "65338fa51b33f878"
+            },
+            "dbaeffb3a024d036": {
+              "id": "dbaeffb3a024d036",
+              "name": {
+                "type": "identifier",
+                "name": "jsx@8:6",
+                "loc": {
+                  "line": 8,
+                  "column": 6
+                },
+                "id": "24407c2da302f485"
+              },
+              "kind": "normal",
+              "type": "jsx",
+              "file": "/src/App.tsx",
+              "hash": "badd576218abe66b",
+              "dependencies": {},
+              "loc": {
+                "line": 8,
+                "column": 6
+              },
+              "render": null,
+              "srcId": "89091d73d3a537b1"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 11,
+              "column": 1
+            }
+          },
+          "async": false,
+          "return": "5fa4c0c2a96eddec",
+          "states": [],
+          "refs": [],
+          "props": [],
+          "hooks": [],
+          "effects": {},
+          "componentType": "Function",
+          "contexts": []
+        }
+      },
+      "relations": [
+        {
+          "from_id": "24b99651629c6aff",
+          "to_id": "symbol:import:/src/App.tsx:MyComponent",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 7,
+          "data_json": {
+            "usageId": "b9187ddde4411c00",
+            "filePath": "/src/App.tsx",
+            "line": 7,
+            "column": 7,
+            "ownerId": "24b99651629c6aff",
+            "ownerKind": "normal",
+            "displayLabel": "MyComponent"
+          }
+        },
+        {
+          "from_id": "dbaeffb3a024d036",
+          "to_id": "symbol:import:/src/App.tsx:CallbackFactory",
+          "kind": "usage-render-call",
+          "line": 8,
+          "column": 7,
+          "data_json": {
+            "usageId": "6741278042c7d3b1",
+            "filePath": "/src/App.tsx",
+            "line": 8,
+            "column": 7,
+            "ownerId": "dbaeffb3a024d036",
+            "ownerKind": "normal",
+            "displayLabel": "CallbackFactory"
+          }
+        }
+      ]
     }
   },
   "edges": [
@@ -3506,6 +3963,41 @@
     {
       "from": "3720d9d904fa2467",
       "to": "9e9757cc8d09428",
+      "label": "render"
+    },
+    {
+      "from": "65338fa51b33f878",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "89091d73d3a537b1",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "5fa4c0c2a96eddec",
+      "label": "render"
+    },
+    {
+      "from": "65338fa51b33f878",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "89091d73d3a537b1",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "24b99651629c6aff",
+      "label": "render"
+    },
+    {
+      "from": "311c554b828f67a5",
+      "to": "dbaeffb3a024d036",
       "label": "render"
     },
     {
@@ -3576,6 +4068,26 @@
     {
       "from": "9e9757cc8d09428",
       "to": "283ba57e642caca1",
+      "label": "hook"
+    },
+    {
+      "from": "65338fa51b33f878",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "89091d73d3a537b1",
+      "to": "311c554b828f67a5",
+      "label": "render"
+    },
+    {
+      "from": "5fa4c0c2a96eddec",
+      "to": "24b99651629c6aff",
+      "label": "hook"
+    },
+    {
+      "from": "5fa4c0c2a96eddec",
+      "to": "dbaeffb3a024d036",
       "label": "hook"
     }
   ],

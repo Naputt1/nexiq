@@ -1,7 +1,232 @@
 {
   "files": {
-    "/index.tsx": {
-      "path": "/index.tsx",
+    "/eslint.config.js": {
+      "path": "/eslint.config.js",
+      "hash": "bc90159d99344e9b",
+      "package_id": "sample-destructuring-dependency@0.0.0",
+      "import": {
+        "js": {
+          "localName": "js",
+          "importedName": null,
+          "source": "@eslint/js",
+          "type": "default",
+          "importKind": "value"
+        },
+        "globals": {
+          "localName": "globals",
+          "importedName": null,
+          "source": "globals",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactHooks": {
+          "localName": "reactHooks",
+          "importedName": null,
+          "source": "eslint-plugin-react-hooks",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactRefresh": {
+          "localName": "reactRefresh",
+          "importedName": null,
+          "source": "eslint-plugin-react-refresh",
+          "type": "default",
+          "importKind": "value"
+        },
+        "tseslint": {
+          "localName": "tseslint",
+          "importedName": null,
+          "source": "typescript-eslint",
+          "type": "default",
+          "importKind": "value"
+        },
+        "defineConfig": {
+          "localName": "defineConfig",
+          "importedName": "defineConfig",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        },
+        "globalIgnores": {
+          "localName": "globalIgnores",
+          "importedName": "globalIgnores",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "value",
+          "id": "cafb2fea281e67de"
+        }
+      },
+      "starExports": [],
+      "defaultExport": "anonymous",
+      "tsTypes": {},
+      "var": {},
+      "relations": []
+    },
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "hash": "537eb828af5df809",
+      "package_id": "sample-destructuring-dependency@0.0.0",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "ThreadView": {
+          "localName": "ThreadView",
+          "importedName": "ThreadView",
+          "source": "/src/App.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "51d92d1c6d1f1871": {
+          "id": "51d92d1c6d1f1871",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@6:2",
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "id": "a8abd32ffb8c90bc"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "57df1f64c32ce05e",
+          "dependencies": {
+            "cec4bdc6c41a05ae": {
+              "id": "cec4bdc6c41a05ae",
+              "name": "jsx@7:4"
+            }
+          },
+          "loc": {
+            "line": 6,
+            "column": 2
+          },
+          "render": {
+            "id": "StrictMode",
+            "instanceId": "6bbdbd6d9dba921c",
+            "tag": "StrictMode",
+            "dependencies": [],
+            "isDependency": true,
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "renderIndex": 0,
+            "kind": "jsx",
+            "children": {
+              "f9ab141a249241da": {
+                "id": "cecd7885fd3615f5",
+                "instanceId": "f9ab141a249241da",
+                "tag": "ThreadView",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 7,
+                  "column": 4
+                },
+                "parentId": "6bbdbd6d9dba921c",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              }
+            }
+          },
+          "srcId": "StrictMode"
+        },
+        "cec4bdc6c41a05ae": {
+          "id": "cec4bdc6c41a05ae",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@7:4",
+            "loc": {
+              "line": 7,
+              "column": 4
+            },
+            "id": "e9add94ca8125596"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "b307ed46bc77aa97",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "cecd7885fd3615f5"
+        }
+      },
+      "relations": [
+        {
+          "from_id": "51d92d1c6d1f1871",
+          "to_id": "symbol:import:/src/main.tsx:StrictMode",
+          "kind": "usage-render-call",
+          "line": 6,
+          "column": 3,
+          "data_json": {
+            "usageId": "78ac5eb08ef66be8",
+            "filePath": "/src/main.tsx",
+            "line": 6,
+            "column": 3,
+            "ownerId": "51d92d1c6d1f1871",
+            "ownerKind": "normal",
+            "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "cec4bdc6c41a05ae",
+          "to_id": "symbol:import:/src/main.tsx:ThreadView",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 5,
+          "data_json": {
+            "usageId": "3118c2a6a35cd92b",
+            "filePath": "/src/main.tsx",
+            "line": 7,
+            "column": 5,
+            "ownerId": "cec4bdc6c41a05ae",
+            "ownerKind": "normal",
+            "displayLabel": "ThreadView"
+          }
+        }
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 5,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
+    },
+    "/src/App.tsx": {
+      "path": "/src/App.tsx",
       "hash": "39e788c752873edb",
       "package_id": "sample-destructuring-dependency@0.0.0",
       "import": {
@@ -25,15 +250,15 @@
           "name": "ThreadView",
           "type": "named",
           "exportKind": "value",
-          "id": "ba1bf171ca67c6dd"
+          "id": "cecd7885fd3615f5"
         }
       },
       "starExports": [],
       "defaultExport": null,
       "tsTypes": {},
       "var": {
-        "b3b83d0e8e708509": {
-          "id": "b3b83d0e8e708509",
+        "be26670b3595c560": {
+          "id": "be26670b3595c560",
           "name": {
             "type": "identifier",
             "name": "useSelector",
@@ -45,7 +270,7 @@
           },
           "kind": "hook",
           "type": "function",
-          "file": "/index.tsx",
+          "file": "/src/App.tsx",
           "hash": "60b1200262ce6ecb",
           "declarationKind": "const",
           "dependencies": {},
@@ -104,7 +329,7 @@
           "refs": [],
           "props": [
             {
-              "id": "b3b83d0e8e708509:prop:fn",
+              "id": "be26670b3595c560:prop:fn",
               "name": "fn",
               "type": "any",
               "kind": "prop",
@@ -119,8 +344,8 @@
           "hooks": [],
           "effects": {}
         },
-        "ba1bf171ca67c6dd": {
-          "id": "ba1bf171ca67c6dd",
+        "cecd7885fd3615f5": {
+          "id": "cecd7885fd3615f5",
           "name": {
             "type": "identifier",
             "name": "ThreadView",
@@ -132,8 +357,8 @@
           },
           "kind": "component",
           "type": "function",
-          "file": "/index.tsx",
-          "hash": "b5932c41e1e6e5cb",
+          "file": "/src/App.tsx",
+          "hash": "e99df0a1f05b3c3a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -141,8 +366,8 @@
             "column": 13
           },
           "var": {
-            "ba1bf171ca67c6dd:callhook:useSelector:15:8": {
-              "id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+            "cecd7885fd3615f5:callhook:useSelector:15:8": {
+              "id": "cecd7885fd3615f5:callhook:useSelector:15:8",
               "name": {
                 "type": "identifier",
                 "name": "thread",
@@ -154,20 +379,20 @@
               },
               "kind": "hook",
               "type": "data",
-              "file": "/index.tsx",
-              "hash": "15a6ba3000ac5cab",
+              "file": "/src/App.tsx",
+              "hash": "29a80cff7adfe55b",
               "dependencies": {},
               "loc": {
                 "line": 15,
                 "column": 8
               },
               "call": {
-                "id": "b3b83d0e8e708509",
+                "id": "be26670b3595c560",
                 "name": "useSelector"
               }
             },
-            "1ced1eea74b79bd9": {
-              "id": "1ced1eea74b79bd9",
+            "91d5d19868330b81": {
+              "id": "91d5d19868330b81",
               "name": {
                 "type": "object",
                 "properties": [
@@ -231,7 +456,7 @@
               },
               "kind": "normal",
               "type": "data",
-              "file": "/index.tsx",
+              "file": "/src/App.tsx",
               "hash": "892e16305c23a729",
               "declarationKind": "const",
               "dependencies": {
@@ -246,8 +471,8 @@
               },
               "children": {}
             },
-            "ba1bf171ca67c6dd:callback:handleFollowing": {
-              "id": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "cecd7885fd3615f5:callback:handleFollowing": {
+              "id": "cecd7885fd3615f5:callback:handleFollowing",
               "name": {
                 "type": "identifier",
                 "name": "handleFollowing",
@@ -259,8 +484,8 @@
               },
               "kind": "callback",
               "type": "function",
-              "file": "/index.tsx",
-              "hash": "44b868fe221839aa",
+              "file": "/src/App.tsx",
+              "hash": "c2db6291702a519f",
               "dependencies": {},
               "loc": {
                 "line": 21,
@@ -285,17 +510,17 @@
               "effects": {},
               "reactDeps": [
                 {
-                  "id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
+                  "id": "91d5d19868330b81:841e96e73f3a4bc0",
                   "name": "isFollowing"
                 },
                 {
-                  "id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
+                  "id": "91d5d19868330b81:cd657974cfc180fe:5cb21731d0f2a56e",
                   "name": "channelId"
                 }
               ]
             },
-            "7cd77b33010ba84d": {
-              "id": "7cd77b33010ba84d",
+            "d237a37ed9af4342": {
+              "id": "d237a37ed9af4342",
               "name": {
                 "type": "identifier",
                 "name": "jsx@28:9",
@@ -307,8 +532,8 @@
               },
               "kind": "normal",
               "type": "jsx",
-              "file": "/index.tsx",
-              "hash": "7e4a84c89c9b2f19",
+              "file": "/src/App.tsx",
+              "hash": "fa321262b87e58a8",
               "dependencies": {
                 "9ac06b202649e60f": {
                   "id": "9ac06b202649e60f",
@@ -320,8 +545,8 @@
                 "column": 9
               },
               "render": {
-                "id": "/index.tsx:div:28:9",
-                "instanceId": "f36bbca3a815fbb1",
+                "id": "/src/App.tsx:div:28:9",
+                "instanceId": "169e3bbe7d5d1393",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -332,7 +557,7 @@
                       "refType": "named",
                       "name": "handleFollowing"
                     },
-                    "valueId": "ba1bf171ca67c6dd:callback:handleFollowing"
+                    "valueId": "cecd7885fd3615f5:callback:handleFollowing"
                   }
                 ],
                 "isDependency": false,
@@ -344,7 +569,7 @@
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "/index.tsx:div:28:9"
+              "srcId": "/src/App.tsx:div:28:9"
             }
           },
           "scope": {
@@ -358,7 +583,7 @@
             }
           },
           "async": false,
-          "return": "7cd77b33010ba84d",
+          "return": "d237a37ed9af4342",
           "states": [],
           "refs": [],
           "props": [],
@@ -370,33 +595,33 @@
       },
       "relations": [
         {
-          "from_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
-          "to_id": "b3b83d0e8e708509",
+          "from_id": "cecd7885fd3615f5:callhook:useSelector:15:8",
+          "to_id": "be26670b3595c560",
           "kind": "usage-call",
           "line": 15,
           "column": 17,
           "data_json": {
-            "usageId": "b23b5f9181329b30",
-            "filePath": "/index.tsx",
+            "usageId": "40bdaceba85bf219",
+            "filePath": "/src/App.tsx",
             "line": 15,
             "column": 17,
-            "ownerId": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+            "ownerId": "cecd7885fd3615f5:callhook:useSelector:15:8",
             "ownerKind": "hook",
             "displayLabel": "useSelector"
           }
         },
         {
-          "from_id": "ba1bf171ca67c6dd",
-          "to_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+          "from_id": "cecd7885fd3615f5",
+          "to_id": "cecd7885fd3615f5:callhook:useSelector:15:8",
           "kind": "usage-read",
           "line": 15,
           "column": 45,
           "data_json": {
-            "usageId": "538085815ca6de7a",
-            "filePath": "/index.tsx",
+            "usageId": "a6c4f864b65be640",
+            "filePath": "/src/App.tsx",
             "line": 15,
             "column": 45,
-            "ownerId": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
+            "ownerId": "cecd7885fd3615f5:callhook:useSelector:15:8",
             "ownerKind": "hook",
             "accessPath": [
               "thread"
@@ -407,113 +632,113 @@
           }
         },
         {
-          "from_id": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
-          "to_id": "1ced1eea74b79bd9",
+          "from_id": "cecd7885fd3615f5:callhook:useSelector:15:8",
+          "to_id": "91d5d19868330b81",
           "kind": "usage-read",
           "line": 19,
           "column": 6,
           "data_json": {
-            "usageId": "79d504e7085f01c0",
-            "filePath": "/index.tsx",
+            "usageId": "cd3fcbb2c8fff1a4",
+            "filePath": "/src/App.tsx",
             "line": 19,
             "column": 6,
-            "ownerId": "1ced1eea74b79bd9",
+            "ownerId": "91d5d19868330b81",
             "ownerKind": "normal",
             "displayLabel": "thread"
           }
         },
         {
-          "from_id": "ba1bf171ca67c6dd:callback:handleFollowing",
-          "to_id": "symbol:import:/index.tsx:useCallback",
+          "from_id": "cecd7885fd3615f5:callback:handleFollowing",
+          "to_id": "symbol:import:/src/App.tsx:useCallback",
           "kind": "usage-call",
           "line": 21,
           "column": 26,
           "data_json": {
-            "usageId": "3aecc9717521b6f3",
-            "filePath": "/index.tsx",
+            "usageId": "6dbfbdf5fbaf8979",
+            "filePath": "/src/App.tsx",
             "line": 21,
             "column": 26,
-            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerId": "cecd7885fd3615f5:callback:handleFollowing",
             "ownerKind": "callback",
             "displayLabel": "useCallback"
           }
         },
         {
-          "from_id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
-          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "from_id": "91d5d19868330b81:841e96e73f3a4bc0",
+          "to_id": "cecd7885fd3615f5:callback:handleFollowing",
           "kind": "usage-read",
           "line": 23,
           "column": 18,
           "data_json": {
-            "usageId": "883f993cb33aebd1",
-            "filePath": "/index.tsx",
+            "usageId": "2c834d2ad062bc44",
+            "filePath": "/src/App.tsx",
             "line": 23,
             "column": 18,
-            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerId": "cecd7885fd3615f5:callback:handleFollowing",
             "ownerKind": "callback",
             "displayLabel": "isFollowing"
           }
         },
         {
-          "from_id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
-          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "from_id": "91d5d19868330b81:cd657974cfc180fe:5cb21731d0f2a56e",
+          "to_id": "cecd7885fd3615f5:callback:handleFollowing",
           "kind": "usage-read",
           "line": 23,
           "column": 31,
           "data_json": {
-            "usageId": "2220e68d6161353",
-            "filePath": "/index.tsx",
+            "usageId": "fc25ecdef29b3594",
+            "filePath": "/src/App.tsx",
             "line": 23,
             "column": 31,
-            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerId": "cecd7885fd3615f5:callback:handleFollowing",
             "ownerKind": "callback",
             "displayLabel": "channelId"
           }
         },
         {
-          "from_id": "1ced1eea74b79bd9:841e96e73f3a4bc0",
-          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "from_id": "91d5d19868330b81:841e96e73f3a4bc0",
+          "to_id": "cecd7885fd3615f5:callback:handleFollowing",
           "kind": "usage-read",
           "line": 25,
           "column": 5,
           "data_json": {
-            "usageId": "42407480875ea467",
-            "filePath": "/index.tsx",
+            "usageId": "f4659edc592fd304",
+            "filePath": "/src/App.tsx",
             "line": 25,
             "column": 5,
-            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerId": "cecd7885fd3615f5:callback:handleFollowing",
             "ownerKind": "callback",
             "displayLabel": "isFollowing"
           }
         },
         {
-          "from_id": "1ced1eea74b79bd9:cd657974cfc180fe:5cb21731d0f2a56e",
-          "to_id": "ba1bf171ca67c6dd:callback:handleFollowing",
+          "from_id": "91d5d19868330b81:cd657974cfc180fe:5cb21731d0f2a56e",
+          "to_id": "cecd7885fd3615f5:callback:handleFollowing",
           "kind": "usage-read",
           "line": 25,
           "column": 18,
           "data_json": {
-            "usageId": "435c4062e1cfb699",
-            "filePath": "/index.tsx",
+            "usageId": "ad1cf8a010288e58",
+            "filePath": "/src/App.tsx",
             "line": 25,
             "column": 18,
-            "ownerId": "ba1bf171ca67c6dd:callback:handleFollowing",
+            "ownerId": "cecd7885fd3615f5:callback:handleFollowing",
             "ownerKind": "callback",
             "displayLabel": "channelId"
           }
         },
         {
-          "from_id": "ba1bf171ca67c6dd:callback:handleFollowing",
-          "to_id": "/index.tsx:div:28:9",
+          "from_id": "cecd7885fd3615f5:callback:handleFollowing",
+          "to_id": "/src/App.tsx:div:28:9",
           "kind": "usage-read",
           "line": 28,
           "column": 23,
           "data_json": {
-            "usageId": "b3871512b1c2b476",
-            "filePath": "/index.tsx",
+            "usageId": "67ad4172eec9b86",
+            "filePath": "/src/App.tsx",
             "line": 28,
             "column": 23,
-            "ownerId": "7cd77b33010ba84d",
+            "ownerId": "d237a37ed9af4342",
             "ownerKind": "normal",
             "displayLabel": "handleFollowing"
           }
@@ -523,22 +748,22 @@
   },
   "edges": [
     {
-      "from": "ba1bf171ca67c6dd",
-      "to": "7cd77b33010ba84d",
+      "from": "cecd7885fd3615f5",
+      "to": "d237a37ed9af4342",
       "label": "render"
     },
     {
-      "from": "ba1bf171ca67c6dd:callhook:useSelector:15:8",
-      "to": "b3b83d0e8e708509",
+      "from": "cecd7885fd3615f5:callhook:useSelector:15:8",
+      "to": "be26670b3595c560",
       "label": "hook"
     },
     {
-      "from": "1ced1eea74b79bd9",
+      "from": "91d5d19868330b81",
       "to": "27f5be35fc906e3d",
       "label": "hook"
     },
     {
-      "from": "7cd77b33010ba84d",
+      "from": "d237a37ed9af4342",
       "to": "9ac06b202649e60f",
       "label": "hook"
     }

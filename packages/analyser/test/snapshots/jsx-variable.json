@@ -1,9 +1,234 @@
 {
   "files": {
+    "/eslint.config.js": {
+      "path": "/eslint.config.js",
+      "hash": "bc90159d99344e9b",
+      "package_id": "sample-jsx-variable@0.0.0",
+      "import": {
+        "js": {
+          "localName": "js",
+          "importedName": null,
+          "source": "@eslint/js",
+          "type": "default",
+          "importKind": "value"
+        },
+        "globals": {
+          "localName": "globals",
+          "importedName": null,
+          "source": "globals",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactHooks": {
+          "localName": "reactHooks",
+          "importedName": null,
+          "source": "eslint-plugin-react-hooks",
+          "type": "default",
+          "importKind": "value"
+        },
+        "reactRefresh": {
+          "localName": "reactRefresh",
+          "importedName": null,
+          "source": "eslint-plugin-react-refresh",
+          "type": "default",
+          "importKind": "value"
+        },
+        "tseslint": {
+          "localName": "tseslint",
+          "importedName": null,
+          "source": "typescript-eslint",
+          "type": "default",
+          "importKind": "value"
+        },
+        "defineConfig": {
+          "localName": "defineConfig",
+          "importedName": "defineConfig",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        },
+        "globalIgnores": {
+          "localName": "globalIgnores",
+          "importedName": "globalIgnores",
+          "source": "eslint/config",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {
+        "anonymous": {
+          "name": "anonymous",
+          "type": "default",
+          "exportKind": "value",
+          "id": "cafb2fea281e67de"
+        }
+      },
+      "starExports": [],
+      "defaultExport": "anonymous",
+      "tsTypes": {},
+      "var": {},
+      "relations": []
+    },
+    "/src/main.tsx": {
+      "path": "/src/main.tsx",
+      "hash": "cb9d4b4a9bada21f",
+      "package_id": "sample-jsx-variable@0.0.0",
+      "import": {
+        "StrictMode": {
+          "localName": "StrictMode",
+          "importedName": "StrictMode",
+          "source": "react",
+          "type": "named",
+          "importKind": "value"
+        },
+        "createRoot": {
+          "localName": "createRoot",
+          "importedName": "createRoot",
+          "source": "react-dom/client",
+          "type": "named",
+          "importKind": "value"
+        },
+        "App": {
+          "localName": "App",
+          "importedName": "App",
+          "source": "/src/App.tsx",
+          "type": "named",
+          "importKind": "value"
+        }
+      },
+      "export": {},
+      "starExports": [],
+      "defaultExport": null,
+      "tsTypes": {},
+      "var": {
+        "51d92d1c6d1f1871": {
+          "id": "51d92d1c6d1f1871",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@6:2",
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "id": "a8abd32ffb8c90bc"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "939967f0753a38f8",
+          "dependencies": {
+            "cec4bdc6c41a05ae": {
+              "id": "cec4bdc6c41a05ae",
+              "name": "jsx@7:4"
+            }
+          },
+          "loc": {
+            "line": 6,
+            "column": 2
+          },
+          "render": {
+            "id": "StrictMode",
+            "instanceId": "6bbdbd6d9dba921c",
+            "tag": "StrictMode",
+            "dependencies": [],
+            "isDependency": true,
+            "loc": {
+              "line": 6,
+              "column": 2
+            },
+            "renderIndex": 0,
+            "kind": "jsx",
+            "children": {
+              "c7ccfcf52fed6762": {
+                "id": "311c554b828f67a5",
+                "instanceId": "c7ccfcf52fed6762",
+                "tag": "App",
+                "dependencies": [],
+                "isDependency": false,
+                "loc": {
+                  "line": 7,
+                  "column": 4
+                },
+                "parentId": "6bbdbd6d9dba921c",
+                "renderIndex": 0,
+                "kind": "jsx",
+                "children": {}
+              }
+            }
+          },
+          "srcId": "StrictMode"
+        },
+        "cec4bdc6c41a05ae": {
+          "id": "cec4bdc6c41a05ae",
+          "name": {
+            "type": "identifier",
+            "name": "jsx@7:4",
+            "loc": {
+              "line": 7,
+              "column": 4
+            },
+            "id": "e9add94ca8125596"
+          },
+          "kind": "normal",
+          "type": "jsx",
+          "file": "/src/main.tsx",
+          "hash": "2fbdba479d5019ac",
+          "dependencies": {},
+          "loc": {
+            "line": 7,
+            "column": 4
+          },
+          "render": null,
+          "srcId": "311c554b828f67a5"
+        }
+      },
+      "relations": [
+        {
+          "from_id": "51d92d1c6d1f1871",
+          "to_id": "symbol:import:/src/main.tsx:StrictMode",
+          "kind": "usage-render-call",
+          "line": 6,
+          "column": 3,
+          "data_json": {
+            "usageId": "78ac5eb08ef66be8",
+            "filePath": "/src/main.tsx",
+            "line": 6,
+            "column": 3,
+            "ownerId": "51d92d1c6d1f1871",
+            "ownerKind": "normal",
+            "displayLabel": "StrictMode"
+          }
+        },
+        {
+          "from_id": "cec4bdc6c41a05ae",
+          "to_id": "symbol:import:/src/main.tsx:App",
+          "kind": "usage-render-call",
+          "line": 7,
+          "column": 5,
+          "data_json": {
+            "usageId": "aa0d019a24a46d0a",
+            "filePath": "/src/main.tsx",
+            "line": 7,
+            "column": 5,
+            "ownerId": "cec4bdc6c41a05ae",
+            "ownerKind": "normal",
+            "displayLabel": "App"
+          }
+        }
+      ],
+      "entryPoint": {
+        "kind": "createRoot",
+        "loc": {
+          "line": 5,
+          "column": 0
+        },
+        "component": "StrictMode"
+      }
+    },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
       "hash": "63e5fad14263c51f",
-      "package_id": ".",
+      "package_id": "sample-jsx-variable@0.0.0",
       "import": {
         "React": {
           "localName": "React",

@@ -2,8 +2,8 @@
   "files": {
     "/eslint.config.js": {
       "path": "/eslint.config.js",
-      "hash": "3c1694874b5d85f",
-      "package_id": "sample-cache-new@0.0.0",
+      "hash": "bc90159d99344e9b",
+      "package_id": "sample-cache@0.0.0",
       "import": {
         "js": {
           "localName": "js",
@@ -57,10 +57,10 @@
       },
       "export": {
         "anonymous": {
+          "id": "cafb2fea281e67de",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "cafb2fea281e67de"
+          "exportKind": "value"
         }
       },
       "starExports": [],

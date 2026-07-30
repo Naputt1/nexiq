@@ -2,7 +2,7 @@
   "files": {
     "/eslint.config.js": {
       "path": "/eslint.config.js",
-      "hash": "3c31918f0aa69c",
+      "hash": "bc90159d99344e9b",
       "package_id": "sample-simple@0.0.0",
       "import": {
         "js": {
