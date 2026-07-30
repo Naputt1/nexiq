@@ -2,7 +2,8 @@ import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.ts";
 import assert from "assert";
-import { getPattern } from "./pattern.ts";
+import { getPattern, getVariableNameKey } from "./pattern.ts";
+import { getDeterministicId } from "../utils/hash.ts";
 import type { ComponentFileVar, DistributiveOmit } from "@nexiq/shared";
 import { getStartLoc, LIFECYCLE_METHODS } from "./classDeclaration.ts";
 import { isReactFunctionVariable } from "../db/variable/type.ts";
@@ -80,6 +81,39 @@ export default function ClassMethod(
               },
             },
           });
+        }
+      }
+
+      // Register TSParameterProperty (constructor shorthand: constructor(public name: string))
+      if (
+        !isPrivate &&
+        t.isIdentifier(node.key) &&
+        (node as t.ClassMethod).kind === "constructor"
+      ) {
+        for (const param of (node as t.ClassMethod).params) {
+          if (t.isTSParameterProperty(param) && t.isIdentifier(param.parameter)) {
+            const pattern = getPattern(param.parameter);
+            const pLoc = {
+              line: param.parameter.loc!.start.line,
+              column: param.parameter.loc!.start.column,
+            };
+            componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies: {},
+                type: "data",
+                loc: pLoc,
+                memberKind: param.accessibility
+                  ? `${param.accessibility}-property`
+                  : "property",
+              } as DistributiveOmit<
+                ComponentFileVar,
+                "id" | "kind" | "var" | "children" | "file" | "hash" | "components"
+              >,
+              "property",
+            );
+          }
         }
       }
 

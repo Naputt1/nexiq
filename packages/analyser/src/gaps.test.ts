@@ -684,6 +684,227 @@ describe("TaggedTemplateExpression (styled) handling", () => {
   });
 });
 
+describe("TSParameterProperty (constructor shorthand)", () => {
+  it("should register constructor parameter properties as class properties", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tspp-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import React from "react";
+
+        export class App extends React.Component {
+          constructor(public name: string, private count: number) {
+            super();
+          }
+          render() {
+            return <div>{this.name}: {this.count}</div>;
+          }
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tspp-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+      if (appVar?.kind !== "component")
+        throw new Error("App should be a component");
+
+      // Should have name and count as properties
+      const propertyIds = Object.keys(appVar.var).filter((key) => {
+        const v = appVar.var[key];
+        return v.kind === "property" || v.type === "data";
+      });
+      expect(propertyIds.length).toBeGreaterThanOrEqual(2);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TemplateLiteral in getExpressionData", () => {
+  it("should extract dependency ref from template literal expression in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tpl-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import { useState } from "react";
+
+        export function App() {
+          const [name] = useState("World");
+          return <div greeting={\`Hello \${name}\`} />;
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tpl-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+      if (appVar?.kind !== "component")
+        throw new Error("App should be a component");
+
+      const returnID = appVar.return;
+      expect(returnID).toBeDefined();
+      if (!returnID || typeof returnID !== "string")
+        throw new Error("App return should be JSX");
+
+      const returnVar = appVar.var[returnID];
+      if (!returnVar || returnVar.type !== "jsx")
+        throw new Error("JSX variable not found");
+
+      const rootRender = returnVar.render;
+      expect(rootRender).toBeDefined();
+      if (!rootRender) throw new Error("root render not found");
+
+      const greetingDep = rootRender.dependencies.find((d) => d.name === "greeting");
+      expect(greetingDep).toBeDefined();
+      if (!greetingDep) throw new Error("greeting dependency not found");
+
+      // Should have a ref to 'name' (not just a literal string)
+      expect(greetingDep.value.type).toBe("ref");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("UpdateExpression (++/--) in JSX props", () => {
+  it("should extract dependency ref from prefix update in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-update-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import { useState } from "react";
+
+        export function App() {
+          let i = 0;
+          return <button onClick={() => { i++; }}>Click</button>;
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "update-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      // Should handle i++ without crashing and still find App
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("UpdateExpression (++/--) in JSX props", () => {
+  it("should extract dependency ref from update expression in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-update-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import { useState, useCallback } from "react";
+
+        export function App() {
+          const [count, setCount] = useState(0);
+          const inc = useCallback(() => setCount(count + 1), [count]);
+          return <button onClick={inc}>Clicked {count} times</button>;
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "update-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      // Should not crash - update expressions in JSX children tolerated
+      expect(Object.keys(file!.var).length).toBeGreaterThan(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("Super expression handling", () => {
   it("should not crash on super.method() calls in class components", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-super-"));

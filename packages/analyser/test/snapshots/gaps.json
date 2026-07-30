@@ -325,7 +325,7 @@
     },
     "/src/App.tsx": {
       "path": "/src/App.tsx",
-      "hash": "3cdcf85d432df1d6",
+      "hash": "f5b194a50804c6d8",
       "package_id": "sample-gaps@0.0.0",
       "import": {
         "useState": {
@@ -341,9 +341,22 @@
           "source": "react",
           "type": "named",
           "importKind": "value"
+        },
+        "React": {
+          "localName": "React",
+          "importedName": null,
+          "source": "react",
+          "type": "default",
+          "importKind": "value"
         }
       },
       "export": {
+        "MyClass": {
+          "name": "MyClass",
+          "type": "named",
+          "exportKind": "class",
+          "id": "ab36ab92a8b6f230"
+        },
         "App": {
           "name": "App",
           "type": "named",
@@ -360,7 +373,7 @@
             "type": "identifier",
             "name": "User",
             "loc": {
-              "line": 3,
+              "line": 4,
               "column": 10
             },
             "id": "933938f5b9947a3c"
@@ -373,26 +386,26 @@
                 "type": "string"
               },
               "loc": {
-                "line": 3,
+                "line": 4,
                 "column": 17
               }
             }
           ],
           "loc": {
-            "line": 3,
+            "line": 4,
             "column": 10
           },
           "id": "7ed7fa9f9cff307f"
         }
       },
       "var": {
-        "1311bf1b8323ac2b": {
-          "id": "1311bf1b8323ac2b",
+        "4853d90a649b72f4": {
+          "id": "4853d90a649b72f4",
           "name": {
             "type": "identifier",
             "name": "config",
             "loc": {
-              "line": 5,
+              "line": 6,
               "column": 6
             },
             "id": "962a2e4df3b6b949"
@@ -400,22 +413,22 @@
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
-          "hash": "c9d7e8d9575e73ac",
+          "hash": "336f7a289540a683",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 5,
+            "line": 6,
             "column": 6
           },
           "children": {}
         },
-        "b26f6b139693502b": {
-          "id": "b26f6b139693502b",
+        "aedf4afc1daad3ba": {
+          "id": "aedf4afc1daad3ba",
           "name": {
             "type": "identifier",
             "name": "alias",
             "loc": {
-              "line": 6,
+              "line": 7,
               "column": 6
             },
             "id": "49d2357ffb76fc65"
@@ -423,7 +436,7 @@
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
-          "hash": "5e12f4072f706fca",
+          "hash": "967f3c3fd04353a9",
           "declarationKind": "const",
           "dependencies": {
             "962a2e4df3b6b949": {
@@ -432,18 +445,18 @@
             }
           },
           "loc": {
-            "line": 6,
+            "line": 7,
             "column": 6
           },
           "children": {}
         },
-        "381e4f65bee08a75": {
-          "id": "381e4f65bee08a75",
+        "bad62391d6357ad1": {
+          "id": "bad62391d6357ad1",
           "name": {
             "type": "identifier",
             "name": "maybeUser",
             "loc": {
-              "line": 7,
+              "line": 8,
               "column": 6
             },
             "id": "e0c3045c1fc98be"
@@ -451,22 +464,22 @@
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
-          "hash": "99beed5d3476de14",
+          "hash": "95e5e98713fa9fc5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 7,
+            "line": 8,
             "column": 6
           },
           "children": {}
         },
-        "db1668c317a02281": {
-          "id": "db1668c317a02281",
+        "45afb0fee032d933": {
+          "id": "45afb0fee032d933",
           "name": {
             "type": "identifier",
             "name": "safe",
             "loc": {
-              "line": 8,
+              "line": 9,
               "column": 6
             },
             "id": "e56410fbfc12a7fa"
@@ -474,11 +487,11 @@
           "kind": "normal",
           "type": "data",
           "file": "/src/App.tsx",
-          "hash": "198ed684da872dad",
+          "hash": "10c4a43fd6e0b41a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 8,
+            "line": 9,
             "column": 6
           },
           "children": {}
@@ -489,7 +502,7 @@
             "type": "identifier",
             "name": "LazyOther",
             "loc": {
-              "line": 10,
+              "line": 11,
               "column": 6
             },
             "id": "1eb505402f815033"
@@ -497,7 +510,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "b2136773fd946f5e",
+          "hash": "6026aa2c9b0accf",
           "declarationKind": "const",
           "dependencies": {
             "fed6a0905a629067": {
@@ -506,39 +519,39 @@
             }
           },
           "loc": {
-            "line": 10,
+            "line": 11,
             "column": 6
           },
           "var": {
-            "29a9e4a7b70d7cc1": {
-              "id": "29a9e4a7b70d7cc1",
+            "c6257ed9266c4c0e": {
+              "id": "c6257ed9266c4c0e",
               "name": {
                 "type": "identifier",
-                "name": "anonymous@10:23",
+                "name": "anonymous@11:23",
                 "loc": {
-                  "line": 10,
+                  "line": 11,
                   "column": 23
                 },
-                "id": "2fa41653329c8447"
+                "id": "c2f4c1e5a6838cb1"
               },
               "kind": "normal",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "1d343251fe9b73d",
+              "hash": "1764692d8fb945bb",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
-                "line": 10,
+                "line": 11,
                 "column": 23
               },
               "var": {},
               "scope": {
                 "start": {
-                  "line": 10,
+                  "line": 11,
                   "column": 23
                 },
                 "end": {
-                  "line": 10,
+                  "line": 11,
                   "column": 46
                 }
               }
@@ -546,11 +559,11 @@
           },
           "scope": {
             "start": {
-              "line": 10,
+              "line": 11,
               "column": 23
             },
             "end": {
-              "line": 10,
+              "line": 11,
               "column": 46
             }
           },
@@ -562,7 +575,7 @@
             "type": "identifier",
             "name": "save",
             "loc": {
-              "line": 12,
+              "line": 13,
               "column": 9
             },
             "id": "319236a0c2cc5206"
@@ -570,21 +583,21 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "69dd932d6b694eaf",
+          "hash": "78ead131a15cecc9",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
-            "line": 12,
+            "line": 13,
             "column": 9
           },
           "var": {},
           "scope": {
             "start": {
-              "line": 12,
+              "line": 13,
               "column": 0
             },
             "end": {
-              "line": 12,
+              "line": 13,
               "column": 32
             }
           },
@@ -597,13 +610,178 @@
             }
           }
         },
+        "ab36ab92a8b6f230": {
+          "id": "ab36ab92a8b6f230",
+          "name": {
+            "type": "identifier",
+            "name": "MyClass",
+            "loc": {
+              "line": 15,
+              "column": 13
+            },
+            "id": "16603d7c3cb133c2"
+          },
+          "kind": "component",
+          "type": "class",
+          "file": "/src/App.tsx",
+          "hash": "878251bc8bf75cc6",
+          "dependencies": {},
+          "loc": {
+            "line": 15,
+            "column": 13
+          },
+          "var": {
+            "d24d23b2390cb40f": {
+              "id": "d24d23b2390cb40f",
+              "name": {
+                "type": "identifier",
+                "name": "constructor",
+                "loc": {
+                  "line": 16,
+                  "column": 2
+                },
+                "id": "9333e9bd0fbe3b32"
+              },
+              "kind": "method",
+              "type": "function",
+              "file": "/src/App.tsx",
+              "hash": "bfe68c3f06924168",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 16,
+                "column": 2
+              },
+              "isStatic": false,
+              "memberKind": "constructor",
+              "var": {},
+              "scope": {
+                "start": {
+                  "line": 16,
+                  "column": 36
+                },
+                "end": {
+                  "line": 16,
+                  "column": 48
+                }
+              },
+              "async": false
+            },
+            "7f6fa18b4a230439": {
+              "id": "7f6fa18b4a230439",
+              "name": {
+                "type": "identifier",
+                "name": "label",
+                "loc": {
+                  "line": 16,
+                  "column": 21
+                },
+                "id": "5fcbb2f8b8df6a6e"
+              },
+              "kind": "property",
+              "type": "data",
+              "file": "/src/App.tsx",
+              "hash": "af0ca27219c419",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 16,
+                "column": 21
+              },
+              "memberKind": "public-property"
+            },
+            "9c47526b030d17bc": {
+              "id": "9c47526b030d17bc",
+              "name": {
+                "type": "identifier",
+                "name": "render",
+                "loc": {
+                  "line": 17,
+                  "column": 2
+                },
+                "id": "caa15df858c0af96"
+              },
+              "kind": "method",
+              "type": "function",
+              "file": "/src/App.tsx",
+              "hash": "8a67b5d2b9b898d8",
+              "declarationKind": "const",
+              "dependencies": {},
+              "loc": {
+                "line": 17,
+                "column": 2
+              },
+              "isStatic": false,
+              "memberKind": "method",
+              "var": {
+                "4e7977f869b5e698": {
+                  "id": "4e7977f869b5e698",
+                  "name": {
+                    "type": "identifier",
+                    "name": "jsx@17:20",
+                    "loc": {
+                      "line": 17,
+                      "column": 20
+                    },
+                    "id": "7fea9f955887d4b4"
+                  },
+                  "kind": "normal",
+                  "type": "jsx",
+                  "file": "/src/App.tsx",
+                  "hash": "934392665259406c",
+                  "dependencies": {},
+                  "loc": {
+                    "line": 17,
+                    "column": 20
+                  },
+                  "render": null,
+                  "srcId": "/src/App.tsx:div:17:20"
+                }
+              },
+              "scope": {
+                "start": {
+                  "line": 17,
+                  "column": 11
+                },
+                "end": {
+                  "line": 17,
+                  "column": 46
+                }
+              },
+              "async": false,
+              "return": "4e7977f869b5e698"
+            }
+          },
+          "scope": {
+            "start": {
+              "line": 15,
+              "column": 7
+            },
+            "end": {
+              "line": 18,
+              "column": 1
+            }
+          },
+          "async": false,
+          "superClass": {
+            "name": "React.Component"
+          },
+          "states": [],
+          "refs": [],
+          "props": [],
+          "propName": "this.props",
+          "hooks": [],
+          "effects": {},
+          "componentType": "Class",
+          "contexts": []
+        },
         "311c554b828f67a5": {
           "id": "311c554b828f67a5",
           "name": {
             "type": "identifier",
             "name": "App",
             "loc": {
-              "line": 14,
+              "line": 20,
               "column": 16
             },
             "id": "ce7286aa30b0e33b"
@@ -611,10 +789,10 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "95caaf006ef37c18",
+          "hash": "6e6d6dc69827ea18",
           "dependencies": {},
           "loc": {
-            "line": 14,
+            "line": 20,
             "column": 16
           },
           "var": {
@@ -629,20 +807,20 @@
                       "type": "identifier",
                       "name": "visible",
                       "loc": {
-                        "line": 15,
+                        "line": 21,
                         "column": 9
                       },
                       "id": "6b1f54e6a3f615f1"
                     },
                     "loc": {
-                      "line": 15,
+                      "line": 21,
                       "column": 9
                     }
                   }
                 ],
                 "raw": "[visible]",
                 "loc": {
-                  "line": 15,
+                  "line": 21,
                   "column": 8
                 },
                 "id": "65beeb58fc140d46"
@@ -650,10 +828,10 @@
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "ca814d3a30691aa2",
+              "hash": "88f50b4ced771df2",
               "dependencies": {},
               "loc": {
-                "line": 15,
+                "line": 21,
                 "column": 8
               }
             },
@@ -668,20 +846,20 @@
                       "type": "identifier",
                       "name": "obj",
                       "loc": {
-                        "line": 16,
+                        "line": 22,
                         "column": 9
                       },
                       "id": "672bb86d850dc178"
                     },
                     "loc": {
-                      "line": 16,
+                      "line": 22,
                       "column": 9
                     }
                   }
                 ],
                 "raw": "[obj]",
                 "loc": {
-                  "line": 16,
+                  "line": 22,
                   "column": 8
                 },
                 "id": "65beeb58fc140d46"
@@ -689,20 +867,20 @@
               "kind": "state",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "ecc18be69fb9b326",
+              "hash": "dbea14f121db5d62",
               "dependencies": {},
               "loc": {
-                "line": 16,
+                "line": 22,
                 "column": 8
               }
             },
-            "fdac95ec2513ea39": {
-              "id": "fdac95ec2513ea39",
+            "d7c2637920d9cd67": {
+              "id": "d7c2637920d9cd67",
               "name": {
                 "type": "identifier",
                 "name": "r",
                 "loc": {
-                  "line": 17,
+                  "line": 23,
                   "column": 8
                 },
                 "id": "bd7b38f7b4af0b35"
@@ -710,30 +888,30 @@
               "kind": "normal",
               "type": "data",
               "file": "/src/App.tsx",
-              "hash": "1a1f43e08e35c7b",
+              "hash": "5060b1ffe089fe96",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
-                "line": 17,
+                "line": 23,
                 "column": 8
               },
               "children": {}
             },
-            "1d8f61299ac1b304": {
-              "id": "1d8f61299ac1b304",
+            "c2b3d2131ad3e808": {
+              "id": "c2b3d2131ad3e808",
               "name": {
                 "type": "identifier",
-                "name": "jsx@19:4",
+                "name": "jsx@25:4",
                 "loc": {
-                  "line": 19,
+                  "line": 25,
                   "column": 4
                 },
-                "id": "394e04e78abe840c"
+                "id": "d27b3dff79068e0d"
               },
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "b815861da9d93e17",
+              "hash": "82e96984054fd921",
               "dependencies": {
                 "49d2357ffb76fc65": {
                   "id": "49d2357ffb76fc65",
@@ -745,12 +923,12 @@
                 }
               },
               "loc": {
-                "line": 19,
+                "line": 25,
                 "column": 4
               },
               "render": {
-                "id": "/src/App.tsx:div:19:4",
-                "instanceId": "e509fbd8727bb766",
+                "id": "/src/App.tsx:div:25:4",
+                "instanceId": "2602d9c39247d1e7",
                 "tag": "div",
                 "dependencies": [
                   {
@@ -775,7 +953,7 @@
                       "refType": "named",
                       "name": "alias"
                     },
-                    "valueId": "b26f6b139693502b"
+                    "valueId": "aedf4afc1daad3ba"
                   },
                   {
                     "id": "db950bc0781c03ae",
@@ -799,7 +977,7 @@
                         "name"
                       ]
                     },
-                    "valueId": "381e4f65bee08a75"
+                    "valueId": "bad62391d6357ad1"
                   },
                   {
                     "id": "647606211ed83dcf",
@@ -814,28 +992,28 @@
                 ],
                 "isDependency": false,
                 "loc": {
-                  "line": 19,
+                  "line": 25,
                   "column": 4
                 },
                 "renderIndex": 0,
                 "kind": "jsx",
                 "children": {}
               },
-              "srcId": "/src/App.tsx:div:19:4"
+              "srcId": "/src/App.tsx:div:25:4"
             }
           },
           "scope": {
             "start": {
-              "line": 14,
+              "line": 20,
               "column": 7
             },
             "end": {
-              "line": 27,
+              "line": 33,
               "column": 1
             }
           },
           "async": false,
-          "return": "1d8f61299ac1b304",
+          "return": "c2b3d2131ad3e808",
           "states": [
             "311c554b828f67a5:state:[visible]",
             "311c554b828f67a5:state:[obj]"
@@ -850,17 +1028,17 @@
       },
       "relations": [
         {
-          "from_id": "1311bf1b8323ac2b",
-          "to_id": "b26f6b139693502b",
+          "from_id": "4853d90a649b72f4",
+          "to_id": "aedf4afc1daad3ba",
           "kind": "usage-read",
-          "line": 6,
+          "line": 7,
           "column": 14,
           "data_json": {
-            "usageId": "b1fc373931f48f5",
+            "usageId": "e19d3b0d9c638610",
             "filePath": "/src/App.tsx",
-            "line": 6,
+            "line": 7,
             "column": 14,
-            "ownerId": "b26f6b139693502b",
+            "ownerId": "aedf4afc1daad3ba",
             "ownerKind": "normal",
             "accessPath": [
               "theme"
@@ -872,32 +1050,32 @@
         },
         {
           "from_id": "7ed7fa9f9cff307f",
-          "to_id": "381e4f65bee08a75",
+          "to_id": "bad62391d6357ad1",
           "kind": "usage-read",
-          "line": 7,
+          "line": 8,
           "column": 17,
           "data_json": {
-            "usageId": "13fab4d37fbb729b",
+            "usageId": "f6823b41453d960c",
             "filePath": "/src/App.tsx",
-            "line": 7,
+            "line": 8,
             "column": 17,
-            "ownerId": "381e4f65bee08a75",
+            "ownerId": "bad62391d6357ad1",
             "ownerKind": "normal",
             "displayLabel": "User"
           }
         },
         {
           "from_id": "7ed7fa9f9cff307f",
-          "to_id": "db1668c317a02281",
+          "to_id": "45afb0fee032d933",
           "kind": "usage-read",
-          "line": 8,
+          "line": 9,
           "column": 41,
           "data_json": {
-            "usageId": "5dbecc8a49bf9b26",
+            "usageId": "e755e2d5386726ee",
             "filePath": "/src/App.tsx",
-            "line": 8,
+            "line": 9,
             "column": 41,
-            "ownerId": "db1668c317a02281",
+            "ownerId": "45afb0fee032d933",
             "ownerKind": "normal",
             "displayLabel": "User"
           }
@@ -906,12 +1084,12 @@
           "from_id": "8297ef101fb4378c",
           "to_id": "symbol:import:/src/App.tsx:lazy",
           "kind": "usage-call",
-          "line": 10,
+          "line": 11,
           "column": 18,
           "data_json": {
-            "usageId": "eeee64def9267628",
+            "usageId": "31189f78372e1632",
             "filePath": "/src/App.tsx",
-            "line": 10,
+            "line": 11,
             "column": 18,
             "ownerId": "8297ef101fb4378c",
             "ownerKind": "normal",
@@ -919,15 +1097,52 @@
           }
         },
         {
+          "from_id": "symbol:import:/src/App.tsx:React",
+          "to_id": "ab36ab92a8b6f230",
+          "kind": "usage-read",
+          "line": 15,
+          "column": 29,
+          "data_json": {
+            "usageId": "19ea74c4e76d8490",
+            "filePath": "/src/App.tsx",
+            "line": 15,
+            "column": 29,
+            "ownerId": "ab36ab92a8b6f230",
+            "ownerKind": "component",
+            "accessPath": [
+              "Component"
+            ],
+            "isOptional": false,
+            "isComputed": false,
+            "displayLabel": "React.Component"
+          }
+        },
+        {
+          "from_id": "7f6fa18b4a230439",
+          "to_id": "d24d23b2390cb40f",
+          "kind": "usage-read",
+          "line": 16,
+          "column": 21,
+          "data_json": {
+            "usageId": "c04142d946feb8d",
+            "filePath": "/src/App.tsx",
+            "line": 16,
+            "column": 21,
+            "ownerId": "d24d23b2390cb40f",
+            "ownerKind": "method",
+            "displayLabel": "label"
+          }
+        },
+        {
           "from_id": "311c554b828f67a5",
           "to_id": "symbol:import:/src/App.tsx:useState",
           "kind": "usage-call",
-          "line": 15,
+          "line": 21,
           "column": 20,
           "data_json": {
-            "usageId": "310c0ccb3b55f9a7",
+            "usageId": "7a0cb9d1598ca4e7",
             "filePath": "/src/App.tsx",
-            "line": 15,
+            "line": 21,
             "column": 20,
             "ownerId": "311c554b828f67a5",
             "ownerKind": "component",
@@ -938,12 +1153,12 @@
           "from_id": "311c554b828f67a5",
           "to_id": "symbol:import:/src/App.tsx:useState",
           "kind": "usage-call",
-          "line": 16,
+          "line": 22,
           "column": 16,
           "data_json": {
-            "usageId": "a64faa059b3f223",
+            "usageId": "7c1f7e519badc2dd",
             "filePath": "/src/App.tsx",
-            "line": 16,
+            "line": 22,
             "column": 16,
             "ownerId": "311c554b828f67a5",
             "ownerKind": "component",
@@ -951,33 +1166,33 @@
           }
         },
         {
-          "from_id": "fdac95ec2513ea39",
+          "from_id": "d7c2637920d9cd67",
           "to_id": "7e81f5ff1ba5e178",
           "kind": "usage-call",
-          "line": 17,
+          "line": 23,
           "column": 12,
           "data_json": {
-            "usageId": "c5b522726e554e2f",
+            "usageId": "5e7c2df105f5b0c",
             "filePath": "/src/App.tsx",
-            "line": 17,
+            "line": 23,
             "column": 12,
-            "ownerId": "fdac95ec2513ea39",
+            "ownerId": "d7c2637920d9cd67",
             "ownerKind": "normal",
             "displayLabel": "save"
           }
         },
         {
           "from_id": "311c554b828f67a5:state:[obj]:672bb86d850dc178",
-          "to_id": "/src/App.tsx:div:19:4",
+          "to_id": "/src/App.tsx:div:25:4",
           "kind": "usage-read",
-          "line": 20,
+          "line": 26,
           "column": 16,
           "data_json": {
-            "usageId": "75605bf3b52d8846",
+            "usageId": "ef1d84a6221a5486",
             "filePath": "/src/App.tsx",
-            "line": 20,
+            "line": 26,
             "column": 16,
-            "ownerId": "1d8f61299ac1b304",
+            "ownerId": "c2b3d2131ad3e808",
             "ownerKind": "normal",
             "accessPath": [
               "nested",
@@ -989,49 +1204,49 @@
           }
         },
         {
-          "from_id": "b26f6b139693502b",
-          "to_id": "/src/App.tsx:div:19:4",
+          "from_id": "aedf4afc1daad3ba",
+          "to_id": "/src/App.tsx:div:25:4",
           "kind": "usage-read",
-          "line": 21,
+          "line": 27,
           "column": 12,
           "data_json": {
-            "usageId": "bbd67da2bf5855f0",
+            "usageId": "2d65f4507a45cc71",
             "filePath": "/src/App.tsx",
-            "line": 21,
+            "line": 27,
             "column": 12,
-            "ownerId": "1d8f61299ac1b304",
+            "ownerId": "c2b3d2131ad3e808",
             "ownerKind": "normal",
             "displayLabel": "alias"
           }
         },
         {
-          "from_id": "381e4f65bee08a75",
-          "to_id": "/src/App.tsx:div:19:4",
+          "from_id": "bad62391d6357ad1",
+          "to_id": "/src/App.tsx:div:25:4",
           "kind": "usage-read",
-          "line": 23,
+          "line": 29,
           "column": 14,
           "data_json": {
-            "usageId": "c8bc4112d4e1a34b",
+            "usageId": "7a58d8a3e262c93",
             "filePath": "/src/App.tsx",
-            "line": 23,
+            "line": 29,
             "column": 14,
-            "ownerId": "1d8f61299ac1b304",
+            "ownerId": "c2b3d2131ad3e808",
             "ownerKind": "normal",
             "displayLabel": "maybeUser"
           }
         },
         {
           "from_id": "311c554b828f67a5:state:[visible]:6b1f54e6a3f615f1",
-          "to_id": "/src/App.tsx:div:19:4",
+          "to_id": "/src/App.tsx:div:25:4",
           "kind": "usage-read",
-          "line": 24,
+          "line": 30,
           "column": 15,
           "data_json": {
-            "usageId": "e668ecad541f7032",
+            "usageId": "b563510347aad36",
             "filePath": "/src/App.tsx",
-            "line": 24,
+            "line": 30,
             "column": 15,
-            "ownerId": "1d8f61299ac1b304",
+            "ownerId": "c2b3d2131ad3e808",
             "ownerKind": "normal",
             "displayLabel": "visible"
           }
@@ -1046,17 +1261,22 @@
       "label": "render"
     },
     {
-      "from": "311c554b828f67a5",
-      "to": "1d8f61299ac1b304",
+      "from": "ab36ab92a8b6f230",
+      "to": "4e7977f869b5e698",
       "label": "render"
     },
     {
-      "from": "1d8f61299ac1b304",
+      "from": "311c554b828f67a5",
+      "to": "c2b3d2131ad3e808",
+      "label": "render"
+    },
+    {
+      "from": "c2b3d2131ad3e808",
       "to": "49d2357ffb76fc65",
       "label": "hook"
     },
     {
-      "from": "1d8f61299ac1b304",
+      "from": "c2b3d2131ad3e808",
       "to": "bb4fb1628bf87182",
       "label": "hook"
     }

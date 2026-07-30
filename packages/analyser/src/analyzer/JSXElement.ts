@@ -75,6 +75,8 @@ function extractDependencies(
     extractDependencies(expr.expression, name, dependency);
   } else if (t.isUnaryExpression(expr)) {
     extractDependencies(expr.argument, name, dependency);
+  } else if (t.isUpdateExpression(expr)) {
+    extractDependencies(expr.argument, name, dependency);
   } else {
     dependency.push({
       id: getDeterministicId(name),
