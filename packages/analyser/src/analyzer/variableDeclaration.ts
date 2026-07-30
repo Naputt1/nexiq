@@ -59,6 +59,14 @@ export default function VariableDeclarator(
           name: init.callee.name,
         };
       }
+    } else if (init?.type === "MemberExpression" || init?.type === "OptionalMemberExpression") {
+      if (t.isIdentifier(init.object)) {
+        const id = getDeterministicId(init.object.name);
+        dependencies[id] = {
+          id,
+          name: init.object.name,
+        };
+      }
     }
     return dependencies;
   };

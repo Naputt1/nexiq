@@ -174,3 +174,4 @@ index.*.node
 *.zip
 test-*.sqlite
 .opencode/
+report

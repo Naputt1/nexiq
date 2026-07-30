@@ -28,6 +28,7 @@ const samples = args._[0]
       "cache-new",
       "async-functions",
       "destructuring-dependency",
+      "gaps",
       "props-dot-dependency",
       "class-components",
     ];

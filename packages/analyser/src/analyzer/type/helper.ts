@@ -599,7 +599,7 @@ function getMemberExpressionNames(
   if (t.isIdentifier(expr)) {
     return [expr.name];
   }
-  if (t.isMemberExpression(expr)) {
+  if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
     if (t.isIdentifier(expr.property)) {
       const left = getMemberExpressionNames(expr.object);
       if (left) {
@@ -659,7 +659,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         refType: "named",
         name: expr.name,
       };
-    case "MemberExpression": {
+    case "MemberExpression":
+    case "OptionalMemberExpression": {
       const names = getMemberExpressionNames(expr);
       if (names) {
         return {
@@ -670,7 +671,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       }
       break;
     }
-    case "BinaryExpression": {
+    case "BinaryExpression":
+    case "NewExpression": {
       return {
         type: "literal-type",
         literal: {

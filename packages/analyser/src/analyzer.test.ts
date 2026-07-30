@@ -22,6 +22,7 @@ describe("analyser snapshots", () => {
     "destructured-export",
     "ts-method-signature",
     "class-components",
+    "gaps",
   ];
 
   projects.forEach((projectName) => {
