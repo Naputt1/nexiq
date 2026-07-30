@@ -59,6 +59,11 @@ export default function VariableDeclarator(
           name: init.callee.name,
         };
       }
+    } else if (init?.type === "TSSatisfiesExpression") {
+      if (t.isIdentifier(init.expression)) {
+        const id = getDeterministicId(init.expression.name);
+        dependencies[id] = { id, name: init.expression.name };
+      }
     } else if (init?.type === "MemberExpression" || init?.type === "OptionalMemberExpression") {
       if (t.isIdentifier(init.object)) {
         const id = getDeterministicId(init.object.name);
@@ -66,6 +71,26 @@ export default function VariableDeclarator(
           id,
           name: init.object.name,
         };
+      }
+    } else if (init?.type === "ObjectExpression") {
+      for (const prop of init.properties) {
+        if (t.isObjectProperty(prop) && t.isIdentifier(prop.value)) {
+          const id = getDeterministicId(prop.value.name);
+          dependencies[id] = { id, name: prop.value.name };
+        } else if (t.isSpreadElement(prop) && t.isIdentifier(prop.argument)) {
+          const id = getDeterministicId(prop.argument.name);
+          dependencies[id] = { id, name: prop.argument.name };
+        }
+      }
+    } else if (init?.type === "ArrayExpression") {
+      for (const element of init.elements) {
+        if (t.isIdentifier(element)) {
+          const id = getDeterministicId(element.name);
+          dependencies[id] = { id, name: element.name };
+        } else if (t.isSpreadElement(element) && t.isIdentifier(element.argument)) {
+          const id = getDeterministicId(element.argument.name);
+          dependencies[id] = { id, name: element.argument.name };
+        }
       }
     }
     return dependencies;

@@ -428,6 +428,153 @@ export function extractFileUsages(
     fileDb.addRelation(relation);
   };
 
+  const processCallLike = (
+    path: traverse.NodePath<t.CallExpression | t.OptionalCallExpression>,
+  ) => {
+    const loc = getStartLoc(path.node);
+    if (!loc) return;
+
+    const owner = getOwnerVariable(path, fileDb);
+    if (!owner) return;
+
+    const callee = path.node.callee;
+    if (t.isIdentifier(callee)) {
+      const target = resolveIdentifierTarget(fileDb, owner, callee.name, loc);
+      if (!target || target.id === owner.id) return;
+      emitRelation("usage-call", owner.id, target.id, loc, owner, {
+        hiddenIntermediate: target.hiddenIntermediate,
+        displayLabel: callee.name,
+      });
+      return;
+    }
+
+    if (
+      t.isMemberExpression(callee) ||
+      t.isOptionalMemberExpression(callee)
+    ) {
+      const target = resolveMemberTarget(callee, path, fileDb);
+      if (!target || target.id === owner.id) return;
+
+      // Special handling for setState functional update parameters
+      if (target.hiddenIntermediate === "state-setter") {
+        const firstArg = path.get("arguments")[0];
+        if (
+          firstArg &&
+          (firstArg.isArrowFunctionExpression() ||
+            firstArg.isFunctionExpression())
+        ) {
+          const params = firstArg.get("params");
+
+          if (Array.isArray(params)) {
+            // First parameter is 'state'
+            if (params.length >= 1 && params[0]?.isIdentifier()) {
+              const paramName = params[0].node.name;
+              const paramLoc = getStartLoc(params[0].node);
+              if (paramLoc) {
+                const paramVar = fileDb.getVariable(paramLoc);
+                if (paramVar) {
+                  componentDB.addVariableDependency(fileName, paramVar.id, {
+                    id: target.id,
+                    name: paramName,
+                  });
+                }
+              }
+            }
+            // Second parameter is 'props'
+            if (params.length >= 2 && params[1]?.isIdentifier()) {
+              const paramName = params[1].node.name;
+              const paramLoc = getStartLoc(params[1].node);
+              if (paramLoc) {
+                const paramVar = fileDb.getVariable(paramLoc);
+                if (paramVar) {
+                  // Link props parameter to the component itself (since component ID is also used for this.props)
+                  let current: Variable | Scope | undefined = owner;
+                  while (current) {
+                    if (!isScope(current) && isComponentVariable(current)) {
+                      componentDB.addVariableDependency(
+                        fileName,
+                        paramVar.id,
+                        {
+                          id: current.id,
+                          name: paramName,
+                        },
+                      );
+                      break;
+                    }
+                    current = current.parent;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Emit usage-write for each key in the setState argument
+        if (firstArg) {
+          let stateNode: t.Node | null = firstArg.node;
+          if (
+            t.isArrowFunctionExpression(stateNode) ||
+            t.isFunctionExpression(stateNode)
+          ) {
+            if (t.isObjectExpression(stateNode.body)) {
+              stateNode = stateNode.body;
+            } else if (t.isBlockStatement(stateNode.body)) {
+              const lastStatement = stateNode.body.body.at(-1);
+              if (
+                t.isReturnStatement(lastStatement) &&
+                lastStatement.argument
+              ) {
+                stateNode = lastStatement.argument;
+              }
+            }
+          }
+
+          if (t.isObjectExpression(stateNode)) {
+            for (const prop of stateNode.properties) {
+              if (
+                t.isObjectProperty(prop) &&
+                !prop.computed &&
+                t.isIdentifier(prop.key)
+              ) {
+                const stateName = prop.key.name;
+                // Resolve stateName to individual state variable
+                let current: Variable | Scope | undefined = owner;
+                while (current) {
+                  if (!isScope(current) && isComponentVariable(current)) {
+                    const stateId = current.var.getIdByName(stateName);
+                    if (stateId) {
+                      emitRelation(
+                        "usage-write",
+                        owner.id,
+                        stateId,
+                        getStartLoc(prop.key)!,
+                        owner,
+                        {
+                          displayLabel: stateName,
+                          hiddenIntermediate: "state-setter",
+                        },
+                      );
+                    }
+                    break;
+                  }
+                  current = current.parent;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      emitRelation("usage-call", owner.id, target.id, loc, owner, {
+        accessPath: target.accessPath,
+        isOptional: target.isOptional,
+        isComputed: target.isComputed,
+        hiddenIntermediate: target.hiddenIntermediate,
+        displayLabel: target.accessPath?.join("."),
+      });
+    }
+  };
+
   traverseFn(ast, {
     Identifier(path) {
       // Compute before isReferencedIdentifier narrows the type
@@ -527,148 +674,11 @@ export function extractFileUsages(
     },
 
     CallExpression(path) {
-      const loc = getStartLoc(path.node);
-      if (!loc) return;
+      processCallLike(path);
+    },
 
-      const owner = getOwnerVariable(path, fileDb);
-      if (!owner) return;
-
-      const callee = path.node.callee;
-      if (t.isIdentifier(callee)) {
-        const target = resolveIdentifierTarget(fileDb, owner, callee.name, loc);
-        if (!target || target.id === owner.id) return;
-        emitRelation("usage-call", owner.id, target.id, loc, owner, {
-          hiddenIntermediate: target.hiddenIntermediate,
-          displayLabel: callee.name,
-        });
-        return;
-      }
-
-      if (
-        t.isMemberExpression(callee) ||
-        t.isOptionalMemberExpression(callee)
-      ) {
-        const target = resolveMemberTarget(callee, path, fileDb);
-        if (!target || target.id === owner.id) return;
-
-        // Special handling for setState functional update parameters
-        if (target.hiddenIntermediate === "state-setter") {
-          const firstArg = path.get("arguments")[0];
-          if (
-            firstArg &&
-            (firstArg.isArrowFunctionExpression() ||
-              firstArg.isFunctionExpression())
-          ) {
-            const params = firstArg.get("params");
-
-            if (Array.isArray(params)) {
-              // First parameter is 'state'
-              if (params.length >= 1 && params[0]?.isIdentifier()) {
-                const paramName = params[0].node.name;
-                const paramLoc = getStartLoc(params[0].node);
-                if (paramLoc) {
-                  const paramVar = fileDb.getVariable(paramLoc);
-                  if (paramVar) {
-                    componentDB.addVariableDependency(fileName, paramVar.id, {
-                      id: target.id,
-                      name: paramName,
-                    });
-                  }
-                }
-              }
-              // Second parameter is 'props'
-              if (params.length >= 2 && params[1]?.isIdentifier()) {
-                const paramName = params[1].node.name;
-                const paramLoc = getStartLoc(params[1].node);
-                if (paramLoc) {
-                  const paramVar = fileDb.getVariable(paramLoc);
-                  if (paramVar) {
-                    // Link props parameter to the component itself (since component ID is also used for this.props)
-                    let current: Variable | Scope | undefined = owner;
-                    while (current) {
-                      if (!isScope(current) && isComponentVariable(current)) {
-                        componentDB.addVariableDependency(
-                          fileName,
-                          paramVar.id,
-                          {
-                            id: current.id,
-                            name: paramName,
-                          },
-                        );
-                        break;
-                      }
-                      current = current.parent;
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          // Emit usage-write for each key in the setState argument
-          if (firstArg) {
-            let stateNode: t.Node | null = firstArg.node;
-            if (
-              t.isArrowFunctionExpression(stateNode) ||
-              t.isFunctionExpression(stateNode)
-            ) {
-              if (t.isObjectExpression(stateNode.body)) {
-                stateNode = stateNode.body;
-              } else if (t.isBlockStatement(stateNode.body)) {
-                const lastStatement = stateNode.body.body.at(-1);
-                if (
-                  t.isReturnStatement(lastStatement) &&
-                  lastStatement.argument
-                ) {
-                  stateNode = lastStatement.argument;
-                }
-              }
-            }
-
-            if (t.isObjectExpression(stateNode)) {
-              for (const prop of stateNode.properties) {
-                if (
-                  t.isObjectProperty(prop) &&
-                  !prop.computed &&
-                  t.isIdentifier(prop.key)
-                ) {
-                  const stateName = prop.key.name;
-                  // Resolve stateName to individual state variable
-                  let current: Variable | Scope | undefined = owner;
-                  while (current) {
-                    if (!isScope(current) && isComponentVariable(current)) {
-                      const stateId = current.var.getIdByName(stateName);
-                      if (stateId) {
-                        emitRelation(
-                          "usage-write",
-                          owner.id,
-                          stateId,
-                          getStartLoc(prop.key)!,
-                          owner,
-                          {
-                            displayLabel: stateName,
-                            hiddenIntermediate: "state-setter",
-                          },
-                        );
-                      }
-                      break;
-                    }
-                    current = current.parent;
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        emitRelation("usage-call", owner.id, target.id, loc, owner, {
-          accessPath: target.accessPath,
-          isOptional: target.isOptional,
-          isComputed: target.isComputed,
-          hiddenIntermediate: target.hiddenIntermediate,
-          displayLabel: target.accessPath?.join("."),
-        });
-      }
+    OptionalCallExpression(path) {
+      processCallLike(path);
     },
 
     NewExpression(path) {

@@ -71,10 +71,10 @@ function extractDependencies(
     }
   } else if (t.isOptionalMemberExpression(expr)) {
     extractDependencies(expr.object, name, dependency);
-  } else if (t.isTSAsExpression(expr)) {
+  } else if (t.isTSNonNullExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr)) {
     extractDependencies(expr.expression, name, dependency);
-  } else if (t.isTSNonNullExpression(expr)) {
-    extractDependencies(expr.expression, name, dependency);
+  } else if (t.isUnaryExpression(expr)) {
+    extractDependencies(expr.argument, name, dependency);
   } else {
     dependency.push({
       id: getDeterministicId(name),
