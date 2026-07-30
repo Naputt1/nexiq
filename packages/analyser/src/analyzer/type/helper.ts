@@ -599,6 +599,9 @@ function getMemberExpressionNames(
   if (t.isIdentifier(expr)) {
     return [expr.name];
   }
+  if (t.isTSNonNullExpression(expr) || t.isTSAsExpression(expr) || t.isParenthesizedExpression(expr)) {
+    return getMemberExpressionNames(expr.expression);
+  }
   if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
     if (t.isIdentifier(expr.property)) {
       const left = getMemberExpressionNames(expr.object);
@@ -681,6 +684,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
         },
       };
     }
+    case "TSNonNullExpression":
+      return getExpressionData(expr.expression);
     case "ArrayExpression": {
       const elements: PropDataType[] = [];
       for (const element of expr.elements) {

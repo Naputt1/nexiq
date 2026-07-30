@@ -73,6 +73,8 @@ function extractDependencies(
     extractDependencies(expr.object, name, dependency);
   } else if (t.isTSAsExpression(expr)) {
     extractDependencies(expr.expression, name, dependency);
+  } else if (t.isTSNonNullExpression(expr)) {
+    extractDependencies(expr.expression, name, dependency);
   } else {
     dependency.push({
       id: getDeterministicId(name),

@@ -223,6 +223,80 @@ describe("MemberExpression dependency in variable init", () => {
   });
 });
 
+describe("TSNonNullExpression (!) in JSX props", () => {
+  it("should extract dependency ref (not literal) from non-null assertion in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-nonnull-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import { useState } from "react";
+
+        interface User { name: string; }
+        const user: User | null = { name: "Alice" };
+
+        export function App() {
+          return <div data={user!.name} />;
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "nonnull-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+      if (appVar?.kind !== "component")
+        throw new Error("App should be a component");
+
+      const returnID = appVar.return;
+      expect(returnID).toBeDefined();
+      if (!returnID || typeof returnID !== "string")
+        throw new Error("App return should be JSX");
+
+      const returnVar = appVar.var[returnID];
+      if (!returnVar || returnVar.type !== "jsx")
+        throw new Error("JSX variable not found");
+
+      const rootRender: ComponentInfoRender | null = returnVar.render;
+      expect(rootRender).toBeDefined();
+      if (!rootRender) throw new Error("root render not found");
+
+      expect(rootRender.tag).toBe("div");
+
+      const dataDep = rootRender.dependencies.find((d) => d.name === "data");
+      expect(dataDep).toBeDefined();
+      if (!dataDep) throw new Error("data dependency not found");
+
+      // Should be a ref to 'user', not a literal string
+      expect(dataDep.value.type).toBe("ref");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("optional chaining (?.) in JSX props", () => {
   it("should extract dependency ref (not literal) from ?. chain in JSX prop", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-chain-"));
