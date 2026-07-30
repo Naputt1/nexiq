@@ -40,6 +40,54 @@ export interface TypeDataThis {
   type: "this";
 }
 
+export interface TypeDataIntrinsic {
+  type: "intrinsic";
+}
+
+export interface TypeDataTypeOperator {
+  type: "type-operator";
+  operator: string;
+  typeAnnotation: TypeData;
+}
+
+export interface TypeDataConstructor {
+  type: "constructor";
+  abstract?: boolean;
+  params: TypeDataParamFunction[];
+  parameters: TypeDataFunctionParameter[];
+  return: TypeData;
+}
+
+export interface TypeDataConditional {
+  type: "conditional-type";
+  checkType: TypeData;
+  extendsType: TypeData;
+  trueType: TypeData;
+  falseType: TypeData;
+}
+
+export interface TypeDataMapped {
+  type: "mapped-type";
+  typeParameter: TypeDataParamFunction;
+  nameType?: TypeData;
+  typeAnnotation?: TypeData;
+  readonly?: boolean | "+" | "-";
+  optional?: boolean | "+" | "-";
+}
+
+export interface TypeDataInfer {
+  type: "infer-type";
+  name: string;
+  constraint?: TypeData;
+}
+
+export interface TypeDataPredicate {
+  type: "type-predicate";
+  parameterName: string | { type: "this" };
+  asserts?: boolean;
+  typeAnnotation?: TypeData;
+}
+
 export interface TypeDataVoid {
   type: "void";
 }
@@ -159,6 +207,7 @@ export type TypeDataPrimitive =
   | TypeDataObject
   | TypeDataSymbol
   | TypeDataThis
+  | TypeDataIntrinsic
   | TypeDataVoid
   | TypeDataUnknown
   | TypeDataNever
@@ -288,4 +337,10 @@ export type TypeData =
   | TypeDataTypeBodyIntersection
   | TypeDataTypeBodyParathesis
   | TypeDataLiteralArray
-  | TypeDataLiteralObject;
+  | TypeDataLiteralObject
+  | TypeDataTypeOperator
+  | TypeDataConstructor
+  | TypeDataConditional
+  | TypeDataMapped
+  | TypeDataInfer
+  | TypeDataPredicate;

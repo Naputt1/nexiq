@@ -71,7 +71,7 @@ function extractDependencies(
     }
   } else if (t.isOptionalMemberExpression(expr)) {
     extractDependencies(expr.object, name, dependency);
-  } else if (t.isTSNonNullExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr)) {
+  } else if (t.isTSNonNullExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr) || t.isTSTypeAssertion(expr)) {
     extractDependencies(expr.expression, name, dependency);
   } else if (t.isUnaryExpression(expr)) {
     extractDependencies(expr.argument, name, dependency);

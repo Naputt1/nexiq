@@ -15,19 +15,29 @@ import type {
   Memo,
   TypeData,
   TypeDataArray,
+  TypeDataConditional,
+  TypeDataConstructor,
   TypeDataDeclare,
   TypeDataFunction,
   TypeDataImport,
   TypeDataIndexAccess,
+  TypeDataInfer,
+  TypeDataIntrinsic,
   TypeDataLiteralType,
   TypeDataLiteralTypeLiteral,
+  TypeDataMapped,
+  TypeDataObject,
+  TypeDataPredicate,
   TypeDataQuery,
   TypeDataRef,
+  TypeDataSymbol,
+  TypeDataThis,
   TypeDataTuple,
   TypeDataTypeBodyIntersection,
   TypeDataTypeBodyLiteral,
   TypeDataTypeBodyParathesis,
   TypeDataTypeBodyUnion,
+  TypeDataTypeOperator,
   VariableLoc,
   VariableName,
   ComponentFileVarHook,
@@ -104,6 +114,13 @@ type TypeDataHandlerMap = {
   object: TypeDataObject;
   symbol: TypeDataSymbol;
   this: TypeDataThis;
+  intrinsic: TypeDataIntrinsic;
+  "type-operator": TypeDataTypeOperator;
+  constructor: TypeDataConstructor;
+  "type-predicate": TypeDataPredicate;
+  "conditional-type": TypeDataConditional;
+  "infer-type": TypeDataInfer;
+  "mapped-type": TypeDataMapped;
 };
 
 type TypeDataHandler<T> = (
@@ -2001,6 +2018,57 @@ export class FileDB {
     object: (_db, _td, _file, _params) => true,
     symbol: (_db, _td, _file, _params) => true,
     this: (_db, _td, _file, _params) => true,
+    intrinsic: (_db, _td, _file, _params) => true,
+    "type-operator": (db, td: TypeDataTypeOperator, file, params) =>
+      db.updateTypeDataID(td.typeAnnotation, file, params),
+    constructor: (db, td: TypeDataConstructor, file, params) => {
+      for (const p of td.parameters) {
+        if (p.typeData && !db.updateTypeDataID(p.typeData, file, params))
+          return false;
+      }
+      for (const param of td.params) {
+        if (
+          param.constraint &&
+          !db.updateTypeDataID(param.constraint, file, params)
+        )
+          return false;
+        if (param.default && !db.updateTypeDataID(param.default, file, params))
+          return false;
+      }
+      return db.updateTypeDataID(td.return, file, params);
+    },
+    "type-predicate": (db, td: TypeDataPredicate, file, params) => {
+      if (td.typeAnnotation && !db.updateTypeDataID(td.typeAnnotation, file, params))
+        return false;
+      return true;
+    },
+    "conditional-type": (db, td: TypeDataConditional, file, params) =>
+      db.updateTypeDataID(td.checkType, file, params) &&
+      db.updateTypeDataID(td.extendsType, file, params) &&
+      db.updateTypeDataID(td.trueType, file, params) &&
+      db.updateTypeDataID(td.falseType, file, params),
+    "infer-type": (db, td: TypeDataInfer, file, params) => {
+      if (td.constraint && !db.updateTypeDataID(td.constraint, file, params))
+        return false;
+      return true;
+    },
+    "mapped-type": (db, td: TypeDataMapped, file, params) => {
+      if (
+        td.typeParameter.constraint &&
+        !db.updateTypeDataID(td.typeParameter.constraint, file, params)
+      )
+        return false;
+      if (
+        td.typeParameter.default &&
+        !db.updateTypeDataID(td.typeParameter.default, file, params)
+      )
+        return false;
+      if (td.nameType && !db.updateTypeDataID(td.nameType, file, params))
+        return false;
+      if (td.typeAnnotation && !db.updateTypeDataID(td.typeAnnotation, file, params))
+        return false;
+      return true;
+    },
   };
 
   private hasTypeDataHandler(
@@ -2069,6 +2137,45 @@ export class FileDB {
       return FileDB.TYPE_DATA_HANDLERS.symbol(this, typeData, file, params);
     } else if (typeData.type === "this") {
       return FileDB.TYPE_DATA_HANDLERS.this(this, typeData, file, params);
+    } else if (typeData.type === "intrinsic") {
+      return FileDB.TYPE_DATA_HANDLERS.intrinsic(this, typeData, file, params);
+    } else if (typeData.type === "type-operator") {
+      return FileDB.TYPE_DATA_HANDLERS["type-operator"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "constructor") {
+      return FileDB.TYPE_DATA_HANDLERS.constructor(this, typeData, file, params);
+    } else if (typeData.type === "type-predicate") {
+      return FileDB.TYPE_DATA_HANDLERS["type-predicate"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "conditional-type") {
+      return FileDB.TYPE_DATA_HANDLERS["conditional-type"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "infer-type") {
+      return FileDB.TYPE_DATA_HANDLERS["infer-type"](
+        this,
+        typeData,
+        file,
+        params,
+      );
+    } else if (typeData.type === "mapped-type") {
+      return FileDB.TYPE_DATA_HANDLERS["mapped-type"](
+        this,
+        typeData,
+        file,
+        params,
+      );
     }
     return true;
   }

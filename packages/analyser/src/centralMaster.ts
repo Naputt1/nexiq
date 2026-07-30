@@ -893,6 +893,38 @@ function rewriteTypeDataRefTargets(
     case "object":
     case "symbol":
     case "this":
+    case "intrinsic":
+      return;
+    case "type-operator":
+      rewriteTypeDataRefTargets(typeData.typeAnnotation, context);
+      return;
+    case "constructor":
+      for (const parameter of typeData.parameters) {
+        rewriteTypeDataRefTargets(parameter.typeData, context);
+      }
+      for (const param of typeData.params) {
+        rewriteTypeDataRefTargets(param.constraint, context);
+        rewriteTypeDataRefTargets(param.default, context);
+      }
+      rewriteTypeDataRefTargets(typeData.return, context);
+      return;
+    case "type-predicate":
+      rewriteTypeDataRefTargets(typeData.typeAnnotation, context);
+      return;
+    case "conditional-type":
+      rewriteTypeDataRefTargets(typeData.checkType, context);
+      rewriteTypeDataRefTargets(typeData.extendsType, context);
+      rewriteTypeDataRefTargets(typeData.trueType, context);
+      rewriteTypeDataRefTargets(typeData.falseType, context);
+      return;
+    case "infer-type":
+      rewriteTypeDataRefTargets(typeData.constraint, context);
+      return;
+    case "mapped-type":
+      rewriteTypeDataRefTargets(typeData.typeParameter.constraint, context);
+      rewriteTypeDataRefTargets(typeData.typeParameter.default, context);
+      rewriteTypeDataRefTargets(typeData.nameType, context);
+      rewriteTypeDataRefTargets(typeData.typeAnnotation, context);
       return;
     default:
       return;

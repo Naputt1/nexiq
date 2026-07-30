@@ -1,15 +1,21 @@
 import type {
   PropDataType,
   TypeData,
+  TypeDataConstructor,
+  TypeDataConditional,
   TypeDataFunction,
   TypeDataFunctionParameter,
   TypeDataImport,
+  TypeDataInfer,
   TypeDataLiteralBody,
   TypeDataLiteralBodyMethod,
   TypeDataLiteralBodyProperty,
   TypeDataLiteralTypeLiteral,
+  TypeDataMapped,
+  TypeDataPredicate,
   TypeDataRef,
   TypeDataTuple,
+  TypeDataTypeOperator,
 } from "@nexiq/shared";
 import * as t from "@babel/types";
 import assert from "assert";
@@ -623,19 +629,138 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
 
       return typeData;
     }
-    case "TSIntrinsicKeyword":
-    case "TSConstructorType":
-    case "TSTypePredicate":
-    case "TSConditionalType":
-    case "TSInferType":
-    case "TSTypeOperator":
-    case "TSMappedType":
-    case "TSTemplateLiteralType":
-      return { type: "any" };
-    default:
+    case "TSTemplateLiteralType": {
       return {
-        type: "any",
+        type: "literal-type",
+        literal: {
+          type: "template",
+          quasis: tsType.quasis.map((q: t.TemplateElement) => q.value.raw),
+          expression: tsType.types.map((t: t.TSType) => getType(t)),
+        },
       };
+    }
+    case "TSIntrinsicKeyword":
+      return { type: "intrinsic" };
+    case "TSTypeOperator": {
+      return {
+        type: "type-operator",
+        operator: tsType.operator,
+        typeAnnotation: getType(tsType.typeAnnotation),
+      };
+    }
+    case "TSConstructorType": {
+      assert(tsType.typeAnnotation != null);
+
+      const typeData: TypeDataConstructor = {
+        type: "constructor",
+        params: [],
+        parameters: [],
+        return: getType(tsType.typeAnnotation),
+      };
+
+      if (tsType.abstract) {
+        typeData.abstract = true;
+      }
+
+      if (tsType.typeParameters) {
+        typeData.params = [];
+        for (const param of tsType.typeParameters.params) {
+          typeData.params.push(getTypeParameter(param));
+        }
+      }
+
+      if (tsType.parameters) {
+        typeData.parameters = [];
+        for (const param of tsType.parameters) {
+          const parameter: TypeDataFunctionParameter = {
+            param: getFuncParam(param),
+          };
+
+          if (param.typeAnnotation) {
+            assert(t.isTSTypeAnnotation(param.typeAnnotation));
+            parameter.typeData = getType(param.typeAnnotation);
+          }
+
+          if ("optional" in param && param.optional) {
+            parameter.optional = true;
+          }
+
+          typeData.parameters.push(parameter);
+        }
+      }
+
+      return typeData;
+    }
+    case "TSTypePredicate": {
+      let parameterName: string | { type: "this" };
+      if (tsType.parameterName.type === "Identifier") {
+        parameterName = tsType.parameterName.name;
+      } else {
+        parameterName = { type: "this" };
+      }
+
+      const typeData: TypeDataPredicate = {
+        type: "type-predicate",
+        parameterName,
+      };
+
+      if (tsType.asserts) {
+        typeData.asserts = true;
+      }
+
+      if (tsType.typeAnnotation) {
+        typeData.typeAnnotation = getType(tsType.typeAnnotation);
+      }
+
+      return typeData;
+    }
+    case "TSConditionalType": {
+      return {
+        type: "conditional-type",
+        checkType: getType(tsType.checkType),
+        extendsType: getType(tsType.extendsType),
+        trueType: getType(tsType.trueType),
+        falseType: getType(tsType.falseType),
+      };
+    }
+    case "TSInferType": {
+      const typeData: TypeDataInfer = {
+        type: "infer-type",
+        name: tsType.typeParameter.name,
+      };
+
+      if (tsType.typeParameter.constraint) {
+        typeData.constraint = getType(tsType.typeParameter.constraint);
+      }
+
+      return typeData;
+    }
+    case "TSMappedType": {
+      const typeData: TypeDataMapped = {
+        type: "mapped-type",
+        typeParameter: getTypeParameter(tsType.typeParameter),
+      };
+
+      if (tsType.readonly != null) {
+        typeData.readonly = tsType.readonly;
+      }
+
+      if (tsType.optional != null) {
+        typeData.optional = tsType.optional;
+      }
+
+      if (tsType.nameType) {
+        typeData.nameType = getType(tsType.nameType);
+      }
+
+      if (tsType.typeAnnotation) {
+        typeData.typeAnnotation = getType(tsType.typeAnnotation);
+      }
+
+      return typeData;
+    }
+    default:
+      return { type: "any" };
   }
 }
 
@@ -645,7 +770,7 @@ function getMemberExpressionNames(
   if (t.isIdentifier(expr)) {
     return [expr.name];
   }
-  if (t.isTSNonNullExpression(expr) || t.isTSAsExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isParenthesizedExpression(expr)) {
+  if (t.isTSNonNullExpression(expr) || t.isTSAsExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isParenthesizedExpression(expr) || t.isTSInstantiationExpression(expr) || t.isTSTypeAssertion(expr)) {
     return getMemberExpressionNames(expr.expression);
   }
   if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
@@ -737,6 +862,8 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
     }
     case "TSNonNullExpression":
     case "TSSatisfiesExpression":
+    case "TSInstantiationExpression":
+    case "TSTypeAssertion":
       return getExpressionData(expr.expression);
     case "UnaryExpression":
       return getExpressionData(expr.argument);

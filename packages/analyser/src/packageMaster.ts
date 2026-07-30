@@ -40,6 +40,7 @@ import TSImportEqualsDeclaration from "./analyzer/TSImportEqualsDeclaration.ts";
 import TSExportAssignment from "./analyzer/TSExportAssignment.ts";
 import TSNamespaceExportDeclaration from "./analyzer/TSNamespaceExportDeclaration.ts";
 import TSDeclareFunction from "./analyzer/TSDeclareFunction.ts";
+import TSDeclareMethod from "./analyzer/TSDeclareMethod.ts";
 import MemberExpression from "./analyzer/memberExpression.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
@@ -483,6 +484,7 @@ export class PackageMaster {
       TSImportEqualsDeclaration: TSImportEqualsDeclaration(this.componentDB, fileName),
       TSExportAssignment: TSExportAssignment(this.componentDB, fileName),
       TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(this.componentDB, fileName),
+      TSDeclareMethod: TSDeclareMethod(this.componentDB, fileName),
       MemberExpression: MemberExpression(this.componentDB, fileName),
       AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
       ...BlockScope(this.componentDB, fileName),
