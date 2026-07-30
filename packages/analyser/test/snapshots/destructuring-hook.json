@@ -256,7 +256,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/Other.tsx",
-          "hash": "ecab1dfce7329e53",
+          "hash": "2a9d80856c6b5d84",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -279,7 +279,12 @@
               "type": "jsx",
               "file": "/src/Other.tsx",
               "hash": "75d9cfc472dbce59",
-              "dependencies": {},
+              "dependencies": {
+                "6b1c7ef67821ce66": {
+                  "id": "6b1c7ef67821ce66",
+                  "name": "loading"
+                }
+              },
               "loc": {
                 "line": 1,
                 "column": 60
@@ -1575,7 +1580,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "c8459f64b7deae62",
+          "hash": "31c91a7390af7b74",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -1598,7 +1603,12 @@
               "type": "jsx",
               "file": "/src/App.tsx",
               "hash": "c4ff15dd436d6a8",
-              "dependencies": {},
+              "dependencies": {
+                "6b1c7ef67821ce66": {
+                  "id": "6b1c7ef67821ce66",
+                  "name": "loading"
+                }
+              },
               "loc": {
                 "line": 51,
                 "column": 2
@@ -2133,6 +2143,11 @@
       "label": "render"
     },
     {
+      "from": "14d39981fe402056",
+      "to": "6b1c7ef67821ce66",
+      "label": "hook"
+    },
+    {
       "from": "9ad56d5fff6d69eb",
       "to": "e4b7943fd57d5d1e",
       "label": "hook"
@@ -2256,6 +2271,11 @@
       "from": "",
       "to": "bdfbc1ef26687ffa",
       "label": "render"
+    },
+    {
+      "from": "c71559ab0ec1a29a",
+      "to": "6b1c7ef67821ce66",
+      "label": "hook"
     }
   ],
   "resolve": []

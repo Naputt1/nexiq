@@ -951,7 +951,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/SimpleClass.tsx",
-          "hash": "a38ea0edd8fca64c",
+          "hash": "1ee346e79158742e",
           "dependencies": {},
           "loc": {
             "line": 11,
@@ -1008,13 +1008,21 @@
               "kind": "state",
               "type": "data",
               "file": "/src/SimpleClass.tsx",
-              "hash": "aa7be8481de6b398",
+              "hash": "27181c9393a60871",
               "dependencies": {},
               "loc": {
                 "line": 14,
                 "column": 9
               },
-              "setter": "this.setState"
+              "setter": "this.setState",
+              "stateType": {
+                "type": "ref",
+                "refType": "qualified",
+                "names": [
+                  "props",
+                  "initialCount"
+                ]
+              }
             },
             "1a3b38e2da4e7e96": {
               "id": "1a3b38e2da4e7e96",
@@ -2054,7 +2062,7 @@
           "kind": "component",
           "type": "class",
           "file": "/src/NestedRender.tsx",
-          "hash": "4c40ebdddd50b675",
+          "hash": "3424f45588a6b7df",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -2282,7 +2290,7 @@
               "kind": "method",
               "type": "function",
               "file": "/src/NestedRender.tsx",
-              "hash": "532a765a42d698a9",
+              "hash": "37bf64522b3917d1",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -2380,7 +2388,7 @@
                   "kind": "normal",
                   "type": "function",
                   "file": "/src/NestedRender.tsx",
-                  "hash": "86a08f92c7c16ea7",
+                  "hash": "7c316a7ebd4a10fa",
                   "declarationKind": "const",
                   "dependencies": {},
                   "loc": {
@@ -2396,6 +2404,13 @@
                     "end": {
                       "line": 21,
                       "column": 54
+                    }
+                  },
+                  "return": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "this.renderItem(item)"
                     }
                   }
                 }

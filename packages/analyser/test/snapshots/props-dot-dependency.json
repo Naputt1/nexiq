@@ -334,7 +334,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "df472cb08ebc23c4",
+          "hash": "4ac8da41f1ae77a9",
           "dependencies": {},
           "loc": {
             "line": 3,
@@ -466,7 +466,12 @@
               "type": "jsx",
               "file": "/src/App.tsx",
               "hash": "ead7ca256f69b7c9",
-              "dependencies": {},
+              "dependencies": {
+                "ea0bfe2446268ce8": {
+                  "id": "ea0bfe2446268ce8",
+                  "name": "expanded"
+                }
+              },
               "loc": {
                 "line": 18,
                 "column": 4
@@ -771,6 +776,11 @@
       "from": "",
       "to": "f1feac25b9f6456e",
       "label": "render"
+    },
+    {
+      "from": "4868cad7295c6f83",
+      "to": "ea0bfe2446268ce8",
+      "label": "hook"
     }
   ],
   "resolve": []

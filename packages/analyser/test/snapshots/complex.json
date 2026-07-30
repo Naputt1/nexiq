@@ -1100,7 +1100,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Hooks.ts",
-          "hash": "4ebc36244b569655",
+          "hash": "723810f59dd2ba58",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -1188,7 +1188,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/Hooks.ts",
-              "hash": "8ba68783850afd76",
+              "hash": "261c20946972a2ea",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -1204,6 +1204,13 @@
                 "end": {
                   "line": 28,
                   "column": 71
+                }
+              },
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "document.removeEventListener(\"mousedown\", onMouseDown)"
                 }
               }
             }
@@ -3081,7 +3088,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "beb672eca4787079",
+          "hash": "e87f741ee323448d",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3100,6 +3107,13 @@
             }
           },
           "async": false,
+          "return": {
+            "type": "literal-type",
+            "literal": {
+              "type": "string",
+              "value": "useDeep3()"
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],
@@ -3120,7 +3134,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/Deep.tsx",
-          "hash": "869635a3bec648d9",
+          "hash": "e73f9df3a2fc03b8",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -3139,6 +3153,13 @@
             }
           },
           "async": false,
+          "return": {
+            "type": "literal-type",
+            "literal": {
+              "type": "string",
+              "value": "useDeep2()"
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

@@ -510,7 +510,7 @@
           "kind": "normal",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "6026aa2c9b0accf",
+          "hash": "7de6485724a3fbd1",
           "declarationKind": "const",
           "dependencies": {
             "fed6a0905a629067": {
@@ -537,7 +537,7 @@
               "kind": "normal",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "1764692d8fb945bb",
+              "hash": "42626fc0775d2ee2",
               "declarationKind": "const",
               "dependencies": {},
               "loc": {
@@ -553,6 +553,13 @@
                 "end": {
                   "line": 11,
                   "column": 46
+                }
+              },
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "import(\"./Other\")"
                 }
               }
             }
@@ -789,7 +796,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "6e6d6dc69827ea18",
+          "hash": "42039f1cf1125bd4",
           "dependencies": {},
           "loc": {
             "line": 20,
@@ -890,7 +897,12 @@
               "file": "/src/App.tsx",
               "hash": "5060b1ffe089fe96",
               "declarationKind": "const",
-              "dependencies": {},
+              "dependencies": {
+                "319236a0c2cc5206": {
+                  "id": "319236a0c2cc5206",
+                  "name": "save"
+                }
+              },
               "loc": {
                 "line": 23,
                 "column": 8
@@ -1269,6 +1281,11 @@
       "from": "311c554b828f67a5",
       "to": "c2b3d2131ad3e808",
       "label": "render"
+    },
+    {
+      "from": "d7c2637920d9cd67",
+      "to": "319236a0c2cc5206",
+      "label": "hook"
     },
     {
       "from": "c2b3d2131ad3e808",

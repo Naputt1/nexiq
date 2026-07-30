@@ -85,6 +85,33 @@ function extractDependencies(
     }
   } else if (t.isAwaitExpression(expr)) {
     extractDependencies(expr.argument, name, dependency);
+  } else if (t.isTaggedTemplateExpression(expr)) {
+    for (const ex of expr.quasi.expressions) {
+      if (t.isExpression(ex)) extractDependencies(ex, name, dependency);
+    }
+  } else if (t.isMemberExpression(expr)) {
+    extractDependencies(expr.object, name, dependency);
+  } else if (t.isThisExpression(expr)) {
+    dependency.push({
+      id: getDeterministicId("this"),
+      name: "this",
+      value: { type: "this" },
+    });
+  } else if (t.isYieldExpression(expr)) {
+    if (expr.argument && t.isExpression(expr.argument)) {
+      extractDependencies(expr.argument, name, dependency);
+    }
+  } else if (t.isMetaProperty(expr)) {
+    dependency.push({
+      id: getDeterministicId(`${expr.meta.name}.${expr.property.name}`),
+      name: `${expr.meta.name}.${expr.property.name}`,
+      value: {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
+      },
+    });
+  } else if (t.isParenthesizedExpression(expr)) {
+    extractDependencies(expr.expression, name, dependency);
   } else {
     dependency.push({
       id: getDeterministicId(name),

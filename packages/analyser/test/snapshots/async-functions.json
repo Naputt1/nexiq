@@ -374,7 +374,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "f6695ffcd49c6d2",
+          "hash": "f59793da67cd5656",
           "dependencies": {},
           "loc": {
             "line": 9,
@@ -392,6 +392,13 @@
             }
           },
           "async": true,
+          "return": {
+            "type": "literal-type",
+            "literal": {
+              "type": "string",
+              "value": "Promise.resolve(42)"
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],
@@ -453,7 +460,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "445f3318a7e13842",
+          "hash": "b8911405a1abfebc",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -514,7 +521,7 @@
               "kind": "memo",
               "type": "function",
               "file": "/src/App.tsx",
-              "hash": "c4a037748fc0d908",
+              "hash": "6c860d2c15ab2662",
               "dependencies": {},
               "loc": {
                 "line": 25,
@@ -532,6 +539,13 @@
                 }
               },
               "async": true,
+              "return": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "Promise.resolve(\"memo\")"
+                }
+              },
               "states": [],
               "refs": [],
               "props": [],

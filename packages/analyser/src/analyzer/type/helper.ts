@@ -316,6 +316,74 @@ export function getMember(member: t.TSTypeElement): TypeDataLiteralBody | null {
     }
 
     return body;
+  } else if (member.type === "TSCallSignatureDeclaration") {
+    assert(member.typeAnnotation?.type === "TSTypeAnnotation");
+    const body: TypeDataLiteralBodyMethod = {
+      signatureType: "method",
+      name: "",
+      params: [],
+      parameters: [],
+      return: getType(member.typeAnnotation.typeAnnotation),
+    };
+
+    if (member.typeParameters) {
+      for (const param of member.typeParameters.params) {
+        body.params.push(getTypeParameter(param));
+      }
+    }
+
+    for (const param of member.parameters) {
+      const parameter: TypeDataFunctionParameter = {
+        param: getFuncParam(param),
+      };
+
+      if (param.typeAnnotation) {
+        assert(t.isTSTypeAnnotation(param.typeAnnotation));
+        parameter.typeData = getType(param.typeAnnotation);
+      }
+
+      if ("optional" in param && param.optional) {
+        parameter.optional = true;
+      }
+
+      body.parameters.push(parameter);
+    }
+
+    return body;
+  } else if (member.type === "TSConstructSignatureDeclaration") {
+    assert(member.typeAnnotation?.type === "TSTypeAnnotation");
+    const body: TypeDataLiteralBodyMethod = {
+      signatureType: "method",
+      name: "",
+      params: [],
+      parameters: [],
+      return: getType(member.typeAnnotation.typeAnnotation),
+    };
+
+    if (member.typeParameters) {
+      for (const param of member.typeParameters.params) {
+        body.params.push(getTypeParameter(param));
+      }
+    }
+
+    for (const param of member.parameters) {
+      const parameter: TypeDataFunctionParameter = {
+        param: getFuncParam(param),
+      };
+
+      if (param.typeAnnotation) {
+        assert(t.isTSTypeAnnotation(param.typeAnnotation));
+        parameter.typeData = getType(param.typeAnnotation);
+      }
+
+      if ("optional" in param && param.optional) {
+        parameter.optional = true;
+      }
+
+      body.parameters.push(parameter);
+    }
+
+    return body;
   }
 
   return null;
@@ -770,14 +838,35 @@ function getMemberExpressionNames(
   if (t.isIdentifier(expr)) {
     return [expr.name];
   }
+  if (t.isThisExpression(expr)) {
+    return ["this"];
+  }
+  if (t.isSuper(expr)) {
+    return ["super"];
+  }
   if (t.isTSNonNullExpression(expr) || t.isTSAsExpression(expr) || t.isTSSatisfiesExpression(expr) || t.isParenthesizedExpression(expr) || t.isTSInstantiationExpression(expr) || t.isTSTypeAssertion(expr)) {
     return getMemberExpressionNames(expr.expression);
+  }
+  if (t.isCallExpression(expr) || t.isOptionalCallExpression(expr)) {
+    if (t.isIdentifier(expr.callee)) {
+      return [expr.callee.name];
+    }
+    if (t.isMemberExpression(expr.callee)) {
+      return getMemberExpressionNames(expr.callee);
+    }
+    return null;
   }
   if (t.isMemberExpression(expr) || t.isOptionalMemberExpression(expr)) {
     if (t.isIdentifier(expr.property)) {
       const left = getMemberExpressionNames(expr.object);
       if (left) {
         return [...left, expr.property.name];
+      }
+    }
+    if (t.isPrivateName(expr.property)) {
+      const left = getMemberExpressionNames(expr.object);
+      if (left) {
+        return [...left, `#${expr.property.id.name}`];
       }
     }
   }
@@ -867,6 +956,20 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       return getExpressionData(expr.expression);
     case "UnaryExpression":
       return getExpressionData(expr.argument);
+    case "TemplateLiteral": {
+      const elements: PropDataType[] = [];
+      for (const ex of expr.expressions) {
+        if (t.isExpression(ex)) {
+          const data = getExpressionData(ex);
+          if (data) {
+            elements.push(data);
+          }
+        }
+      }
+      if (elements.length === 1) return elements[0];
+      if (elements.length > 1) return { type: "literal-array", elements };
+      return { type: "literal-type", literal: { type: "string", value: "" } };
+    }
     case "ArrayExpression": {
       const elements: PropDataType[] = [];
       for (const element of expr.elements) {
@@ -875,11 +978,62 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
           if (data) {
             elements.push(data);
           }
+        } else if (t.isSpreadElement(element) && t.isExpression(element.argument)) {
+          const data = getExpressionData(element.argument);
+          if (data) {
+            elements.push(data);
+          }
         }
       }
       return {
         type: "literal-array",
         elements,
+      };
+    }
+    case "ParenthesizedExpression":
+      return getExpressionData(expr.expression);
+    case "ThisExpression":
+      return { type: "this" };
+    case "ConditionalExpression": {
+      const data = getExpressionData(expr.test);
+      const consequentData = getExpressionData(expr.consequent);
+      const alternateData = getExpressionData(expr.alternate);
+      return data || consequentData || alternateData || {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
+      };
+    }
+    case "LogicalExpression": {
+      const leftData = getExpressionData(expr.left);
+      const rightData = getExpressionData(expr.right);
+      return leftData || rightData || {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
+      };
+    }
+    case "CallExpression":
+    case "OptionalCallExpression": {
+      return {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
+      };
+    }
+    case "AssignmentExpression":
+      return getExpressionData(expr.right);
+    case "SequenceExpression":
+      return getExpressionData(
+        expr.expressions[expr.expressions.length - 1]!,
+      );
+    case "AwaitExpression":
+      return getExpressionData(expr.argument);
+    case "YieldExpression":
+      if (expr.argument) return getExpressionData(expr.argument);
+      return { type: "undefined" };
+    case "MetaProperty":
+    case "ImportExpression": {
+      return {
+        type: "literal-type",
+        literal: { type: "string", value: generateFn(expr).code },
       };
     }
     case "ObjectExpression": {

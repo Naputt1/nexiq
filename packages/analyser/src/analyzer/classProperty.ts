@@ -9,7 +9,7 @@ import { isClassComponentVariable } from "../db/variable/type.ts";
 export default function ClassProperty(
   componentDB: ComponentDB,
   fileName: string,
-): traverse.VisitNode<traverse.Node, t.ClassProperty | t.ClassPrivateProperty> {
+): traverse.VisitNode<traverse.Node, t.ClassProperty | t.ClassPrivateProperty | t.ClassAccessorProperty> {
   return {
     enter(nodePath) {
       const node = nodePath.node;

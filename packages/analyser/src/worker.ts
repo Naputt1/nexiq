@@ -91,6 +91,7 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     ClassPrivateMethod: ClassMethod(componentDB, fileName),
     ClassProperty: ClassProperty(componentDB, fileName),
     ClassPrivateProperty: ClassProperty(componentDB, fileName),
+    ClassAccessorProperty: ClassProperty(componentDB, fileName),
     VariableDeclarator: VariableDeclarator(componentDB, fileName),
     ReturnStatement: ReturnStatement(componentDB, fileName),
     ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),

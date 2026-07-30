@@ -110,6 +110,41 @@ export default function VariableDeclarator(
       Object.assign(dependencies, extractDependencies(init.argument));
     } else if (init?.type === "TSNonNullExpression") {
       Object.assign(dependencies, extractDependencies(init.expression));
+    } else if (init?.type === "TSAsExpression") {
+      Object.assign(dependencies, extractDependencies(init.expression));
+    } else if (init?.type === "TSTypeAssertion") {
+      Object.assign(dependencies, extractDependencies(init.expression));
+    } else if (init?.type === "TSInstantiationExpression") {
+      Object.assign(dependencies, extractDependencies(init.expression));
+    } else if (init?.type === "TaggedTemplateExpression") {
+      for (const ex of init.quasi.expressions) {
+        Object.assign(dependencies, extractDependencies(ex as t.Expression));
+      }
+    } else if (init?.type === "SequenceExpression") {
+      for (const ex of init.expressions) {
+        Object.assign(dependencies, extractDependencies(ex));
+      }
+    } else if (init?.type === "AwaitExpression") {
+      Object.assign(dependencies, extractDependencies(init.argument));
+    } else if (init?.type === "AssignmentExpression") {
+      Object.assign(dependencies, extractDependencies(init.right));
+    } else if (init?.type === "UpdateExpression") {
+      Object.assign(dependencies, extractDependencies(init.argument));
+    } else if (init?.type === "ParenthesizedExpression") {
+      Object.assign(dependencies, extractDependencies(init.expression));
+    } else if (init?.type === "ThisExpression") {
+      // this is a keyword reference, no dependencies to extract
+    } else if (init?.type === "YieldExpression") {
+      if (init.argument) {
+        Object.assign(dependencies, extractDependencies(init.argument));
+      }
+    } else if (init?.type === "MetaProperty") {
+      // new.target / import.meta — no dependencies
+    } else if (init?.type === "OptionalCallExpression") {
+      if (init.callee.type === "Identifier") {
+        const id = getDeterministicId(init.callee.name);
+        dependencies[id] = { id, name: init.callee.name };
+      }
     }
     return dependencies;
   };
@@ -728,25 +763,25 @@ export default function VariableDeclarator(
               declarationKind,
             );
           }
-        } else {
-          // Normal data variable not in Program block
-          const dependencies = extractDependencies(init);
-          currentId = componentDB.addVariable(
-            fileName,
-            {
-              name: pattern,
-              dependencies,
-              type: "data",
-              loc,
-              parentId: pParentId,
-            } as Omit<
-              ComponentFileVarNormalData,
-              "kind" | "file" | "id" | "var" | "hash"
-            >,
-            "normal",
-            declarationKind,
-          );
-        }
+          } else {
+            // Normal data variable not in Program block
+            const dependencies = extractDependencies(init);
+            currentId = componentDB.addVariable(
+              fileName,
+              {
+                name: pattern,
+                dependencies,
+                type: "data",
+                loc,
+                parentId: pParentId,
+              } as Omit<
+                ComponentFileVarNormalData,
+                "kind" | "file" | "id" | "var" | "hash"
+              >,
+              "normal",
+              declarationKind,
+            );
+          }
       } else if (t.isObjectPattern(pId) || t.isArrayPattern(pId)) {
         const dependencies = extractDependencies(init);
 

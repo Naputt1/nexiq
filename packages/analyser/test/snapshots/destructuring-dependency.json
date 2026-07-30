@@ -271,7 +271,7 @@
           "kind": "hook",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "60b1200262ce6ecb",
+          "hash": "c1f3deac4549ba9a",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -302,6 +302,13 @@
                 "literal": {
                   "type": "number",
                   "value": 0
+                }
+              },
+              "last_reply_at": {
+                "type": "literal-type",
+                "literal": {
+                  "type": "string",
+                  "value": "Date.now()"
                 }
               },
               "is_following": {

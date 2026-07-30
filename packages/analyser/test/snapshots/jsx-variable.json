@@ -477,7 +477,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "d3e349d2e272ef42",
+          "hash": "b40db9e96befa3d5",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -854,7 +854,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "1a57cfcf58b767ed",
+              "hash": "c6c65b08cd2f510b",
               "dependencies": {
                 "eaf06c6480b2cd11": {
                   "id": "eaf06c6480b2cd11",
@@ -1002,18 +1002,7 @@
                                   "type": "literal-type",
                                   "literal": {
                                     "type": "string",
-                                    "value": "active"
-                                  }
-                                }
-                              },
-                              {
-                                "id": "51db861cceddb843",
-                                "name": "className",
-                                "value": {
-                                  "type": "literal-type",
-                                  "literal": {
-                                    "type": "string",
-                                    "value": ""
+                                    "value": "x > 0"
                                   }
                                 }
                               }

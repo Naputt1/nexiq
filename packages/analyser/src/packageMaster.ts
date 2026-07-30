@@ -461,6 +461,7 @@ export class PackageMaster {
       ClassPrivateMethod: ClassMethod(this.componentDB, fileName),
       ClassProperty: ClassProperty(this.componentDB, fileName),
       ClassPrivateProperty: ClassProperty(this.componentDB, fileName),
+      ClassAccessorProperty: ClassProperty(this.componentDB, fileName),
       VariableDeclarator: VariableDeclarator(this.componentDB, fileName),
       ReturnStatement: ReturnStatement(this.componentDB, fileName),
       ArrowFunctionExpression: ArrowFunctionExpression(

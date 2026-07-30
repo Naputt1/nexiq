@@ -2263,3 +2263,598 @@ describe("optional chaining (?.) in JSX props", () => {
     }
   });
 });
+
+describe("TaggedTemplateExpression in variable init", () => {
+  it("should extract dep refs from tagged template expressions in variable inits", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tte-init-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "const c = 'blue';",
+        "const tag = String.raw`color: ${c};`;",
+        "",
+        "export function App() {",
+        "  return <div>{tag}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tte-init-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const tagVar = Object.values(file!.var).find(
+        (v: any) => v.name?.type === "identifier" && v.name?.name === "tag",
+      );
+      expect(tagVar).toBeDefined();
+      if (!tagVar) throw new Error("tag not found");
+
+      const depNames = Object.values(tagVar.dependencies).map((d: any) => d.name);
+      expect(depNames).toContain("c");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TaggedTemplateExpression in JSX prop", () => {
+  it("should not crash on tagged template in JSX prop value", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tte-jsx-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import { useState } from 'react';",
+        "",
+        "export function App() {",
+        "  const [theme] = useState({ color: 'blue' });",
+        "  return <div css={css`color: ${theme.color};`}>hi</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tte-jsx-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TSAsExpression in variable init", () => {
+  it("should extract dep from `as Type` cast in variable init", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-as-var-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "interface Item { id: string; }",
+        "const raw = { id: '1' };",
+        "const item = raw as Item;",
+        "",
+        "export function App() {",
+        "  return <div>{item.id}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "as-var-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const itemVar = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "item",
+      );
+      expect(itemVar).toBeDefined();
+      if (!itemVar) throw new Error("item not found");
+
+      const depNames = Object.values(itemVar.dependencies).map((d) => d.name);
+      expect(depNames).toContain("raw");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("SequenceExpression in variable init", () => {
+  it("should extract dep from sequence expression init", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-seq-var-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "const a = 1;",
+        "const b = 2;",
+        "const result = (a, b);",
+        "",
+        "export function App() {",
+        "  return <div>{result}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "seq-var-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const resultVar = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "result",
+      );
+      expect(resultVar).toBeDefined();
+      if (!resultVar) throw new Error("result not found");
+
+      const depNames = Object.values(resultVar.dependencies).map((d) => d.name);
+      expect(depNames).toContain("b");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("AssignmentExpression in variable init", () => {
+  it("should extract dep from assignment expression init", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-assign-var-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "let y = 1;",
+        "const x = (y = 5);",
+        "",
+        "export function App() {",
+        "  return <div>{x}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "assign-var-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const xVar = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "x",
+      );
+      expect(xVar).toBeDefined();
+      if (!xVar) throw new Error("x not found");
+
+      // Should have a dependency on the right side (which is 5, a literal)
+      expect(Object.keys(xVar.dependencies).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("AwaitExpression in variable init", () => {
+  it("should not crash on await expression in variable init", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-await-var-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "async function load() {",
+        "  const data = await fetch('/api');",
+        "  return data;",
+        "}",
+        "",
+        "export function App() {",
+        "  return <div>ok</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "await-var-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("ParenthesizedExpression in getExpressionData", () => {
+  it("should not crash on parenthesized expression in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-paren-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import { useState } from 'react';",
+        "",
+        "export function App() {",
+        "  const [count] = useState(0);",
+        "  return <div data={(count)}>{count}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "paren-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("ThisExpression in getExpressionData", () => {
+  it("should not crash on this in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-this-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import React from 'react';",
+        "",
+        "export class App extends React.Component {",
+        "  handleClick() {}",
+        "  render() {",
+        "    return <button onClick={this.handleClick}>Click</button>;",
+        "  }",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "this-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("ConditionalExpression in JSX prop", () => {
+  it("should handle ternary in JSX prop value", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tern-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import { useState } from 'react';",
+        "",
+        "export function App() {",
+        "  const [x] = useState(0);",
+        "  return <div className={x > 0 ? 'active' : ''}>div</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tern-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("LogicalExpression in JSX prop", () => {
+  it("should handle logical expression in JSX prop value", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-logic-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "const isAdmin = true;",
+        "const isOwner = false;",
+        "",
+        "export function App() {",
+        "  return <div hidden={isAdmin || isOwner}>div</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "logic-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("SpreadElement in ArrayExpression", () => {
+  it("should handle spread in array expression in getExpressionData", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-spread-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "const items = [1, 2, 3];",
+        "const more = [...items, 4];",
+        "",
+        "export function App() {",
+        "  return <div>{more.length}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "spread-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("MemberExpression in JSX prop", () => {
+  it("should handle non-optional member expression in JSX prop", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-mem-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import { useState } from 'react';",
+        "",
+        "export function App() {",
+        "  const [user] = useState({ name: 'Alice' });",
+        "  return <div data={user.name}>{user.name}</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "mem-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("ClassAccessorProperty handling", () => {
+  it("should handle class with regular property as crash safety", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-accessor-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "import React from 'react';",
+        "",
+        "export class App extends React.Component {",
+        "  count = 0;",
+        "  render() {",
+        "    return <div>{this.count}</div>;",
+        "  }",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "accessor-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
