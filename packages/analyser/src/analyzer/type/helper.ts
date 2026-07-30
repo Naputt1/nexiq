@@ -400,6 +400,46 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       return {
         type: "any",
       };
+    case "TSObjectKeyword":
+      return {
+        type: "object",
+      };
+    case "TSSymbolKeyword":
+      return {
+        type: "symbol",
+      };
+    case "TSThisType":
+      return {
+        type: "this",
+      };
+    case "TSExpressionWithTypeArguments": {
+      let typeData: TypeDataRef;
+      const expr = tsType.expression;
+      if (expr.type === "Identifier") {
+        typeData = {
+          type: "ref",
+          refType: "named",
+          name: expr.name,
+        };
+      } else if (expr.type === "TSQualifiedName") {
+        typeData = {
+          type: "ref",
+          refType: "qualified",
+          names: getQualifiedName(expr),
+        };
+      } else {
+        assert(false, "invlid type reference");
+      }
+
+      if (tsType.typeParameters) {
+        typeData.params = [];
+        for (const param of tsType.typeParameters.params) {
+          typeData.params.push(getType(param));
+        }
+      }
+
+      return typeData;
+    }
     case "TSUnionType": {
       const typeData: TypeData = {
         type: "union",
@@ -500,6 +540,18 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
             optional: element.optional,
             typeData: getType(element.elementType),
           });
+        } else if (element.type === "TSOptionalType") {
+          typeData.elements.push({
+            type: "unnamed",
+            optional: true,
+            typeData: getType(element.typeAnnotation),
+          });
+        } else if (element.type === "TSRestType") {
+          typeData.elements.push({
+            type: "unnamed",
+            rest: true,
+            typeData: getType(element.typeAnnotation),
+          });
         } else {
           typeData.elements.push({
             type: "unnamed",
@@ -572,19 +624,13 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
       return typeData;
     }
     case "TSIntrinsicKeyword":
-    case "TSObjectKeyword":
-    case "TSSymbolKeyword":
-    case "TSThisType":
     case "TSConstructorType":
     case "TSTypePredicate":
-    case "TSOptionalType":
-    case "TSRestType":
     case "TSConditionalType":
     case "TSInferType":
     case "TSTypeOperator":
     case "TSMappedType":
     case "TSTemplateLiteralType":
-    case "TSExpressionWithTypeArguments":
       return { type: "any" };
     default:
       return {

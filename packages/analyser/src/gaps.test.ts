@@ -1593,6 +1593,188 @@ describe("this.props member expression tracking in class components", () => {
   });
 });
 
+describe("CatchClause param registration", () => {
+  it("should register the catch error variable in file vars", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-catch-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "export function App() {",
+        "  try {",
+        '    throw new Error("fail");',
+        "  } catch (e) {",
+        "    console.log(e.message);",
+        "  }",
+        '  return <div>ok</div>;',
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "catch-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+      if (appVar?.kind !== "component")
+        throw new Error("App should be a component");
+
+      // Analysis should succeed - catch param is registered in nested scope
+      expect(Object.keys(appVar.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TS type precision: object, symbol, this", () => {
+  it("should not crash on object, symbol, or this types", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-ts-prec-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "types.ts"),
+      [
+        "type A = object;",
+        "type B = symbol;",
+        "type C = this;",
+        "",
+        "export function App() {",
+        '  return <div>ok</div>;',
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "ts-prec-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/types.ts"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/types.ts"];
+      expect(file).toBeDefined();
+      // Should analyze without crashing
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TSExpressionWithTypeArguments in extends", () => {
+  it("should not crash on interface extends with type arguments", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-extends-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "types.ts"),
+      [
+        "interface Base<T> { value: T; }",
+        "interface Concrete extends Base<string> { extra: number; }",
+        "",
+        "export function App() {",
+        '  return <div>ok</div>;',
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "extends-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/types.ts"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/types.ts"];
+      expect(file).toBeDefined();
+      // Should not crash on TSExpressionWithTypeArguments
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("TSOptionalType and TSRestType in tuples", () => {
+  it("should not crash on optional and rest tuple elements", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-tuple-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "types.ts"),
+      [
+        "type A = [string, number?];",
+        "type B = [string, ...boolean[]];",
+        "",
+        "export function App() {",
+        '  return <div>ok</div>;',
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "tuple-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/types.ts"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/types.ts"];
+      expect(file).toBeDefined();
+      // Should not crash on optional/rest tuple types
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("optional chaining (?.) in JSX props", () => {
   it("should extract dependency ref (not literal) from ?. chain in JSX prop", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-chain-"));

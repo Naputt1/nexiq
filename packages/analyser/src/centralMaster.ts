@@ -890,6 +890,10 @@ function rewriteTypeDataRefTargets(
         }
       }
       return;
+    case "object":
+    case "symbol":
+    case "this":
+      return;
     default:
       return;
   }

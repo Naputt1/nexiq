@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 import type traverse from "@babel/traverse";
 import type { ComponentDB } from "../db/componentDB.ts";
+import { getPattern } from "./pattern.ts";
 
 function toScope(node: t.Node) {
   if (!node.loc) return null;
@@ -14,6 +15,29 @@ function toScope(node: t.Node) {
       column: node.loc.end.column,
     },
   };
+}
+
+function registerCatchParam(
+  componentDB: ComponentDB,
+  fileName: string,
+  p: t.LVal,
+) {
+  const loc = {
+    line: p.loc!.start.line,
+    column: p.loc!.start.column,
+  };
+
+  componentDB.addVariable(
+    fileName,
+    {
+      name: getPattern(p),
+      dependencies: {},
+      type: "data",
+      loc,
+    },
+    "normal",
+    "let",
+  );
 }
 
 export default function BlockScope(componentDB: ComponentDB, fileName: string) {
@@ -76,6 +100,42 @@ export default function BlockScope(componentDB: ComponentDB, fileName: string) {
     CatchClause: {
       enter(nodePath: traverse.NodePath<t.CatchClause>) {
         addScope(nodePath.node);
+
+        const param = nodePath.node.param;
+        if (!param) return;
+
+        if (t.isIdentifier(param)) {
+          registerCatchParam(componentDB, fileName, param);
+        } else if (t.isObjectPattern(param)) {
+          for (const prop of param.properties) {
+            if (t.isRestElement(prop)) {
+              registerCatchParam(componentDB, fileName, prop.argument);
+            } else if (t.isObjectProperty(prop)) {
+              const val = prop.value;
+              if (
+                t.isIdentifier(val) ||
+                t.isObjectPattern(val) ||
+                t.isArrayPattern(val)
+              ) {
+                registerCatchParam(componentDB, fileName, val);
+              }
+            }
+          }
+        } else if (t.isArrayPattern(param)) {
+          for (const el of param.elements) {
+            if (el) {
+              if (t.isRestElement(el)) {
+                registerCatchParam(componentDB, fileName, el.argument);
+              } else if (
+                t.isIdentifier(el) ||
+                t.isObjectPattern(el) ||
+                t.isArrayPattern(el)
+              ) {
+                registerCatchParam(componentDB, fileName, el);
+              }
+            }
+          }
+        }
       },
     },
     StaticBlock: {

@@ -28,6 +28,18 @@ export interface TypeDataAny {
   type: "any";
 }
 
+export interface TypeDataObject {
+  type: "object";
+}
+
+export interface TypeDataSymbol {
+  type: "symbol";
+}
+
+export interface TypeDataThis {
+  type: "this";
+}
+
 export interface TypeDataVoid {
   type: "void";
 }
@@ -144,6 +156,9 @@ export type TypeDataPrimitive =
   | TypeDataNull
   | TypeDataUndefined
   | TypeDataAny
+  | TypeDataObject
+  | TypeDataSymbol
+  | TypeDataThis
   | TypeDataVoid
   | TypeDataUnknown
   | TypeDataNever
@@ -168,6 +183,8 @@ export interface TypeDataTupleElementNamed extends TypeDataTupleElementBase {
 
 export interface TypeDataTupleElementUnNamed extends TypeDataTupleElementBase {
   type: "unnamed";
+  optional?: boolean;
+  rest?: boolean;
 }
 
 export type TypeDataTupleElement =

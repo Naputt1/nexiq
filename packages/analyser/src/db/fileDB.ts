@@ -101,6 +101,9 @@ type TypeDataHandlerMap = {
   function: TypeDataFunction;
   tuple: TypeDataTuple;
   "index-access": TypeDataIndexAccess;
+  object: TypeDataObject;
+  symbol: TypeDataSymbol;
+  this: TypeDataThis;
 };
 
 type TypeDataHandler<T> = (
@@ -1995,6 +1998,9 @@ export class FileDB {
     "index-access": (db, td: TypeDataIndexAccess, file, params) =>
       db.updateTypeDataID(td.indexType, file, params) &&
       db.updateTypeDataID(td.objectType, file, params),
+    object: (_db, _td, _file, _params) => true,
+    symbol: (_db, _td, _file, _params) => true,
+    this: (_db, _td, _file, _params) => true,
   };
 
   private hasTypeDataHandler(
@@ -2057,6 +2063,12 @@ export class FileDB {
         file,
         params,
       );
+    } else if (typeData.type === "object") {
+      return FileDB.TYPE_DATA_HANDLERS.object(this, typeData, file, params);
+    } else if (typeData.type === "symbol") {
+      return FileDB.TYPE_DATA_HANDLERS.symbol(this, typeData, file, params);
+    } else if (typeData.type === "this") {
+      return FileDB.TYPE_DATA_HANDLERS.this(this, typeData, file, params);
     }
     return true;
   }
