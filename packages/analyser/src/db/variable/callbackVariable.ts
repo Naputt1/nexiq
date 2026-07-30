@@ -22,8 +22,6 @@ export class CallbackVariable extends ReactWithCallbackVariable<"callback"> {
 
   public load(data: Partial<ComponentFileVarCallback>) {
     super.load(data);
-
-    // TODO: handle merge
   }
 
   public getData(): ComponentFileVarCallback {

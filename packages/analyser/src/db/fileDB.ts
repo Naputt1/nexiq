@@ -2200,7 +2200,7 @@ export class FileDB {
       .map((prop) => {
         const propBase = {
           name: prop.name,
-          type: "any", // TODO: extract type string from prop type
+          type: prop.type,
           kind: "prop" as const,
           loc: prop.loc,
         };
@@ -2244,7 +2244,7 @@ export class FileDB {
     type: TypeData,
     file: File,
     visited: Set<string> = new Set(),
-  ): { name: string; loc: VariableLoc }[] {
+  ): { name: string; type: string; loc: VariableLoc }[] {
     if (type.type === "ref") {
       const name = type.refType === "named" ? type.name : type.names[0];
       if (!name || visited.has(name)) return [];
@@ -2263,6 +2263,7 @@ export class FileDB {
             )
             .map((b) => ({
               name: b.name,
+              type: b.type.type,
               loc: b.loc || { line: 0, column: 0 },
             }));
 
@@ -2294,6 +2295,7 @@ export class FileDB {
         )
         .map((b) => ({
           name: b.name,
+          type: b.type.type,
           loc: b.loc || { line: 0, column: 0 },
         }));
     } else if (type.type === "intersection") {

@@ -260,7 +260,6 @@ export class ComponentDB {
     return insertedId;
   }
 
-  // TODO: add stateType
   public addStateVariable(
     fileName: string,
     componentId: string,
@@ -951,34 +950,6 @@ export class ComponentDB {
     visited.add(variable.id);
 
     const resolveRenders = (
-      children: Record<string, ComponentInfoRender>,
-      pId?: string,
-    ) => {
-      if (!children) return;
-      for (const render of Object.values(children || {})) {
-        if (!render) continue;
-        const isTag =
-          (render.tag && render.tag[0] === render.tag[0]?.toLowerCase()) ||
-          render.tag === "Fragment";
-        if (
-          render.id &&
-          render.id !== "" &&
-          !render.isDependency &&
-          pId != null &&
-          !isTag
-        ) {
-          this.edges.push({
-            from: render.id,
-            to: pId,
-            label: "render",
-          });
-        }
-        resolveRenders(render.children, pId);
-      }
-    };
-
-    //TODO: test and replace
-    const resolveRenders2 = (
       render: ComponentInfoRender | null,
       pId?: string,
     ) => {
@@ -1002,7 +973,7 @@ export class ComponentDB {
 
       if (render.children) {
         for (const child of Object.values(render.children)) {
-          resolveRenders2(child, pId);
+          resolveRenders(child, pId);
         }
       }
     };
@@ -1033,7 +1004,7 @@ export class ComponentDB {
               label: "render",
             });
           }
-          resolveRenders2(returnVar.render, variable.id);
+          resolveRenders(returnVar.render, variable.id);
         } else if (
           typeof returnData !== "string" &&
           returnData.type === "ref"
@@ -1057,7 +1028,9 @@ export class ComponentDB {
               .get(variable.file.path)
               .var.get(refId, true);
             if (targetVar && isJSXVariable(targetVar)) {
-              resolveRenders(targetVar.children, variable.id);
+              for (const child of Object.values(targetVar.children || {})) {
+                resolveRenders(child, variable.id);
+              }
             }
           }
         }
@@ -1092,7 +1065,9 @@ export class ComponentDB {
           to: variable.id,
           label: "render",
         });
-        resolveRenders(variable.children, parent);
+        for (const child of Object.values(variable.children || {})) {
+          resolveRenders(child, parent);
+        }
       }
     }
 

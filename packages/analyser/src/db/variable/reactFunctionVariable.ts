@@ -404,7 +404,6 @@ export abstract class ReactFunctionVariable<
         }
       }
 
-      // debugger;
     }
   }
 

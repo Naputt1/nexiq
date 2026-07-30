@@ -1266,13 +1266,13 @@
             {
               "id": "b04033a58b519d57:prop:initialCount",
               "name": "initialCount",
-              "type": "any",
+              "type": "number",
               "kind": "prop",
               "loc": {
                 "line": 4,
                 "column": 2
               },
-              "hash": "e63f5b7c817c00f8"
+              "hash": "c5d45cbae55c7578"
             }
           ],
           "propName": "this.props",

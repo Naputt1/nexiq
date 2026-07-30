@@ -63,8 +63,9 @@ export abstract class Variable<
     this.isStatic = data.isStatic ?? this.isStatic;
     this.memberKind = data.memberKind ?? this.memberKind;
 
-    // TODO: handle merge
-    this.dependencies = data.dependencies ?? this.dependencies;
+    if (data.dependencies) {
+      Object.assign(this.dependencies, data.dependencies);
+    }
 
     this.loc = data.loc ?? this.loc;
     this.scopeId = data.scopeId ?? this.scopeId;

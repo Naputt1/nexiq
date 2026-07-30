@@ -85,8 +85,6 @@ function getFuncParam(
             type: "rest-element",
             name: property.argument.name,
           });
-        } else {
-          // debugger;
         }
       }
 
@@ -203,8 +201,6 @@ function getQualifiedName(tsType: t.TSQualifiedName): string[] {
     id.push(tsType.left.name);
   } else if (tsType.left.type === "TSQualifiedName") {
     id.push(...getQualifiedName(tsType.left));
-  } else {
-    // debugger;
   }
 
   if (tsType.right.type === "Identifier") {
@@ -451,7 +447,6 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        // debugger;
         assert(false, "invlid type reference");
       }
 

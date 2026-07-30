@@ -56,6 +56,7 @@ describe("analyser multi-threaded consistency", () => {
     "class-components",
     "props-dot-dependency",
     "async-functions",
+    "gaps",
   ];
 
   projects.forEach((projectName) => {

@@ -157,8 +157,6 @@ export default function CallExpression(
                 },
               };
             }
-          } else {
-            // debugger;
           }
 
           const reactDeps: ReactDependency[] = [];

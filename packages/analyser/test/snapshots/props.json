@@ -1928,244 +1928,244 @@
             {
               "id": "90e2b1081177c79d:prop:i",
               "name": "i",
-              "type": "any",
+              "type": "number",
               "kind": "prop",
               "loc": {
                 "line": 40,
                 "column": 2
               },
-              "hash": "ac3482fe308ba485"
+              "hash": "afcaff1c04805cbe"
             },
             {
               "id": "90e2b1081177c79d:prop:items2",
               "name": "items2",
-              "type": "any",
+              "type": "array",
               "kind": "prop",
               "loc": {
                 "line": 42,
                 "column": 2
               },
-              "hash": "59d08cec37d64a53"
+              "hash": "f3ef6a0b9e8fcdff"
             },
             {
               "id": "90e2b1081177c79d:prop:test",
               "name": "test",
-              "type": "any",
+              "type": "type-literal",
               "kind": "prop",
               "loc": {
                 "line": 43,
                 "column": 2
               },
-              "hash": "101f5414387280a6"
+              "hash": "dda47526ddb0cb37"
             },
             {
               "id": "90e2b1081177c79d:prop:test2",
               "name": "test2",
-              "type": "any",
+              "type": "ref",
               "kind": "prop",
               "loc": {
                 "line": 44,
                 "column": 2
               },
-              "hash": "dc7d3781234245bd"
+              "hash": "ac4733835d326d01"
             },
             {
               "id": "90e2b1081177c79d:prop:test3",
               "name": "test3",
-              "type": "any",
+              "type": "ref",
               "kind": "prop",
               "loc": {
                 "line": 45,
                 "column": 2
               },
-              "hash": "d3095d4c6c2a8890"
+              "hash": "a70e6b0e6b8edac0"
             },
             {
               "id": "90e2b1081177c79d:prop:test4",
               "name": "test4",
-              "type": "any",
+              "type": "type-literal",
               "kind": "prop",
               "loc": {
                 "line": 46,
                 "column": 2
               },
-              "hash": "c0c9738b451f259d"
+              "hash": "72c1cca22762f28b"
             },
             {
               "id": "90e2b1081177c79d:prop:t",
               "name": "t",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 49,
                 "column": 2
               },
-              "hash": "403a05258705ab72"
+              "hash": "3c8feffb7b9e2568"
             },
             {
               "id": "90e2b1081177c79d:prop:f",
               "name": "f",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 50,
                 "column": 2
               },
-              "hash": "4152efd248c5d957"
+              "hash": "e47896f8e34b388a"
             },
             {
               "id": "90e2b1081177c79d:prop:te",
               "name": "te",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 51,
                 "column": 2
               },
-              "hash": "fccd6b91e2837c8c"
+              "hash": "d27ebf3f2d04fdce"
             },
             {
               "id": "90e2b1081177c79d:prop:union",
               "name": "union",
-              "type": "any",
+              "type": "union",
               "kind": "prop",
               "loc": {
                 "line": 52,
                 "column": 2
               },
-              "hash": "72865c836ce9347e"
+              "hash": "ebd3f1b20f242b15"
             },
             {
               "id": "90e2b1081177c79d:prop:intersection",
               "name": "intersection",
-              "type": "any",
+              "type": "intersection",
               "kind": "prop",
               "loc": {
                 "line": 53,
                 "column": 2
               },
-              "hash": "662465f0865d66e"
+              "hash": "da3f06f27f19336f"
             },
             {
               "id": "90e2b1081177c79d:prop:bigint",
               "name": "bigint",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 54,
                 "column": 2
               },
-              "hash": "e01f717c54bd7279"
+              "hash": "370dda24e46f61a8"
             },
             {
               "id": "90e2b1081177c79d:prop:template",
               "name": "template",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 55,
                 "column": 2
               },
-              "hash": "630b3d5c0738fd54"
+              "hash": "e46554f7abb429a4"
             },
             {
               "id": "90e2b1081177c79d:prop:template2",
               "name": "template2",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 56,
                 "column": 2
               },
-              "hash": "c75f971da9dd5917"
+              "hash": "3db2d1904cc3a5e0"
             },
             {
               "id": "90e2b1081177c79d:prop:unary",
               "name": "unary",
-              "type": "any",
+              "type": "literal-type",
               "kind": "prop",
               "loc": {
                 "line": 57,
                 "column": 2
               },
-              "hash": "49c67cd031060faf"
+              "hash": "fd8cd68b8b363e5a"
             },
             {
               "id": "90e2b1081177c79d:prop:unary2",
               "name": "unary2",
-              "type": "any",
+              "type": "union",
               "kind": "prop",
               "loc": {
                 "line": 58,
                 "column": 2
               },
-              "hash": "bbb250f67cd9cfbf"
+              "hash": "a7459493a91d0c92"
             },
             {
               "id": "90e2b1081177c79d:prop:object",
               "name": "object",
-              "type": "any",
+              "type": "ref",
               "kind": "prop",
               "loc": {
                 "line": 59,
                 "column": 2
               },
-              "hash": "79086a4b0bd89bc6"
+              "hash": "6cb73374bdeac1ca"
             },
             {
               "id": "90e2b1081177c79d:prop:c",
               "name": "c",
-              "type": "any",
+              "type": "function",
               "kind": "prop",
               "loc": {
                 "line": 60,
                 "column": 2
               },
-              "hash": "c849e421bd48a2ac"
+              "hash": "5515bf730d0881c9"
             },
             {
               "id": "90e2b1081177c79d:prop:cb",
               "name": "cb",
-              "type": "any",
+              "type": "function",
               "kind": "prop",
               "loc": {
                 "line": 73,
                 "column": 2
               },
-              "hash": "e4ab87e01c8fdd40"
+              "hash": "575e9eacb74b9339"
             },
             {
               "id": "90e2b1081177c79d:prop:cb2",
               "name": "cb2",
-              "type": "any",
+              "type": "function",
               "kind": "prop",
               "loc": {
                 "line": 74,
                 "column": 2
               },
-              "hash": "da6532b9a8caabaf"
+              "hash": "ae7b6447e1daada9"
             },
             {
               "id": "90e2b1081177c79d:prop:cb3",
               "name": "cb3",
-              "type": "any",
+              "type": "function",
               "kind": "prop",
               "loc": {
                 "line": 75,
                 "column": 2
               },
-              "hash": "348214e72edf8615"
+              "hash": "7407be48c649a84a"
             },
             {
               "id": "90e2b1081177c79d:prop:cb4",
               "name": "cb4",
-              "type": "any",
+              "type": "function",
               "kind": "prop",
               "loc": {
                 "line": 76,
                 "column": 2
               },
-              "hash": "75b69c7abee6d286"
+              "hash": "ef5c7daf2e65000b"
             }
           ],
           "hooks": [],
