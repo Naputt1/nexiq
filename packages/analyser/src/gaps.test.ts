@@ -1009,6 +1009,52 @@ describe("IfStatement block scope", () => {
   });
 });
 
+describe("TSEnumDeclaration handling", () => {
+  it("should register enum members as variables", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-enum-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        'enum Status { Active, Inactive, Pending }',
+        'const current = Status.Active;',
+        '',
+        'export function App() {',
+        '  return <div>{current}</div>;',
+        '}',
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "enum-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      // Status enum should exist as a variable
+      const statusVar = Object.values(file!.var).find(
+        (v) => v.name.type === "identifier" && v.name.name === "Status",
+      );
+      expect(statusVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("Super expression handling", () => {
   it("should not crash on super.method() calls in class components", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-super-"));

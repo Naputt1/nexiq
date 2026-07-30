@@ -31,6 +31,7 @@ import CallExpression from "./analyzer/callExpression.ts";
 import ReturnStatement from "./analyzer/returnStatement.ts";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
+import TSEnumDeclaration from "./analyzer/TSEnumDeclaration.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
   AnalyzerWorkerRequest,
@@ -91,6 +92,7 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     CallExpression: CallExpression(componentDB, fileName),
     TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
     TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
+    TSEnumDeclaration: TSEnumDeclaration(componentDB, fileName),
     AssignmentExpression: AssignmentExpression(componentDB, fileName),
     ...BlockScope(componentDB, fileName),
   });
