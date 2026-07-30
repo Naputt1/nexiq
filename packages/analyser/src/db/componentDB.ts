@@ -1042,8 +1042,8 @@ export class ComponentDB {
           let refId: string | null = null;
           if (ref.refType === "named") {
             refId = this.getVariableID(ref.name, variable.file.path);
-          } else {
-            // TODO: handle qualified names
+          } else if (ref.refType === "qualified" && ref.names.length > 0) {
+            refId = this.getVariableID(ref.names[0], variable.file.path);
           }
 
           if (refId) {

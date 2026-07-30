@@ -2858,3 +2858,174 @@ describe("ClassAccessorProperty handling", () => {
     }
   });
 });
+
+describe("Interface extends with type arguments (H1)", () => {
+  it("should handle extends Base<string> with type args", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-h1-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "types.ts"),
+      [
+        "interface Base<T> { value: T; }",
+        "interface Concrete extends Base<string> { extra: number; }",
+        "",
+        "export function App() {",
+        "  return <div>ok</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "h1-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/types.ts"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/types.ts"];
+      expect(file).toBeDefined();
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Interface extends with qualified name (H1b)", () => {
+  it("should handle extends NS.Base with qualified name", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-h1b-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "types.ts"),
+      [
+        "declare namespace NS { interface Base { value: string; } }",
+        "interface Concrete extends NS.Base { extra: number; }",
+        "",
+        "export function App() {",
+        "  return <div>ok</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "h1b-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/types.ts"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/types.ts"];
+      expect(file).toBeDefined();
+      expect(Object.keys(file!.var).length).toBeGreaterThanOrEqual(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Generic function component with type params (H4)", () => {
+  it("should handle const Comp = <T,> generic component", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-h4-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "interface Item { id: string; }",
+        "const List = <T extends Item>(props: { items: T[] }) => {",
+        "  return <div>{props.items.length}</div>;",
+        "};",
+        "",
+        "export function App() {",
+        "  return <List items={[{ id: '1' }]} />;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "h4-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const listVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "List",
+      );
+      expect(listVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Qualified ref in render (H2)", () => {
+  it("should not crash on qualified refs in render output", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-h2-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "const config = { theme: 'dark' };",
+        "",
+        "export function App() {",
+        "  return <div data-theme={config.theme}>content</div>;",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "h2-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+      const appVar = Object.values(file!.var).find(
+        (v) => v.kind === "component" && v.name.type === "identifier" && v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});

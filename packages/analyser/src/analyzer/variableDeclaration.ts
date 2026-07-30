@@ -325,11 +325,16 @@ export default function VariableDeclarator(
 
           if (component.propType == null) {
             if (
-              nodePath.node.init?.type === "ArrowFunctionExpression" ||
-              nodePath.node.init?.type === "FunctionExpression"
+              init?.type === "ArrowFunctionExpression" ||
+              init?.type === "FunctionExpression"
             ) {
-              if (nodePath.node.init.typeParameters) {
-                // TODO: handle type parameters
+              if (init.typeParameters) {
+                component.typeParams = [];
+                for (const param of init.typeParameters.params) {
+                  component.typeParams.push({
+                    name: param.name,
+                  });
+                }
               }
             }
           }

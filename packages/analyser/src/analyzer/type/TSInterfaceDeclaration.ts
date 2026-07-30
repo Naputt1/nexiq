@@ -39,13 +39,21 @@ export default function TSInterfaceDeclaration(
     if (nodePath.node.extends) {
       typeData.extends = [];
       for (const ex of nodePath.node.extends) {
-        //TODO: handle other type
-        if (ex.expression.type != "Identifier") {
-          continue;
+        const expr = ex.expression;
+        if (expr.type === "Identifier") {
+          typeData.extends.push(expr.name);
+        } else if (expr.type === "TSQualifiedName") {
+          const names: string[] = [];
+          let current: t.TSEntityName = expr;
+          while (current.type === "TSQualifiedName") {
+            names.unshift(current.right.name);
+            current = current.left;
+          }
+          if (current.type === "Identifier") {
+            names.unshift(current.name);
+          }
+          typeData.extends.push(names.join("."));
         }
-        assert(ex.expression.type == "Identifier");
-
-        typeData.extends.push(ex.expression.name);
       }
     }
 
