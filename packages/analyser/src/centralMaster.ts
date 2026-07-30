@@ -496,31 +496,6 @@ function collectCrossPackageUsageEdges(
   };
 
   const walkRenderChildren = (
-    children: Record<string, ComponentInfoRender> | undefined,
-    ownerId: string,
-  ) => {
-    if (!children) {
-      return;
-    }
-
-    for (const child of Object.values(children)) {
-      const targetExportId = child.isDependency
-        ? getResolvedImportId(child.tag)
-        : undefined;
-
-      if (targetExportId) {
-        pushEdge({
-          from: targetExportId,
-          to: ownerId,
-          label: "render",
-        });
-      }
-      walkRenderChildren(child.children, ownerId);
-    }
-  };
-
-  //TODO: test and replace
-  const walkRenderChildren2 = (
     child: ComponentInfoRender | null,
     ownerId: string,
   ) => {
@@ -541,7 +516,7 @@ function collectCrossPackageUsageEdges(
     }
 
     for (const grandChild of Object.values(child.children)) {
-      walkRenderChildren2(grandChild, ownerId);
+      walkRenderChildren(grandChild, ownerId);
     }
   };
 
@@ -580,7 +555,7 @@ function collectCrossPackageUsageEdges(
             label: "render",
           });
         }
-        walkRenderChildren2(returnValue.render, currentOwnerId);
+        walkRenderChildren(returnValue.render, currentOwnerId);
       }
     }
 
@@ -610,12 +585,11 @@ function collectCrossPackageUsageEdges(
 
     if (currentOwnerId) {
       if ("render" in variable && variable.render) {
-        walkRenderChildren(
-          { [variable.render.instanceId]: variable.render },
-          currentOwnerId,
-        );
+        walkRenderChildren(variable.render, currentOwnerId);
       } else if ("children" in variable && variable.children) {
-        walkRenderChildren(variable.children, currentOwnerId);
+        for (const child of Object.values(variable.children)) {
+          walkRenderChildren(child, currentOwnerId);
+        }
       }
     }
 

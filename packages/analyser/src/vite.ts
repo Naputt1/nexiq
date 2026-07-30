@@ -16,7 +16,7 @@ export function getViteAliases(
 
   const ast = parser.parse(code, {
     sourceType: "module",
-    plugins: ["typescript", "jsx"],
+    plugins: ["typescript", "jsx", "decorators", "importAttributes"],
   });
 
   const aliases: Record<string, string> = {};

@@ -47,6 +47,6 @@ export function getFiles(dir: string, customIgnore: string[] = []): string[] {
 export function parseCode(code: string): File {
   return parser.parse(code, {
     sourceType: "module",
-    plugins: ["jsx", "typescript", "classProperties"],
+    plugins: ["jsx", "typescript", "classProperties", "decorators", "importAttributes"],
   });
 }

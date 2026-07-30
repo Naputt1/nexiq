@@ -2233,7 +2233,7 @@ export class FileDB {
     for (const prop of properties) {
       const stateId = getDeterministicId(file.path, id, "state", prop.name);
       if (!com.states.has(stateId)) {
-        file.addStateVariable(id, prop.name, prop.loc);
+        file.addStateVariable(id, prop.name, prop.loc, prop.type ? { type: prop.type } as TypeData : undefined);
       }
     }
 
