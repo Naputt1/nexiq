@@ -92,6 +92,24 @@ export default function VariableDeclarator(
           dependencies[id] = { id, name: element.argument.name };
         }
       }
+    } else if (init?.type === "ConditionalExpression") {
+      Object.assign(dependencies, extractDependencies(init.test));
+      Object.assign(dependencies, extractDependencies(init.consequent));
+      Object.assign(dependencies, extractDependencies(init.alternate));
+    } else if (init?.type === "LogicalExpression") {
+      Object.assign(dependencies, extractDependencies(init.left));
+      Object.assign(dependencies, extractDependencies(init.right));
+    } else if (init?.type === "BinaryExpression") {
+      Object.assign(dependencies, extractDependencies(init.left));
+      Object.assign(dependencies, extractDependencies(init.right));
+    } else if (init?.type === "TemplateLiteral") {
+      for (const expr of init.expressions) {
+        Object.assign(dependencies, extractDependencies(expr));
+      }
+    } else if (init?.type === "UnaryExpression") {
+      Object.assign(dependencies, extractDependencies(init.argument));
+    } else if (init?.type === "TSNonNullExpression") {
+      Object.assign(dependencies, extractDependencies(init.expression));
     }
     return dependencies;
   };

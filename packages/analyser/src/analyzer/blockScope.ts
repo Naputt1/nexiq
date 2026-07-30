@@ -63,6 +63,16 @@ export default function BlockScope(componentDB: ComponentDB, fileName: string) {
         addScope(nodePath.node);
       },
     },
+    WhileStatement: {
+      enter(nodePath: traverse.NodePath<t.WhileStatement>) {
+        addScope(nodePath.node);
+      },
+    },
+    DoWhileStatement: {
+      enter(nodePath: traverse.NodePath<t.DoWhileStatement>) {
+        addScope(nodePath.node);
+      },
+    },
     CatchClause: {
       enter(nodePath: traverse.NodePath<t.CatchClause>) {
         addScope(nodePath.node);

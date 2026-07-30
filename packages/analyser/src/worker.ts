@@ -37,6 +37,7 @@ import TSImportEqualsDeclaration from "./analyzer/TSImportEqualsDeclaration.ts";
 import TSExportAssignment from "./analyzer/TSExportAssignment.ts";
 import TSNamespaceExportDeclaration from "./analyzer/TSNamespaceExportDeclaration.ts";
 import TSDeclareFunction from "./analyzer/TSDeclareFunction.ts";
+import MemberExpression from "./analyzer/memberExpression.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
   AnalyzerWorkerRequest,
@@ -103,6 +104,7 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     TSImportEqualsDeclaration: TSImportEqualsDeclaration(componentDB, fileName),
     TSExportAssignment: TSExportAssignment(componentDB, fileName),
     TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(componentDB, fileName),
+    MemberExpression: MemberExpression(componentDB, fileName),
     AssignmentExpression: AssignmentExpression(componentDB, fileName),
     ...BlockScope(componentDB, fileName),
   });
