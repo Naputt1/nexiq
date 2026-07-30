@@ -35,6 +35,11 @@ import FunctionExpression from "./analyzer/functionExpression.ts";
 import TSInterfaceDeclaration from "./analyzer/type/TSInterfaceDeclaration.ts";
 import TSTypeAliasDeclaration from "./analyzer/type/TSTypeAliasDeclaration.ts";
 import TSEnumDeclaration from "./analyzer/TSEnumDeclaration.ts";
+import TSModuleDeclaration from "./analyzer/TSModuleDeclaration.ts";
+import TSImportEqualsDeclaration from "./analyzer/TSImportEqualsDeclaration.ts";
+import TSExportAssignment from "./analyzer/TSExportAssignment.ts";
+import TSNamespaceExportDeclaration from "./analyzer/TSNamespaceExportDeclaration.ts";
+import TSDeclareFunction from "./analyzer/TSDeclareFunction.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
@@ -472,6 +477,11 @@ export class PackageMaster {
         fileName,
       ),
       TSEnumDeclaration: TSEnumDeclaration(this.componentDB, fileName),
+      TSDeclareFunction: TSDeclareFunction(this.componentDB, fileName),
+      TSModuleDeclaration: TSModuleDeclaration(this.componentDB, fileName),
+      TSImportEqualsDeclaration: TSImportEqualsDeclaration(this.componentDB, fileName),
+      TSExportAssignment: TSExportAssignment(this.componentDB, fileName),
+      TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(this.componentDB, fileName),
       AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
       ...BlockScope(this.componentDB, fileName),
     });

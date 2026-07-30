@@ -38,6 +38,15 @@ export default function ExportNamedDeclaration(
 
           exportKind = isComponent ? "component" : "function";
           name = decl.id?.name;
+        } else if (decl.type === "TSEnumDeclaration") {
+          exportKind = "value";
+          name = decl.id.name;
+        } else if (decl.type === "TSDeclareFunction") {
+          exportKind = "function";
+          name = decl.id?.name;
+        } else if (decl.type === "TSModuleDeclaration") {
+          exportKind = "value";
+          name = decl.id.name;
         } else if (decl.type === "VariableDeclaration") {
           decl.declarations.forEach((declarator) => {
             const pattern = getPattern(declarator.id);

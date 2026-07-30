@@ -77,6 +77,14 @@ function extractDependencies(
     extractDependencies(expr.argument, name, dependency);
   } else if (t.isUpdateExpression(expr)) {
     extractDependencies(expr.argument, name, dependency);
+  } else if (t.isAssignmentExpression(expr)) {
+    extractDependencies(expr.right, name, dependency);
+  } else if (t.isSequenceExpression(expr)) {
+    for (const ex of expr.expressions) {
+      if (t.isExpression(ex)) extractDependencies(ex, name, dependency);
+    }
+  } else if (t.isAwaitExpression(expr)) {
+    extractDependencies(expr.argument, name, dependency);
   } else {
     dependency.push({
       id: getDeterministicId(name),

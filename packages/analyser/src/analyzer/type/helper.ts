@@ -651,6 +651,11 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       return {
         type: "null",
       };
+    case "RegExpLiteral":
+      return {
+        type: "literal-type",
+        literal: { type: "string", value: expr.pattern },
+      };
     case "Identifier":
       if (expr.name === "undefined") {
         return {
@@ -708,18 +713,40 @@ export function getExpressionData(expr: t.Expression): PropDataType | null {
       const properties: Record<string, PropDataType> = {};
       for (const prop of expr.properties) {
         if (t.isObjectProperty(prop)) {
-          let key: string | null = null;
-          if (t.isIdentifier(prop.key)) {
-            key = prop.key.name;
-          } else if (t.isStringLiteral(prop.key)) {
-            key = prop.key.value;
-          }
-
-          if (key && t.isExpression(prop.value)) {
-            const data = getExpressionData(prop.value);
-            if (data) {
-              properties[key] = data;
+          if (prop.computed && t.isExpression(prop.key)) {
+            const keyData = getExpressionData(prop.key);
+            if (keyData && keyData.type === "ref" && "name" in keyData) {
+              properties[keyData.name as string] = keyData;
             }
+            if (t.isExpression(prop.value)) {
+              const data = getExpressionData(prop.value);
+              if (data && data.type === "ref" && "name" in data) {
+                properties[data.name as string] = data;
+              }
+            }
+          } else {
+            let key: string | null = null;
+            if (t.isIdentifier(prop.key)) {
+              key = prop.key.name;
+            } else if (t.isStringLiteral(prop.key)) {
+              key = prop.key.value;
+            }
+
+            if (key && t.isExpression(prop.value)) {
+              const data = getExpressionData(prop.value);
+              if (data) {
+                properties[key] = data;
+              }
+            }
+          }
+        } else if (t.isSpreadElement(prop) && t.isExpression(prop.argument)) {
+          const data = getExpressionData(prop.argument);
+          if (data) {
+            properties["..."] = data;
+          }
+        } else if (t.isObjectMethod(prop)) {
+          if (t.isIdentifier(prop.key)) {
+            properties[prop.key.name] = { type: "function" };
           }
         }
       }

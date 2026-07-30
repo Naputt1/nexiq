@@ -1689,6 +1689,39 @@
           },
           "children": {}
         },
+        "f59961fc12e22f2": {
+          "id": "f59961fc12e22f2",
+          "name": {
+            "type": "identifier",
+            "name": "create",
+            "loc": {
+              "line": 87,
+              "column": 17
+            },
+            "id": "7868524009f4bb2d"
+          },
+          "kind": "normal",
+          "type": "function",
+          "file": "/src/type.tsx",
+          "hash": "185cfa27d8500c04",
+          "declarationKind": "const",
+          "dependencies": {},
+          "loc": {
+            "line": 87,
+            "column": 17
+          },
+          "var": {},
+          "scope": {
+            "start": {
+              "line": 87,
+              "column": 17
+            },
+            "end": {
+              "line": 87,
+              "column": 17
+            }
+          }
+        },
         "798772ab7346d97e": {
           "id": "798772ab7346d97e",
           "name": {
