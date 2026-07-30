@@ -68,5 +68,10 @@ export default function BlockScope(componentDB: ComponentDB, fileName: string) {
         addScope(nodePath.node);
       },
     },
+    StaticBlock: {
+      enter(nodePath: traverse.NodePath<t.StaticBlock>) {
+        addScope(nodePath.node);
+      },
+    },
   };
 }

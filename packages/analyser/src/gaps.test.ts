@@ -905,6 +905,110 @@ describe("UpdateExpression (++/--) in JSX props", () => {
   });
 });
 
+describe("StaticBlock in classes", () => {
+  it("should not crash on static { } blocks and create scopes for them", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-static-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      `
+        import React from "react";
+
+        export class App extends React.Component {
+          static counter = 0;
+          static {
+            App.counter = 42;
+          }
+          render() {
+            return <div>{App.counter}</div>;
+          }
+        }
+      `,
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "static-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("IfStatement block scope", () => {
+  it("should create a block scope for if/else bodies", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-ifscope-"));
+    const srcDir = path.join(tmpDir, "src");
+    fs.mkdirSync(srcDir);
+
+    fs.writeFileSync(
+      path.join(srcDir, "App.tsx"),
+      [
+        "export function App({ cond }: { cond: boolean }) {",
+        "  if (cond) {",
+        '    const x = "in if";',
+        "    return <div>{x}</div>;",
+        "  } else {",
+        '    const y = "in else";',
+        "    return <span>{y}</span>;",
+        "  }",
+        "}",
+      ].join("\n"),
+    );
+
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "ifscope-test" }),
+    );
+
+    try {
+      const packageJson = new PackageJson(tmpDir);
+      const graph = await analyzeFiles(
+        tmpDir,
+        null,
+        ["src/App.tsx"],
+        packageJson,
+      );
+
+      const file = graph.files["/src/App.tsx"];
+      expect(file).toBeDefined();
+
+      const appVar = Object.values(file!.var).find(
+        (v) =>
+          v.kind === "component" &&
+          v.name.type === "identifier" &&
+          v.name.name === "App",
+      );
+      expect(appVar).toBeDefined();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("Super expression handling", () => {
   it("should not crash on super.method() calls in class components", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-super-"));
