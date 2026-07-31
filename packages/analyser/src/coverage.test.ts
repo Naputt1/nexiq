@@ -171,8 +171,17 @@ describe("analyser coverage expansion", () => {
         type T = string | number | null | undefined | void | unknown | never | bigint;
         export const App = (p: T) => <div />;
         
-        // Unsupported types for lines 550+
         type U = keyof T | T[keyof T];
+        type V = object | symbol | this;
+        type W = intrinsic;
+        type X = new (name: string) => T;
+        type Y = T extends string ? true : false;
+        type Z = T extends infer R ? R : never;
+        type A1 = { [K in keyof T]: T[K] };
+        type B1 = T extends string ? (value: T) => value is string : never;
+        type C1 = string[];
+        type D1 = [string, number?];
+        type E1 = [string, ...boolean[]];
       `,
     });
 
@@ -187,7 +196,133 @@ describe("analyser coverage expansion", () => {
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("should cover export declarations", async () => {
+  it("should cover TSAsExpression, TSNonNull, Unary, TemplateLiteral in JSX props", async () => {
+    const tmpDir = createTmpProject({
+      "src/App.tsx": `
+        export function App() {
+          const items = [1, 2, 3];
+          const visible = true;
+          const name = "World";
+          return (
+            <div
+              data={items as number[]}
+              className={name}
+              hidden={!visible}
+            >
+              {items.length}
+            </div>
+          );
+        }
+      `,
+    });
+
+    const packageJson = new PackageJson(tmpDir);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
+    expect(graph.files["/src/App.tsx"]).toBeDefined();
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it("should cover getExpressionData edge cases", async () => {
+    const tmpDir = createTmpProject({
+      "src/App.tsx": `
+        export function App() {
+          return (
+            <div
+              data={(count)}
+              class={x > 0 ? "a" : "b"}
+              hidden={isAdmin || isOwner}
+              ref={fn()}
+            >
+              {items}
+            </div>
+          );
+        }
+      `,
+    });
+
+    const packageJson = new PackageJson(tmpDir);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
+    expect(graph.files["/src/App.tsx"]).toBeDefined();
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it("should cover variable init expression types", async () => {
+    const tmpDir = createTmpProject({
+      "src/App.tsx": `
+        const a = 1;
+        const b = 2;
+        const c = a ? b : a;
+        const d = a && b;
+        const e = a + b;
+        const f = \`\${a}\`;
+        const g = !a;
+        const h = a as number;
+        const i = a!;
+        const j = (a, b);
+        const k = await Promise.resolve(1);
+        const l = (x = 5);
+        const m = ++a;
+
+        export function App() {
+          return <div>{c}</div>;
+        }
+      `,
+    });
+
+    const packageJson = new PackageJson(tmpDir);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
+    expect(graph.files["/src/App.tsx"]).toBeDefined();
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it("should cover block scopes (if, while, do-while, static, catch)", async () => {
+    const tmpDir = createTmpProject({
+      "src/App.tsx": `
+        import React from "react";
+
+        export function App() {
+          if (true) { const x = 1; }
+          while (false) { const y = 2; }
+          do { const z = 3; } while (false);
+          try { throw new Error("x"); } catch (e) { console.log(e); }
+          return <div>ok</div>;
+        }
+
+        export class Cls extends React.Component {
+          static counter = 0;
+          static { Cls.counter = 42; }
+          render() { return <div>{Cls.counter}</div>; }
+        }
+      `,
+    });
+
+    const packageJson = new PackageJson(tmpDir);
+    const graph = await analyzeFiles(
+      tmpDir,
+      null,
+      ["src/App.tsx"],
+      packageJson,
+    );
+    expect(graph.files["/src/App.tsx"]).toBeDefined();
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it("should cover export declarations with enums, declare functions, modules", async () => {
     const tmpDir = createTmpProject({
       "src/App.tsx": `
         export default class MyClass extends React.Component {
@@ -195,6 +330,8 @@ describe("analyser coverage expansion", () => {
         }
         export class AnotherClass {}
         export { a as b } from './mod';
+        export enum Status { Active, Inactive }
+        export declare function helper(): void;
       `,
       "src/Anon.tsx": `
         export default class extends React.Component {

@@ -67,6 +67,7 @@ export interface EffectInfo extends ComponentLoc, ReactDependencies {
 export interface PropData {
   id: string;
   name: string;
+  /** Type discriminator from TypeData (e.g. "string", "number", "ref", "any", etc.) or "any" when unknown */
   type: string;
   kind: "prop" | "spread";
   props?: PropData[];

@@ -530,13 +530,13 @@
             {
               "id": "f1feac25b9f6456e:prop:props",
               "name": "props",
-              "type": "any",
+              "type": "TSTypeLiteral",
               "kind": "prop",
               "loc": {
                 "line": 3,
                 "column": 33
               },
-              "hash": "c913f4018cd56103"
+              "hash": "56a68804af8993c9"
             }
           ],
           "propName": "props",

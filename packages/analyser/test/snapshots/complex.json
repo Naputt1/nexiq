@@ -998,13 +998,13 @@
             {
               "id": "7a755d146a3ba89a:prop:initialValue",
               "name": "initialValue",
-              "type": "any",
+              "type": "TSNumberKeyword",
               "kind": "prop",
               "loc": {
                 "line": 3,
                 "column": 30
               },
-              "hash": "9f760feb8a0dfe2e"
+              "hash": "ff7631fec136531b"
             }
           ],
           "propName": "initialValue",
@@ -1233,24 +1233,24 @@
             {
               "id": "79cf30df8bf873d3:prop:ref",
               "name": "ref",
-              "type": "any",
+              "type": "TSAnyKeyword",
               "kind": "prop",
               "loc": {
                 "line": 20,
                 "column": 35
               },
-              "hash": "e9ceb2c440128b84"
+              "hash": "b0f4f05ab9fa1738"
             },
             {
               "id": "79cf30df8bf873d3:prop:handler",
               "name": "handler",
-              "type": "any",
+              "type": "TSAnyKeyword",
               "kind": "prop",
               "loc": {
                 "line": 20,
                 "column": 45
               },
-              "hash": "ccdee2445dd6b143"
+              "hash": "3611c038d72bac07"
             }
           ],
           "propName": "ref",

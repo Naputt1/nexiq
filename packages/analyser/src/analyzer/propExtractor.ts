@@ -155,7 +155,9 @@ export function extractFromPattern(
           if (t.isIdentifier(value)) {
             const propBase: Omit<PropData, "id" | "hash"> = {
               name: value.name,
-              type: "any",
+              type: property.value?.typeAnnotation?.typeAnnotation
+                ? property.value.typeAnnotation.typeAnnotation.type
+                : "any",
               kind: "prop" as const,
               defaultValue,
               loc: value.loc
@@ -176,7 +178,9 @@ export function extractFromPattern(
             const nestedProps = extractFromPattern(value, componentId);
             const propBase: Omit<PropData, "id" | "hash"> = {
               name: propName,
-              type: "any",
+              type: property.value?.typeAnnotation?.typeAnnotation
+                ? property.value.typeAnnotation.typeAnnotation.type
+                : "any",
               kind: "prop" as const,
               props: nestedProps,
               defaultValue,
@@ -200,7 +204,9 @@ export function extractFromPattern(
         if (t.isIdentifier(property.argument)) {
           const propBase = {
             name: property.argument.name,
-            type: "any",
+            type: property.argument?.typeAnnotation?.typeAnnotation
+              ? property.argument.typeAnnotation.typeAnnotation.type
+              : "any",
             kind: "spread" as const,
             loc: property.argument.loc
               ? {
@@ -228,7 +234,9 @@ export function extractFromPattern(
   } else if (t.isIdentifier(pattern)) {
     const propBase = {
       name: pattern.name,
-      type: "any",
+      type: pattern?.typeAnnotation?.typeAnnotation
+        ? pattern.typeAnnotation.typeAnnotation.type
+        : "any",
       kind: "prop" as const,
       loc: pattern.loc
         ? {
