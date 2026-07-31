@@ -268,7 +268,7 @@ export interface TypeDataLiteralBodyBase {
   signatureType: "property" | "index" | "method";
 }
 
-export interface TypeDataLiteralBodyIndexPrarameter {
+export interface TypeDataLiteralBodyIndexParameter {
   name: string;
   type: TypeData;
 }
@@ -276,7 +276,7 @@ export interface TypeDataLiteralBodyIndexPrarameter {
 export interface TypeDataLiteralBodyIndex extends TypeDataLiteralBodyBase {
   signatureType: "index";
   type: TypeData;
-  parameter: TypeDataLiteralBodyIndexPrarameter;
+  parameter: TypeDataLiteralBodyIndexParameter;
 }
 
 export interface TypeDataLiteralBodyProperty extends TypeDataLiteralBodyBase {

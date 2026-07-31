@@ -1,5 +1,3 @@
-export type AppTheme = "dark" | "light";
-
 export interface SubProject {
   name: string;
   path: string;
