@@ -4,9 +4,11 @@ import { PackageJson } from "./db/packageJson.ts";
 import { ComponentDB } from "./db/componentDB.ts";
 import { File } from "./db/fileDB.ts";
 import { FunctionVariable } from "./db/variable/functionVariable.ts";
+import { WorkerPool } from "./workerPool.ts";
 import path from "path";
 import fs from "fs";
 import os from "os";
+import { fileURLToPath } from "node:url";
 
 describe("analyser robustness", () => {
   it("should handle problematic React patterns without crashing", async () => {
@@ -149,6 +151,108 @@ describe("analyser robustness", () => {
         incoming as unknown as Partial<ReturnType<typeof existing.getData>>,
       ),
     ).not.toThrow();
+  });
+
+  it("should reject in-flight tasks when a worker crashes mid-task", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-worker-crash-"));
+    const crashWorker = path.join(tmpDir, "crash-worker.mjs");
+    fs.writeFileSync(
+      crashWorker,
+      `
+        import { parentPort } from "node:worker_threads";
+        parentPort.on("message", () => {
+          throw new Error("Simulated worker crash");
+        });
+      `,
+    );
+
+    const pool = new WorkerPool(1, crashWorker);
+    try {
+      const task = pool.runTask({
+        type: "analyze_files",
+        filePaths: ["/src/App.tsx"],
+      });
+      const settled = expect(task).rejects.toThrow(/Simulated worker crash|exited/);
+      await settled;
+    } finally {
+      await pool.terminate();
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should reject queued tasks when all workers have died", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-worker-exhaust-"));
+    const crashWorker = path.join(tmpDir, "crash-worker.mjs");
+    fs.writeFileSync(
+      crashWorker,
+      `
+        import { parentPort } from "node:worker_threads";
+        parentPort.on("message", () => {
+          process.exit(1);
+        });
+      `,
+    );
+
+    const pool = new WorkerPool(1, crashWorker);
+    try {
+      // Fire two tasks: the first crashes the sole worker, the second should
+      // be rejected once the pool is drained.
+      const first = pool.runTask({
+        type: "analyze_files",
+        filePaths: ["/src/A.tsx"],
+      });
+      const second = pool.runTask({
+        type: "analyze_files",
+        filePaths: ["/src/B.tsx"],
+      });
+
+      const firstSettled = expect(first).rejects.toThrow();
+      const secondSettled = expect(second).rejects.toThrow(/crashed|died|exited/);
+      await firstSettled;
+      await secondSettled;
+    } finally {
+      await pool.terminate();
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should reject queued tasks on terminate", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "nexiq-worker-term-"));
+    const slowWorker = path.join(tmpDir, "slow-worker.mjs");
+    fs.writeFileSync(
+      slowWorker,
+      `
+        import { parentPort } from "node:worker_threads";
+        parentPort.on("message", () => {
+          setTimeout(() => {}, 10000);
+        });
+      `,
+    );
+
+    const pool = new WorkerPool(1, slowWorker);
+    try {
+      const first = pool.runTask({
+        type: "analyze_files",
+        filePaths: ["/src/A.tsx"],
+      });
+      const second = pool.runTask({
+        type: "analyze_files",
+        filePaths: ["/src/B.tsx"],
+      });
+
+      // Attach rejection handlers eagerly to avoid unhandled rejections.
+      const firstSettled = expect(first).rejects.toThrow(/terminated/);
+      const secondSettled = expect(second).rejects.toThrow(/terminated/);
+
+      // Give the first task time to occupy the single worker, then terminate.
+      await new Promise((r) => setTimeout(r, 100));
+      await pool.terminate();
+
+      await secondSettled;
+      await firstSettled;
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("should tolerate function variables with missing nested scopes during dependency resolution", () => {

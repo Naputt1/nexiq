@@ -117,7 +117,7 @@ export class SqliteDB extends BaseSqliteDB {
   private insertExportStmt!: Database.Statement;
   private insertFileStmt!: Database.Statement;
   private deleteRelationsByScopeStmt!: Database.Statement;
-  private deleteRelationsByPathStmt!: Database.Statement;
+  private deleteRelationsByFileStmt!: Database.Statement;
   private deleteExportsStmt!: Database.Statement;
   private deleteRendersStmt!: Database.Statement;
   private deleteSymbolsStmt!: Database.Statement;
@@ -162,8 +162,8 @@ export class SqliteDB extends BaseSqliteDB {
       "DELETE FROM relations WHERE from_id IN (SELECT e.id FROM entities e JOIN scopes s ON e.scope_id = s.id WHERE s.file_id = ?)",
     );
 
-    this.deleteRelationsByPathStmt = this.db.prepare(
-      "DELETE FROM relations WHERE json_extract(data_json, '$.filePath') = ?",
+    this.deleteRelationsByFileStmt = this.db.prepare(
+      "DELETE FROM relations WHERE file_id = ?",
     );
 
     this.deleteExportsStmt = this.db.prepare(
@@ -212,6 +212,10 @@ export class SqliteDB extends BaseSqliteDB {
         );
 
         const fileId = info.lastInsertRowid as number;
+
+        // Purge stale relations for this file before persisting fresh ones,
+        // so relations removed from the current source aren't resurrected.
+        this.deleteRelationsByFileStmt.run(fileId);
 
         const batch: DBBatch = {
           entities: new Set(),
@@ -704,6 +708,28 @@ export class SqliteDB extends BaseSqliteDB {
     }
   }
 
+  /**
+   * Purge DB rows for files that are no longer present in the given active
+   * path set. Cascades clean scopes, entities, relations, renders, etc.
+   */
+  public deleteStaleFiles(activePaths: Set<string>) {
+    const allFilePaths = (
+      this.db.prepare("SELECT path FROM files").all() as { path: string }[]
+    ).map((row) => row.path);
+
+    const deleteStmt = this.db.prepare("DELETE FROM files WHERE path = ?");
+    const purge = this.db.transaction((paths: string[]) => {
+      for (const stalePath of paths) {
+        deleteStmt.run(stalePath);
+      }
+    });
+
+    const stale = allFilePaths.filter((p) => !activePaths.has(p));
+    if (stale.length > 0) {
+      purge(stale);
+    }
+  }
+
   public saveFileResults(fileData: FileResultWithPackage | File) {
     this.saveFileResultsTransaction(fileData);
   }
@@ -867,10 +893,10 @@ export class SqliteDB extends BaseSqliteDB {
       .prepare(
         `
       SELECT * FROM relations
-      WHERE json_extract(data_json, '$.filePath') = ?
+      WHERE file_id = ?
     `,
       )
-      .all(filePath) as RelationRow[];
+      .all(fileId) as RelationRow[];
 
     for (const rel of relations) {
       const parent = varMap.get(rel.from_id);

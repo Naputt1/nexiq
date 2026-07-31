@@ -16,17 +16,34 @@ import type {
  * If a worker crashes while handling a task, that task is rejected and the
  * worker slot is removed from the pool. Any tasks still queued when the pool
  * drains below one worker are also rejected.
+ *
+ * Tasks that hang past `TASK_TIMEOUT_MS` are rejected; the hung worker is
+ * retired and, if any surviving workers remain, the task is retried once.
  */
+const TASK_TIMEOUT_MS = 60_000;
+const isDev = process.env.MODE === "development";
+
+function log(...args: unknown[]) {
+  if (isDev) {
+    console.log(...args);
+  }
+}
+
+interface TaskEntry {
+  task: AnalyzerWorkerRequest;
+  resolve: (val: AnalyzerWorkerResponse) => void;
+  reject: (err: Error) => void;
+  retriesLeft: number;
+  timer?: NodeJS.Timeout;
+}
+
 export class WorkerPool {
   private workers: { worker: Worker; idle: boolean }[] = [];
-  private taskQueue: {
-    task: AnalyzerWorkerRequest;
-    resolve: (val: AnalyzerWorkerResponse) => void;
-    reject: (err: Error) => void;
-  }[] = [];
+  private taskQueue: TaskEntry[] = [];
   private currentTasks = new Map<
     Worker,
     {
+      entry: TaskEntry;
       resolve: (val: AnalyzerWorkerResponse) => void;
       reject: (err: Error) => void;
     }
@@ -41,7 +58,7 @@ export class WorkerPool {
     for (let i = 0; i < size; i++) {
       this.spawnWorker();
     }
-    console.log(
+    log(
       `[WorkerPool] Initialized with ${size} persistent workers for ${workerScript}`,
     );
   }
@@ -119,7 +136,7 @@ export class WorkerPool {
     if (!workerInfo) return;
 
     const task = this.currentTasks.get(worker);
-    console.log(
+    log(
       `[WorkerPool] Message received from Worker ${worker.threadId} (task: ${!!task})`,
     );
 
@@ -127,6 +144,9 @@ export class WorkerPool {
     this.currentTasks.delete(worker);
 
     if (task) {
+      if (task.entry.timer) {
+        clearTimeout(task.entry.timer);
+      }
       task.resolve(msg);
     }
     this.nextTask();
@@ -157,6 +177,9 @@ export class WorkerPool {
 
     // Reject the in-flight task so its Promise settles
     if (task) {
+      if (task.entry.timer) {
+        clearTimeout(task.entry.timer);
+      }
       task.reject(err instanceof Error ? err : new Error(String(err)));
     }
 
@@ -168,6 +191,9 @@ export class WorkerPool {
       );
       const drained = this.taskQueue.splice(0);
       for (const queued of drained) {
+        if (queued.timer) {
+          clearTimeout(queued.timer);
+        }
         queued.reject(
           new Error("WorkerPool exhausted: all workers have crashed"),
         );
@@ -179,9 +205,37 @@ export class WorkerPool {
     this.nextTask();
   }
 
+  private onTaskTimeout(entry: TaskEntry, worker: Worker) {
+    const workerIndex = this.workers.findIndex((w) => w.worker === worker);
+    if (workerIndex === -1) return;
+
+    console.error(
+      `[WorkerPool] Task timed out on Worker ${worker.threadId} (retries left: ${entry.retriesLeft}). Retiring worker.`,
+    );
+
+    // Retire the hung worker permanently (no re-spawn).
+    this.workers.splice(workerIndex, 1);
+    this.currentTasks.delete(worker);
+
+    if (entry.retriesLeft > 0) {
+      // Requeue for a surviving worker to retry.
+      entry.retriesLeft -= 1;
+      this.taskQueue.unshift(entry);
+      this.nextTask();
+    } else {
+      entry.reject(new Error("Task timed out"));
+    }
+  }
+
   public runTask(task: AnalyzerWorkerRequest): Promise<AnalyzerWorkerResponse> {
     return new Promise((resolve, reject) => {
-      this.taskQueue.push({ task, resolve, reject });
+      const entry: TaskEntry = {
+        task,
+        resolve,
+        reject,
+        retriesLeft: 1,
+      };
+      this.taskQueue.push(entry);
       this.nextTask();
     });
   }
@@ -189,20 +243,40 @@ export class WorkerPool {
   private nextTask() {
     const idleWorker = this.workers.find((w) => w.idle);
     if (idleWorker && this.taskQueue.length > 0) {
-      const { task, resolve, reject } = this.taskQueue.shift()!;
+      const entry = this.taskQueue.shift()!;
       idleWorker.idle = false;
-      this.currentTasks.set(idleWorker.worker, { resolve, reject });
-      console.log(
-        `[WorkerPool] Task assigned to Worker ${idleWorker.worker.threadId}: ${task.filePaths.length} files`,
+      entry.timer = setTimeout(
+        () => this.onTaskTimeout(entry, idleWorker.worker),
+        TASK_TIMEOUT_MS,
       );
-      idleWorker.worker.postMessage(task);
+      this.currentTasks.set(idleWorker.worker, {
+        entry,
+        resolve: entry.resolve,
+        reject: entry.reject,
+      });
+      log(
+        `[WorkerPool] Task assigned to Worker ${idleWorker.worker.threadId}: ${entry.task.filePaths.length} files`,
+      );
+      idleWorker.worker.postMessage(entry.task);
     }
   }
 
   public async terminate() {
     this.isTerminating = true;
+    for (const queued of this.taskQueue.splice(0)) {
+      if (queued.timer) {
+        clearTimeout(queued.timer);
+      }
+      queued.reject(new Error("WorkerPool terminated"));
+    }
+    for (const [worker, task] of this.currentTasks) {
+      if (task.entry.timer) {
+        clearTimeout(task.entry.timer);
+      }
+      task.reject(new Error("WorkerPool terminated"));
+    }
+    this.currentTasks.clear();
     await Promise.all(this.workers.map((w) => w.worker.terminate()));
     this.workers = [];
-    this.currentTasks.clear();
   }
 }

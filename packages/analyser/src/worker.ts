@@ -142,6 +142,21 @@ if (parentPort) {
       );
     }
 
+    if (!request || typeof request.filePaths === "undefined") {
+      parentPort!.postMessage({
+        type: "batch_result",
+        results: [
+          {
+            type: "file_extract_error",
+            filePath: "",
+            error: "Malformed worker request",
+            parser: "babel",
+          },
+        ],
+      });
+      return;
+    }
+
     for (const filePath of request.filePaths) {
       try {
         if (process.env.MODE === "development") {
@@ -188,10 +203,33 @@ if (parentPort) {
       }
     }
 
-    const response: AnalyzerWorkerResponse = {
-      type: "batch_result",
-      results,
-    };
-    parentPort!.postMessage(response);
+    try {
+      const response: AnalyzerWorkerResponse = {
+        type: "batch_result",
+        results,
+      };
+      parentPort!.postMessage(response);
+    } catch (error) {
+      console.error(
+        `[Worker ${threadId}] Failed to post batch result:`,
+        error,
+      );
+      try {
+        parentPort!.postMessage({
+          type: "batch_result",
+          results: [
+            {
+              type: "file_extract_error",
+              filePath: "",
+              error: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              parser: "babel",
+            },
+          ],
+        });
+      } catch {
+        // Worker is shutting down; nothing more we can do.
+      }
+    }
   });
 }

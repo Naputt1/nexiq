@@ -287,9 +287,13 @@ export class PackageMaster {
       return;
     }
 
-    if (this.packageRow) {
-      this.sqlite.insertPackage(this.packageRow);
-      this.sqlite.clearPackageDependencies(this.packageRow.id);
+    const row: PackageRow | undefined =
+      this.packageRow ??
+      this.buildFallbackPackageRow(this.packageJson, this.srcDir);
+
+    if (row) {
+      this.sqlite.insertPackage(row);
+      this.sqlite.clearPackageDependencies(row.id);
       const raw = this.packageJson.rawData as {
         dependencies?: Record<string, string>;
         devDependencies?: Record<string, string>;
@@ -298,7 +302,7 @@ export class PackageMaster {
         raw.dependencies || {},
       )) {
         this.sqlite.insertPackageDependency({
-          package_id: this.packageRow.id,
+          package_id: row.id,
           dependency_name,
           dependency_version,
           is_dev: false,
@@ -308,13 +312,28 @@ export class PackageMaster {
         raw.devDependencies || {},
       )) {
         this.sqlite.insertPackageDependency({
-          package_id: this.packageRow.id,
+          package_id: row.id,
           dependency_name,
           dependency_version,
           is_dev: true,
         });
       }
     }
+  }
+
+  private buildFallbackPackageRow(
+    packageJson: PackageJsonStore,
+    srcDir: string,
+  ): PackageRow | undefined {
+    const raw = packageJson.rawData as { name?: string };
+    if (!raw.name) return undefined;
+    const packageIdForFile = packageJson.getPackageIdForFile(srcDir);
+    return {
+      id: packageIdForFile ?? srcDir,
+      name: raw.name,
+      version: "",
+      path: srcDir,
+    };
   }
 
   private startRun() {
@@ -670,6 +689,12 @@ export class PackageMaster {
 
       filesToAnalyze.push(fileNameWithSlash);
       this.markFileStatus(fullfileName, "pending");
+    }
+
+    if (this.sqlite) {
+      // Purge cached rows for files that are no longer on disk.
+      const activePaths = new Set(this.files.map((f) => `/${f}`));
+      this.sqlite.deleteStaleFiles(activePaths);
     }
 
     if (this.shouldUseWorkerPool(filesToAnalyze.length)) {
