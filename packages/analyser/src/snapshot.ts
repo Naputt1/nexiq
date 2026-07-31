@@ -47,7 +47,6 @@ export function normalize(data: SnapshotData): SnapshotData {
 export async function runSnapshot(sample: string) {
   const SRC_DIR = `../sample-project/${sample}`;
   const OUT_FILE = `./test/snapshots/${sample}.json`;
-  const PUBLIC_FILE = "../ui/public/graph.json";
 
   assert(fs.existsSync(SRC_DIR), "sample not found: " + SRC_DIR);
 
@@ -83,10 +82,6 @@ export async function runSnapshot(sample: string) {
   );
 
   const normalized = normalize(graph);
-
-  fs.mkdirSync(path.dirname(PUBLIC_FILE), { recursive: true });
-  fs.writeFileSync(PUBLIC_FILE, JSON.stringify(normalized, null, 2));
-  console.log(`Graph written to ${PUBLIC_FILE}`);
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
   fs.writeFileSync(OUT_FILE, JSON.stringify(normalized, null, 2));

@@ -60,7 +60,7 @@ describe("analyser multi-threaded consistency", () => {
   ];
 
   projects.forEach((projectName) => {
-    it(`should produce consistent results for ${projectName} (single vs multi-threaded)`, async () => {
+    it(`should be consistent and match snapshot for ${projectName}`, async () => {
       const projectPath = path.resolve(
         process.cwd(),
         `../sample-project/${projectName}`,
@@ -114,6 +114,18 @@ describe("analyser multi-threaded consistency", () => {
         throw err;
       }
 
+      // Multi-threaded output should also match the stored snapshot.
+      const snapshotPath = path.resolve(
+        process.cwd(),
+        `test/snapshots/${projectName}.json`,
+      );
+      if (fs.existsSync(snapshotPath)) {
+        const snapshotData: SnapshotData = JSON.parse(
+          fs.readFileSync(snapshotPath, "utf-8"),
+        );
+        expect(normalizedMulti).toEqual(normalize(snapshotData as any));
+      }
+
       // Specifically verify class props if it's the 'class-components' project
       if (projectName === "class-components") {
         const file = multiThreadedGraph.files["/src/SimpleClass.tsx"];
@@ -146,38 +158,6 @@ describe("analyser multi-threaded consistency", () => {
         );
         expect(renderEdges.length).toBeGreaterThan(0);
       }
-    });
-
-    it(`should match stored snapshot for ${projectName} in multi-threaded mode`, async () => {
-      const projectPath = path.resolve(
-        process.cwd(),
-        `../sample-project/${projectName}`,
-      );
-
-      const multiThreadedGraph = await analyzeProject(projectPath, {
-        fileWorkerThreads: 2,
-      });
-
-      const snapshotPath = path.resolve(
-        process.cwd(),
-        `test/snapshots/${projectName}.json`,
-      );
-
-      if (!fs.existsSync(snapshotPath)) {
-        console.warn(
-          `Snapshot not found for ${projectName}, skipping comparison`,
-        );
-        return;
-      }
-
-      const snapshotData: SnapshotData = JSON.parse(
-        fs.readFileSync(snapshotPath, "utf-8"),
-      );
-
-      const result = normalize(multiThreadedGraph);
-      const normalizedSnapshot = normalize(snapshotData as any);
-
-      expect(result).toEqual(normalizedSnapshot);
     });
   });
 });
