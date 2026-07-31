@@ -187,11 +187,11 @@ function getLiteralType(literal: t.TSLiteralType): TypeDataLiteralTypeLiteral {
         };
       }
 
-      assert(false, "invlid unary literal type");
+      return { type: "string", value: "" };
     }
   }
 
-  assert(false, "invlid literal type");
+  return { type: "string", value: "" };
 }
 
 function getQualifiedName(tsType: t.TSQualifiedName): string[] {
@@ -447,7 +447,7 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(tsType.typeName),
         };
       } else {
-        assert(false, "invlid type reference");
+        return { type: "any" };
       }
 
       if (tsType.typeParameters) {
@@ -497,7 +497,7 @@ export function getType(tsType: t.TSType | t.TSTypeAnnotation): TypeData {
           names: getQualifiedName(expr),
         };
       } else {
-        assert(false, "invlid type reference");
+        return { type: "any" };
       }
 
       if (tsType.typeParameters) {
