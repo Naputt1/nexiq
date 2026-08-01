@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { performance } from "node:perf_hooks";
 import type {
   ComponentDBResolve,
   ComponentFile,
@@ -20,6 +21,7 @@ import { PackageMaster } from "./packageMaster.ts";
 import type {
   AnalyzeProjectOptions,
   PackageAnalysisSummary,
+  PhaseCallback,
   ResolvedCrossPackageRelation,
   WorkspaceAnalysisHandoff,
   WorkspaceExternalImport,
@@ -30,6 +32,30 @@ import { resolvePath } from "./utils/path.ts";
 
 function getWorkspaceRunId(rootDir: string) {
   return `workspace:${rootDir.replace(/[^a-zA-Z0-9_-]/g, "_")}:${Date.now()}`;
+}
+
+function withPhase<T>(
+  onPhase: PhaseCallback | undefined,
+  phase: string,
+  fn: () => T,
+): T {
+  if (!onPhase) return fn();
+  const start = performance.now();
+  const result = fn();
+  onPhase(phase, performance.now() - start);
+  return result;
+}
+
+async function withPhaseAsync<T>(
+  onPhase: PhaseCallback | undefined,
+  phase: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  if (!onPhase) return fn();
+  const start = performance.now();
+  const result = await fn();
+  onPhase(phase, performance.now() - start);
+  return result;
 }
 
 async function runWithConcurrency<T>(
@@ -1003,10 +1029,12 @@ export interface CentralMasterOptions extends AnalyzeProjectOptions {
 export class CentralMaster {
   private readonly srcDir: string;
   private readonly options: CentralMasterOptions;
+  private readonly onPhase: PhaseCallback | undefined;
 
   constructor(options: CentralMasterOptions) {
     this.srcDir = options.srcDir;
     this.options = options;
+    this.onPhase = options.onPhase;
   }
 
   private mergePackageGraphs(
@@ -1080,9 +1108,11 @@ export class CentralMaster {
 
   public async analyzeWorkspace(): Promise<JsonData> {
     const rootDir = resolvePath(this.srcDir).replace(/[/\\]$/, "");
-    const discoveredPackages = (await discoverWorkspacePackages(rootDir)).sort(
-      (a, b) => (a.path || "").localeCompare(b.path || ""),
-    );
+    const discoveredPackages = (
+      await withPhaseAsync(this.onPhase, "discoverPackages", async () =>
+        discoverWorkspacePackages(rootDir),
+      )
+    ).sort((a, b) => (a.path || "").localeCompare(b.path || ""));
 
     const normalize = (p: string) => {
       if (!p) {
@@ -1123,9 +1153,10 @@ export class CentralMaster {
           `Falling back to single package analysis.`,
       );
       const packageJson = new PackageJson(rootDir);
-      const sqlite = this.options.sqlitePath
-        ? new SqliteDB(this.options.sqlitePath)
-        : undefined;
+      const sqlite =
+        this.options.sqlitePath && this.options.persist !== false
+          ? new SqliteDB(this.options.sqlitePath)
+          : undefined;
       try {
         const master = new PackageMaster({
           srcDir: rootDir,
@@ -1135,6 +1166,7 @@ export class CentralMaster {
           cacheData: this.options.cacheData,
           sqlite,
           threads: this.options.fileWorkerThreads,
+          onPhase: this.onPhase,
         });
         const summary = await master.analyzePackage();
         return summary.graph;
@@ -1150,7 +1182,8 @@ export class CentralMaster {
       this.options.centralSqlitePath ||
       path.join(rootDir, ".nexiq", "workspace.sqlite");
 
-    const workspaceDb = new WorkspaceSqliteDB(centralDbPath);
+    const persist = this.options.persist !== false;
+    const workspaceDb = persist ? new WorkspaceSqliteDB(centralDbPath) : null;
     const runId = getWorkspaceRunId(rootDir);
     const summaries: (PackageAnalysisSummary & { dbPath: string })[] = [];
     const packageDirById = new Map<string, string>();
@@ -1177,7 +1210,7 @@ export class CentralMaster {
       .filter((pkg) => pkg.path !== rootDir)
       .map((pkg) => path.relative(rootDir, pkg.path) + "/**");
 
-    workspaceDb.beginWorkspaceRun({
+    workspaceDb?.beginWorkspaceRun({
       id: runId,
       root_dir: rootDir,
       status: "running",
@@ -1185,41 +1218,45 @@ export class CentralMaster {
     });
 
     try {
-      await runWithConcurrency(packages, packageConcurrency, async (pkg) => {
-        const packageJson = new PackageJson(pkg.path);
-        const dbPath = getPackageDbPath(packageDbDir, pkg.path);
-        const sqlite = new SqliteDB(dbPath);
-        try {
-          const extraIgnores = pkg.path === rootDir ? subPackageDirs : [];
-          const master = new PackageMaster({
-            srcDir: pkg.path,
-            viteConfigPath: getViteConfig(pkg.path),
-            files: getFiles(pkg.path, [
-              ...(this.options.ignorePatterns || []),
-              ...extraIgnores,
-            ]),
-            packageJson,
-            cacheData: undefined,
-            sqlite,
-            threads: effectiveFileWorkerThreads,
-          });
-          const summary = await master.analyzePackage();
-          summaries.push({
-            ...summary,
-            dbPath,
-          });
-          packageDirById.set(summary.packageId, pkg.path);
-          packageByName.set(summary.packageName, {
-            packageId: summary.packageId,
-            handoff: summary.workspaceHandoff,
-            srcDir: pkg.path,
-          });
-        } finally {
-          sqlite.close();
-        }
+      await withPhaseAsync(this.onPhase, "packages", async () => {
+        await runWithConcurrency(packages, packageConcurrency, async (pkg) => {
+          const packageJson = new PackageJson(pkg.path);
+          const dbPath = getPackageDbPath(packageDbDir, pkg.path);
+          const sqlite = persist ? new SqliteDB(dbPath) : undefined;
+          try {
+            const extraIgnores = pkg.path === rootDir ? subPackageDirs : [];
+            const master = new PackageMaster({
+              srcDir: pkg.path,
+              viteConfigPath: getViteConfig(pkg.path),
+              files: getFiles(pkg.path, [
+                ...(this.options.ignorePatterns || []),
+                ...extraIgnores,
+              ]),
+              packageJson,
+              cacheData: undefined,
+              sqlite,
+              threads: effectiveFileWorkerThreads,
+              onPhase: this.onPhase,
+            });
+            const summary = await master.analyzePackage();
+            summaries.push({
+              ...summary,
+              dbPath,
+            });
+            packageDirById.set(summary.packageId, pkg.path);
+            packageByName.set(summary.packageName, {
+              packageId: summary.packageId,
+              handoff: summary.workspaceHandoff,
+              srcDir: pkg.path,
+            });
+          } finally {
+            sqlite?.close();
+          }
+        });
       });
 
       // Sequential database updates to avoid better-sqlite3 transaction conflicts
+      withPhase(this.onPhase, "workspaceDb", () => {
       for (const summary of summaries) {
         const pkgPath = packageDirById.get(summary.packageId)!;
         const workspacePackage: WorkspacePackageRow = {
@@ -1234,28 +1271,30 @@ export class CentralMaster {
           workspacePackage.version = originalPkg.version;
         }
 
-        try {
-          workspaceDb.db.transaction(() => {
-            workspaceDb.upsertWorkspacePackage(workspacePackage);
-            workspaceDb.clearPackageDependencies(summary.packageId);
-            for (const dep of summary.workspaceHandoff.dependencies) {
-              workspaceDb.insertPackageDependency({
-                package_id: summary.packageId,
-                dependency_name: dep.name,
-                dependency_version: dep.version,
-                is_dev: dep.isDev,
-              });
-            }
-          })();
-        } catch (err: unknown) {
-          console.error(
-            `Error updating workspace DB for package ${summary.packageId}:`,
-            err,
-          );
-          throw err;
+        if (workspaceDb) {
+          try {
+            workspaceDb.db.transaction(() => {
+              workspaceDb.upsertWorkspacePackage(workspacePackage);
+              workspaceDb.clearPackageDependencies(summary.packageId);
+              for (const dep of summary.workspaceHandoff.dependencies) {
+                workspaceDb.insertPackageDependency({
+                  package_id: summary.packageId,
+                  dependency_name: dep.name,
+                  dependency_version: dep.version,
+                  is_dev: dep.isDev,
+                });
+              }
+            })();
+          } catch (err: unknown) {
+            console.error(
+              `Error updating workspace DB for package ${summary.packageId}:`,
+              err,
+            );
+            throw err;
+          }
         }
 
-        workspaceDb.insertPackageRunSummary({
+        workspaceDb?.insertPackageRunSummary({
           id: `${runId}:${summary.packageId}`,
           workspace_run_id: runId,
           package_id: summary.packageId,
@@ -1271,7 +1310,7 @@ export class CentralMaster {
         });
 
         for (const pkgExport of summary.workspaceHandoff.exports) {
-          workspaceDb.insertPackageExport({
+          workspaceDb?.insertPackageExport({
             id: `${runId}:${pkgExport.packageId}:${pkgExport.filePath}:${pkgExport.exportName}:${pkgExport.exportType}`,
             run_id: runId,
             package_id: pkgExport.packageId,
@@ -1286,7 +1325,7 @@ export class CentralMaster {
         }
 
         for (const externalImport of summary.workspaceHandoff.externalImports) {
-          workspaceDb.insertDeferredExternalImport({
+          workspaceDb?.insertDeferredExternalImport({
             id: `${runId}:${externalImport.packageId}:${externalImport.filePath}:${externalImport.localName}:${externalImport.sourceModule}`,
             run_id: runId,
             package_id: externalImport.packageId,
@@ -1302,20 +1341,26 @@ export class CentralMaster {
           });
         }
       }
+      });
 
-      const merged = this.mergePackageGraphs(summaries, packageDirById);
-      for (const summary of summaries) {
-        const pkg = packageByName.get(summary.packageName);
-        const packageDir =
-          packageDirById.get(summary.packageId) || summary.srcDir;
-        if (pkg) {
-          pkg.remapContext = buildPackageGraphRemapContext(
-            rootDir,
-            packageDir,
-            summary,
-          );
+      const merged = withPhase(this.onPhase, "merge", () =>
+        this.mergePackageGraphs(summaries, packageDirById),
+      );
+      withPhase(this.onPhase, "remap", () => {
+        for (const summary of summaries) {
+          const pkg = packageByName.get(summary.packageName);
+          const packageDir =
+            packageDirById.get(summary.packageId) || summary.srcDir;
+          if (pkg) {
+            pkg.remapContext = buildPackageGraphRemapContext(
+              rootDir,
+              packageDir,
+              summary,
+            );
+          }
         }
-      }
+      });
+      const crossPackageResolveStart = performance.now();
       const crossPackageErrorsByPackage = new Map<string, number>();
       const canonicalImportResolutions = new Map<string, string>();
       const namespaceBindings = new Map<string, NamespaceBinding>();
@@ -1377,7 +1422,7 @@ export class CentralMaster {
           }
           if (!targetPackage) {
             const message = `Failed to resolve workspace package import ${externalImport.sourceModule}`;
-            workspaceDb.insertCrossPackageResolveError({
+            workspaceDb?.insertCrossPackageResolveError({
               id: getCrossPackageErrorId(runId, externalImport),
               run_id: runId,
               from_package_id: summary.packageId,
@@ -1413,7 +1458,7 @@ export class CentralMaster {
             const message =
               resolution.error ||
               `Failed to resolve import ${externalImport.sourceModule}`;
-            workspaceDb.insertCrossPackageResolveError({
+            workspaceDb?.insertCrossPackageResolveError({
               id: getCrossPackageErrorId(runId, externalImport),
               run_id: runId,
               from_package_id: summary.packageId,
@@ -1440,7 +1485,7 @@ export class CentralMaster {
           }
 
           const relation = resolution.relation;
-          workspaceDb.insertPackageRelation({
+          workspaceDb?.insertPackageRelation({
             from_package_id: relation.fromPackageId,
             to_package_id: relation.toPackageId,
             relation_kind: relation.relationKind,
@@ -1521,7 +1566,7 @@ export class CentralMaster {
             }
             seenTypeErrors.add(key);
 
-            workspaceDb.insertCrossPackageResolveError({
+            workspaceDb?.insertCrossPackageResolveError({
               id: `${runId}:${owner.packageId}:${file.path}:${exportName}:${sourceModule}:type`,
               run_id: runId,
               from_package_id: owner.packageId,
@@ -1584,24 +1629,28 @@ export class CentralMaster {
           summary.filesFailed > 0 ||
           summary.resolveErrors > 0 ||
           (crossPackageErrorsByPackage.get(summary.packageId) || 0) > 0;
-        workspaceDb.updatePackageRunSummaryStatus(
+        workspaceDb?.updatePackageRunSummaryStatus(
           summaryId,
           hasErrors ? "completed_with_errors" : "completed",
         );
       }
 
-      workspaceDb.finishWorkspaceRun(
+      workspaceDb?.finishWorkspaceRun(
         runId,
         totalCrossPackageErrors > 0 || totalPackageErrors > 0
           ? "completed_with_errors"
           : "completed",
       );
+      this.onPhase?.(
+        "crossPackageResolve",
+        performance.now() - crossPackageResolveStart,
+      );
       return merged;
     } catch (err: unknown) {
-      workspaceDb.finishWorkspaceRun(runId, "failed");
+      workspaceDb?.finishWorkspaceRun(runId, "failed");
       throw err;
     } finally {
-      workspaceDb.close();
+      workspaceDb?.close();
     }
   }
 }

@@ -1,9 +1,8 @@
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execSync } from "node:child_process";
 import type { CaseResult } from "./case.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,7 +24,9 @@ const TIERS: Tier[] = [
 interface CliArgs {
   projects: string[];
   threads: number;
+  packageConcurrency?: number;
   reps: number;
+  noSqlite: boolean;
   out?: string;
   nodeArgs: string[];
 }
@@ -33,8 +34,9 @@ interface CliArgs {
 function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     projects: [],
-    threads: Math.min(os.cpus().length, 4),
+    threads: os.cpus().length,
     reps: 3,
+    noSqlite: false,
     nodeArgs: ["--max-old-space-size=4096"],
   };
   for (let i = 0; i < argv.length; i++) {
@@ -67,6 +69,14 @@ function parseArgs(argv: string[]): CliArgs {
       case "--threads":
       case "-t":
         args.threads = parseNumber("--threads", next());
+        break;
+      case "--package-concurrency":
+      case "--pkg-concurrency":
+        args.packageConcurrency = parseNumber("--package-concurrency", next());
+        break;
+      case "--no-sqlite":
+      case "--in-memory":
+        args.noSqlite = true;
         break;
       case "--reps":
       case "-r":
@@ -104,7 +114,9 @@ function runCase(
   payload: {
     project: string;
     mode: "serial" | "parallel";
-    threads: number;
+    fileWorkerThreads: number;
+    packageConcurrency?: number;
+    persist?: boolean;
     rep: number;
     root: string;
   },
@@ -126,19 +138,24 @@ function runCase(
       stderr += data.toString();
     });
 
+    const errorResult = (error: string): CaseResult => ({
+      project: payload.project,
+      mode: payload.mode,
+      fileWorkerThreads: payload.fileWorkerThreads,
+      packageConcurrency: payload.packageConcurrency,
+      persist: payload.persist !== false,
+      rep: payload.rep,
+      durationMs: 0,
+      peakRssBytes: 0,
+      peakHeapBytes: 0,
+      filesTotal: 0,
+      resolveErrors: 0,
+      phases: {},
+      error,
+    });
+
     child.on("error", (error) => {
-      resolve({
-        project: payload.project,
-        mode: payload.mode,
-        threads: payload.threads,
-        rep: payload.rep,
-        durationMs: 0,
-        peakRssBytes: 0,
-        peakHeapBytes: 0,
-        filesTotal: 0,
-        resolveErrors: 0,
-        error: error.message,
-      });
+      resolve(errorResult(error.message));
     });
 
     child.on("close", (code) => {
@@ -155,20 +172,14 @@ function runCase(
           // fall through to error result
         }
       }
-      resolve({
-        project: payload.project,
-        mode: payload.mode,
-        threads: payload.threads,
-        rep: payload.rep,
-        durationMs: 0,
-        peakRssBytes: 0,
-        peakHeapBytes: 0,
-        filesTotal: 0,
-        resolveErrors: 0,
-        error:
+      resolve(
+        errorResult(
           stderr.trim() ||
-          (code === 0 ? "Failed to parse case output" : `Exited with code ${code}`),
-      });
+            (code === 0
+              ? "Failed to parse case output"
+              : `Exited with code ${code}`),
+        ),
+      );
     });
   });
 }
@@ -186,11 +197,49 @@ function formatBytes(bytes: number): string {
 
 interface ModeSummary {
   mode: "serial" | "parallel";
-  threads: number;
+  fileWorkerThreads: number;
+  packageConcurrency?: number;
   medianMs: number;
   peakRssBytes: number;
   filesTotal: number;
   failedReps: number;
+  phases: Record<string, number>;
+}
+
+function pickMedianRep(cases: CaseResult[], medianMs: number): CaseResult {
+  const ok = cases.filter((c) => !c.error);
+  if (ok.length === 0) {
+    return cases[0];
+  }
+  return ok.reduce((closest, c) =>
+    Math.abs(c.durationMs - medianMs) < Math.abs(closest.durationMs - medianMs)
+      ? c
+      : closest,
+  );
+}
+
+function summarize(
+  mode: "serial" | "parallel",
+  fileWorkerThreads: number,
+  packageConcurrency: number | undefined,
+  cases: CaseResult[],
+): ModeSummary {
+  const ok = cases.filter((c) => !c.error);
+  const medianMs = median(ok.map((c) => c.durationMs));
+  return {
+    mode,
+    fileWorkerThreads,
+    packageConcurrency,
+    medianMs,
+    peakRssBytes: Math.max(0, ...ok.map((c) => c.peakRssBytes)),
+    filesTotal: ok[0]?.filesTotal ?? 0,
+    failedReps: cases.length - ok.length,
+    phases: pickMedianRep(cases, medianMs).phases ?? {},
+  };
+}
+
+function phaseRows(phases: Record<string, number>): [string, number][] {
+  return Object.entries(phases).sort((a, b) => b[1] - a[1]);
 }
 
 async function main() {
@@ -213,13 +262,20 @@ async function main() {
     `Analysis benchmark: ${projects.map((p) => p.name).join(", ")} x ${args.reps} reps`,
   );
   console.log(
-    `  serial   -> fileWorkerThreads: 1`,
+    `  serial   -> fileWorkerThreads: 1, packageConcurrency: 1 (true serial)`,
   );
-  console.log(`  parallel -> fileWorkerThreads: ${args.threads}`);
+  console.log(
+    `  parallel -> fileWorkerThreads: ${args.threads}, packageConcurrency: ${
+      args.packageConcurrency ?? "auto"
+    }, persist: ${args.noSqlite ? "off" : "on"}`,
+  );
   console.log("");
 
   const allResults: CaseResult[] = [];
-  const summaryByProject = new Map<string, { serial: ModeSummary; parallel: ModeSummary }>();
+  const summaryByProject = new Map<
+    string,
+    { serial: ModeSummary; parallel: ModeSummary }
+  >();
 
   for (const project of projects) {
     const absoluteRoot = path.resolve(REPO_ROOT, project.root);
@@ -229,14 +285,25 @@ async function main() {
     };
 
     for (const mode of ["serial", "parallel"] as const) {
-      const threads = mode === "serial" ? 1 : args.threads;
+      const fileWorkerThreads =
+        mode === "serial" ? 1 : args.threads;
+      const packageConcurrency =
+        mode === "serial" ? 1 : args.packageConcurrency;
       for (let rep = 1; rep <= args.reps; rep++) {
         process.stdout.write(
           `  [${project.name}/${mode}] rep ${rep}/${args.reps}...`,
         );
         const result = await runCase(
           caseScript,
-          { project: project.name, mode, threads, rep, root: absoluteRoot },
+          {
+            project: project.name,
+            mode,
+            fileWorkerThreads,
+            packageConcurrency,
+            persist: !args.noSqlite,
+            rep,
+            root: absoluteRoot,
+          },
           args.nodeArgs,
         );
         allResults.push(result);
@@ -251,31 +318,26 @@ async function main() {
       }
     }
 
-    const summarize = (
-      mode: "serial" | "parallel",
-      cases: CaseResult[],
-    ): ModeSummary => {
-      const ok = cases.filter((c) => !c.error);
-      return {
-        mode,
-        threads: mode === "serial" ? 1 : args.threads,
-        medianMs: median(ok.map((c) => c.durationMs)),
-        peakRssBytes: Math.max(0, ...ok.map((c) => c.peakRssBytes)),
-        filesTotal: ok[0]?.filesTotal ?? 0,
-        failedReps: cases.length - ok.length,
-      };
-    };
-
     summaryByProject.set(project.name, {
-      serial: summarize("serial", byMode.serial),
-      parallel: summarize("parallel", byMode.parallel),
+      serial: summarize(
+        "serial",
+        1,
+        1,
+        byMode.serial,
+      ),
+      parallel: summarize(
+        "parallel",
+        args.threads,
+        args.packageConcurrency,
+        byMode.parallel,
+      ),
     });
   }
 
   console.log("");
   console.log("Summary");
   console.log(
-    "  Project | Mode     | Threads | Median   | Peak RSS  | Files      | Speedup",
+    "  Project | Mode     | FileThreads | PkgConcurrency | Median   | Peak RSS  | Files | Speedup",
   );
   for (const project of projects) {
     const s = summaryByProject.get(project.name)!;
@@ -284,10 +346,35 @@ async function main() {
       ["serial", s.serial],
       ["parallel", s.parallel],
     ] as const) {
-      const suffix = sum.failedReps > 0 ? ` (${sum.failedReps} rep(s) failed)` : "";
+      const suffix =
+        sum.failedReps > 0 ? ` (${sum.failedReps} rep(s) failed)` : "";
       console.log(
-        `  ${project.name.padEnd(7)} | ${label.padEnd(10)} | ${String(sum.threads).padEnd(7)} | ${formatMs(sum.medianMs).padEnd(8)} | ${formatBytes(sum.peakRssBytes).padEnd(9)} | ${sum.filesTotal}${suffix} | ${label === "parallel" ? `${speedup.toFixed(2)}x` : "-"}`,
+        `  ${project.name.padEnd(7)} | ${label.padEnd(10)} | ${String(sum.fileWorkerThreads).padEnd(11)} | ${String(sum.packageConcurrency ?? "-").padEnd(13)} | ${formatMs(sum.medianMs).padEnd(8)} | ${formatBytes(sum.peakRssBytes).padEnd(9)} | ${sum.filesTotal}${suffix} | ${label === "parallel" ? `${speedup.toFixed(2)}x` : "-"}`,
       );
+    }
+  }
+
+  console.log("");
+  console.log("Phase breakdown (median rep, cumulative ms)");
+  console.log("  Project | Mode     | Phase              | Time");
+  for (const project of projects) {
+    const s = summaryByProject.get(project.name)!;
+    for (const [label, sum] of [
+      ["serial", s.serial],
+      ["parallel", s.parallel],
+    ] as const) {
+      const rows = phaseRows(sum.phases);
+      if (rows.length === 0) {
+        console.log(
+          `  ${project.name.padEnd(7)} | ${label.padEnd(10)} | (no phase data)`,
+        );
+        continue;
+      }
+      for (const [phase, ms] of rows) {
+        console.log(
+          `  ${project.name.padEnd(7)} | ${label.padEnd(10)} | ${phase.padEnd(19)} | ${formatMs(ms)}`,
+        );
+      }
     }
   }
 
@@ -319,8 +406,10 @@ async function main() {
     },
     config: {
       projects: projects.map((p) => p.name),
-      threads: args.threads,
+      fileWorkerThreads: args.threads,
+      packageConcurrency: args.packageConcurrency,
       reps: args.reps,
+      persist: !args.noSqlite,
     },
     summary: Object.fromEntries(
       [...summaryByProject.entries()].map(([name, s]) => [

@@ -81,7 +81,7 @@ export async function analyzeProject(
   const files = getFiles(srcDir, activeIgnorePatterns || []);
   let sqlite: SqliteDB | undefined;
 
-  if (options.sqlitePath) {
+  if (options.sqlitePath && options.persist !== false) {
     sqlite = new SqliteDB(options.sqlitePath);
   }
 
@@ -94,6 +94,7 @@ export async function analyzeProject(
       cacheData,
       sqlite,
       options.fileWorkerThreads,
+      options.onPhase,
     );
   } finally {
     sqlite?.close();

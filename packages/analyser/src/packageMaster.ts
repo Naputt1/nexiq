@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import type {
   ComponentFile,
@@ -50,6 +51,7 @@ import type {
   FileTaskMessage,
   FileRunStatus,
   PackageAnalysisSummary,
+  PhaseCallback,
   WorkspaceAnalysisHandoff,
   WorkspaceExternalImport,
   WorkspacePackageDependency,
@@ -59,12 +61,38 @@ import { resolvePath } from "./utils/path.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const MIN_FILES_FOR_WORKERS = 24;
+// Worker startup (fresh V8 isolate loading babel + analyser) measures ~150-200ms
+// wall, so the pool only pays off for projects large enough to amortize it.
+const MIN_FILES_FOR_WORKERS = 150;
 const MIN_FILES_PER_WORKER = 8;
 
 function createRunId(prefix: string, scope: string) {
   const safeScope = scope.replace(/[^a-zA-Z0-9_-]/g, "_");
   return `${prefix}:${safeScope}:${Date.now()}`;
+}
+
+function withPhase<T>(
+  onPhase: PhaseCallback | undefined,
+  phase: string,
+  fn: () => T,
+): T {
+  if (!onPhase) return fn();
+  const start = performance.now();
+  const result = fn();
+  onPhase(phase, performance.now() - start);
+  return result;
+}
+
+async function withPhaseAsync<T>(
+  onPhase: PhaseCallback | undefined,
+  phase: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  if (!onPhase) return fn();
+  const start = performance.now();
+  const result = await fn();
+  onPhase(phase, performance.now() - start);
+  return result;
 }
 
 function getPackageRow(
@@ -234,6 +262,7 @@ export interface PackageMasterOptions {
   cacheData: JsonData | undefined;
   sqlite: SqliteDB | undefined;
   threads: number | undefined;
+  onPhase?: PhaseCallback | undefined;
 }
 
 export class PackageMaster {
@@ -244,6 +273,9 @@ export class PackageMaster {
   private readonly cacheData: JsonData | undefined;
   private readonly sqlite: SqliteDB | undefined;
   private readonly threads: number;
+  private readonly onPhase: PhaseCallback | undefined;
+  private mainReconstructMs = 0;
+  private sqliteWriteMs = 0;
   private readonly viteAliases: Record<string, string>;
   private readonly tsConfigManager: TsConfigManager;
   private readonly componentDB: ComponentDB;
@@ -259,6 +291,7 @@ export class PackageMaster {
     this.packageJson = options.packageJson;
     this.cacheData = options.cacheData;
     this.sqlite = options.sqlite;
+    this.onPhase = options.onPhase;
     this.threads =
       options.threads ??
       (process.env.VITEST || process.env.SNAPSHOT ? 1 : Math.min(os.cpus().length, 4));
@@ -613,6 +646,13 @@ export class PackageMaster {
     );
   }
 
+  private getWorkerCount(fileCount: number) {
+    // Don't spawn `threads` workers for a project that only has a handful of
+    // files — scale the pool down to roughly one worker per MIN_FILES_PER_WORKER.
+    const scaled = Math.ceil(fileCount / MIN_FILES_PER_WORKER);
+    return Math.max(1, Math.min(this.threads, scaled));
+  }
+
   private getBatchSize(fileCount: number, workerCount: number) {
     const target = Math.ceil(fileCount / Math.max(workerCount * 2, 1));
     return Math.max(4, Math.min(100, target));
@@ -625,8 +665,11 @@ export class PackageMaster {
   ) {
     if (message.type === "file_success") {
       const result = message.result;
+      const reconstructStart = performance.now();
       this.componentDB.addFile(filePath, result);
+      this.mainReconstructMs += performance.now() - reconstructStart;
       this.componentDB.addResolveTasks(message.resolveTasks);
+      const sqliteStart = performance.now();
       this.markFileStatus(filePath, "parsed", {
         fileHash: result.hash,
         fingerprint: result.fingerPrint,
@@ -640,6 +683,7 @@ export class PackageMaster {
           this.packageRow?.id,
         );
       }
+      this.sqliteWriteMs += performance.now() - sqliteStart;
       succeededFiles.push(filePath);
       return false;
     }
@@ -670,34 +714,47 @@ export class PackageMaster {
   public async analyzePackage(): Promise<PackageAnalysisSummary> {
     this.upsertPackageMetadata();
     this.startRun();
+    this.mainReconstructMs = 0;
+    this.sqliteWriteMs = 0;
 
     const filesToAnalyze: string[] = [];
     const succeededFiles: string[] = [];
     let filesFailed = 0;
 
-    for (const fullfileName of this.files) {
-      const fileNameWithSlash = `/${fullfileName}`;
-      let fileCache: ComponentFile | undefined =
-        this.cacheData?.files?.[fileNameWithSlash];
-      if (!fileCache && this.sqlite) {
-        fileCache = this.sqlite.getLatestSuccessfulFileResult(fullfileName);
+    withPhase(this.onPhase, "discover", () => {
+      for (const fullfileName of this.files) {
+        const fileNameWithSlash = `/${fullfileName}`;
+        let fileCache: ComponentFile | undefined =
+          this.cacheData?.files?.[fileNameWithSlash];
+        if (!fileCache && this.sqlite) {
+          fileCache = this.sqlite.getLatestSuccessfulFileResult(fullfileName);
+        }
+
+        if (!this.componentDB.addFile(fileNameWithSlash, fileCache)) {
+          continue;
+        }
+
+        filesToAnalyze.push(fileNameWithSlash);
+        this.markFileStatus(fullfileName, "pending");
       }
 
-      if (!this.componentDB.addFile(fileNameWithSlash, fileCache)) {
-        continue;
+      if (this.sqlite) {
+        // Purge cached rows for files that are no longer on disk.
+        const activePaths = new Set(this.files.map((f) => `/${f}`));
+        this.sqlite.deleteStaleFiles(activePaths);
       }
+    });
 
-      filesToAnalyze.push(fileNameWithSlash);
-      this.markFileStatus(fullfileName, "pending");
-    }
+    let workerPool: WorkerPool | undefined;
+    let workerStartupWall = 0;
+    let workerStartupTotal = 0;
+    let ipcWaitMs = 0;
+    let workerCpuTotalMs = 0;
+    let workerSerializeTotalMs = 0;
+    let mainMergeMs = 0;
 
-    if (this.sqlite) {
-      // Purge cached rows for files that are no longer on disk.
-      const activePaths = new Set(this.files.map((f) => `/${f}`));
-      this.sqlite.deleteStaleFiles(activePaths);
-    }
-
-    if (this.shouldUseWorkerPool(filesToAnalyze.length)) {
+    await withPhaseAsync(this.onPhase, "analyze", async () => {
+      if (this.shouldUseWorkerPool(filesToAnalyze.length)) {
       const ext = import.meta.url.endsWith(".ts") ? ".ts" : ".js";
       let workerScript = fileURLToPath(
         new URL(`./worker${ext}`, import.meta.url),
@@ -710,14 +767,21 @@ export class PackageMaster {
         workerScript = distWorker;
       }
 
-      const pool = new WorkerPool(this.threads, workerScript, {
-        srcDir: this.srcDir,
-        viteAliases: this.viteAliases,
-        packageJsonData: this.packageJson.rawData,
-        runId: this.runId,
-        tsConfigMap: this.tsConfigManager.toJSON(),
-      });
-      const batchSize = this.getBatchSize(filesToAnalyze.length, this.threads);
+      workerPool = new WorkerPool(
+        this.getWorkerCount(filesToAnalyze.length),
+        workerScript,
+        {
+          srcDir: this.srcDir,
+          viteAliases: this.viteAliases,
+          packageJsonData: this.packageJson.rawData,
+          runId: this.runId,
+          tsConfigMap: this.tsConfigManager.toJSON(),
+        },
+      );
+      const batchSize = this.getBatchSize(
+        filesToAnalyze.length,
+        this.getWorkerCount(filesToAnalyze.length),
+      );
       const batches: string[][] = [];
       for (let index = 0; index < filesToAnalyze.length; index += batchSize) {
         batches.push(filesToAnalyze.slice(index, index + batchSize));
@@ -729,14 +793,19 @@ export class PackageMaster {
             this.markFileStatus(filePath, "running");
           }
           try {
-            const response = await pool.runTask({
+            const ipcStart = performance.now();
+            const response = await workerPool!.runTask({
               type: "analyze_files",
               filePaths: batch,
             });
+            ipcWaitMs += performance.now() - ipcStart;
+            workerCpuTotalMs += response.workerCpuMs || 0;
+            workerSerializeTotalMs += response.serializeMs || 0;
             const resultByFile = new Map(
               response.results.map((item) => [item.filePath, item]),
             );
 
+            const mergeStart = performance.now();
             const processBatch = this.sqlite?.db.transaction(() => {
               for (const filePath of batch) {
                 const message = resultByFile.get(filePath);
@@ -777,6 +846,7 @@ export class PackageMaster {
                 }
               }
             }
+            mainMergeMs += performance.now() - mergeStart;
           } catch (error) {
             const err =
               error instanceof Error ? error : new Error(String(error));
@@ -791,7 +861,10 @@ export class PackageMaster {
         }),
       );
 
-      await pool.terminate();
+      const startupMs = workerPool.getStartupMs();
+      workerStartupWall = startupMs.wall;
+      workerStartupTotal = startupMs.total;
+      await workerPool!.terminate();
     } else {
       for (const filePath of filesToAnalyze) {
         this.markFileStatus(filePath, "running");
@@ -831,15 +904,34 @@ export class PackageMaster {
         }
       }
     }
+    });
+
+    // Split the "analyze" phase into its overhead components (worker path only).
+    if (workerPool) {
+      this.onPhase?.("workerStartupWall", workerStartupWall);
+      this.onPhase?.("workerStartupTotal", workerStartupTotal);
+      this.onPhase?.("workerCpu", workerCpuTotalMs);
+      this.onPhase?.("workerSerialize", workerSerializeTotalMs);
+      this.onPhase?.("ipcWait", ipcWaitMs);
+      this.onPhase?.("mainMerge", mainMergeMs);
+      this.onPhase?.("mainReconstruct", this.mainReconstructMs);
+      this.onPhase?.("sqliteWrite", this.sqliteWriteMs);
+    }
 
     for (const filePath of succeededFiles) {
       this.markFileStatus(filePath, "resolve_pending");
     }
 
-    const unresolvedTasks = this.componentDB.resolve();
-    this.componentDB.resolveDependency();
+    const unresolvedTasks = withPhase(this.onPhase, "resolve", () =>
+      this.componentDB.resolve(),
+    );
+    withPhase(this.onPhase, "resolveDependency", () => {
+      this.componentDB.resolveDependency();
+    });
 
-    const edges = this.componentDB.getEdges();
+    const edges = withPhase(this.onPhase, "edges", () =>
+      this.componentDB.getEdges(),
+    );
 
     if (this.sqlite) {
       this.sqlite.saveEdges(edges);
@@ -875,6 +967,13 @@ export class PackageMaster {
       );
     }
 
+    const graph = withPhase(this.onPhase, "getData", () =>
+      this.componentDB.getData(),
+    );
+    const workspaceHandoff = withPhase(this.onPhase, "buildHandoff", () =>
+      this.buildWorkspaceHandoff(unresolvedTasks),
+    );
+
     return {
       packageId: this.packageRow?.id || this.srcDir,
       packageName: this.packageName,
@@ -884,8 +983,8 @@ export class PackageMaster {
       filesSucceeded: succeededFiles.length,
       filesFailed,
       resolveErrors: unresolvedTasks.length,
-      graph: { ...this.componentDB.getData(), resolve: unresolvedTasks },
-      workspaceHandoff: this.buildWorkspaceHandoff(unresolvedTasks),
+      graph: { ...graph, resolve: unresolvedTasks },
+      workspaceHandoff,
     };
   }
 }

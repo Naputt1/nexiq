@@ -116,6 +116,8 @@ export interface ResolvedCrossPackageRelation {
   relationKind: "import";
 }
 
+export type PhaseCallback = (phase: string, ms: number) => void;
+
 export interface AnalyzeProjectOptions {
   cacheFile?: string | undefined;
   ignorePatterns?: string[] | undefined;
@@ -126,6 +128,9 @@ export interface AnalyzeProjectOptions {
   packageConcurrency?: number | undefined;
   fileWorkerThreads?: number | undefined;
   analysisPaths?: string[] | undefined;
+  /** When false, skip all SQLite persistence (pure in-memory analysis). Defaults to true. */
+  persist?: boolean | undefined;
+  onPhase?: PhaseCallback | undefined;
 }
 
 export interface FileTaskSuccessMessage {
@@ -163,10 +168,17 @@ export interface FileBatchTask {
 export interface FileBatchResultMessage {
   type: "batch_result";
   results: FileTaskMessage[];
+  workerCpuMs?: number;
+  serializeMs?: number;
+}
+
+export interface WorkerReadyMessage {
+  type: "worker_ready";
 }
 
 export type AnalyzerWorkerRequest = FileBatchTask;
 export type AnalyzerWorkerResponse = FileBatchResultMessage;
+export type AnalyzerWorkerMessage = FileBatchResultMessage | WorkerReadyMessage;
 
 export type AnalysisRunRecord = AnalysisRunRow;
 export type FileRunStatusRecord = FileRunStatusRow;

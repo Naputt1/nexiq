@@ -2,6 +2,8 @@
 // (tsup's dts step fails on a pre-existing type error in src/db/fileDB.ts).
 // Narrow ambient typing for the surface this benchmark actually consumes.
 declare module "@nexiq/analyser" {
+  export type PhaseCallback = (phase: string, ms: number) => void;
+
   export interface AnalyzeProjectOptions {
     cacheFile?: string | undefined;
     ignorePatterns?: string[] | undefined;
@@ -12,6 +14,8 @@ declare module "@nexiq/analyser" {
     packageConcurrency?: number | undefined;
     fileWorkerThreads?: number | undefined;
     analysisPaths?: string[] | undefined;
+    persist?: boolean | undefined;
+    onPhase?: PhaseCallback | undefined;
   }
 
   export interface JsonFile {

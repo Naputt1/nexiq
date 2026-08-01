@@ -1,4 +1,5 @@
 import { parentPort, threadId, workerData } from "node:worker_threads";
+import { performance } from "node:perf_hooks";
 
 console.error("Worker process starting...");
 
@@ -41,12 +42,15 @@ import TSDeclareMethod from "./analyzer/TSDeclareMethod.ts";
 import MemberExpression from "./analyzer/memberExpression.ts";
 import { extractFileUsages } from "./analyzer/usageCollector.ts";
 import type {
+  AnalyzerWorkerMessage,
   AnalyzerWorkerRequest,
   AnalyzerWorkerResponse,
   FileTaskMessage,
   FileTaskSuccessMessage,
   WorkerSessionConfig,
 } from "./types.ts";
+import type { ComponentDBResolve } from "@nexiq/shared";
+import type { ComponentFile } from "@nexiq/shared";
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
@@ -54,7 +58,22 @@ import { TsConfigManager } from "./tsconfig.ts";
 
 const sessionConfig = (workerData || {}) as WorkerSessionConfig;
 
-async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
+// Signal that the module graph (babel parser, analyser visitors) has finished
+// loading so the pool can measure worker startup overhead.
+if (parentPort) {
+  parentPort.postMessage({ type: "worker_ready" } satisfies AnalyzerWorkerMessage);
+}
+
+async function analyzeFile(
+  filePath: string,
+  config: WorkerSessionConfig,
+): Promise<{
+  fileData: ComponentFile;
+  resolveTasks: ComponentDBResolve[];
+  cpuMs: number;
+  serializeMs: number;
+}> {
+  const cpuStart = performance.now();
   const { srcDir, viteAliases, packageJsonData, tsConfigMap } = config;
   const fileName = filePath;
   const fullPath = resolvePath(srcDir, filePath);
@@ -121,7 +140,10 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
     file.init = true;
     file.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
   }
+  const cpuMs = performance.now() - cpuStart;
+  const serializeStart = performance.now();
   const fileData = file!.getData();
+  const serializeMs = performance.now() - serializeStart;
   if (process.env.MODE === "development") {
     console.error(
       `[Worker ${threadId}] Found ${Object.keys(fileData.var).length} top-level components/variables in ${filePath}`,
@@ -130,12 +152,16 @@ async function analyzeFile(filePath: string, config: WorkerSessionConfig) {
   return {
     fileData,
     resolveTasks: componentDB.getResolveTasks(),
+    cpuMs,
+    serializeMs,
   };
 }
 
 if (parentPort) {
   parentPort.on("message", async (request: AnalyzerWorkerRequest) => {
     const results: FileTaskMessage[] = [];
+    let workerCpuMs = 0;
+    let workerSerializeMs = 0;
     if (process.env.MODE === "development") {
       console.log(
         `[Worker ${threadId}] Received batch: ${request.filePaths.length} files`,
@@ -162,10 +188,12 @@ if (parentPort) {
         if (process.env.MODE === "development") {
           console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
         }
-        const { fileData, resolveTasks } = await analyzeFile(
+        const { fileData, resolveTasks, cpuMs, serializeMs } = await analyzeFile(
           filePath,
           sessionConfig,
         );
+        workerCpuMs += cpuMs;
+        workerSerializeMs += serializeMs;
         const message: FileTaskSuccessMessage = {
           type: "file_success",
           filePath,
@@ -207,6 +235,8 @@ if (parentPort) {
       const response: AnalyzerWorkerResponse = {
         type: "batch_result",
         results,
+        workerCpuMs,
+        serializeMs: workerSerializeMs,
       };
       parentPort!.postMessage(response);
     } catch (error) {

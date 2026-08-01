@@ -1,6 +1,8 @@
 import { Worker } from "node:worker_threads";
 import { pathToFileURL } from "node:url";
+import { performance } from "node:perf_hooks";
 import type {
+  AnalyzerWorkerMessage,
   AnalyzerWorkerRequest,
   AnalyzerWorkerResponse,
   WorkerSessionConfig,
@@ -38,7 +40,12 @@ interface TaskEntry {
 }
 
 export class WorkerPool {
-  private workers: { worker: Worker; idle: boolean }[] = [];
+  private workers: {
+    worker: Worker;
+    idle: boolean;
+    spawnedAt: number;
+    startupMs: number;
+  }[] = [];
   private taskQueue: TaskEntry[] = [];
   private currentTasks = new Map<
     Worker,
@@ -128,12 +135,22 @@ export class WorkerPool {
       }
     });
 
-    this.workers.push({ worker, idle: true });
+    this.workers.push({ worker, idle: true, spawnedAt: performance.now(), startupMs: 0 });
   }
 
-  private onWorkerMessage(worker: Worker, msg: AnalyzerWorkerResponse) {
+  private onWorkerMessage(worker: Worker, msg: AnalyzerWorkerMessage) {
     const workerInfo = this.workers.find((w) => w.worker === worker);
     if (!workerInfo) return;
+
+    // Worker finished loading its module graph; record startup latency.
+    // Do NOT touch idle/currentTasks: the worker may already be processing a
+    // dispatched task (ready arrives asynchronously after module load), and
+    // flipping it idle here would let the pool double-assign it and orphan the
+    // in-flight task's promise.
+    if (msg.type === "worker_ready") {
+      workerInfo.startupMs = performance.now() - workerInfo.spawnedAt;
+      return;
+    }
 
     const task = this.currentTasks.get(worker);
     log(
@@ -225,6 +242,20 @@ export class WorkerPool {
     } else {
       entry.reject(new Error("Task timed out"));
     }
+  }
+
+  /**
+   * Worker startup latency, from spawn to "module graph loaded" signal.
+   * `wall` is the max (loads happen concurrently), `total` is the summed CPU.
+   */
+  public getStartupMs(): { wall: number; total: number } {
+    const latencies = this.workers
+      .map((w) => w.startupMs)
+      .filter((ms) => ms > 0);
+    return {
+      wall: latencies.length > 0 ? Math.max(...latencies) : 0,
+      total: latencies.reduce((sum, ms) => sum + ms, 0),
+    };
   }
 
   public runTask(task: AnalyzerWorkerRequest): Promise<AnalyzerWorkerResponse> {

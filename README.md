@@ -86,6 +86,24 @@ pnpm typecheck            # Run type-checking across workspace
 pnpm lint                 # Run linting with autofix
 ```
 
+The analysis benchmark (`benchmarks/analysis`) compares `analyzeProject` with a
+true single-threaded run (`fileWorkerThreads: 1`, `packageConcurrency: 1`)
+against a parallel run, reporting wall time, peak memory, and a per-phase
+breakdown:
+
+```bash
+pnpm benchmark:analysis                                          # all projects, 3 reps
+pnpm benchmark:analysis -- --projects=small,large --reps=3 --threads=8 --package-concurrency=2
+pnpm benchmark:analysis -- --projects=large --no-sqlite          # skip SQLite persistence
+```
+
+Flags: `--projects` (comma-separated tier names), `--reps` (default 3),
+`--threads` (parallel file worker threads, default CPU count),
+`--package-concurrency` (parallel workspace packages for monorepos; default auto),
+`--no-sqlite` (skip SQLite persistence — SQLite writes are ~2/3 of monorepo analysis
+time; see the `persist` option on `analyzeProject`), `--out` (results path).
+Results land in `benchmarks/results/analysis/`.
+
 ### Package-Level Entry Commands
 
 Useful commands exposed by the main packages:
