@@ -1,0 +1,24 @@
+{
+  "name": "@nexiq/analysis-benchmark",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/run.ts src/case.ts --format esm --clean",
+    "benchmark": "node dist/run.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@nexiq/analyser": "workspace:*"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.13.4",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.58.0"
+  }
+}

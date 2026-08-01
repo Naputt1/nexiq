@@ -81,6 +81,7 @@ pnpm dev:cli              # Run the CLI in dev mode
 pnpm test:analyze         # Run analyser tests
 pnpm snapshot:analyze     # Update analyser snapshots
 pnpm benchmark            # Run performance benchmarks
+pnpm benchmark:analysis   # Benchmark serial vs parallel analysis
 pnpm typecheck            # Run type-checking across workspace
 pnpm lint                 # Run linting with autofix
 ```

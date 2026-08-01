@@ -12,6 +12,7 @@
     "test:analyze": "turbo run test --filter=@nexiq/analyser",
     "snapshot:analyze": "turbo run snapshot --filter=@nexiq/analyser",
     "benchmark": "turbo run start --filter=@nexiq/benchmark-cli",
+    "benchmark:analysis": "pnpm --filter=@nexiq/analysis-benchmark build && node benchmarks/analysis/dist/run.js",
     "benchmark:view": "turbo run dev --filter=viewer",
     "build:analyze": "turbo run build --filter=@nexiq/analyser",
     "typecheck": "turbo run typecheck",

@@ -3,6 +3,7 @@ packages:
   - packages/sample-project/*
   - benchmarks/viewer
   - benchmarks/cli
+  - benchmarks/analysis
 
 strictPeerDependencies: false
 
