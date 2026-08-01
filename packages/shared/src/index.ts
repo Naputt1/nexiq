@@ -7,6 +7,7 @@ import type {
   RelationKind,
   EntityMetadata,
 } from "./component.js";
+import type { RouteRow, RouteLinkRow } from "./types/routes.js";
 
 export type DataEdge = {
   from: string;
@@ -243,6 +244,8 @@ export type DatabaseData = {
   renders: RenderRow[];
   exports: ExportRow[];
   relations: RelationRow[];
+  routes?: RouteRow[] | undefined;
+  route_links?: RouteLinkRow[] | undefined;
   analysis_runs?: AnalysisRunRow[] | undefined;
   file_run_status?: FileRunStatusRow[] | undefined;
   file_analysis_errors?: FileAnalysisErrorRow[] | undefined;

@@ -5,6 +5,7 @@ export * from "./primitive.js";
 export * from "./object.js";
 export * from "./git.js";
 export * from "./config.js";
+export * from "./routes.js";
 
 export interface ProjectStatus {
   hasConfig: boolean;

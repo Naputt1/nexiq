@@ -23,6 +23,8 @@ import type {
   TypeData,
   TypeDataParam,
   ComponentInfoRender,
+  RouteRow,
+  RouteLinkRow,
 } from "@nexiq/shared";
 
 // Re-exporting these from shared for convenience if needed by extensions
@@ -38,7 +40,16 @@ export type {
   TypeData,
   TypeDataParam,
   ComponentInfoRender,
+  RouteRow,
+  RouteLinkRow,
 };
+export type {
+  RouteFramework,
+  RouteType,
+  RouteKind,
+  RouteLinkType,
+  RouteData,
+} from "@nexiq/shared";
 
 export interface UsageOccurrence {
   usageId: string;
@@ -515,6 +526,8 @@ export function getTaskData(context: TaskContext): DatabaseData {
       renders: [],
       exports: [],
       relations: [],
+      routes: [],
+      route_links: [],
     };
     context.taskDataCache = empty;
     return empty;
@@ -550,6 +563,8 @@ export function getTaskData(context: TaskContext): DatabaseData {
       renders: [],
       exports: [],
       relations: [],
+      routes: [],
+      route_links: [],
     };
 
     filteredPackages.forEach((pkg, index) => {
@@ -736,6 +751,36 @@ export function getTaskData(context: TaskContext): DatabaseData {
           )
           .all() as RelationRow[];
         aggregated.relations.push(...relRows);
+
+        // 9. Routes & route links
+        if (pkgTableExists("routes")) {
+          const routeRows = pkgDb
+            .prepare(
+              `SELECT 
+                '${pkgPrefix}' || id as id,
+                framework, path_pattern, route_type, route_kind, file_path,
+                CASE WHEN component_symbol_id IS NOT NULL THEN '${pkgPrefix}' || component_symbol_id ELSE NULL END as component_symbol_id,
+                CASE WHEN parent_route_id IS NOT NULL THEN '${pkgPrefix}' || parent_route_id ELSE NULL END as parent_route_id,
+                params, priority, data_json
+              FROM routes`,
+            )
+            .all() as RouteRow[];
+          aggregated.routes!.push(...routeRows);
+        }
+
+        if (pkgTableExists("route_links")) {
+          const linkRows = pkgDb
+            .prepare(
+              `SELECT 
+                '${pkgPrefix}' || id as id,
+                CASE WHEN from_entity_id IS NOT NULL THEN '${pkgPrefix}' || from_entity_id ELSE NULL END as from_entity_id,
+                CASE WHEN to_route_id IS NOT NULL THEN '${pkgPrefix}' || to_route_id ELSE NULL END as to_route_id,
+                path_pattern, link_type, line, "column", file_path, data_json
+              FROM route_links`,
+            )
+            .all() as RouteLinkRow[];
+          aggregated.route_links!.push(...linkRows);
+        }
       } finally {
         pkgDb.close();
       }
@@ -752,6 +797,8 @@ export function getTaskData(context: TaskContext): DatabaseData {
   const hasPackages = tableExists("packages");
   const hasDeps = tableExists("package_dependencies");
   const hasExports = tableExists("exports");
+  const hasRoutes = tableExists("routes");
+  const hasRouteLinks = tableExists("route_links");
 
   const singleProjectData = {
     packages: hasPackages
@@ -771,6 +818,12 @@ export function getTaskData(context: TaskContext): DatabaseData {
       ? (db.prepare("SELECT * FROM exports").all() as ExportRow[])
       : [],
     relations: db.prepare("SELECT * FROM relations").all() as RelationRow[],
+    routes: hasRoutes
+      ? (db.prepare("SELECT * FROM routes").all() as RouteRow[])
+      : [],
+    route_links: hasRouteLinks
+      ? (db.prepare("SELECT * FROM route_links").all() as RouteLinkRow[])
+      : [],
     diff: context.snapshotData?.diff || context.taskDataCache?.diff,
   };
   context.taskDataCache = singleProjectData;
@@ -850,12 +903,60 @@ export interface MCPTool {
   handler: (args: MCPToolHandlerArgs) => Promise<unknown>;
 }
 
+/**
+ * Context provided to a route scanner after project analysis completes.
+ * The database is the project cache database (read/write); scanners may
+ * create their own tables (e.g. `routes`, `route_links`) and query the
+ * standard tables (files/scopes/entities/symbols/exports) to resolve
+ * component references.
+ */
+export interface RouteScanContext {
+  /**
+   * Read/write database instance for querying graph data and writing route rows.
+   */
+  db: Database;
+  /**
+   * Root path of the project being analyzed.
+   */
+  projectRoot: string;
+  /**
+   * Specific paths within the project to focus analysis on.
+   */
+  analysisPaths?: string[];
+}
+
+/**
+ * A framework-specific router scanner. Scanners run after the main analysis
+ * pass and persist route data (e.g. into `routes`/`route_links` tables) that
+ * later GraphViewTasks and MCP tools can consume.
+ */
+export interface RouteScanner {
+  /**
+   * Unique id of the scanner, e.g. "nextjs" | "tanstack".
+   */
+  id: string;
+  /**
+   * Framework name this scanner handles.
+   */
+  framework: string;
+  /**
+   * Optional detection: return false to skip scanning when the project does
+   * not use this framework.
+   */
+  supported?: (context: RouteScanContext) => boolean;
+  /**
+   * Scan the project for routes and persist them into the database.
+   */
+  scan: (context: RouteScanContext) => Promise<void> | void;
+}
+
 export interface Extension<TGraph = unknown> {
   id: string;
   viewTasks?: Record<string, GraphViewTask[]>; // Mapping of GraphViewType to tasks
   detailSections?: DetailSection<TGraph>[];
   mcpTools?: MCPTool[];
   nodeTypes?: Record<string, NodeAppearance>; // Custom node types to register
+  routeScanner?: RouteScanner | RouteScanner[];
 }
 
 /**

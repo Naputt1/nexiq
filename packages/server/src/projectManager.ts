@@ -508,6 +508,14 @@ export class ProjectManager {
       // Not a workspace DB, use as-is
     }
 
+    // Run router scanners against the cache database after analysis completes.
+    await this.runRouteScanners(projectInfo, {
+      projectRoot: analysisPath,
+      analysisPaths: subProjects?.map((p) =>
+        path.join(projectPath, p.replace(/^\/+/, "")),
+      ),
+    });
+
     // Set up watcher
     try {
       const subscription = await watcher.subscribe(
@@ -552,7 +560,16 @@ export class ProjectManager {
                 projectInfo.db = new SqliteDB(projectInfo.sqlitePath);
                 projectInfo.nodeDetailCache.clear();
 
-                console.error(`Project ${cacheRoot} re-analyzed successfully.`);
+                return this.runRouteScanners(projectInfo, {
+                  projectRoot: analysisPath,
+                  analysisPaths: subProjects?.map((p) =>
+                    path.join(projectPath, p.replace(/^\/+/, "")),
+                  ),
+                }).then(() => {
+                  console.error(
+                    `Project ${cacheRoot} re-analyzed successfully.`,
+                  );
+                });
               })
               .catch((reAnalyzeError: Error) => {
                 console.error(
@@ -586,6 +603,51 @@ export class ProjectManager {
     }
 
     return projectInfo;
+  }
+
+  /**
+   * Run registered route scanners after analysis so framework-specific router
+   * data (routes/route_links tables) is persisted into the cache database.
+   */
+  private async runRouteScanners(
+    project: ProjectInfo,
+    options: {
+      projectRoot: string;
+      analysisPaths?: string[];
+    },
+  ): Promise<void> {
+    if (!project.db) {
+      return;
+    }
+
+    for (const ext of project.extensions) {
+      const scanners = ext.routeScanner
+        ? Array.isArray(ext.routeScanner)
+          ? ext.routeScanner
+          : [ext.routeScanner]
+        : [];
+      for (const scanner of scanners) {
+        const context = {
+          db: project.db.db,
+          projectRoot: options.projectRoot,
+          analysisPaths: options.analysisPaths,
+        };
+        try {
+          if (scanner.supported && !scanner.supported(context)) {
+            continue;
+          }
+          await scanner.scan(context);
+          console.error(
+            `Route scanner ${scanner.id} finished for ${options.projectRoot}`,
+          );
+        } catch (e) {
+          console.error(
+            `Route scanner ${scanner.id} failed for ${options.projectRoot}:`,
+            e instanceof Error ? e.message : e,
+          );
+        }
+      }
+    }
   }
 
   async getNodeDetail(
