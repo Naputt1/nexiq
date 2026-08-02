@@ -18,7 +18,7 @@ import { WorkerPool } from "./workerPool.ts";
 import { parseCode } from "./analyzer/utils.ts";
 import { File as AnalyserFile } from "./db/fileDB.ts";
 import type { File } from "@babel/types";
-import { traverseFn } from "./utils/babel.ts";
+import { mergeVisitors, traverseFn } from "./utils/babel.ts";
 import ImportDeclaration from "./analyzer/importDeclaration.ts";
 import ExportNamedDeclaration from "./analyzer/exportNamedDeclaration.ts";
 import ExportDefaultDeclaration from "./analyzer/exportDefaultDeclaration.ts";
@@ -45,7 +45,7 @@ import TSDeclareMethod from "./analyzer/TSDeclareMethod.ts";
 import MemberExpression from "./analyzer/memberExpression.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
-import { extractFileUsages } from "./analyzer/usageCollector.ts";
+import { createUsageCollector } from "./analyzer/usageCollector.ts";
 import type {
   DeferredResolveTask,
   FileTaskMessage,
@@ -495,56 +495,70 @@ export class PackageMaster {
     const code = fs.readFileSync(resolvePath(this.srcDir, fileName), "utf-8");
     const ast: File = parseCode(code);
 
-    traverseFn(ast, {
-      ImportDeclaration: ImportDeclaration(this.componentDB, fileName),
-      ExportNamedDeclaration: ExportNamedDeclaration(
-        this.componentDB,
-        fileName,
+    const usage = createUsageCollector(this.componentDB, fileName);
+
+    traverseFn(
+      ast,
+      mergeVisitors(
+        {
+          ImportDeclaration: ImportDeclaration(this.componentDB, fileName),
+          ExportNamedDeclaration: ExportNamedDeclaration(
+            this.componentDB,
+            fileName,
+          ),
+          ExportAllDeclaration: ExportAllDeclaration(this.componentDB, fileName),
+          ExportDefaultDeclaration: ExportDefaultDeclaration(
+            this.componentDB,
+            fileName,
+          ),
+          FunctionDeclaration: FunctionDeclaration(this.componentDB, fileName),
+          ClassDeclaration: ClassDeclaration(this.componentDB, fileName),
+          ClassExpression: ClassDeclaration(this.componentDB, fileName),
+          ClassMethod: ClassMethod(this.componentDB, fileName),
+          ClassPrivateMethod: ClassMethod(this.componentDB, fileName),
+          ClassProperty: ClassProperty(this.componentDB, fileName),
+          ClassPrivateProperty: ClassProperty(this.componentDB, fileName),
+          ClassAccessorProperty: ClassProperty(this.componentDB, fileName),
+          VariableDeclarator: VariableDeclarator(this.componentDB, fileName),
+          ReturnStatement: ReturnStatement(this.componentDB, fileName),
+          ArrowFunctionExpression: ArrowFunctionExpression(
+            this.componentDB,
+            fileName,
+          ),
+          FunctionExpression: FunctionExpression(this.componentDB, fileName),
+          ...JSXElement(this.componentDB, fileName),
+          CallExpression: CallExpression(this.componentDB, fileName),
+          TSTypeAliasDeclaration: TSTypeAliasDeclaration(
+            this.componentDB,
+            fileName,
+          ),
+          TSInterfaceDeclaration: TSInterfaceDeclaration(
+            this.componentDB,
+            fileName,
+          ),
+          TSEnumDeclaration: TSEnumDeclaration(this.componentDB, fileName),
+          TSDeclareFunction: TSDeclareFunction(this.componentDB, fileName),
+          TSModuleDeclaration: TSModuleDeclaration(this.componentDB, fileName),
+          TSImportEqualsDeclaration: TSImportEqualsDeclaration(this.componentDB, fileName),
+          TSExportAssignment: TSExportAssignment(this.componentDB, fileName),
+          TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(this.componentDB, fileName),
+          TSDeclareMethod: TSDeclareMethod(this.componentDB, fileName),
+          MemberExpression: MemberExpression(this.componentDB, fileName),
+          AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
+          ...BlockScope(this.componentDB, fileName),
+        },
+        usage.visitors,
+        {
+          Program: {
+            exit() {
+              usage.flush();
+            },
+          },
+        },
       ),
-      ExportAllDeclaration: ExportAllDeclaration(this.componentDB, fileName),
-      ExportDefaultDeclaration: ExportDefaultDeclaration(
-        this.componentDB,
-        fileName,
-      ),
-      FunctionDeclaration: FunctionDeclaration(this.componentDB, fileName),
-      ClassDeclaration: ClassDeclaration(this.componentDB, fileName),
-      ClassExpression: ClassDeclaration(this.componentDB, fileName),
-      ClassMethod: ClassMethod(this.componentDB, fileName),
-      ClassPrivateMethod: ClassMethod(this.componentDB, fileName),
-      ClassProperty: ClassProperty(this.componentDB, fileName),
-      ClassPrivateProperty: ClassProperty(this.componentDB, fileName),
-      ClassAccessorProperty: ClassProperty(this.componentDB, fileName),
-      VariableDeclarator: VariableDeclarator(this.componentDB, fileName),
-      ReturnStatement: ReturnStatement(this.componentDB, fileName),
-      ArrowFunctionExpression: ArrowFunctionExpression(
-        this.componentDB,
-        fileName,
-      ),
-      FunctionExpression: FunctionExpression(this.componentDB, fileName),
-      ...JSXElement(this.componentDB, fileName),
-      CallExpression: CallExpression(this.componentDB, fileName),
-      TSTypeAliasDeclaration: TSTypeAliasDeclaration(
-        this.componentDB,
-        fileName,
-      ),
-      TSInterfaceDeclaration: TSInterfaceDeclaration(
-        this.componentDB,
-        fileName,
-      ),
-      TSEnumDeclaration: TSEnumDeclaration(this.componentDB, fileName),
-      TSDeclareFunction: TSDeclareFunction(this.componentDB, fileName),
-      TSModuleDeclaration: TSModuleDeclaration(this.componentDB, fileName),
-      TSImportEqualsDeclaration: TSImportEqualsDeclaration(this.componentDB, fileName),
-      TSExportAssignment: TSExportAssignment(this.componentDB, fileName),
-      TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(this.componentDB, fileName),
-      TSDeclareMethod: TSDeclareMethod(this.componentDB, fileName),
-      MemberExpression: MemberExpression(this.componentDB, fileName),
-      AssignmentExpression: AssignmentExpression(this.componentDB, fileName),
-      ...BlockScope(this.componentDB, fileName),
-    });
+    );
 
     this.componentDB.clearStack();
-    extractFileUsages(ast, this.componentDB, fileName);
 
     const file = this.componentDB.getFile(fileName);
     file.package_id =
@@ -751,6 +765,11 @@ export class PackageMaster {
     let ipcWaitMs = 0;
     let workerCpuTotalMs = 0;
     let workerSerializeTotalMs = 0;
+    let workerReadTotalMs = 0;
+    let workerParseTotalMs = 0;
+    let workerExtractTotalMs = 0;
+    let workerTraverseMainTotalMs = 0;
+    let workerUsageTotalMs = 0;
     let mainMergeMs = 0;
 
     await withPhaseAsync(this.onPhase, "analyze", async () => {
@@ -801,6 +820,11 @@ export class PackageMaster {
             ipcWaitMs += performance.now() - ipcStart;
             workerCpuTotalMs += response.workerCpuMs || 0;
             workerSerializeTotalMs += response.serializeMs || 0;
+            workerReadTotalMs += response.workerReadMs || 0;
+            workerParseTotalMs += response.workerParseMs || 0;
+            workerExtractTotalMs += response.workerExtractMs || 0;
+            workerTraverseMainTotalMs += response.workerTraverseMainMs || 0;
+            workerUsageTotalMs += response.workerUsageMs || 0;
             const resultByFile = new Map(
               response.results.map((item) => [item.filePath, item]),
             );
@@ -911,6 +935,11 @@ export class PackageMaster {
       this.onPhase?.("workerStartupWall", workerStartupWall);
       this.onPhase?.("workerStartupTotal", workerStartupTotal);
       this.onPhase?.("workerCpu", workerCpuTotalMs);
+      this.onPhase?.("workerRead", workerReadTotalMs);
+      this.onPhase?.("workerParse", workerParseTotalMs);
+      this.onPhase?.("workerExtract", workerExtractTotalMs);
+      this.onPhase?.("workerTraverseMain", workerTraverseMainTotalMs);
+      this.onPhase?.("workerUsage", workerUsageTotalMs);
       this.onPhase?.("workerSerialize", workerSerializeTotalMs);
       this.onPhase?.("ipcWait", ipcWaitMs);
       this.onPhase?.("mainMerge", mainMergeMs);

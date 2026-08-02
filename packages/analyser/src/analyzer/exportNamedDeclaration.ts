@@ -29,11 +29,8 @@ export default function ExportNamedDeclaration(
           name = decl.id?.name;
         } else if (decl.type === "FunctionDeclaration") {
           let isComponent = false;
-          nodePath.traverse({
-            JSXElement(innerPath) {
-              isComponent = true;
-              innerPath.stop();
-            },
+          t.traverseFast(decl, (n) => {
+            if (t.isJSXElement(n)) isComponent = true;
           });
 
           exportKind = isComponent ? "component" : "function";

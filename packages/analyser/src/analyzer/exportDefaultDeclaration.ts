@@ -23,11 +23,8 @@ export default function ExportDefaultDeclaration(
         name = decl.id?.name ?? "anonymous";
 
         let isComponent = false;
-        nodePath.traverse({
-          JSXElement(innerPath) {
-            isComponent = true;
-            innerPath.stop();
-          },
+        t.traverseFast(decl, (n) => {
+          if (t.isJSXElement(n)) isComponent = true;
         });
 
         exportKind = isComponent ? "component" : "function";
@@ -47,11 +44,8 @@ export default function ExportDefaultDeclaration(
         // If it's an arrow/function with JSX, treat as component
         if (t.isArrowFunctionExpression(decl) || t.isFunctionExpression(decl)) {
           let isComponent = false;
-          nodePath.traverse({
-            JSXElement(innerPath) {
-              isComponent = true;
-              innerPath.stop();
-            },
+          t.traverseFast(decl, (n) => {
+            if (t.isJSXElement(n)) isComponent = true;
           });
           exportKind = isComponent ? "component" : "function";
         } else if (t.isCallExpression(decl)) {

@@ -170,6 +170,11 @@ export interface FileBatchResultMessage {
   results: FileTaskMessage[];
   workerCpuMs?: number;
   serializeMs?: number;
+  workerReadMs?: number;
+  workerParseMs?: number;
+  workerExtractMs?: number;
+  workerTraverseMainMs?: number;
+  workerUsageMs?: number;
 }
 
 export interface WorkerReadyMessage {

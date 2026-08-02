@@ -374,11 +374,13 @@ function shouldSkipReferencedIdentifier(path: traverse.NodePath<t.Identifier>) {
   return false;
 }
 
-export function extractFileUsages(
-  ast: File,
+export function createUsageCollector(
   componentDB: ComponentDB,
   fileName: string,
-) {
+): {
+  visitors: Record<string, (path: traverse.NodePath) => void>;
+  flush: () => void;
+} {
   const fileDb = componentDB.getFile(fileName);
   const seen = new Set<string>();
 
@@ -575,8 +577,12 @@ export function extractFileUsages(
     }
   };
 
-  traverseFn(ast, {
-    Identifier(path) {
+  // NodePaths are buffered during the (single) traversal and processed at
+  // Program exit, once every variable/scope is registered — matching the old
+  // two-pass behavior while eliminating the second full Babel traversal.
+  const pending: traverse.NodePath[] = [];
+
+  const handleIdentifier = (path: traverse.NodePath<t.Identifier>) => {
       // Compute before isReferencedIdentifier narrows the type
       const isShorthandProp =
         path.parentPath.isObjectProperty() && path.parentPath.node.shorthand;
@@ -651,9 +657,11 @@ export function extractFileUsages(
         hiddenIntermediate: target.hiddenIntermediate,
         displayLabel: path.node.name,
       });
-    },
+  };
 
-    JSXOpeningElement(path) {
+  const handleJSXOpeningElement = (
+    path: traverse.NodePath<t.JSXOpeningElement>,
+  ) => {
       const nameNode = path.node.name;
       if (!t.isJSXIdentifier(nameNode)) return;
       if (!/^[A-Z]/.test(nameNode.name)) return;
@@ -671,17 +679,9 @@ export function extractFileUsages(
         hiddenIntermediate: target.hiddenIntermediate,
         displayLabel: nameNode.name,
       });
-    },
+  };
 
-    CallExpression(path) {
-      processCallLike(path);
-    },
-
-    OptionalCallExpression(path) {
-      processCallLike(path);
-    },
-
-    NewExpression(path) {
+  const handleNewExpression = (path: traverse.NodePath<t.NewExpression>) => {
       const loc = getStartLoc(path.node);
       if (!loc) return;
 
@@ -697,9 +697,11 @@ export function extractFileUsages(
         hiddenIntermediate: target.hiddenIntermediate,
         displayLabel: callee.name,
       });
-    },
+  };
 
-    AssignmentExpression(path) {
+  const handleAssignment = (
+    path: traverse.NodePath<t.AssignmentExpression>,
+  ) => {
       const loc = getStartLoc(path.node.left);
       if (!loc) return;
 
@@ -739,9 +741,9 @@ export function extractFileUsages(
           target.accessPath?.join(".") ||
           (t.isIdentifier(path.node.left) ? path.node.left.name : undefined),
       });
-    },
+  };
 
-    UpdateExpression(path) {
+  const handleUpdate = (path: traverse.NodePath<t.UpdateExpression>) => {
       const loc = getStartLoc(path.node.argument);
       if (!loc || !t.isIdentifier(path.node.argument)) return;
 
@@ -760,6 +762,69 @@ export function extractFileUsages(
         hiddenIntermediate: target.hiddenIntermediate,
         displayLabel: path.node.argument.name,
       });
+  };
+
+  const visitors = {
+    Identifier(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    JSXOpeningElement(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    CallExpression(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    OptionalCallExpression(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    NewExpression(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    AssignmentExpression(path: traverse.NodePath) {
+      pending.push(path);
+    },
+    UpdateExpression(path: traverse.NodePath) {
+      pending.push(path);
+    },
+  };
+
+  const flush = () => {
+    for (const path of pending) {
+      if (path.isIdentifier()) {
+        handleIdentifier(path);
+      } else if (path.isJSXOpeningElement()) {
+        handleJSXOpeningElement(path);
+      } else if (path.isCallExpression() || path.isOptionalCallExpression()) {
+        processCallLike(path as traverse.NodePath<
+          t.CallExpression | t.OptionalCallExpression
+        >);
+      } else if (path.isNewExpression()) {
+        handleNewExpression(path);
+      } else if (path.isAssignmentExpression()) {
+        handleAssignment(path);
+      } else if (path.isUpdateExpression()) {
+        handleUpdate(path);
+      }
+    }
+    pending.length = 0;
+  };
+
+  return { visitors, flush };
+}
+
+// Backward-compatible standalone traversal (used by any external callers).
+export function extractFileUsages(
+  ast: File,
+  componentDB: ComponentDB,
+  fileName: string,
+) {
+  const collector = createUsageCollector(componentDB, fileName);
+  traverseFn(ast, {
+    ...collector.visitors,
+    Program: {
+      exit() {
+        collector.flush();
+      },
     },
   });
 }

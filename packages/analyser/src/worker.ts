@@ -13,7 +13,7 @@ process.on("unhandledRejection", (reason, _promise) => {
 
 import fs from "node:fs";
 import { parseCode } from "./analyzer/utils.ts";
-import { traverseFn } from "./utils/babel.ts";
+import { mergeVisitors, traverseFn } from "./utils/babel.ts";
 import { ComponentDB } from "./db/componentDB.ts";
 import { PackageJson } from "./db/packageJson.ts";
 import ImportDeclaration from "./analyzer/importDeclaration.ts";
@@ -40,7 +40,7 @@ import TSNamespaceExportDeclaration from "./analyzer/TSNamespaceExportDeclaratio
 import TSDeclareFunction from "./analyzer/TSDeclareFunction.ts";
 import TSDeclareMethod from "./analyzer/TSDeclareMethod.ts";
 import MemberExpression from "./analyzer/memberExpression.ts";
-import { extractFileUsages } from "./analyzer/usageCollector.ts";
+import { createUsageCollector } from "./analyzer/usageCollector.ts";
 import type {
   AnalyzerWorkerMessage,
   AnalyzerWorkerRequest,
@@ -49,7 +49,6 @@ import type {
   FileTaskSuccessMessage,
   WorkerSessionConfig,
 } from "./types.ts";
-import type { ComponentDBResolve } from "@nexiq/shared";
 import type { ComponentFile } from "@nexiq/shared";
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
@@ -64,95 +63,117 @@ if (parentPort) {
   parentPort.postMessage({ type: "worker_ready" } satisfies AnalyzerWorkerMessage);
 }
 
-async function analyzeFile(
+// PackageJson and TsConfigManager are immutable per batch, so they are created
+// once per batch and reused. The ComponentDB is intentionally per-file: it
+// accumulates traversal state (edges, resolve tasks, scope history) that must
+// not leak between files — sharing it across a batch produced subtly different
+// variable-id resolutions for some files.
+// NOTE: this deliberately does NOT call componentDB.resolveDependency() — that
+// pass only builds render edges into the worker-local ComponentDB, which is
+// never returned, and the parent re-runs it once on the merged DB (matching the
+// serial path). The per-file data is identical either way.
+function analyzeFileInBatch(
+  componentDB: ComponentDB,
+  packageJson: PackageJson,
   filePath: string,
-  config: WorkerSessionConfig,
-): Promise<{
+  srcDir: string,
+): {
   fileData: ComponentFile;
-  resolveTasks: ComponentDBResolve[];
-  cpuMs: number;
+  readMs: number;
+  parseMs: number;
+  traverseMainMs: number;
+  usageMs: number;
+  extractMs: number;
   serializeMs: number;
-}> {
-  const cpuStart = performance.now();
-  const { srcDir, viteAliases, packageJsonData, tsConfigMap } = config;
-  const fileName = filePath;
+} {
   const fullPath = resolvePath(srcDir, filePath);
 
-  const packageJson = new PackageJson(srcDir, packageJsonData);
-
-  let tsConfigManager: TsConfigManager | undefined;
-  if (tsConfigMap) {
-    tsConfigManager = TsConfigManager.fromJSON(tsConfigMap);
-  }
-
-  const componentDB = new ComponentDB({
-    packageJson,
-    viteAliases,
-    dir: srcDir,
-    sqlite: undefined, // Workers don't write to SQLite
-    tsConfigManager,
-  });
-
+  const readStart = performance.now();
   const code = fs.readFileSync(fullPath, "utf-8");
-  const ast = parseCode(code);
+  const readMs = performance.now() - readStart;
 
+  const parseStart = performance.now();
+  const ast = parseCode(code);
+  const parseMs = performance.now() - parseStart;
+
+  const extractStart = performance.now();
   componentDB.addFile(filePath);
 
-  traverseFn(ast, {
-    ImportDeclaration: ImportDeclaration(componentDB, fileName),
-    ExportNamedDeclaration: ExportNamedDeclaration(componentDB, fileName),
-    ExportAllDeclaration: ExportAllDeclaration(componentDB, fileName),
-    ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
-    FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
-    ClassDeclaration: ClassDeclaration(componentDB, fileName),
-    ClassExpression: ClassDeclaration(componentDB, fileName),
-    ClassMethod: ClassMethod(componentDB, fileName),
-    ClassPrivateMethod: ClassMethod(componentDB, fileName),
-    ClassProperty: ClassProperty(componentDB, fileName),
-    ClassPrivateProperty: ClassProperty(componentDB, fileName),
-    ClassAccessorProperty: ClassProperty(componentDB, fileName),
-    VariableDeclarator: VariableDeclarator(componentDB, fileName),
-    ReturnStatement: ReturnStatement(componentDB, fileName),
-    ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),
-    FunctionExpression: FunctionExpression(componentDB, fileName),
-    ...JSXElement(componentDB, fileName),
-    CallExpression: CallExpression(componentDB, fileName),
-    TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
-    TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
-    TSEnumDeclaration: TSEnumDeclaration(componentDB, fileName),
-    TSDeclareFunction: TSDeclareFunction(componentDB, fileName),
-    TSModuleDeclaration: TSModuleDeclaration(componentDB, fileName),
-    TSImportEqualsDeclaration: TSImportEqualsDeclaration(componentDB, fileName),
-    TSExportAssignment: TSExportAssignment(componentDB, fileName),
-    TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(componentDB, fileName),
-    TSDeclareMethod: TSDeclareMethod(componentDB, fileName),
-    MemberExpression: MemberExpression(componentDB, fileName),
-    AssignmentExpression: AssignmentExpression(componentDB, fileName),
-    ...BlockScope(componentDB, fileName),
-  });
+  const fileName = filePath;
+  let usageMs = 0;
+  const usage = createUsageCollector(componentDB, filePath);
+  const collectUsage = () => {
+    const flushStart = performance.now();
+    usage.flush();
+    usageMs += performance.now() - flushStart;
+  };
+  const traverseMainStart = performance.now();
+  traverseFn(
+    ast,
+    mergeVisitors(
+      {
+        ImportDeclaration: ImportDeclaration(componentDB, fileName),
+        ExportNamedDeclaration: ExportNamedDeclaration(componentDB, fileName),
+        ExportAllDeclaration: ExportAllDeclaration(componentDB, fileName),
+        ExportDefaultDeclaration: ExportDefaultDeclaration(componentDB, fileName),
+        FunctionDeclaration: FunctionDeclaration(componentDB, fileName),
+        ClassDeclaration: ClassDeclaration(componentDB, fileName),
+        ClassExpression: ClassDeclaration(componentDB, fileName),
+        ClassMethod: ClassMethod(componentDB, fileName),
+        ClassPrivateMethod: ClassMethod(componentDB, fileName),
+        ClassProperty: ClassProperty(componentDB, fileName),
+        ClassPrivateProperty: ClassProperty(componentDB, fileName),
+        ClassAccessorProperty: ClassProperty(componentDB, fileName),
+        VariableDeclarator: VariableDeclarator(componentDB, fileName),
+        ReturnStatement: ReturnStatement(componentDB, fileName),
+        ArrowFunctionExpression: ArrowFunctionExpression(componentDB, fileName),
+        FunctionExpression: FunctionExpression(componentDB, fileName),
+        ...JSXElement(componentDB, fileName),
+        CallExpression: CallExpression(componentDB, fileName),
+        TSTypeAliasDeclaration: TSTypeAliasDeclaration(componentDB, fileName),
+        TSInterfaceDeclaration: TSInterfaceDeclaration(componentDB, fileName),
+        TSEnumDeclaration: TSEnumDeclaration(componentDB, fileName),
+        TSDeclareFunction: TSDeclareFunction(componentDB, fileName),
+        TSModuleDeclaration: TSModuleDeclaration(componentDB, fileName),
+        TSImportEqualsDeclaration: TSImportEqualsDeclaration(componentDB, fileName),
+        TSExportAssignment: TSExportAssignment(componentDB, fileName),
+        TSNamespaceExportDeclaration: TSNamespaceExportDeclaration(componentDB, fileName),
+        TSDeclareMethod: TSDeclareMethod(componentDB, fileName),
+        MemberExpression: MemberExpression(componentDB, fileName),
+        AssignmentExpression: AssignmentExpression(componentDB, fileName),
+        ...BlockScope(componentDB, fileName),
+      },
+      usage.visitors,
+      {
+        Program: {
+          exit() {
+            collectUsage();
+          },
+        },
+      },
+    ),
+  );
+  const traverseMainMs = performance.now() - traverseMainStart;
 
-  extractFileUsages(ast, componentDB, filePath);
-
-  componentDB.resolveDependency();
+  const extractMs = performance.now() - extractStart;
 
   const file = componentDB.getFile(filePath);
   if (file) {
     file.init = true;
     file.package_id = packageJson.getPackageIdForFile(fullPath) || undefined;
   }
-  const cpuMs = performance.now() - cpuStart;
+
   const serializeStart = performance.now();
   const fileData = file!.getData();
   const serializeMs = performance.now() - serializeStart;
-  if (process.env.MODE === "development") {
-    console.error(
-      `[Worker ${threadId}] Found ${Object.keys(fileData.var).length} top-level components/variables in ${filePath}`,
-    );
-  }
+
   return {
     fileData,
-    resolveTasks: componentDB.getResolveTasks(),
-    cpuMs,
+    readMs,
+    parseMs,
+    traverseMainMs,
+    usageMs,
+    extractMs,
     serializeMs,
   };
 }
@@ -161,6 +182,11 @@ if (parentPort) {
   parentPort.on("message", async (request: AnalyzerWorkerRequest) => {
     const results: FileTaskMessage[] = [];
     let workerCpuMs = 0;
+    let workerReadMs = 0;
+    let workerParseMs = 0;
+    let workerExtractMs = 0;
+    let workerTraverseMainMs = 0;
+    let workerUsageMs = 0;
     let workerSerializeMs = 0;
     if (process.env.MODE === "development") {
       console.log(
@@ -183,16 +209,42 @@ if (parentPort) {
       return;
     }
 
+    // PackageJson + TsConfigManager are created once per batch and reused.
+    const { srcDir, viteAliases, packageJsonData, tsConfigMap } = sessionConfig;
+    const packageJson = new PackageJson(srcDir, packageJsonData);
+    const tsConfigManager = tsConfigMap
+      ? TsConfigManager.fromJSON(tsConfigMap)
+      : undefined;
+
     for (const filePath of request.filePaths) {
       try {
         if (process.env.MODE === "development") {
           console.log(`[Worker ${threadId}] Analyzing file: ${filePath}`);
         }
-        const { fileData, resolveTasks, cpuMs, serializeMs } = await analyzeFile(
-          filePath,
-          sessionConfig,
-        );
-        workerCpuMs += cpuMs;
+        // Fresh ComponentDB per file — its traversal state must not leak.
+        const componentDB = new ComponentDB({
+          packageJson,
+          viteAliases,
+          dir: srcDir,
+          sqlite: undefined, // Workers don't write to SQLite
+          tsConfigManager,
+        });
+        const {
+          fileData,
+          readMs,
+          parseMs,
+          traverseMainMs,
+          usageMs,
+          extractMs,
+          serializeMs,
+        } = analyzeFileInBatch(componentDB, packageJson, filePath, srcDir);
+        const resolveTasks = componentDB.getResolveTasks();
+        workerCpuMs += readMs + parseMs + extractMs;
+        workerReadMs += readMs;
+        workerParseMs += parseMs;
+        workerExtractMs += extractMs;
+        workerTraverseMainMs += traverseMainMs;
+        workerUsageMs += usageMs;
         workerSerializeMs += serializeMs;
         const message: FileTaskSuccessMessage = {
           type: "file_success",
@@ -237,6 +289,11 @@ if (parentPort) {
         results,
         workerCpuMs,
         serializeMs: workerSerializeMs,
+        workerReadMs,
+        workerParseMs,
+        workerExtractMs,
+        workerTraverseMainMs,
+        workerUsageMs,
       };
       parentPort!.postMessage(response);
     } catch (error) {

@@ -233,18 +233,18 @@ export function isRefUsed(
   } else if (t.isIdentifier(firstParam)) {
     const propsName = firstParam.name;
     let found = false;
-    nodePath.traverse({
-      MemberExpression(p) {
-        if (
-          t.isIdentifier(p.node.object) &&
-          p.node.object.name === propsName &&
-          t.isIdentifier(p.node.property) &&
-          p.node.property.name === "ref"
-        ) {
-          found = true;
-          p.stop();
-        }
-      },
+    // Manual walk instead of a nested Babel traversal (no NodePath/scope).
+    t.traverseFast(nodePath.node, (n) => {
+      if (found) return;
+      if (
+        t.isMemberExpression(n) &&
+        t.isIdentifier(n.object) &&
+        n.object.name === propsName &&
+        t.isIdentifier(n.property) &&
+        n.property.name === "ref"
+      ) {
+        found = true;
+      }
     });
     return found;
   }
