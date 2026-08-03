@@ -264,7 +264,11 @@ export class File {
 
     assert(v != null, `Variable not found: ${variable.kind}`);
 
-    let existing = scope.get(v.id, true);
+    // Match addVariable: only merge against a variable in the SAME scope, not a
+    // recursive search. A recursive lookup would find a same-id variable in a
+    // nested scope (e.g. same-named locals in different scopes) and wrongly
+    // merge this one into it instead of adding it here.
+    let existing = scope.get(v.id);
     if (!existing || existing.kind !== v.kind) {
       scope.add(v);
       existing = undefined;
@@ -281,6 +285,7 @@ export class File {
       const scopedVar = v as unknown as {
         var: Scope;
         syncSets?: () => void;
+        states?: Set<string>;
       };
       scopedVar.var.initPrevIds(variable.var || {});
       for (const childVar of Object.values(variable.var || {})) {
@@ -289,6 +294,13 @@ export class File {
 
       if (isHookVariable(v) || isComponentVariable(v)) {
         scopedVar.syncSets?.();
+        // syncSets rebuilds `states` from all state-typed members, which can
+        // differ from the traversal-built set (the `state = {...}` container is
+        // a state member but is not itself a state). Restore the serialized
+        // set so reconstruction matches the serial/in-place output exactly.
+        if (variable.states && Array.isArray(variable.states)) {
+          scopedVar.states = new Set(variable.states);
+        }
       }
     }
 
@@ -1150,7 +1162,11 @@ export class File {
 
       const nameKey = getVariableNameKey(stateVar.name);
       const prevId = component.var.getPrevId(nameKey);
-      if (prevId) {
+      // Only reuse a cached id when it refers to an existing state variable —
+      // reusing a member's id (e.g. a property of the same name) for a
+      // type-derived state collides with it and displaces the member. The
+      // deterministic id above is stable on its own.
+      if (prevId && prevId !== id && this.var.get(prevId, true)?.kind === "state") {
         stateVar.id = prevId;
       }
 
