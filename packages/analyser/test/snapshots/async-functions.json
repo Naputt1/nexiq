@@ -813,18 +813,8 @@
       "label": "render"
     },
     {
-      "from": "3c1c2c7b2aead5f7",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "311c554b828f67a5",
       "to": "f84cb808f29e98dc",
-      "label": "render"
-    },
-    {
-      "from": "3c1c2c7b2aead5f7",
-      "to": "311c554b828f67a5",
       "label": "render"
     },
     {

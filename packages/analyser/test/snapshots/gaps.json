@@ -3456,11 +3456,6 @@
       "label": "render"
     },
     {
-      "from": "",
-      "to": "38875b36479957fb",
-      "label": "render"
-    },
-    {
       "from": "5b069f6cc7129c0c",
       "to": "810a33751161c4f1",
       "label": "hook"

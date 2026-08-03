@@ -3847,11 +3847,6 @@
     },
     {
       "from": "216167f81fcb87bd",
-      "to": "603b2a53f6795d86",
-      "label": "render"
-    },
-    {
-      "from": "216167f81fcb87bd",
       "to": "1458a754b6727f0",
       "label": "render"
     },
@@ -3883,26 +3878,6 @@
     {
       "from": "311c554b828f67a5",
       "to": "1c68783e81f4ad97",
-      "label": "render"
-    },
-    {
-      "from": "b04033a58b519d57",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "df67c87f23fed77c",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "f6e530a81c178cd2",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "216167f81fcb87bd",
-      "to": "311c554b828f67a5",
       "label": "render"
     },
     {
@@ -4029,26 +4004,6 @@
       "from": "603b2a53f6795d86",
       "to": "f70ac2777b4ad259",
       "label": "hook"
-    },
-    {
-      "from": "b04033a58b519d57",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "df67c87f23fed77c",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "f6e530a81c178cd2",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "216167f81fcb87bd",
-      "to": "311c554b828f67a5",
-      "label": "render"
     },
     {
       "from": "1c68783e81f4ad97",

@@ -4175,16 +4175,6 @@
       "label": "render"
     },
     {
-      "from": "65338fa51b33f878",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "89091d73d3a537b1",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "311c554b828f67a5",
       "to": "24b99651629c6aff",
       "label": "render"
@@ -4278,16 +4268,6 @@
       "from": "9e9757cc8d09428",
       "to": "283ba57e642caca1",
       "label": "hook"
-    },
-    {
-      "from": "65338fa51b33f878",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "89091d73d3a537b1",
-      "to": "311c554b828f67a5",
-      "label": "render"
     },
     {
       "from": "5fa4c0c2a96eddec",

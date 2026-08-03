@@ -3168,16 +3168,6 @@
       "label": "render"
     },
     {
-      "from": "2a486d3d9e6ca850",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "311c554b828f67a5",
       "to": "967eb61cba3ad6fc",
       "label": "render"
@@ -3250,16 +3240,6 @@
     {
       "from": "8c661cc89799b0d9",
       "to": "31516088f6afa588",
-      "label": "render"
-    },
-    {
-      "from": "2a486d3d9e6ca850",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
       "label": "render"
     },
     {
@@ -3336,11 +3316,6 @@
       "from": "67d5e37bc7233e4",
       "to": "9f4f7f31ea7062ff",
       "label": "hook"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
-      "label": "render"
     },
     {
       "from": "9f0b0dea1ac92e2f",

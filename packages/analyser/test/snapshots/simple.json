@@ -2670,16 +2670,6 @@
       "label": "render"
     },
     {
-      "from": "2a486d3d9e6ca850",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
       "from": "311c554b828f67a5",
       "to": "9e038a40ca02979",
       "label": "render"
@@ -2752,16 +2742,6 @@
     {
       "from": "8c661cc89799b0d9",
       "to": "31516088f6afa588",
-      "label": "render"
-    },
-    {
-      "from": "2a486d3d9e6ca850",
-      "to": "311c554b828f67a5",
-      "label": "render"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
       "label": "render"
     },
     {
@@ -2838,11 +2818,6 @@
       "from": "64b45644a30468bb",
       "to": "e474ad1afd04801e",
       "label": "hook"
-    },
-    {
-      "from": "8058275cdfd1a41c",
-      "to": "311c554b828f67a5",
-      "label": "render"
     },
     {
       "from": "f3da9470727caa6f",

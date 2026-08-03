@@ -1125,9 +1125,23 @@ export class ComponentDB {
   }
 
   public getEdges(): DataEdge[] {
-    const edges: DataEdge[] = [...this.edges];
+    const seen = new Set<string>();
+    const edges: DataEdge[] = [];
+    const push = (edge: DataEdge) => {
+      const key = `${edge.label}:${edge.from}:${edge.to}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        edges.push(edge);
+      }
+    };
+
+    for (const edge of this.edges) {
+      push(edge);
+    }
     for (const file of this.files.getFiles()) {
-      edges.push(...file.getEdges());
+      for (const edge of file.getEdges()) {
+        push(edge);
+      }
     }
 
     return edges;
