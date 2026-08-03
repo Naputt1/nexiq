@@ -447,12 +447,12 @@
               {
                 "type": "ref",
                 "refType": "named",
-                "name": "6bec296411d9ed68"
+                "name": "Test3"
               },
               {
                 "type": "ref",
                 "refType": "named",
-                "name": "dcf492560ff097d3"
+                "name": "Child4"
               }
             ]
           },

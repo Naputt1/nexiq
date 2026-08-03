@@ -4,6 +4,7 @@ import type {
   ComponentFile,
   ComponentFileExport,
   ComponentFileImport,
+  ComponentFileVar,
   CrossPackageResolveErrorRow,
   FileAnalysisErrorRow,
   FileRunStatusRow,
@@ -138,6 +139,7 @@ export interface FileTaskSuccessMessage {
   filePath: string;
   result: ComponentFile;
   resolveTasks: ComponentDBResolve[];
+  blockedVars?: Record<string, Record<string, ComponentFileVar>> | undefined;
 }
 
 export interface FileTaskErrorMessage {

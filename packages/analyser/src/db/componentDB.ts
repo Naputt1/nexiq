@@ -900,6 +900,17 @@ export class ComponentDB {
     return this.files.add(file, cache);
   }
 
+  public getBlockedVars(fileName: string) {
+    return this.files.getBlockedVars(fileName);
+  }
+
+  public loadBlockedVars(
+    fileName: string,
+    blockedVars: Record<string, Record<string, ComponentFileVar>>,
+  ) {
+    this.files.loadBlockedVars(fileName, blockedVars);
+  }
+
   public setEntryPoint(fileName: string, entryPoint: EntryPoint) {
     this.files.setEntryPoint(fileName, entryPoint);
   }
@@ -1215,6 +1226,7 @@ export class ComponentDB {
 
   public resolve() {
     this.isResolve = true;
+    this.files.setResolving(true);
     this.unresolvedResolveTasks = [];
 
     const maxRetries = 1000;
@@ -1280,6 +1292,7 @@ export class ComponentDB {
 
     this.resolveTasks = [];
     this.isResolve = false;
+    this.files.setResolving(false);
     return [...this.unresolvedResolveTasks];
   }
 

@@ -690,6 +690,9 @@ export class PackageMaster {
       const result = message.result;
       const reconstructStart = performance.now();
       this.componentDB.addFile(filePath, result);
+      if (message.blockedVars) {
+        this.componentDB.loadBlockedVars(filePath, message.blockedVars);
+      }
       this.mainReconstructMs += performance.now() - reconstructStart;
       this.resolveTasksByFile.set(filePath, message.resolveTasks);
       const sqliteStart = performance.now();

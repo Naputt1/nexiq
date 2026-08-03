@@ -49,7 +49,7 @@ import type {
   FileTaskSuccessMessage,
   WorkerSessionConfig,
 } from "./types.ts";
-import type { ComponentFile } from "@nexiq/shared";
+import type { ComponentFile, ComponentFileVar } from "@nexiq/shared";
 import { resolvePath } from "./utils/path.ts";
 import AssignmentExpression from "./analyzer/assignmentExpression.ts";
 import BlockScope from "./analyzer/blockScope.ts";
@@ -79,6 +79,7 @@ function analyzeFileInBatch(
   srcDir: string,
 ): {
   fileData: ComponentFile;
+  blockedVars: Record<string, Record<string, ComponentFileVar>>;
   readMs: number;
   parseMs: number;
   traverseMainMs: number;
@@ -165,10 +166,12 @@ function analyzeFileInBatch(
 
   const serializeStart = performance.now();
   const fileData = file!.getData();
+  const blockedVars = file!.getBlockedVars();
   const serializeMs = performance.now() - serializeStart;
 
   return {
     fileData,
+    blockedVars,
     readMs,
     parseMs,
     traverseMainMs,
@@ -231,6 +234,7 @@ if (parentPort) {
         });
         const {
           fileData,
+          blockedVars,
           readMs,
           parseMs,
           traverseMainMs,
@@ -251,6 +255,7 @@ if (parentPort) {
           filePath,
           result: fileData,
           resolveTasks,
+          blockedVars,
         };
         results.push(message);
       } catch (error) {

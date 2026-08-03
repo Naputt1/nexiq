@@ -301,6 +301,9 @@ export class File {
   }
 
   private rawData: ComponentFile | null = null;
+  // Block scopes reconstructed in load(), keyed by blockId. Used to re-attach
+  // block-scoped variables (serialized separately from ComponentFile.var).
+  private blockScopesById = new Map<string, Scope>();
   public load(data: ComponentFile, changed: boolean) {
     this.init = changed;
     this.path = data.path;
@@ -312,6 +315,7 @@ export class File {
     this.relations = [...(data.relations || [])];
     this.locIdsMap.clear();
     this.renderInstanceMap.clear();
+    this.blockScopesById.clear();
     this.var = new Scope();
 
     if (data.var) {
@@ -348,6 +352,9 @@ export class File {
         blockScope.id,
         new Scope(undefined, undefined, blockScope.id, blockScope.scope),
       );
+    }
+    for (const [id, scope] of blockScopeNodes) {
+      this.blockScopesById.set(id, scope);
     }
     const synthesizedVarScopes = new Map<string, Scope>();
     const blockSpan = (bs: ComponentFileBlockScope) =>
@@ -414,11 +421,15 @@ export class File {
         type: exportData.type,
         exportKind: exportData.exportKind,
       };
-
-      if (exportData.type === "default") {
-        this.defaultExport = exportData.name;
-      }
     }
+    // Prefer the serialized defaultExport: traversal sets it via a separate
+    // path that doesn't always produce a type === "default" export record
+    // (e.g. `export default class Foo` records a "named" export), so deriving
+    // it purely from export types loses it on reconstruction.
+    this.defaultExport =
+      data.defaultExport ??
+      Object.values(this.export).find((e) => e.type === "default")?.name ??
+      null;
 
     for (const typeData of Object.values(data.tsTypes || {})) {
       this.tsTypes.set(typeData.id, typeData);
@@ -846,6 +857,44 @@ export class File {
     }
 
     return this.var.findDeepestVariable(loc);
+  }
+
+  // Block-scoped variables (attached to block scopes in-place) are not part of
+  // ComponentFile.var. They are serialized separately so the reconstructed
+  // live tree can restore them; getData() intentionally excludes them so the
+  // graph output stays identical to the serial path.
+  public getBlockedVars(): Record<string, Record<string, ComponentFileVar>> {
+    const out: Record<string, Record<string, ComponentFileVar>> = {};
+    const walk = (scope: Scope) => {
+      for (const variable of scope.values()) {
+        if (
+          (isBaseFunctionVariable(variable) || isClassVariable(variable)) &&
+          variable.var
+        ) {
+          walk(variable.var);
+        }
+      }
+      for (const child of scope.getChildScopes()) {
+        if (child.blockId && child.loc) {
+          out[child.blockId] = child.getData();
+        }
+        walk(child);
+      }
+    };
+    walk(this.var);
+    return out;
+  }
+
+  public loadBlockedVars(
+    blockedVars: Record<string, Record<string, ComponentFileVar>>,
+  ) {
+    for (const [blockId, vars] of Object.entries(blockedVars || {})) {
+      const scope = this.blockScopesById.get(blockId);
+      if (!scope) continue;
+      for (const variable of Object.values(vars || {})) {
+        this.loadVariable(variable, scope);
+      }
+    }
   }
 
   public getData(): ComponentFile {
@@ -1398,6 +1447,10 @@ export class FileDB {
 
   private files: Map<string, File>;
   private readonly packageJson: PackageJson;
+  // Mirrors ComponentDB.isResolve: cross-file workspace lookups are only
+  // performed during resolve() so serial and parallel resolve against the
+  // complete DB rather than traversal-order-dependent partial state.
+  private isResolving = false;
 
   constructor(src_dir: string, packageJson: PackageJson) {
     this.files = new Map();
@@ -1454,6 +1507,19 @@ export class FileDB {
     return true; // Changed
   }
 
+  public getBlockedVars(fileName: string) {
+    const file = this.files.get(fileName);
+    return file?.getBlockedVars();
+  }
+
+  public loadBlockedVars(
+    fileName: string,
+    blockedVars: Record<string, Record<string, ComponentFileVar>>,
+  ) {
+    const file = this.files.get(fileName);
+    file?.loadBlockedVars(blockedVars);
+  }
+
   public addImport(fileName: string, fileImport: ComponentFileImport) {
     const file = this.files.get(fileName);
     assert(file != null, "File not found");
@@ -1470,6 +1536,10 @@ export class FileDB {
 
   public has(fileName: string) {
     return this.files.has(fileName);
+  }
+
+  public setResolving(value: boolean) {
+    this.isResolving = value;
   }
 
   public get(fileName: string) {
@@ -1723,7 +1793,7 @@ export class FileDB {
       currentFilePath,
       source,
     );
-    if (!resolvedSource || !this.has(resolvedSource)) {
+    if (!this.isResolving || !resolvedSource || !this.has(resolvedSource)) {
       return undefined;
     }
 
@@ -1759,7 +1829,7 @@ export class FileDB {
     if (file.import?.has(name)) {
       const importData = file.import.get(name);
       if (importData) {
-        if (this.has(importData.source)) {
+        if (this.isResolving && this.has(importData.source)) {
           const sourceFile = this.get(importData.source);
           if (sourceFile) {
             const exportId = sourceFile.getExport(importData, this);
