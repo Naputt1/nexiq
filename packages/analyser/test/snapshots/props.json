@@ -57,10 +57,10 @@
       },
       "export": {
         "anonymous": {
+          "id": "cafb2fea281e67de",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "cafb2fea281e67de"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -84,22 +84,22 @@
       },
       "export": {
         "Test2": {
+          "id": "7f99636109ead299",
           "name": "Test2",
           "type": "type",
-          "exportKind": "type",
-          "id": "7f99636109ead299"
+          "exportKind": "type"
         },
         "Test3": {
+          "id": "6bec296411d9ed68",
           "name": "Test3",
           "type": "type",
-          "exportKind": "type",
-          "id": "6bec296411d9ed68"
+          "exportKind": "type"
         },
         "Child4": {
+          "id": "dcf492560ff097d3",
           "name": "Child4",
           "type": "type",
-          "exportKind": "type",
-          "id": "dcf492560ff097d3"
+          "exportKind": "type"
         }
       },
       "starExports": [],
@@ -306,34 +306,34 @@
       },
       "export": {
         "TypePropsVar": {
+          "id": "798772ab7346d97e",
           "name": "TypePropsVar",
           "type": "named",
-          "exportKind": "value",
-          "id": "798772ab7346d97e"
+          "exportKind": "value"
         },
         "TypePropsVarFunction": {
+          "id": "90e2b1081177c79d",
           "name": "TypePropsVarFunction",
           "type": "named",
-          "exportKind": "value",
-          "id": "90e2b1081177c79d"
+          "exportKind": "value"
         },
         "TypePropsVarInline": {
+          "id": "c6fb8be07af7c236",
           "name": "TypePropsVarInline",
           "type": "named",
-          "exportKind": "value",
-          "id": "c6fb8be07af7c236"
+          "exportKind": "value"
         },
         "TypePropsVarInlineFunction": {
+          "id": "80b1b60c7d127de5",
           "name": "TypePropsVarInlineFunction",
           "type": "named",
-          "exportKind": "value",
-          "id": "80b1b60c7d127de5"
+          "exportKind": "value"
         },
         "TypePropsFunction": {
+          "id": "f51adcb408401731",
           "name": "TypePropsFunction",
           "type": "named",
-          "exportKind": "component",
-          "id": "f51adcb408401731"
+          "exportKind": "component"
         }
       },
       "starExports": [],
@@ -3366,10 +3366,10 @@
       },
       "export": {
         "DestructuringProps": {
+          "id": "1259634e1eafe1c6",
           "name": "DestructuringProps",
           "type": "named",
-          "exportKind": "value",
-          "id": "1259634e1eafe1c6"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -3775,10 +3775,10 @@
       },
       "export": {
         "App": {
+          "id": "311c554b828f67a5",
           "name": "App",
           "type": "named",
-          "exportKind": "component",
-          "id": "311c554b828f67a5"
+          "exportKind": "component"
         }
       },
       "starExports": [],

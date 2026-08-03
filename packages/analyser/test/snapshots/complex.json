@@ -57,10 +57,10 @@
       },
       "export": {
         "anonymous": {
+          "id": "cafb2fea281e67de",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "cafb2fea281e67de"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -247,16 +247,16 @@
       },
       "export": {
         "AliasedA": {
+          "id": "2a879fb569f27e07",
           "name": "AliasedA",
           "type": "named",
-          "exportKind": "value",
-          "id": "2a879fb569f27e07"
+          "exportKind": "value"
         },
         "MainNested": {
+          "id": "ddeaede563e8cb02",
           "name": "MainNested",
           "type": "default",
-          "exportKind": "value",
-          "id": "ddeaede563e8cb02"
+          "exportKind": "value"
         }
       },
       "starExports": [
@@ -282,22 +282,22 @@
       },
       "export": {
         "SubComponentA": {
+          "id": "a32b256a44b5089f",
           "name": "SubComponentA",
           "type": "named",
-          "exportKind": "value",
-          "id": "a32b256a44b5089f"
+          "exportKind": "value"
         },
         "SubComponentB": {
+          "id": "a19fd7017beb07a8",
           "name": "SubComponentB",
           "type": "named",
-          "exportKind": "component",
-          "id": "a19fd7017beb07a8"
+          "exportKind": "component"
         },
         "MainNested": {
+          "id": "6826ec85ac9962e0",
           "name": "MainNested",
           "type": "default",
-          "exportKind": "component",
-          "id": "6826ec85ac9962e0"
+          "exportKind": "component"
         }
       },
       "starExports": [],
@@ -940,22 +940,22 @@
       },
       "export": {
         "useCustomHook": {
+          "id": "7a755d146a3ba89a",
           "name": "useCustomHook",
           "type": "named",
-          "exportKind": "function",
-          "id": "7a755d146a3ba89a"
+          "exportKind": "function"
         },
         "useOtherHook": {
+          "id": "4f0723afcf0b7560",
           "name": "useOtherHook",
           "type": "named",
-          "exportKind": "value",
-          "id": "4f0723afcf0b7560"
+          "exportKind": "value"
         },
         "useClickOutsideRef": {
+          "id": "79cf30df8bf873d3",
           "name": "useClickOutsideRef",
           "type": "named",
-          "exportKind": "function",
-          "id": "79cf30df8bf873d3"
+          "exportKind": "function"
         }
       },
       "starExports": [],
@@ -1670,22 +1670,22 @@
       },
       "export": {
         "MemoizedComponent": {
+          "id": "7cb39a3350cd7439",
           "name": "MemoizedComponent",
           "type": "named",
-          "exportKind": "value",
-          "id": "7cb39a3350cd7439"
+          "exportKind": "value"
         },
         "ForwardRefComponent": {
+          "id": "66105c08a1f70b91",
           "name": "ForwardRefComponent",
           "type": "named",
-          "exportKind": "value",
-          "id": "66105c08a1f70b91"
+          "exportKind": "value"
         },
         "WrappedComponent": {
+          "id": "8b20080379f3a04b",
           "name": "WrappedComponent",
           "type": "named",
-          "exportKind": "value",
-          "id": "8b20080379f3a04b"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -2316,10 +2316,10 @@
       },
       "export": {
         "DestructuringProps": {
+          "id": "1259634e1eafe1c6",
           "name": "DestructuringProps",
           "type": "named",
-          "exportKind": "value",
-          "id": "1259634e1eafe1c6"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -2792,16 +2792,16 @@
       },
       "export": {
         "DeepApp": {
+          "id": "5a51946d93053e40",
           "name": "DeepApp",
           "type": "named",
-          "exportKind": "value",
-          "id": "5a51946d93053e40"
+          "exportKind": "value"
         },
         "DeepDependency": {
+          "id": "7732b08b7377499b",
           "name": "DeepDependency",
           "type": "named",
-          "exportKind": "value",
-          "id": "7732b08b7377499b"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -3938,22 +3938,22 @@
       },
       "export": {
         "MyContext": {
+          "id": "b3379aa31af9888",
           "name": "MyContext",
           "type": "named",
-          "exportKind": "value",
-          "id": "b3379aa31af9888"
+          "exportKind": "value"
         },
         "MyProvider": {
+          "id": "cf259be6f1cb800b",
           "name": "MyProvider",
           "type": "named",
-          "exportKind": "value",
-          "id": "cf259be6f1cb800b"
+          "exportKind": "value"
         },
         "MyConsumer": {
+          "id": "922ba1247fc0dd3d",
           "name": "MyConsumer",
           "type": "named",
-          "exportKind": "value",
-          "id": "922ba1247fc0dd3d"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -4455,10 +4455,10 @@
       },
       "export": {
         "ComplexApp": {
+          "id": "1554bc91c15f5c0b",
           "name": "ComplexApp",
           "type": "named",
-          "exportKind": "component",
-          "id": "1554bc91c15f5c0b"
+          "exportKind": "component"
         }
       },
       "starExports": [],

@@ -906,19 +906,34 @@ export class PackageMaster {
         this.markFileStatus(filePath, "running");
         try {
           const result = this.runSingleThreadedAnalysis(filePath);
-          this.markFileStatus(filePath, "parsed", {
-            fileHash: result.hash,
-            fingerprint: result.fingerPrint,
-          });
-          if (this.sqlite) {
-            if (this.packageRow?.id) {
-              result.package_id = this.packageRow.id;
+
+          // Round-trip the in-process result through the same serialize ->
+          // reconstruct pipeline the worker path uses. The live traversal tree
+          // can carry state that serialization normalizes (e.g. a JSX variable
+          // whose `type` was mutated to "data" by merging a same-loc data
+          // alias); building edges from the reconstructed tree makes serial
+          // output identical to the worker path, which already round-trips.
+          const fileData = result.getData();
+          const blockedVars = result.getBlockedVars();
+          this.componentDB.addFile(filePath, fileData);
+          this.componentDB.loadBlockedVars(filePath, blockedVars);
+
+          const file = this.componentDB.getFile(filePath);
+          if (file) {
+            this.markFileStatus(filePath, "parsed", {
+              fileHash: file.hash,
+              fingerprint: file.fingerPrint,
+            });
+            if (this.sqlite) {
+              if (this.packageRow?.id) {
+                file.package_id = this.packageRow.id;
+              }
+              this.sqlite.saveFileResultsForRun(
+                this.runId,
+                file,
+                this.packageRow?.id,
+              );
             }
-            this.sqlite.saveFileResultsForRun(
-              this.runId,
-              result,
-              this.packageRow?.id,
-            );
           }
           succeededFiles.push(filePath);
         } catch (error) {

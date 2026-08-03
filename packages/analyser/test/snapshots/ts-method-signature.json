@@ -57,10 +57,10 @@
       },
       "export": {
         "anonymous": {
+          "id": "cafb2fea281e67de",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "cafb2fea281e67de"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -240,22 +240,22 @@
       },
       "export": {
         "MyInterface": {
+          "id": "2a6fb9e029700a2d",
           "name": "MyInterface",
           "type": "type",
-          "exportKind": "type",
-          "id": "2a6fb9e029700a2d"
+          "exportKind": "type"
         },
         "MyType": {
+          "id": "16ac33881c31cf6a",
           "name": "MyType",
           "type": "type",
-          "exportKind": "type",
-          "id": "16ac33881c31cf6a"
+          "exportKind": "type"
         },
         "App": {
+          "id": "311c554b828f67a5",
           "name": "App",
           "type": "named",
-          "exportKind": "value",
-          "id": "311c554b828f67a5"
+          "exportKind": "value"
         }
       },
       "starExports": [],

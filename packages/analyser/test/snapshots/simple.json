@@ -57,10 +57,10 @@
       },
       "export": {
         "anonymous": {
+          "id": "cafb2fea281e67de",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "cafb2fea281e67de"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -247,10 +247,10 @@
       },
       "export": {
         "Child": {
+          "id": "8058275cdfd1a41c",
           "name": "Child",
           "type": "named",
-          "exportKind": "component",
-          "id": "8058275cdfd1a41c"
+          "exportKind": "component"
         }
       },
       "starExports": [],
@@ -409,16 +409,16 @@
       },
       "export": {
         "UserContext": {
+          "id": "3b05a7ce5ff0d425",
           "name": "UserContext",
           "type": "named",
-          "exportKind": "value",
-          "id": "3b05a7ce5ff0d425"
+          "exportKind": "value"
         },
         "App": {
+          "id": "311c554b828f67a5",
           "name": "App",
           "type": "default",
-          "exportKind": "value",
-          "id": "311c554b828f67a5"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -2207,10 +2207,10 @@
       "import": {},
       "export": {
         "Test": {
+          "id": "a6b739fa4a0a9b84",
           "name": "Test",
           "type": "default",
-          "exportKind": "value",
-          "id": "a6b739fa4a0a9b84"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -2322,10 +2322,10 @@
       "import": {},
       "export": {
         "Test": {
+          "id": "8c661cc89799b0d9",
           "name": "Test",
           "type": "default",
-          "exportKind": "component",
-          "id": "8c661cc89799b0d9"
+          "exportKind": "component"
         }
       },
       "starExports": [],
@@ -2436,10 +2436,10 @@
       "import": {},
       "export": {
         "anonymous": {
+          "id": "f33cc2344f0788c8",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "value",
-          "id": "f33cc2344f0788c8"
+          "exportKind": "value"
         }
       },
       "starExports": [],
@@ -2563,10 +2563,10 @@
       "import": {},
       "export": {
         "anonymous": {
+          "id": "194edf5b8ca4a536",
           "name": "anonymous",
           "type": "default",
-          "exportKind": "component",
-          "id": "194edf5b8ca4a536"
+          "exportKind": "component"
         }
       },
       "starExports": [],
