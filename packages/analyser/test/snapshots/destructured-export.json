@@ -469,6 +469,36 @@
           },
           "async": false,
           "return": "7cc97a23e626856d",
+          "children": {
+            "b2e108291b626c5c": {
+              "id": "/src/App.tsx:div:5:9",
+              "instanceId": "b2e108291b626c5c",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            },
+            "7aba0f2118960f14": {
+              "id": "3b61c6631db1ad5b",
+              "instanceId": "7aba0f2118960f14",
+              "tag": "useUser",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 4,
+                "column": 15
+              },
+              "renderIndex": 1,
+              "kind": "hook",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

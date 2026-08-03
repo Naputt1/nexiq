@@ -1090,8 +1090,12 @@ export class ComponentDB {
           to: variable.id,
           label: "render",
         });
-        for (const child of Object.values(variable.children || {})) {
-          resolveRenders(child, parent);
+        // Walk the render tree (identical across modes via serialized data)
+        // rather than variable.children, which is only populated when render is
+        // set at construction time (reconstruction) and stays empty when it is
+        // assigned later during traversal (serial).
+        if (variable.render) {
+          resolveRenders(variable.render, parent);
         }
       }
     }
@@ -1122,7 +1126,6 @@ export class ComponentDB {
 
   public getEdges(): DataEdge[] {
     const edges: DataEdge[] = [...this.edges];
-
     for (const file of this.files.getFiles()) {
       edges.push(...file.getEdges());
     }

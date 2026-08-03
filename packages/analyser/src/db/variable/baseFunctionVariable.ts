@@ -35,7 +35,7 @@ export abstract class BaseFunctionVariable<
     this.scope = options.scope;
     this.async = options.async;
     this.return = options.return;
-    this.children = {};
+    this.children = options.children ?? {};
     this.superClass = options.superClass;
   }
 
@@ -47,6 +47,9 @@ export abstract class BaseFunctionVariable<
     if (data.async !== undefined) this.async = data.async;
     if (data.return !== undefined) this.return = data.return;
     this.superClass = data.superClass ?? this.superClass;
+    if (data.children) {
+      this.children = data.children;
+    }
     this.var.merge(data.var);
   }
 
@@ -59,6 +62,9 @@ export abstract class BaseFunctionVariable<
       async: this.async,
       return: this.return,
       superClass: this.superClass,
+      ...(Object.keys(this.children).length > 0
+        ? { children: this.children }
+        : {}),
     };
   }
 

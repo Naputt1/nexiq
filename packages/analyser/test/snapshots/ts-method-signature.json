@@ -462,6 +462,22 @@
           },
           "async": false,
           "return": "ac19971c890d320a",
+          "children": {
+            "fe6478e6f2df7661": {
+              "id": "/src/App.tsx:div:13:9",
+              "instanceId": "fe6478e6f2df7661",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 13,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

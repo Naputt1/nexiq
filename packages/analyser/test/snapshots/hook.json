@@ -845,6 +845,22 @@
           },
           "async": false,
           "return": "92f295c8f0b6b743",
+          "children": {
+            "517eb834c52fcf9d": {
+              "id": "/src/various-imports.tsx:div:36:4",
+              "instanceId": "517eb834c52fcf9d",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 36,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [
             "65338fa51b33f878:state:[s1, setS1]",
             "65338fa51b33f878:state:[s2, setS2]",
@@ -1950,6 +1966,36 @@
           },
           "async": false,
           "return": "b1b5f69e8e220cf8",
+          "children": {
+            "b58236e8faf71648": {
+              "id": "/src/effectt.tsx:div:19:9",
+              "instanceId": "b58236e8faf71648",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 19,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            },
+            "f0ce289f4cf4bc51": {
+              "id": "7a755d146a3ba89a",
+              "instanceId": "f0ce289f4cf4bc51",
+              "tag": "useCustomHook",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 7,
+                "column": 30
+              },
+              "renderIndex": 1,
+              "kind": "hook",
+              "children": {}
+            }
+          },
           "states": [
             "66289b593d160656:state:[state, setState]"
           ],
@@ -2560,6 +2606,50 @@
           },
           "async": false,
           "return": "bf1b66ac05fc1c35",
+          "children": {
+            "c64791032123f921": {
+              "id": "/src/callback.tsx:div:14:4",
+              "instanceId": "c64791032123f921",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "e67a7184a83a3fcb",
+                  "name": "onClick",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "() => console.log(inc(1))"
+                    }
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 14,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "5ae1d6f128de5979": {
+                  "id": "b467437c6d4d1f03",
+                  "instanceId": "5ae1d6f128de5979",
+                  "tag": "onClick",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 14,
+                    "column": 9
+                  },
+                  "parentId": "c64791032123f921",
+                  "renderIndex": 0,
+                  "kind": "attribute",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [
             "89091d73d3a537b1:state:[count, setCount]"
           ],
@@ -2991,6 +3081,50 @@
           },
           "async": false,
           "return": "9e9757cc8d09428",
+          "children": {
+            "aff877137359b961": {
+              "id": "/src/callback.tsx:div:38:9",
+              "instanceId": "aff877137359b961",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "e67a7184a83a3fcb",
+                  "name": "onClick",
+                  "value": {
+                    "type": "literal-type",
+                    "literal": {
+                      "type": "string",
+                      "value": "() => doSearch('test')"
+                    }
+                  }
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 38,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "7f57d34291329e23": {
+                  "id": "d9c287d823385cd3",
+                  "instanceId": "7f57d34291329e23",
+                  "tag": "onClick",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 38,
+                    "column": 14
+                  },
+                  "parentId": "aff877137359b961",
+                  "renderIndex": 0,
+                  "kind": "attribute",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [
             "3720d9d904fa2467:state:[searchState, setSearchState]"
           ],
@@ -3912,6 +4046,53 @@
           },
           "async": false,
           "return": "5fa4c0c2a96eddec",
+          "children": {
+            "4b10cd7c9d4d337b": {
+              "id": "/src/App.tsx:div:6:4",
+              "instanceId": "4b10cd7c9d4d337b",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 6,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "b4366b95069a0d75": {
+                  "id": "65338fa51b33f878",
+                  "instanceId": "b4366b95069a0d75",
+                  "tag": "MyComponent",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 7,
+                    "column": 6
+                  },
+                  "parentId": "4b10cd7c9d4d337b",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "8ae8f7ad1434e3a": {
+                  "id": "89091d73d3a537b1",
+                  "instanceId": "8ae8f7ad1434e3a",
+                  "tag": "CallbackFactory",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 8,
+                    "column": 6
+                  },
+                  "parentId": "4b10cd7c9d4d337b",
+                  "renderIndex": 1,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

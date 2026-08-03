@@ -352,6 +352,22 @@
           },
           "async": true,
           "return": "7cc97a23e626856d",
+          "children": {
+            "b2e108291b626c5c": {
+              "id": "/src/App.tsx:div:5:9",
+              "instanceId": "b2e108291b626c5c",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 5,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],
@@ -687,6 +703,38 @@
           },
           "async": false,
           "return": "c2e2d8f518b587e3",
+          "children": {
+            "f1c971150c1cc0c4": {
+              "id": "/src/App.tsx:div:35:4",
+              "instanceId": "f1c971150c1cc0c4",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 35,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "9abbd29837eef14a": {
+                  "id": "3c1c2c7b2aead5f7",
+                  "instanceId": "9abbd29837eef14a",
+                  "tag": "AsyncComponent",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 36,
+                    "column": 6
+                  },
+                  "parentId": "f1c971150c1cc0c4",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

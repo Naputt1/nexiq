@@ -521,6 +521,38 @@
           },
           "async": false,
           "return": "4868cad7295c6f83",
+          "children": {
+            "3d50b56716bf678d": {
+              "id": "/src/App.tsx:div:18:4",
+              "instanceId": "3d50b56716bf678d",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 18,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "57a6bb522462eaf7": {
+                  "id": "",
+                  "instanceId": "57a6bb522462eaf7",
+                  "tag": "Ternary",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 19,
+                    "column": 7
+                  },
+                  "parentId": "3d50b56716bf678d",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [
             "f1feac25b9f6456e:state:[expanding, setExpanding]",
             "f1feac25b9f6456e:state:[expanded, setExpanded]"

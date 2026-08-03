@@ -591,6 +591,33 @@
           },
           "async": false,
           "return": "d237a37ed9af4342",
+          "children": {
+            "169e3bbe7d5d1393": {
+              "id": "/src/App.tsx:div:28:9",
+              "instanceId": "169e3bbe7d5d1393",
+              "tag": "div",
+              "dependencies": [
+                {
+                  "id": "e67a7184a83a3fcb",
+                  "name": "onClick",
+                  "value": {
+                    "type": "ref",
+                    "refType": "named",
+                    "name": "handleFollowing"
+                  },
+                  "valueId": "cecd7885fd3615f5:callback:handleFollowing"
+                }
+              ],
+              "isDependency": false,
+              "loc": {
+                "line": 28,
+                "column": 9
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],

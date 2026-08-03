@@ -334,6 +334,38 @@
           },
           "async": false,
           "return": "14d39981fe402056",
+          "children": {
+            "83234778f80e93f2": {
+              "id": "/src/Other.tsx:div:1:60",
+              "instanceId": "83234778f80e93f2",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 1,
+                "column": 60
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "84d7d4b65985f58f": {
+                  "id": "",
+                  "instanceId": "84d7d4b65985f58f",
+                  "tag": "Ternary",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 1,
+                    "column": 66
+                  },
+                  "parentId": "83234778f80e93f2",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "refs": [],
           "props": [
@@ -450,6 +482,22 @@
           },
           "async": false,
           "return": "9ad56d5fff6d69eb",
+          "children": {
+            "dbf8f0e64c019492": {
+              "id": "/src/Child.tsx:div:1:53",
+              "instanceId": "dbf8f0e64c019492",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 1,
+                "column": 53
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [
@@ -1437,6 +1485,197 @@
           },
           "async": false,
           "return": "79571077bf87702d",
+          "children": {
+            "ed1aa44fb4a1658f": {
+              "id": "/src/App.tsx:div:36:4",
+              "instanceId": "ed1aa44fb4a1658f",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 36,
+                "column": 4
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "b36c2c8bb470dda8": {
+                  "id": "/src/App.tsx:h1:37:6",
+                  "instanceId": "b36c2c8bb470dda8",
+                  "tag": "h1",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 37,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "6180416866de6f9d": {
+                  "id": "/src/App.tsx:p:38:6",
+                  "instanceId": "6180416866de6f9d",
+                  "tag": "p",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 38,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 1,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "b4c6559bf000b8d5": {
+                  "id": "/src/App.tsx:p:39:6",
+                  "instanceId": "b4c6559bf000b8d5",
+                  "tag": "p",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 39,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 2,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "afe7b8e4f5e5636f": {
+                  "id": "/src/App.tsx:p:40:6",
+                  "instanceId": "afe7b8e4f5e5636f",
+                  "tag": "p",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 40,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 3,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "209c63f6e571f969": {
+                  "id": "",
+                  "instanceId": "209c63f6e571f969",
+                  "tag": "ShortCircuit",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 41,
+                    "column": 7
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 4,
+                  "kind": "jsx",
+                  "children": {
+                    "ca423de8d3560584": {
+                      "id": "/src/App.tsx:p:41:20",
+                      "instanceId": "ca423de8d3560584",
+                      "tag": "p",
+                      "dependencies": [],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 41,
+                        "column": 20
+                      },
+                      "parentId": "209c63f6e571f969",
+                      "renderIndex": 0,
+                      "kind": "jsx",
+                      "children": {}
+                    }
+                  }
+                },
+                "3c5c5bfef2307e1d": {
+                  "id": "",
+                  "instanceId": "3c5c5bfef2307e1d",
+                  "tag": "ShortCircuit",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 42,
+                    "column": 7
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 5,
+                  "kind": "jsx",
+                  "children": {
+                    "8a86437613939b1a": {
+                      "id": "/src/App.tsx:p:42:16",
+                      "instanceId": "8a86437613939b1a",
+                      "tag": "p",
+                      "dependencies": [],
+                      "isDependency": false,
+                      "loc": {
+                        "line": 42,
+                        "column": 16
+                      },
+                      "parentId": "3c5c5bfef2307e1d",
+                      "renderIndex": 0,
+                      "kind": "jsx",
+                      "children": {}
+                    }
+                  }
+                },
+                "f24700df9a673f9a": {
+                  "id": "94b6fcbf54cdfaec",
+                  "instanceId": "f24700df9a673f9a",
+                  "tag": "Child",
+                  "dependencies": [
+                    {
+                      "id": "e4b7943fd57d5d1e",
+                      "name": "data",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "name"
+                      },
+                      "valueId": "311c554b828f67a5:callhook:useQuery:20:8:2922cb56c1ed4a1b:eda2bf3c5d76549c:25e5a94a10ee5432"
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 43,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 6,
+                  "kind": "jsx",
+                  "children": {}
+                },
+                "c0b1dff71a417c7a": {
+                  "id": "bdfbc1ef26687ffa",
+                  "instanceId": "c0b1dff71a417c7a",
+                  "tag": "Other",
+                  "dependencies": [
+                    {
+                      "id": "6b1c7ef67821ce66",
+                      "name": "loading",
+                      "value": {
+                        "type": "ref",
+                        "refType": "named",
+                        "name": "isLoading"
+                      },
+                      "valueId": "311c554b828f67a5:callhook:useQuery:20:8:889638b7d4938d85"
+                    }
+                  ],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 44,
+                    "column": 6
+                  },
+                  "parentId": "ed1aa44fb4a1658f",
+                  "renderIndex": 7,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "refs": [],
           "props": [],
@@ -1546,6 +1785,22 @@
           },
           "async": false,
           "return": "1490b1b0fb984b0d",
+          "children": {
+            "9b4b43a508e2a211": {
+              "id": "/src/App.tsx:div:49:46",
+              "instanceId": "9b4b43a508e2a211",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 49,
+                "column": 46
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {}
+            }
+          },
           "states": [],
           "refs": [],
           "props": [
@@ -1658,6 +1913,38 @@
           },
           "async": false,
           "return": "c71559ab0ec1a29a",
+          "children": {
+            "cfa8643d3a50cf96": {
+              "id": "/src/App.tsx:div:51:2",
+              "instanceId": "cfa8643d3a50cf96",
+              "tag": "div",
+              "dependencies": [],
+              "isDependency": false,
+              "loc": {
+                "line": 51,
+                "column": 2
+              },
+              "renderIndex": 0,
+              "kind": "jsx",
+              "children": {
+                "c226f50e52e3a6ec": {
+                  "id": "",
+                  "instanceId": "c226f50e52e3a6ec",
+                  "tag": "Ternary",
+                  "dependencies": [],
+                  "isDependency": false,
+                  "loc": {
+                    "line": 51,
+                    "column": 8
+                  },
+                  "parentId": "cfa8643d3a50cf96",
+                  "renderIndex": 0,
+                  "kind": "jsx",
+                  "children": {}
+                }
+              }
+            }
+          },
           "states": [],
           "refs": [],
           "props": [
