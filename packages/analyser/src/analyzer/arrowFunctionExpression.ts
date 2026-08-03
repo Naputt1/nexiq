@@ -70,11 +70,12 @@ export default function ArrowFunctionExpression(
           const parentRenderId = componentDB.getCurrentRenderInstance();
           if (parentRenderId) {
             const file = componentDB.getFile(fileName);
-            file.addRender(
+            const instanceId = getDeterministicId(
+              `${fileName}-${attrName.name}-${attrLoc.line}-${attrLoc.column}`,
+            );
+            const renderID = file.addRender(
               attrId,
-              getDeterministicId(
-                `${fileName}-${attrName.name}-${attrLoc.line}-${attrLoc.column}`,
-              ),
+              instanceId,
               attrName.name,
               [],
               false,
@@ -82,6 +83,22 @@ export default function ArrowFunctionExpression(
               "attribute",
               parentRenderId,
             );
+            if (!renderID) {
+              // The parent render instance isn't attached yet (it was deferred
+              // to resolve()), so defer this attribute render too — resolve()
+              // will re-run it after its parent has been attached.
+              componentDB.addResolveTask({
+                type: "comAddRender",
+                fileName,
+                tag: attrName.name,
+                dependency: [],
+                loc: attrLoc,
+                kind: "attribute",
+                parentId: parentRenderId,
+                srcId: attrId,
+                instanceId,
+              });
+            }
           }
         }
         return;

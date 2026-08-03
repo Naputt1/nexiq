@@ -160,4 +160,45 @@ describe("analyser multi-threaded consistency", () => {
       }
     });
   });
+
+  // The worker pool is only engaged for projects with >=150 files, so the
+  // consistency tests above never exercise it. Force the thresholds down so a
+  // real worker run is compared against the single-threaded in-place path.
+  // NOTE: the file data (scopes, vars, renders) is the primary contract and is
+  // compared here; the edge list still has a pre-existing worker-path duplicate
+  // issue that is tracked separately.
+  it("should be consistent when the worker pool is forced", async () => {
+    const prevMinFiles = process.env["NEXIQ_MIN_FILES_FOR_WORKERS"];
+    const prevMinPerWorker = process.env["NEXIQ_MIN_FILES_PER_WORKER"];
+    process.env["NEXIQ_MIN_FILES_FOR_WORKERS"] = "1";
+    process.env["NEXIQ_MIN_FILES_PER_WORKER"] = "1";
+    try {
+      const projectPath = path.resolve(
+        process.cwd(),
+        `../sample-project/complex`,
+      );
+
+      const singleThreadedGraph = await analyzeProject(projectPath, {
+        fileWorkerThreads: 1,
+      });
+      const multiThreadedGraph = await analyzeProject(projectPath, {
+        fileWorkerThreads: 4,
+      });
+
+      expect(normalize(multiThreadedGraph).files).toEqual(
+        normalize(singleThreadedGraph).files,
+      );
+    } finally {
+      if (prevMinFiles === undefined) {
+        delete process.env["NEXIQ_MIN_FILES_FOR_WORKERS"];
+      } else {
+        process.env["NEXIQ_MIN_FILES_FOR_WORKERS"] = prevMinFiles;
+      }
+      if (prevMinPerWorker === undefined) {
+        delete process.env["NEXIQ_MIN_FILES_PER_WORKER"];
+      } else {
+        process.env["NEXIQ_MIN_FILES_PER_WORKER"] = prevMinPerWorker;
+      }
+    }
+  }, 30000);
 });

@@ -387,7 +387,7 @@
           "kind": "component",
           "type": "function",
           "file": "/src/App.tsx",
-          "hash": "ab80277a9577cd65",
+          "hash": "93e82eed25dab09b",
           "declarationKind": "const",
           "dependencies": {},
           "loc": {
@@ -434,7 +434,7 @@
               "kind": "normal",
               "type": "jsx",
               "file": "/src/App.tsx",
-              "hash": "6454b1e5500b14d1",
+              "hash": "de98602cbb73905f",
               "dependencies": {},
               "loc": {
                 "line": 5,
@@ -450,7 +450,7 @@
                   "line": 5,
                   "column": 9
                 },
-                "renderIndex": 1,
+                "renderIndex": 0,
                 "kind": "jsx",
                 "children": {}
               },

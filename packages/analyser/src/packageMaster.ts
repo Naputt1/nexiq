@@ -63,8 +63,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Worker startup (fresh V8 isolate loading babel + analyser) measures ~150-200ms
 // wall, so the pool only pays off for projects large enough to amortize it.
-const MIN_FILES_FOR_WORKERS = 150;
-const MIN_FILES_PER_WORKER = 8;
+function workerPoolThresholds() {
+  return {
+    minFiles: Number(process.env["NEXIQ_MIN_FILES_FOR_WORKERS"] ?? 150),
+    minPerWorker: Number(process.env["NEXIQ_MIN_FILES_PER_WORKER"] ?? 8),
+  };
+}
 
 function createRunId(prefix: string, scope: string) {
   const safeScope = scope.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -276,6 +280,9 @@ export class PackageMaster {
   private readonly onPhase: PhaseCallback | undefined;
   private mainReconstructMs = 0;
   private sqliteWriteMs = 0;
+  // Buffer per-file resolve tasks so they can be flushed in package file order,
+  // matching the order the serial path queues them during traversal.
+  private resolveTasksByFile = new Map<string, ComponentDBResolve[]>();
   private readonly viteAliases: Record<string, string>;
   private readonly tsConfigManager: TsConfigManager;
   private readonly componentDB: ComponentDB;
@@ -653,17 +660,19 @@ export class PackageMaster {
   }
 
   private shouldUseWorkerPool(fileCount: number) {
+    const { minFiles, minPerWorker } = workerPoolThresholds();
     return (
       this.threads > 1 &&
-      fileCount >= MIN_FILES_FOR_WORKERS &&
-      this.threads * MIN_FILES_PER_WORKER <= fileCount * 2
+      fileCount >= minFiles &&
+      this.threads * minPerWorker <= fileCount * 2
     );
   }
 
   private getWorkerCount(fileCount: number) {
     // Don't spawn `threads` workers for a project that only has a handful of
     // files — scale the pool down to roughly one worker per MIN_FILES_PER_WORKER.
-    const scaled = Math.ceil(fileCount / MIN_FILES_PER_WORKER);
+    const { minPerWorker } = workerPoolThresholds();
+    const scaled = Math.ceil(fileCount / minPerWorker);
     return Math.max(1, Math.min(this.threads, scaled));
   }
 
@@ -682,7 +691,7 @@ export class PackageMaster {
       const reconstructStart = performance.now();
       this.componentDB.addFile(filePath, result);
       this.mainReconstructMs += performance.now() - reconstructStart;
-      this.componentDB.addResolveTasks(message.resolveTasks);
+      this.resolveTasksByFile.set(filePath, message.resolveTasks);
       const sqliteStart = performance.now();
       this.markFileStatus(filePath, "parsed", {
         fileHash: result.hash,
@@ -950,6 +959,18 @@ export class PackageMaster {
     for (const filePath of succeededFiles) {
       this.markFileStatus(filePath, "resolve_pending");
     }
+
+    // Flush worker resolve tasks in package file order. With cross-file
+    // resolution gated to resolve() (see _getExportId), serial queues tasks
+    // during traversal in file order, so replaying the same order here makes
+    // resolve() attach renders/hooks in an identical sequence in both modes.
+    for (const filePath of filesToAnalyze) {
+      const tasks = this.resolveTasksByFile.get(filePath);
+      if (tasks && tasks.length > 0) {
+        this.componentDB.addResolveTasks(tasks);
+      }
+    }
+    this.resolveTasksByFile.clear();
 
     const unresolvedTasks = withPhase(this.onPhase, "resolve", () =>
       this.componentDB.resolve(),

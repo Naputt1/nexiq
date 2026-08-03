@@ -441,6 +441,8 @@ export type IResolveAddRender = {
   loc: VariableLoc;
   kind?: ComponentInfoRender["kind"] | undefined;
   parentId?: string | undefined;
+  srcId?: string | undefined;
+  instanceId?: string | undefined;
 };
 export type IResolveAddHook = {
   type: "comAddHook";

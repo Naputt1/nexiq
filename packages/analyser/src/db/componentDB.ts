@@ -686,7 +686,12 @@ export class ComponentDB {
       };
     }
 
-    if (this.files.has(comImport.source)) {
+    // Cross-file workspace resolution only during resolve(): during traversal
+    // the serial path's progressive shared DB would resolve references based on
+    // which files happened to be processed earlier, while the parallel per-file
+    // workers never have the target loaded. Deferring to resolve() (complete
+    // DB, file-order task queue) makes both modes deterministic and identical.
+    if (this.isResolve && this.files.has(comImport.source)) {
       const file = this.files.get(comImport.source);
       const id = file.getExport(comImport, this.files);
       if (id) {
@@ -784,11 +789,16 @@ export class ComponentDB {
     loc: VariableLoc,
     kind: ComponentInfoRender["kind"] = "jsx",
     parentId?: string,
+    srcIdOverride?: string,
+    instanceIdOverride?: string,
   ) {
-    let srcId = "";
+    // srcId/instanceId may be precomputed by the caller (e.g. JSX attributes
+    // created via File.addRender directly). When provided, skip resolution so
+    // a deferred re-run attaches the exact same render.
+    let srcId = srcIdOverride ?? "";
     let isDependency = false;
 
-    if (tag === "Fragment") {
+    if (!srcIdOverride && tag === "Fragment") {
       srcId = `${fileName}:Fragment:${loc.line}:${loc.column}`;
     } else {
       const v = this.files.getHookInfoFromLoc(fileName, loc);
@@ -812,9 +822,11 @@ export class ComponentDB {
       }
     }
 
-    const instanceId = getDeterministicId(
-      `${fileName}-${tag}-${loc.line}-${loc.column}`,
-    );
+    const instanceId =
+      instanceIdOverride ??
+      getDeterministicId(
+        `${fileName}-${tag}-${loc.line}-${loc.column}`,
+      );
 
     if (!srcId) {
       if (tag && tag[0] === tag[0]?.toLowerCase()) {
@@ -857,6 +869,8 @@ export class ComponentDB {
           dependency,
           loc,
           parentId,
+          srcId: srcIdOverride,
+          instanceId: instanceIdOverride,
         });
       }
     }
@@ -1132,6 +1146,8 @@ export class ComponentDB {
         task.loc,
         task.kind,
         task.parentId,
+        task.srcId,
+        task.instanceId,
       );
     },
     comAddHook: (db, task) => {

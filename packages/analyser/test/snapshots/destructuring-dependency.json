@@ -338,13 +338,13 @@
             {
               "id": "be26670b3595c560:prop:fn",
               "name": "fn",
-              "type": "any",
+              "type": "TSAnyKeyword",
               "kind": "prop",
               "loc": {
                 "line": 4,
                 "column": 21
               },
-              "hash": "e52b884c9876efdb"
+              "hash": "d5e5f945662e1b47"
             }
           ],
           "propName": "fn",

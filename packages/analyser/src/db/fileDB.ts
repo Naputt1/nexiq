@@ -1,6 +1,7 @@
 import assert from "assert";
 import type {
   ComponentFile,
+  ComponentFileBlockScope,
   ComponentFileExport,
   ComponentFileImport,
   ComponentFileVar,
@@ -321,28 +322,77 @@ export class File {
       this.loadVariable(variable);
     }
 
-    const blockScopes = [...(data.blockScopes || [])].sort((a, b) => {
-      const aSpan =
-        (a.scope.end.line - a.scope.start.line) * 10_000 +
-        (a.scope.end.column - a.scope.start.column);
-      const bSpan =
-        (b.scope.end.line - b.scope.start.line) * 10_000 +
-        (b.scope.end.column - b.scope.start.column);
-      return bSpan - aSpan;
-    });
-    const scopeMap = new Map<string, Scope>();
+    // Reconstruct block scopes deterministically from their serialized parentId.
+    // The old span-sorted + findDeepestScope fallback was order-dependent: it
+    // could wire a block under the wrong ancestor because findDeepestScope
+    // descends into block childScopes before function-variable scopes, and in
+    // the reconstructed tree those function variables may not be attached where
+    // the original traversal placed them. parentId already encodes the exact
+    // parent (a block id, "scope:block:<varId>" for a function-variable scope,
+    // or absent for the file root), so wiring directly from it is exact and
+    // order-independent.
+    //
+    // One parentId case can't be wired from the var tree: a function variable
+    // that was declared inside a block scope is attached to that block in the
+    // in-place tree and is therefore not part of ComponentFile.var (only root
+    // and function-nested variables are serialized). Such variables survive only
+    // as "scope:block:<varId>" parentId references. For those we synthesize a
+    // placeholder scope owned by a minimal variable with that id, attached to
+    // the deepest block whose span contains the referenced block's start (the
+    // block the variable was declared inside), so getBlockScopes() output and
+    // name resolution match the in-place tree.
+    const blockScopes = [...(data.blockScopes || [])];
+    const blockScopeNodes = new Map<string, Scope>();
     for (const blockScope of blockScopes) {
-      const parentScope =
-        (blockScope.parentId && scopeMap.get(blockScope.parentId)) ||
-        this.var.findDeepestScope(blockScope.scope.start);
-      const scope = new Scope(
-        parentScope,
-        undefined,
+      blockScopeNodes.set(
         blockScope.id,
-        blockScope.scope,
+        new Scope(undefined, undefined, blockScope.id, blockScope.scope),
       );
+    }
+    const synthesizedVarScopes = new Map<string, Scope>();
+    const blockSpan = (bs: ComponentFileBlockScope) =>
+      (bs.scope.end.line - bs.scope.start.line) * 10_000 +
+      (bs.scope.end.column - bs.scope.start.column);
+    for (const blockScope of blockScopes) {
+      const scope = blockScopeNodes.get(blockScope.id)!;
+      let parentScope: Scope | undefined;
+      if (blockScope.parentId) {
+        if (blockScope.parentId.startsWith("scope:block:")) {
+          const varId = blockScope.parentId.slice("scope:block:".length);
+          const v = this.var.get(varId, true);
+          parentScope =
+            v && (isBaseFunctionVariable(v) || isClassVariable(v))
+              ? v.var
+              : undefined;
+          if (!parentScope) {
+            let synth = synthesizedVarScopes.get(varId);
+            if (!synth) {
+              synth = new Scope(undefined, { id: varId } as Variable);
+              synthesizedVarScopes.set(varId, synth);
+              let deepest: ComponentFileBlockScope | undefined;
+              for (const other of blockScopes) {
+                if (other.id === blockScope.id) continue;
+                if (Scope.isLocInScope(blockScope.scope.start, other.scope)) {
+                  if (!deepest || blockSpan(other) < blockSpan(deepest)) {
+                    deepest = other;
+                  }
+                }
+              }
+              const parent = deepest
+                ? blockScopeNodes.get(deepest.id)
+                : undefined;
+              synth.parent = parent ?? this.var;
+              (parent ?? this.var).addChildScope(synth);
+            }
+            parentScope = synth;
+          }
+        } else {
+          parentScope = blockScopeNodes.get(blockScope.parentId);
+        }
+      }
+      parentScope ??= this.var;
+      scope.parent = parentScope;
       parentScope.addChildScope(scope);
-      scopeMap.set(blockScope.id, scope);
     }
 
     for (const importData of Object.values(data.import || {})) {
