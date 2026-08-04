@@ -84,6 +84,8 @@ export type ComponentDBOptions = {
   tsConfigManager?: TsConfigManager | undefined;
 };
 
+const IMPORT_CACHE_MAX = 200_000;
+
 export class ComponentDB {
   private edges: DataEdge[];
   private files: FileDB;
@@ -98,6 +100,8 @@ export class ComponentDB {
   private packageJson: PackageJson;
   private viteAliases: Record<string, string>;
   private tsConfigManager: TsConfigManager | undefined;
+
+  private importFileNameCache = new Map<string, string>();
 
   private dir: string;
 
@@ -1325,6 +1329,22 @@ export class ComponentDB {
   }
 
   public getImportFileName(name: string, fileName: string) {
+    const cacheKey = `${name}\u0001${path.dirname(fileName)}\u0001${
+      this.tsConfigManager?.getAllowImportingTsExtensions(fileName) ?? false
+    }`;
+    const cached = this.importFileNameCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const resolved = this.resolveImportFileName(name, fileName);
+    if (this.importFileNameCache.size >= IMPORT_CACHE_MAX) {
+      this.importFileNameCache.clear();
+    }
+    this.importFileNameCache.set(cacheKey, resolved);
+    return resolved;
+  }
+
+  private resolveImportFileName(name: string, fileName: string): string {
     let source = name;
     if (source.startsWith(".") || source.startsWith("..")) {
       const fileDir = path.dirname(fileName);

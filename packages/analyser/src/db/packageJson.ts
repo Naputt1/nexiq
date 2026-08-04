@@ -12,6 +12,11 @@ export type PackageJsonData = {
 export class PackageJson {
   private dataCache: Map<string, PackageJsonData | null>;
   private isDepCache: Map<string, Set<string>>;
+  private fileDirCache = new Map<string, string>();
+  private packageByDir = new Map<
+    string,
+    { dir: string; data: PackageJsonData } | null
+  >();
   public rootDir: string;
 
   constructor(dir: string, initialData?: Record<string, unknown>) {
@@ -72,22 +77,40 @@ export class PackageJson {
   public getPackageForFile(
     filePath: string,
   ): { dir: string; data: PackageJsonData } | null {
-    let currentDir = filePath;
-    // Check if path is a file, avoid issues with .ext
-    if (!fs.existsSync(currentDir) || fs.statSync(currentDir).isFile()) {
-      currentDir = path.dirname(currentDir);
+    // Cache the file -> directory resolution and the directory -> package
+    // lookup: isDependency() is invoked for every import and each call used to
+    // re-run existsSync/statSync plus a package.json walk up the tree.
+    let currentDir = this.fileDirCache.get(filePath);
+    if (currentDir === undefined) {
+      currentDir = filePath;
+      // Check if path is a file, avoid issues with .ext
+      if (!fs.existsSync(currentDir) || fs.statSync(currentDir).isFile()) {
+        currentDir = path.dirname(currentDir);
+      }
+      this.fileDirCache.set(filePath, currentDir);
     }
 
-    while (currentDir.startsWith(this.rootDir) || currentDir === this.rootDir) {
+    const cached = this.packageByDir.get(currentDir);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    let found: { dir: string; data: PackageJsonData } | null = null;
+    while (
+      currentDir.startsWith(this.rootDir) ||
+      currentDir === this.rootDir
+    ) {
       const data = this.loadPackageJson(currentDir);
       if (data) {
-        return { dir: currentDir, data };
+        found = { dir: currentDir, data };
+        break;
       }
       const parentDir = path.dirname(currentDir);
       if (parentDir === currentDir) break;
       currentDir = parentDir;
     }
-    return null;
+    this.packageByDir.set(currentDir, found);
+    return found;
   }
 
   public getPackageIdForFile(filePath: string): string | null {

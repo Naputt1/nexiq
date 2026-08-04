@@ -34,7 +34,14 @@ function getOwnerVariable(
   path: traverse.NodePath,
   fileDb: import("../db/fileDB.ts").File,
 ): Variable | undefined {
-  const fnExprPath = path.findParent(
+  // Compute the ancestor chain once and scan it for the different node types
+  // below. @babel/traverse's findParent() rebuilds the full ancestry array on
+  // every call, and this runs for every referenced identifier, so a single
+  // getAncestry() + linear scans is a large win in hot files.
+  const ancestry = path.getAncestry();
+  const ancestors = ancestry.slice(1);
+
+  const fnExprPath = ancestors.find(
     (candidate) =>
       candidate.isArrowFunctionExpression() || candidate.isFunctionExpression(),
   );
@@ -43,9 +50,9 @@ function getOwnerVariable(
     const loc = getStartLoc(fnExprPath.node);
 
     if (loc) {
-      const jsxAttrPath = fnExprPath.findParent((candidate) =>
-        candidate.isJSXAttribute(),
-      );
+      const jsxAttrPath = ancestry
+        .slice(ancestry.indexOf(fnExprPath) + 1)
+        .find((candidate) => candidate.isJSXAttribute());
 
       if (jsxAttrPath?.isJSXAttribute()) {
         const attrName = jsxAttrPath.node.name;
@@ -66,7 +73,7 @@ function getOwnerVariable(
     }
   }
 
-  const jsxPath = path.findParent(
+  const jsxPath = ancestors.find(
     (candidate) => candidate.isJSXElement() || candidate.isJSXFragment(),
   );
   if (jsxPath?.node.loc?.start) {
@@ -103,7 +110,7 @@ function getOwnerVariable(
     }
   }
 
-  const ownerPath = path.findParent((candidate) => {
+  const ownerPath = ancestors.find((candidate) => {
     return (
       candidate.isVariableDeclarator() ||
       candidate.isFunctionDeclaration() ||
