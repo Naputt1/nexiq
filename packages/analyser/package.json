@@ -52,7 +52,7 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "^25.5.0",
     "@types/seedrandom": "^3.0.8",
-    "@vitest/coverage-v8": "4.1.2",
+    "@vitest/coverage-v8": "4.1.11",
     "@vitest/ui": "^4.1.2",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
